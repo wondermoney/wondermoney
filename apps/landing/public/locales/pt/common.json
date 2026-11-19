@@ -507,6 +507,78 @@
         "methodology": "Metodologia do INE"
       }
     },
+    "propertyTax": {
+      "title": "Simulador de IMI",
+      "shortName": "IMI",
+      "subtitle": "Estima o IMI anual de um imóvel em Portugal, vê quando se paga cada prestação e quanto deves reservar todos os meses.",
+      "description": "Estima o IMI, as datas de pagamento e a reserva mensal.",
+      "pageTitle": "Simulador de IMI: Imposto Municipal sobre Imóveis e Prazos de Pagamento",
+      "pageDescription": "Calcula o IMI anual a partir do valor patrimonial tributário e da taxa municipal, vê as prestações de maio, agosto e novembro e quanto reservar por mês.",
+      "fields": {
+        "kind": "Tipo de prédio",
+        "vpt": "Valor patrimonial tributário (VPT)",
+        "rate": "Taxa municipal",
+        "dependants": "Dependentes (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Prédio urbano",
+        "rustic": "Prédio rústico"
+      },
+      "vptHelp": "O VPT consta da caderneta predial e da nota de cobrança do IMI.",
+      "rateHelp": "Cada município fixa a sua taxa para prédios urbanos, entre {{min}} e {{max}}. O valor inicial é apenas um exemplo: usa a taxa do teu município.",
+      "rusticNote": "Os prédios rústicos pagam a taxa nacional de {{rate}}. Não há taxa municipal para introduzir.",
+      "dependantsHelp": "Só se o prédio for a tua habitação própria e permanente e o teu município aplicar a redução do IMI Familiar. Muitos não aplicam, ou só a partir de um certo número de dependentes.",
+      "dependantsOptions": {
+        "0": "Sem redução",
+        "1": "1 dependente (30 €)",
+        "2": "2 dependentes (70 €)",
+        "3": "3 ou mais dependentes (140 €)"
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "rateRange": "Introduz uma taxa entre {{min}} e {{max}}, o intervalo legal para prédios urbanos.",
+        "dependants": "Escolhe o número de dependentes na lista.",
+        "summary": "Revê os campos assinalados para veres a estimativa."
+      },
+      "result": {
+        "annualTax": "IMI anual estimado",
+        "monthlyProvision": "Reserva mensal (IMI anual ÷ 12)",
+        "grossTax": "IMI antes da redução",
+        "deduction": "Redução do IMI Familiar",
+        "scheduleTitle": "Calendário de pagamento",
+        "nothingDue": "Nada a pagar: a redução cobre todo o imposto."
+      },
+      "months": {
+        "may": "Maio",
+        "august": "Agosto",
+        "november": "Novembro"
+      },
+      "guide": {
+        "exampleTitle": "Exemplo de cálculo",
+        "example": "Um prédio com VPT de {{vpt}} num município que cobra {{rate}} paga {{tax}} por ano. Como o imposto excede 500 €, é pago em três prestações de {{instalment}}, em maio, agosto e novembro. Reservar {{monthly}} por mês chega para o pagar.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodTax": "O IMI anual é o VPT multiplicado pela taxa, arredondado ao cêntimo. Nos prédios urbanos usa-se a taxa fixada pelo teu município, que por lei está entre 0,30% e 0,45%. Nos prédios rústicos usa-se 0,8%.",
+        "methodFamily": "Se escolheres um número de dependentes, o montante fixo do IMI Familiar (30 € com um, 70 € com dois, 140 € com três ou mais) é subtraído ao imposto, que nunca fica abaixo de zero. A aplicação depende do teu município.",
+        "methodPayment": "O imposto é pago numa prestação em maio até 100 €, em duas em maio e novembro entre 100 € e 500 €, e em três em maio, agosto e novembro acima de 500 €. As prestações são iguais; o eventual cêntimo de arredondamento fica na última.",
+        "methodBudget": "A reserva mensal divide o imposto anual por 12, para teres o dinheiro pronto quando cada prestação vencer.",
+        "exemptionTitle": "Isenção para habitação própria e permanente",
+        "exemption": "Alguns proprietários de habitação própria e permanente estão isentos de IMI, durante um período limitado após a compra ou enquanto o rendimento do agregado e o VPT ficarem abaixo dos limites do Estatuto dos Benefícios Fiscais. Os limites mudam ao longo do tempo e há condições a cumprir, por isso o simulador não aplica nenhuma isenção. Confirma se tens direito no Portal das Finanças antes de usares o resultado.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionRate": "A taxa municipal é introduzida por ti. Esta página não tem uma tabela das taxas dos municípios, e os municípios podem majorar ou minorar a taxa em casos específicos, por exemplo prédios devolutos ou degradados, que o simulador ignora.",
+        "assumptionScope": "A estimativa cobre um único prédio sujeito às regras gerais. Não inclui o adicional ao IMI (AIMI), as isenções temporárias nem outras deduções municipais.",
+        "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. O valor que conta é o da nota de cobrança do IMI emitida pela Autoridade Tributária.",
+        "sourcesTitle": "Fontes",
+        "sourceRates": "Código do IMI, artigo 112.º: taxas (consultado a 19 de novembro de 2026)",
+        "sourcePayment": "Código do IMI, artigo 120.º: pagamento em prestações (consultado a 19 de novembro de 2026)",
+        "sourceExemption": "Portal das Finanças: isenções de IMI e IMI Familiar",
+        "reviewed": "Regras revistas a 19 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI, segundo bancos e municípios portugueses."
+      },
+      "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IMI",
+      "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IMI todos os meses, para as prestações já estarem cobertas.",
+      "nextStepCta": "Reserva dinheiro todos os meses para o teu IMI"
+    },
     "hub": {
       "title": "Ferramentas e calculadoras financeiras",
       "description": "Calculadoras interativas gratuitas para planear o teu futuro financeiro. Sem registo necessário.",
@@ -2334,6 +2406,180 @@
       "nextStepDescription": "Reserva dinheiro no WonderMoney para a prestação, o combustível e as contas que vencem durante o ano.",
       "nextStepCta": "Cria o teu orçamento no WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Simulador de IMT e Imposto do Selo na compra de casa",
+      "shortName": "IMT e Selo",
+      "subtitle": "Estima o IMT e o Imposto do Selo a pagar na compra de um imóvel em Portugal e vê quanto dinheiro deves juntar à entrada.",
+      "description": "Estima o IMT e o Imposto do Selo na compra de imóveis em Portugal.",
+      "pageTitle": "Simulador de IMT e Imposto do Selo 2026 na compra de casa",
+      "pageDescription": "Estima o IMT e o Imposto do Selo de 2026 na compra de um imóvel em Portugal: continente ou ilhas, tipo de uso, selo do crédito à habitação e isenção para jovens.",
+      "propertyTitle": "Imóvel",
+      "financingTitle": "Crédito à habitação",
+      "youngTitle": "Isenção para jovens (IMT Jovem)",
+      "youngNote": "Só se todas as condições se verificarem na data da escritura: tens 35 anos ou menos, é a tua primeira casa e vais viver nela de forma permanente. Isenção total até {{full}}; isenção parcial até {{partial}}, com IMT e selo da compra apenas sobre o excedente.",
+      "youngUnavailable": "A isenção só se aplica a habitação própria e permanente. Escolhe esse uso para verificar a elegibilidade.",
+      "fields": {
+        "price": "Preço de compra",
+        "taxValue": "Valor patrimonial tributário (VPT), opcional",
+        "region": "Localização",
+        "use": "Uso do imóvel",
+        "loan": "Montante do crédito",
+        "young": "Cumpro as condições da isenção para jovens"
+      },
+      "help": {
+        "price": "O preço que consta da escritura.",
+        "taxValue": "A Autoridade Tributária tributa o maior valor entre o preço e o VPT. Deixa a zero se não souberes.",
+        "loan": "Indica zero numa compra a pronto. O selo do crédito não é abrangido pela isenção para jovens neste simulador."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Açores ou Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Habitação própria e permanente",
+        "secondary": "Habitação secundária ou outros fins",
+        "rustic": "Prédio rústico",
+        "otherUrban": "Outros prédios urbanos ou terrenos"
+      },
+      "errors": {
+        "required": "Indica um número válido.",
+        "negative": "Indica zero ou um valor positivo.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "loan": "O crédito não pode exceder o preço de compra.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Total de impostos a pagar",
+        "effectiveRate": "{{rate}} do valor tributável",
+        "reference": "Valor tributável",
+        "imt": "IMT",
+        "stampPurchase": "Imposto do Selo da compra (0,8%)",
+        "stampLoan": "Imposto do Selo do crédito (0,6%)",
+        "exemptFull": "Isenção para jovens aplicada: elimina o IMT e o selo da compra e poupa {{saving}}.",
+        "exemptPartial": "Isenção parcial para jovens aplicada: o IMT e o selo da compra incidem apenas sobre a parte acima do limite da isenção total. Poupa {{saving}} no total.",
+        "exemptNone": "Com este valor a isenção não se aplica. Abrange compras até {{partial}} (total até {{full}}) e apenas nas condições indicadas à esquerda.",
+        "tableNote": "Tabela de {{year}}, revista em {{date}}. Estimativa educativa, não é aconselhamento fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Comprar uma habitação própria e permanente no continente por {{price}} com um crédito de {{loan}} custa {{imt}} de IMT, {{stampPurchase}} de Imposto do Selo da compra e {{stampLoan}} de selo do crédito. São {{total}} no total, a pagar para além da entrada e que deves somar à tua meta de poupança.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodBase": "A base de cálculo é o maior valor entre o preço de compra e o valor patrimonial tributário (VPT).",
+        "methodImt": "Nas habitações, o IMT é a base multiplicada pela taxa do escalão menos uma parcela a abater fixa, que torna o imposto progressivo. Acima do último escalão progressivo, a taxa aplica-se a todo o valor sem parcela a abater. Os prédios rústicos pagam 5% e os outros prédios urbanos ou terrenos 6,5%.",
+        "methodStamp": "O Imposto do Selo é 0,8% da base na compra (verba 1.1) e, se pedires crédito, 0,6% do montante emprestado (verba 17.1.4, créditos de cinco anos ou mais).",
+        "methodRounding": "O IMT e cada Imposto do Selo são arredondados separadamente ao cêntimo, como a Autoridade Tributária os liquida. O selo sobre juros e comissões não está incluído.",
+        "tableTitle": "Tabela de IMT {{year}}: habitação própria e permanente, continente",
+        "tableAbove": "Valores superiores",
+        "tableLimit": "Valor até",
+        "tableRate": "Taxa",
+        "tableDeduct": "Parcela a abater",
+        "tableNote": "Até {{exempt}} o primeiro escalão é 0%. A habitação secundária tem tabela própria, com 1% desde o primeiro euro, e os Açores e a Madeira usam as mesmas taxas com limites 25% mais altos.",
+        "sourceImt": "CIMT, artigo 17.º (Portal das Finanças)",
+        "sourceStamp": "Código do Imposto do Selo (Portal das Finanças)",
+        "review": "Regras e limites de {{year}}, revistos pela última vez em {{date}}. Confirma-os de novo antes de assinar.",
+        "assumptionsTitle": "Pressupostos e situações suportadas",
+        "assumptionScope": "Este simulador segue a lei fiscal portuguesa e só se aplica a imóveis situados em Portugal, seja qual for o teu país de residência. É educativo e não constitui aconselhamento fiscal.",
+        "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. A isenção do selo da compra é uma dedução limitada a 0,8% do limite da isenção total, por isso acima dele pagas 0,8% apenas sobre o excedente. O selo do crédito continua a ser cobrado.",
+        "assumptionLoan": "O selo do crédito pressupõe um empréstimo de cinco anos ou mais e é sempre cobrado. Comissões do crédito, avaliação e custos de notário ou registo não estão incluídos.",
+        "assumptionUnsupported": "Não suportado: não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT.",
+        "assumptionIslands": "Para os Açores e a Madeira os limites são os do continente aumentados em 25% e arredondados ao euro, com as mesmas taxas. Confirma os limites regionais com a Autoridade Tributária."
+      },
+      "nextStepHeadline": "Planeia o dinheiro de que precisas para comprar",
+      "nextStepDescription": "Soma o IMT e o Imposto do Selo à poupança de que precisas antes de comprar e acompanha o progresso no WonderMoney.",
+      "nextStepCta": "Inclui os impostos na meta da entrada da casa"
+    },
+    "youthMortgage": {
+      "title": "Simulador de crédito habitação jovem",
+      "shortName": "Crédito habitação jovem",
+      "subtitle": "Veja que condições da garantia pública as suas respostas cumprem e estime a prestação, os impostos da compra e o dinheiro necessário na escritura.",
+      "description": "Estime um crédito habitação jovem: prestação, impostos e dinheiro na escritura.",
+      "pageTitle": "Simulador de Crédito Habitação Jovem: Garantia Pública e Prestação",
+      "pageDescription": "Veja as condições da garantia pública para jovens em 2026 e estime a prestação, o IMT e o Imposto do Selo com e sem isenção jovem, e o dinheiro necessário na escritura.",
+      "checkTitle": "1. Garantia pública: que condições as suas respostas cumprem",
+      "checkIntro": "Apenas informativo. Esta lista mostra que condições as respostas abaixo cumprem; não diz se tem direito à garantia. Quem decide são o banco e o Estado.",
+      "checkSummary": "{{met}} de {{total}} condições cumpridas pelas suas respostas.",
+      "checkNote": "Condições revistas em {{date}}. A garantia cobre até {{percent}}% do valor da transação, pelo que o financiamento pode chegar a 100%. Não altera a taxa de juro.",
+      "estimateTitle": "2. Estime o crédito e o dinheiro necessário",
+      "years": "anos",
+      "fields": {
+        "age": "A sua idade na data do contrato",
+        "income": "Rendimento coletável anual, opcional",
+        "ownHome": "A casa será a minha habitação própria e permanente",
+        "otherProperty": "Sou proprietário, total ou parcial, de outro imóvel para habitação",
+        "price": "Preço de compra",
+        "deposit": "Entrada",
+        "annualRate": "Taxa de juro (TAN)",
+        "termYears": "Prazo do crédito"
+      },
+      "help": {
+        "income": "Usado apenas na lista de condições. O limite é o topo do 8.º escalão de IRS.",
+        "price": "O preço da escritura. A lista de condições também usa este valor.",
+        "deposit": "O dinheiro que entra de seu bolso. Pode ser zero.",
+        "annualRate": "Taxa anual nominal. A garantia não a reduz.",
+        "termYears": "Até 40 anos."
+      },
+      "status": {
+        "met": "Cumprida",
+        "notMet": "Não cumprida",
+        "unknown": "Sem resposta"
+      },
+      "conditions": {
+        "age": "Ter entre {{minAge}} e {{maxAge}} anos.",
+        "ownHome": "A casa destina-se a habitação própria e permanente.",
+        "otherProperty": "Não ser proprietário, total ou parcial, de outro imóvel para habitação.",
+        "price": "A casa custa até {{maxPrice}}.",
+        "income": "Rendimento coletável anual até ao 8.º escalão de IRS ({{maxIncome}} em 2026)."
+      },
+      "errors": {
+        "required": "Introduza um número válido.",
+        "zero": "Introduza um preço superior a zero.",
+        "negative": "Introduza zero ou um valor positivo.",
+        "tooLarge": "Introduza um valor até {{max}}.",
+        "depositTooLarge": "A entrada não pode ser superior ao preço.",
+        "loanTooSmall": "O crédito seria inferior a 100 euros. Reduza a entrada ou trate-o como compra a pronto.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Prestação mensal (capital e juros)",
+        "noLoan": "A entrada cobre o preço todo, por isso não há crédito.",
+        "loan": "Montante do crédito",
+        "ltv": "Financiamento sobre o valor (LTV)",
+        "interest": "Juros totais no prazo",
+        "taxesWithout": "IMT e Imposto do Selo sem isenção jovem",
+        "taxesWith": "IMT e Imposto do Selo com isenção jovem",
+        "cashWithout": "Dinheiro na escritura sem isenção (entrada e impostos)",
+        "cashWith": "Dinheiro na escritura com isenção jovem",
+        "exemptionNote": "A isenção jovem (IMT Jovem) pressupõe ter até 35 anos e comprar a primeira habitação própria e permanente. O Imposto do Selo de 0,6% sobre o crédito continua a ser cobrado.",
+        "bankNote": "Os bancos decidem se concedem crédito, a que taxa e com que LTV. Estimativa educativa, não é uma proposta. Comissões, seguros, avaliação e custos de notário ou registo não estão incluídos."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Comprar uma casa de {{price}} sem entrada, com taxa de {{rate}} e prazo de {{years}} anos, implica pedir {{loan}} e pagar cerca de {{monthly}} por mês. O IMT e o Imposto do Selo somam {{taxesWithout}} sem isenção jovem e {{taxesWith}} com ela (fica só o selo do crédito). Com a isenção, o dinheiro necessário na escritura é {{cash}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodPayment": "Crédito = preço menos entrada. A prestação mensal é a de um crédito de taxa fixa com prestações constantes, o mesmo motor do simulador de crédito habitação. O LTV é o crédito a dividir pelo preço.",
+        "methodTaxes": "O IMT e o Imposto do Selo vêm do simulador de impostos de compra de casa, para habitação própria e permanente no continente: a isenção jovem elimina ambos até ao limite total e cobra IMT a 8% sobre o excedente até ao limite parcial.",
+        "methodCash": "O dinheiro na escritura é a entrada mais os impostos. Mostramos com e sem isenção jovem.",
+        "methodGuarantee": "A garantia não entra na prestação: apenas ajuda o banco a aceitar um LTV mais alto, até 100%, e a taxa é definida pelo banco.",
+        "conditionsTitle": "Condições da garantia pública verificadas (Decreto-Lei n.º 44/2024)",
+        "conditionAge": "Ter entre {{minAge}} e {{maxAge}} anos na data do contrato e domicílio fiscal em Portugal.",
+        "conditionHome": "A casa é comprada como habitação própria e permanente.",
+        "conditionProperty": "Não ser proprietário, total ou parcial, de outro imóvel para habitação.",
+        "conditionPrice": "A casa custa até {{maxPrice}} (a avaliação do banco pode reduzir o valor da transação).",
+        "conditionIncome": "Rendimento até ao 8.º escalão de IRS: {{maxIncome}} por ano em 2026 (eram 83 696 euros em 2025).",
+        "conditionDate": "Só contratos de crédito celebrados até 31 de dezembro de 2026 podem beneficiar, e a garantia cobre até {{percent}}% do valor da transação durante um máximo de 10 anos.",
+        "sourceGovernment": "Governo de Portugal: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Condições revistas pela última vez em {{date}}. O limite de rendimento de 2026 é o limite superior do 8.º escalão de IRS do artigo 68.º do Código do IRS, atualizado em 3,51% pela Lei n.º 73-A/2025 (Orçamento do Estado para 2026). Os bancos decidem cada pedido.",
+        "assumptionsTitle": "Pressupostos e limites",
+        "assumptionBanks": "Os bancos avaliam o seu risco de crédito e podem recusar o crédito ou propor outras condições, independentemente da lista. Num crédito com dois titulares, ambos têm de cumprir as condições.",
+        "assumptionRate": "A taxa é a que introduzir. A garantia não altera a taxa de juro.",
+        "assumptionTaxes": "Os impostos são para habitação própria e permanente no continente e, nos valores com isenção, assumem que cumpre as condições do IMT Jovem.",
+        "assumptionScope": "Apenas educativo: não é aconselhamento financeiro, fiscal ou jurídico."
+      },
+      "nextStepHeadline": "Planeie a entrada e o custo de viver na sua casa",
+      "nextStepDescription": "Defina um objetivo para a entrada e orce a prestação, os impostos e as despesas da casa no WonderMoney.",
+      "nextStepCta": "Planeie a sua entrada e os custos de habitação"
+    },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
       "shortName": "Crédito pessoal",
@@ -2438,6 +2684,316 @@
         "assumptionOtherCosts": "Ficam de fora custos que o simulador não pergunta, como seguros opcionais, encargos por atraso ou uma comissão de reembolso antecipado.",
         "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulador de certificados de aforro",
+      "shortName": "Certificados de aforro",
+      "subtitle": "Estima quanto podem render os Certificados de Aforro Série F: juros trimestrais, prémios de permanência e 28% de IRS retido, em bruto e em líquido.",
+      "description": "Estima juros, prémios e imposto dos Certificados de Aforro Série F.",
+      "pageTitle": "Simulador de Certificados de Aforro Série F: juros, prémios e rendimento líquido",
+      "pageDescription": "Simula a rentabilidade dos Certificados de Aforro Série F com prémios de permanência, retenção de 28% de IRS e taxa base editável, em bruto e líquido.",
+      "assumption": "A taxa base muda todos os meses com a Euribor a 3 meses. Esta estimativa mantém a taxa que indicas em todos os trimestres, por isso o resultado é uma ilustração, não uma previsão.",
+      "fields": {
+        "amount": "Montante subscrito",
+        "years": "Anos de permanência",
+        "baseRate": "Taxa base (pressuposto)",
+        "baseRateHelp": "Taxa anual bruta, até {{rate}} (o limite das regras). Altera-a para testar outros cenários."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou uma taxa positiva.",
+        "tooSmall": "O mínimo por conta é {{min}}.",
+        "tooLarge": "O máximo por conta é {{max}}.",
+        "years": "Introduz um número inteiro de anos, de 1 a {{years}}.",
+        "baseRate": "A taxa base não pode exceder {{rate}}.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "finalValue": "Valor líquido estimado no fim",
+        "invested": "Montante subscrito",
+        "grossInterest": "Juros brutos",
+        "irs": "IRS retido (28%)",
+        "netInterest": "Juros líquidos",
+        "premiumInterest": "Dos juros brutos, vêm de prémios de permanência",
+        "netYield": "Rendimento líquido anual"
+      },
+      "table": {
+        "title": "Ano a ano",
+        "year": "Ano",
+        "rate": "Taxa bruta",
+        "gross": "Juros brutos",
+        "net": "Juros líquidos",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Regras da Série F que o simulador segue",
+        "rulesIntro": "Regras publicadas pelo IGCP na ficha de produto da Série F de {{rulesDate}} (Portaria n.º 149-A/2023). As regras podem mudar, e as condições em vigor do emitente é que contam.",
+        "ruleTerm": "Prazo de {{termYears}} anos. Podes resgatar, total ou parcialmente, a partir do primeiro vencimento de juros; o simulador usa anos completos de permanência.",
+        "ruleRate": "Cada trimestre rende a taxa base em vigor no início do trimestre mais o prémio de permanência do ano da subscrição. A taxa base segue a Euribor a 3 meses, com máximo de {{maxBase}} e mínimo de 0%.",
+        "ruleTax": "Os juros vencem trimestralmente e são capitalizados automaticamente depois de IRS, retido na fonte a {{irsRate}}.",
+        "ruleRedeem": "Só pessoas singulares podem ser titulares. O limite é {{maxAmount}} por conta aforro na Série F, com um mínimo de {{minAmount}}.",
+        "premiumTitle": "Prémio de permanência por ano da subscrição",
+        "premiumYears": "Ano",
+        "premiumPoints": "Pontos percentuais",
+        "sourceSheet": "Ficha de produto da Série F do IGCP (abril de 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "abril de 2026",
+        "exampleTitle": "Exemplo prático",
+        "exampleText": "Subscreves {{amount}} e manténs durante {{years}} anos, com uma taxa base de {{baseRate}}. Os certificados rendem {{grossInterest}} de juros brutos, dos quais {{irs}} vão para IRS, ficando {{netInterest}} líquidos. O saldo chega a {{finalValue}}, um rendimento líquido de {{netYield}} ao ano.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodQuarter": "Cada trimestre rende um quarto da taxa anual (taxa base mais prémio) sobre o saldo atual. Os valores são arredondados ao cêntimo em cada trimestre.",
+        "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
+        "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. A taxa real é revista todos os meses, por isso os juros efetivos serão diferentes.",
+        "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
+        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
+      },
+      "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
+      "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
+      "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
+    },
+    "netSalary": {
+      "title": "Simulador de salário líquido 2026",
+      "shortName": "Salário líquido",
+      "subtitle": "Converte o salário bruto mensal no que recebes: retenção de IRS, Segurança Social e subsídio de alimentação, com as tabelas de 2026.",
+      "description": "Estima o teu salário líquido mensal em Portugal com as tabelas de retenção de IRS de 2026.",
+      "pageTitle": "Simulador de Salário Líquido 2026: do Bruto ao Líquido",
+      "pageDescription": "Converte o salário bruto em líquido com as tabelas de retenção de IRS de 2026 para o Continente, os Açores e a Madeira, 11% de Segurança Social e subsídio de alimentação.",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal",
+        "region": "Região",
+        "status": "Situação do titular",
+        "dependants": "Dependentes",
+        "allowances": "Subsídios",
+        "mealGroup": "Subsídio de alimentação",
+        "mealDaily": "Subsídio de alimentação por dia",
+        "mealDays": "Dias por mês",
+        "mealKind": "Pago em"
+      },
+      "regions": {
+        "mainland": "Portugal Continental",
+        "azores": "Açores",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Não casado",
+        "marriedOneEarner": "Casado, único titular",
+        "marriedTwoEarners": "Casado, dois titulares"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
+        "twelfths": "Em duodécimos (repartidos por 12 pagamentos)"
+      },
+      "mealKinds": {
+        "cash": "Em dinheiro, com o salário",
+        "card": "Cartão de refeição"
+      },
+      "help": {
+        "gross": "O salário base antes de subsídios, Segurança Social e IRS.",
+        "status": "Escolhe \"único titular\" só se o cônjuge não tiver rendimentos ou se ganhares pelo menos 95% do rendimento do casal. A união de facto conta como casamento.",
+        "allowances": "Em duodécimos, os dois meses extra são somados a cada pagamento mensal (14 ÷ 12 do salário base).",
+        "meal": "Isento até {{cash}} por dia em dinheiro e {{card}} em cartão. O que exceder é tributado como salário."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "tooSmall": "Introduz um número positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "whole": "Introduz um número inteiro.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "netMonthly": "Líquido estimado num mês normal",
+        "withholding": "Retenção de IRS",
+        "socialSecurity": "Segurança Social (11%)",
+        "allowanceNet": "Líquido de cada pagamento de subsídio",
+        "annualNet": "Líquido estimado num ano",
+        "notFinalTax": "A retenção mensal é um adiantamento do teu IRS anual, não o imposto final. O IRS final é apurado na declaração anual, por isso podes receber reembolso ou ter de pagar mais."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Com um salário bruto de {{gross}} por mês, não casado e sem dependentes, no Continente e com {{meal}} por mês de subsídio de alimentação em dinheiro, a retenção de IRS é {{withholding}} e a Segurança Social é {{socialSecurity}}. Com os subsídios de férias e de Natal pagos à parte, um mês normal rende {{net}} líquidos, cada pagamento de subsídio rende {{allowanceNet}} e o ano rende {{annual}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodWithholding": "A retenção de IRS segue as tabelas mensais de 2026: o rendimento mensal vezes a taxa marginal do escalão, menos a parcela a abater e um valor fixo por cada dependente. A partir de três dependentes, a taxa desce um ponto percentual.",
+        "methodSocialSecurity": "A Segurança Social do trabalhador é 11% da remuneração sujeita, incluindo o subsídio de alimentação acima do limite isento.",
+        "methodMeal": "O subsídio de alimentação está isento até ao limite diário, que depende de ser pago em dinheiro ou em cartão. O simulador soma à remuneração tributável apenas o excesso.",
+        "methodAllowances": "Com 14 pagamentos, os subsídios de férias e de Natal são tributados cada um por si, como as tabelas exigem. Em duodécimos, o valor extra soma-se a cada mês.",
+        "methodBudget": "Os valores líquidos são o que chega à tua conta, por isso são o ponto de partida certo para um orçamento mensal.",
+        "finalTitle": "A retenção não é o teu IRS final",
+        "final": "O que é retido todos os meses é um pagamento por conta. A Autoridade Tributária apura o IRS real na declaração anual, com os rendimentos do ano inteiro e as tuas deduções. A retenção pode ficar acima ou abaixo do imposto devido, e é por isso que muita gente recebe reembolso ou tem imposto a pagar.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedYouth": "O IRS Jovem não é aplicado.",
+        "unsupportedDisability": "Não estão incluídas as tabelas para pessoas com deficiência nem as tabelas de pensões.",
+        "unsupportedNovember": "O ajustamento excecional dos rendimentos pagos em novembro de 2026 (Despacho 12523-A/2026, Continente) é ignorado. Reduz a retenção a metade só nesse mês.",
+        "unsupportedOther": "Outros rendimentos, trabalho suplementar, não residentes, taxas de retenção voluntariamente mais altas e custos do empregador ficam fora desta estimativa.",
+        "sourcesTitle": "Fontes",
+        "sourceDespacho": "Despacho n.º 233-A/2026: tabelas de retenção de 2026, Continente",
+        "sourceRegional": "Portal das Finanças: tabelas de retenção dos Açores e da Madeira",
+        "sourceMeal": "Portal das Finanças: limites de isenção do subsídio de alimentação (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: taxas contributivas",
+        "reviewed": "Tabelas e taxas revistas a 19 de novembro de 2026. A taxa de 11% da Segurança Social e os limites do subsídio de alimentação foram confirmados em fontes secundárias, não nos textos originais."
+      },
+      "nextStepHeadline": "Do salário a um plano para o teu dinheiro",
+      "nextStepDescription": "A WonderMoney parte do que realmente levas para casa e mostra para onde vai cada euro, mês após mês.",
+      "nextStepCta": "Cria um orçamento a partir do teu salário líquido"
+    },
+    "withholdingTables": {
+      "title": "Tabelas de retenção de IRS 2026",
+      "shortName": "Tabelas de retenção de IRS",
+      "subtitle": "As tabelas mensais de retenção de 2026 para o Continente, os Açores e a Madeira, com a fórmula da parcela a abater e os escalões anuais de IRS.",
+      "description": "Consulta as tabelas de retenção de IRS de 2026 e os escalões anuais em Portugal.",
+      "pageTitle": "Tabelas de IRS 2026: Retenção na Fonte e Parcela a Abater",
+      "pageDescription": "As tabelas mensais de retenção de IRS de 2026 para o Continente, os Açores e a Madeira, como funciona a fórmula da parcela a abater e os escalões anuais de IRS.",
+      "fields": {
+        "region": "Região",
+        "table": "Tabela de retenção",
+        "remuneration": "Remuneração mensal",
+        "dependants": "Dependentes"
+      },
+      "regions": {
+        "mainland": "Portugal Continental",
+        "azores": "Açores",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabela I: não casado sem dependentes ou casado dois titulares",
+        "II": "Tabela II: não casado com um ou mais dependentes",
+        "III": "Tabela III: casado, único titular"
+      },
+      "remunerationHelp": "Opcional. Introduz uma remuneração mensal bruta para destacar o escalão e ver a retenção.",
+      "errors": {
+        "remuneration": "Introduz um valor até {{max}}.",
+        "dependants": "Introduz um número inteiro de 0 a {{max}}."
+      },
+      "result": {
+        "withholding": "Retenção mensal de IRS",
+        "row": "A taxa marginal deste escalão é {{rate}}.",
+        "empty": "Introduz uma remuneração mensal e um número válido de dependentes para ver a retenção."
+      },
+      "formula": "Retenção = remuneração × taxa marginal − parcela a abater − {{dependant}} × número de dependentes. Nunca é inferior a zero e, a partir de três dependentes, a taxa desce um ponto percentual.",
+      "notFinalTax": "A retenção é um adiantamento do teu IRS anual, não o imposto final. A declaração anual apura o valor real.",
+      "tableTitle": "Tabela {{table}}: {{region}}",
+      "tableSource": "Aprovada pelo {{act}}, para rendimentos pagos de {{from}} a {{to}}.",
+      "tableCaption": "Taxa marginal e parcela a abater por remuneração mensal",
+      "columns": {
+        "remuneration": "Remuneração mensal",
+        "rate": "Taxa marginal",
+        "parcela": "Parcela a abater",
+        "upTo": "Até {{limit}}",
+        "above": "Superior a {{limit}}"
+      },
+      "annual": {
+        "title": "Escalões anuais de IRS para rendimentos de 2026",
+        "intro": "São as taxas do artigo 68.º do Código do IRS, aplicadas ao rendimento coletável anual. Cada taxa aplica-se apenas à parte do rendimento dentro do respetivo escalão.",
+        "caption": "Taxas anuais de IRS por escalão de rendimento coletável",
+        "income": "Rendimento coletável",
+        "rate": "Taxa sobre a parte do escalão"
+      },
+      "guide": {
+        "howTitle": "Como ler as tabelas",
+        "howFormula": "Procura o escalão onde cabe a remuneração mensal, multiplica-a pela taxa marginal e subtrai a parcela a abater. Subtrai o valor adicional por cada dependente e o resultado é a retenção.",
+        "howTransition": "Nos primeiros escalões a parcela a abater é uma fórmula com a letra R, a remuneração mensal. Faz a retenção subir de forma suave a partir de zero, para que um pequeno aumento nunca reduza o salário líquido.",
+        "howDependants": "Cada dependente reduz a retenção num valor fixo. Com três ou mais dependentes, a taxa marginal do escalão é um ponto percentual mais baixa.",
+        "howTables": "A tabela I serve os não casados sem dependentes e os casados dois titulares. A tabela II serve os não casados com dependentes e a tabela III os casados, único titular.",
+        "finalTitle": "A retenção não é o imposto final",
+        "final": "As tabelas definem quanto a entidade patronal retém todos os meses. Não calculam o teu IRS final, que a declaração anual apura com os escalões acima, o rendimento do ano inteiro e as tuas deduções.",
+        "unsupportedTitle": "Não incluído",
+        "unsupportedDisability": "As tabelas para pessoas com deficiência (IV a VII).",
+        "unsupportedYouth": "O IRS Jovem, que tem regras próprias.",
+        "unsupportedNovember": "O ajustamento excecional dos rendimentos pagos em novembro de 2026 no Continente, que reduz a retenção a metade só nesse mês.",
+        "unsupportedPensions": "As tabelas de pensões (VIII a XI).",
+        "sourcesTitle": "Fontes",
+        "sourceMainland": "Despacho n.º 233-A/2026: tabelas de retenção de 2026, Continente",
+        "sourceRegional": "Portal das Finanças: tabelas de retenção, incluindo os Açores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: tabelas de retenção da Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: artigo 68.º do Código do IRS",
+        "reviewed": "Tabelas revistas a 19 de novembro de 2026 face aos anexos publicados. Consulta o Portal das Finanças para alterações posteriores."
+      },
+      "nextStepHeadline": "Da retenção ao teu plano mensal",
+      "nextStepDescription": "A WonderMoney transforma o teu líquido estimado num plano, para que cada euro tenha uma função antes de o mês começar.",
+      "nextStepCta": "Usa a estimativa líquida num plano mensal"
+    },
+    "vehicleTax": {
+      "title": "Simulador de IUC",
+      "shortName": "IUC",
+      "subtitle": "Estima o IUC anual de um automóvel ligeiro de passageiros em Portugal, vê quando se paga e quanto deves reservar todos os meses.",
+      "description": "Estima o IUC, a data de pagamento e a reserva mensal.",
+      "pageTitle": "Simulador de IUC 2026: Imposto Único de Circulação por Cilindrada e CO2",
+      "pageDescription": "Calcula o IUC de 2026 de um automóvel a partir da cilindrada, do combustível, das emissões de CO2 e da data da matrícula, vê quando se paga e quanto reservar por mês.",
+      "fields": {
+        "fuel": "Combustível",
+        "cc": "Cilindrada",
+        "year": "Ano da primeira matrícula",
+        "month": "Mês da primeira matrícula",
+        "co2": "Emissões oficiais de CO2",
+        "standard": "Ciclo de ensaio de CO2"
+      },
+      "fuels": {
+        "petrol": "Gasolina",
+        "diesel": "Gasóleo ou outro combustível",
+        "electric": "Elétrico"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "Em centímetros cúbicos (cm³), como consta do documento único automóvel (campo P.1).",
+      "co2Help": "Em gramas por quilómetro, como consta do documento único automóvel (campo V.7).",
+      "registrationHelp": "A data da primeira matrícula, em Portugal ou noutro país da UE ou do EEE, define a categoria e o coeficiente. Os carros matriculados antes de julho de 2007 são da categoria A; a partir de julho de 2007 são da categoria B.",
+      "electricNote": "Os automóveis totalmente elétricos matriculados a partir de julho de 2007 estão isentos de IUC, por isso não há nada para introduzir.",
+      "errors": {
+        "required": "Introduz um número válido.",
+        "zero": "Introduz um valor superior a zero.",
+        "negative": "Introduz um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "yearTooOld": "Este simulador cobre automóveis matriculados a partir de 1981.",
+        "yearTooNew": "Introduz um ano de matrícula até {{max}}.",
+        "month": "Escolhe um mês da lista.",
+        "electricCategoryA": "Os automóveis elétricos matriculados antes de julho de 2007 não são suportados. Consulta o Portal das Finanças.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "annualTax": "IUC anual estimado",
+        "monthlyProvision": "Reserva mensal (IUC anual ÷ 12)",
+        "category": "Categoria do IUC",
+        "baseTax": "Taxas de cilindrada e CO2",
+        "additionalTax": "Taxa adicional",
+        "coefficient": "Coeficiente do ano",
+        "dueMonth": "A pagar em 2026:",
+        "dueMonthValue": "Em {{month}}, o mês do aniversário da matrícula.",
+        "scheduleTitle": "A partir de 2027: calendário de pagamento",
+        "exempt": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC.",
+        "dieselSurcharge": "Adicional de gasóleo (não multiplicado pelo coeficiente)"
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Um automóvel a gasóleo com {{cc}} cm³, emissões oficiais WLTP de {{co2}} g/km e matriculado em {{year}} paga {{tax}} de IUC por ano. Reservar {{monthly}} por mês cobre o valor.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodA": "Categoria A (carros matriculados de 1981 até junho de 2007): o imposto vem de uma tabela por combustível, cilindrada e período de matrícula (depois de 1995, de 1990 a 1995, de 1981 a 1989).",
+        "methodB": "Categoria B (carros matriculados a partir de julho de 2007): somam-se a taxa da cilindrada e a taxa do CO2 e multiplica-se por um coeficiente que depende do ano da matrícula (1,00 em 2007, 1,05 em 2008, 1,10 em 2009, 1,15 a partir de 2010). O CO2 lê-se na coluna WLTP ou NEDC, conforme o ciclo de ensaio do documento único automóvel.",
+        "methodAdditional": "Os carros da categoria B matriculados depois de 1 de janeiro de 2017 pagam uma taxa adicional quando as emissões são elevadas: 31,77 € acima de 205 g/km (WLTP) ou 180 g/km (NEDC) e 63,74 € acima de 260 g/km (WLTP) ou 250 g/km (NEDC). A taxa adicional também é multiplicada pelo coeficiente. O texto legal não a limita por combustível, por isso o simulador aplica-a a todos.",
+        "methodDiesel": "Os automóveis a gasóleo pagam também o adicional de IUC (artigo 216.º da Lei n.º 82-B/2014, mantido em vigor em 2026 pelo Orçamento do Estado). Depende da cilindrada, aplica-se às categorias A e B e soma-se depois do coeficiente, sem ser multiplicado por ele.",
+        "methodPayment": "Até 2026 o IUC paga-se no mês do aniversário da matrícula. A partir de 2027, pelo Decreto-Lei n.º 161/2026, é liquidado até abril e pago em abril até 100 €, em abril e outubro de 100 € até 500 €, e em abril, julho e outubro acima de 500 €.",
+        "methodBudget": "A reserva mensal divide o valor anual por 12, para o dinheiro estar pronto quando chegar a cobrança.",
+        "exemptionTitle": "Automóveis elétricos",
+        "exemption": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC e o simulador mostra zero. Os híbridos plug-in e outros veículos pagam conforme a cilindrada e o CO2 do documento único automóvel, por isso introduz esses valores.",
+        "scopeTitle": "O que está coberto",
+        "scopeSupported": "Automóveis ligeiros de passageiros: categoria A (matriculados de 1981 a junho de 2007) e categoria B (matriculados a partir de julho de 2007).",
+        "scopeUnsupported": "Não suportado: veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionYear": "As taxas são as tabelas de {{taxYear}} do Código do IUC (artigos 9.º e 10.º), na redação da {{law}}. O Portal das Finanças não indica alterações posteriores a estas taxas.",
+        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula. O Portal das Finanças mostra o novo calendário de abril a partir de 2027, mas não a redação anterior, por isso confirma a tua data no Portal das Finanças. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
+        "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. Conta o valor da nota de cobrança da Autoridade Tributária.",
+        "sourcesTitle": "Fontes",
+        "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
+        "sourceCategoryB": "Código do IUC, artigo 10.º: taxas da categoria B, taxas adicionais e coeficientes (consultado a 19 de novembro de 2026)",
+        "sourcePayment": "Código do IUC, artigo 17.º: pagamento (consultado a 19 de novembro de 2026)",
+        "sourceDiesel": "Portal das Finanças: adicional de gasóleo, artigo 216.º da Lei n.º 82-B/2014, mantido em 2026 pelo artigo 94.º da Lei n.º 73-A/2025 (consultado a 19 de novembro de 2026). A página não indica valores, por isso os montantes vêm das tabelas publicadas pelo ACP.",
+        "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}."
+      },
+      "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
+      "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
+      "nextStepCta": "Reserva um doze avos do teu imposto automóvel anual"
     }
   },
   "resources": {

@@ -70,6 +70,18 @@ export const TOOLS_CATALOG = [
 		group: "budgetAndSave",
 		related: ["toolHouseholdBudget", "toolSavingsGoal", "toolInvestmentReturn"],
 	},
+	{
+		key: "netSalary",
+		routeId: "toolNetSalary",
+		group: "budgetAndSave",
+		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate"],
+	},
+	{
+		key: "withholdingTables",
+		routeId: "toolWithholdingTables",
+		group: "budgetAndSave",
+		related: ["toolNetSalary", "toolHouseholdBudget", "toolBorrowingCapacity"],
+	},
 	// Borrow and buy a home
 	{
 		key: "mortgage",
@@ -117,7 +129,31 @@ export const TOOLS_CATALOG = [
 		key: "carLoan",
 		routeId: "toolCarLoan",
 		group: "borrowAndBuyHome",
-		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome"],
+		related: ["toolHouseholdBudget", "toolPersonalLoan", "toolDebtToIncome", "toolVehicleTax"],
+	},
+	{
+		key: "propertyTax",
+		routeId: "toolPropertyTax",
+		group: "borrowAndBuyHome",
+		related: ["toolHouseholdBudget", "toolMortgage", "toolBuyVsRent"],
+	},
+	{
+		key: "purchaseTaxes",
+		routeId: "toolPurchaseTaxes",
+		group: "borrowAndBuyHome",
+		related: ["toolMortgage", "toolBorrowingCapacity", "toolSavingsGoal"],
+	},
+	{
+		key: "youthMortgage",
+		routeId: "toolYouthMortgage",
+		group: "borrowAndBuyHome",
+		related: ["toolMortgage", "toolPurchaseTaxes", "toolSavingsGoal"],
+	},
+	{
+		key: "vehicleTax",
+		routeId: "toolVehicleTax",
+		group: "borrowAndBuyHome",
+		related: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
 	},
 	{
 		key: "personalLoan",
@@ -150,6 +186,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
 		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund"],
+	},
+	{
+		key: "savingsCertificates",
+		routeId: "toolSavingsCertificates",
+		group: "investAndGrow",
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation"],
 	},
 	// Track your wealth
 	{

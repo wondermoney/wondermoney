@@ -507,6 +507,78 @@
         "methodology": "Methodik des INE"
       }
     },
+    "propertyTax": {
+      "title": "IMI-Rechner (portugiesische Grundsteuer)",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Schätzen Sie die jährliche IMI für eine Immobilie in Portugal, die Fälligkeiten der Raten und den Betrag, den Sie monatlich zurücklegen sollten.",
+      "description": "IMI in Portugal, Zahlungstermine und monatliche Rücklage schätzen.",
+      "pageTitle": "IMI-Rechner: Grundsteuer in Portugal und Zahlungstermine",
+      "pageDescription": "Schätzen Sie die jährliche IMI aus Steuerwert und kommunalem Satz, mit den Raten im Mai, August und November und der monatlichen Rücklage.",
+      "fields": {
+        "kind": "Art der Immobilie",
+        "vpt": "Steuerlicher Vermögenswert (VPT)",
+        "rate": "Kommunaler Satz",
+        "dependants": "Unterhaltsberechtigte (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Städtische Immobilie",
+        "rustic": "Ländliche Immobilie"
+      },
+      "vptHelp": "Der VPT steht in der Caderneta Predial und im IMI-Bescheid.",
+      "rateHelp": "Jede Gemeinde legt ihren Satz für städtische Immobilien zwischen {{min}} und {{max}} fest. Der Vorgabewert ist nur ein Beispiel: Nehmen Sie den Satz Ihrer Gemeinde.",
+      "rusticNote": "Ländliche Immobilien werden mit dem landesweiten Satz von {{rate}} besteuert. Ein kommunaler Satz ist nicht einzugeben.",
+      "dependantsHelp": "Nur wenn die Immobilie Ihr Hauptwohnsitz ist und Ihre Gemeinde die Ermäßigung IMI Familiar anwendet. Viele tun das nicht oder erst ab einer bestimmten Zahl Unterhaltsberechtigter.",
+      "dependantsOptions": {
+        "0": "Keine Ermäßigung",
+        "1": "1 Unterhaltsberechtigter (30 €)",
+        "2": "2 Unterhaltsberechtigte (70 €)",
+        "3": "3 oder mehr Unterhaltsberechtigte (140 €)"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "rateRange": "Geben Sie einen Satz von {{min}} bis {{max}} ein, die gesetzliche Spanne für städtische Immobilien.",
+        "dependants": "Wählen Sie die Anzahl der Unterhaltsberechtigten aus der Liste.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "annualTax": "Geschätzte jährliche IMI",
+        "monthlyProvision": "Monatliche Rücklage (jährliche IMI ÷ 12)",
+        "grossTax": "IMI vor der Ermäßigung",
+        "deduction": "Ermäßigung IMI Familiar",
+        "scheduleTitle": "Zahlungsplan",
+        "nothingDue": "Nichts zu zahlen: Die Ermäßigung deckt die gesamte Steuer."
+      },
+      "months": {
+        "may": "Mai",
+        "august": "August",
+        "november": "November"
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine Immobilie mit einem VPT von {{vpt}} in einer Gemeinde mit {{rate}} schuldet {{tax}} im Jahr. Da der Betrag über 500 € liegt, wird er in drei Raten zu {{instalment}} im Mai, August und November gezahlt. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodTax": "Die jährliche IMI ist der VPT mal Satz, auf den Cent gerundet. Städtische Immobilien nutzen den Satz Ihrer Gemeinde, der gesetzlich zwischen 0,30 % und 0,45 % liegt. Ländliche Immobilien nutzen 0,8 %.",
+        "methodFamily": "Wählen Sie eine Zahl Unterhaltsberechtigter, wird der feste Betrag der IMI Familiar (30 € bei einem, 70 € bei zwei, 140 € bei drei oder mehr) von der Steuer abgezogen; sie sinkt nie unter null. Ob er gilt, entscheidet Ihre Gemeinde.",
+        "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
+        "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
+        "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit, für begrenzte Zeit nach dem Kauf oder solange Haushaltseinkommen und VPT unter den Grenzen des Steuervergünstigungsstatuts liegen. Die Grenzen ändern sich und es gelten Bedingungen, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
+        "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
+        "assumptionEducational": "Dies ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im IMI-Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
+        "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
+        "sourceExemption": "Portal das Finanças: IMI-Befreiungen und IMI Familiar",
+        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI, wie von portugiesischen Banken und Gemeinden wiedergegeben."
+      },
+      "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
+      "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
+      "nextStepCta": "Legen Sie monatlich Geld für Ihre IMI zurück"
+    },
     "hub": {
       "title": "Finanztools & Rechner",
       "description": "Kostenlose interaktive Rechner, die Ihnen helfen, Ihre finanzielle Zukunft zu planen. Keine Registrierung erforderlich.",
@@ -2334,6 +2406,180 @@
       "nextStepDescription": "Lege in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
       "nextStepCta": "Erstelle dein Budget in WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Rechner für Kaufnebenkosten in Portugal (IMT und Stempelsteuer)",
+      "shortName": "Kaufsteuern",
+      "subtitle": "Schätzen Sie die IMT und die Stempelsteuer (Imposto do Selo) beim Immobilienkauf in Portugal und sehen Sie, wie viel Bargeld zusätzlich zur Anzahlung nötig ist.",
+      "description": "Schätzen Sie IMT und Stempelsteuer beim Immobilienkauf in Portugal.",
+      "pageTitle": "IMT- und Stempelsteuer-Rechner für den Immobilienkauf in Portugal",
+      "pageDescription": "Schätzen Sie IMT und Imposto do Selo 2026 beim Immobilienkauf in Portugal: Festland oder Inseln, Nutzung, Stempelsteuer auf das Darlehen und Befreiung für Junge.",
+      "propertyTitle": "Immobilie",
+      "financingTitle": "Hypothek",
+      "youngTitle": "Befreiung für junge Käufer (IMT Jovem)",
+      "youngNote": "Nur wenn alle Bedingungen am Tag der Urkunde erfüllt sind: Sie sind höchstens 35 Jahre alt, es ist Ihre erste Wohnung und Sie wohnen dauerhaft darin. Volle Befreiung bis {{full}}; teilweise bis {{partial}}, mit IMT und Stempelsteuer auf den Kauf nur auf den Mehrbetrag.",
+      "youngUnavailable": "Die Befreiung gilt nur für die eigene dauerhaft bewohnte Wohnung. Wählen Sie diese Nutzung, um die Berechtigung zu prüfen.",
+      "fields": {
+        "price": "Kaufpreis",
+        "taxValue": "Steuerwert (VPT), optional",
+        "region": "Lage",
+        "use": "Nutzung der Immobilie",
+        "loan": "Darlehensbetrag",
+        "young": "Ich erfülle die Bedingungen für junge Käufer"
+      },
+      "help": {
+        "price": "Der in der Urkunde genannte Preis.",
+        "taxValue": "Die Steuerbehörde besteuert den höheren Wert aus Preis und VPT. Lassen Sie 0, wenn unbekannt.",
+        "loan": "Geben Sie 0 bei Barkauf ein. Die Stempelsteuer auf das Darlehen ist in diesem Rechner nicht von der Befreiung für Junge erfasst."
+      },
+      "regions": {
+        "mainland": "Portugiesisches Festland",
+        "islands": "Azoren oder Madeira"
+      },
+      "uses": {
+        "ownPermanent": "Eigene dauerhaft bewohnte Wohnung",
+        "secondary": "Zweitwohnung oder andere Wohnnutzung",
+        "rustic": "Ländliches Grundstück",
+        "otherUrban": "Sonstige städtische Immobilie oder Grundstück"
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "loan": "Das Darlehen darf den Kaufpreis nicht übersteigen.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Zu zahlende Steuern gesamt",
+        "effectiveRate": "{{rate}} des steuerpflichtigen Werts",
+        "reference": "Steuerpflichtiger Wert",
+        "imt": "IMT",
+        "stampPurchase": "Stempelsteuer auf den Kauf (0,8 %)",
+        "stampLoan": "Stempelsteuer auf das Darlehen (0,6 %)",
+        "exemptFull": "Befreiung für junge Käufer angewendet: entfallen IMT und Stempelsteuer auf den Kauf und spart {{saving}}.",
+        "exemptPartial": "Teilbefreiung für junge Käufer angewendet: IMT und Stempelsteuer auf den Kauf fallen nur auf den Teil über der Grenze der vollen Befreiung an. Sie spart insgesamt {{saving}}.",
+        "exemptNone": "Bei diesem Wert gilt die Befreiung nicht. Sie gilt für Käufe bis {{partial}} (voll bis {{full}}) und nur unter den Bedingungen im Kasten links.",
+        "tableNote": "Tabelle {{year}}, geprüft am {{date}}. Lehrreiche Schätzung, keine Steuerberatung."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Der Kauf einer eigenen, dauerhaft bewohnten Wohnung auf dem Festland für {{price}} mit einem Darlehen von {{loan}} kostet {{imt}} IMT, {{stampPurchase}} Stempelsteuer auf den Kauf und {{stampLoan}} Stempelsteuer auf das Darlehen. Das sind insgesamt {{total}}, zusätzlich zur Anzahlung, und sollten in Ihr Sparziel einfließen.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodBase": "Bemessungsgrundlage ist der höhere Wert aus Kaufpreis und Steuerwert (VPT).",
+        "methodImt": "Bei Wohnungen ist die IMT die Grundlage mal dem Satz der Stufe minus einem festen Abzug (parcela a abater), der die Steuer progressiv macht. Oberhalb der letzten progressiven Stufe gilt der Satz für den gesamten Wert ohne Abzug. Ländliche Grundstücke zahlen 5 %, sonstige städtische Immobilien oder Grundstücke 6,5 %.",
+        "methodStamp": "Die Stempelsteuer beträgt 0,8 % der Grundlage beim Kauf (verba 1.1) und bei einem Darlehen 0,6 % des Darlehensbetrags (verba 17.1.4, Laufzeit ab fünf Jahren).",
+        "methodRounding": "IMT und jede Stempelsteuer werden getrennt auf den Cent gerundet, wie die Steuerbehörde sie festsetzt. Stempelsteuer auf Zinsen und Gebühren ist nicht enthalten.",
+        "tableTitle": "IMT-Tabelle {{year}}: eigene dauerhaft bewohnte Wohnung, Festland",
+        "tableAbove": "Höhere Werte",
+        "tableLimit": "Wert bis",
+        "tableRate": "Satz",
+        "tableDeduct": "Abzug",
+        "tableNote": "Bis {{exempt}} liegt die erste Stufe bei 0 %. Zweitwohnungen haben eine eigene Tabelle mit 1 % ab dem ersten Euro, und die Azoren und Madeira nutzen dieselben Sätze mit um 25 % höheren Grenzen.",
+        "sourceImt": "CIMT, Artikel 17 (Portal das Finanças)",
+        "sourceStamp": "Stempelsteuergesetz (Portal das Finanças)",
+        "review": "Regeln und Grenzen für {{year}}, zuletzt geprüft am {{date}}. Prüfen Sie sie vor der Unterschrift erneut.",
+        "assumptionsTitle": "Annahmen und unterstützte Fälle",
+        "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
+        "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
+        "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
+        "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
+        "assumptionIslands": "Für die Azoren und Madeira sind die Grenzen die des Festlands plus 25 %, auf den Euro gerundet, mit denselben Sätzen. Bestätigen Sie die regionalen Grenzen bei der Steuerbehörde."
+      },
+      "nextStepHeadline": "Planen Sie das Bargeld für den Kauf",
+      "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
+      "nextStepCta": "Steuern in Ihr Anzahlungsziel einrechnen"
+    },
+    "youthMortgage": {
+      "title": "Rechner für den Jugend-Immobilienkredit (Portugal)",
+      "shortName": "Jugendkredit",
+      "subtitle": "Sehen Sie, welche Bedingungen der staatlichen Garantie Ihre Angaben erfüllen, und schätzen Sie Monatsrate, Kaufnebenkosten und das Bargeld bei der Beurkundung.",
+      "description": "Schätzen Sie einen Immobilienkredit für junge Käufer in Portugal: Rate, Steuern und Bargeld.",
+      "pageTitle": "Jugend-Immobilienkredit Portugal Rechner: Staatsgarantie und Monatsrate",
+      "pageDescription": "Prüfen Sie die Bedingungen der öffentlichen Garantie für junge Käufer 2026 in Portugal und schätzen Sie Rate, IMT und Stempelsteuer mit und ohne Jugendbefreiung sowie das nötige Bargeld bei der Beurkundung.",
+      "checkTitle": "1. Staatsgarantie: welche Bedingungen Ihre Angaben erfüllen",
+      "checkIntro": "Nur zur Information. Diese Liste zeigt, welche Bedingungen Ihre Angaben erfüllen; sie sagt nicht, ob Sie Anspruch haben. Bank und Staat entscheiden.",
+      "checkSummary": "{{met}} von {{total}} Bedingungen durch Ihre Angaben erfüllt.",
+      "checkNote": "Bedingungen geprüft am {{date}}. Die Garantie deckt bis zu {{percent}} % des Transaktionswerts, sodass die Finanzierung 100 % erreichen kann. Sie ändert den Zinssatz nicht.",
+      "estimateTitle": "2. Kredit und nötiges Bargeld schätzen",
+      "years": "Jahre",
+      "fields": {
+        "age": "Ihr Alter am Vertragsdatum",
+        "income": "Zu versteuerndes Jahreseinkommen, optional",
+        "ownHome": "Die Immobilie wird mein dauerhafter Hauptwohnsitz",
+        "otherProperty": "Ich besitze ganz oder teilweise eine andere Wohnimmobilie",
+        "price": "Kaufpreis",
+        "deposit": "Eigenkapital",
+        "annualRate": "Sollzins (TAN)",
+        "termYears": "Kreditlaufzeit"
+      },
+      "help": {
+        "income": "Nur für die Bedingungsliste. Die Grenze ist die Obergrenze der 8. IRS-Stufe.",
+        "price": "Der Preis laut Kaufvertrag. Die Bedingungsliste nutzt ebenfalls diesen Wert.",
+        "deposit": "Das Bargeld, das Sie einbringen. Es darf null sein.",
+        "annualRate": "Nominaler Jahreszins. Die Garantie senkt ihn nicht.",
+        "termYears": "Bis zu 40 Jahre."
+      },
+      "status": {
+        "met": "Erfüllt",
+        "notMet": "Nicht erfüllt",
+        "unknown": "Keine Angabe"
+      },
+      "conditions": {
+        "age": "Alter zwischen {{minAge}} und {{maxAge}} Jahren.",
+        "ownHome": "Die Immobilie dient als eigener dauerhafter Hauptwohnsitz.",
+        "otherProperty": "Kein ganzer oder teilweiser Besitz einer anderen Wohnimmobilie.",
+        "price": "Die Immobilie kostet höchstens {{maxPrice}}.",
+        "income": "Zu versteuerndes Jahreseinkommen bis zur 8. IRS-Stufe ({{maxIncome}} im Jahr 2026)."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "zero": "Geben Sie einen Preis über null ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "depositTooLarge": "Das Eigenkapital darf den Preis nicht übersteigen.",
+        "loanTooSmall": "Der Kredit läge unter 100 Euro. Senken Sie das Eigenkapital oder betrachten Sie es als Barkauf.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Monatsrate (Tilgung und Zinsen)",
+        "noLoan": "Das Eigenkapital deckt den gesamten Preis, es gibt also keinen Kredit.",
+        "loan": "Kreditbetrag",
+        "ltv": "Beleihungsauslauf (LTV)",
+        "interest": "Gesamtzinsen über die Laufzeit",
+        "taxesWithout": "IMT und Stempelsteuer ohne Jugendbefreiung",
+        "taxesWith": "IMT und Stempelsteuer mit Jugendbefreiung",
+        "cashWithout": "Bargeld bei Beurkundung ohne Befreiung (Eigenkapital und Steuern)",
+        "cashWith": "Bargeld bei Beurkundung mit Jugendbefreiung",
+        "exemptionNote": "Die Jugendbefreiung (IMT Jovem) setzt voraus, dass Sie höchstens 35 sind und Ihre erste eigene dauerhafte Wohnung kaufen. Die Stempelsteuer von 0,6 % auf den Kredit fällt weiterhin an.",
+        "bankNote": "Die Bank entscheidet, ob, zu welchem Zins und mit welchem LTV sie finanziert. Bildungszwecke, kein Angebot. Kreditgebühren, Versicherung, Bewertung und Notarkosten sind nicht enthalten."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Der Kauf einer Immobilie für {{price}} ohne Eigenkapital, bei {{rate}} Zins und {{years}} Jahren Laufzeit, bedeutet {{loan}} Kredit bei etwa {{monthly}} im Monat. IMT und Stempelsteuer betragen {{taxesWithout}} ohne Jugendbefreiung und {{taxesWith}} mit ihr (nur die Stempelsteuer auf den Kredit bleibt). Mit der Befreiung beträgt das nötige Bargeld bei der Beurkundung {{cash}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodPayment": "Kredit = Preis minus Eigenkapital. Die Monatsrate ist die einer Annuität mit festem Zins, dieselbe Rechenlogik wie im Hypothekenrechner. Der LTV ist der Kredit geteilt durch den Preis.",
+        "methodTaxes": "IMT und Stempelsteuer stammen aus dem Rechner für Kaufnebenkosten, für den eigenen dauerhaften Wohnsitz auf dem Festland: Die Jugendbefreiung streicht beide bis zur Vollgrenze und erhebt 8 % IMT auf den Mehrbetrag bis zur Teilgrenze.",
+        "methodCash": "Das Bargeld bei der Beurkundung ist das Eigenkapital plus die Steuern. Wir zeigen es mit und ohne Jugendbefreiung.",
+        "methodGuarantee": "Die Garantie fließt nicht in die Rate ein: Sie hilft der Bank nur, einen höheren LTV bis 100 % zu akzeptieren, den Zins legt die Bank fest.",
+        "conditionsTitle": "Geprüfte Bedingungen der Staatsgarantie (Decreto-Lei Nr. 44/2024)",
+        "conditionAge": "Alter zwischen {{minAge}} und {{maxAge}} Jahren am Vertragsdatum und steuerlicher Wohnsitz in Portugal.",
+        "conditionHome": "Die Immobilie wird als eigener dauerhafter Hauptwohnsitz gekauft.",
+        "conditionProperty": "Kein ganzer oder teilweiser Besitz einer anderen Wohnimmobilie.",
+        "conditionPrice": "Die Immobilie kostet höchstens {{maxPrice}} (die Bankbewertung kann den Transaktionswert senken).",
+        "conditionIncome": "Einkommen bis zur 8. IRS-Stufe: {{maxIncome}} pro Jahr in 2026 (2025 waren es 83.696 Euro).",
+        "conditionDate": "Nur Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden, kommen infrage, und die Garantie deckt bis zu {{percent}} % des Transaktionswerts für höchstens 10 Jahre.",
+        "sourceGovernment": "Portugiesische Regierung: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Bedingungen zuletzt geprüft am {{date}}. Die Einkommensgrenze 2026 ist die Obergrenze der 8. IRS-Stufe nach Artikel 68 des IRS-Gesetzbuchs, um 3,51 % angehoben durch das Gesetz 73-A/2025 (Staatshaushalt 2026). Die Banken entscheiden über jeden Antrag.",
+        "assumptionsTitle": "Annahmen und Grenzen",
+        "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
+        "assumptionRate": "Der Zins ist der, den Sie eingeben. Die Garantie ändert den Zinssatz nicht.",
+        "assumptionTaxes": "Die Steuern gelten für den eigenen dauerhaften Wohnsitz auf dem portugiesischen Festland und setzen in den Werten mit Befreiung voraus, dass Sie die Bedingungen des IMT Jovem erfüllen.",
+        "assumptionScope": "Nur zu Bildungszwecken: keine Finanz-, Steuer- oder Rechtsberatung."
+      },
+      "nextStepHeadline": "Planen Sie Eigenkapital und Wohnkosten",
+      "nextStepDescription": "Setzen Sie ein Ziel für das Eigenkapital und budgetieren Sie Rate, Steuern und laufende Wohnkosten in WonderMoney.",
+      "nextStepCta": "Eigenkapital und laufende Wohnkosten planen"
+    },
     "personalLoan": {
       "title": "Privatkredit-Rechner",
       "shortName": "Privatkredit",
@@ -2438,6 +2684,316 @@
         "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
         "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Rechner für portugiesische Sparzertifikate (Certificados de Aforro)",
+      "shortName": "Sparzertifikate",
+      "subtitle": "Schätze, was die portugiesischen Certificados de Aforro Série F bringen können: vierteljährliche Zinsen, Treueprämien und 28 % einbehaltene IRS, brutto und netto.",
+      "description": "Schätze Zinsen, Prämien und Steuer der Certificados de Aforro Série F.",
+      "pageTitle": "Certificados de Aforro Série F Rechner: Zinsen, Prämien und Nettorendite",
+      "pageDescription": "Schätze die Rendite der Certificados de Aforro Série F mit Treueprämien, 28 % IRS-Einbehalt und anpassbarem Basiszins, brutto und netto.",
+      "assumption": "Der Basiszins ändert sich jeden Monat mit dem 3-Monats-Euribor. Diese Schätzung hält den eingegebenen Zins für alle Quartale konstant, das Ergebnis ist also eine Illustration, keine Prognose.",
+      "fields": {
+        "amount": "Gezeichneter Betrag",
+        "years": "Jahre Haltedauer",
+        "baseRate": "Basiszins (Annahme)",
+        "baseRateHelp": "Brutto-Jahreszins, bis {{rate}} (die Obergrenze der Regeln). Ändere ihn, um andere Szenarien zu testen."
+      },
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "negative": "Gib null oder einen positiven Zins ein.",
+        "tooSmall": "Das Minimum pro Konto beträgt {{min}}.",
+        "tooLarge": "Das Maximum pro Konto beträgt {{max}}.",
+        "years": "Gib eine ganze Zahl von Jahren von 1 bis {{years}} ein.",
+        "baseRate": "Der Basiszins darf {{rate}} nicht überschreiten.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "finalValue": "Geschätzter Nettowert am Ende",
+        "invested": "Gezeichneter Betrag",
+        "grossInterest": "Bruttozinsen",
+        "irs": "Einbehaltene IRS (28 %)",
+        "netInterest": "Nettozinsen",
+        "premiumInterest": "Davon aus Treueprämien (brutto)",
+        "netYield": "Netto-Jahresrendite"
+      },
+      "table": {
+        "title": "Jahr für Jahr",
+        "year": "Jahr",
+        "rate": "Bruttozins",
+        "gross": "Bruttozinsen",
+        "net": "Nettozinsen",
+        "balance": "Guthaben"
+      },
+      "guide": {
+        "rulesTitle": "Regeln der Série F, denen der Rechner folgt",
+        "rulesIntro": "Regeln, wie der IGCP sie im Produktblatt der Série F von {{rulesDate}} veröffentlicht hat (Portaria n.º 149-A/2023). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
+        "ruleTerm": "Laufzeit von {{termYears}} Jahren. Du kannst ab dem ersten Zinstermin ganz oder teilweise zurückgeben; der Rechner nutzt volle Jahre Haltedauer.",
+        "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins folgt dem 3-Monats-Euribor, mit Obergrenze {{maxBase}} und Untergrenze 0 %.",
+        "ruleTax": "Zinsen fallen vierteljährlich an und werden nach IRS automatisch kapitalisiert; die IRS wird an der Quelle mit {{irsRate}} einbehalten.",
+        "ruleRedeem": "Nur natürliche Personen können Inhaber sein. Die Grenze liegt bei {{maxAmount}} pro Aforro-Konto in der Série F, das Minimum bei {{minAmount}}.",
+        "premiumTitle": "Treueprämie nach Zeichnungsjahr",
+        "premiumYears": "Jahr",
+        "premiumPoints": "Prozentpunkte",
+        "sourceSheet": "IGCP-Produktblatt Série F (April 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "April 2026",
+        "exampleTitle": "Rechenbeispiel",
+        "exampleText": "Du zeichnest {{amount}} und hältst {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodQuarter": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
+        "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
+        "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Der echte Zins wird monatlich neu festgelegt, die tatsächlichen Zinsen weichen daher ab.",
+        "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Einkommen. Deine persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
+        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
+      },
+      "nextStepHeadline": "Sieh deine Zertifikate neben deinem übrigen Erspartem",
+      "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
+      "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
+    },
+    "netSalary": {
+      "title": "Nettogehalt-Rechner Portugal 2026",
+      "shortName": "Nettogehalt",
+      "subtitle": "Rechnen Sie das monatliche Bruttogehalt in Ihr Netto um: IRS-Quellensteuer, Sozialversicherung und Essenszuschuss mit den Tabellen 2026.",
+      "description": "Schätzen Sie Ihr monatliches Nettogehalt in Portugal mit den IRS-Quellensteuertabellen 2026.",
+      "pageTitle": "Nettogehalt-Rechner Portugal 2026: vom Brutto zum Netto",
+      "pageDescription": "Rechnen Sie Brutto in Netto um, mit den IRS-Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, 11 % Sozialversicherung und Essenszuschuss.",
+      "fields": {
+        "grossMonthly": "Monatliches Bruttogehalt",
+        "region": "Region",
+        "status": "Situation des Steuerpflichtigen",
+        "dependants": "Unterhaltsberechtigte",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "mealGroup": "Essenszuschuss",
+        "mealDaily": "Essenszuschuss pro Tag",
+        "mealDays": "Tage pro Monat",
+        "mealKind": "Ausgezahlt als"
+      },
+      "regions": {
+        "mainland": "Festlandportugal",
+        "azores": "Azoren",
+        "madeira": "Madeira"
+      },
+      "statuses": {
+        "single": "Nicht verheiratet",
+        "marriedOneEarner": "Verheiratet, ein Einkommen",
+        "marriedTwoEarners": "Verheiratet, zwei Einkommen"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld separat)",
+        "twelfths": "In Zwölfteln (auf 12 Zahlungen verteilt)"
+      },
+      "mealKinds": {
+        "cash": "Bar mit dem Gehalt",
+        "card": "Essenskarte"
+      },
+      "help": {
+        "gross": "Das Grundgehalt vor Zuschlägen, Sozialversicherung und IRS.",
+        "status": "Wählen Sie \"ein Einkommen\" nur, wenn Ihr Ehepartner kein Einkommen hat oder Sie mindestens 95 % des Paareinkommens verdienen. Eine eheähnliche Gemeinschaft zählt als Ehe.",
+        "allowances": "In Zwölfteln werden die beiden zusätzlichen Monate auf jede Monatszahlung aufgeschlagen (14 ÷ 12 des Grundgehalts).",
+        "meal": "Steuerfrei bis {{cash}} pro Tag in bar und {{card}} auf der Essenskarte. Der Mehrbetrag wird wie Gehalt besteuert."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie eine positive Zahl ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "netMonthly": "Geschätztes Netto in einem normalen Monat",
+        "withholding": "IRS-Quellensteuer",
+        "socialSecurity": "Sozialversicherung (11 %)",
+        "allowanceNet": "Netto jeder Sonderzahlung",
+        "annualNet": "Geschätztes Netto im Jahr",
+        "notFinalTax": "Die monatliche Quellensteuer ist ein Vorschuss auf Ihre jährliche IRS, nicht die endgültige Steuer. Die endgültige IRS wird in der Jahreserklärung festgesetzt, es kann also eine Erstattung oder eine Nachzahlung geben."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Bei einem Bruttogehalt von {{gross}} im Monat, unverheiratet und ohne Unterhaltsberechtigte, in Festlandportugal und mit {{meal}} im Monat Essenszuschuss in bar betragen die IRS-Quellensteuer {{withholding}} und die Sozialversicherung {{socialSecurity}}. Wenn Urlaubs- und Weihnachtsgeld separat gezahlt werden, bleiben in einem normalen Monat {{net}} netto, jede Sonderzahlung bringt {{allowanceNet}} und das Jahr {{annual}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodWithholding": "Die IRS-Quellensteuer folgt den Monatstabellen 2026: das Monatsentgelt mal Grenzsteuersatz der Zeile, minus Parcela a abater und ein fester Betrag je Unterhaltsberechtigtem. Ab drei Unterhaltsberechtigten sinkt der Satz um einen Prozentpunkt.",
+        "methodSocialSecurity": "Die Sozialversicherung des Arbeitnehmers beträgt 11 % des beitragspflichtigen Entgelts, einschließlich des Essenszuschusses über dem steuerfreien Limit.",
+        "methodMeal": "Der Essenszuschuss ist bis zum Tageslimit steuerfrei, das davon abhängt, ob er bar oder per Karte gezahlt wird. Der Rechner addiert nur den Mehrbetrag zum steuerpflichtigen Entgelt.",
+        "methodAllowances": "Bei 14 Zahlungen werden Urlaubs- und Weihnachtsgeld jeweils für sich besteuert, wie es die Tabellen verlangen. In Zwölfteln wird der Zusatzbetrag auf jeden Monat aufgeschlagen.",
+        "methodBudget": "Die Nettowerte sind das, was auf Ihrem Konto ankommt, und damit der richtige Ausgangspunkt für ein Monatsbudget.",
+        "finalTitle": "Die Quellensteuer ist nicht Ihre endgültige IRS",
+        "final": "Was jeden Monat einbehalten wird, ist eine Vorauszahlung. Die Steuerbehörde setzt Ihre tatsächliche IRS in der Jahreserklärung fest, mit dem Einkommen des ganzen Jahres und Ihren Abzügen. Die Quellensteuer kann über oder unter der geschuldeten Steuer liegen, deshalb gibt es Erstattungen oder Nachzahlungen.",
+        "unsupportedTitle": "Nicht unterstützt",
+        "unsupportedYouth": "IRS Jovem wird nicht angewendet.",
+        "unsupportedDisability": "Die Tabellen für Menschen mit Behinderung und die Rententabellen sind nicht enthalten.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Sie halbiert die Quellensteuer nur in diesem Monat.",
+        "unsupportedOther": "Sonstige Einkünfte, Überstunden, Nichtansässige, freiwillig höhere Quellensteuersätze und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
+        "sourcesTitle": "Quellen",
+        "sourceDespacho": "Despacho n.º 233-A/2026: Quellensteuertabellen 2026, Festlandportugal",
+        "sourceRegional": "Portal das Finanças: Quellensteuertabellen für die Azoren und Madeira",
+        "sourceMeal": "Portal das Finanças: Freigrenzen für den Essenszuschuss (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social: Beitragssätze",
+        "reviewed": "Tabellen und Sätze geprüft am 19. November 2026. Der Sozialversicherungssatz von 11 % und die Limits des Essenszuschusses wurden anhand von Sekundärquellen geprüft, nicht anhand der Originaltexte."
+      },
+      "nextStepHeadline": "Vom Gehalt zum Plan für Ihr Geld",
+      "nextStepDescription": "WonderMoney geht von dem aus, was Sie wirklich ausgezahlt bekommen, und zeigt, wohin jeder Euro geht, Monat für Monat.",
+      "nextStepCta": "Ein Budget aus Ihrem Nettogehalt erstellen"
+    },
+    "withholdingTables": {
+      "title": "IRS-Quellensteuertabellen Portugal 2026",
+      "shortName": "IRS-Quellensteuertabellen",
+      "subtitle": "Die monatlichen Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, mit der Formel der Parcela a abater und den jährlichen IRS-Stufen.",
+      "description": "Die IRS-Quellensteuertabellen 2026 und die jährlichen Stufen für Portugal im Überblick.",
+      "pageTitle": "IRS-Quellensteuertabellen 2026 Portugal: Sätze und Parcela a Abater",
+      "pageDescription": "Die monatlichen IRS-Quellensteuertabellen 2026 für Festlandportugal, die Azoren und Madeira, wie die Formel der Parcela a abater funktioniert, und die jährlichen IRS-Stufen.",
+      "fields": {
+        "region": "Region",
+        "table": "Quellensteuertabelle",
+        "remuneration": "Monatliches Entgelt",
+        "dependants": "Unterhaltsberechtigte"
+      },
+      "regions": {
+        "mainland": "Festlandportugal",
+        "azores": "Azoren",
+        "madeira": "Madeira"
+      },
+      "tableOptions": {
+        "I": "Tabelle I: nicht verheiratet ohne Unterhaltsberechtigte oder verheiratet mit zwei Einkommen",
+        "II": "Tabelle II: nicht verheiratet mit einem oder mehreren Unterhaltsberechtigten",
+        "III": "Tabelle III: verheiratet mit einem Einkommen"
+      },
+      "remunerationHelp": "Optional. Geben Sie ein monatliches Bruttoentgelt ein, um die Zeile hervorzuheben und die Quellensteuer zu sehen.",
+      "errors": {
+        "remuneration": "Geben Sie einen Betrag bis {{max}} ein.",
+        "dependants": "Geben Sie eine ganze Zahl von 0 bis {{max}} ein."
+      },
+      "result": {
+        "withholding": "Monatliche IRS-Quellensteuer",
+        "row": "Der Grenzsteuersatz dieser Zeile beträgt {{rate}}.",
+        "empty": "Geben Sie ein monatliches Entgelt und eine gültige Zahl von Unterhaltsberechtigten ein, um die Quellensteuer zu sehen."
+      },
+      "formula": "Quellensteuer = Entgelt × Grenzsteuersatz − Parcela a abater − {{dependant}} × Zahl der Unterhaltsberechtigten. Sie ist nie kleiner als null, und ab drei Unterhaltsberechtigten sinkt der Satz um einen Prozentpunkt.",
+      "notFinalTax": "Die Quellensteuer ist ein Vorschuss auf Ihre jährliche IRS, nicht die endgültige Steuer. Die Jahreserklärung setzt den tatsächlichen Betrag fest.",
+      "tableTitle": "Tabelle {{table}}: {{region}}",
+      "tableSource": "Genehmigt durch {{act}}, für Einkünfte, die vom {{from}} bis {{to}} gezahlt werden.",
+      "tableCaption": "Grenzsteuersatz und Parcela a abater nach monatlichem Entgelt",
+      "columns": {
+        "remuneration": "Monatliches Entgelt",
+        "rate": "Grenzsteuersatz",
+        "parcela": "Parcela a abater",
+        "upTo": "Bis {{limit}}",
+        "above": "Über {{limit}}"
+      },
+      "annual": {
+        "title": "Jährliche IRS-Stufen für Einkünfte 2026",
+        "intro": "Das sind die Sätze nach Artikel 68 des Código do IRS, angewendet auf das jährliche zu versteuernde Einkommen. Jeder Satz gilt nur für den Teil des Einkommens innerhalb seiner Stufe.",
+        "caption": "Jährliche IRS-Sätze nach Stufe des zu versteuernden Einkommens",
+        "income": "Zu versteuerndes Einkommen",
+        "rate": "Satz auf den Teil der Stufe"
+      },
+      "guide": {
+        "howTitle": "So lesen Sie die Tabellen",
+        "howFormula": "Suchen Sie die Zeile, in die das Monatsentgelt fällt, multiplizieren Sie es mit dem Grenzsteuersatz und ziehen Sie die Parcela a abater ab. Ziehen Sie den Zusatzbetrag je Unterhaltsberechtigtem ab, das Ergebnis ist die Quellensteuer.",
+        "howTransition": "In den ersten Zeilen ist die Parcela a abater eine Formel mit dem Buchstaben R, dem Monatsentgelt. Sie lässt die Quellensteuer ab null sanft steigen, damit eine kleine Gehaltserhöhung das Netto nie senkt.",
+        "howDependants": "Jeder Unterhaltsberechtigte senkt die Quellensteuer um einen festen Betrag. Ab drei Unterhaltsberechtigten liegt der Grenzsteuersatz der Zeile einen Prozentpunkt niedriger.",
+        "howTables": "Tabelle I gilt für Nicht-Verheiratete ohne Unterhaltsberechtigte und für Verheiratete mit zwei Einkommen. Tabelle II gilt für Nicht-Verheiratete mit Unterhaltsberechtigten und Tabelle III für Verheiratete mit einem Einkommen.",
+        "finalTitle": "Die Quellensteuer ist nicht die endgültige Steuer",
+        "final": "Die Tabellen legen fest, wie viel Ihr Arbeitgeber jeden Monat einbehält. Sie berechnen nicht Ihre endgültige IRS, die die Jahreserklärung mit den obigen Stufen, dem Einkommen des ganzen Jahres und Ihren Abzügen festsetzt.",
+        "unsupportedTitle": "Nicht enthalten",
+        "unsupportedDisability": "Die Tabellen für Menschen mit Behinderung (IV bis VII).",
+        "unsupportedYouth": "IRS Jovem, das eigene Regeln hat.",
+        "unsupportedNovember": "Die einmalige Anpassung für im November 2026 auf dem Festland gezahlte Einkünfte, die die Quellensteuer nur in diesem Monat halbiert.",
+        "unsupportedPensions": "Die Rententabellen (VIII bis XI).",
+        "sourcesTitle": "Quellen",
+        "sourceMainland": "Despacho n.º 233-A/2026: Quellensteuertabellen 2026, Festlandportugal",
+        "sourceRegional": "Portal das Finanças: Quellensteuertabellen, einschließlich der Azoren (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026: Quellensteuertabellen für Madeira",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026: Artikel 68 des Código do IRS",
+        "reviewed": "Tabellen am 19. November 2026 anhand der veröffentlichten Anhänge geprüft. Spätere Änderungen finden Sie im Portal das Finanças."
+      },
+      "nextStepHeadline": "Von der Quellensteuer zu Ihrem Monatsplan",
+      "nextStepDescription": "WonderMoney macht aus Ihrem geschätzten Netto einen Plan, damit jeder Euro vor Monatsbeginn eine Aufgabe hat.",
+      "nextStepCta": "Die Netto-Schätzung in einem Monatsplan nutzen"
+    },
+    "vehicleTax": {
+      "title": "Kfz-Steuer-Rechner (IUC)",
+      "shortName": "Kfz-Steuer (IUC)",
+      "subtitle": "Schätze die jährliche IUC für einen Pkw in Portugal, sieh, wann sie fällig ist und wie viel du jeden Monat zurücklegen solltest.",
+      "description": "Schätze die portugiesische IUC, ihre Fälligkeit und eine monatliche Rücklage.",
+      "pageTitle": "IUC-Rechner 2026: portugiesische Kfz-Steuer nach Hubraum und CO2",
+      "pageDescription": "Schätze die IUC 2026 für ein in Portugal zugelassenes Auto nach Hubraum, Kraftstoff, CO2-Ausstoß und Zulassungsdatum, mit Fälligkeit und monatlicher Rücklage.",
+      "fields": {
+        "fuel": "Kraftstoff",
+        "cc": "Hubraum",
+        "year": "Jahr der Erstzulassung",
+        "month": "Monat der Erstzulassung",
+        "co2": "Offizieller CO2-Ausstoß",
+        "standard": "CO2-Prüfzyklus"
+      },
+      "fuels": {
+        "petrol": "Benzin",
+        "diesel": "Diesel oder anderer Kraftstoff",
+        "electric": "Elektro"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "In Kubikzentimetern (cm³), wie im Fahrzeugschein angegeben (Feld P.1).",
+      "co2Help": "In Gramm pro Kilometer, wie im Fahrzeugschein angegeben (Feld V.7).",
+      "registrationHelp": "Das Datum der Erstzulassung in Portugal oder einem anderen EU- oder EWR-Land bestimmt Kategorie und Koeffizient. Autos, die vor Juli 2007 zugelassen wurden, gehören zu Kategorie A, ab Juli 2007 zu Kategorie B.",
+      "electricNote": "Reine Elektroautos, die ab Juli 2007 zugelassen wurden, sind von der IUC befreit, daher gibt es nichts einzugeben.",
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "zero": "Gib einen Wert über null ein.",
+        "negative": "Gib einen positiven Wert ein.",
+        "tooLarge": "Gib einen Wert bis {{max}} ein.",
+        "yearTooOld": "Dieser Rechner deckt Autos ab, die ab 1981 erstmals zugelassen wurden.",
+        "yearTooNew": "Gib ein Zulassungsjahr bis {{max}} ein.",
+        "month": "Wähle einen Monat aus der Liste.",
+        "electricCategoryA": "Elektroautos mit Zulassung vor Juli 2007 werden nicht unterstützt. Prüfe das Portal das Finanças.",
+        "summary": "Prüfe die markierten Felder, um deine Schätzung zu sehen."
+      },
+      "result": {
+        "annualTax": "Geschätzte jährliche IUC",
+        "monthlyProvision": "Monatliche Rücklage (jährliche IUC ÷ 12)",
+        "category": "IUC-Kategorie",
+        "baseTax": "Hubraum- plus CO2-Satz",
+        "additionalTax": "Zusatzsatz",
+        "coefficient": "Jahreskoeffizient",
+        "dueMonth": "Fällig 2026:",
+        "dueMonthValue": "Im {{month}}, dem Monat des Zulassungsjahrestags.",
+        "scheduleTitle": "Ab 2027: Zahlungsplan",
+        "exempt": "Reine Elektroautos der Kategorie B sind von der IUC befreit.",
+        "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)"
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Ein Diesel mit {{cc}} cm³ Hubraum, offiziellen WLTP-Emissionen von {{co2}} g/km und Erstzulassung {{year}} zahlt {{tax}} IUC im Jahr. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodA": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007): Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
+        "methodB": "Kategorie B (Autos mit Zulassung ab Juli 2007): Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
+        "methodAdditional": "Autos der Kategorie B mit Erstzulassung nach dem 1. Januar 2017 zahlen bei hohen Emissionen einen Zusatzsatz: 31,77 € über 205 g/km (WLTP) oder 180 g/km (NEDC) und 63,74 € über 260 g/km (WLTP) oder 250 g/km (NEDC). Auch der Zusatzsatz wird mit dem Koeffizienten multipliziert. Der Gesetzestext beschränkt ihn nicht nach Kraftstoff, daher wendet der Rechner ihn auf alle an.",
+        "methodDiesel": "Dieselfahrzeuge zahlen zusätzlich den Dieselzuschlag (adicional de IUC, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 durch den Staatshaushalt weitergeführt). Er hängt vom Hubraum ab, gilt für die Kategorien A und B und wird nach dem Koeffizienten addiert, nicht damit multipliziert.",
+        "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Ab 2027 wird sie nach dem Decreto-Lei Nr. 161/2026 bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt.",
+        "methodBudget": "Die monatliche Rücklage teilt den Jahresbetrag durch 12, damit das Geld bereitsteht, wenn der Bescheid kommt.",
+        "exemptionTitle": "Elektroautos",
+        "exemption": "Reine Elektroautos der Kategorie B sind von der IUC befreit, der Rechner zeigt null. Plug-in-Hybride und andere Fahrzeuge werden nach Hubraum und CO2 laut Fahrzeugschein besteuert, gib diese Werte ein.",
+        "scopeTitle": "Was abgedeckt ist",
+        "scopeSupported": "Leichte Pkw: Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
+        "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
+        "assumptionsTitle": "Annahmen",
+        "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags. Das Portal das Finanças zeigt den neuen April-Zahlungsplan ab 2027, aber nicht die frühere Fassung, bestätige also dein Datum im Portal das Finanças. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionEducational": "Das ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
+        "sourcesTitle": "Quellen",
+        "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
+        "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
+        "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
+        "sourceDiesel": "Portal das Finanças: Dieselzuschlag, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 fortgeführt durch Artikel 94 des Gesetzes Nr. 73-A/2025 (abgerufen am 19. November 2026). Die Seite nennt keine Beträge, daher stammen die Beträge aus den veröffentlichten ACP-Tabellen.",
+        "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}."
+      },
+      "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
+      "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
+      "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück"
     }
   },
   "resources": {

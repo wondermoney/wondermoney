@@ -38,6 +38,20 @@ import CarLoanGuide from "@/components/calculators/CarLoanGuide.astro";
 import PersonalLoanGuide from "@/components/calculators/PersonalLoanGuide.astro";
 import InflationCalculatorComp from "@/components/calculators/InflationCalculatorComp";
 import InflationGuide from "@/components/calculators/InflationGuide.astro";
+import SavingsCertificatesCalculatorComp from "@/components/calculators/SavingsCertificatesCalculatorComp";
+import SavingsCertificatesGuide from "@/components/calculators/SavingsCertificatesGuide.astro";
+import PropertyTaxCalculatorComp from "@/components/calculators/PropertyTaxCalculatorComp";
+import PropertyTaxGuide from "@/components/calculators/PropertyTaxGuide.astro";
+import VehicleTaxCalculatorComp from "@/components/calculators/VehicleTaxCalculatorComp";
+import VehicleTaxGuide from "@/components/calculators/VehicleTaxGuide.astro";
+import PurchaseTaxesCalculatorComp from "@/components/calculators/PurchaseTaxesCalculatorComp";
+import PurchaseTaxesGuide from "@/components/calculators/PurchaseTaxesGuide.astro";
+import YouthMortgageCalculatorComp from "@/components/calculators/YouthMortgageCalculatorComp";
+import YouthMortgageGuide from "@/components/calculators/YouthMortgageGuide.astro";
+import NetSalaryCalculatorComp from "@/components/calculators/NetSalaryCalculatorComp";
+import NetSalaryGuide from "@/components/calculators/NetSalaryGuide.astro";
+import WithholdingTablesComp from "@/components/calculators/WithholdingTablesComp";
+import WithholdingTablesGuide from "@/components/calculators/WithholdingTablesGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -135,6 +149,41 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.inflation.nextStepCta"),
     ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
+  toolSavingsCertificates: {
+    headline: t("tools.savingsCertificates.nextStepHeadline"),
+    description: t("tools.savingsCertificates.nextStepDescription"),
+    ctaText: t("tools.savingsCertificates.nextStepCta"),
+  },
+  toolPropertyTax: {
+    headline: t("tools.propertyTax.nextStepHeadline"),
+    description: t("tools.propertyTax.nextStepDescription"),
+    ctaText: t("tools.propertyTax.nextStepCta"),
+  },
+  toolVehicleTax: {
+    headline: t("tools.vehicleTax.nextStepHeadline"),
+    description: t("tools.vehicleTax.nextStepDescription"),
+    ctaText: t("tools.vehicleTax.nextStepCta"),
+  },
+  toolPurchaseTaxes: {
+    headline: t("tools.purchaseTaxes.nextStepHeadline"),
+    description: t("tools.purchaseTaxes.nextStepDescription"),
+    ctaText: t("tools.purchaseTaxes.nextStepCta"),
+  },
+  toolYouthMortgage: {
+    headline: t("tools.youthMortgage.nextStepHeadline"),
+    description: t("tools.youthMortgage.nextStepDescription"),
+    ctaText: t("tools.youthMortgage.nextStepCta"),
+  },
+  toolNetSalary: {
+    headline: t("tools.netSalary.nextStepHeadline"),
+    description: t("tools.netSalary.nextStepDescription"),
+    ctaText: t("tools.netSalary.nextStepCta"),
+  },
+  toolWithholdingTables: {
+    headline: t("tools.withholdingTables.nextStepHeadline"),
+    description: t("tools.withholdingTables.nextStepDescription"),
+    ctaText: t("tools.withholdingTables.nextStepCta"),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -229,7 +278,16 @@ const schema = {
     {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
     {routeId === "toolCarLoan" && <CarLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolInflation" && <InflationCalculatorComp locale={locale} client:load />}
+    {routeId === "toolSavingsCertificates" && (
+      <SavingsCertificatesCalculatorComp locale={locale} client:load />
+    )}
+    {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
+    {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
+    {routeId === "toolNetSalary" && <NetSalaryCalculatorComp locale={locale} client:load />}
+    {routeId === "toolWithholdingTables" && <WithholdingTablesComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
+    {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
+    {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -247,7 +305,14 @@ const schema = {
   {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
   {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
   {routeId === "toolInflation" && <InflationGuide locale={locale} />}
+  {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
+  {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
+  {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
+  {routeId === "toolNetSalary" && <NetSalaryGuide locale={locale} />}
+  {routeId === "toolWithholdingTables" && <WithholdingTablesGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
+  {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
+  {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

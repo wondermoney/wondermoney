@@ -507,6 +507,78 @@
         "methodology": "Méthodologie de l’INE"
       }
     },
+    "propertyTax": {
+      "title": "Calculateur de l'IMI portugais",
+      "shortName": "IMI (Portugal)",
+      "subtitle": "Estimez l'IMI annuel d'un bien au Portugal, la date de chaque échéance et la somme à mettre de côté chaque mois.",
+      "description": "Estimez l'IMI portugais, les dates de paiement et la provision mensuelle.",
+      "pageTitle": "Calculateur de l'IMI : taxe foncière au Portugal et échéances",
+      "pageDescription": "Estimez votre IMI annuel à partir de la valeur patrimoniale fiscale et du taux municipal, avec les échéances de mai, août et novembre et la provision mensuelle.",
+      "fields": {
+        "kind": "Type de bien",
+        "vpt": "Valeur patrimoniale fiscale (VPT)",
+        "rate": "Taux municipal",
+        "dependants": "Personnes à charge (IMI Familiar)"
+      },
+      "kinds": {
+        "urban": "Bien urbain",
+        "rustic": "Bien rustique"
+      },
+      "vptHelp": "Le VPT figure sur la caderneta predial et sur l'avis de paiement de l'IMI.",
+      "rateHelp": "Chaque commune fixe son taux pour les biens urbains, entre {{min}} et {{max}}. La valeur par défaut n'est qu'un exemple : utilisez le taux de votre commune.",
+      "rusticNote": "Les biens rustiques sont taxés au taux national de {{rate}}. Il n'y a pas de taux municipal à saisir.",
+      "dependantsHelp": "Uniquement si le bien est votre résidence principale et si votre commune applique la réduction IMI Familiar. Beaucoup ne l'appliquent pas, ou seulement à partir d'un certain nombre de personnes à charge.",
+      "dependantsOptions": {
+        "0": "Aucune réduction",
+        "1": "1 personne à charge (30 €)",
+        "2": "2 personnes à charge (70 €)",
+        "3": "3 personnes à charge ou plus (140 €)"
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "rateRange": "Saisissez un taux de {{min}} à {{max}}, la fourchette légale pour les biens urbains.",
+        "dependants": "Choisissez le nombre de personnes à charge dans la liste.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "annualTax": "IMI annuel estimé",
+        "monthlyProvision": "Provision mensuelle (IMI annuel ÷ 12)",
+        "grossTax": "IMI avant réduction",
+        "deduction": "Réduction IMI Familiar",
+        "scheduleTitle": "Calendrier de paiement",
+        "nothingDue": "Rien à payer : la réduction couvre tout l'impôt."
+      },
+      "months": {
+        "may": "Mai",
+        "august": "Août",
+        "november": "Novembre"
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Un bien d'un VPT de {{vpt}} dans une commune qui applique {{rate}} doit {{tax}} par an. Le montant dépassant 500 €, il se paie en trois échéances de {{instalment}} en mai, août et novembre. Mettre {{monthly}} de côté chaque mois suffit.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodTax": "L'IMI annuel est le VPT multiplié par le taux, arrondi au centime. Les biens urbains utilisent le taux fixé par la commune, compris par la loi entre 0,30 % et 0,45 %. Les biens rustiques utilisent 0,8 %.",
+        "methodFamily": "Si vous choisissez un nombre de personnes à charge, le montant fixe de l'IMI Familiar (30 € pour une, 70 € pour deux, 140 € pour trois ou plus) est déduit de l'impôt, qui ne descend jamais sous zéro. Son application dépend de votre commune.",
+        "methodPayment": "L'impôt se paie en une échéance en mai jusqu'à 100 €, en deux en mai et novembre de 100 € à 500 €, et en trois en mai, août et novembre au-delà de 500 €. Les échéances sont égales ; l'éventuel centime d'arrondi va à la dernière.",
+        "methodBudget": "La provision mensuelle divise l'impôt annuel par 12 pour que l'argent soit prêt à chaque échéance.",
+        "exemptionTitle": "Exonération pour la résidence principale",
+        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI, pendant une durée limitée après l'achat ou tant que le revenu du foyer et le VPT restent sous les plafonds du statut des avantages fiscaux. Les plafonds évoluent et des conditions s'appliquent : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionRate": "Le taux municipal est à saisir par vos soins. Cette page ne contient pas de table des taux communaux, et les communes peuvent majorer ou minorer le taux dans certains cas, par exemple pour des bâtiments vacants ou dégradés, ce que le calculateur ignore.",
+        "assumptionScope": "L'estimation porte sur un seul bien soumis aux règles générales. Elle exclut l'IMI additionnel (AIMI), les exonérations temporaires et les autres déductions communales.",
+        "assumptionEducational": "Il s'agit d'une estimation pédagogique, pas d'un conseil fiscal. Le montant qui compte est celui de l'avis d'IMI de l'administration fiscale.",
+        "sourcesTitle": "Sources",
+        "sourceRates": "Código do IMI, article 112 : taux (consulté le 19 novembre 2026)",
+        "sourcePayment": "Código do IMI, article 120 : paiement par échéances (consulté le 19 novembre 2026)",
+        "sourceExemption": "Portal das Finanças : exonérations d'IMI et IMI Familiar",
+        "reviewed": "Règles vérifiées le 19 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI, d'après des banques et communes portugaises."
+      },
+      "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
+      "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
+      "nextStepCta": "Mettez de côté chaque mois l'argent de votre IMI"
+    },
     "hub": {
       "title": "Outils et calculatrices financiers",
       "description": "Calculatrices interactives gratuites pour vous aider à planifier votre avenir financier. Aucune inscription requise.",
@@ -2334,6 +2406,180 @@
       "nextStepDescription": "Mettez de l’argent de côté dans WonderMoney pour la mensualité, le carburant et les factures à payer dans l’année.",
       "nextStepCta": "Créez votre budget dans WonderMoney"
     },
+    "purchaseTaxes": {
+      "title": "Simulateur des taxes d'achat immobilier au Portugal (IMT et timbre)",
+      "shortName": "Taxes d'achat",
+      "subtitle": "Estimez l'IMT et le droit de timbre (Imposto do Selo) dus pour l'achat d'un bien au Portugal et la somme à ajouter à votre apport.",
+      "description": "Estimez l'IMT et le droit de timbre pour un achat immobilier au Portugal.",
+      "pageTitle": "Simulateur IMT et droit de timbre pour acheter au Portugal",
+      "pageDescription": "Estimez l'IMT et l'Imposto do Selo 2026 pour un achat immobilier au Portugal : continent ou îles, usage, timbre du prêt et exonération des jeunes.",
+      "propertyTitle": "Bien",
+      "financingTitle": "Prêt immobilier",
+      "youngTitle": "Exonération des jeunes (IMT Jovem)",
+      "youngNote": "Uniquement si toutes les conditions sont remplies à la date de l'acte : vous avez 35 ans ou moins, c'est votre premier logement et vous y habiterez de façon permanente. Exonération totale jusqu'à {{full}} ; partielle jusqu'à {{partial}}, avec IMT et timbre d'achat sur l'excédent seulement.",
+      "youngUnavailable": "L'exonération ne vaut que pour une résidence principale permanente. Choisissez cet usage pour vérifier votre éligibilité.",
+      "fields": {
+        "price": "Prix d'achat",
+        "taxValue": "Valeur fiscale (VPT), facultatif",
+        "region": "Localisation",
+        "use": "Usage du bien",
+        "loan": "Montant du prêt",
+        "young": "Je remplis les conditions de l'exonération des jeunes"
+      },
+      "help": {
+        "price": "Le prix indiqué dans l'acte.",
+        "taxValue": "L'administration fiscale retient le plus élevé du prix et de la VPT. Laissez zéro si vous l'ignorez.",
+        "loan": "Indiquez zéro pour un achat comptant. Le timbre du prêt n'est pas couvert par l'exonération des jeunes dans ce simulateur."
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "islands": "Açores ou Madère"
+      },
+      "uses": {
+        "ownPermanent": "Résidence principale permanente",
+        "secondary": "Résidence secondaire ou autre usage",
+        "rustic": "Terrain rustique",
+        "otherUrban": "Autres biens urbains ou terrains"
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "loan": "Le prêt ne peut pas dépasser le prix d'achat.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "total": "Total des taxes à payer",
+        "effectiveRate": "{{rate}} de la valeur imposable",
+        "reference": "Valeur imposable",
+        "imt": "IMT",
+        "stampPurchase": "Droit de timbre sur l'achat (0,8 %)",
+        "stampLoan": "Droit de timbre sur le prêt (0,6 %)",
+        "exemptFull": "Exonération des jeunes appliquée : elle supprime l'IMT et le timbre d'achat et fait économiser {{saving}}.",
+        "exemptPartial": "Exonération partielle des jeunes appliquée : l'IMT et le timbre d'achat ne portent que sur la part au-dessus du plafond d'exonération totale. Elle fait économiser {{saving}} au total.",
+        "exemptNone": "À cette valeur, l'exonération ne s'applique pas. Elle couvre les achats jusqu'à {{partial}} (totale jusqu'à {{full}}) et seulement sous les conditions indiquées à gauche.",
+        "tableNote": "Barème {{year}}, revu le {{date}}. Estimation pédagogique, pas un conseil fiscal."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Acheter une résidence principale permanente sur le continent pour {{price}} avec un prêt de {{loan}} coûte {{imt}} d'IMT, {{stampPurchase}} de timbre d'achat et {{stampLoan}} de timbre sur le prêt. Cela fait {{total}} au total, à payer en plus de l'apport et à ajouter à votre objectif d'épargne.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodBase": "La base est le plus élevé du prix d'achat et de la valeur fiscale (VPT).",
+        "methodImt": "Pour un logement, l'IMT est la base multipliée par le taux de sa tranche moins une déduction fixe (parcela a abater) qui rend l'impôt progressif. Au-delà de la dernière tranche progressive, le taux s'applique à toute la valeur sans déduction. Les terrains rustiques paient 5 % et les autres biens urbains ou terrains 6,5 %.",
+        "methodStamp": "Le timbre est de 0,8 % de la base à l'achat (verba 1.1) et, avec un prêt, de 0,6 % du montant emprunté (verba 17.1.4, prêts de cinq ans ou plus).",
+        "methodRounding": "L'IMT et chaque timbre sont arrondis séparément au centime, comme les liquide l'administration fiscale. Le timbre sur les intérêts et les frais n'est pas inclus.",
+        "tableTitle": "Barème IMT {{year}} : résidence principale permanente, continent",
+        "tableAbove": "Valeurs supérieures",
+        "tableLimit": "Valeur jusqu'à",
+        "tableRate": "Taux",
+        "tableDeduct": "Déduction",
+        "tableNote": "Jusqu'à {{exempt}}, la première tranche est à 0 %. La résidence secondaire a son propre barème, à 1 % dès le premier euro, et les Açores et Madère appliquent les mêmes taux avec des plafonds supérieurs de 25 %.",
+        "sourceImt": "CIMT, article 17 (Portal das Finanças)",
+        "sourceStamp": "Code du droit de timbre (Portal das Finanças)",
+        "review": "Règles et plafonds de {{year}}, revus pour la dernière fois le {{date}}. Vérifiez-les à nouveau avant de signer.",
+        "assumptionsTitle": "Hypothèses et situations prises en charge",
+        "assumptionScope": "Ce simulateur suit la loi fiscale portugaise et ne s'applique qu'aux biens situés au Portugal, quel que soit votre pays de résidence. Il est pédagogique et ne constitue pas un conseil fiscal.",
+        "assumptionYoung": "L'exonération des jeunes (35 ans ou moins, premier logement permanent, conditions remplies à la date de l'acte, logement gardé comme résidence permanente) est un choix distinct, pris en compte seulement si vous la cochez. Elle est totale jusqu'à {{youngFull}} et partielle jusqu'à {{youngPartial}}. L'exonération du timbre d'achat est une déduction plafonnée à 0,8 % du plafond d'exonération totale : au-delà, vous payez 0,8 % uniquement sur l'excédent. Le timbre du prêt reste dû.",
+        "assumptionLoan": "Le timbre du prêt suppose un crédit de cinq ans ou plus et est toujours dû. Les frais de dossier, l'expertise et les frais de notaire ou de registre ne sont pas inclus.",
+        "assumptionUnsupported": "Non pris en charge : non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT.",
+        "assumptionIslands": "Pour les Açores et Madère, les plafonds sont ceux du continent majorés de 25 % et arrondis à l'euro, avec les mêmes taux. Confirmez les plafonds régionaux auprès de l'administration fiscale."
+      },
+      "nextStepHeadline": "Planifiez la somme dont vous avez besoin pour acheter",
+      "nextStepDescription": "Ajoutez l'IMT et le timbre à l'épargne nécessaire avant d'acheter, puis suivez votre progression dans WonderMoney.",
+      "nextStepCta": "Intégrez les taxes à votre objectif d'apport immobilier"
+    },
+    "youthMortgage": {
+      "title": "Simulateur de crédit immobilier jeune (Portugal)",
+      "shortName": "Crédit jeune",
+      "subtitle": "Voyez quelles conditions de la garantie publique vos réponses remplissent, puis estimez la mensualité, les taxes d'achat et la somme à avoir le jour de la signature.",
+      "description": "Estimez un crédit immobilier jeune au Portugal : mensualité, taxes et apport en espèces.",
+      "pageTitle": "Simulateur de Crédit Immobilier Jeune au Portugal : Garantie et Mensualité",
+      "pageDescription": "Vérifiez les conditions 2026 de la garantie publique pour les jeunes au Portugal et estimez la mensualité, l'IMT et l'impôt du timbre avec et sans exonération jeune, ainsi que la somme à avoir à la signature.",
+      "checkTitle": "1. Garantie publique : les conditions que vos réponses remplissent",
+      "checkIntro": "À titre informatif seulement. Cette liste montre quelles conditions vos réponses remplissent ; elle ne dit pas si vous y avez droit. La banque et l'État décident.",
+      "checkSummary": "{{met}} conditions sur {{total}} remplies d'après vos réponses.",
+      "checkNote": "Conditions vérifiées le {{date}}. La garantie couvre jusqu'à {{percent}} % de la valeur de la transaction, ce qui permet de financer jusqu'à 100 %. Elle ne change pas le taux d'intérêt.",
+      "estimateTitle": "2. Estimez le crédit et la somme nécessaire",
+      "years": "ans",
+      "fields": {
+        "age": "Votre âge à la date du contrat",
+        "income": "Revenu imposable annuel, facultatif",
+        "ownHome": "Le logement sera ma résidence principale",
+        "otherProperty": "Je possède tout ou partie d'un autre bien à usage d'habitation",
+        "price": "Prix d'achat",
+        "deposit": "Apport",
+        "annualRate": "Taux d'intérêt (TAN)",
+        "termYears": "Durée du crédit"
+      },
+      "help": {
+        "income": "Utilisé uniquement pour la liste de conditions. La limite est le haut de la 8e tranche de l'IRS.",
+        "price": "Le prix de l'acte. La liste de conditions utilise aussi cette valeur.",
+        "deposit": "La somme que vous apportez. Elle peut être nulle.",
+        "annualRate": "Taux annuel nominal. La garantie ne le réduit pas.",
+        "termYears": "Jusqu'à 40 ans."
+      },
+      "status": {
+        "met": "Remplie",
+        "notMet": "Non remplie",
+        "unknown": "Sans réponse"
+      },
+      "conditions": {
+        "age": "Avoir entre {{minAge}} et {{maxAge}} ans.",
+        "ownHome": "Le logement est votre résidence principale.",
+        "otherProperty": "Ne pas posséder, en tout ou en partie, un autre bien à usage d'habitation.",
+        "price": "Le logement coûte au plus {{maxPrice}}.",
+        "income": "Revenu imposable annuel jusqu'à la 8e tranche de l'IRS ({{maxIncome}} en 2026)."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "zero": "Saisissez un prix supérieur à zéro.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "depositTooLarge": "L'apport ne peut pas dépasser le prix.",
+        "loanTooSmall": "Le crédit serait inférieur à 100 euros. Réduisez l'apport ou considérez un achat comptant.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "monthly": "Mensualité (capital et intérêts)",
+        "noLoan": "L'apport couvre tout le prix, il n'y a donc pas de crédit.",
+        "loan": "Montant du crédit",
+        "ltv": "Quotité de financement (LTV)",
+        "interest": "Intérêts totaux sur la durée",
+        "taxesWithout": "IMT et impôt du timbre sans exonération jeune",
+        "taxesWith": "IMT et impôt du timbre avec exonération jeune",
+        "cashWithout": "Somme à la signature sans exonération (apport et taxes)",
+        "cashWith": "Somme à la signature avec exonération jeune",
+        "exemptionNote": "L'exonération jeune (IMT Jovem) suppose d'avoir 35 ans ou moins et d'acheter votre première résidence principale. L'impôt du timbre de 0,6 % sur le crédit reste dû.",
+        "bankNote": "Les banques décident d'accorder le crédit, à quel taux et avec quelle quotité. Estimation pédagogique, pas une offre. Frais de dossier, assurance, expertise et frais de notaire ne sont pas inclus."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Acheter un logement à {{price}} sans apport, avec un taux de {{rate}} sur {{years}} ans, revient à emprunter {{loan}} pour environ {{monthly}} par mois. L'IMT et l'impôt du timbre s'élèvent à {{taxesWithout}} sans exonération jeune et {{taxesWith}} avec elle (il ne reste que le timbre du crédit). Avec l'exonération, la somme à avoir à la signature est de {{cash}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodPayment": "Crédit = prix moins apport. La mensualité est celle d'un crédit à taux fixe à mensualités constantes, le même moteur que le simulateur de crédit immobilier. La LTV est le crédit divisé par le prix.",
+        "methodTaxes": "L'IMT et l'impôt du timbre viennent du simulateur de taxes d'achat, pour une résidence principale au Portugal continental : l'exonération jeune supprime les deux jusqu'à la limite totale et applique 8 % d'IMT sur l'excédent jusqu'à la limite partielle.",
+        "methodCash": "La somme à la signature est l'apport plus les taxes. Nous l'affichons avec et sans exonération jeune.",
+        "methodGuarantee": "La garantie n'entre pas dans la mensualité : elle aide seulement la banque à accepter une LTV plus élevée, jusqu'à 100 %, et le taux est fixé par la banque.",
+        "conditionsTitle": "Conditions de la garantie publique vérifiées (décret-loi n° 44/2024)",
+        "conditionAge": "Avoir entre {{minAge}} et {{maxAge}} ans à la date du contrat et un domicile fiscal au Portugal.",
+        "conditionHome": "Le logement est acheté comme résidence principale.",
+        "conditionProperty": "Ne pas posséder, en tout ou en partie, un autre bien à usage d'habitation.",
+        "conditionPrice": "Le logement coûte au plus {{maxPrice}} (l'expertise de la banque peut réduire la valeur de la transaction).",
+        "conditionIncome": "Revenu jusqu'à la 8e tranche de l'IRS : {{maxIncome}} par an en 2026 (83 696 euros en 2025).",
+        "conditionDate": "Seuls les contrats de crédit signés jusqu'au 31 décembre 2026 peuvent en bénéficier, et la garantie couvre jusqu'à {{percent}} % de la valeur de la transaction pendant 10 ans au plus.",
+        "sourceGovernment": "Gouvernement portugais : Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira : Crédito habitação jovem",
+        "review": "Conditions vérifiées pour la dernière fois le {{date}}. La limite de revenu 2026 est la limite supérieure de la 8e tranche de l'IRS de l'article 68 du code de l'IRS, revalorisée de 3,51 % par la loi 73-A/2025 (budget de l'État 2026). Les banques décident de chaque demande.",
+        "assumptionsTitle": "Hypothèses et limites",
+        "assumptionBanks": "Les banques évaluent votre risque de crédit et peuvent refuser le prêt ou proposer d'autres conditions, quelle que soit la liste. Pour un prêt à deux emprunteurs, les deux doivent remplir les conditions.",
+        "assumptionRate": "Le taux est celui que vous saisissez. La garantie ne change pas le taux d'intérêt.",
+        "assumptionTaxes": "Les taxes concernent une résidence principale au Portugal continental et, dans les montants avec exonération, supposent que vous remplissez les conditions de l'IMT Jovem.",
+        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique."
+      },
+      "nextStepHeadline": "Planifiez l'apport et le coût de votre logement",
+      "nextStepDescription": "Fixez un objectif d'apport et budgétez la mensualité, les taxes et les charges du logement dans WonderMoney.",
+      "nextStepCta": "Planifiez votre apport et vos coûts de logement"
+    },
     "personalLoan": {
       "title": "Simulateur de prêt personnel",
       "shortName": "Prêt personnel",
@@ -2438,6 +2684,316 @@
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
         "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulateur de certificats d’épargne portugais (Certificados de Aforro)",
+      "shortName": "Certificats d’épargne",
+      "subtitle": "Estimez ce que pourraient rapporter les Certificados de Aforro Série F du Portugal : intérêts trimestriels, primes de permanence et 28 % d’IRS retenu, en brut et en net.",
+      "description": "Estimez intérêts, primes et impôt des Certificados de Aforro Série F.",
+      "pageTitle": "Simulateur Certificados de Aforro Série F : intérêts, primes et rendement net",
+      "pageDescription": "Estimez le rendement des Certificados de Aforro Série F avec les primes de permanence, la retenue de 28 % d’IRS et un taux de base modifiable, en brut et en net.",
+      "assumption": "Le taux de base change chaque mois avec l’Euribor à 3 mois. Cette estimation conserve le taux saisi pour tous les trimestres : le résultat est une illustration, pas une prévision.",
+      "fields": {
+        "amount": "Montant souscrit",
+        "years": "Années de détention",
+        "baseRate": "Taux de base (hypothèse)",
+        "baseRateHelp": "Taux annuel brut, jusqu’à {{rate}} (le plafond des règles). Modifiez-le pour tester d’autres scénarios."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou un taux positif.",
+        "tooSmall": "Le minimum par compte est de {{min}}.",
+        "tooLarge": "Le maximum par compte est de {{max}}.",
+        "years": "Saisissez un nombre entier d’années, de 1 à {{years}}.",
+        "baseRate": "Le taux de base ne peut pas dépasser {{rate}}.",
+        "summary": "Vérifiez les champs signalés pour voir l’estimation."
+      },
+      "result": {
+        "finalValue": "Valeur nette estimée à la fin",
+        "invested": "Montant souscrit",
+        "grossInterest": "Intérêts bruts",
+        "irs": "IRS retenu (28 %)",
+        "netInterest": "Intérêts nets",
+        "premiumInterest": "Part des intérêts bruts issue des primes de permanence",
+        "netYield": "Rendement net annuel"
+      },
+      "table": {
+        "title": "Année par année",
+        "year": "Année",
+        "rate": "Taux brut",
+        "gross": "Intérêts bruts",
+        "net": "Intérêts nets",
+        "balance": "Solde"
+      },
+      "guide": {
+        "rulesTitle": "Règles de la Série F suivies par le simulateur",
+        "rulesIntro": "Règles publiées par l’IGCP dans la fiche produit de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Les règles peuvent changer et ce sont les conditions en vigueur de l’émetteur qui comptent.",
+        "ruleTerm": "Durée de {{termYears}} ans. Vous pouvez racheter, en tout ou en partie, à partir de la première échéance d’intérêts ; le simulateur utilise des années entières de détention.",
+        "ruleRate": "Chaque trimestre rapporte le taux de base en vigueur au début du trimestre plus la prime de permanence de l’année de souscription. Le taux de base suit l’Euribor à 3 mois, plafonné à {{maxBase}} et plancher à 0 %.",
+        "ruleTax": "Les intérêts sont versés chaque trimestre et capitalisés automatiquement après IRS, retenu à la source à {{irsRate}}.",
+        "ruleRedeem": "Seules les personnes physiques peuvent être titulaires. La limite est de {{maxAmount}} par compte aforro en Série F, avec un minimum de {{minAmount}}.",
+        "premiumTitle": "Prime de permanence selon l’année de souscription",
+        "premiumYears": "Année",
+        "premiumPoints": "Points de pourcentage",
+        "sourceSheet": "Fiche produit Série F de l’IGCP (avril 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "avril 2026",
+        "exampleTitle": "Exemple chiffré",
+        "exampleText": "Vous souscrivez {{amount}} et conservez {{years}} ans avec un taux de base de {{baseRate}}. Les certificats rapportent {{grossInterest}} d’intérêts bruts, dont {{irs}} d’IRS, soit {{netInterest}} nets. Le solde atteint {{finalValue}}, un rendement net de {{netYield}} par an.",
+        "methodTitle": "Comment fonctionne l’estimation",
+        "methodQuarter": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
+        "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s’ajoutent au solde, de sorte que les trimestres suivants rapportent des intérêts dessus.",
+        "methodYield": "Le rendement net annuel est la croissance composée annuelle entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Le taux réel est révisé chaque mois : les intérêts effectifs seront différents.",
+        "assumptionRules": "Le taux d’IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
+        "assumptionScope": "Information générale, pas une recommandation de souscrire ou d’éviter un produit, et aucune comparaison avec d’autres épargnes."
+      },
+      "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
+      "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
+      "nextStepCta": "Incluez vos certificats dans la vue d’ensemble de votre épargne"
+    },
+    "netSalary": {
+      "title": "Calculateur de salaire net au Portugal 2026",
+      "shortName": "Salaire net",
+      "subtitle": "Transformez un salaire brut mensuel en salaire net : retenue d'IRS, sécurité sociale et indemnité repas, avec les barèmes 2026.",
+      "description": "Estimez votre salaire net mensuel au Portugal avec les barèmes de retenue d'IRS 2026.",
+      "pageTitle": "Calculateur de Salaire Net Portugal 2026 : du Brut au Net",
+      "pageDescription": "Convertissez un salaire brut en net avec les barèmes de retenue d'IRS 2026 pour le Portugal continental, les Açores et Madère, 11 % de sécurité sociale et l'indemnité repas.",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel",
+        "region": "Région",
+        "status": "Situation du titulaire",
+        "dependants": "Personnes à charge",
+        "allowances": "Primes de vacances et de Noël",
+        "mealGroup": "Indemnité repas",
+        "mealDaily": "Indemnité repas par jour",
+        "mealDays": "Jours par mois",
+        "mealKind": "Versée en"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Açores",
+        "madeira": "Madère"
+      },
+      "statuses": {
+        "single": "Non marié",
+        "marriedOneEarner": "Marié, un seul revenu",
+        "marriedTwoEarners": "Marié, deux revenus"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 versements (primes de vacances et de Noël à part)",
+        "twelfths": "En douzièmes (répartis sur 12 versements)"
+      },
+      "mealKinds": {
+        "cash": "En espèces avec le salaire",
+        "card": "Carte repas"
+      },
+      "help": {
+        "gross": "Le salaire de base avant primes, sécurité sociale et IRS.",
+        "status": "Choisissez « un seul revenu » uniquement si votre conjoint n'a aucun revenu ou si vous gagnez au moins 95 % des revenus du couple. L'union de fait compte comme un mariage.",
+        "allowances": "En douzièmes, les deux mois supplémentaires s'ajoutent à chaque versement mensuel (14 ÷ 12 du salaire de base).",
+        "meal": "Exonérée jusqu'à {{cash}} par jour en espèces et {{card}} sur carte repas. Le surplus est imposé comme un salaire."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez un nombre positif.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "netMonthly": "Net estimé pour un mois ordinaire",
+        "withholding": "Retenue d'IRS",
+        "socialSecurity": "Sécurité sociale (11 %)",
+        "allowanceNet": "Net de chaque versement de prime",
+        "annualNet": "Net estimé sur une année",
+        "notFinalTax": "La retenue mensuelle est une avance sur votre IRS annuel, pas l'impôt définitif. L'IRS final est établi dans la déclaration annuelle : vous pouvez donc être remboursé ou devoir davantage."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Avec un salaire brut de {{gross}} par mois, sans être marié ni avoir de personnes à charge, au Portugal continental et avec {{meal}} par mois d'indemnité repas en espèces, la retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}}. Avec les primes de vacances et de Noël versées à part, un mois ordinaire donne {{net}} net, chaque versement de prime donne {{allowanceNet}} et l'année donne {{annual}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodWithholding": "La retenue d'IRS suit les barèmes mensuels 2026 : la rémunération mensuelle multipliée par le taux marginal de sa tranche, moins la parcela a abater et un montant fixe par personne à charge. À partir de trois personnes à charge, le taux baisse d'un point.",
+        "methodSocialSecurity": "La sécurité sociale du salarié est de 11 % de la rémunération soumise, y compris l'indemnité repas au-delà du plafond exonéré.",
+        "methodMeal": "L'indemnité repas est exonérée jusqu'au plafond journalier, qui dépend du versement en espèces ou sur carte. Le calculateur n'ajoute que l'excédent à la rémunération imposable.",
+        "methodAllowances": "Avec 14 versements, les primes de vacances et de Noël sont imposées chacune séparément, comme l'exigent les barèmes. En douzièmes, le supplément s'ajoute à chaque mois.",
+        "methodBudget": "Les montants nets sont ce qui arrive sur votre compte : c'est le bon point de départ d'un budget mensuel.",
+        "finalTitle": "La retenue n'est pas votre IRS définitif",
+        "final": "Ce qui est retenu chaque mois est un acompte. L'administration fiscale établit votre IRS réel dans la déclaration annuelle, avec les revenus de toute l'année et vos déductions. La retenue peut être supérieure ou inférieure à l'impôt dû, d'où les remboursements ou les compléments à payer.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedYouth": "L'IRS Jovem n'est pas appliqué.",
+        "unsupportedDisability": "Les barèmes pour les personnes handicapées et ceux des pensions ne sont pas inclus.",
+        "unsupportedNovember": "L'ajustement exceptionnel des revenus versés en novembre 2026 (Despacho 12523-A/2026, Portugal continental) est ignoré. Il divise par deux la retenue de ce seul mois.",
+        "unsupportedOther": "Les autres revenus, les heures supplémentaires, les non-résidents, les taux de retenue volontairement plus élevés et les coûts de l'employeur sont hors de cette estimation.",
+        "sourcesTitle": "Sources",
+        "sourceDespacho": "Despacho n.º 233-A/2026 : barèmes de retenue 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças : barèmes de retenue des Açores et de Madère",
+        "sourceMeal": "Portal das Finanças : plafonds d'exonération de l'indemnité repas (Portaria n.º 51-B/2026/1)",
+        "sourceSocialSecurity": "Segurança Social : taux de cotisation",
+        "reviewed": "Barèmes et taux vérifiés le 19 novembre 2026. Le taux de 11 % de sécurité sociale et les plafonds de l'indemnité repas ont été confirmés par des sources secondaires, pas par les textes originaux."
+      },
+      "nextStepHeadline": "Du salaire à un plan pour votre argent",
+      "nextStepDescription": "WonderMoney part de ce que vous touchez réellement et montre où va chaque euro, mois après mois.",
+      "nextStepCta": "Construire un budget à partir de votre salaire net"
+    },
+    "withholdingTables": {
+      "title": "Barèmes de retenue d'IRS au Portugal 2026",
+      "shortName": "Barèmes de retenue d'IRS",
+      "subtitle": "Les barèmes mensuels de retenue 2026 pour le Portugal continental, les Açores et Madère, avec la formule de la parcela a abater et les tranches annuelles d'IRS.",
+      "description": "Consultez les barèmes de retenue d'IRS 2026 et les tranches annuelles au Portugal.",
+      "pageTitle": "Barèmes de Retenue d'IRS 2026 au Portugal : Taux et Parcela a Abater",
+      "pageDescription": "Les barèmes mensuels de retenue d'IRS 2026 pour le Portugal continental, les Açores et Madère, le fonctionnement de la formule de la parcela a abater et les tranches annuelles d'IRS.",
+      "fields": {
+        "region": "Région",
+        "table": "Barème de retenue",
+        "remuneration": "Rémunération mensuelle",
+        "dependants": "Personnes à charge"
+      },
+      "regions": {
+        "mainland": "Portugal continental",
+        "azores": "Açores",
+        "madeira": "Madère"
+      },
+      "tableOptions": {
+        "I": "Barème I : non marié sans personne à charge, ou marié avec deux revenus",
+        "II": "Barème II : non marié avec une ou plusieurs personnes à charge",
+        "III": "Barème III : marié avec un seul revenu"
+      },
+      "remunerationHelp": "Facultatif. Saisissez une rémunération brute mensuelle pour mettre sa tranche en évidence et voir la retenue.",
+      "errors": {
+        "remuneration": "Saisissez un montant jusqu'à {{max}}.",
+        "dependants": "Saisissez un nombre entier de 0 à {{max}}."
+      },
+      "result": {
+        "withholding": "Retenue mensuelle d'IRS",
+        "row": "Le taux marginal de cette tranche est de {{rate}}.",
+        "empty": "Saisissez une rémunération mensuelle et un nombre valide de personnes à charge pour voir la retenue."
+      },
+      "formula": "Retenue = rémunération × taux marginal − parcela a abater − {{dependant}} × nombre de personnes à charge. Elle n'est jamais inférieure à zéro et, à partir de trois personnes à charge, le taux baisse d'un point.",
+      "notFinalTax": "La retenue est une avance sur votre IRS annuel, pas l'impôt définitif. La déclaration annuelle établit le montant réel.",
+      "tableTitle": "Barème {{table}} : {{region}}",
+      "tableSource": "Approuvé par le {{act}}, pour les revenus versés du {{from}} au {{to}}.",
+      "tableCaption": "Taux marginal et parcela a abater selon la rémunération mensuelle",
+      "columns": {
+        "remuneration": "Rémunération mensuelle",
+        "rate": "Taux marginal",
+        "parcela": "Parcela a abater",
+        "upTo": "Jusqu'à {{limit}}",
+        "above": "Au-delà de {{limit}}"
+      },
+      "annual": {
+        "title": "Tranches annuelles d'IRS pour les revenus 2026",
+        "intro": "Ce sont les taux de l'article 68 du Código do IRS, appliqués au revenu imposable annuel. Chaque taux ne s'applique qu'à la part du revenu située dans sa tranche.",
+        "caption": "Taux annuels d'IRS par tranche de revenu imposable",
+        "income": "Revenu imposable",
+        "rate": "Taux sur la part de la tranche"
+      },
+      "guide": {
+        "howTitle": "Comment lire les barèmes",
+        "howFormula": "Trouvez la tranche qui contient la rémunération mensuelle, multipliez-la par le taux marginal et soustrayez la parcela a abater. Soustrayez le montant supplémentaire par personne à charge : le résultat est la retenue.",
+        "howTransition": "Dans les premières tranches, la parcela a abater est une formule avec la lettre R, la rémunération mensuelle. Elle fait monter la retenue progressivement à partir de zéro, si bien qu'une petite augmentation ne réduit jamais le net.",
+        "howDependants": "Chaque personne à charge réduit la retenue d'un montant fixe. À partir de trois personnes à charge, le taux marginal de la tranche est inférieur d'un point.",
+        "howTables": "Le barème I s'applique aux non mariés sans personne à charge et aux mariés avec deux revenus. Le barème II s'applique aux non mariés avec personnes à charge et le barème III aux mariés avec un seul revenu.",
+        "finalTitle": "La retenue n'est pas l'impôt définitif",
+        "final": "Les barèmes fixent ce que votre employeur retient chaque mois. Ils ne calculent pas votre IRS final, que la déclaration annuelle établit avec les tranches ci-dessus, les revenus de toute l'année et vos déductions.",
+        "unsupportedTitle": "Non inclus",
+        "unsupportedDisability": "Les barèmes pour les personnes handicapées (IV à VII).",
+        "unsupportedYouth": "L'IRS Jovem, qui a ses propres règles.",
+        "unsupportedNovember": "L'ajustement exceptionnel des revenus versés en novembre 2026 au Portugal continental, qui divise par deux la retenue de ce seul mois.",
+        "unsupportedPensions": "Les barèmes des pensions (VIII à XI).",
+        "sourcesTitle": "Sources",
+        "sourceMainland": "Despacho n.º 233-A/2026 : barèmes de retenue 2026, Portugal continental",
+        "sourceRegional": "Portal das Finanças : barèmes de retenue, dont les Açores (Despacho n.º 1179/2026)",
+        "sourceMadeira": "Circular n.º 2/2026 : barèmes de retenue de Madère",
+        "sourceAnnual": "Decreto-Lei n.º 212/2026 : article 68 du Código do IRS",
+        "reviewed": "Barèmes vérifiés le 19 novembre 2026 sur les annexes publiées. Consultez le Portal das Finanças pour les changements ultérieurs."
+      },
+      "nextStepHeadline": "De la retenue à votre plan mensuel",
+      "nextStepDescription": "WonderMoney transforme votre net estimé en plan, pour que chaque euro ait un rôle avant le début du mois.",
+      "nextStepCta": "Utiliser l'estimation nette dans un plan mensuel"
+    },
+    "vehicleTax": {
+      "title": "Calculateur de l'IUC",
+      "shortName": "IUC",
+      "subtitle": "Estimez l'IUC annuel d'une voiture particulière au Portugal, voyez quand il est dû et combien mettre de côté chaque mois.",
+      "description": "Estimez l'IUC portugais, son échéance et une provision mensuelle.",
+      "pageTitle": "Calculateur IUC 2026 : taxe de circulation portugaise selon la cylindrée et le CO2",
+      "pageDescription": "Estimez l'IUC 2026 d'une voiture immatriculée au Portugal selon la cylindrée, le carburant, les émissions de CO2 et la date d'immatriculation, avec l'échéance et la provision mensuelle.",
+      "fields": {
+        "fuel": "Carburant",
+        "cc": "Cylindrée",
+        "year": "Année de première immatriculation",
+        "month": "Mois de première immatriculation",
+        "co2": "Émissions officielles de CO2",
+        "standard": "Cycle d'essai du CO2"
+      },
+      "fuels": {
+        "petrol": "Essence",
+        "diesel": "Diesel ou autre carburant",
+        "electric": "Électrique"
+      },
+      "standards": {
+        "wltp": "WLTP",
+        "nedc": "NEDC"
+      },
+      "ccHelp": "En centimètres cubes (cm³), comme indiqué sur la carte grise (champ P.1).",
+      "co2Help": "En grammes par kilomètre, comme indiqué sur la carte grise (champ V.7).",
+      "registrationHelp": "La date de première immatriculation, au Portugal ou dans un autre pays de l'UE ou de l'EEE, détermine la catégorie et le coefficient. Les voitures immatriculées avant juillet 2007 sont en catégorie A ; à partir de juillet 2007, en catégorie B.",
+      "electricNote": "Les voitures entièrement électriques immatriculées à partir de juillet 2007 sont exonérées d'IUC : il n'y a rien à saisir.",
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "zero": "Saisissez une valeur supérieure à zéro.",
+        "negative": "Saisissez une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "yearTooOld": "Ce calculateur couvre les voitures immatriculées à partir de 1981.",
+        "yearTooNew": "Saisissez une année d'immatriculation jusqu'à {{max}}.",
+        "month": "Choisissez un mois dans la liste.",
+        "electricCategoryA": "Les voitures électriques immatriculées avant juillet 2007 ne sont pas prises en charge. Consultez le Portal das Finanças.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "annualTax": "IUC annuel estimé",
+        "monthlyProvision": "Provision mensuelle (IUC annuel ÷ 12)",
+        "category": "Catégorie d'IUC",
+        "baseTax": "Taux de cylindrée et de CO2",
+        "additionalTax": "Taux additionnel",
+        "coefficient": "Coefficient de l'année",
+        "dueMonth": "À payer en 2026 :",
+        "dueMonthValue": "En {{month}}, le mois de l'anniversaire de l'immatriculation.",
+        "scheduleTitle": "À partir de 2027 : calendrier de paiement",
+        "exempt": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC.",
+        "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)"
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une voiture diesel de {{cc}} cm³, avec des émissions officielles WLTP de {{co2}} g/km et immatriculée en {{year}}, doit {{tax}} d'IUC par an. Mettre {{monthly}} de côté chaque mois suffit.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodA": "Catégorie A (voitures immatriculées de 1981 à juin 2007) : l'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
+        "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
+        "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
+        "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
+        "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. À partir de 2027, selon le décret-loi n.º 161/2026, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €.",
+        "methodBudget": "La provision mensuelle divise le montant annuel par 12, pour que l'argent soit prêt à l'échéance.",
+        "exemptionTitle": "Voitures électriques",
+        "exemption": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC et le calculateur affiche zéro. Les hybrides rechargeables et autres véhicules sont taxés selon leur cylindrée et leur CO2 figurant sur la carte grise : saisissez ces valeurs.",
+        "scopeTitle": "Ce qui est couvert",
+        "scopeSupported": "Voitures particulières légères : catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
+        "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
+        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation. Le Portal das Finanças affiche le nouveau calendrier d'avril à partir de 2027, mais pas la rédaction antérieure : confirmez votre date sur le Portal das Finanças. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
+        "assumptionEducational": "Ceci est une estimation éducative, pas un conseil fiscal. Le montant de l'avis de l'administration fiscale fait foi.",
+        "sourcesTitle": "Sources",
+        "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
+        "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
+        "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
+        "sourceDiesel": "Portal das Finanças : supplément diesel, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par l'article 94 de la loi n.º 73-A/2025 (consulté le 19 novembre 2026). La page n'indique aucun montant : les montants viennent des tableaux publiés par l'ACP.",
+        "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}."
+      },
+      "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
+      "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
+      "nextStepCta": "Mettez de côté un douzième de votre taxe auto annuelle"
     }
   },
   "resources": {
