@@ -97,9 +97,13 @@ export function instalmentMonths(annualEuros: number): InstalmentMonth[] {
 }
 
 interface CategoryARow { upTo: number; cents: Record<"recent" | "mid" | "old", number> }
+interface Band { upTo: number; cents: number }
 
-const bandOf = <T extends { upTo: number }>(bands: readonly T[], value: number) =>
-  bands.find((band) => value <= band.upTo) as T;
+function bandOf(bands: readonly Band[], value: number): Band;
+function bandOf(bands: readonly CategoryARow[], value: number): CategoryARow;
+function bandOf(bands: readonly { upTo: number }[], value: number) {
+  return bands.find((band) => value <= band.upTo)!;
+}
 
 const checkNumber = (value: number, max: number): FieldError | undefined => {
   if (Number.isNaN(value)) return "required";
