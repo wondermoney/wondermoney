@@ -384,6 +384,14 @@ const ROUTE_SLUGS = {
 		de: "kfz-steuer-iuc-rechner-portugal",
 		it: "calcolatore-iuc-portogallo",
 	},
+	toolPropertyCapitalGains: {
+		pt: "simulador-mais-valias-venda-casa",
+		en: "portugal-property-capital-gains-calculator",
+		es: "calculadora-plusvalias-venta-vivienda-portugal",
+		fr: "calculateur-plus-values-immobilieres-portugal",
+		de: "immobilien-veraeusserungsgewinn-rechner-portugal",
+		it: "calcolatore-plusvalenze-immobiliari-portogallo",
+	},
 	toolPurchaseTaxes: {
 		pt: "simulador-imt-imposto-selo",
 		en: "property-purchase-taxes-calculator",
@@ -408,6 +416,22 @@ const ROUTE_SLUGS = {
 		de: "nettogehalt-rechner-portugal",
 		it: "calcolatore-stipendio-netto-portogallo",
 	},
+	toolChristmasAllowance: {
+		pt: "simulador-subsidio-de-natal",
+		en: "portugal-christmas-allowance-calculator",
+		es: "calculadora-paga-extra-navidad-portugal",
+		fr: "calculateur-prime-noel-portugal",
+		de: "weihnachtsgeld-rechner-portugal",
+		it: "calcolatore-tredicesima-portogallo",
+	},
+	toolHolidayAllowance: {
+		pt: "simulador-subsidio-de-ferias",
+		en: "portugal-holiday-allowance-calculator",
+		es: "calculadora-paga-vacaciones-portugal",
+		fr: "calculateur-prime-vacances-portugal",
+		de: "urlaubsgeld-rechner-portugal",
+		it: "calcolatore-quattordicesima-portogallo",
+	},
 	toolWithholdingTables: {
 		pt: "tabelas-retencao-irs-2026",
 		en: "portugal-irs-withholding-tables",
@@ -415,6 +439,14 @@ const ROUTE_SLUGS = {
 		fr: "baremes-retenue-source-irs-portugal",
 		de: "irs-quellensteuer-tabellen-portugal",
 		it: "tabelle-ritenuta-irs-portogallo",
+	},
+	toolUnemploymentBenefit: {
+		pt: "simulador-subsidio-desemprego",
+		en: "portugal-unemployment-benefit-calculator",
+		es: "calculadora-subsidio-desempleo-portugal",
+		fr: "calculateur-allocation-chomage-portugal",
+		de: "arbeitslosengeld-rechner-portugal",
+		it: "calcolatore-sussidio-disoccupazione-portogallo",
 	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
@@ -540,8 +572,12 @@ export const TOOL_ROUTE_IDS = [
 	"toolPurchaseTaxes",
 	"toolYouthMortgage",
 	"toolNetSalary",
+	"toolChristmasAllowance",
+	"toolHolidayAllowance",
 	"toolWithholdingTables",
+	"toolUnemploymentBenefit",
 	"toolVehicleTax",
+	"toolPropertyCapitalGains",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -834,14 +870,27 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"net-salary-calculator": "toolNetSalary",
 	"net-salary": "toolNetSalary",
 	"salario-liquido": "toolNetSalary",
+	toolchristmasallowance: "toolChristmasAllowance",
+	"christmas-allowance": "toolChristmasAllowance",
+	"subsidio-de-natal": "toolChristmasAllowance",
+	toolholidayallowance: "toolHolidayAllowance",
+	"holiday-allowance": "toolHolidayAllowance",
+	"subsidio-de-ferias": "toolHolidayAllowance",
 	toolwithholdingtables: "toolWithholdingTables",
 	"irs-withholding-tables": "toolWithholdingTables",
 	"tabelas-de-irs": "toolWithholdingTables",
 	"tabelas-irs": "toolWithholdingTables",
+	toolunemploymentbenefit: "toolUnemploymentBenefit",
+	"unemployment-benefit-calculator": "toolUnemploymentBenefit",
+	"unemployment-benefit": "toolUnemploymentBenefit",
+	"subsidio-de-desemprego": "toolUnemploymentBenefit",
 	toolvehicletax: "toolVehicleTax",
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",
 	iuc: "toolVehicleTax",
+	toolpropertycapitalgains: "toolPropertyCapitalGains",
+	"capital-gains-calculator": "toolPropertyCapitalGains",
+	"mais-valias": "toolPropertyCapitalGains",
 }
 
 function normalizeRouteLookupKey(value: string): string {

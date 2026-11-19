@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney transforme votre net estimé en plan, pour que chaque euro ait un rôle avant le début du mois.",
       "nextStepCta": "Utiliser l'estimation nette dans un plan mensuel"
     },
+    "unemploymentBenefit": {
+      "title": "Calculateur de l'allocation chômage au Portugal 2026",
+      "shortName": "Allocation chômage",
+      "subtitle": "Estimez l'allocation chômage mensuelle (subsídio de desemprego), sa durée et le total, avec les plafonds de 2026.",
+      "description": "Estimez votre allocation chômage au Portugal : montant mensuel, durée et total.",
+      "pageTitle": "Calculateur d'Allocation Chômage Portugal 2026 : Montant et Durée",
+      "pageDescription": "Estimez l'allocation chômage au Portugal : 65 % de la rémunération de référence, les limites de l'IAS 2026, la durée selon l'âge et les cotisations, et un revenu réduit pour votre budget.",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel",
+        "allowances": "Primes de vacances et de Noël",
+        "age": "Âge au moment du chômage",
+        "contributionMonths": "Mois avec rémunération déclarée",
+        "years20": "Années avec rémunération déclarée sur les 20 dernières",
+        "household": "Foyer",
+        "dependants": "Enfants ou personnes à charge"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 versements (primes de vacances et de Noël à part)",
+        "twelfths": "Lissées (le salaire les inclut déjà)"
+      },
+      "households": {
+        "alone": "Je vis seul(e) ou mon conjoint ne donne pas droit à la majoration",
+        "partnerWorking": "Mon conjoint travaille",
+        "partnerUnemployed": "Mon conjoint est aussi au chômage (inscrit à l'IEFP)",
+        "singleParent": "Je suis le seul parent du foyer"
+      },
+      "help": {
+        "gross": "Le salaire de base des derniers mois, avant sécurité sociale et IRS. Les 12 mois pris en compte incluent les primes de vacances et de Noël.",
+        "allowances": "Avec 14 versements, le calculateur compte 14 fois le salaire ; lissées, il en compte 12, car les primes sont déjà incluses.",
+        "age": "Votre âge le jour où vous êtes devenu chômeur.",
+        "months": "Mois avec rémunération déclarée depuis la dernière fois où vous avez perçu l'allocation. Le tableau commence à 12 mois.",
+        "years20": "Années complètes avec rémunération déclarée sur les 20 dernières. Chaque tranche de 5 ans ajoute des jours.",
+        "household": "La majoration de 10 % exige des enfants ou personnes à charge et soit les deux conjoints au chômage et inscrits, soit un foyer monoparental. Elle doit être demandée."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "belowTable": "Le tableau de durée commence à {{min}} mois avec rémunération déclarée. En dessous, cette estimation ne s'applique pas.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "monthly": "Allocation mensuelle estimée (30 jours)",
+        "daily": "Allocation par jour",
+        "duration": "Durée estimée",
+        "durationValue": "{{days}} jours (environ {{months}} mois)",
+        "durationParts": "Dont période de base et jours supplémentaires",
+        "durationPartsValue": "{{base}} + {{extra}} jours",
+        "total": "Total estimé sur toute la période",
+        "netBefore": "Rémunération de référence nette estimée par mois",
+        "drop": "Baisse de revenu mensuelle pour votre budget",
+        "increaseApplied": "La majoration de 10 % pour les foyers avec enfants est incluse.",
+        "estimate": "Une estimation pour planifier, pas une décision. La sécurité sociale calcule le montant réel à partir de vos rémunérations déclarées.",
+        "limit": {
+          "none": "Le montant est 65 % de la rémunération de référence ; aucune limite appliquée.",
+          "max": "Le montant a atteint le maximum de 2,5 fois l'IAS ({{max}} par mois).",
+          "netCap": "Le montant a été limité à 75 % de la rémunération de référence nette estimée.",
+          "minimum": "Le montant a été relevé au minimum, 1 IAS ({{ias}} par mois).",
+          "minimumWage": "Le montant a été relevé à 1,15 fois l'IAS, le minimum lorsque les rémunérations retenues atteignent le salaire minimum."
+        }
+      },
+      "checklist": {
+        "title": "Conditions à vérifier (pas une décision)",
+        "involuntary": "Votre chômage est involontaire, par exemple un licenciement ou la fin d'un contrat à durée déterminée.",
+        "contributions": "Vous avez au moins 360 jours de rémunération déclarée dans les 24 mois précédant le chômage.",
+        "registration": "Vous êtes inscrit au centre pour l'emploi (IEFP).",
+        "ready": "Vous vivez au Portugal et êtes apte et disponible pour travailler.",
+        "deadline": "Vous demandez l'allocation dans les 90 jours suivant le début du chômage.",
+        "note": "Seule la sécurité sociale décide de votre droit. Cette liste est un rappel, pas un verdict."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne de {{age}} ans, à {{gross}} par mois en 14 versements, avec {{months}} mois et {{years}} ans de rémunération déclarée sur les 20 dernières années, vivant seule. La rémunération de référence est de {{reference}} par jour : 65 % sur 30 jours donnent {{monthly}} par mois ({{daily}} par jour). La période est de {{base}} jours plus {{extra}} jours supplémentaires, soit {{days}} jours au total, donc environ {{total}} sur toute la période. Face à une rémunération nette estimée de {{net}} par mois, la baisse de revenu est de {{drop}} par mois.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodReference": "La rémunération de référence (RR) est le total des rémunérations déclarées sur les 12 plus anciens des 14 mois précédant le mois du chômage, primes de vacances et de Noël comprises, divisé par 360. Le calculateur prend 14 ou 12 fois votre salaire mensuel.",
+        "methodAmount": "L'allocation journalière est 65 % de la RR. Le montant mensuel correspond à 30 jours.",
+        "methodLimits": "L'allocation mensuelle ne peut dépasser 2,5 fois l'IAS ({{max}} en 2026) ni 75 % de la RR nette, ni être inférieure à 1 IAS ({{ias}}), sauf si la RR nette est inférieure à l'IAS. Quand les rémunérations retenues atteignent au moins le salaire minimum ({{rmmg}}), le minimum est de 1,15 IAS.",
+        "methodNet": "La RR nette est la RR moins 11 % de sécurité sociale et le taux de retenue d'IRS. Le calculateur estime ce taux avec les barèmes de retenue 2026 du continent pour votre salaire mensuel, en célibataire, ou en marié à deux revenus si votre conjoint est dans le foyer.",
+        "methodIncrease": "L'allocation augmente de 10 % lorsque les deux conjoints sont au chômage et inscrits, ou que vous êtes le seul parent, et qu'il y a des enfants ou personnes à charge. Elle doit être demandée. Le calculateur l'applique au montant déjà plafonné et jamais au-delà de 2,5 IAS.",
+        "methodDuration": "La durée dépend de votre âge et des mois avec rémunération déclarée, plus des jours supplémentaires pour chaque tranche complète de 5 ans avec rémunération sur les 20 dernières années : 30 jours jusqu'à 39 ans, 45 jours de 40 à 49 ans et 60 jours à partir de 50 ans.",
+        "methodNoReduction": "L'ancienne réduction de 10 % après 180 jours de versement n'est pas appliquée : le guide 2026 de la sécurité sociale ne la mentionne pas.",
+        "methodTax": "Le guide de la sécurité sociale indique que l'allocation n'a pas à être déclarée à l'IRS. Vérifiez votre cas auprès de l'administration fiscale.",
+        "methodBudget": "L'allocation mensuelle est le revenu avec lequel planifier. Comparez-la à votre salaire net pour voir la baisse, puis voyez combien de temps vos économies couvrent l'écart.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedTransitional": "Le tableau transitoire pour les personnes qui remplissaient déjà la condition de cotisation au 31 mars 2012 et n'ont pas été au chômage depuis. Le calculateur n'utilise que le tableau général.",
+        "unsupportedSocial": "L'allocation sociale de chômage (subsídio social de desemprego), qui selon le guide ne peut être demandée que jusqu'au 30 décembre 2026.",
+        "unsupportedSelfEmployed": "Indépendants, gérants et administrateurs, allocation de chômage partiel, enseignants à règles propres et anciens bénéficiaires d'une pension d'invalidité.",
+        "unsupportedOther": "Salaires très variables sur les 12 mois pris en compte, périodes sans rémunération déclarée dans cet intervalle, autres revenus et versement unique pour créer son emploi.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social : Guia Prático Subsídio de Desemprego (v4.79, 16 octobre 2026), qui indique aussi l'IAS 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) et le salaire minimum de 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, dans sa rédaction actuelle : régime de protection du chômage",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021 : majoration de 10 % pour les foyers avec enfants et minimum de 1,15 IAS",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 d'après le guide de la sécurité sociale et le texte du Decreto-Lei n.º 119/2021 au Diário da República. Le taux d'IRS derrière le plafond de 75 % et l'ordre de la majoration de 10 % sont des simplifications de notre part, et la fin de la réduction de 10 % après 180 jours provient du guide et de la presse, pas de la loi consolidée."
+      },
+      "nextStepHeadline": "Avant la baisse de revenu, préparez le coussin",
+      "nextStepDescription": "WonderMoney montre votre trésorerie, vos dépenses mensuelles et combien de temps vos économies tiennent avec un revenu plus bas.",
+      "nextStepCta": "Estimez combien de temps durera votre réserve de trésorerie"
+    },
     "vehicleTax": {
       "title": "Calculateur de l'IUC",
       "shortName": "IUC",
@@ -2994,6 +3093,187 @@
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
       "nextStepCta": "Mettez de côté un douzième de votre taxe auto annuelle"
+    },
+    "propertyCapitalGains": {
+      "title": "Calculateur de plus-values sur la vente d'un logement",
+      "shortName": "Plus-values immobilières",
+      "subtitle": "Estimez la plus-value de la vente d'un bien au Portugal, l'IRS supplémentaire qu'elle peut entraîner et la part du prix qui reste disponible.",
+      "description": "Estimez l'IRS sur la vente d'un bien au Portugal, avec l'exclusion pour remploi.",
+      "pageTitle": "Calculateur de Plus-values Immobilières au Portugal 2026 : IRS à la Vente",
+      "pageDescription": "Estimez la plus-value de la vente d'un bien au Portugal en 2026 avec le coefficient de dévaluation monétaire, les frais et le remploi dans votre résidence principale, puis voyez l'IRS supplémentaire et le solde.",
+      "sections": {
+        "property": "Le bien",
+        "expenses": "Frais",
+        "income": "Vos revenus",
+        "reinvestment": "Résidence principale"
+      },
+      "fields": {
+        "saleValue": "Prix de vente",
+        "purchaseValue": "Prix d'acquisition",
+        "purchaseYear": "Année d'achat",
+        "purchaseMonth": "Mois d'achat",
+        "saleMonth": "Mois de la vente en {{saleYear}}",
+        "purchaseExpenses": "Frais d'acquisition",
+        "worksExpenses": "Travaux des 12 dernières années",
+        "saleExpenses": "Frais de vente",
+        "otherIncome": "Autres revenus annuels imposables",
+        "joint": "Imposition commune (couple)",
+        "ownHome": "C'était ma résidence principale et je compte réinvestir le produit",
+        "reinvested": "Montant réinvesti dans une autre résidence principale",
+        "loanRepaid": "Capital de prêt remboursé grâce à la vente"
+      },
+      "help": {
+        "dates": "Le coefficient ne s'applique que si le bien a été détenu plus de 24 mois. Le calculateur couvre les ventes de {{saleYear}}.",
+        "purchaseExpenses": "IMT et Imposto do Selo payés à l'achat, plus les frais de notaire et de registre et la commission d'agence.",
+        "worksExpenses": "Uniquement les travaux sur facture, des 12 dernières années, qui ont accru la valeur du bien.",
+        "saleExpenses": "La commission d'agence et les autres frais de la vente, comme le certificat énergétique.",
+        "otherIncome": "Les autres revenus du foyer soumis à l'IRS dans l'année, après les déductions spécifiques et avant les déductions de l'impôt. Indiquez 0 s'il n'y en a pas.",
+        "joint": "Divise le revenu en deux, comme en imposition commune. Laissez désactivé pour une déclaration individuelle.",
+        "reinvested": "Compte les achats de 24 mois avant à 36 mois après la vente, au Portugal ou dans l'UE/EEE.",
+        "loanRepaid": "La part du prix de vente qui rembourse le prêt du bien vendu."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "zero": "Saisissez une valeur supérieure à zéro.",
+        "negative": "Saisissez une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "yearTooOld": "Les biens achetés avant {{year}} relèvent d'un régime propre et ne sont pas couverts.",
+        "yearTooNew": "Saisissez une année d'achat jusqu'à {{saleYear}}.",
+        "month": "Choisissez un mois dans la liste.",
+        "afterSale": "L'achat ne peut pas être postérieur à la vente.",
+        "loanTooLarge": "Le prêt remboursé ne peut pas dépasser le prix de vente.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "extraTax": "IRS supplémentaire estimé sur la plus-value",
+        "estimateNote": "Impôt avec la plus-value moins impôt sans elle, pour la déclaration annuelle. Ne tient pas compte des déductions de l'impôt et votre déclaration finale peut différer.",
+        "loss": "La vente se solde par une moins-value, aucun gain n'est donc ajouté à vos revenus.",
+        "zero": "Il n'y a pas de plus-value, donc pas d'IRS supplémentaire.",
+        "cashAfter": "Solde après frais de vente, prêt remboursé et IRS estimé",
+        "gain": "Plus-value (ou moins-value)",
+        "adjustedPurchase": "Prix d'acquisition actualisé",
+        "coefficient": "Coefficient de dévaluation",
+        "coefficientNone": "Non appliqué ({{months}} mois de détention)",
+        "expenses": "Frais déduits",
+        "exemptPercent": "Exclu par le remploi",
+        "taxableGain": "Plus-value à imposer",
+        "includedIncome": "Ajouté à vos revenus (50 %)"
+      },
+      "checklist": {
+        "title": "Conditions à vérifier pour l'exclusion par remploi",
+        "domicile": "Le logement vendu était votre résidence principale, avec votre domicile fiscal, dans les 12 mois précédant la vente.",
+        "reinvest": "Le produit de la vente, net du prêt remboursé, est réinvesti dans une autre résidence principale, un terrain pour la construire ou des travaux sur celle-ci, au Portugal ou dans l'UE/EEE, entre 24 mois avant et 36 mois après la vente.",
+        "declare": "Vous déclarez l'intention de réinvestir, et le montant, dans la déclaration d'IRS de l'année de la vente.",
+        "occupy": "Le nouveau logement devient votre résidence principale, avec votre domicile fiscal, dans les 12 mois suivant le remploi.",
+        "register": "Pour un terrain ou une construction, l'inscription au registre est demandée dans les 48 mois de la vente et le logement sert de résidence jusqu'à la fin de la cinquième année suivante.",
+        "note": "Cette liste est un rappel, pas un verdict. C'est l'administration fiscale qui décide si les conditions sont remplies."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Un logement acheté en {{purchaseYear}} pour {{purchaseValue}} et vendu en {{saleYear}} pour {{saleValue}}. Le prix d'acquisition est actualisé par le coefficient {{coefficient}} à {{adjustedPurchase}} et {{expenses}} de frais sont déduits, ce qui laisse une plus-value de {{gain}}. La moitié, {{included}}, s'ajoute à d'autres revenus de {{otherIncome}} et ajoute environ {{extraTax}} d'IRS.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodGain": "Plus-value = prix de vente moins le prix d'acquisition actualisé par le coefficient, moins les frais d'acquisition et de vente et les travaux des 12 dernières années (CIRS, articles 46, 50 et 51).",
+        "methodCoefficient": "Le coefficient de dévaluation monétaire de l'année d'achat ne s'applique que si le bien a été détenu plus de 24 mois. Les valeurs de {{saleYear}} viennent de la {{portaria}} et sont conservées pour les achats depuis {{firstYear}}.",
+        "methodExpenses": "Les frais doivent être nécessaires, effectivement payés et justifiés : IMT et Imposto do Selo de l'achat, commissions d'agence et travaux des 12 dernières années sur facture.",
+        "methodHalf": "Seuls 50 % d'une plus-value positive s'ajoutent aux autres revenus de l'année et sont imposés selon le barème progressif de l'IRS de {{saleYear}}. L'IRS supplémentaire affiché est l'impôt avec la plus-value moins l'impôt sans elle.",
+        "methodExemption": "La plus-value de la résidence principale est exclue quand le produit de la vente, net du prêt remboursé, est réinvesti dans une autre dans les délais légaux. Si une partie seulement est réinvestie, la même proportion de la plus-value est exclue.",
+        "methodCash": "Le solde retranche du prix de vente les frais de vente, le prêt remboursé et l'IRS estimé. Il ne retranche pas ce que vous dépensez pour le logement suivant.",
+        "scopeTitle": "Ce qui est couvert",
+        "scopeSupported": "Les personnes physiques résidentes fiscales au Portugal qui vendent en {{saleYear}} un bien de leur patrimoine privé acheté depuis {{firstYear}}.",
+        "scopeUnsupported": "Non couvert : non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, ventes sous la valeur fiscale du bien, la surtaxe de solidarité et les déductions de l'impôt.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionBrackets": "L'IRS supplémentaire utilise le barème annuel de l'IRS de {{saleYear}} sur le revenu saisi, comme estimation de l'effet sur la déclaration annuelle. L'imposition commune est modélisée en divisant le revenu par deux.",
+        "assumptionNotModelled": "Le calculateur ne vérifie ni les conditions du remploi ni la valeur fiscale du bien. Les coefficients ont été lus dans un résumé secondaire de la Portaria et sont à confirmer au Diário da República.",
+        "assumptionEducational": "Il s'agit d'une estimation pédagogique, pas d'un conseil fiscal. Seul l'avis d'imposition de l'administration fiscale fait foi.",
+        "sourcesTitle": "Sources",
+        "sourceGains": "CIRS, article 43 : plus-values et moins-values (consulté le 19 novembre 2026)",
+        "sourceExemption": "CIRS, article 10 : exclusion par remploi dans la résidence principale (consulté le 19 novembre 2026)",
+        "sourceCoefficients": "{{portaria}} : coefficients de dévaluation pour {{saleYear}}",
+        "reviewed": "Règles et coefficients de {{saleYear}} revus le {{reviewed}}."
+      },
+      "nextStepHeadline": "Sachez ce que vous pouvez vraiment utiliser de la vente",
+      "nextStepDescription": "WonderMoney vous aide à mettre l'impôt de côté et à voir ce qui reste pour votre prochain logement.",
+      "nextStepCta": "Planifiez la part du produit de la vente qui reste disponible"
+    },
+    "christmasAllowance": {
+      "title": "Calculateur de la prime de Noël au Portugal 2026",
+      "shortName": "Prime de Noël",
+      "subtitle": "Estimez votre prime de Noël nette (subsídio de Natal) : retenue d'IRS, sécurité sociale, année d'embauche et versement en douzièmes.",
+      "description": "Estimez votre prime de Noël nette au Portugal, avec une première année partielle et un versement en douzièmes.",
+      "pageTitle": "Calculateur de la Prime de Noël au Portugal 2026 : Subsídio de Natal Net",
+      "pageDescription": "Calculez votre prime de Noël nette au Portugal avec les barèmes de retenue d'IRS 2026 et 11 % de sécurité sociale, pour une année complète ou partielle, en une fois ou en douzièmes.",
+      "nextStepHeadline": "Décidez à quoi sert la prime",
+      "nextStepDescription": "WonderMoney vous permet d'affecter un revenu exceptionnel à vos objectifs et à vos prochaines dépenses, pour qu'il ne se perde pas dans le mois.",
+      "nextStepCta": "Répartir la prime entre objectifs et dépenses",
+      "guide": {
+        "example": "Avec un salaire de base de {{salary}} par mois, non marié, sans personne à charge, au Portugal continental et en poste toute l'année, la prime de Noël est de {{gross}} avant déductions. La retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}} : {{net}} arrivent sur votre compte.",
+        "ruleAmount": "La prime de Noël équivaut à un mois de salaire et doit être versée avant le 15 décembre (Código do Trabalho, art. 263, n.º 1).",
+        "ruleHiringYear": "L'année d'embauche, la prime est proportionnelle au temps travaillé dans l'année civile (art. 263, n.º 2). Le calculateur compte les jours calendaires entre la date de début et le 31 décembre ; certains employeurs comptent des mois, ce qui peut différer de quelques euros.",
+        "methodPlan": "Le net est un revenu supplémentaire qui arrive une fois par an : il rend mieux avec un plan, d'abord les objectifs, puis les dépenses à couvrir."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Calculateur de la prime de vacances au Portugal 2026",
+      "shortName": "Prime de vacances",
+      "subtitle": "Estimez votre prime de vacances nette (subsídio de férias) : retenue d'IRS, sécurité sociale, année d'embauche et versement en douzièmes.",
+      "description": "Estimez votre prime de vacances nette au Portugal, avec l'année d'embauche et un versement en douzièmes.",
+      "pageTitle": "Calculateur de la Prime de Vacances au Portugal 2026 : Subsídio de Férias Net",
+      "pageDescription": "Calculez votre prime de vacances nette au Portugal avec les barèmes de retenue d'IRS 2026 et 11 % de sécurité sociale, y compris la règle de 2 jours par mois de l'année d'embauche et le versement en douzièmes.",
+      "nextStepHeadline": "Transformez la prime en vacances",
+      "nextStepDescription": "WonderMoney vous aide à mettre la prime de côté pour le voyage auquel elle est destinée, avec un objectif et une date, au lieu de la laisser se fondre dans le mois.",
+      "nextStepCta": "Créer un fonds vacances avec le montant reçu",
+      "guide": {
+        "example": "Vous avez commencé le 15 mars 2026 avec un salaire de base de {{salary}} par mois, non marié, sans personne à charge, au Portugal continental. Vous avez 9 mois complets, donc {{days}} jours de congés, et la prime de vacances est de {{gross}} avant déductions. La retenue d'IRS est de {{withholding}} et la sécurité sociale de {{socialSecurity}} : {{net}} arrivent sur votre compte.",
+        "ruleAmount": "La prime de vacances couvre la durée minimale des congés, en plus de la rémunération des congés (Código do Trabalho, art. 264, n.º 2), et se verse avant le début des congés sauf accord écrit contraire (n.º 3). Sur une année complète, elle équivaut à un mois de salaire.",
+        "ruleHiringYear": "L'année d'embauche, vous avez droit à 2 jours ouvrables de congés par mois complet de contrat, dans la limite de 20 jours (art. 239, n.º 1). Le calculateur pondère la prime par ces jours rapportés aux 22 jours ouvrables d'une année complète : 18 jours donnent 18/22 d'un mois de salaire.",
+        "methodPlan": "Le net est un argent pensé pour se reposer : mieux vaut le mettre de côté pour le voyage, avec un objectif et une date, avant de le dépenser."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Mode de versement de la prime",
+        "startDate": "Date de début (facultatif)"
+      },
+      "modes": {
+        "lumpSum": "En une fois",
+        "twelfths": "En douzièmes (ajoutés à chaque salaire mensuel)"
+      },
+      "help": {
+        "gross": "Votre salaire de base avant primes, sécurité sociale et IRS.",
+        "mode": "En une fois, la prime est versée d'un seul coup. En douzièmes, elle est répartie sur les mois travaillés dans l'année et versée avec chaque salaire.",
+        "startDate": {
+          "christmas": "Laissez vide si vous avez travaillé toute l'année {{year}}. L'année où vous commencez, la prime de Noël est proportionnelle au temps travaillé.",
+          "holiday": "Laissez vide si vous étiez déjà employé avant {{year}}. L'année d'embauche, vous avez 2 jours ouvrables de congés par mois complet, dans la limite de 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Saisissez une date valide.",
+        "afterYear": "Cette page couvre {{year}}. Saisissez une date de début en {{year}} ou avant, ou laissez vide.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "netAllowance": "Prime nette estimée",
+        "netTwelfth": "Montant net supplémentaire dans chaque salaire mensuel",
+        "gross": "Prime brute",
+        "withholding": "Retenue d'IRS",
+        "socialSecurity": "Sécurité sociale (11 %)",
+        "net": "Prime nette de l'année",
+        "twelfthGross": "Douzième brut ajouté à chaque salaire",
+        "twelfthCount": "Nombre de versements mensuels",
+        "proportion": "Part d'une prime complète : {{percent}}.",
+        "holidayDays": "Jours de congés comptés : {{days}} sur 22 ({{percent}} d'une prime complète).",
+        "noAllowanceYet": "Sans aucun mois complet l'année d'embauche, il n'y a pas encore de prime de vacances à verser. Les 2 jours ouvrables par mois ne comptent qu'une fois le mois complet.",
+        "noWithholdingOnTwelfth": "Chaque douzième est retenu au taux effectif de la prime entière, qui est de 0 % à ce niveau : aucune retenue d'IRS n'est prélevée. Votre employeur peut ajouter le douzième au salaire du mois et retenir sur le total, ce qui retient davantage."
+      },
+      "guide": {
+        "methodWithholding": "Chaque versement est soumis à retenue séparément avec le barème mensuel 2026, sans être ajouté au salaire du mois : le Despacho n.º 233-A/2026 (n.º 10) demande aux employeurs d'indiquer un taux effectif distinct pour chaque rémunération, comme les mois où l'on verse les primes de vacances et de Noël.",
+        "methodTwelfths": "En douzièmes, la prime est répartie à parts égales sur les mois travaillés dans l'année (12 pour une année complète). Chaque douzième est retenu séparément au taux effectif de la prime entière, la pratique habituelle des employeurs depuis la Lei n.º 11/2013, art. 3 (absente du Despacho). Votre employeur peut au contraire ajouter le douzième au salaire du mois et retenir sur le total, ce qui retient en général davantage : vérifiez votre fiche de paie.",
+        "methodSocialSecurity": "La sécurité sociale à la charge du salarié représente 11 % de la prime brute.",
+        "unsupportedNovember": "L'ajustement ponctuel des revenus versés en novembre 2026 (Despacho 12523-A/2026, Portugal continental) est ignoré. Une prime versée en novembre verrait sa retenue réduite de moitié.",
+        "unsupportedOther": "Seul le salaire de base compte. Les compléments d'ancienneté, les autres éléments de rémunération, la fin ou la suspension du contrat en cours d'année, les conventions collectives plus généreuses et les coûts de l'employeur sont hors de cette estimation.",
+        "sourceCode": "Código do Trabalho, art. 239, 263 et 264 : durée des congés, prime de Noël et prime de vacances",
+        "reviewed": "Règles vérifiées le 19 novembre 2026. La retenue séparée de chaque versement du mois a été vérifiée dans le texte original du Despacho n.º 233-A/2026, et les articles du Código do Trabalho dans des copies du texte consolidé. La référence de 22 jours ouvrables de la prime de vacances relève de la pratique courante et ne figure pas dans ces textes. Retenir chaque douzième au taux effectif de la prime entière (Lei n.º 11/2013, art. 3) est la pratique habituelle des employeurs ; cette loi n'a pas été vérifiée dans son texte. Le taux de 11 % de sécurité sociale a été confirmé par des sources secondaires."
+      }
     }
   },
   "resources": {

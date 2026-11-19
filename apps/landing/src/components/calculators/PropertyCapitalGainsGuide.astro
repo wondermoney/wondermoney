@@ -1,0 +1,76 @@
+---
+import { CAPITAL_GAINS_EXAMPLE, CAPITAL_GAINS_TABLES, computeCapitalGains } from "@/lib/calculators/propertyCapitalGains";
+import { formatMoney } from "@/lib/numberFormat";
+import type { Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.propertyCapitalGains.guide.${key}`;
+const example = computeCapitalGains(CAPITAL_GAINS_EXAMPLE);
+if (!example.ok) throw new Error("Invalid property capital gains worked example");
+
+const money = (value: number) => formatMoney(locale, value, { decimals: 0 });
+const values = {
+  saleValue: money(CAPITAL_GAINS_EXAMPLE.saleValue),
+  purchaseValue: money(CAPITAL_GAINS_EXAMPLE.purchaseValue),
+  purchaseYear: String(CAPITAL_GAINS_EXAMPLE.purchaseYear),
+  coefficient: example.result.coefficient.toFixed(2),
+  adjustedPurchase: money(example.result.adjustedPurchase),
+  expenses: money(example.result.expenses),
+  gain: money(example.result.gain),
+  included: money(example.result.includedIncome),
+  otherIncome: money(CAPITAL_GAINS_EXAMPLE.otherIncome),
+  extraTax: money(example.result.extraTax),
+  saleYear: String(CAPITAL_GAINS_TABLES.saleYear),
+  firstYear: String(CAPITAL_GAINS_TABLES.firstYear),
+  portaria: CAPITAL_GAINS_TABLES.portaria,
+  reviewed: new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(CAPITAL_GAINS_TABLES.reviewed)),
+};
+const cirs = "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/";
+const sources = [
+  ["sourceGains", `${cirs}irs43.aspx`],
+  ["sourceExemption", `${cirs}irs10.aspx`],
+  ["sourceCoefficients", "https://diariodarepublica.pt/dr/detalhe/portaria/457-2026-1180341125"],
+] as const;
+---
+
+<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+  <section aria-labelledby="capital-gains-example">
+    <h2 id="capital-gains-example" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("exampleTitle"))}
+    </h2>
+    <p class="mt-4">{t(k("example"), values)}</p>
+  </section>
+  <section aria-labelledby="capital-gains-method">
+    <h2 id="capital-gains-method" class="text-2xl font-semibold tracking-tight text-foreground">
+      {t(k("methodTitle"))}
+    </h2>
+    <ul class="mt-4 list-disc space-y-2 pl-6">
+      {["methodGain", "methodCoefficient", "methodExpenses", "methodHalf", "methodExemption", "methodCash"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("scopeTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["scopeSupported", "scopeUnsupported"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {["assumptionBrackets", "assumptionNotModelled", "assumptionEducational"].map((key) => <li>{t(k(key), values)}</li>)}
+    </ul>
+    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="mt-3 list-disc space-y-2 pl-6">
+      {sources.map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key), values)}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="mt-4 text-sm">{t(k("reviewed"), values)}</p>
+  </section>
+</div>

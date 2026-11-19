@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney convierte tu neto estimado en un plan, para que cada euro tenga un destino antes de empezar el mes.",
       "nextStepCta": "Usa la estimación neta en un plan mensual"
     },
+    "unemploymentBenefit": {
+      "title": "Calculadora del subsidio de desempleo en Portugal 2026",
+      "shortName": "Subsidio de desempleo",
+      "subtitle": "Estima el subsidio de desempleo mensual, cuánto dura y el total, con los límites de 2026.",
+      "description": "Estima tu subsidio de desempleo en Portugal: importe mensual, duración y total.",
+      "pageTitle": "Calculadora del Subsidio de Desempleo en Portugal 2026: Importe y Duración",
+      "pageDescription": "Estima el subsidio de desempleo en Portugal: 65% de la remuneración de referencia, los límites del IAS de 2026, la duración según edad y cotización y una cifra de ingresos reducidos para tu presupuesto.",
+      "fields": {
+        "grossMonthly": "Salario bruto mensual",
+        "allowances": "Pagas extra",
+        "age": "Edad al quedarte en paro",
+        "contributionMonths": "Meses con remuneración registrada",
+        "years20": "Años con remuneración registrada en los últimos 20",
+        "household": "Hogar",
+        "dependants": "Hijos o personas a cargo"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagos (pagas de vacaciones y Navidad aparte)",
+        "twelfths": "Prorrateadas (el salario ya las incluye)"
+      },
+      "households": {
+        "alone": "Vivo solo/a o mi pareja no da derecho al aumento",
+        "partnerWorking": "Mi pareja trabaja",
+        "partnerUnemployed": "Mi pareja también está en paro (inscrita en el IEFP)",
+        "singleParent": "Soy el único progenitor del hogar"
+      },
+      "help": {
+        "gross": "El salario base de los últimos meses, antes de la Seguridad Social y el IRS. Los 12 meses contados incluyen las pagas de vacaciones y Navidad.",
+        "allowances": "Con 14 pagos la calculadora cuenta 14 veces el salario; prorrateadas cuenta 12, porque las pagas ya están dentro.",
+        "age": "Tu edad el día en que te quedaste en paro.",
+        "months": "Meses con remuneración registrada desde la última vez que cobraste el subsidio de desempleo. La tabla empieza en 12 meses.",
+        "years20": "Años completos con remuneración registrada en los últimos 20. Cada 5 años añaden días.",
+        "household": "El aumento del 10% exige hijos o personas a cargo y que ambos miembros de la pareja estén en paro e inscritos, o un hogar monoparental. Hay que solicitarlo."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "belowTable": "La tabla de duración empieza en {{min}} meses con remuneración registrada. Con menos, esta estimación no se aplica.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "monthly": "Subsidio mensual estimado (30 días)",
+        "daily": "Subsidio por día",
+        "duration": "Duración estimada",
+        "durationValue": "{{days}} días (unos {{months}} meses)",
+        "durationParts": "De ellos, periodo base y días adicionales",
+        "durationPartsValue": "{{base}} + {{extra}} días",
+        "total": "Total estimado en todo el periodo",
+        "netBefore": "Remuneración de referencia neta estimada al mes",
+        "drop": "Caída de ingresos mensual para tu presupuesto",
+        "increaseApplied": "Incluye el aumento del 10% para hogares con hijos.",
+        "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real a partir de tus remuneraciones registradas.",
+        "limit": {
+          "none": "El importe es el 65% de la remuneración de referencia; no se aplicó ningún límite.",
+          "max": "El importe alcanzó el máximo de 2,5 veces el IAS ({{max}} al mes).",
+          "netCap": "El importe quedó limitado al 75% de la remuneración de referencia neta estimada.",
+          "minimum": "El importe se elevó al mínimo, 1 IAS ({{ias}} al mes).",
+          "minimumWage": "El importe se elevó a 1,15 veces el IAS, el mínimo cuando las remuneraciones usadas alcanzan el salario mínimo."
+        }
+      },
+      "checklist": {
+        "title": "Condiciones que conviene comprobar (no es una decisión)",
+        "involuntary": "El desempleo es involuntario, por ejemplo un despido o el fin de un contrato temporal.",
+        "contributions": "Tienes al menos 360 días de remuneración registrada en los 24 meses anteriores al desempleo.",
+        "registration": "Estás inscrito/a en el centro de empleo (IEFP).",
+        "ready": "Vives en Portugal y puedes y estás disponible para trabajar.",
+        "deadline": "Solicitas el subsidio en los 90 días siguientes a quedarte en paro.",
+        "note": "Solo la Seguridad Social decide si tienes derecho. Esta lista es un recordatorio, no un veredicto."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo",
+        "example": "Una persona de {{age}} años, con {{gross}} al mes en 14 pagos, con {{months}} meses y {{years}} años de remuneración registrada en los últimos 20, que vive sola. La remuneración de referencia es de {{reference}} al día, así que el 65% durante 30 días da {{monthly}} al mes ({{daily}} al día). El periodo es de {{base}} días más {{extra}} días adicionales, {{days}} días en total, es decir, unos {{total}} en todo el periodo. Frente a una remuneración neta estimada de {{net}} al mes, la caída de ingresos es de {{drop}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia (RR) es el total de las remuneraciones registradas en los 12 meses más antiguos de los 14 anteriores al mes del desempleo, incluidas las pagas de vacaciones y Navidad, dividido entre 360. La calculadora usa 14 o 12 veces tu salario mensual.",
+        "methodAmount": "El subsidio diario es el 65% de la RR. La cifra mensual son 30 días.",
+        "methodLimits": "El subsidio mensual no puede superar 2,5 veces el IAS ({{max}} en 2026) ni el 75% de la RR neta, ni ser inferior a 1 IAS ({{ias}}), salvo que la RR neta sea inferior al IAS. Cuando las remuneraciones usadas son al menos iguales al salario mínimo ({{rmmg}}), el mínimo es 1,15 IAS.",
+        "methodNet": "La RR neta es la RR menos el 11% de Seguridad Social y el tipo de retención de IRS. La calculadora estima ese tipo con las tablas de retención de 2026 del continente para tu salario mensual, como soltero/a, o como casado/a con dos perceptores si tu pareja está en el hogar.",
+        "methodIncrease": "El subsidio sube un 10% cuando ambos miembros de la pareja están en paro e inscritos, o eres el único progenitor, y hay hijos o personas a cargo. Hay que solicitarlo. La calculadora lo aplica al importe ya limitado y nunca por encima de 2,5 IAS.",
+        "methodDuration": "La duración depende de tu edad y de los meses con remuneración registrada, más días extra por cada 5 años completos con registro en los últimos 20: 30 días hasta los 39 años, 45 días de 40 a 49 y 60 días desde los 50.",
+        "methodNoReduction": "No se aplica el antiguo recorte del 10% tras 180 días de cobro: la guía de la Seguridad Social de 2026 no lo recoge.",
+        "methodTax": "La guía de la Seguridad Social indica que el subsidio no hay que declararlo en el IRS. Confirma tu caso con la Autoridad Tributaria.",
+        "methodBudget": "El subsidio mensual es el ingreso con el que debes planificar. Compáralo con tu salario neto para ver la caída y después mira cuánto tiempo tus ahorros cubren la diferencia.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedTransitional": "La tabla transitoria para quien ya cumplía el requisito de cotización el 31 de marzo de 2012 y no ha estado en paro desde entonces. La calculadora usa solo la tabla general.",
+        "unsupportedSocial": "El subsidio social de desempleo, que según la guía solo puede solicitarse hasta el 30 de diciembre de 2026.",
+        "unsupportedSelfEmployed": "Autónomos, gerentes y administradores, subsidio de desempleo parcial, docentes con reglas propias y antiguos pensionistas de invalidez.",
+        "unsupportedOther": "Salarios que variaron mucho en los 12 meses contados, periodos sin remuneración registrada dentro de ellos, otros ingresos y el pago único para crear tu propio empleo.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 de octubre de 2026), que recoge también el IAS de 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) y el salario mínimo de 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, en su redacción actual: régimen de protección por desempleo",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: aumento del 10% para hogares con hijos y mínimo de 1,15 IAS",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente a la guía de la Seguridad Social y al texto del Decreto-Lei n.º 119/2021 en el Diário da República. El tipo de IRS detrás del límite del 75% y el orden del aumento del 10% son simplificaciones nuestras, y el fin del recorte del 10% tras 180 días procede de la guía y de la prensa, no de la ley consolidada."
+      },
+      "nextStepHeadline": "Antes de que bajen los ingresos, planifica el colchón",
+      "nextStepDescription": "WonderMoney te muestra tu efectivo, tu gasto mensual y cuánto duran tus ahorros con unos ingresos menores.",
+      "nextStepCta": "Estima cuánto durará tu colchón de efectivo"
+    },
     "vehicleTax": {
       "title": "Calculadora del IUC",
       "shortName": "IUC",
@@ -2994,6 +3093,187 @@
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",
       "nextStepCta": "Aparta una doceava parte de tu impuesto anual del coche"
+    },
+    "propertyCapitalGains": {
+      "title": "Calculadora de plusvalías por la venta de una vivienda",
+      "shortName": "Plusvalías por venta de vivienda",
+      "subtitle": "Estima la plusvalía de vender un inmueble en Portugal, el IRS adicional que puede generar y cuánto del importe de la venta queda disponible.",
+      "description": "Estima el IRS de la venta de un inmueble en Portugal, con la exclusión por reinversión.",
+      "pageTitle": "Calculadora de Plusvalías Inmobiliarias en Portugal 2026: IRS al Vender una Vivienda",
+      "pageDescription": "Estima la plusvalía de vender un inmueble en Portugal en 2026 con el coeficiente de devaluación de la moneda, los gastos y la reinversión en tu vivienda habitual, y ve el IRS adicional y el dinero que queda.",
+      "sections": {
+        "property": "El inmueble",
+        "expenses": "Gastos",
+        "income": "Tus ingresos",
+        "reinvestment": "Vivienda habitual"
+      },
+      "fields": {
+        "saleValue": "Valor de venta",
+        "purchaseValue": "Valor de adquisición",
+        "purchaseYear": "Año de compra",
+        "purchaseMonth": "Mes de compra",
+        "saleMonth": "Mes de la venta en {{saleYear}}",
+        "purchaseExpenses": "Gastos de adquisición",
+        "worksExpenses": "Obras de los últimos 12 años",
+        "saleExpenses": "Gastos de venta",
+        "otherIncome": "Otros ingresos anuales sujetos a tributación",
+        "joint": "Tributación conjunta (pareja)",
+        "ownHome": "Era mi vivienda habitual y pienso reinvertir el importe",
+        "reinvested": "Importe reinvertido en otra vivienda habitual",
+        "loanRepaid": "Capital del préstamo amortizado con la venta"
+      },
+      "help": {
+        "dates": "El coeficiente solo se aplica si el inmueble se tuvo más de 24 meses. La calculadora cubre ventas en {{saleYear}}.",
+        "purchaseExpenses": "IMT e Imposto do Selo pagados en la compra, más notaría y registro y la comisión de la inmobiliaria.",
+        "worksExpenses": "Solo obras con factura, de los últimos 12 años, que aumentaron el valor del inmueble.",
+        "saleExpenses": "La comisión de la inmobiliaria y otros costes de la venta, como el certificado energético.",
+        "otherIncome": "Los demás ingresos del hogar sujetos a IRS en el año, tras las deducciones específicas y antes de las deducciones de la cuota. Indica 0 si no hay.",
+        "joint": "Divide los ingresos entre dos, como en la tributación conjunta. Déjalo apagado para una declaración individual.",
+        "reinvested": "Cuenta compras desde 24 meses antes hasta 36 meses después de la venta, en Portugal o en la UE/EEE.",
+        "loanRepaid": "La parte del importe de la venta que paga la hipoteca del inmueble vendido."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "zero": "Introduce un valor superior a cero.",
+        "negative": "Introduce un valor positivo.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "yearTooOld": "Los inmuebles comprados antes de {{year}} tienen un régimen propio y no están cubiertos.",
+        "yearTooNew": "Introduce un año de compra de hasta {{saleYear}}.",
+        "month": "Elige un mes de la lista.",
+        "afterSale": "La compra no puede ser posterior a la venta.",
+        "loanTooLarge": "El préstamo amortizado no puede superar el valor de venta.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "extraTax": "IRS adicional estimado sobre la plusvalía",
+        "estimateNote": "Impuesto con la plusvalía menos impuesto sin ella, para la declaración anual. Ignora las deducciones de la cuota y tu declaración final puede diferir.",
+        "loss": "La venta terminó en pérdida, así que no se suma ninguna ganancia a tus ingresos.",
+        "zero": "No hay plusvalía, así que no hay IRS adicional.",
+        "cashAfter": "Dinero que queda tras gastos de venta, préstamo amortizado e IRS estimado",
+        "gain": "Plusvalía (o minusvalía)",
+        "adjustedPurchase": "Valor de adquisición actualizado",
+        "coefficient": "Coeficiente de devaluación",
+        "coefficientNone": "No aplicado ({{months}} meses de tenencia)",
+        "expenses": "Gastos deducidos",
+        "exemptPercent": "Excluido por reinversión",
+        "taxableGain": "Plusvalía a tributar",
+        "includedIncome": "Sumado a tus ingresos (50%)"
+      },
+      "checklist": {
+        "title": "Condiciones que conviene comprobar para la exclusión por reinversión",
+        "domicile": "La vivienda vendida era tu vivienda habitual, con tu domicilio fiscal en ella, en los 12 meses anteriores a la venta.",
+        "reinvest": "El importe de la venta, neto del préstamo amortizado, se reinvierte en otra vivienda habitual, en un terreno para construirla o en obras en ella, en Portugal o en la UE/EEE, entre 24 meses antes y 36 meses después de la venta.",
+        "declare": "Declaras la intención de reinvertir, y el importe, en la declaración de IRS del año de la venta.",
+        "occupy": "La nueva vivienda pasa a ser tu vivienda habitual, con tu domicilio fiscal en ella, en los 12 meses siguientes a la reinversión.",
+        "register": "Para terreno o construcción, el registro se solicita en los 48 meses siguientes a la venta y la vivienda se usa como residencia hasta el final del quinto año posterior.",
+        "note": "Esta lista es un recordatorio, no un veredicto. Es la Autoridad Tributaria quien decide si se cumplen las condiciones."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Una vivienda comprada en {{purchaseYear}} por {{purchaseValue}} y vendida en {{saleYear}} por {{saleValue}}. El valor de adquisición se actualiza con el coeficiente {{coefficient}} hasta {{adjustedPurchase}} y se deducen {{expenses}} de gastos, lo que deja una plusvalía de {{gain}}. La mitad, {{included}}, se suma a otros ingresos de {{otherIncome}} y añade unos {{extraTax}} de IRS.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodGain": "Plusvalía = valor de venta menos el valor de adquisición actualizado con el coeficiente, menos los gastos de adquisición y de venta y las obras de los últimos 12 años (CIRS, artículos 46, 50 y 51).",
+        "methodCoefficient": "El coeficiente de devaluación de la moneda del año de compra solo se aplica si el inmueble se tuvo más de 24 meses. Los valores de {{saleYear}} proceden de la {{portaria}} y se guardan para compras desde {{firstYear}}.",
+        "methodExpenses": "Los gastos deben ser necesarios, efectivamente pagados y justificados: IMT e Imposto do Selo de la compra, comisiones de agencia y obras de los últimos 12 años con factura.",
+        "methodHalf": "Solo el 50% de una plusvalía positiva se suma a los demás ingresos del año y tributa en los tramos progresivos del IRS de {{saleYear}}. El IRS adicional mostrado es el impuesto con la plusvalía menos el impuesto sin ella.",
+        "methodExemption": "La plusvalía de la vivienda habitual se excluye cuando el importe de la venta, neto del préstamo amortizado, se reinvierte en otra dentro de los plazos legales. Si solo se reinvierte una parte, se excluye la misma proporción de la plusvalía.",
+        "methodCash": "El dinero que queda resta del valor de venta los gastos de venta, el préstamo amortizado y el IRS estimado. No resta lo que gastes en la siguiente vivienda.",
+        "scopeTitle": "Qué cubre",
+        "scopeSupported": "Personas físicas residentes fiscales en Portugal que venden en {{saleYear}} un inmueble de su patrimonio privado comprado desde {{firstYear}}.",
+        "scopeUnsupported": "No cubre: no residentes, inmuebles comprados antes de {{firstYear}}, empresas e inmuebles afectos a una actividad, herencias y donaciones, viviendas con ayuda pública superior al 30% de su valor tributario, ventas por debajo del valor tributario, el recargo de solidaridad y las deducciones de la cuota.",
+        "assumptionsTitle": "Supuestos",
+        "assumptionBrackets": "El IRS adicional usa los tramos anuales del IRS de {{saleYear}} sobre los ingresos que introduces, como estimación del efecto en la declaración anual. La tributación conjunta se modela dividiendo los ingresos entre dos.",
+        "assumptionNotModelled": "La calculadora no comprueba las condiciones de la reinversión ni el valor tributario del inmueble. Los coeficientes se leyeron de un resumen secundario de la Portaria y conviene confirmarlos en el Diário da República.",
+        "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Cuenta la liquidación de IRS de la Autoridad Tributaria.",
+        "sourcesTitle": "Fuentes",
+        "sourceGains": "CIRS, artículo 43: ganancias y pérdidas (consultado el 19 de noviembre de 2026)",
+        "sourceExemption": "CIRS, artículo 10: exclusión por reinversión en la vivienda habitual (consultado el 19 de noviembre de 2026)",
+        "sourceCoefficients": "{{portaria}}: coeficientes de devaluación para {{saleYear}}",
+        "reviewed": "Reglas y coeficientes de {{saleYear}} revisados el {{reviewed}}."
+      },
+      "nextStepHeadline": "Sabe cuánto de la venta puedes usar de verdad",
+      "nextStepDescription": "WonderMoney te ayuda a apartar el impuesto y a ver qué queda para tu próxima vivienda.",
+      "nextStepCta": "Planifica cuánto del importe de la venta queda disponible"
+    },
+    "christmasAllowance": {
+      "title": "Calculadora de la paga extra de Navidad en Portugal 2026",
+      "shortName": "Paga de Navidad",
+      "subtitle": "Estima tu subsídio de Natal neto: retención de IRS, Seguridad Social, el año de incorporación y el pago prorrateado en doceavas.",
+      "description": "Estima tu paga extra de Navidad neta en Portugal, con el primer año parcial y el pago en doceavas.",
+      "pageTitle": "Calculadora de la Paga de Navidad en Portugal 2026: Subsídio de Natal Neto",
+      "pageDescription": "Calcula tu paga extra de Navidad neta en Portugal con las tablas de retención de IRS de 2026 y el 11% de Seguridad Social, para un año completo o parcial y en un pago o en doceavas.",
+      "nextStepHeadline": "Decide para qué es la paga",
+      "nextStepDescription": "WonderMoney te deja asignar un ingreso extra a tus metas y a tus próximos gastos, para que no se diluya en el mes.",
+      "nextStepCta": "Repartir la paga entre metas y gastos",
+      "guide": {
+        "example": "Con un salario base de {{salary}} al mes, sin casar y sin dependientes, en Portugal continental y trabajando todo el año, la paga de Navidad es de {{gross}} antes de descuentos. La retención de IRS es de {{withholding}} y la Seguridad Social de {{socialSecurity}}, así que a tu cuenta llegan {{net}}.",
+        "ruleAmount": "La paga de Navidad equivale a un mes de salario y se debe pagar antes del 15 de diciembre (Código do Trabalho, art. 263, n.º 1).",
+        "ruleHiringYear": "En el año de incorporación, la paga es proporcional al tiempo trabajado en el año natural (art. 263, n.º 2). La calculadora cuenta los días naturales desde la fecha de inicio hasta el 31 de diciembre; algunas empresas cuentan meses, lo que puede variar unos pocos euros.",
+        "methodPlan": "El neto es dinero extra que llega una vez al año, así que rinde más con un plan: primero las metas y después los gastos que debe cubrir."
+      }
+    },
+    "holidayAllowance": {
+      "title": "Calculadora de la paga de vacaciones en Portugal 2026",
+      "shortName": "Paga de vacaciones",
+      "subtitle": "Estima tu subsídio de férias neto: retención de IRS, Seguridad Social, el año de incorporación y el pago en doceavas.",
+      "description": "Estima tu paga de vacaciones neta en Portugal, con el año de incorporación y el pago en doceavas.",
+      "pageTitle": "Calculadora de la Paga de Vacaciones en Portugal 2026: Subsídio de Férias Neto",
+      "pageDescription": "Calcula tu paga de vacaciones neta en Portugal con las tablas de retención de IRS de 2026 y el 11% de Seguridad Social, con la regla de 2 días por mes del año de incorporación y el pago en doceavas.",
+      "nextStepHeadline": "Convierte la paga en vacaciones",
+      "nextStepDescription": "WonderMoney te ayuda a reservar la paga para el viaje al que va destinada, con un objetivo y una fecha, en lugar de dejarla diluirse en el mes.",
+      "nextStepCta": "Crear un fondo de vacaciones con el importe recibido",
+      "guide": {
+        "example": "Empezaste el 15 de marzo de 2026 con un salario base de {{salary}} al mes, sin casar y sin dependientes, en Portugal continental. Tienes 9 meses completos, así que te corresponden {{days}} días de vacaciones, y la paga de vacaciones es de {{gross}} antes de descuentos. La retención de IRS es de {{withholding}} y la Seguridad Social de {{socialSecurity}}, así que a tu cuenta llegan {{net}}.",
+        "ruleAmount": "El subsídio de férias cubre la duración mínima de las vacaciones, además de la retribución del periodo de vacaciones (Código do Trabalho, art. 264, n.º 2), y se paga antes de que empiecen, salvo pacto escrito en contrario (n.º 3). En un año completo equivale a un mes de salario.",
+        "ruleHiringYear": "En el año de incorporación tienes 2 días hábiles de vacaciones por cada mes completo de contrato, hasta 20 días (art. 239, n.º 1). La calculadora pondera la paga por esos días sobre los 22 días hábiles de un año completo, así que 18 días dan 18/22 de un mes de salario.",
+        "methodPlan": "El neto es dinero pensado para descansar, así que conviene reservarlo para el viaje, con un objetivo y una fecha, antes de gastarlo."
+      }
+    },
+    "allowance": {
+      "fields": {
+        "mode": "Cómo se paga la paga extra",
+        "startDate": "Fecha de inicio (opcional)"
+      },
+      "modes": {
+        "lumpSum": "En un solo pago",
+        "twelfths": "En doceavas (sumadas a cada salario mensual)"
+      },
+      "help": {
+        "gross": "Tu salario base antes de pagas extra, Seguridad Social e IRS.",
+        "mode": "En un solo pago se cobra de una vez. En doceavas, la paga se reparte entre los meses que trabajas en el año y se cobra con cada salario.",
+        "startDate": {
+          "christmas": "Déjalo vacío si trabajaste todo {{year}}. En el año en que empiezas, la paga de Navidad es proporcional al tiempo trabajado.",
+          "holiday": "Déjalo vacío si ya estabas empleado antes de {{year}}. En el año de incorporación tienes 2 días hábiles de vacaciones por cada mes completo, hasta 20."
+        }
+      },
+      "errors": {
+        "invalidDate": "Introduce una fecha válida.",
+        "afterYear": "Esta página cubre {{year}}. Introduce una fecha de inicio en {{year}} o anterior, o déjala vacía.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "netAllowance": "Paga neta estimada",
+        "netTwelfth": "Importe neto extra en cada salario mensual",
+        "gross": "Paga bruta",
+        "withholding": "Retención de IRS",
+        "socialSecurity": "Seguridad Social (11%)",
+        "net": "Paga neta del año",
+        "twelfthGross": "Doceava bruta sumada a cada salario",
+        "twelfthCount": "Número de pagos mensuales",
+        "proportion": "Parte de una paga completa: {{percent}}.",
+        "holidayDays": "Días de vacaciones contados: {{days}} de 22 ({{percent}} de una paga completa).",
+        "noAllowanceYet": "Sin ningún mes completo todavía en el año de incorporación, no hay paga de vacaciones que cobrar. Los 2 días hábiles por mes solo cuentan cuando el mes está completo.",
+        "noWithholdingOnTwelfth": "Cada doceava se retiene al tipo efectivo de la paga completa, que a este nivel es 0%, así que no se retiene IRS. Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que retiene más."
+      },
+      "guide": {
+        "methodWithholding": "Cada pago se retiene por separado con la tabla mensual de 2026, sin sumarlo al salario del mes: el Despacho n.º 233-A/2026 (n.º 10) pide a las empresas mostrar un tipo efectivo distinto para cada remuneración, como en los meses en que se pagan las pagas de vacaciones y de Navidad.",
+        "methodTwelfths": "En doceavas, la paga se reparte por igual entre los meses que trabajas en el año (12 en un año completo). Cada doceava se retiene por separado al tipo efectivo de la paga completa, la práctica habitual de las empresas desde la Lei n.º 11/2013, art. 3 (no figura en el Despacho). Tu empresa puede sumar la doceava al salario del mes y retener sobre el total, lo que suele retener más: revisa tu nómina.",
+        "methodSocialSecurity": "La Seguridad Social a cargo del trabajador es el 11% de la paga bruta.",
+        "unsupportedNovember": "El ajuste puntual de los ingresos pagados en noviembre de 2026 (Despacho 12523-A/2026, Portugal continental) se ignora. Una paga cobrada en noviembre tendría la retención reducida a la mitad.",
+        "unsupportedOther": "Solo cuenta el salario base. Los complementos de antigüedad, otros conceptos retributivos, la extinción o suspensión del contrato durante el año, los convenios que paguen más y los costes de la empresa quedan fuera de esta estimación.",
+        "sourceCode": "Código do Trabalho, arts. 239, 263 y 264: duración de las vacaciones, paga de Navidad y paga de vacaciones",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026. La retención por separado de cada pago del mes se comprobó en el texto original del Despacho n.º 233-A/2026, y los artículos del Código do Trabalho en copias del texto consolidado. La referencia de 22 días hábiles de la paga de vacaciones es práctica habitual, no figura en esos textos. Retener cada doceava al tipo efectivo de la paga completa (Lei n.º 11/2013, art. 3) es la práctica habitual de las empresas; esa ley no se comprobó con su texto. El 11% de Seguridad Social se comprobó en fuentes secundarias."
+      }
     }
   },
   "resources": {
