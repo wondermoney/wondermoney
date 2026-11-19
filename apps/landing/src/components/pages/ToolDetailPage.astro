@@ -68,6 +68,8 @@ import Sp500HistoryCalculatorComp from "@/components/calculators/Sp500HistoryCal
 import Sp500HistoryGuide from "@/components/calculators/Sp500HistoryGuide.astro";
 import EuriborCalculatorComp from "@/components/calculators/EuriborCalculatorComp";
 import EuriborGuide from "@/components/calculators/EuriborGuide.astro";
+import DepositRateIndexComp from "@/components/calculators/DepositRateIndexComp";
+import DepositRateIndexGuide from "@/components/calculators/DepositRateIndexGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -247,6 +249,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.euribor.nextStepCta"),
     ctaHref: toLocalizedPath("featureCredits", locale),
   },
+  toolDepositRateIndex: {
+    headline: t("tools.depositRateIndex.nextStepHeadline"),
+    description: t("tools.depositRateIndex.nextStepDescription"),
+    ctaText: t("tools.depositRateIndex.nextStepCta"),
+    ctaHref: toLocalizedPath("featureGoals", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -360,6 +368,7 @@ const schema = {
     {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
     {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
     {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
+    {routeId === "toolDepositRateIndex" && <DepositRateIndexComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -394,6 +403,7 @@ const schema = {
   {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
   {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
   {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
+  {routeId === "toolDepositRateIndex" && <DepositRateIndexGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

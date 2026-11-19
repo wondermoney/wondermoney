@@ -480,6 +480,14 @@ const ROUTE_SLUGS = {
 		de: "euribor-aktuell",
 		it: "euribor-oggi",
 	},
+	toolDepositRateIndex: {
+		pt: "indice-taxas-depositos-a-prazo",
+		en: "term-deposit-rate-index-portugal",
+		es: "indice-tipos-depositos-plazo-portugal",
+		fr: "indice-taux-depots-a-terme-portugal",
+		de: "festgeldzins-index-portugal",
+		it: "indice-tassi-depositi-vincolati-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -623,6 +631,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolStatePension",
 	"toolSp500History",
 	"toolEuribor",
+	"toolDepositRateIndex",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -954,6 +963,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	euribor: "toolEuribor",
 	"euribor-today": "toolEuribor",
 	"euribor-hoje": "toolEuribor",
+	tooldepositrateindex: "toolDepositRateIndex",
+	"deposit-rate-index": "toolDepositRateIndex",
+	"indice-depositos-a-prazo": "toolDepositRateIndex",
 }
 
 function normalizeRouteLookupKey(value: string): string {

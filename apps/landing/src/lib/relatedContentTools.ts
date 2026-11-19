@@ -99,6 +99,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolMortgage", "toolRateRevision", "toolMortgageTransfer"],
     destination: "toolEuribor",
   },
+  {
+    sources: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation"],
+    destination: "toolDepositRateIndex",
+  },
 ];
 
 export function getRelatedContentTools(

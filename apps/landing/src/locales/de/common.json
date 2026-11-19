@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Füge sie in WonderMoney hinzu, um alles, was du gespart hast, an einem Ort zu verfolgen.",
       "nextStepCta": "Zertifikate in deine Sparübersicht aufnehmen"
     },
+    "depositRateIndex": {
+      "title": "Festgeld-Zinsindex: was Banken in Portugal tatsächlich zahlen",
+      "shortName": "Festgeld-Zinsindex",
+      "subtitle": "Der durchschnittliche Zinssatz, den Banken in Portugal und im Euroraum für neue Festgelder privater Haushalte zahlten, Monat für Monat seit 2003, mit Abzug von Inflation und 28 % IRS.",
+      "description": "Durchschnittliche Zinsen auf neue Festgelder in Portugal und im Euroraum, nach Inflation und Steuer.",
+      "pageTitle": "Festgeld-Zinsindex Portugal: Durchschnittszinsen und Inflation",
+      "pageDescription": "Offizielle Durchschnittszinsen auf neue Festgelder privater Haushalte in Portugal und im Euroraum seit 2003, der Realzins nach Inflation und 28 % IRS und ein kleiner Rechner. Daten: Statistiken der Banco de Portugal über die EZB.",
+      "snapshot": {
+        "title": "Durchschnittszins auf neue Festgelder, {{month}}",
+        "intro": "Offizielle Durchschnitte des vereinbarten Zinssatzes auf neue Festgelder privater Haushalte, von den Banken gemeldet. Das ist ein Richtwert, keine Angebotsliste.",
+        "portugal": "Portugal, alle Laufzeiten",
+        "euroArea": "Euroraum, alle Laufzeiten",
+        "asOf": "Datenstand {{month}}, der letzte veröffentlichte Monat beim Abruf der Daten am {{retrieved}}.",
+        "provisional": "Der letzte Monat ist vorläufig und kann revidiert werden.",
+        "caption": "Durchschnittszins auf neue Festgelder nach Ursprungslaufzeit, Portugal und Euroraum",
+        "maturity": "Ursprungslaufzeit",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Euroraum",
+        "noData": "k. A."
+      },
+      "real": {
+        "title": "Realzins {{year}}, das letzte vollständige Jahr",
+        "nominal": "Durchschnittlich gezahlter Zins",
+        "inflation": "Inflation",
+        "gross": "Realzins vor Steuer",
+        "net": "Realzins nach {{tax}} % IRS",
+        "positive": "{{year}} hat das durchschnittliche neue Festgeld nach IRS die Inflation noch übertroffen.",
+        "negative": "{{year}} hat das durchschnittliche neue Festgeld nach IRS Kaufkraft verloren: Die Preise stiegen schneller als die erhaltenen Zinsen."
+      },
+      "notBestOffer": "Dies ist ein Durchschnitt dessen, was Banken tatsächlich auf neue Einlagen gezahlt haben, nicht das beste Angebot. Aktions- und Kampagnenzinsen liegen meist höher, manche Einlagen bringen weniger. Diese Seite nennt keine Banken und empfiehlt kein Produkt: Vergleiche aktuelle Angebote selbst, bevor du dich entscheidest.",
+      "calculator": {
+        "title": "Zinsen zum Durchschnittssatz",
+        "intro": "Gib einen Betrag und eine Laufzeit ein, um zu sehen, welche Zinsen ein Festgeld zum aktuellen Durchschnittssatz dieser Laufzeit bringt, netto nach 28 % IRS, und was die Inflation davon abzieht."
+      },
+      "fields": {
+        "amount": "Angelegter Betrag",
+        "term": "Laufzeit",
+        "termSuffix": "Monate",
+        "inflation": "Angenommene Inflation pro Jahr"
+      },
+      "help": {
+        "term": "Ganze Monate, 1 bis 120. Bis 12 Monate gilt der Durchschnitt bis 1 Jahr, bei 13 bis 24 Monaten der von 1 bis 2 Jahren, bei längeren Laufzeiten der über 2 Jahre.",
+        "inflation": "Vorbelegt mit der portugiesischen Inflation von {{year}} (jahresdurchschnittlicher VPI, INE). Ändere sie, um andere Szenarien zu testen."
+      },
+      "errors": {
+        "amount": {
+          "required": "Gib einen Betrag über null ein.",
+          "negative": "Der Betrag darf nicht negativ sein.",
+          "tooLarge": "Gib {{max}} oder weniger ein."
+        },
+        "termMonths": {
+          "required": "Gib eine Laufzeit von mindestens 1 Monat ein.",
+          "tooLarge": "Die Laufzeit darf höchstens {{max}} Monate betragen.",
+          "notWhole": "Gib eine ganze Zahl an Monaten ein."
+        },
+        "inflation": {
+          "required": "Gib eine Inflationsrate ein, oder 0.",
+          "outOfRange": "Gib eine Inflationsrate von {{min}} % bis {{top}} % ein."
+        },
+        "summary": "Prüfe die markierten Felder, um das Ergebnis zu sehen."
+      },
+      "buckets": {
+        "all": "Alle Laufzeiten",
+        "upTo1y": "Bis 1 Jahr",
+        "1to2y": "Über 1 bis 2 Jahre",
+        "over2y": "Über 2 Jahre"
+      },
+      "result": {
+        "net": "Nettozinsen nach {{tax}} % IRS",
+        "gross": "Bruttozinsen",
+        "tax": "Einbehaltene IRS ({{tax}} %)",
+        "inflationCost": "Was die Inflation über die Laufzeit abzieht",
+        "realGain": "Zinsen nach Inflation",
+        "realYield": "Realer Jahresertrag nach Steuer",
+        "assumptions": "Durchschnittszins neuer Einlagen ({{bucket}}): {{rate}} pro Jahr ({{month}}). Einfache Zinsen, am Ende der Laufzeit gezahlt, {{months}} Monate.",
+        "fallback": "In dieser Laufzeitgruppe wurden im letzten Monat keine neuen Einlagen erfasst, daher gilt der Durchschnitt aller Laufzeiten.",
+        "beats": "Unter diesen Annahmen decken die Zinsen nach Steuer den Kaufkraftverlust.",
+        "loses": "Unter diesen Annahmen zieht die Inflation mehr ab, als die Zinsen bringen: Am Laufzeitende kauft das Geld weniger.",
+        "note": "Ein Richtwert, kein Angebot: Der Zins deiner Bank, mögliche Gebühren und die genaue Tageszählung verändern das Ergebnis. Nur zu Bildungszwecken, keine Finanzberatung."
+      },
+      "history": {
+        "title": "Verlauf seit 2003",
+        "bucket": "Im Diagramm gezeigte Laufzeit",
+        "chartLabel": "Liniendiagramm der monatlichen Durchschnittszinsen auf neue Festgelder in Portugal und im Euroraum mit der jährlichen portugiesischen Inflation",
+        "portugal": "Portugal",
+        "euroArea": "Euroraum",
+        "inflation": "Portugiesische Inflation (Kalenderjahr)",
+        "chartNote": "Die Zinsen sind Monatsdurchschnitte. Die Inflation ist die jahresdurchschnittliche Veränderung der Verbraucherpreise je Kalenderjahr und springt daher im Januar; das laufende Jahr ist noch nicht vollständig.",
+        "caption": "Jahresdurchschnittszins auf neue Festgelder, Inflation und Realzins nach IRS",
+        "year": "Jahr",
+        "realNet": "Realzins nach {{tax}} % IRS"
+      },
+      "sourceNote": "Quelle: Durchschnittszinsen auf neue Festgelder privater Haushalte (annualisierter vereinbarter Satz), Statistiken der Banco de Portugal, veröffentlicht im EZB-Datenportal, letzter Monat {{month}}, abgerufen am {{retrieved}}. Inflation: Verbraucherpreisindex des INE über das BPstat der Banco de Portugal. Jahreswerte von WonderMoney berechnet. Nur zu Bildungszwecken.",
+      "nextStepHeadline": "Vom Richtwert zum persönlichen Sparplan",
+      "nextStepDescription": "Der Durchschnitt zeigt, was der Markt gezahlt hat. Setze dir in WonderMoney ein Sparziel und verfolge, wie deine eigenen Einlagen im Vergleich dazu abschneiden.",
+      "nextStepCta": "Sparziel festlegen",
+      "guide": {
+        "read": {
+          "title": "So liest du den Index",
+          "what": "Jeden Monat melden die Banken in Portugal der Banco de Portugal den Zinssatz der neuen Festgelder, die sie von privaten Haushalten hereingenommen haben. Der Index ist der Durchschnitt dieser Sätze über alle Banken, gewichtet nach dem Volumen des Neugeschäfts: das, was tatsächlich vereinbart wurde. Die Euroraum-Linie ist dieselbe Statistik für alle Banken des Euroraums, zum Vergleich.",
+          "notBest": "Es ist nicht der beste verfügbare Zins. Ein Durchschnitt enthält kleine Einlagen, Bestandskunden und Banken, die wenig zahlen; ein Aktions- oder Kampagnenzins kann daher deutlich darüber liegen, und manche Einlagen bringen weniger.",
+          "noRecommendation": "Hier wird keine Bank und kein Produkt genannt oder bewertet. Nutze den Durchschnitt, um einzuschätzen, ob ein Angebot hoch oder niedrig wirkt, und vergleiche dann aktuelle Angebote selbst, einschließlich ihrer Bedingungen."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Lege {{amount}} für {{months}} Monate zum aktuellen Durchschnittssatz dieser Laufzeit an, {{rate}} pro Jahr ({{month}}). Die am Ende gezahlten Zinsen betragen {{gross}}; nach {{taxRate}} % IRS (einbehaltene Steuer: {{tax}}) bleiben dir {{net}}.",
+          "real": "Bei einer Inflation von {{inflation}} pro Jahr verliert dasselbe Geld über die Laufzeit {{inflationCost}} an Kaufkraft; nach Inflation bleiben also {{realGain}}.",
+          "year": "Rückblickend zahlte das durchschnittliche neue Festgeld {{year}}, im letzten vollständigen Jahr, {{yearRate}}; nach Inflation und 28 % IRS lag der Realzins bei {{yearReal}}."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Die Zinssätze sind veröffentlichte Statistiken. WonderMoney fügt nur diese Berechnungen hinzu:",
+          "steps": {
+            "a": "Jahreszins: der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
+            "b": "Inflation: die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum Jahr.",
+            "c": "Realzins: (1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
+            "d": "Rechner: einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, mit 28 % Einbehalt, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
+          },
+          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "source": "Zinssätze: monatliche Durchschnittszinsen auf neue Einlagen mit vereinbarter Laufzeit privater Haushalte (annualisierter vereinbarter Satz, alle Beträge, in Euro), {{first}} bis {{last}}, von der Banco de Portugal aus den Meldungen der Banken erstellt und im EZB-Datenportal veröffentlicht (Reihen {{seriesPt}} für Portugal und {{seriesEa}} für den Euroraum, wobei x die Laufzeit ist: gesamt, bis 1 Jahr, über 1 bis 2 Jahre, über 2 Jahre). Abgerufen am {{retrieved}}.",
+          "ecbLink": "EZB-Datenportal (MIR)",
+          "bpstatLink": "BPstat der Banco de Portugal",
+          "cpiLink": "Verbraucherpreisindex des INE in BPstat",
+          "inflation": "Inflation: jahresdurchschnittlicher Verbraucherpreisindex für Portugal, vom INE erstellt und von der Banco de Portugal verbreitet (BPstat-Reihe 12704686), abgerufen am {{cpiRetrieved}}.",
+          "reuse": "Die EZB erlaubt die freie Nutzung ihrer Statistiken, wenn sie korrekt wiedergegeben werden und die Quelle genannt wird. Diese Seite veröffentlicht Monatswerte erneut und lädt zur Laufzeit keine Daten: Die Zahlen ändern sich nur, wenn die Datendatei aktualisiert wird."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht abdecken",
+          "items": {
+            "average": "Ein Durchschnitt des Neugeschäfts: Er mischt Einlagenhöhen, Banken und Kunden. Dein Zins kann höher oder niedriger sein.",
+            "lag": "Die Statistiken erscheinen monatlich mit Verzögerung, und der letzte Monat kann revidiert werden.",
+            "tax": "Steuer: 28 % ist der IRS-Einbehalt auf Zinsen für Gebietsansässige. Deine Situation kann abweichen, etwa wenn du die Zinsen in deiner Jahressteuererklärung angibst.",
+            "inflation": "Inflation: Deine eigenen Preise weichen vom nationalen Durchschnitt ab, und die künftige Inflation ist unbekannt. Der Rechner hält die eingegebene Rate über die gesamte Laufzeit konstant.",
+            "buckets": "Laufzeitgruppen ohne neue Einlagen in einem Monat erscheinen als k. A. Für eine Laufzeit in dieser Gruppe nutzt der Rechner den Durchschnitt aller Laufzeiten.",
+            "advice": "Nur zu Bildungszwecken: Diese Seite ist weder Finanzberatung noch ein Angebot."
+          }
+        },
+        "related": {
+          "title": "Weiterlesen",
+          "termDepositLink": "Festgeldrechner",
+          "termDepositBody": "Gib den Zins deiner Bank ein und sieh Zinsen, Steuer und Nettorendite.",
+          "savingsCertificatesLink": "Rechner für Certificados de Aforro",
+          "savingsCertificatesBody": "Vergleiche ein Festgeld mit den Certificados de Aforro Série F.",
+          "inflationLink": "Inflationsrechner",
+          "inflationBody": "Sieh, wie viel Kaufkraft Geld zwischen zwei beliebigen Jahren verloren hat."
+        }
+      }
+    },
     "netSalary": {
       "title": "Nettogehalt-Rechner Portugal 2026",
       "shortName": "Nettogehalt",

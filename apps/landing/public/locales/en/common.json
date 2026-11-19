@@ -2758,6 +2758,157 @@
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
       "nextStepCta": "Include certificates in your savings overview"
     },
+    "depositRateIndex": {
+      "title": "Term deposit rate index: what banks in Portugal actually pay",
+      "shortName": "Deposit rate index",
+      "subtitle": "The average interest rate banks in Portugal and the euro area paid on new household term deposits, month by month since 2003, with inflation and the 28% IRS taken off.",
+      "description": "Average new term deposit rates in Portugal and the euro area, after inflation and tax.",
+      "pageTitle": "Term Deposit Rate Index Portugal: Average Rates vs Inflation",
+      "pageDescription": "Official average interest rates on new household term deposits in Portugal and the euro area since 2003, the real rate after inflation and the 28% IRS, and a small calculator. Data: Banco de Portugal statistics via the ECB.",
+      "snapshot": {
+        "title": "Average new term deposit rate, {{month}}",
+        "intro": "Official averages of the interest rate agreed on new term deposits from households, as reported by banks. It is a benchmark, not a list of offers.",
+        "portugal": "Portugal, all maturities",
+        "euroArea": "Euro area, all maturities",
+        "asOf": "Data as of {{month}}, the latest month published when the data was retrieved on {{retrieved}}.",
+        "provisional": "The latest month is provisional and may be revised.",
+        "caption": "Average new term deposit rate by original maturity, Portugal and the euro area",
+        "maturity": "Original maturity",
+        "portugalShort": "Portugal",
+        "euroAreaShort": "Euro area",
+        "noData": "n/a"
+      },
+      "real": {
+        "title": "Real rate in {{year}}, the latest complete year",
+        "nominal": "Average rate paid",
+        "inflation": "Inflation",
+        "gross": "Real rate before tax",
+        "net": "Real rate after {{tax}}% IRS",
+        "positive": "In {{year}} the average new deposit still beat inflation after IRS.",
+        "negative": "In {{year}} the average new deposit lost purchasing power after IRS: prices rose faster than the interest earned."
+      },
+      "notBestOffer": "This is an average of what banks actually paid on new deposits, not the best offer. Promotional and campaign rates are usually higher, and some deposits pay less. This page names no banks and recommends no product: compare current offers yourself before you decide.",
+      "calculator": {
+        "title": "Interest at the average rate",
+        "intro": "Enter an amount and a term to see the interest a deposit would earn at the latest average rate for that maturity, net of the 28% IRS, and what inflation would take."
+      },
+      "fields": {
+        "amount": "Amount deposited",
+        "term": "Term",
+        "termSuffix": "months",
+        "inflation": "Assumed inflation per year"
+      },
+      "help": {
+        "term": "Whole months, 1 to 120. Up to 12 months uses the up-to-1-year average, 13 to 24 months the 1-to-2-year average, longer terms the over-2-years average.",
+        "inflation": "Pre-filled with Portuguese inflation in {{year}} (annual average CPI, INE). Change it to test other scenarios."
+      },
+      "errors": {
+        "amount": {
+          "required": "Enter an amount above zero.",
+          "negative": "The amount cannot be negative.",
+          "tooLarge": "Enter {{max}} or less."
+        },
+        "termMonths": {
+          "required": "Enter a term of at least 1 month.",
+          "tooLarge": "The term can be at most {{max}} months.",
+          "notWhole": "Enter a whole number of months."
+        },
+        "inflation": {
+          "required": "Enter an inflation rate, or 0.",
+          "outOfRange": "Enter an inflation rate from {{min}}% to {{top}}%."
+        },
+        "summary": "Check the highlighted fields to see the result."
+      },
+      "buckets": {
+        "all": "All maturities",
+        "upTo1y": "Up to 1 year",
+        "1to2y": "Over 1 and up to 2 years",
+        "over2y": "Over 2 years"
+      },
+      "result": {
+        "net": "Net interest after {{tax}}% IRS",
+        "gross": "Gross interest",
+        "tax": "IRS withheld ({{tax}}%)",
+        "inflationCost": "What inflation takes over the term",
+        "realGain": "Interest left after inflation",
+        "realYield": "Real yearly yield, after tax",
+        "assumptions": "Average new-deposit rate for {{bucket}}: {{rate}} a year ({{month}}). Simple interest paid at maturity, {{months}} months.",
+        "fallback": "No new deposits were recorded in this maturity group in the latest month, so the all-maturities average is used.",
+        "beats": "On these assumptions the interest, after tax, covers the loss of purchasing power.",
+        "loses": "On these assumptions inflation takes more than the interest earns: the money buys less at maturity.",
+        "note": "A benchmark, not an offer: your bank's rate, any fees and the exact day count change the result. Educational only, not financial advice."
+      },
+      "history": {
+        "title": "History since 2003",
+        "bucket": "Maturity shown in the chart",
+        "chartLabel": "Line chart of monthly average new term deposit rates in Portugal and the euro area, with yearly Portuguese inflation",
+        "portugal": "Portugal",
+        "euroArea": "Euro area",
+        "inflation": "Portuguese inflation (calendar year)",
+        "chartNote": "Rates are monthly averages. Inflation is the annual average consumer price change of each calendar year, so it steps in January; the current year is not complete.",
+        "caption": "Yearly average new deposit rate, inflation and real rate after IRS",
+        "year": "Year",
+        "realNet": "Real rate after {{tax}}% IRS"
+      },
+      "sourceNote": "Source: average interest rates on new household term deposits (annualised agreed rate), Banco de Portugal statistics published in the ECB Data Portal, latest month {{month}}, retrieved {{retrieved}}. Inflation: INE consumer price index through Banco de Portugal's BPstat. Yearly figures computed by WonderMoney. Educational only.",
+      "nextStepHeadline": "Move from the benchmark to a personal savings plan",
+      "nextStepDescription": "The average shows what the market paid. Set a savings goal in WonderMoney and track how your own deposits compare with it.",
+      "nextStepCta": "Set a savings goal",
+      "guide": {
+        "read": {
+          "title": "How to read the index",
+          "what": "Every month banks in Portugal report to Banco de Portugal the interest rate on the new term deposits they took from households. The index is the average of those rates across banks, weighted by the amount of new business: what was actually agreed. The euro-area line is the same statistic for all euro-area banks, for comparison.",
+          "notBest": "It is not the best rate on offer. An average includes small deposits, existing customers and banks that pay little, so a campaign or promotional rate can be well above it, and some deposits earn less.",
+          "noRecommendation": "No bank or product is named or ranked here. Use the average to judge whether an offer looks high or low, then compare current offers yourself, including their conditions."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Deposit {{amount}} for {{months}} months at the latest average rate for that maturity, {{rate}} a year ({{month}}). Interest paid at maturity is {{gross}}; after {{taxRate}}% IRS (tax withheld: {{tax}}) you keep {{net}}.",
+          "real": "With inflation at {{inflation}} a year, the same money loses {{inflationCost}} of purchasing power over the term, so what is left after inflation is {{realGain}}.",
+          "year": "Looking back, in {{year}}, the latest complete year, the average new deposit paid {{yearRate}}; after inflation and the 28% IRS the real rate was {{yearReal}}."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
+          "steps": {
+            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+          },
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+        },
+        "data": {
+          "title": "Data and sources",
+          "source": "Rates: monthly average interest rates on new deposits with agreed maturity from households (annualised agreed rate, all amounts, in euro), {{first}} to {{last}}, compiled from the banks' reports by Banco de Portugal and published in the ECB Data Portal (series {{seriesPt}} for Portugal and {{seriesEa}} for the euro area, where x is the maturity: total, up to 1 year, over 1 and up to 2 years, over 2 years). Retrieved on {{retrieved}}.",
+          "ecbLink": "ECB Data Portal (MIR)",
+          "bpstatLink": "Banco de Portugal BPstat",
+          "cpiLink": "INE consumer price index in BPstat",
+          "inflation": "Inflation: annual average consumer price index for Portugal produced by INE and distributed by Banco de Portugal (BPstat series 12704686), retrieved on {{cpiRetrieved}}.",
+          "reuse": "The ECB allows free use of its statistics when they are reproduced accurately and the source is cited. This page republishes monthly values and loads no data at runtime: the numbers change only when the data file is refreshed."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "An average of new business: it mixes deposit sizes, banks and customers. Your rate may be higher or lower.",
+            "lag": "The statistics are published monthly with a delay, and the latest month can be revised.",
+            "tax": "Tax: 28% is the IRS withholding rate on interest for residents. Your situation can differ, for example if you include the interest in your annual tax return.",
+            "inflation": "Inflation: your own prices differ from the national average, and future inflation is unknown. The calculator holds the rate you enter for the whole term.",
+            "buckets": "Maturity groups with no new deposits in a month show n/a. For a term in such a group the calculator uses the all-maturities average.",
+            "advice": "Educational only: this page is not financial advice or an offer."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "termDepositLink": "Term deposit calculator",
+          "termDepositBody": "Enter your own bank's rate and see the interest, the tax and the net yield.",
+          "savingsCertificatesLink": "Savings certificates calculator",
+          "savingsCertificatesBody": "Compare a deposit with Certificados de Aforro Série F.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how much purchasing power money lost between any two years."
+        }
+      }
+    },
     "netSalary": {
       "title": "Portugal net salary calculator 2026",
       "shortName": "Net salary",
