@@ -2569,7 +2569,7 @@
         "conditionDate": "Seuls les contrats de crédit signés jusqu'au 31 décembre 2026 peuvent en bénéficier, et la garantie couvre jusqu'à {{percent}} % de la valeur de la transaction pendant 10 ans au plus.",
         "sourceGovernment": "Gouvernement portugais : Garantia Pública",
         "sourceLiteracia": "Literacia Financeira : Crédito habitação jovem",
-        "review": "Conditions vérifiées pour la dernière fois le {{date}}. La limite de revenu 2026 applique la revalorisation de 3,51 % des tranches de l'IRS et n'a pas été confirmée dans un barème officiel. Confirmez-la auprès de votre banque avant de décider.",
+        "review": "Conditions vérifiées pour la dernière fois le {{date}}. La limite de revenu 2026 est la limite supérieure de la 8e tranche de l'IRS de l'article 68 du code de l'IRS, revalorisée de 3,51 % par la loi 73-A/2025 (budget de l'État 2026). Les banques décident de chaque demande.",
         "assumptionsTitle": "Hypothèses et limites",
         "assumptionBanks": "Les banques évaluent votre risque de crédit et peuvent refuser le prêt ou proposer d'autres conditions, quelle que soit la liste. Pour un prêt à deux emprunteurs, les deux doivent remplir les conditions.",
         "assumptionRate": "Le taux est celui que vous saisissez. La garantie ne change pas le taux d'intérêt.",

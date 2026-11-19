@@ -2569,7 +2569,7 @@
         "conditionDate": "Solo i contratti di mutuo firmati entro il 31 dicembre 2026 possono beneficiarne, e la garanzia copre fino al {{percent}}% del valore della transazione per al massimo 10 anni.",
         "sourceGovernment": "Governo portoghese: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
-        "review": "Condizioni verificate l'ultima volta il {{date}}. Il limite di reddito 2026 applica l'aggiornamento del 3,51% degli scaglioni IRS e non è stato confermato in una tabella ufficiale. Confermalo con la tua banca prima di decidere.",
+        "review": "Condizioni verificate l'ultima volta il {{date}}. Il limite di reddito 2026 è la soglia superiore dell'8º scaglione IRS dell'articolo 68 del codice IRS, aggiornata del 3,51% dalla Legge 73-A/2025 (Bilancio dello Stato 2026). Le banche decidono su ogni richiesta.",
         "assumptionsTitle": "Ipotesi e limiti",
         "assumptionBanks": "Le banche valutano il tuo rischio di credito e possono rifiutare il mutuo o proporre condizioni diverse, a prescindere dall'elenco. In un mutuo cointestato entrambi devono rispettare le condizioni.",
         "assumptionRate": "Il tasso è quello che inserisci. La garanzia non cambia il tasso di interesse.",

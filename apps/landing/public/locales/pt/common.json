@@ -2569,7 +2569,7 @@
         "conditionDate": "Só contratos de crédito celebrados até 31 de dezembro de 2026 podem beneficiar, e a garantia cobre até {{percent}}% do valor da transação durante um máximo de 10 anos.",
         "sourceGovernment": "Governo de Portugal: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
-        "review": "Condições revistas pela última vez em {{date}}. O limite de rendimento de 2026 aplica a atualização de 3,51% dos escalões de IRS e não foi confirmado numa tabela oficial. Confirme com o seu banco antes de decidir.",
+        "review": "Condições revistas pela última vez em {{date}}. O limite de rendimento de 2026 é o limite superior do 8.º escalão de IRS do artigo 68.º do Código do IRS, atualizado em 3,51% pela Lei n.º 73-A/2025 (Orçamento do Estado para 2026). Os bancos decidem cada pedido.",
         "assumptionsTitle": "Pressupostos e limites",
         "assumptionBanks": "Os bancos avaliam o seu risco de crédito e podem recusar o crédito ou propor outras condições, independentemente da lista. Num crédito com dois titulares, ambos têm de cumprir as condições.",
         "assumptionRate": "A taxa é a que introduzir. A garantia não altera a taxa de juro.",

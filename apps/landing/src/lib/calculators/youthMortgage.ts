@@ -16,8 +16,8 @@ export const YOUTH_GUARANTEE = {
   /** Maximum price of the home, in euros (portugal.gov.pt, Literacia Financeira). */
   maxPrice: 450_000,
   /**
-   * Upper limit of the 8th IRS bracket, in euros a year. 83,696 was the 2025 figure; the 2026
-   * brackets rise 3.51% (Lei n.º 73-A/2025), which gives 86,634.
+   * Upper limit of the 8th IRS bracket in euros a year: article 68 of the IRS Code for 2026,
+   * the 2025 limit (83,696) updated by 3.51% in Lei n.º 73-A/2025 (State Budget 2026).
    */
   maxIncome: 86_634,
   /** Share of the transaction value the State can guarantee, in percent. */

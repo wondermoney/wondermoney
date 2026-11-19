@@ -2569,7 +2569,7 @@
         "conditionDate": "Only loan contracts signed by 31 December 2026 qualify, and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
         "sourceGovernment": "Portuguese Government: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
-        "review": "Conditions last reviewed on {{date}}. The 2026 income limit applies the 3.51% update of the IRS brackets and was not confirmed in an official table. Check it with your bank before you decide.",
+        "review": "Conditions last reviewed on {{date}}. The 2026 income limit is the upper limit of the 8th IRS bracket in article 68 of the IRS Code, updated by 3.51% by Lei 73-A/2025 (State Budget 2026). Banks decide on each application.",
         "assumptionsTitle": "Assumptions and limits",
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
         "assumptionRate": "The rate is the one you enter. The guarantee does not change the interest rate.",

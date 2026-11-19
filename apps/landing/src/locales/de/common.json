@@ -2569,7 +2569,7 @@
         "conditionDate": "Nur Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden, kommen infrage, und die Garantie deckt bis zu {{percent}} % des Transaktionswerts für höchstens 10 Jahre.",
         "sourceGovernment": "Portugiesische Regierung: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
-        "review": "Bedingungen zuletzt geprüft am {{date}}. Die Einkommensgrenze 2026 wendet die Anhebung der IRS-Stufen um 3,51 % an und wurde in keiner amtlichen Tabelle bestätigt. Klären Sie sie vor Ihrer Entscheidung mit Ihrer Bank.",
+        "review": "Bedingungen zuletzt geprüft am {{date}}. Die Einkommensgrenze 2026 ist die Obergrenze der 8. IRS-Stufe nach Artikel 68 des IRS-Gesetzbuchs, um 3,51 % angehoben durch das Gesetz 73-A/2025 (Staatshaushalt 2026). Die Banken entscheiden über jeden Antrag.",
         "assumptionsTitle": "Annahmen und Grenzen",
         "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
         "assumptionRate": "Der Zins ist der, den Sie eingeben. Die Garantie ändert den Zinssatz nicht.",
