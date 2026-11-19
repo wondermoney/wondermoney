@@ -1,6 +1,7 @@
 ---
 // Prerendered explanation, worked example and method for the personal loan calculator. The
 // figures come from the same function the calculator runs, starting from its first state.
+import ToolGuide from "./ToolGuide.astro";
 import {
   PERSONAL_LOAN_EXAMPLE,
   PERSONAL_LOAN_LIMITS,
@@ -77,7 +78,7 @@ const related = [
 ] as const;
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="personal-loan-what">
     <h2 id="personal-loan-what" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("whatTitle"))}
@@ -139,4 +140,4 @@ const related = [
       {assumptions.map((item) => <li>{item}</li>)}
     </ul>
   </section>
-</div>
+</ToolGuide>

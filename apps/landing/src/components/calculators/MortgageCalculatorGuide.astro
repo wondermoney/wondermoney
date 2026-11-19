@@ -1,6 +1,7 @@
 ---
 // Prerendered explanation for the mortgage calculator: what the result covers, a worked
 // example computed from the same function the calculator runs, and the method.
+import ToolGuide from "./ToolGuide.astro";
 import {
   MORTGAGE_EXAMPLE,
   MORTGAGE_LIMITS,
@@ -59,7 +60,7 @@ const excluded = list("tools.mortgage.guide.coverage.excluded");
 const assumptions = list("tools.mortgage.guide.method.assumptions");
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="mortgage-coverage">
     <h2 id="mortgage-coverage" class="text-2xl font-semibold tracking-tight text-foreground">
       {t("tools.mortgage.guide.coverage.title")}
@@ -118,4 +119,4 @@ const assumptions = list("tools.mortgage.guide.method.assumptions");
       <li>{t("tools.mortgage.guide.method.limits", values)}</li>
     </ul>
   </section>
-</div>
+</ToolGuide>

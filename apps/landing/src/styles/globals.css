@@ -242,3 +242,52 @@ html {
 .article-prose :where(h2) {
   scroll-margin-top: 6rem;
 }
+
+/* The guide under a calculator (ToolGuide.astro) reads like a learn guide's
+ * body: the same 40rem column, 18px / 1.7 in the content ink, and section
+ * heads at the article's H2 size, each with its index ("01") above it when
+ * there are two or more. Unlayered, so it wins over the utility classes the
+ * guides were written with. A formula line wraps inside the column instead of
+ * pushing the page sideways on a phone. */
+.tool-guide {
+  max-width: 40rem;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: oklch(var(--ink-2));
+  overflow-wrap: break-word;
+  counter-reset: tool-guide;
+}
+.tool-guide > * + * {
+  margin-top: 3.5rem;
+}
+.tool-guide > section > h2 {
+  font-size: 1.625rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: oklch(var(--foreground));
+  scroll-margin-top: 6rem;
+}
+@media (min-width: 40rem) {
+  .tool-guide > section > h2 {
+    font-size: 1.875rem;
+    line-height: 1.33;
+  }
+}
+.tool-guide:has(> section ~ section) > section > h2::before {
+  counter-increment: tool-guide;
+  content: counter(tool-guide, decimal-leading-zero);
+  content: counter(tool-guide, decimal-leading-zero) / "";
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+  color: oklch(var(--primary));
+}
+.tool-guide :is(p, div).font-mono {
+  overflow-wrap: anywhere;
+}

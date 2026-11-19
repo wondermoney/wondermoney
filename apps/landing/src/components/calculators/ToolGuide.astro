@@ -1,0 +1,18 @@
+---
+/**
+ * The column every calculator guide is written in (Direction B): the reading
+ * measure, type and numbered section heads of a learn guide's body
+ * (GuideSections.astro), from `.tool-guide` in globals.css. A guide puts its
+ * `<section>`s, each opening with its `<h2>`, straight inside; with two or
+ * more, each head carries its index ("01") above it.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={["tool-guide", className]}>
+  <slot />
+</div>

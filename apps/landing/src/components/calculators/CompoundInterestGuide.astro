@@ -2,6 +2,7 @@
 // Prerendered explanation, worked example, method and assumptions for the
 // compound interest calculator. The example is the calculator's starting state,
 // computed by the same function, so the prose and the tool never disagree.
+import ToolGuide from "./ToolGuide.astro";
 import {
   EXAMPLE_INPUTS,
   MAX_AMOUNT,
@@ -69,7 +70,7 @@ const assumptions = ["assumption1", "assumption2", "assumption3", "assumption4"]
 );
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section>
     <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("whatHeading"))}</h2>
     <p class="mt-4">{t(k("whatBody1"))}</p>
@@ -119,4 +120,4 @@ const assumptions = ["assumption1", "assumption2", "assumption3", "assumption4"]
     <p class="mt-4">{t(k("rateBody1"))}</p>
     <p class="mt-4">{t(k("rateBody2"))}</p>
   </section>
-</div>
+</ToolGuide>

@@ -4754,6 +4754,17 @@
       "reviewed": "Vérifié",
       "glossaryTerms": "Termes du glossaire",
       "result": "Résultat"
+    },
+    "monthly": {
+      "comingSoon": "Les bilans mensuels arrivent bientôt.",
+      "methodology": "Méthodologie",
+      "snapshotTable": "Les chiffres du mois",
+      "changeVsPrevious": "Évolution par rapport à la période précédente",
+      "whatChanged": "Ce qui a changé",
+      "whoShouldCare": "Qui est concerné",
+      "trendChart": "Tendance",
+      "chartType": "Type de graphique",
+      "dataSources": "Sources des données"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Un glossaire complet des termes financiers et d'investissement.",
       "description": "Chaque terme financier et d'investissement expliqué en langage clair. Parcourez par lettre ou recherchez un concept précis.",
       "searchPlaceholder": "Rechercher des termes...",
-      "comingSoon": "Termes du glossaire bientôt disponibles."
+      "comingSoon": "Termes du glossaire bientôt disponibles.",
+      "letterNav": "Termes par lettre"
     },
     "term": {
       "whyItMatters": "Pourquoi c'est important",
@@ -5914,7 +5926,16 @@
       "compass": "Dessin au trait d'une boussole de poche posée sur une carte pliée, l'aiguille pointant le long d'un itinéraire en pointillés vers un point marqué.",
       "cardindex": "Dessin au trait d'un fichier en bois avec porte-étiquette et trou de préhension, rempli de fiches lignées et d'intercalaires à onglets.",
       "calendar": "Dessin au trait d'un calendrier de bureau posé debout, avec une reliure à spirale et la grille d'un mois où un jour est entouré.",
-      "riskdial": "Dessin au trait d'une jauge sur un socle, son aiguille parcourant cinq segments, de prudent à audacieux."
+      "riskdial": "Dessin au trait d'une jauge sur un socle, son aiguille parcourant cinq segments, de prudent à audacieux.",
+      "house": "Dessin au trait d'une petite maison sur son terrain, avec une cheminée, une porte, des fenêtres et un chemin de pierres, dont les tuiles se posent à mesure que le prêt est remboursé.",
+      "deed": "Dessin au trait d'un acte de propriété sous un sceau de cire avec un ruban, une clé de maison posée dessus.",
+      "car": "Dessin au trait d'une petite citadine sur un tronçon de route, ses roues tournant à mesure qu'elle avance.",
+      "payslip": "Dessin au trait d'une fiche de paie avec des lignes de montants, à côté d'une enveloppe où la part nette d'une ligne est rangée comme un billet.",
+      "easelchart": "Dessin au trait d’un chevalet de conférence sur trois pieds, avec sur son bloc une courbe des années qui monte malgré des creux et un curseur marquant une année.",
+      "meter": "Dessin au trait d’un ancien compteur électrique, avec une rangée de cadrans et un disque qui tourne derrière la vitre, plus vite quand la charge augmente.",
+      "pump": "Dessin au trait d’une pompe à essence sur son îlot, le pistolet sortant de son support au bout du tuyau tandis que la jauge de remplissage monte.",
+      "wallet": "Dessin au trait d’un portefeuille ouvert avec trois cartes dans des fentes en escalier, l’une d’elles glissant au-dehors.",
+      "safe": "Dessin au trait d’un petit coffre-fort avec un cadran à combinaison et une poignée à rayons, sa porte s’ouvrant sur des piles de pièces."
     }
   }
 }

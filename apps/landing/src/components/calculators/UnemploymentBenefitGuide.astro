@@ -1,4 +1,5 @@
 ---
+import ToolGuide from "./ToolGuide.astro";
 import {
   IAS_2026_CENTS,
   MAX_IAS_HUNDREDTHS,
@@ -53,7 +54,7 @@ const methods = [
 ];
 ---
 
-<div class="mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="unemployment-example">
     <h2 id="unemployment-example" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("exampleTitle"))}
@@ -83,4 +84,4 @@ const methods = [
     </ul>
     <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
   </section>
-</div>
+</ToolGuide>

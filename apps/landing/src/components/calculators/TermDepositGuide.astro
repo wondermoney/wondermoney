@@ -1,6 +1,7 @@
 ---
 // Prerendered explanation, worked example and method for the term deposit calculator. The
 // figures come from the same calculation the calculator runs.
+import ToolGuide from "./ToolGuide.astro";
 import {
   TERM_DEPOSIT_EXAMPLE,
   TERM_DEPOSIT_LIMITS,
@@ -69,7 +70,7 @@ const linkClass =
   "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mx-auto mt-12 max-w-3xl space-y-10 text-base leading-7 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="term-deposit-what">
     <h2 id="term-deposit-what" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("whatHeading"))}
@@ -134,4 +135,4 @@ const linkClass =
       <a href={savingsGoalHref} class={linkClass}>{t(k("nextSavingsGoalLink"))}</a>
     </p>
   </section>
-</div>
+</ToolGuide>

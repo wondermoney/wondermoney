@@ -4754,6 +4754,17 @@
       "reviewed": "Geprüft",
       "glossaryTerms": "Glossarbegriffe",
       "result": "Ergebnis"
+    },
+    "monthly": {
+      "comingSoon": "Die monatlichen Berichte folgen in Kürze.",
+      "methodology": "Methodik",
+      "snapshotTable": "Die Zahlen des Monats",
+      "changeVsPrevious": "Veränderung gegenüber dem Vorzeitraum",
+      "whatChanged": "Was sich geändert hat",
+      "whoShouldCare": "Wen es betrifft",
+      "trendChart": "Trend",
+      "chartType": "Diagrammtyp",
+      "dataSources": "Datenquellen"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Ein umfassendes Glossar mit Finanz- und Anlagebegriffen.",
       "description": "Jeder Finanz- und Anlagebegriff in verständlicher Sprache erklärt. Nach Buchstabe durchsuchen oder nach einem bestimmten Begriff suchen.",
       "searchPlaceholder": "Begriffe suchen...",
-      "comingSoon": "Glossarbegriffe folgen in Kürze."
+      "comingSoon": "Glossarbegriffe folgen in Kürze.",
+      "letterNav": "Begriffe nach Buchstaben"
     },
     "term": {
       "whyItMatters": "Warum es wichtig ist",
@@ -5914,7 +5926,16 @@
       "compass": "Strichzeichnung eines Taschenkompasses auf einer gefalteten Karte, dessen Nadel entlang einer gestrichelten Route zu einem markierten Punkt zeigt.",
       "cardindex": "Strichzeichnung eines Karteikastens aus Holz mit Etikettenhalter und Griffloch, gefüllt mit linierten Karteikarten und Trennkarten mit Reitern.",
       "calendar": "Strichzeichnung eines aufgestellten Tischkalenders mit Drahtbindung und einem Monatsraster, in dem ein Tag eingekreist ist.",
-      "riskdial": "Strichzeichnung einer Anzeige auf einem Sockel, deren Zeiger über fünf Segmente von vorsichtig bis mutig schwingt."
+      "riskdial": "Strichzeichnung einer Anzeige auf einem Sockel, deren Zeiger über fünf Segmente von vorsichtig bis mutig schwingt.",
+      "house": "Strichzeichnung eines kleinen Hauses auf seinem Grundstück, mit Schornstein, Tür, Fenstern und einem Weg aus Trittsteinen, dessen Dachziegel verlegt werden, während der Kredit abbezahlt wird.",
+      "deed": "Strichzeichnung einer Eigentumsurkunde mit Wachssiegel und Band, auf der ein Hausschlüssel liegt.",
+      "car": "Strichzeichnung eines kleinen Kompaktwagens auf einem Straßenstück, dessen Räder sich beim Rollen drehen.",
+      "payslip": "Strichzeichnung einer Gehaltsabrechnung mit Zeilen von Beträgen neben einer Lohntüte, in der der Nettoanteil einer Zeile als Geldschein steckt.",
+      "easelchart": "Strichzeichnung eines Flipchart-Ständers auf drei Beinen, auf dem Block ein Liniendiagramm über die Jahre, das trotz Einbrüchen steigt, und ein Cursor, der ein Jahr markiert.",
+      "meter": "Strichzeichnung eines alten Stromzählers mit einer Reihe von Zählwerk-Zifferblättern und einer Drehscheibe hinter Glas, die sich bei steigender Last schneller dreht.",
+      "pump": "Strichzeichnung einer Zapfsäule auf ihrer Insel, deren Zapfpistole am Schlauch aus der Halterung gehoben wird, während die Füllanzeige steigt.",
+      "wallet": "Strichzeichnung einer aufgeklappten Geldbörse mit drei Karten in gestuften Fächern, von denen eine herausgleitet.",
+      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt."
     }
   }
 }

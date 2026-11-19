@@ -81,9 +81,13 @@ import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp"
 import FreeBankAccountsGuide from "@/components/calculators/FreeBankAccountsGuide.astro";
 import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccountsComp";
 import RemuneratedAccountsGuide from "@/components/calculators/RemuneratedAccountsGuide.astro";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
 import CTABanner from "@/components/shared/CTABanner";
+import FigureCards from "@/components/shared/FigureCards.astro";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
-import RelatedContent from "@/components/shared/RelatedContent";
+import type { OutlineEntry } from "@/lib/articleOutline";
+import type { FigureCard } from "@/lib/figureCards";
+import { figureForTool, PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
 import { getToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
@@ -303,27 +307,40 @@ const nextStepCtaByRouteId: Partial<
   },
 };
 
-type RelatedItem = { title: string; description: string; href: string; type: "calculator" | "guide" };
+const calculatorLabel = t("global.relatedContent.calculator");
+const guideLabel = t("global.relatedContent.guide");
 
-const relatedItems: RelatedItem[] = related.map((relatedRouteId) => {
+const relatedCards: FigureCard[] = related.map((relatedRouteId) => {
   const relatedKey = getToolCatalogEntry(relatedRouteId).key;
 
   return {
     title: t(`tools.${relatedKey}.title`),
     description: t(`tools.${relatedKey}.description`),
     href: toLocalizedPath(relatedRouteId, locale),
-    type: "calculator",
+    figure: figureForTool(relatedRouteId),
+    kind: calculatorLabel,
   };
 });
 
 if ((SAVINGS_GUIDE_RELATED_ROUTE_IDS as readonly string[]).includes(routeId)) {
-  relatedItems.push({
+  relatedCards.push({
     title: t("savingsGuide.title"),
     description: t("savingsGuide.hubDescription"),
     href: toLocalizedPath("pageSavingsGuide", locale),
-    type: "guide",
+    figure: PAGE_FIGURES.pageSavingsGuide,
+    kind: guideLabel,
   });
 }
+
+// Every calculator but these two has a guide under it; the hero's chips jump to both.
+const toolsWithoutGuide: readonly ToolRouteId[] = ["toolNetWorth", "toolSavingsRate"];
+const hasGuide = !toolsWithoutGuide.includes(routeId);
+const outline: OutlineEntry[] = hasGuide
+  ? [
+      { id: "calculator", title: calculatorLabel },
+      { id: "guide", title: guideLabel },
+    ]
+  : [];
 
 const alternateLinks = buildAlternateLinks(routeId);
 const pageTitle = t(`tools.${key}.pageTitle`);
@@ -351,128 +368,141 @@ const schema = {
   title={pageTitle}
   description={pageDescription}
   alternateLinks={alternateLinks}
-  breadcrumbs={[
-    { label: t("header.tools"), href: toolsHubHref },
-    { label: sectionTitle, href: toolsHubHref },
-  ]}
+  layout="article"
   locale={locale}
   structuredData={schema}
 >
-  <section>
-    <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-      {sectionTitle}
-    </h1>
-    <p class="mt-3 max-w-3xl text-lg text-muted-foreground">{sectionSubtitle}</p>
-  </section>
+  <article>
+    <ArticleHero
+      locale={locale}
+      title={sectionTitle}
+      dek={sectionSubtitle}
+      breadcrumbs={[{ label: t("header.tools"), href: toolsHubHref }, { label: sectionTitle }]}
+      outline={outline}
+      figure={figureForTool(routeId)}
+    />
 
-  <div class="mt-8">
-    {routeId === "toolCompoundInterest" && <CompoundInterestCalculatorComp locale={locale} client:load />}
-    {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
-    {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
-    {routeId === "toolInvestmentReturn" && (
-      <>
-        <section class="mb-10 space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.pastHeading")}</h2>
-          <InvestmentReturnCalculatorComp locale={locale} client:load />
-        </section>
-        <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight">{t("tools.investmentReturn.projection.heading")}</h2>
-          <p class="max-w-3xl text-muted-foreground">{t("tools.investmentReturn.projection.intro")}</p>
-          <IndexProjectionCalculator locale={locale} client:load />
-        </section>
-        <IndexProjectionGuide locale={locale} />
-      </>
-    )}
-    {routeId === "toolInvestorProfile" && <InvestorProfileQuiz locale={locale} client:load />}
-    {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
-    {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
-    {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
-    {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
-    {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
-    {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
-    {routeId === "toolEarlyRepayment" && <EarlyRepaymentCalculatorComp locale={locale} client:load />}
-    {routeId === "toolMortgageTransfer" && (
-      <MortgageTransferCalculatorComp locale={locale} client:load />
-    )}
-    {routeId === "toolBuyVsRent" && <BuyVsRentCalculatorComp locale={locale} client:load />}
-    {routeId === "toolBorrowingCapacity" && (
-      <BorrowingCapacityCalculatorComp locale={locale} client:load />
-    )}
-    {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
-    {routeId === "toolCarLoan" && <CarLoanCalculatorComp locale={locale} client:load />}
-    {routeId === "toolInflation" && <InflationCalculatorComp locale={locale} client:load />}
-    {routeId === "toolSavingsCertificates" && (
-      <SavingsCertificatesCalculatorComp locale={locale} client:load />
-    )}
-    {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
-    {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
-    {routeId === "toolNetSalary" && <NetSalaryCalculatorComp locale={locale} client:load />}
-    {routeId === "toolChristmasAllowance" && <AllowanceCalculatorComp locale={locale} kind="christmas" client:load />}
-    {routeId === "toolHolidayAllowance" && <AllowanceCalculatorComp locale={locale} kind="holiday" client:load />}
-    {routeId === "toolWithholdingTables" && <WithholdingTablesComp locale={locale} client:load />}
-    {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitCalculatorComp locale={locale} client:load />}
-    {routeId === "toolSickPay" && <SickPayCalculatorComp locale={locale} client:load />}
-    {routeId === "toolDismissalCompensation" && <DismissalCompensationCalculatorComp locale={locale} client:load />}
-    {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
-    {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
-    {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
-    {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsCalculatorComp locale={locale} client:load />}
-    {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
-    {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
-    {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
-    {routeId === "toolDepositRateIndex" && <DepositRateIndexComp locale={locale} client:load />}
-    {routeId === "toolTermDepositOffers" && <TermDepositOffersComp locale={locale} client:load />}
-    {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
-    {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
-    {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
-    {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
-  </div>
+    <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+      <div id="calculator" class="scroll-mt-24">
+        {routeId === "toolCompoundInterest" && <CompoundInterestCalculatorComp locale={locale} client:load />}
+        {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
+        {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
+        {routeId === "toolInvestmentReturn" && (
+          <>
+            <section class="space-y-5">
+              <h2 class="text-2xl font-bold tracking-[-0.015em] text-foreground sm:text-3xl">{t("tools.investmentReturn.projection.pastHeading")}</h2>
+              <InvestmentReturnCalculatorComp locale={locale} client:load />
+            </section>
+            <section class="mt-16 space-y-5">
+              <h2 class="text-2xl font-bold tracking-[-0.015em] text-foreground sm:text-3xl">{t("tools.investmentReturn.projection.heading")}</h2>
+              <p class="max-w-[40rem] text-lg leading-[1.7] text-ink-2">{t("tools.investmentReturn.projection.intro")}</p>
+              <IndexProjectionCalculator locale={locale} client:load />
+            </section>
+          </>
+        )}
+        {routeId === "toolInvestorProfile" && <InvestorProfileQuiz locale={locale} client:load />}
+        {routeId === "toolDebtToIncome" && <DebtToIncomeCalculatorComp locale={locale} client:load />}
+        {routeId === "toolEmergencyFund" && <EmergencyFundCalculatorComp locale={locale} client:load />}
+        {routeId === "toolMortgage" && <MortgageCalculatorComp locale={locale} client:load />}
+        {routeId === "toolHouseholdBudget" && <HouseholdBudgetCalculatorComp locale={locale} client:load />}
+        {routeId === "toolSavingsGoal" && <SavingsGoalCalculatorComp locale={locale} client:load />}
+        {routeId === "toolTermDeposit" && <TermDepositCalculatorComp locale={locale} client:load />}
+        {routeId === "toolEarlyRepayment" && <EarlyRepaymentCalculatorComp locale={locale} client:load />}
+        {routeId === "toolMortgageTransfer" && (
+          <MortgageTransferCalculatorComp locale={locale} client:load />
+        )}
+        {routeId === "toolBuyVsRent" && <BuyVsRentCalculatorComp locale={locale} client:load />}
+        {routeId === "toolBorrowingCapacity" && (
+          <BorrowingCapacityCalculatorComp locale={locale} client:load />
+        )}
+        {routeId === "toolRateRevision" && <RateRevisionCalculatorComp locale={locale} client:load />}
+        {routeId === "toolCarLoan" && <CarLoanCalculatorComp locale={locale} client:load />}
+        {routeId === "toolInflation" && <InflationCalculatorComp locale={locale} client:load />}
+        {routeId === "toolSavingsCertificates" && (
+          <SavingsCertificatesCalculatorComp locale={locale} client:load />
+        )}
+        {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
+        {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
+        {routeId === "toolNetSalary" && <NetSalaryCalculatorComp locale={locale} client:load />}
+        {routeId === "toolChristmasAllowance" && <AllowanceCalculatorComp locale={locale} kind="christmas" client:load />}
+        {routeId === "toolHolidayAllowance" && <AllowanceCalculatorComp locale={locale} kind="holiday" client:load />}
+        {routeId === "toolWithholdingTables" && <WithholdingTablesComp locale={locale} client:load />}
+        {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitCalculatorComp locale={locale} client:load />}
+        {routeId === "toolSickPay" && <SickPayCalculatorComp locale={locale} client:load />}
+        {routeId === "toolDismissalCompensation" && <DismissalCompensationCalculatorComp locale={locale} client:load />}
+        {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
+        {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
+        {routeId === "toolVehicleTax" && <VehicleTaxCalculatorComp locale={locale} client:load />}
+        {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsCalculatorComp locale={locale} client:load />}
+        {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
+        {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
+        {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
+        {routeId === "toolDepositRateIndex" && <DepositRateIndexComp locale={locale} client:load />}
+        {routeId === "toolTermDepositOffers" && <TermDepositOffersComp locale={locale} client:load />}
+        {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
+        {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
+        {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
+        {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
+      </div>
 
-  {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
-  {routeId === "toolInvestorProfile" && <InvestorProfileGuide locale={locale} />}
-  {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
-  {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
-  {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
-  {routeId === "toolHouseholdBudget" && <HouseholdBudgetGuide locale={locale} />}
-  {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
-  {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
-  {routeId === "toolEarlyRepayment" && <EarlyRepaymentGuide locale={locale} />}
-  {routeId === "toolMortgageTransfer" && <MortgageTransferGuide locale={locale} />}
-  {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
-  {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
-  {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
-  {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
-  {routeId === "toolInflation" && <InflationGuide locale={locale} />}
-  {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
-  {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
-  {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
-  {routeId === "toolNetSalary" && <NetSalaryGuide locale={locale} />}
-  {routeId === "toolChristmasAllowance" && <AllowanceGuide locale={locale} kind="christmas" />}
-  {routeId === "toolHolidayAllowance" && <AllowanceGuide locale={locale} kind="holiday" />}
-  {routeId === "toolWithholdingTables" && <WithholdingTablesGuide locale={locale} />}
-  {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitGuide locale={locale} />}
-  {routeId === "toolSickPay" && <SickPayGuide locale={locale} />}
-  {routeId === "toolDismissalCompensation" && <DismissalCompensationGuide locale={locale} />}
-  {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
-  {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
-  {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}
-  {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsGuide locale={locale} />}
-  {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
-  {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
-  {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
-  {routeId === "toolDepositRateIndex" && <DepositRateIndexGuide locale={locale} />}
-  {routeId === "toolTermDepositOffers" && <TermDepositOffersGuide locale={locale} />}
-  {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
-  {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
-  {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
-  {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
+      {hasGuide && (
+        <div id="guide" class="mt-16 scroll-mt-24 border-t border-border pt-12 lg:mt-20 lg:pt-16">
+          {routeId === "toolInvestmentReturn" && <IndexProjectionGuide locale={locale} />}
+          {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
+          {routeId === "toolInvestorProfile" && <InvestorProfileGuide locale={locale} />}
+          {routeId === "toolDebtToIncome" && <DebtToIncomeGuide locale={locale} />}
+          {routeId === "toolEmergencyFund" && <EmergencyFundMethod locale={locale} />}
+          {routeId === "toolMortgage" && <MortgageCalculatorGuide locale={locale} />}
+          {routeId === "toolHouseholdBudget" && <HouseholdBudgetGuide locale={locale} />}
+          {routeId === "toolSavingsGoal" && <SavingsGoalGuide locale={locale} />}
+          {routeId === "toolTermDeposit" && <TermDepositGuide locale={locale} />}
+          {routeId === "toolEarlyRepayment" && <EarlyRepaymentGuide locale={locale} />}
+          {routeId === "toolMortgageTransfer" && <MortgageTransferGuide locale={locale} />}
+          {routeId === "toolBuyVsRent" && <BuyVsRentGuide locale={locale} />}
+          {routeId === "toolBorrowingCapacity" && <BorrowingCapacityGuide locale={locale} />}
+          {routeId === "toolRateRevision" && <RateRevisionGuide locale={locale} />}
+          {routeId === "toolCarLoan" && <CarLoanGuide locale={locale} />}
+          {routeId === "toolInflation" && <InflationGuide locale={locale} />}
+          {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
+          {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
+          {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
+          {routeId === "toolNetSalary" && <NetSalaryGuide locale={locale} />}
+          {routeId === "toolChristmasAllowance" && <AllowanceGuide locale={locale} kind="christmas" />}
+          {routeId === "toolHolidayAllowance" && <AllowanceGuide locale={locale} kind="holiday" />}
+          {routeId === "toolWithholdingTables" && <WithholdingTablesGuide locale={locale} />}
+          {routeId === "toolUnemploymentBenefit" && <UnemploymentBenefitGuide locale={locale} />}
+          {routeId === "toolSickPay" && <SickPayGuide locale={locale} />}
+          {routeId === "toolDismissalCompensation" && <DismissalCompensationGuide locale={locale} />}
+          {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
+          {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
+          {routeId === "toolVehicleTax" && <VehicleTaxGuide locale={locale} />}
+          {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsGuide locale={locale} />}
+          {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
+          {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
+          {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
+          {routeId === "toolDepositRateIndex" && <DepositRateIndexGuide locale={locale} />}
+          {routeId === "toolTermDepositOffers" && <TermDepositOffersGuide locale={locale} />}
+          {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
+          {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
+          {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
+          {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
+        </div>
+      )}
 
-  <div class="mt-8">
-    <FinancialDisclaimer locale={locale} client:idle />
-  </div>
+      <div class="mt-12 max-w-[40rem]">
+        <FinancialDisclaimer locale={locale} client:idle />
+      </div>
+    </div>
+  </article>
 
-  <RelatedContent locale={locale} client:idle items={relatedItems} />
-  <div class="mt-8">
-    <CTABanner locale={locale} client:idle {...nextStepCtaByRouteId[routeId]} />
+  <div class="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
+    <CTABanner locale={locale} variant="card" client:idle {...nextStepCtaByRouteId[routeId]} />
+
+    {relatedCards.length > 0 && (
+      <section aria-labelledby="related-content" class="mt-16">
+        <h2 id="related-content" class="text-base font-semibold text-foreground">{t("global.relatedContent.title")}</h2>
+        <FigureCards locale={locale} cards={relatedCards} class="mt-4" />
+      </section>
+    )}
   </div>
 </ContentLayout>

@@ -2,6 +2,7 @@
 // Prerendered explanation for the term deposit offers comparison: what the table is and is not, a
 // worked example computed by the same function the table runs, the method, the data and its
 // date, what the figures leave out, and the tools to go on with.
+import ToolGuide from "./ToolGuide.astro";
 import { DEPOSIT_TAX_RATE } from "@/lib/calculators/depositRates";
 import {
   TERM_DEPOSIT_OFFERS,
@@ -56,7 +57,7 @@ const linkClass =
   "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="offers-read">
     <h2 id="offers-read" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("read.title"))}
@@ -128,4 +129,4 @@ const linkClass =
       }
     </ul>
   </section>
-</div>
+</ToolGuide>

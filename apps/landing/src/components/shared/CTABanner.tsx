@@ -63,7 +63,12 @@ function CTABannerContent({
 }: Omit<Props, "locale">) {
   const { t } = useTranslations();
   const action = (
-    <Button asChild size={variant === "card" ? "default" : "lg"}>
+    <Button
+      asChild
+      size={variant === "card" ? "default" : "lg"}
+      // A long next-step label wraps inside the card on a phone instead of pushing past it.
+      className={variant === "card" ? "h-auto min-h-10 max-w-full whitespace-normal py-2 text-center" : undefined}
+    >
       <a
         href={ctaHref}
         onClick={() =>

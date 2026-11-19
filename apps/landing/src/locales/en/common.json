@@ -4754,6 +4754,17 @@
       "reviewed": "Reviewed",
       "glossaryTerms": "Glossary Terms",
       "result": "Result"
+    },
+    "monthly": {
+      "comingSoon": "Monthly updates are coming soon.",
+      "methodology": "Methodology",
+      "snapshotTable": "This month's figures",
+      "changeVsPrevious": "Change from the previous period",
+      "whatChanged": "What changed",
+      "whoShouldCare": "Who should pay attention",
+      "trendChart": "Trend",
+      "chartType": "Chart type",
+      "dataSources": "Data sources"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "A comprehensive glossary of financial and investing terms.",
       "description": "Every financial and investing term explained in plain language. Browse by letter or search for a specific concept.",
       "searchPlaceholder": "Search terms...",
-      "comingSoon": "Glossary terms coming soon."
+      "comingSoon": "Glossary terms coming soon.",
+      "letterNav": "Terms by letter"
     },
     "term": {
       "whyItMatters": "Why It Matters",
@@ -5914,7 +5926,16 @@
       "compass": "Line drawing of a pocket compass lying on a folded map, its needle pointing along a dashed route to a marked spot.",
       "cardindex": "Line drawing of a wooden card index box with a label holder and a finger hole, filled with ruled cards and tabbed dividers.",
       "calendar": "Line drawing of a desk calendar standing on its fold, with a wire binding and a month grid with one day circled.",
-      "riskdial": "Line drawing of a gauge on a base, its needle swinging across five segments from cautious to bold."
+      "riskdial": "Line drawing of a gauge on a base, its needle swinging across five segments from cautious to bold.",
+      "house": "Line drawing of a small house on its plot, with a chimney, a door, windows and a path of stepping stones, its roof tiles laid as the loan is paid.",
+      "deed": "Line drawing of a property deed under a wax seal with a ribbon, a house key lying on it.",
+      "car": "Line drawing of a small hatchback on a stretch of road, its wheels turning as it rolls.",
+      "payslip": "Line drawing of a payslip with rows of amounts beside a pay envelope, the net share of one row standing in the envelope as a note.",
+      "easelchart": "Line drawing of a flip-chart easel on three legs, with a line chart of the years climbing through dips on its pad and a cursor marking one year.",
+      "meter": "Line drawing of an old electricity meter with a row of register dials and a disc turning behind its glass, faster as the load rises.",
+      "pump": "Line drawing of a petrol pump on its island, the nozzle lifting from its holster on the hose as the fill gauge rises.",
+      "wallet": "Line drawing of an open wallet with three cards in stepped slots, one of them sliding out.",
+      "safe": "Line drawing of a small safe with a combination dial and a spoked handle, its door swinging open on stacked coins."
     }
   }
 }

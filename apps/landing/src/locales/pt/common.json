@@ -4754,6 +4754,17 @@
       "reviewed": "Revisto",
       "glossaryTerms": "Termos do glossário",
       "result": "Resultado"
+    },
+    "monthly": {
+      "comingSoon": "As atualizações mensais chegam em breve.",
+      "methodology": "Metodologia",
+      "snapshotTable": "Os números do mês",
+      "changeVsPrevious": "Mudança face ao período anterior",
+      "whatChanged": "O que mudou",
+      "whoShouldCare": "A quem interessa",
+      "trendChart": "Tendência",
+      "chartType": "Tipo de gráfico",
+      "dataSources": "Fontes de dados"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Glossário completo de termos financeiros e de investimento.",
       "description": "Todos os termos financeiros e de investimento explicados de forma simples.",
       "searchPlaceholder": "Pesquisar termos...",
-      "comingSoon": "Glossário em breve disponível."
+      "comingSoon": "Glossário em breve disponível.",
+      "letterNav": "Termos por letra"
     },
     "term": {
       "whyItMatters": "Porque importa",
@@ -5914,7 +5926,16 @@
       "compass": "Desenho de linhas de uma bússola de bolso pousada sobre um mapa dobrado, com a agulha a apontar ao longo de um percurso tracejado até um ponto marcado.",
       "cardindex": "Desenho de linhas de um ficheiro de fichas em madeira, com porta-etiqueta e orifício para o dedo, cheio de fichas pautadas e separadores com abas.",
       "calendar": "Desenho de linhas de um calendário de secretária em pé, com argolas de arame e a grelha de um mês com um dia assinalado.",
-      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado."
+      "riskdial": "Desenho de linhas de um mostrador sobre uma base, com o ponteiro a percorrer cinco segmentos, do prudente ao arrojado.",
+      "house": "Desenho de linhas de uma pequena casa no seu terreno, com chaminé, porta, janelas e um caminho de pedras, cujas telhas vão sendo assentes à medida que o empréstimo é pago.",
+      "deed": "Desenho de linhas de uma escritura de imóvel com um selo de lacre e uma fita, com a chave de uma casa pousada em cima.",
+      "car": "Desenho de linhas de um pequeno carro compacto numa estrada, com as rodas a girar enquanto avança.",
+      "payslip": "Desenho de linhas de um recibo de vencimento com linhas de valores, ao lado de um envelope onde a parte líquida de uma linha está guardada como uma nota.",
+      "easelchart": "Desenho de linhas de um cavalete de bloco de papel com três pernas, com um gráfico de linhas dos anos a subir entre quedas e um cursor a marcar um ano.",
+      "meter": "Desenho de linhas de um contador de eletricidade antigo, com uma fila de mostradores e um disco que gira por trás do vidro, mais depressa quando a carga sobe.",
+      "pump": "Desenho de linhas de uma bomba de combustível na sua ilha, com a pistola a sair do suporte presa à mangueira enquanto o indicador de enchimento sobe.",
+      "wallet": "Desenho de linhas de uma carteira aberta com três cartões em ranhuras escalonadas, um deles a deslizar para fora.",
+      "safe": "Desenho de linhas de um pequeno cofre com um disco de combinação e um puxador de raios, com a porta a abrir-se sobre pilhas de moedas."
     }
   }
 }

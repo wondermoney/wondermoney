@@ -1,6 +1,7 @@
 ---
 // Prerendered explanation, worked example and method for the buy versus rent calculator.
 // The figures come from the same calculation the calculator runs.
+import ToolGuide from "./ToolGuide.astro";
 import {
   BUY_VS_RENT_EXAMPLE,
   BUY_VS_RENT_EXAMPLE_ALTERNATIVE_RENT,
@@ -93,7 +94,7 @@ const mortgageHref = toLocalizedPath("toolMortgage", locale);
 const netWorthHref = toLocalizedPath("toolNetWorth", locale);
 ---
 
-<div class="mt-12 max-w-3xl space-y-12 text-ink-2">
+<ToolGuide>
   <section aria-labelledby="buy-vs-rent-what">
     <h2 id="buy-vs-rent-what" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("whatHeading"))}
@@ -158,4 +159,4 @@ const netWorthHref = toLocalizedPath("toolNetWorth", locale);
       <a href={netWorthHref} class={linkClass}>{t(k("relatedNetWorthLink"))}</a>.
     </p>
   </section>
-</div>
+</ToolGuide>

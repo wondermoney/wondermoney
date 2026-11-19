@@ -2,19 +2,19 @@
 import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
 import CTABanner from "@/components/shared/CTABanner";
-import RelatedContent from "@/components/shared/RelatedContent";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import FigureCards from "@/components/shared/FigureCards.astro";
+import ArticleSection from "@/components/learning/ArticleSection.astro";
 import GlossaryFormula from "@/components/learning/GlossaryFormula.astro";
 import DataTable from "@/components/learning/DataTable.astro";
 import ReferenceList from "@/components/learning/ReferenceList.astro";
 import { PortableText } from "astro-portabletext";
 import type { PortableTextProps } from "astro-portabletext/types";
-import {
-  resolveCalculatorRouteIdFromLegacy,
-  toLocalizedPath,
-  toToolsHubPath,
-  type Lang,
-} from "@/lib/routes";
-import { getRelatedContentTools } from "@/lib/relatedContentTools";
+import { buildOutline, portableTextToPlain, readingMinutes } from "@/lib/articleOutline";
+import { glossaryTermCards } from "@/lib/figureCards";
+import { hasFormulaContent } from "@/lib/glossaryFormula";
+import type { PortableTextBlock } from "@/lib/learningContent";
+import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 import type { GlossaryTermEntry } from "@/lib/pageStaticPaths";
 
@@ -31,8 +31,6 @@ const canonicalPath = `/${locale}/glossary/${term.slug}`;
 const canonicalUrl = `${Astro.url.origin}${canonicalPath}`;
 
 const glossaryPrefix = `/${locale}/glossary`;
-const learnPrefix = `/${locale}/learn`;
-const toolsHubPrefix = toToolsHubPath(locale);
 const primaryDefinition = term.plainDefinition || term.definition;
 const technicalDefinition = term.technicalDefinition;
 const whyItMatters = term.whyItMatters;
@@ -83,47 +81,50 @@ const normalizedReferences: Array<{ title?: string; url?: string; publisher?: st
     return acc;
   }, [] as Array<{ title?: string; url?: string; publisher?: string }>);
 
-const relatedItems: {
-  title: string;
-  description: string;
-  href: string;
-  type: "calculator" | "guide" | "glossary";
-}[] = [];
+const relatedTerms = (term.relatedTerms ?? []).filter((related) => related.slug && related.locale === locale);
 
-if (term.relatedTerms) {
-  for (const related of term.relatedTerms) {
-    if (related.slug && related.locale === locale) {
-      relatedItems.push({
-        title: related.term,
-        description: "",
-        href: `${glossaryPrefix}/${related.slug}`,
-        type: "glossary",
-      });
-    }
-  }
-}
+const relatedLinks = glossaryTermCards({
+  locale,
+  t,
+  relatedCalculator: term.relatedCalculator,
+  relatedGuide: { slug: term.relatedGuideSlug, title: term.relatedGuideTitle },
+});
+// "Keep reading" holds three cards, as under a guide; the other calculators follow as chips.
+const KEEP_READING = 3;
+const relatedCards = relatedLinks.slice(0, KEEP_READING);
+const moreTools = relatedLinks.slice(KEEP_READING);
 
-if (term.relatedCalculator) {
-  const routeId = resolveCalculatorRouteIdFromLegacy(term.relatedCalculator, locale);
+const explanationBlocks = Array.isArray(term.explanation) ? (term.explanation as PortableTextBlock[]) : [];
+const showExplanation = !technicalDefinition && Boolean(term.explanation);
+const exampleText = miniExample || term.example;
 
-  relatedItems.push({
-    title: term.relatedCalculator,
-    description: "",
-    href: routeId ? toLocalizedPath(routeId, locale) : toolsHubPrefix,
-    type: "calculator",
-  });
-}
+// The body's titled sections, in reading order; numbered when there are two or more.
+type SectionKey = "whyItMatters" | "technicalDefinition" | "explanation" | "formula" | "example" | "miniTable";
+const sectionTitles: Array<[SectionKey, string]> = [];
+if (whyItMatters) sectionTitles.push(["whyItMatters", t("glossary.term.whyItMatters")]);
+if (technicalDefinition) sectionTitles.push(["technicalDefinition", t("glossary.term.technicalDefinition")]);
+if (showExplanation) sectionTitles.push(["explanation", t("glossary.term.explanation")]);
+if (hasFormulaContent(term.formula)) sectionTitles.push(["formula", term.formula.title || t("glossary.term.formula")]);
+if (exampleText) sectionTitles.push(["example", hasStructuredExample ? t("glossary.term.miniExample") : t("glossary.term.example")]);
+if (miniTableRows.length > 0) sectionTitles.push(["miniTable", term.miniTable?.title || t("glossary.term.miniTable")]);
 
-relatedItems.push(...getRelatedContentTools(relatedItems, locale, t));
+const outline = buildOutline(sectionTitles.map(([, title]) => title));
+const numbered = outline.length > 1;
+const section = (key: SectionKey) => {
+  const index = sectionTitles.findIndex(([candidate]) => candidate === key);
+  return index < 0 ? undefined : { entry: outline[index], index, numbered };
+};
 
-if (term.relatedGuideSlug) {
-  relatedItems.push({
-    title: term.relatedGuideTitle || "Related Guide",
-    description: "",
-    href: `${learnPrefix}/${term.relatedGuideSlug}`,
-    type: "guide",
-  });
-}
+const readMinutes = readingMinutes([
+  primaryDefinition ?? "",
+  whyItMatters ?? "",
+  technicalDefinition ?? "",
+  showExplanation ? portableTextToPlain(explanationBlocks) : "",
+  term.formula?.notes ?? "",
+  exampleText ?? "",
+]);
+
+const categoryLabel = term.category ? t(`category.${term.category}`, { defaultValue: term.category }) : undefined;
 
 const definedTermSchema = {
   "@context": "https://schema.org",
@@ -139,126 +140,131 @@ const definedTermSchema = {
 };
 
 const explanationValue = term.explanation;
+const whyItMattersSection = section("whyItMatters");
+const technicalSection = section("technicalDefinition");
+const explanationSection = section("explanation");
+const formulaSection = section("formula");
+const exampleSection = section("example");
+const miniTableSection = section("miniTable");
 ---
 
 <ContentLayout
   title={term.seoTitle || `${term.term} — WonderMoney`}
   description={term.seoDescription || primaryDefinition}
   canonicalUrl={canonicalUrl}
-  breadcrumbs={[
-    { label: t("header.glossary"), href: glossaryPrefix },
-    { label: term.term, href: "#" },
-  ]}
+  layout="article"
   locale={locale}
   alternateLinks={alternateLinks}
   structuredData={definedTermSchema}
 >
   <article>
-    <section>
-      <h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-        {term.term}
-      </h1>
-      {term.category && (
-        <p class="mt-2 text-sm text-muted-foreground">{term.category}</p>
-      )}
-      {primaryDefinition && (
-        <p class="mt-4 text-lg leading-8 text-muted-foreground">
-          {primaryDefinition}
-        </p>
-      )}
-    </section>
+    <ArticleHero
+      locale={locale}
+      title={term.term}
+      breadcrumbs={[
+        { label: t("header.glossary"), href: glossaryPrefix },
+        ...(categoryLabel ? [{ label: categoryLabel }] : []),
+      ]}
+      readMinutes={readMinutes}
+      outline={outline}
+    />
 
-    {whyItMatters && (
-      <div class="mt-10 rounded-card border border-warning/30 bg-warning/5 p-6">
-        <h2 class="text-lg font-semibold text-warning-text">
-          {t("glossary.term.whyItMatters")}
-        </h2>
-        <p class="mt-2 text-warning-text">{whyItMatters}</p>
+    <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+      <div class="max-w-[40rem] space-y-10">
+        {primaryDefinition && (
+          <div class="prose prose-lg article-prose">
+            <p class="text-foreground">{primaryDefinition}</p>
+          </div>
+        )}
+
+        {whyItMattersSection && (
+          <ArticleSection {...whyItMattersSection}>
+            <p>{whyItMatters}</p>
+          </ArticleSection>
+        )}
+
+        {technicalSection && (
+          <ArticleSection {...technicalSection}>
+            <p>{technicalDefinition}</p>
+          </ArticleSection>
+        )}
+
+        {explanationSection && (
+          <ArticleSection {...explanationSection}>
+            <PortableText value={explanationValue as PortableTextProps["value"]} />
+          </ArticleSection>
+        )}
+
+        {formulaSection && (
+          <ArticleSection {...formulaSection}>
+            <GlossaryFormula formula={term.formula} />
+          </ArticleSection>
+        )}
+
+        {exampleSection && (
+          <ArticleSection {...exampleSection}>
+            <p>{exampleText}</p>
+          </ArticleSection>
+        )}
+
+        {miniTableSection && (
+          <ArticleSection {...miniTableSection}>
+            <div class="not-prose">
+              <DataTable columns={miniTableColumns} rows={miniTableRows} />
+            </div>
+          </ArticleSection>
+        )}
+
+        {normalizedReferences.length > 0 && (
+          <ReferenceList title={t("glossary.term.references")} references={normalizedReferences} />
+        )}
       </div>
-    )}
 
-    {technicalDefinition && (
-      <div class="prose mx-auto mt-10 lg:prose-lg">
-        <h2>
-          {t("glossary.term.technicalDefinition")}
-        </h2>
-        <p>{technicalDefinition}</p>
-      </div>
-    )}
-
-    {term.formula && (
-      <div class="mt-10">
-        <GlossaryFormula formula={term.formula} title={t("glossary.term.formula")} />
-      </div>
-    )}
-
-    {hasStructuredExample && (
-      <div class="mt-10 rounded-card border border-success/30 bg-success/5 p-6">
-        <h2 class="text-lg font-semibold text-success-text">
-          {t("glossary.term.miniExample")}
-        </h2>
-        <p class="mt-2 text-success-text">{miniExample}</p>
-      </div>
-    )}
-
-    {miniTableRows.length > 0 && (
-      <div class="mt-10">
-        <DataTable
-          title={term.miniTable?.title || t("glossary.term.miniTable")}
-          columns={miniTableColumns}
-          rows={miniTableRows}
-        />
-      </div>
-    )}
-
-    {normalizedReferences.length > 0 && (
-      <div class="mt-10">
-        <ReferenceList title={t("glossary.term.references")} references={normalizedReferences} />
-      </div>
-    )}
-
-    {!technicalDefinition && term.explanation && (
-      <div class="prose mx-auto mt-10 lg:prose-lg">
-        <h2>
-          {t("glossary.term.explanation")}
-        </h2>
-        <PortableText value={explanationValue as PortableTextProps["value"]} />
-      </div>
-    )}
-
-    {!hasStructuredExample && term.example && (
-      <div class="mt-10 rounded-card border border-success/30 bg-success/5 p-6">
-        <h2 class="text-lg font-semibold text-success-text">
-          {t("glossary.term.example")}
-        </h2>
-        <p class="mt-2 text-success-text">{term.example}</p>
-      </div>
-    )}
-
-    {term.relatedTerms && term.relatedTerms.length > 0 && (
-      <div class="mt-10">
-        <h2 class="text-xl font-bold text-foreground">
-          {t("glossary.term.relatedTerms")}
-        </h2>
-        <div class="mt-4 flex flex-wrap gap-2">
-          {term.relatedTerms
-            .filter((related) => related.slug && related.locale === locale)
-            .map((related) => (
-              <a
-                href={`${glossaryPrefix}/${related.slug}`}
-                class="rounded-full border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent hover:text-primary"
-              >
-                {related.term}
-              </a>
+      {relatedTerms.length > 0 && (
+        <section class="mt-12 max-w-[40rem]">
+          <h2 class="text-lg font-semibold text-foreground">{t("glossary.term.relatedTerms")}</h2>
+          <ul role="list" class="mt-4 flex flex-wrap gap-2.5">
+            {relatedTerms.map((related) => (
+              <li class="min-w-0">
+                <a
+                  href={`${glossaryPrefix}/${related.slug}`}
+                  class="inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  {related.term}
+                </a>
+              </li>
             ))}
-        </div>
-      </div>
-    )}
+          </ul>
+        </section>
+      )}
+    </div>
   </article>
 
-  {relatedItems.length > 0 && <RelatedContent locale={locale} client:idle items={relatedItems} />}
+  <div class="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
+    <CTABanner locale={locale} variant="card" client:idle />
 
-  <div class="mt-8">
-    <CTABanner locale={locale} client:idle />
+    {relatedCards.length > 0 && (
+      <section aria-labelledby="keep-reading" class="mt-16">
+        <h2 id="keep-reading" class="text-base font-semibold text-foreground">{t("article.keepReading")}</h2>
+        <FigureCards locale={locale} cards={relatedCards} class="mt-4" />
+        {moreTools.length > 0 && (
+          <div class="mt-8">
+            <h3 class="text-sm font-semibold text-foreground">{t("header.tools")}</h3>
+            <ul role="list" class="mt-3 flex flex-wrap gap-2.5">
+              {moreTools.map((tool) => (
+                <li class="min-w-0">
+                  <a
+                    href={tool.href}
+                    class="inline-flex min-h-10 items-center rounded-full border border-border bg-card px-3.5 py-1.5 text-sm text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    {tool.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+    )}
   </div>
 </ContentLayout>

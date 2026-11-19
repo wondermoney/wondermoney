@@ -4754,6 +4754,17 @@
       "reviewed": "Revisado",
       "glossaryTerms": "Términos del glosario",
       "result": "Resultado"
+    },
+    "monthly": {
+      "comingSoon": "Las novedades mensuales llegarán pronto.",
+      "methodology": "Metodología",
+      "snapshotTable": "Las cifras del mes",
+      "changeVsPrevious": "Cambio respecto al periodo anterior",
+      "whatChanged": "Qué ha cambiado",
+      "whoShouldCare": "A quién le interesa",
+      "trendChart": "Tendencia",
+      "chartType": "Tipo de gráfico",
+      "dataSources": "Fuentes de datos"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Un glosario completo de términos financieros y de inversión.",
       "description": "Todos los términos financieros y de inversión explicados en lenguaje sencillo. Navega por letra o busca un concepto específico.",
       "searchPlaceholder": "Buscar términos...",
-      "comingSoon": "Términos del glosario próximamente."
+      "comingSoon": "Términos del glosario próximamente.",
+      "letterNav": "Términos por letra"
     },
     "term": {
       "whyItMatters": "Por qué importa",
@@ -5914,7 +5926,16 @@
       "compass": "Dibujo lineal de una brújula de bolsillo sobre un mapa plegado, con la aguja apuntando a lo largo de una ruta discontinua hasta un punto marcado.",
       "cardindex": "Dibujo lineal de un fichero de madera con portaetiquetas y agujero para el dedo, lleno de fichas rayadas y separadores con pestañas.",
       "calendar": "Dibujo lineal de un calendario de sobremesa de pie, con espiral de alambre y la cuadrícula de un mes con un día marcado con un círculo.",
-      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz."
+      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz.",
+      "house": "Dibujo lineal de una casa pequeña en su parcela, con chimenea, puerta, ventanas y un camino de piedras, cuyas tejas se colocan a medida que se paga el préstamo.",
+      "deed": "Dibujo lineal de una escritura de propiedad con un sello de lacre y una cinta, y la llave de una casa encima.",
+      "car": "Dibujo lineal de un coche compacto en un tramo de carretera, con las ruedas girando mientras avanza.",
+      "payslip": "Dibujo lineal de una nómina con filas de importes junto a un sobre, con la parte neta de una fila guardada en el sobre como un billete.",
+      "easelchart": "Dibujo lineal de un caballete de rotafolio sobre tres patas, con un gráfico de líneas de los años que sube entre caídas y un cursor que marca un año.",
+      "meter": "Dibujo lineal de un contador eléctrico antiguo, con una fila de esferas y un disco que gira tras el cristal, más rápido cuando sube la carga.",
+      "pump": "Dibujo lineal de un surtidor de gasolina en su isleta, con la pistola saliendo de su soporte unida a la manguera mientras sube el indicador de llenado.",
+      "wallet": "Dibujo lineal de una cartera abierta con tres tarjetas en ranuras escalonadas, una de ellas deslizándose hacia fuera.",
+      "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas."
     }
   }
 }
