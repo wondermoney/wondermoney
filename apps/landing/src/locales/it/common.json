@@ -2488,6 +2488,98 @@
       "nextStepDescription": "Aggiungi IMT e bollo al risparmio che ti serve prima di comprare e segui i progressi in WonderMoney.",
       "nextStepCta": "Includi le imposte nell'obiettivo dell'anticipo per la casa"
     },
+    "youthMortgage": {
+      "title": "Calcolatore del mutuo giovani (Portogallo)",
+      "shortName": "Mutuo giovani",
+      "subtitle": "Scopri quali condizioni della garanzia pubblica rispettano le tue risposte, poi stima la rata, le imposte di acquisto e il denaro necessario al rogito.",
+      "description": "Stima un mutuo per giovani in Portogallo: rata, imposte e denaro al rogito.",
+      "pageTitle": "Calcolatore Mutuo Giovani Portogallo: Garanzia Pubblica e Rata",
+      "pageDescription": "Verifica le condizioni 2026 della garanzia pubblica per i giovani in Portogallo e stima rata, IMT e imposta di bollo con e senza esenzione giovani, e il denaro necessario al rogito.",
+      "checkTitle": "1. Garanzia pubblica: quali condizioni rispettano le tue risposte",
+      "checkIntro": "Solo a scopo informativo. Questo elenco mostra quali condizioni rispettano le risposte qui sotto; non dice se hai diritto alla garanzia. Decidono la banca e lo Stato.",
+      "checkSummary": "{{met}} condizioni su {{total}} rispettate dalle tue risposte.",
+      "checkNote": "Condizioni verificate il {{date}}. La garanzia copre fino al {{percent}}% del valore della transazione, quindi il finanziamento può arrivare al 100%. Non cambia il tasso di interesse.",
+      "estimateTitle": "2. Stima il mutuo e il denaro necessario",
+      "years": "anni",
+      "fields": {
+        "age": "La tua età alla data del contratto",
+        "income": "Reddito imponibile annuo, facoltativo",
+        "ownHome": "La casa sarà la mia abitazione principale e permanente",
+        "otherProperty": "Possiedo in tutto o in parte un altro immobile abitativo",
+        "price": "Prezzo di acquisto",
+        "deposit": "Anticipo",
+        "annualRate": "Tasso di interesse (TAN)",
+        "termYears": "Durata del mutuo"
+      },
+      "help": {
+        "income": "Usato solo per l'elenco delle condizioni. Il limite è la soglia superiore dell'8º scaglione IRS.",
+        "price": "Il prezzo dell'atto. Anche l'elenco delle condizioni usa questo valore.",
+        "deposit": "Il denaro che metti di tasca tua. Può essere zero.",
+        "annualRate": "Tasso annuo nominale. La garanzia non lo riduce.",
+        "termYears": "Fino a 40 anni."
+      },
+      "status": {
+        "met": "Rispettata",
+        "notMet": "Non rispettata",
+        "unknown": "Senza risposta"
+      },
+      "conditions": {
+        "age": "Avere tra {{minAge}} e {{maxAge}} anni.",
+        "ownHome": "La casa è la tua abitazione principale e permanente.",
+        "otherProperty": "Non possedere, in tutto o in parte, un altro immobile abitativo.",
+        "price": "La casa costa fino a {{maxPrice}}.",
+        "income": "Reddito imponibile annuo fino all'8º scaglione IRS ({{maxIncome}} nel 2026)."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "zero": "Inserisci un prezzo superiore a zero.",
+        "negative": "Inserisci zero o un valore positivo.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "depositTooLarge": "L'anticipo non può superare il prezzo.",
+        "loanTooSmall": "Il mutuo sarebbe inferiore a 100 euro. Riduci l'anticipo o consideralo un acquisto in contanti.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Rata mensile (capitale e interessi)",
+        "noLoan": "L'anticipo copre tutto il prezzo, quindi non c'è mutuo.",
+        "loan": "Importo del mutuo",
+        "ltv": "Rapporto finanziamento/valore (LTV)",
+        "interest": "Interessi totali nella durata",
+        "taxesWithout": "IMT e imposta di bollo senza esenzione giovani",
+        "taxesWith": "IMT e imposta di bollo con esenzione giovani",
+        "cashWithout": "Denaro al rogito senza esenzione (anticipo e imposte)",
+        "cashWith": "Denaro al rogito con esenzione giovani",
+        "exemptionNote": "L'esenzione giovani (IMT Jovem) presuppone di avere 35 anni o meno e di comprare la prima abitazione principale e permanente. L'imposta di bollo dello 0,6% sul mutuo resta dovuta.",
+        "bankNote": "Le banche decidono se concedere il mutuo, a quale tasso e con quale LTV. Stima a scopo educativo, non è un'offerta. Spese di istruttoria, assicurazione, perizia e costi di notaio e registro non sono inclusi."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Comprare una casa da {{price}} senza anticipo, con tasso {{rate}} e durata di {{years}} anni significa chiedere {{loan}} con una rata di circa {{monthly}} al mese. IMT e imposta di bollo sommano {{taxesWithout}} senza esenzione giovani e {{taxesWith}} con essa (resta solo il bollo sul mutuo). Con l'esenzione, il denaro necessario al rogito è {{cash}}.",
+        "methodTitle": "Come funziona la stima",
+        "methodPayment": "Mutuo = prezzo meno anticipo. La rata mensile è quella di un mutuo a tasso fisso con rate costanti, lo stesso motore del calcolatore del mutuo. L'LTV è il mutuo diviso per il prezzo.",
+        "methodTaxes": "IMT e imposta di bollo derivano dal calcolatore delle imposte di acquisto, per abitazione principale e permanente nel Portogallo continentale: l'esenzione giovani le azzera entrambe fino al limite totale e applica l'8% di IMT sull'eccedenza fino al limite parziale.",
+        "methodCash": "Il denaro al rogito è l'anticipo più le imposte. Lo mostriamo con e senza esenzione giovani.",
+        "methodGuarantee": "La garanzia non entra nella rata: aiuta solo la banca ad accettare un LTV più alto, fino al 100%, e il tasso lo decide la banca.",
+        "conditionsTitle": "Condizioni della garanzia pubblica verificate (Decreto-Legge n. 44/2024)",
+        "conditionAge": "Avere tra {{minAge}} e {{maxAge}} anni alla data del contratto e domicilio fiscale in Portogallo.",
+        "conditionHome": "La casa è acquistata come abitazione principale e permanente.",
+        "conditionProperty": "Non possedere, in tutto o in parte, un altro immobile abitativo.",
+        "conditionPrice": "La casa costa fino a {{maxPrice}} (la perizia della banca può ridurre il valore della transazione).",
+        "conditionIncome": "Reddito fino all'8º scaglione IRS: {{maxIncome}} all'anno nel 2026 (nel 2025 erano 83.696 euro).",
+        "conditionDate": "Solo i contratti di mutuo firmati entro il 31 dicembre 2026 possono beneficiarne, e la garanzia copre fino al {{percent}}% del valore della transazione per al massimo 10 anni.",
+        "sourceGovernment": "Governo portoghese: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Condizioni verificate l'ultima volta il {{date}}. Il limite di reddito 2026 applica l'aggiornamento del 3,51% degli scaglioni IRS e non è stato confermato in una tabella ufficiale. Confermalo con la tua banca prima di decidere.",
+        "assumptionsTitle": "Ipotesi e limiti",
+        "assumptionBanks": "Le banche valutano il tuo rischio di credito e possono rifiutare il mutuo o proporre condizioni diverse, a prescindere dall'elenco. In un mutuo cointestato entrambi devono rispettare le condizioni.",
+        "assumptionRate": "Il tasso è quello che inserisci. La garanzia non cambia il tasso di interesse.",
+        "assumptionTaxes": "Le imposte riguardano un'abitazione principale e permanente nel Portogallo continentale e, nei valori con esenzione, presuppongono che tu rispetti le condizioni dell'IMT Jovem.",
+        "assumptionScope": "Solo a scopo educativo: non è consulenza finanziaria, fiscale o legale."
+      },
+      "nextStepHeadline": "Pianifica l'anticipo e il costo della tua casa",
+      "nextStepDescription": "Fissa un obiettivo per l'anticipo e preventiva rata, imposte e spese correnti della casa in WonderMoney.",
+      "nextStepCta": "Pianifica il tuo anticipo e le spese per la casa"
+    },
     "personalLoan": {
       "title": "Calcolo prestito personale",
       "shortName": "Prestito personale",

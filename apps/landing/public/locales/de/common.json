@@ -2488,6 +2488,98 @@
       "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
       "nextStepCta": "Steuern in Ihr Anzahlungsziel einrechnen"
     },
+    "youthMortgage": {
+      "title": "Rechner für den Jugend-Immobilienkredit (Portugal)",
+      "shortName": "Jugendkredit",
+      "subtitle": "Sehen Sie, welche Bedingungen der staatlichen Garantie Ihre Angaben erfüllen, und schätzen Sie Monatsrate, Kaufnebenkosten und das Bargeld bei der Beurkundung.",
+      "description": "Schätzen Sie einen Immobilienkredit für junge Käufer in Portugal: Rate, Steuern und Bargeld.",
+      "pageTitle": "Jugend-Immobilienkredit Portugal Rechner: Staatsgarantie und Monatsrate",
+      "pageDescription": "Prüfen Sie die Bedingungen der öffentlichen Garantie für junge Käufer 2026 in Portugal und schätzen Sie Rate, IMT und Stempelsteuer mit und ohne Jugendbefreiung sowie das nötige Bargeld bei der Beurkundung.",
+      "checkTitle": "1. Staatsgarantie: welche Bedingungen Ihre Angaben erfüllen",
+      "checkIntro": "Nur zur Information. Diese Liste zeigt, welche Bedingungen Ihre Angaben erfüllen; sie sagt nicht, ob Sie Anspruch haben. Bank und Staat entscheiden.",
+      "checkSummary": "{{met}} von {{total}} Bedingungen durch Ihre Angaben erfüllt.",
+      "checkNote": "Bedingungen geprüft am {{date}}. Die Garantie deckt bis zu {{percent}} % des Transaktionswerts, sodass die Finanzierung 100 % erreichen kann. Sie ändert den Zinssatz nicht.",
+      "estimateTitle": "2. Kredit und nötiges Bargeld schätzen",
+      "years": "Jahre",
+      "fields": {
+        "age": "Ihr Alter am Vertragsdatum",
+        "income": "Zu versteuerndes Jahreseinkommen, optional",
+        "ownHome": "Die Immobilie wird mein dauerhafter Hauptwohnsitz",
+        "otherProperty": "Ich besitze ganz oder teilweise eine andere Wohnimmobilie",
+        "price": "Kaufpreis",
+        "deposit": "Eigenkapital",
+        "annualRate": "Sollzins (TAN)",
+        "termYears": "Kreditlaufzeit"
+      },
+      "help": {
+        "income": "Nur für die Bedingungsliste. Die Grenze ist die Obergrenze der 8. IRS-Stufe.",
+        "price": "Der Preis laut Kaufvertrag. Die Bedingungsliste nutzt ebenfalls diesen Wert.",
+        "deposit": "Das Bargeld, das Sie einbringen. Es darf null sein.",
+        "annualRate": "Nominaler Jahreszins. Die Garantie senkt ihn nicht.",
+        "termYears": "Bis zu 40 Jahre."
+      },
+      "status": {
+        "met": "Erfüllt",
+        "notMet": "Nicht erfüllt",
+        "unknown": "Keine Angabe"
+      },
+      "conditions": {
+        "age": "Alter zwischen {{minAge}} und {{maxAge}} Jahren.",
+        "ownHome": "Die Immobilie dient als eigener dauerhafter Hauptwohnsitz.",
+        "otherProperty": "Kein ganzer oder teilweiser Besitz einer anderen Wohnimmobilie.",
+        "price": "Die Immobilie kostet höchstens {{maxPrice}}.",
+        "income": "Zu versteuerndes Jahreseinkommen bis zur 8. IRS-Stufe ({{maxIncome}} im Jahr 2026)."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "zero": "Geben Sie einen Preis über null ein.",
+        "negative": "Geben Sie null oder einen positiven Wert ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "depositTooLarge": "Das Eigenkapital darf den Preis nicht übersteigen.",
+        "loanTooSmall": "Der Kredit läge unter 100 Euro. Senken Sie das Eigenkapital oder betrachten Sie es als Barkauf.",
+        "summary": "Prüfen Sie die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Monatsrate (Tilgung und Zinsen)",
+        "noLoan": "Das Eigenkapital deckt den gesamten Preis, es gibt also keinen Kredit.",
+        "loan": "Kreditbetrag",
+        "ltv": "Beleihungsauslauf (LTV)",
+        "interest": "Gesamtzinsen über die Laufzeit",
+        "taxesWithout": "IMT und Stempelsteuer ohne Jugendbefreiung",
+        "taxesWith": "IMT und Stempelsteuer mit Jugendbefreiung",
+        "cashWithout": "Bargeld bei Beurkundung ohne Befreiung (Eigenkapital und Steuern)",
+        "cashWith": "Bargeld bei Beurkundung mit Jugendbefreiung",
+        "exemptionNote": "Die Jugendbefreiung (IMT Jovem) setzt voraus, dass Sie höchstens 35 sind und Ihre erste eigene dauerhafte Wohnung kaufen. Die Stempelsteuer von 0,6 % auf den Kredit fällt weiterhin an.",
+        "bankNote": "Die Bank entscheidet, ob, zu welchem Zins und mit welchem LTV sie finanziert. Bildungszwecke, kein Angebot. Kreditgebühren, Versicherung, Bewertung und Notarkosten sind nicht enthalten."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Der Kauf einer Immobilie für {{price}} ohne Eigenkapital, bei {{rate}} Zins und {{years}} Jahren Laufzeit, bedeutet {{loan}} Kredit bei etwa {{monthly}} im Monat. IMT und Stempelsteuer betragen {{taxesWithout}} ohne Jugendbefreiung und {{taxesWith}} mit ihr (nur die Stempelsteuer auf den Kredit bleibt). Mit der Befreiung beträgt das nötige Bargeld bei der Beurkundung {{cash}}.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodPayment": "Kredit = Preis minus Eigenkapital. Die Monatsrate ist die einer Annuität mit festem Zins, dieselbe Rechenlogik wie im Hypothekenrechner. Der LTV ist der Kredit geteilt durch den Preis.",
+        "methodTaxes": "IMT und Stempelsteuer stammen aus dem Rechner für Kaufnebenkosten, für den eigenen dauerhaften Wohnsitz auf dem Festland: Die Jugendbefreiung streicht beide bis zur Vollgrenze und erhebt 8 % IMT auf den Mehrbetrag bis zur Teilgrenze.",
+        "methodCash": "Das Bargeld bei der Beurkundung ist das Eigenkapital plus die Steuern. Wir zeigen es mit und ohne Jugendbefreiung.",
+        "methodGuarantee": "Die Garantie fließt nicht in die Rate ein: Sie hilft der Bank nur, einen höheren LTV bis 100 % zu akzeptieren, den Zins legt die Bank fest.",
+        "conditionsTitle": "Geprüfte Bedingungen der Staatsgarantie (Decreto-Lei Nr. 44/2024)",
+        "conditionAge": "Alter zwischen {{minAge}} und {{maxAge}} Jahren am Vertragsdatum und steuerlicher Wohnsitz in Portugal.",
+        "conditionHome": "Die Immobilie wird als eigener dauerhafter Hauptwohnsitz gekauft.",
+        "conditionProperty": "Kein ganzer oder teilweiser Besitz einer anderen Wohnimmobilie.",
+        "conditionPrice": "Die Immobilie kostet höchstens {{maxPrice}} (die Bankbewertung kann den Transaktionswert senken).",
+        "conditionIncome": "Einkommen bis zur 8. IRS-Stufe: {{maxIncome}} pro Jahr in 2026 (2025 waren es 83.696 Euro).",
+        "conditionDate": "Nur Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden, kommen infrage, und die Garantie deckt bis zu {{percent}} % des Transaktionswerts für höchstens 10 Jahre.",
+        "sourceGovernment": "Portugiesische Regierung: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Bedingungen zuletzt geprüft am {{date}}. Die Einkommensgrenze 2026 wendet die Anhebung der IRS-Stufen um 3,51 % an und wurde in keiner amtlichen Tabelle bestätigt. Klären Sie sie vor Ihrer Entscheidung mit Ihrer Bank.",
+        "assumptionsTitle": "Annahmen und Grenzen",
+        "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
+        "assumptionRate": "Der Zins ist der, den Sie eingeben. Die Garantie ändert den Zinssatz nicht.",
+        "assumptionTaxes": "Die Steuern gelten für den eigenen dauerhaften Wohnsitz auf dem portugiesischen Festland und setzen in den Werten mit Befreiung voraus, dass Sie die Bedingungen des IMT Jovem erfüllen.",
+        "assumptionScope": "Nur zu Bildungszwecken: keine Finanz-, Steuer- oder Rechtsberatung."
+      },
+      "nextStepHeadline": "Planen Sie Eigenkapital und Wohnkosten",
+      "nextStepDescription": "Setzen Sie ein Ziel für das Eigenkapital und budgetieren Sie Rate, Steuern und laufende Wohnkosten in WonderMoney.",
+      "nextStepCta": "Eigenkapital und laufende Wohnkosten planen"
+    },
     "personalLoan": {
       "title": "Privatkredit-Rechner",
       "shortName": "Privatkredit",
