@@ -2438,6 +2438,74 @@
         "assumptionOtherCosts": "Ficam de fora custos que o simulador não pergunta, como seguros opcionais, encargos por atraso ou uma comissão de reembolso antecipado.",
         "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulador de certificados de aforro",
+      "shortName": "Certificados de aforro",
+      "subtitle": "Estima quanto podem render os Certificados de Aforro Série F: juros trimestrais, prémios de permanência e 28% de IRS retido, em bruto e em líquido.",
+      "description": "Estima juros, prémios e imposto dos Certificados de Aforro Série F.",
+      "pageTitle": "Simulador de Certificados de Aforro Série F: juros, prémios e rendimento líquido",
+      "pageDescription": "Simula a rentabilidade dos Certificados de Aforro Série F com prémios de permanência, retenção de 28% de IRS e taxa base editável, em bruto e líquido.",
+      "assumption": "A taxa base muda todos os meses com a Euribor a 3 meses. Esta estimativa mantém a taxa que indicas em todos os trimestres, por isso o resultado é uma ilustração, não uma previsão.",
+      "fields": {
+        "amount": "Montante subscrito",
+        "years": "Anos de permanência",
+        "baseRate": "Taxa base (pressuposto)",
+        "baseRateHelp": "Taxa anual bruta, até {{rate}} (o limite das regras). Altera-a para testar outros cenários."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Introduz zero ou uma taxa positiva.",
+        "tooSmall": "O mínimo por conta é {{min}}.",
+        "tooLarge": "O máximo por conta é {{max}}.",
+        "years": "Introduz um número inteiro de anos, de 1 a {{years}}.",
+        "baseRate": "A taxa base não pode exceder {{rate}}.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "finalValue": "Valor líquido estimado no fim",
+        "invested": "Montante subscrito",
+        "grossInterest": "Juros brutos",
+        "irs": "IRS retido (28%)",
+        "netInterest": "Juros líquidos",
+        "premiumInterest": "Dos juros brutos, vêm de prémios de permanência",
+        "netYield": "Rendimento líquido anual"
+      },
+      "table": {
+        "title": "Ano a ano",
+        "year": "Ano",
+        "rate": "Taxa bruta",
+        "gross": "Juros brutos",
+        "net": "Juros líquidos",
+        "balance": "Saldo"
+      },
+      "guide": {
+        "rulesTitle": "Regras da Série F que o simulador segue",
+        "rulesIntro": "Regras publicadas pelo IGCP na ficha de produto da Série F de {{rulesDate}} (Portaria n.º 149-A/2023). As regras podem mudar, e as condições em vigor do emitente é que contam.",
+        "ruleTerm": "Prazo de {{termYears}} anos. Podes resgatar, total ou parcialmente, a partir do primeiro vencimento de juros; o simulador usa anos completos de permanência.",
+        "ruleRate": "Cada trimestre rende a taxa base em vigor no início do trimestre mais o prémio de permanência do ano da subscrição. A taxa base segue a Euribor a 3 meses, com máximo de {{maxBase}} e mínimo de 0%.",
+        "ruleTax": "Os juros vencem trimestralmente e são capitalizados automaticamente depois de IRS, retido na fonte a {{irsRate}}.",
+        "ruleRedeem": "Só pessoas singulares podem ser titulares. O limite é {{maxAmount}} por conta aforro na Série F, com um mínimo de {{minAmount}}.",
+        "premiumTitle": "Prémio de permanência por ano da subscrição",
+        "premiumYears": "Ano",
+        "premiumPoints": "Pontos percentuais",
+        "sourceSheet": "Ficha de produto da Série F do IGCP (abril de 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "abril de 2026",
+        "exampleTitle": "Exemplo prático",
+        "exampleText": "Subscreves {{amount}} e manténs durante {{years}} anos, com uma taxa base de {{baseRate}}. Os certificados rendem {{grossInterest}} de juros brutos, dos quais {{irs}} vão para IRS, ficando {{netInterest}} líquidos. O saldo chega a {{finalValue}}, um rendimento líquido de {{netYield}} ao ano.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodQuarter": "Cada trimestre rende um quarto da taxa anual (taxa base mais prémio) sobre o saldo atual. Os valores são arredondados ao cêntimo em cada trimestre.",
+        "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
+        "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
+        "assumptionsTitle": "Pressupostos",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. A taxa real é revista todos os meses, por isso os juros efetivos serão diferentes.",
+        "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
+        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
+      },
+      "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
+      "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
+      "nextStepCta": "Inclui os certificados na tua visão geral da poupança"
     }
   },
   "resources": {

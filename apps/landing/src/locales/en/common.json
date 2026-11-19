@@ -2438,6 +2438,74 @@
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
         "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Savings certificates calculator (Certificados de Aforro)",
+      "shortName": "Savings certificates",
+      "subtitle": "Estimate what Portuguese Certificados de Aforro Série F could pay: quarterly interest, permanence bonuses and the 28% IRS withheld, gross and net.",
+      "description": "Estimate Certificados de Aforro Série F interest, bonuses and tax.",
+      "pageTitle": "Certificados de Aforro Calculator: Série F Interest, Bonuses and Net Return",
+      "pageDescription": "Estimate Certificados de Aforro Série F returns with the permanence bonuses, the 28% IRS withholding and an editable base rate, shown gross and net.",
+      "assumption": "The base rate changes every month with the 3-month Euribor. This estimate holds the rate you enter for every quarter, so treat the result as an illustration, not a forecast.",
+      "fields": {
+        "amount": "Amount subscribed",
+        "years": "Years held",
+        "baseRate": "Base rate (assumption)",
+        "baseRateHelp": "Annual gross rate, up to {{rate}} (the ceiling in the rules). Edit it to test other scenarios."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "Enter zero or a positive rate.",
+        "tooSmall": "The minimum per account is {{min}}.",
+        "tooLarge": "The maximum per account is {{max}}.",
+        "years": "Enter a whole number of years from 1 to {{years}}.",
+        "baseRate": "The base rate cannot exceed {{rate}}.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "finalValue": "Estimated net value at the end",
+        "invested": "Amount subscribed",
+        "grossInterest": "Gross interest",
+        "irs": "IRS withheld (28%)",
+        "netInterest": "Net interest",
+        "premiumInterest": "Of the gross interest, from permanence bonuses",
+        "netYield": "Net annual yield"
+      },
+      "table": {
+        "title": "Year by year",
+        "year": "Year",
+        "rate": "Gross rate",
+        "gross": "Gross interest",
+        "net": "Net interest",
+        "balance": "Balance"
+      },
+      "guide": {
+        "rulesTitle": "Série F rules this calculator follows",
+        "rulesIntro": "Rules as published by IGCP in the Série F product sheet of {{rulesDate}} (Portaria n.º 149-A/2023). Rules can change, and the issuer’s current terms are the ones that count.",
+        "ruleTerm": "Term of {{termYears}} years. You can redeem, in whole or in part, from the first interest date; the calculator uses whole years held.",
+        "ruleRate": "Each quarter earns the base rate at the start of that quarter plus the permanence bonus for the subscription year. The base rate follows the 3-month Euribor and is capped at {{maxBase}} and floored at 0%.",
+        "ruleTax": "Interest is paid quarterly and capitalised automatically after IRS, withheld at source at {{irsRate}}.",
+        "ruleRedeem": "Only individuals can hold certificates. The limit is {{maxAmount}} per savings account in Série F, with a minimum of {{minAmount}}.",
+        "premiumTitle": "Permanence bonus by subscription year",
+        "premiumYears": "Year",
+        "premiumPoints": "Percentage points",
+        "sourceSheet": "IGCP Série F product sheet (April 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "April 2026",
+        "exampleTitle": "Worked example",
+        "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
+        "methodTitle": "How the estimate works",
+        "methodQuarter": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
+        "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
+        "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
+        "assumptionsTitle": "Assumptions",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. The real rate is reset monthly, so actual interest will differ.",
+        "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
+        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
+      },
+      "nextStepHeadline": "See your certificates next to the rest of your savings",
+      "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
+      "nextStepCta": "Include certificates in your savings overview"
     }
   },
   "resources": {

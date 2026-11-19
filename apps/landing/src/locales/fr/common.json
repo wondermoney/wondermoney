@@ -2438,6 +2438,74 @@
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
         "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
       }
+    },
+    "savingsCertificates": {
+      "title": "Simulateur de certificats d’épargne portugais (Certificados de Aforro)",
+      "shortName": "Certificats d’épargne",
+      "subtitle": "Estimez ce que pourraient rapporter les Certificados de Aforro Série F du Portugal : intérêts trimestriels, primes de permanence et 28 % d’IRS retenu, en brut et en net.",
+      "description": "Estimez intérêts, primes et impôt des Certificados de Aforro Série F.",
+      "pageTitle": "Simulateur Certificados de Aforro Série F : intérêts, primes et rendement net",
+      "pageDescription": "Estimez le rendement des Certificados de Aforro Série F avec les primes de permanence, la retenue de 28 % d’IRS et un taux de base modifiable, en brut et en net.",
+      "assumption": "Le taux de base change chaque mois avec l’Euribor à 3 mois. Cette estimation conserve le taux saisi pour tous les trimestres : le résultat est une illustration, pas une prévision.",
+      "fields": {
+        "amount": "Montant souscrit",
+        "years": "Années de détention",
+        "baseRate": "Taux de base (hypothèse)",
+        "baseRateHelp": "Taux annuel brut, jusqu’à {{rate}} (le plafond des règles). Modifiez-le pour tester d’autres scénarios."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Saisissez zéro ou un taux positif.",
+        "tooSmall": "Le minimum par compte est de {{min}}.",
+        "tooLarge": "Le maximum par compte est de {{max}}.",
+        "years": "Saisissez un nombre entier d’années, de 1 à {{years}}.",
+        "baseRate": "Le taux de base ne peut pas dépasser {{rate}}.",
+        "summary": "Vérifiez les champs signalés pour voir l’estimation."
+      },
+      "result": {
+        "finalValue": "Valeur nette estimée à la fin",
+        "invested": "Montant souscrit",
+        "grossInterest": "Intérêts bruts",
+        "irs": "IRS retenu (28 %)",
+        "netInterest": "Intérêts nets",
+        "premiumInterest": "Part des intérêts bruts issue des primes de permanence",
+        "netYield": "Rendement net annuel"
+      },
+      "table": {
+        "title": "Année par année",
+        "year": "Année",
+        "rate": "Taux brut",
+        "gross": "Intérêts bruts",
+        "net": "Intérêts nets",
+        "balance": "Solde"
+      },
+      "guide": {
+        "rulesTitle": "Règles de la Série F suivies par le simulateur",
+        "rulesIntro": "Règles publiées par l’IGCP dans la fiche produit de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Les règles peuvent changer et ce sont les conditions en vigueur de l’émetteur qui comptent.",
+        "ruleTerm": "Durée de {{termYears}} ans. Vous pouvez racheter, en tout ou en partie, à partir de la première échéance d’intérêts ; le simulateur utilise des années entières de détention.",
+        "ruleRate": "Chaque trimestre rapporte le taux de base en vigueur au début du trimestre plus la prime de permanence de l’année de souscription. Le taux de base suit l’Euribor à 3 mois, plafonné à {{maxBase}} et plancher à 0 %.",
+        "ruleTax": "Les intérêts sont versés chaque trimestre et capitalisés automatiquement après IRS, retenu à la source à {{irsRate}}.",
+        "ruleRedeem": "Seules les personnes physiques peuvent être titulaires. La limite est de {{maxAmount}} par compte aforro en Série F, avec un minimum de {{minAmount}}.",
+        "premiumTitle": "Prime de permanence selon l’année de souscription",
+        "premiumYears": "Année",
+        "premiumPoints": "Points de pourcentage",
+        "sourceSheet": "Fiche produit Série F de l’IGCP (avril 2026)",
+        "sourceIgcp": "AforroNet (IGCP)",
+        "rulesDateValue": "avril 2026",
+        "exampleTitle": "Exemple chiffré",
+        "exampleText": "Vous souscrivez {{amount}} et conservez {{years}} ans avec un taux de base de {{baseRate}}. Les certificats rapportent {{grossInterest}} d’intérêts bruts, dont {{irs}} d’IRS, soit {{netInterest}} nets. Le solde atteint {{finalValue}}, un rendement net de {{netYield}} par an.",
+        "methodTitle": "Comment fonctionne l’estimation",
+        "methodQuarter": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
+        "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s’ajoutent au solde, de sorte que les trimestres suivants rapportent des intérêts dessus.",
+        "methodYield": "Le rendement net annuel est la croissance composée annuelle entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
+        "assumptionsTitle": "Hypothèses",
+        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Le taux réel est révisé chaque mois : les intérêts effectifs seront différents.",
+        "assumptionRules": "Le taux d’IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
+        "assumptionScope": "Information générale, pas une recommandation de souscrire ou d’éviter un produit, et aucune comparaison avec d’autres épargnes."
+      },
+      "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
+      "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
+      "nextStepCta": "Incluez vos certificats dans la vue d’ensemble de votre épargne"
     }
   },
   "resources": {
