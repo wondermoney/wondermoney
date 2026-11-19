@@ -2710,7 +2710,8 @@
         "dueMonth": "A pagar em 2026:",
         "dueMonthValue": "Em {{month}}, o mês do aniversário da matrícula.",
         "scheduleTitle": "A partir de 2027: calendário de pagamento",
-        "exempt": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC."
+        "exempt": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC.",
+        "dieselSurcharge": "Adicional de gasóleo (não multiplicado pelo coeficiente)"
       },
       "guide": {
         "exampleTitle": "Exemplo prático",
@@ -2719,6 +2720,7 @@
         "methodA": "Categoria A (carros matriculados de 1981 até junho de 2007): o imposto vem de uma tabela por combustível, cilindrada e período de matrícula (depois de 1995, de 1990 a 1995, de 1981 a 1989).",
         "methodB": "Categoria B (carros matriculados a partir de julho de 2007): somam-se a taxa da cilindrada e a taxa do CO2 e multiplica-se por um coeficiente que depende do ano da matrícula (1,00 em 2007, 1,05 em 2008, 1,10 em 2009, 1,15 a partir de 2010). O CO2 lê-se na coluna WLTP ou NEDC, conforme o ciclo de ensaio do documento único automóvel.",
         "methodAdditional": "Os carros da categoria B matriculados depois de 1 de janeiro de 2017 pagam uma taxa adicional quando as emissões são elevadas: 31,77 € acima de 205 g/km (WLTP) ou 180 g/km (NEDC) e 63,74 € acima de 260 g/km (WLTP) ou 250 g/km (NEDC). A taxa adicional também é multiplicada pelo coeficiente. O texto legal não a limita por combustível, por isso o simulador aplica-a a todos.",
+        "methodDiesel": "Os automóveis a gasóleo pagam também o adicional de IUC (artigo 216.º da Lei n.º 82-B/2014, mantido em vigor em 2026 pelo Orçamento do Estado). Depende da cilindrada, aplica-se às categorias A e B e soma-se depois do coeficiente, sem ser multiplicado por ele.",
         "methodPayment": "Até 2026 o IUC paga-se no mês do aniversário da matrícula. A partir de 2027, pelo Decreto-Lei n.º 161/2026, é liquidado até abril e pago em abril até 100 €, em abril e outubro de 100 € até 500 €, e em abril, julho e outubro acima de 500 €.",
         "methodBudget": "A reserva mensal divide o valor anual por 12, para o dinheiro estar pronto quando chegar a cobrança.",
         "exemptionTitle": "Automóveis elétricos",
@@ -2734,6 +2736,7 @@
         "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
         "sourceCategoryB": "Código do IUC, artigo 10.º: taxas da categoria B, taxas adicionais e coeficientes (consultado a 19 de novembro de 2026)",
         "sourcePayment": "Código do IUC, artigo 17.º: pagamento (consultado a 19 de novembro de 2026)",
+        "sourceDiesel": "Portal das Finanças: adicional de gasóleo, artigo 216.º da Lei n.º 82-B/2014, mantido em 2026 pelo artigo 94.º da Lei n.º 73-A/2025 (consultado a 19 de novembro de 2026). A página não indica valores, por isso os montantes vêm das tabelas publicadas pelo ACP.",
         "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}."
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",

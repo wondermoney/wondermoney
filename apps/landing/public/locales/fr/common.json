@@ -2710,7 +2710,8 @@
         "dueMonth": "À payer en 2026 :",
         "dueMonthValue": "En {{month}}, le mois de l'anniversaire de l'immatriculation.",
         "scheduleTitle": "À partir de 2027 : calendrier de paiement",
-        "exempt": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC."
+        "exempt": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC.",
+        "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)"
       },
       "guide": {
         "exampleTitle": "Exemple chiffré",
@@ -2719,6 +2720,7 @@
         "methodA": "Catégorie A (voitures immatriculées de 1981 à juin 2007) : l'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
         "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
         "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
+        "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
         "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. À partir de 2027, selon le décret-loi n.º 161/2026, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €.",
         "methodBudget": "La provision mensuelle divise le montant annuel par 12, pour que l'argent soit prêt à l'échéance.",
         "exemptionTitle": "Voitures électriques",
@@ -2734,6 +2736,7 @@
         "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
+        "sourceDiesel": "Portal das Finanças : supplément diesel, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par l'article 94 de la loi n.º 73-A/2025 (consulté le 19 novembre 2026). La page n'indique aucun montant : les montants viennent des tableaux publiés par l'ACP.",
         "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}."
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",

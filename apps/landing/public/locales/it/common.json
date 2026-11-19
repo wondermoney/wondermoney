@@ -2710,7 +2710,8 @@
         "dueMonth": "Da pagare nel 2026:",
         "dueMonthValue": "A {{month}}, il mese dell'anniversario dell'immatricolazione.",
         "scheduleTitle": "Dal 2027: calendario dei pagamenti",
-        "exempt": "Le auto interamente elettriche della categoria B sono esenti dall'IUC."
+        "exempt": "Le auto interamente elettriche della categoria B sono esenti dall'IUC.",
+        "dieselSurcharge": "Supplemento diesel (non moltiplicato per il coefficiente)"
       },
       "guide": {
         "exampleTitle": "Esempio pratico",
@@ -2719,6 +2720,7 @@
         "methodA": "Categoria A (auto immatricolate dal 1981 a giugno 2007): l'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
         "methodB": "Categoria B (auto immatricolate da luglio 2007): si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
         "methodAdditional": "Le auto di categoria B immatricolate dopo il 1° gennaio 2017 pagano un'aliquota aggiuntiva se le emissioni sono alte: 31,77 € sopra 205 g/km (WLTP) o 180 g/km (NEDC) e 63,74 € sopra 260 g/km (WLTP) o 250 g/km (NEDC). Anche l'aliquota aggiuntiva è moltiplicata per il coefficiente. Il testo di legge non la limita per carburante, quindi il calcolo la applica a tutti.",
+        "methodDiesel": "Le auto diesel pagano anche il supplemento diesel (adicional de IUC, articolo 216 della legge n.º 82-B/2014, mantenuto per il 2026 dalla legge di bilancio). Dipende dalla cilindrata, vale per le categorie A e B e si somma dopo il coefficiente, senza essere moltiplicato per esso.",
         "methodPayment": "Fino al 2026 l'IUC si paga nel mese dell'anniversario dell'immatricolazione. Dal 2027, con il Decreto-Lei n.º 161/2026, viene liquidata entro aprile e pagata ad aprile fino a 100 €, ad aprile e ottobre da 100 € a 500 €, e ad aprile, luglio e ottobre oltre 500 €.",
         "methodBudget": "L'accantonamento mensile divide l'importo annuale per 12, così il denaro è pronto quando arriva la richiesta.",
         "exemptionTitle": "Auto elettriche",
@@ -2734,6 +2736,7 @@
         "sourceCategoryA": "Código do IUC, articolo 9: aliquote della categoria A (consultato il 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, articolo 10: aliquote della categoria B, aliquote aggiuntive e coefficienti (consultato il 19 novembre 2026)",
         "sourcePayment": "Código do IUC, articolo 17: pagamento (consultato il 19 novembre 2026)",
+        "sourceDiesel": "Portal das Finanças: supplemento diesel, articolo 216 della legge n.º 82-B/2014, mantenuto per il 2026 dall'articolo 94 della legge n.º 73-A/2025 (consultato il 19 novembre 2026). La pagina non indica importi, quindi gli importi provengono dalle tabelle pubblicate dall'ACP.",
         "reviewed": "Aliquote {{taxYear}} verificate il {{reviewed}}."
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",

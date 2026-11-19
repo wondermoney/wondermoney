@@ -13,15 +13,22 @@ describe("annual vehicle tax (IUC)", () => {
   it("adds the cylinder and CO2 rates and applies the year coefficient (category B)", () => {
     expect(resultFor()).toEqual({
       category: "B", exempt: false, coefficient: 1.15, baseTax: 128.89, additionalTax: 0,
-      annualTax: 148.22, monthlyProvision: 12.35, dueMonth: 3,
-      schedule2027: [{ month: 4, amount: 74.11 }, { month: 10, amount: 74.11 }],
+      dieselSurcharge: 10.07, annualTax: 158.29, monthlyProvision: 13.19, dueMonth: 3,
+      schedule2027: [{ month: 4, amount: 79.14 }, { month: 10, amount: 79.15 }],
     });
   });
 
+  it("adds no diesel surcharge for petrol and does not multiply it by the coefficient", () => {
+    expect(resultFor({ fuel: "petrol" })).toMatchObject({ dieselSurcharge: 0, annualTax: 148.22 });
+    // 1.15 applies to 128.89 only; the 10.07 surcharge is added as is.
+    expect(resultFor({ fuel: "diesel", cc: 1598, co2: 120 }).annualTax).toBe(158.29);
+    expect(resultFor({ fuel: "diesel", cc: 1250, co2: 120, year: 2007, month: 7 }).dieselSurcharge).toBe(5.02);
+  });
+
   it("charges the additional rate above the WLTP or NEDC threshold for registrations after 2016", () => {
-    expect(resultFor({ cc: 1999, co2: 230 })).toMatchObject({ additionalTax: 31.77, annualTax: 426.83 });
+    expect(resultFor({ cc: 1999, co2: 230 })).toMatchObject({ additionalTax: 31.77, dieselSurcharge: 20.12, annualTax: 446.95 });
     expect(resultFor({ cc: 1999, co2: 205 }).additionalTax).toBe(0);
-    expect(resultFor({ cc: 3000, co2: 270 })).toMatchObject({ additionalTax: 63.74, annualTax: 992.25 });
+    expect(resultFor({ cc: 3000, co2: 270 })).toMatchObject({ additionalTax: 63.74, dieselSurcharge: 68.85, annualTax: 1061.1 });
     // NEDC thresholds are lower than WLTP.
     expect(resultFor({ cc: 1999, co2: 200, standard: "nedc" }).additionalTax).toBe(31.77);
     expect(resultFor({ cc: 1999, co2: 200, standard: "wltp" }).additionalTax).toBe(0);
@@ -29,11 +36,11 @@ describe("annual vehicle tax (IUC)", () => {
   });
 
   it("does not charge the additional rate before 2017", () => {
-    expect(resultFor({ cc: 1999, co2: 230, year: 2015 })).toMatchObject({ additionalTax: 0, annualTax: 390.3 });
+    expect(resultFor({ cc: 1999, co2: 230, year: 2015 })).toMatchObject({ additionalTax: 0, annualTax: 410.42 });
   });
 
   it("uses coefficient 1.00 for July 2007 and 1.15 from 2010", () => {
-    expect(resultFor({ cc: 1250, co2: 120, year: 2007, month: 7 })).toMatchObject({
+    expect(resultFor({ fuel: "petrol", cc: 1250, co2: 120, year: 2007, month: 7 })).toMatchObject({
       category: "B", coefficient: 1, annualTax: 96.92, schedule2027: [{ month: 4, amount: 96.92 }],
     });
     expect(resultFor({ cc: 1250, co2: 120, year: 2008 }).coefficient).toBe(1.05);
@@ -45,9 +52,13 @@ describe("annual vehicle tax (IUC)", () => {
     expect(resultFor({ fuel: "petrol", cc: 1999, year: 2000, month: 5 })).toMatchObject({
       category: "A", annualTax: 158.31, dueMonth: 5,
     });
-    expect(resultFor({ fuel: "diesel", cc: 1999, year: 1995, month: 5 }).annualTax).toBe(22.45);
+    expect(resultFor({ fuel: "diesel", cc: 1999, year: 1995, month: 5 })).toMatchObject({
+      annualTax: 26, dieselSurcharge: 3.55,
+    });
     expect(resultFor({ fuel: "petrol", cc: 1200, year: 1985, month: 5 }).annualTax).toBe(12.55);
-    expect(resultFor({ fuel: "diesel", cc: 3001, year: 2006, month: 6 }).annualTax).toBe(158.31);
+    expect(resultFor({ fuel: "diesel", cc: 3001, year: 2006, month: 6 })).toMatchObject({
+      annualTax: 183.32, dieselSurcharge: 25.01,
+    });
     expect(resultFor({ fuel: "petrol", cc: 3501, year: 1990, month: 1 }).annualTax).toBe(263.11);
     // CO2 is not asked for category A, so a blank value is fine.
     expect(resultFor({ fuel: "petrol", cc: 1200, year: 2000, month: 6, co2: NaN }).category).toBe("A");
@@ -67,7 +78,7 @@ describe("annual vehicle tax (IUC)", () => {
     expect(instalmentMonths(500.01)).toEqual([4, 7, 10]);
     const big = resultFor({ cc: 3000, co2: 270 });
     expect(big.schedule2027.map((row) => row.month)).toEqual([4, 7, 10]);
-    expect(big.schedule2027.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(992.25);
+    expect(big.schedule2027.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(1061.1);
   });
 
   it("rejects empty, zero, negative and huge capacity and CO2 with clear codes", () => {

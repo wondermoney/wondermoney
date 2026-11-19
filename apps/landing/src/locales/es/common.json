@@ -2710,7 +2710,8 @@
         "dueMonth": "A pagar en 2026:",
         "dueMonthValue": "En {{month}}, el mes del aniversario de la matriculación.",
         "scheduleTitle": "Desde 2027: calendario de pago",
-        "exempt": "Los coches totalmente eléctricos de la categoría B están exentos de IUC."
+        "exempt": "Los coches totalmente eléctricos de la categoría B están exentos de IUC.",
+        "dieselSurcharge": "Recargo diésel (no se multiplica por el coeficiente)"
       },
       "guide": {
         "exampleTitle": "Ejemplo práctico",
@@ -2719,6 +2720,7 @@
         "methodA": "Categoría A (coches matriculados de 1981 a junio de 2007): el impuesto sale de una tabla por combustible, cilindrada y período de matriculación (después de 1995, de 1990 a 1995, de 1981 a 1989).",
         "methodB": "Categoría B (coches matriculados desde julio de 2007): se suman la tasa de cilindrada y la de CO2 y se multiplica por un coeficiente según el año de matriculación (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 desde 2010). El CO2 se lee en la columna WLTP o NEDC según el ciclo de ensayo de tu documento.",
         "methodAdditional": "Los coches de la categoría B matriculados después del 1 de enero de 2017 pagan una tasa adicional si las emisiones son altas: 31,77 € por encima de 205 g/km (WLTP) o 180 g/km (NEDC) y 63,74 € por encima de 260 g/km (WLTP) o 250 g/km (NEDC). La tasa adicional también se multiplica por el coeficiente. El texto legal no la limita por combustible, así que la calculadora la aplica a todos.",
+        "methodDiesel": "Los coches diésel pagan además el adicional de IUC (artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por los Presupuestos del Estado). Depende de la cilindrada, se aplica a las categorías A y B y se suma después del coeficiente, sin multiplicarse por él.",
         "methodPayment": "Hasta 2026 el IUC se paga en el mes del aniversario de la matriculación. Desde 2027, según el Decreto-Ley n.º 161/2026, se liquida hasta abril y se paga en abril hasta 100 €, en abril y octubre de 100 € a 500 €, y en abril, julio y octubre por encima de 500 €.",
         "methodBudget": "La reserva mensual divide el importe anual entre 12, para que el dinero esté listo cuando llegue el cobro.",
         "exemptionTitle": "Coches eléctricos",
@@ -2734,6 +2736,7 @@
         "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
         "sourceCategoryB": "Código do IUC, artículo 10: tasas de la categoría B, tasas adicionales y coeficientes (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IUC, artículo 17: pago (consultado el 19 de noviembre de 2026)",
+        "sourceDiesel": "Portal das Finanças: recargo diésel, artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por el artículo 94 de la Ley n.º 73-A/2025 (consultado el 19 de noviembre de 2026). La página no indica importes, así que los importes salen de las tablas publicadas por el ACP.",
         "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}."
       },
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",

@@ -182,6 +182,9 @@ function VehicleTaxCalculator() {
                       { label: t(k("result.coefficient")), value: `×${result.coefficient.toFixed(2)}` },
                     ]
                   : []),
+                ...(result.dieselSurcharge > 0
+                  ? [{ label: t(k("result.dieselSurcharge")), value: money(result.dieselSurcharge) }]
+                  : []),
               ]}
             />
             {!result.exempt && (

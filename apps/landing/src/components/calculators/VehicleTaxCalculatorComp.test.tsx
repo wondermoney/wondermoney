@@ -17,18 +17,18 @@ afterEach(() => {
 
 it("shows the example, validates the engine size and tracks one edit with metadata only", () => {
   render(<VehicleTaxCalculatorComp locale="en" />);
-  expect(screen.getByText("€148.22")).toBeTruthy();
-  expect(screen.getByText("€12.35")).toBeTruthy();
+  expect(screen.getByText("€158.29")).toBeTruthy();
+  expect(screen.getByText("€13.19")).toBeTruthy();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   const cc = screen.getByRole("spinbutton", { name: "Engine size" });
   fireEvent.change(cc, { target: { value: "0" } });
   expect(cc.getAttribute("aria-invalid")).toBe("true");
-  expect(screen.queryByText("€148.22")).toBeNull();
+  expect(screen.queryByText("€158.29")).toBeNull();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   fireEvent.change(cc, { target: { value: "1250" } });
-  expect(screen.getByText("€111.46")).toBeTruthy();
+  expect(screen.getByText("€116.48")).toBeTruthy();
   fireEvent.change(screen.getByLabelText("Fuel"), { target: { value: "electric" } });
   expect(screen.queryByRole("spinbutton", { name: "Engine size" })).toBeNull();
   expect(screen.getAllByText("€0.00").length).toBeGreaterThan(0);

@@ -2710,7 +2710,8 @@
         "dueMonth": "Due in 2026:",
         "dueMonthValue": "In {{month}}, the month of your registration anniversary.",
         "scheduleTitle": "From 2027: payment schedule",
-        "exempt": "Fully electric cars in category B are exempt from IUC."
+        "exempt": "Fully electric cars in category B are exempt from IUC.",
+        "dieselSurcharge": "Diesel surcharge (not multiplied by the coefficient)"
       },
       "guide": {
         "exampleTitle": "Worked example",
@@ -2719,6 +2720,7 @@
         "methodA": "Category A (cars registered from 1981 up to June 2007): the tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
         "methodB": "Category B (cars registered from July 2007): the engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
         "methodAdditional": "Category B cars first registered after 1 January 2017 pay an additional rate when emissions are high: €31.77 above 205 g/km (WLTP) or 180 g/km (NEDC), and €63.74 above 260 g/km (WLTP) or 250 g/km (NEDC). The additional rate is also multiplied by the coefficient. The legal text does not limit it by fuel, so the calculator applies it to every fuel.",
+        "methodDiesel": "Diesel cars also pay the diesel surcharge (adicional de IUC, article 216 of Lei n.º 82-B/2014, kept in force for 2026 by the State Budget). It depends on engine size, applies to categories A and B, and is added after the coefficient, not multiplied by it.",
         "methodPayment": "Until 2026 the IUC is paid in the month of the registration anniversary. From 2027, under Decreto-Lei n.º 161/2026, it is settled by April and paid in April up to €100, in April and October from €100 up to €500, and in April, July and October above €500.",
         "methodBudget": "The monthly provision divides the annual amount by 12, so the money is ready when the bill arrives.",
         "exemptionTitle": "Electric cars",
@@ -2734,6 +2736,7 @@
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
         "sourceCategoryB": "Código do IUC, article 10: category B rates, additional rates and coefficients (consulted 19 November 2026)",
         "sourcePayment": "Código do IUC, article 17: payment (consulted 19 November 2026)",
+        "sourceDiesel": "Portal das Finanças: diesel surcharge, article 216 of Lei n.º 82-B/2014, kept for 2026 by article 94 of Lei n.º 73-A/2025 (consulted 19 November 2026). The page lists no amounts, so the diesel amounts come from published ACP tables.",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}."
       },
       "nextStepHeadline": "Never be caught out by the car tax",

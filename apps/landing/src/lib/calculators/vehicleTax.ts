@@ -55,6 +55,26 @@ export const IUC_TABLES = {
     { upTo: 3000, cents: { recent: 6240, mid: 3487, old: 1749 } },
     { upTo: Infinity, cents: { recent: 15831, mid: 8349, old: 3609 } },
   ],
+  /**
+   * Diesel "adicional de IUC" (Lei n.º 82-B/2014, art. 216, kept in force each year by the State Budget,
+   * for 2026 by art. 94 of Lei n.º 73-A/2025). Diesel only, categories A and B, never multiplied by
+   * the year coefficient. Amounts in cents, from the ACP tables: the Portal das Finanças page that
+   * names the surcharge shows no amounts.
+   */
+  dieselSurcharge: {
+    categoryA: [
+      { upTo: 1500, cents: { recent: 314, mid: 198, old: 139 } },
+      { upTo: 2000, cents: { recent: 631, mid: 355, old: 198 } },
+      { upTo: 3000, cents: { recent: 986, mid: 551, old: 276 } },
+      { upTo: Infinity, cents: { recent: 2501, mid: 1319, old: 570 } },
+    ],
+    categoryB: [
+      { upTo: 1250, cents: 502 },
+      { upTo: 1750, cents: 1007 },
+      { upTo: 2500, cents: 2012 },
+      { upTo: Infinity, cents: 6885 },
+    ],
+  },
 } as const;
 
 export const VEHICLE_TAX_LIMITS = { cc: 10_000, co2: 1_000, firstYear: 1981, lastYear: 2026 } as const;
@@ -141,6 +161,7 @@ export function computeVehicleTax(input: VehicleTaxInput) {
   let exempt = false;
   let baseCents = 0;
   let additionalCents = 0;
+  let dieselCents = 0;
   let coefficient = 1;
 
   if (category === "A") {
@@ -148,7 +169,8 @@ export function computeVehicleTax(input: VehicleTaxInput) {
       input.fuel === "petrol" ? IUC_TABLES.categoryAGasoline : IUC_TABLES.categoryAOther;
     const age = year > 1995 ? "recent" : year >= 1990 ? "mid" : "old";
     baseCents = bandOf(table, input.cc).cents[age];
-    annualCents = baseCents;
+    if (input.fuel === "diesel") dieselCents = bandOf(IUC_TABLES.dieselSurcharge.categoryA, input.cc).cents[age];
+    annualCents = baseCents + dieselCents;
   } else if (electric) {
     exempt = true;
   } else {
@@ -160,7 +182,8 @@ export function computeVehicleTax(input: VehicleTaxInput) {
     }
     const coefficientHundredths = IUC_TABLES.coefficients[Math.min(Math.max(year, 2007), 2010)];
     coefficient = coefficientHundredths / 100;
-    annualCents = Math.round(((baseCents + additionalCents) * coefficientHundredths) / 100);
+    if (input.fuel === "diesel") dieselCents = bandOf(IUC_TABLES.dieselSurcharge.categoryB, input.cc).cents;
+    annualCents = Math.round(((baseCents + additionalCents) * coefficientHundredths) / 100) + dieselCents;
   }
 
   const months = instalmentMonths(annualCents / 100);
@@ -174,6 +197,7 @@ export function computeVehicleTax(input: VehicleTaxInput) {
       coefficient,
       baseTax: baseCents / 100,
       additionalTax: additionalCents / 100,
+      dieselSurcharge: dieselCents / 100,
       annualTax: annualCents / 100,
       monthlyProvision: Math.round(annualCents / 12) / 100,
       /** Month (1-12) the 2026 IUC is paid: the month of the registration anniversary. */

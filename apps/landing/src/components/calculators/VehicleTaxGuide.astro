@@ -30,6 +30,7 @@ const sources = [
   ["sourceCategoryA", `${base}iuc9.aspx`],
   ["sourceCategoryB", `${base}iuc10.aspx`],
   ["sourcePayment", `${base}iuc17.aspx`],
+  ["sourceDiesel", `${base}iuc-adicional.aspx`],
 ] as const;
 ---
 
@@ -45,7 +46,7 @@ const sources = [
       {t(k("methodTitle"))}
     </h2>
     <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodA", "methodB", "methodAdditional", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key), values)}</li>)}
+      {["methodA", "methodB", "methodAdditional", "methodDiesel", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key), values)}</li>)}
     </ul>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
     <p class="mt-3">{t(k("exemption"))}</p>
