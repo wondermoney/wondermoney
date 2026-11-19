@@ -68,9 +68,9 @@ describe("tools catalog", () => {
 			"trackWealth",
 		])
 		expect(groups).toEqual({
-			budgetAndSave: ["toolHouseholdBudget", "toolSavingsRate", "toolEmergencyFund", "toolSavingsGoal", "toolInflation", "toolNetSalary", "toolChristmasAllowance", "toolHolidayAllowance", "toolWithholdingTables", "toolUnemploymentBenefit"],
+			budgetAndSave: ["toolHouseholdBudget", "toolSavingsRate", "toolEmergencyFund", "toolSavingsGoal", "toolInflation", "toolNetSalary", "toolChristmasAllowance", "toolHolidayAllowance", "toolWithholdingTables", "toolUnemploymentBenefit", "toolSickPay", "toolDismissalCompensation"],
 			borrowAndBuyHome: ["toolMortgage", "toolDebtToIncome", "toolBorrowingCapacity", "toolEarlyRepayment", "toolMortgageTransfer", "toolBuyVsRent", "toolRateRevision", "toolCarLoan", "toolPropertyTax", "toolPurchaseTaxes", "toolYouthMortgage", "toolVehicleTax", "toolPropertyCapitalGains", "toolPersonalLoan"],
-			investAndGrow: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "pageFireCalculator", "toolTermDeposit", "toolSavingsCertificates"],
+			investAndGrow: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "pageFireCalculator", "toolStatePension", "toolTermDeposit", "toolSavingsCertificates"],
 			trackWealth: ["toolNetWorth"],
 		})
 	})

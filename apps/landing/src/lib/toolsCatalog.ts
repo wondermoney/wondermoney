@@ -56,7 +56,7 @@ export const TOOLS_CATALOG = [
 		key: "emergencyFund",
 		routeId: "toolEmergencyFund",
 		group: "budgetAndSave",
-		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolUnemploymentBenefit"],
+		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolUnemploymentBenefit", "toolSickPay"],
 	},
 	{
 		key: "savingsGoal",
@@ -74,7 +74,7 @@ export const TOOLS_CATALOG = [
 		key: "netSalary",
 		routeId: "toolNetSalary",
 		group: "budgetAndSave",
-		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate", "toolUnemploymentBenefit"],
+		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate", "toolUnemploymentBenefit", "toolDismissalCompensation"],
 	},
 	{
 		key: "christmasAllowance",
@@ -98,7 +98,19 @@ export const TOOLS_CATALOG = [
 		key: "unemploymentBenefit",
 		routeId: "toolUnemploymentBenefit",
 		group: "budgetAndSave",
-		related: ["toolEmergencyFund", "toolHouseholdBudget", "toolNetSalary"],
+		related: ["toolEmergencyFund", "toolHouseholdBudget", "toolNetSalary", "toolSickPay", "toolDismissalCompensation"],
+	},
+	{
+		key: "sickPay",
+		routeId: "toolSickPay",
+		group: "budgetAndSave",
+		related: ["toolNetSalary", "toolEmergencyFund", "toolHouseholdBudget"],
+	},
+	{
+		key: "dismissalCompensation",
+		routeId: "toolDismissalCompensation",
+		group: "budgetAndSave",
+		related: ["toolUnemploymentBenefit", "toolEmergencyFund", "toolNetSalary"],
 	},
 	// Borrow and buy a home
 	{
@@ -205,6 +217,12 @@ export const TOOLS_CATALOG = [
 		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund"],
 	},
 	{ key: "fire", routeId: "pageFireCalculator", group: "investAndGrow" },
+	{
+		key: "statePension",
+		routeId: "toolStatePension",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"],
+	},
 	{
 		key: "termDeposit",
 		routeId: "toolTermDeposit",

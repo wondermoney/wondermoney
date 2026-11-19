@@ -40,7 +40,8 @@ const monthlyAnnualBillingPatterns = [
 const stalePricePattern =
 	/€(?:4[.,]99|39[.,]90|4[.,]15|3[.,]90|24[.,]90)|(?:4,99|39,90|4,15|3,90|24,90)\s*(?:€|EUR)|EUR(?:4\.99|39\.90|3\.90|24\.90)|price:\s*["']?(?:4\.99|39\.90|4\.15|3\.90|24\.90)["']?/gi
 
-const staleTrialLanguagePattern = /14[- ]day|no credit card/gi
+// "14 days" (plural) is legitimate copy, e.g. the dismissal compensation rate; the retired offer said "14-day".
+const staleTrialLanguagePattern = /14[- ]day(?!s)|no credit card/gi
 
 const anyThirtyDayPattern = /30[- ]days?|30 dias|30 días|30 jours|30 Tage|30-täg|30 giorni/i
 const acquisitionKeyPattern = /trial|offer|acquisition/i
@@ -167,7 +168,7 @@ describe("public acquisition offer", () => {
 	it("no longer states a 14-day trial or no-credit-card offer in any locale", () => {
 		for (const locale of locales) {
 			const content = read(`src/locales/${locale}/common.json`)
-			expect(content).not.toMatch(/14[- ]day/i)
+			expect(content).not.toMatch(/14[- ]day(?!s)/i)
 			expect(content).not.toMatch(/no credit card/i)
 			expect(content).not.toMatch(/€3\.90/)
 			expect(content).not.toMatch(/€24\.90/)

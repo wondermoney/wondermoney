@@ -1,0 +1,77 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it, vi } from "vitest";
+import { getToolStaticPaths } from "../pageStaticPaths";
+import { getRelatedContentTools } from "../relatedContentTools";
+import { SUPPORTED_LANGS, resolveToolRouteIdFromLegacy, toLocalizedPath, type Lang } from "../routes";
+import { buildToolsHub, getToolCatalogEntry } from "../toolsCatalog";
+import { getTranslations } from "../translations";
+
+vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
+
+const slugs = {
+  pt: "simulador-compensacao-despedimento",
+  en: "portugal-dismissal-compensation-calculator",
+  es: "calculadora-indemnizacion-despido-portugal",
+  fr: "calculateur-indemnite-licenciement-portugal",
+  de: "abfindungsrechner-kuendigung-portugal",
+  it: "calcolatore-indennita-licenziamento-portogallo",
+} satisfies Record<Lang, string>;
+
+function localeCopy(lang: Lang, base: "src" | "public") {
+  const file = new URL(`../../../${base}/locales/${lang}/common.json`, import.meta.url);
+  return JSON.parse(readFileSync(file, "utf8")).tools.dismissalCompensation;
+}
+
+function copyShape(value: unknown): unknown {
+  if (typeof value === "string") return value.match(/\{\{\w+\}\}/g)?.sort() ?? [];
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, entry]) => [key, copyShape(entry)]),
+  );
+}
+
+describe("localized dismissal compensation tool page", () => {
+  it.each(SUPPORTED_LANGS)("prerenders and links to the calculator in %s", (lang) => {
+    const href = `/${lang}/tools/${slugs[lang]}`;
+    expect(toLocalizedPath("toolDismissalCompensation", lang)).toBe(href);
+    const paths = getToolStaticPaths(lang).filter((entry) => entry.props.routeId === "toolDismissalCompensation");
+    expect(paths).toHaveLength(1);
+    expect(paths[0].params.tool).toBe(slugs[lang]);
+    expect(resolveToolRouteIdFromLegacy(slugs[lang], lang)).toBe("toolDismissalCompensation");
+    expect(buildToolsHub(lang).flatMap((group) => group.tools)).toContainEqual(
+      expect.objectContaining({ routeId: "toolDismissalCompensation", href }),
+    );
+    const related = getRelatedContentTools(
+      [{ href: toLocalizedPath("toolUnemploymentBenefit", lang) }], lang, getTranslations(lang),
+    );
+    expect(related).toContainEqual(expect.objectContaining({ href }));
+    for (const source of ["toolUnemploymentBenefit", "toolNetSalary"] as const) {
+      expect(getToolCatalogEntry(source).related).toContain("toolDismissalCompensation");
+    }
+  });
+
+  it.each(SUPPORTED_LANGS)("names its sources, review date and unsupported situations in %s", (lang) => {
+    const { guide } = localeCopy(lang, "src");
+    expect(guide.reviewed).toContain("2026");
+    for (const key of [
+      "sourceLaw69", "sourceLaw13", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
+      "unsupportedAgreement", "unsupportedPublic", "supported",
+    ]) {
+      expect(guide[key]).toBeTruthy();
+    }
+    expect(guide.sourceLaw69).toContain("69/2013");
+    expect(guide.sourceLaw13).toContain("13/2023");
+    expect(guide.reviewed).toContain("1");
+  });
+
+  it.each(SUPPORTED_LANGS)("has the same translation keys, placeholders and public mirror in %s", (lang) => {
+    const copy = localeCopy(lang, "src");
+    expect(copyShape(copy)).toEqual(copyShape(localeCopy("en", "src")));
+    expect(localeCopy(lang, "public")).toEqual(copy);
+  });
+
+  it("has distinct titles and descriptions", () => {
+    const copies = SUPPORTED_LANGS.map((lang) => localeCopy(lang, "src"));
+    expect(new Set(copies.map((copy) => copy.pageTitle)).size).toBe(SUPPORTED_LANGS.length);
+    expect(new Set(copies.map((copy) => copy.pageDescription)).size).toBe(SUPPORTED_LANGS.length);
+  });
+});

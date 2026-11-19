@@ -3012,6 +3012,96 @@
       "nextStepDescription": "A WonderMoney mostra o seu dinheiro, a despesa mensal e quanto tempo duram as poupanças com um rendimento mais baixo.",
       "nextStepCta": "Estime quanto tempo dura a sua reserva de dinheiro"
     },
+    "sickPay": {
+      "title": "Simulador de subsídio de doença 2026 (baixa médica)",
+      "shortName": "Subsídio de doença",
+      "subtitle": "Estime o subsídio de doença de uma baixa médica: valor por escalão de duração, dias de espera e a perda de rendimento.",
+      "description": "Estime o subsídio de doença em Portugal: valor diário, total, dias de espera e diferença face ao seu salário líquido.",
+      "pageTitle": "Simulador de Subsídio de Doença 2026: Baixa Médica em Portugal",
+      "pageDescription": "Estime o subsídio de doença em Portugal: remuneração de referência a 180 dias, 55% a 75% consoante a duração, os 3 dias de espera, o mínimo de 9,20 € e a perda de rendimento durante a baixa.",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal",
+        "allowances": "Subsídios",
+        "sickDays": "Dias de baixa",
+        "dependants": "Filhos até 16 anos (ou 24 com abono de família)",
+        "hospitalisation": "Internamento hospitalar ou cirurgia de ambulatório"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
+        "twelfths": "Em duodécimos (o salário já os inclui)"
+      },
+      "help": {
+        "gross": "O salário base dos meses considerados, antes de Segurança Social e IRS. Os subsídios de férias e de Natal não entram na remuneração de referência.",
+        "allowances": "Em duodécimos, o simulador retira os dois subsídios para obter o salário base que a remuneração de referência usa.",
+        "sickDays": "Total de dias do certificado de incapacidade temporária (CIT), contados desde o primeiro dia. Os trabalhadores por conta de outrem podem receber até 1095 dias.",
+        "dependants": "Usado no acréscimo de 5 pontos, que exige 3 ou mais filhos e uma remuneração de referência até 500 euros por mês.",
+        "hospitalisation": "Com internamento hospitalar ou cirurgia de ambulatório, o subsídio é pago desde o 1.º dia, sem período de espera."
+      },
+      "errors": {
+        "required": "Introduza um número válido.",
+        "tooSmall": "Introduza um valor de pelo menos {{min}}.",
+        "tooLarge": "Introduza um valor até {{max}}.",
+        "whole": "Introduza um número inteiro.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Total estimado pago pela Segurança Social",
+        "paidDays": "Dias pagos",
+        "waiting": "Dias de espera (não pagos pela Segurança Social)",
+        "waitingValue": "{{days}} dias, cerca de {{amount}} de salário líquido",
+        "waitingNone": "Nenhum",
+        "reference": "Remuneração de referência por dia",
+        "netPay": "Salário líquido normal por mês",
+        "firstGap": "Perda de rendimento nos primeiros 30 dias",
+        "averageGap": "Perda média mensal de rendimento durante toda a baixa",
+        "bandsTitle": "Por escalão de duração",
+        "bandLabel": "Dias {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} dias pagos × {{daily}} = {{amount}}",
+        "increaseApplied": "Inclui o acréscimo de 5 pontos para remunerações baixas e 3 ou mais filhos.",
+        "allWaiting": "Todos os dias desta baixa são dias de espera, por isso a Segurança Social não paga nada. Verifique se o contrato ou o instrumento de regulamentação coletiva obriga a entidade patronal a pagá-los.",
+        "waitingNote": "A Segurança Social não paga os 3 primeiros dias. Se a entidade patronal os paga depende do contrato ou do instrumento de regulamentação coletiva.",
+        "estimate": "Uma estimativa para planear, não uma decisão. A Segurança Social calcula o valor real com as remunerações registadas.",
+        "limit": {
+          "none": "O valor diário é a percentagem da remuneração de referência de cada escalão; sem limites aplicados.",
+          "minimum": "O valor diário foi elevado ao mínimo de {{min}} (30% da retribuição mínima mensal garantida).",
+          "referencePay": "A remuneração de referência é inferior a {{min}} por dia, por isso o subsídio é igual a essa remuneração.",
+          "netCap": "O valor diário foi limitado ao valor líquido estimado da remuneração de referência."
+        }
+      },
+      "checklist": {
+        "title": "Condições a verificar (não é uma decisão)",
+        "certificate": "Tem um certificado de incapacidade temporária (CIT) passado por um médico e enviado eletronicamente para a Segurança Social.",
+        "guarantee": "Tem 6 meses de remunerações registadas (não têm de ser seguidos) no dia em que deixa de trabalhar.",
+        "professionalIndex": "Trabalhou pelo menos 12 dias nos primeiros quatro dos últimos seis meses, contando o mês em que deixa de trabalhar.",
+        "waiting": "Não há período de espera com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e continua depois dele. O simulador só tem opção para a primeira.",
+        "note": "Só a Segurança Social decide se tem direito. Esta lista é um lembrete, não uma decisão."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Um trabalhador com {{gross}} por mês em 14 pagamentos, de baixa durante {{days}} dias e sem internamento. A remuneração de referência é {{reference}} por dia. Os dias 1 a 3 são de espera, por isso o primeiro escalão paga 27 dias a 55% e os 15 seguintes a 60%: {{total}} no total. O salário líquido normal é {{net}} por mês; ao longo da baixa a perda média é de {{gap}} por mês.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodReference": "A remuneração de referência (RR) é a soma das remunerações registadas nos 6 meses mais antigos dos 8 anteriores ao mês em que começa a baixa, sem subsídios de férias e de Natal, a dividir por 180. O simulador usa o seu salário mensal a dividir por 30.",
+        "methodBands": "O subsídio diário é uma percentagem da RR que aumenta com a duração da baixa: 55% até 30 dias, 60% do dia 31 ao 90, 70% do dia 91 ao 365 e 75% depois, até 1095 dias para trabalhadores por conta de outrem. Os dias contam desde o primeiro dia da baixa, incluindo os de espera.",
+        "methodWaiting": "Os trabalhadores por conta de outrem têm um período de espera de 3 dias que a Segurança Social não paga. Com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e vai além dele, o pagamento começa no 1.º dia.",
+        "methodMinimum": "O subsídio diário não pode ser inferior a {{min}} (30% da retribuição mínima mensal garantida de {{rmmg}}). Se a própria RR for inferior, o subsídio é igual à RR.",
+        "methodIncrease": "Nos escalões de 55% e 60%, a percentagem sobe 5 pontos quando a RR é de, no máximo, 500 euros por mês e o agregado tem 3 ou mais filhos até 16 anos (ou 24 com abono de família), ou filhos com bonificação por deficiência. O simulador só considera o número de filhos.",
+        "methodNetCap": "O subsídio diário também não pode ultrapassar o valor líquido da RR. O simulador estima-o com 11% de Segurança Social e a taxa de retenção de IRS de 2026 do continente para um titular não casado.",
+        "methodGap": "A perda de rendimento compara o seu salário líquido normal (14 ou 12 pagamentos, em média por 12 meses) com o que a Segurança Social paga. Os subsídios de férias e de Natal não são repostos pelos dias de baixa.",
+        "methodBudget": "A diferença é o rendimento que tem de cobrir com poupanças ou cortando despesas durante a baixa. Use-a para dimensionar a sua reserva.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedTuberculosis": "Tuberculose, paga a 80% ou 100% da RR consoante os familiares a cargo, sem limite de tempo.",
+        "unsupportedSelfEmployed": "Trabalhadores independentes (10 dias de espera, até 365 dias), seguro social voluntário e trabalhadores do serviço doméstico.",
+        "unsupportedShort": "Ausências curtas cobertas pela autodeclaração de doença do SNS 24: não modelámos as respetivas regras.",
+        "unsupportedOther": "Menos de 6 meses de remunerações registadas, remunerações muito variáveis, indemnizações por acidente de trabalho ou doença profissional e acordos coletivos que complementam o subsídio.",
+        "sourcesTitle": "Fontes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de outubro de 2026), com a retribuição mínima mensal garantida de 2026 de 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, na sua redação atual: o regime de proteção na doença",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social. O limite de 500 euros do acréscimo de 5 pontos vem da lei consolidada e de fontes secundárias, porque o texto do guia não mostra o valor. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa."
+      },
+      "nextStepHeadline": "Planeie a quebra temporária de rendimento",
+      "nextStepDescription": "O WonderMoney mostra o seu dinheiro, as suas despesas e durante quanto tempo as poupanças cobrem um rendimento mais baixo.",
+      "nextStepCta": "Ajuste o seu orçamento à quebra temporária de rendimento"
+    },
     "vehicleTax": {
       "title": "Simulador de IUC",
       "shortName": "IUC",
@@ -3273,6 +3363,176 @@
         "unsupportedOther": "Conta só o salário base. Diuturnidades, outras componentes da retribuição, cessação ou suspensão do contrato durante o ano, contratos coletivos que paguem mais e custos do empregador ficam fora desta estimativa.",
         "sourceCode": "Código do Trabalho, arts. 239.º, 263.º e 264.º: duração das férias, subsídio de Natal e subsídio de férias",
         "reviewed": "Regras revistas a 19 de novembro de 2026. A retenção em separado de cada pagamento do mês foi confirmada no texto original do Despacho n.º 233-A/2026, e os artigos do Código do Trabalho em cópias do texto consolidado. A referência de 22 dias úteis do subsídio de férias é prática corrente, não consta desses textos. Reter cada duodécimo à taxa efetiva do subsídio inteiro (Lei n.º 11/2013, art. 3.º) é a prática habitual das empresas; essa lei não foi confrontada com o texto. A taxa de 11% da Segurança Social foi confirmada em fontes secundárias."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Simulador de compensação por despedimento 2026",
+      "shortName": "Compensação por despedimento",
+      "subtitle": "Estima a compensação por despedimento coletivo, extinção do posto de trabalho ou inadaptação num contrato sem termo, com os limites e as taxas por data do contrato.",
+      "description": "Estima a tua compensação por despedimento em Portugal: taxas por data do contrato, limites e plano de recebimento.",
+      "pageTitle": "Simulador de Compensação por Despedimento 2026: Estimativa do art. 366.º",
+      "pageDescription": "Estima a compensação por despedimento coletivo ou extinção do posto de trabalho: 12, 18, 20 ou 30 dias por ano consoante a data do contrato, o limite de 12 meses e um plano de recebimento.",
+      "fields": {
+        "baseMonthly": "Retribuição base mensal (bruta)",
+        "seniorityPay": "Diuturnidades mensais",
+        "startDate": "Data de início do contrato",
+        "endDate": "Data de cessação"
+      },
+      "help": {
+        "baseMonthly": "A retribuição base em euros por mês, antes da Segurança Social e do IRS. Não incluas subsídios, prémios nem horas extra.",
+        "seniorityPay": "As diuturnidades são complementos pagos pela antiguidade. Indica 0 se não tiveres.",
+        "startDate": "O dia em que o contrato sem termo começou. Se houve grupo de empresas ou um contrato anterior com o mesmo empregador, confirma como conta a tua antiguidade.",
+        "endDate": "O último dia do contrato. Conta como dia trabalhado. Esta estimativa cobre cessações em {{year}}."
+      },
+      "scope": "Cobre despedimento coletivo, extinção do posto de trabalho e inadaptação num contrato sem termo. Não cobre contratos a termo, despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública.",
+      "errors": {
+        "required": "Indica um valor válido.",
+        "tooSmall": "Indica um valor de pelo menos {{min}}.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "invalidDate": "Indica uma data válida.",
+        "endBeforeStart": "A data de cessação não pode ser anterior à data de início.",
+        "startFuture": "O contrato não pode começar no futuro.",
+        "endOutsideYear": "Esta estimativa cobre cessações em {{year}}, o ano do salário mínimo usado nos limites.",
+        "summary": "Verifica os campos assinalados para veres a estimativa."
+      },
+      "result": {
+        "compensation": "Compensação estimada",
+        "seniority": "Antiguidade",
+        "seniorityValue": "{{years}} anos",
+        "regime": "Regras aplicadas",
+        "regimes": {
+          "before2011": "Contrato anterior a 1 de novembro de 2011",
+          "from2011": "Contrato de 1 de novembro de 2011 a 30 de setembro de 2013",
+          "from2013": "Contrato a partir de 1 de outubro de 2013"
+        },
+        "usedMonthly": "Valor mensal usado",
+        "daily": "Valor diário (valor mensal a dividir por 30)",
+        "cap": "Limite global (12 valores mensais)",
+        "breakdownTitle": "Detalhe por período",
+        "periods": {
+          "oneMonth": "{{years}} anos a {{days}} dias por ano",
+          "twentyDays": "{{years}} anos a {{days}} dias por ano",
+          "eighteenDays": "{{years}} anos a {{days}} dias por ano",
+          "twelveDays": "{{years}} anos a {{days}} dias por ano",
+          "fourteenDays": "{{years}} anos a {{days}} dias por ano"
+        },
+        "caps": {
+          "none": "Não foi aplicado nenhum limite.",
+          "monthlyBase": "O valor mensal foi limitado a 20 vezes o salário mínimo ({{limit}}; o salário mínimo é {{rmmg}}).",
+          "total": "A compensação foi limitada a 12 valores mensais ({{cap}}).",
+          "earlyPart": "A parte até 30 de setembro de 2013 já atinge o limite de {{cap}}, por isso o período seguinte não é somado."
+        },
+        "payoutTitle": "Recebimento repartido pelos próximos meses",
+        "payoutValue": "Em {{months}} meses: {{amount}} por mês (antes de impostos)",
+        "payoutNote": "É só uma sugestão para planeares: o empregador paga normalmente a compensação no fim do contrato, de uma só vez.",
+        "estimate": "Uma estimativa para aprenderes e planeares, não é aconselhamento jurídico. O empregador, um advogado, a ACT ou o teu sindicato podem confirmar o valor."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Quem ganha {{base}} por mês mais {{seniorityPay}} de diuturnidades, com um contrato que começou em {{start}} e terminou em {{end}}, tem {{seniority}} anos de antiguidade. O valor diário é {{daily}}. O contrato começou entre 1 de novembro de 2011 e 30 de setembro de 2013, por isso {{twentyYears}} anos até 30 de setembro de 2013 contam 20 dias ({{twentyAmount}}), {{eighteenYears}} anos completam os três primeiros anos a 18 dias ({{eighteenAmount}}), {{twelveYears}} anos até 30 de abril de 2023 contam 12 dias ({{twelveAmount}}) e os últimos {{fourteenYears}} anos contam 14 dias ({{fourteenAmount}}). O total é {{total}}, abaixo do limite de {{cap}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodBase": "A base é a retribuição base mensal mais as diuturnidades. O valor diário é esse valor mensal dividido por 30.",
+        "methodRates": "Para a antiguidade a partir de 1 de maio de 2023, a compensação é de 14 dias de retribuição base e diuturnidades por cada ano completo (art. 366.º, n.º 1, do Código do Trabalho, na redação da Lei n.º 13/2023). A antiguidade anterior mantém a taxa antiga: 12 dias por ano desde 1 de outubro de 2013.",
+        "methodTransitional": "Os contratos mais antigos mantêm as taxas anteriores para o tempo já trabalhado (art. 5.º da Lei n.º 69/2013). Antes de 1 de novembro de 2011: um mês por ano até 31 de outubro de 2012 e depois 20 dias por ano até 30 de setembro de 2013. De 1 de novembro de 2011 a 30 de setembro de 2013: 20 dias por ano até 30 de setembro de 2013. De 1 de outubro de 2013 a 30 de abril de 2023 todos os contratos contam 12 dias por ano, exceto que os três primeiros anos de antiguidade contam 18 dias quando o contrato tinha menos de três anos a 1 de outubro de 2013. A partir de 1 de maio de 2023 cada ano conta 14 dias.",
+        "methodCaps": "O valor mensal não pode exceder 20 vezes o salário mínimo ({{baseCap}} com o salário mínimo de {{rmmg}} em 2026) e a compensação total não pode exceder 12 valores mensais, no máximo {{totalCapRmmg}} (240 vezes o salário mínimo). Quando a parte até 30 de setembro de 2013 já atinge esse limite, os períodos seguintes não são somados.",
+        "methodFraction": "Um ano incompleto conta proporcionalmente: o simulador conta os aniversários completos da data de início mais os dias desde o último, a dividir pelos dias desse ano. A data de cessação conta como dia trabalhado.",
+        "methodTax": "Só como informação, não entra no valor: parte da indemnização pode ficar excluída de IRS ao abrigo do art. 2.º, n.º 4, do CIRS, até um limite ligado à remuneração regular dos últimos 12 meses e aos anos de antiguidade. O resto é rendimento tributável. Pergunta à Autoridade Tributária ou a um contabilista qual é o limite exato no teu caso.",
+        "methodBudget": "A compensação é um valor único. Repartires o valor pelos próximos meses, juntamente com o subsídio de desemprego a que tenhas direito, mostra quanto tempo cobre as tuas despesas.",
+        "supportedTitle": "Situações cobertas",
+        "supported": "Despedimento coletivo, extinção do posto de trabalho e inadaptação do trabalhador, num contrato sem termo, com cessação em 2026.",
+        "unsupportedTitle": "Não cobre",
+        "unsupportedFixedTerm": "A caducidade de contratos a termo (arts. 344.º e 345.º do Código do Trabalho), que tem taxas e regras transitórias próprias.",
+        "unsupportedJustCause": "O despedimento com justa causa (disciplinar), que segue outras regras.",
+        "unsupportedUnlawful": "O despedimento ilícito, em que o tribunal fixa a indemnização, em geral entre 15 e 45 dias de retribuição base por ano de antiguidade.",
+        "unsupportedAgreement": "A cessação por acordo, em que o valor é negociado e não há fórmula legal.",
+        "unsupportedPublic": "Os trabalhadores da função pública, que seguem outras regras.",
+        "sourcesTitle": "Fontes",
+        "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nova redação do art. 366.º e regime transitório do art. 5.º",
+        "sourceLaw13": "Guia da APEL sobre a Agenda do Trabalho Digno: Lei n.º 13/2023, que subiu a taxa do art. 366.º, n.º 1, para 14 dias desde 1 de maio de 2023",
+        "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344.º, 345.º e 366.º",
+        "sourceDgert": "DGERT: compensação por despedimento coletivo (art. 366.º)",
+        "reviewed": "Regras revistas a 19 de novembro de 2026 com o texto da Lei n.º 69/2013, publicado pela Assembleia da República, e o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias por ano da Lei n.º 13/2023, em vigor desde 1 de maio de 2023, e os 12 dias e o limite do art. 366.º vêm dos resumos da APEL e da DGERT e do Código do Trabalho consolidado, não do texto do Diário da República. Aplicamos os 14 dias só à antiguidade desde 1 de maio de 2023, a leitura habitual da norma transitória. Informação para aprender, não é aconselhamento jurídico."
+      },
+      "nextStepHeadline": "Planeia o recebimento antes de ele chegar",
+      "nextStepDescription": "A WonderMoney mostra as tuas contas e as despesas mensais em conjunto, para repartires uma indemnização pelos meses seguintes.",
+      "nextStepCta": "Planear o recebimento pelos próximos meses"
+    },
+    "statePension": {
+      "title": "Simulador da pensão de reforma 2026",
+      "shortName": "Pensão de reforma",
+      "subtitle": "Estime a sua pensão de velhice mensal, a taxa de substituição e a diferença face ao salário líquido de hoje.",
+      "description": "Estime a pensão de reforma em Portugal: valor mensal, taxa de substituição e diferença face ao salário.",
+      "pageTitle": "Simulador de Pensão de Reforma 2026: Estimativa da Pensão de Velhice",
+      "pageDescription": "Estimativa aproximada da pensão de velhice em Portugal para carreiras iniciadas em 2002 ou depois: fórmula de 2026, idade de reforma, penalização da reforma antecipada, pensões mínimas e a diferença face ao salário.",
+      "ageValue": "{{years}} anos e {{months}} meses",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal médio (euros de hoje)",
+        "years": "Anos de descontos na reforma",
+        "ageYears": "Idade de reforma: anos",
+        "ageMonths": "Idade de reforma: meses a mais"
+      },
+      "help": {
+        "gross": "O seu salário bruto médio ao longo da carreira, em euros de hoje, pago 14 vezes por ano (subsídios de férias e de Natal à parte). Indique uma média real, não o salário nominal de cada ano.",
+        "years": "Anos com remunerações registadas. Só contam 40 anos para a pensão; são precisos pelo menos 15 para ter pensão de velhice.",
+        "age": "A idade normal em 2026 é {{normal}}. A partir dos 60 anos pode reformar-se mais cedo com penalização e, até aos 70, mais tarde com bonificação."
+      },
+      "errors": {
+        "required": "Indique um número válido.",
+        "tooSmall": "Indique um valor de pelo menos {{min}}.",
+        "tooLarge": "Indique um valor até {{max}}.",
+        "whole": "Indique um número inteiro.",
+        "belowMinimum": "A pensão de velhice exige pelo menos {{min}} anos de descontos. Com menos, esta estimativa não se aplica.",
+        "tooLongForAge": "Os descontos começam aos 16 anos, no mínimo, por isso com esta idade o máximo é {{max}} anos.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Pensão bruta mensal estimada (14 pagamentos)",
+        "replacement": "Taxa de substituição (pensão / salário bruto médio)",
+        "statutory": "Pensão antes do ajuste por antecipação ou adiamento",
+        "rate": "Taxa global de formação",
+        "netPay": "O seu salário líquido hoje (por pagamento)",
+        "gap": "Diferença mensal face ao salário líquido",
+        "adjustment": {
+          "none": "Reforma na idade normal de 2026 ({{normal}}): sem penalização nem bonificação.",
+          "early": "Reformar-se {{months}} meses antes da idade normal ({{normal}}) retira {{penalty}} (0,5% por mês) e aplica o fator de sustentabilidade de 2026, de {{factor}}.",
+          "late": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação de {{bonus}}.",
+          "lateCapped": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação, que fica em {{bonus}} porque a pensão não pode passar 92% da remuneração de referência."
+        },
+        "floorApplied": "A pensão foi elevada para o mínimo de 2026 correspondente à sua carreira.",
+        "gapSome": "Para manter o nível de vida precisaria de cerca de {{gap}} por mês vindos de poupanças e investimentos (antes de impostos).",
+        "gapNone": "Com esta idade, a pensão estimada cobre o seu salário líquido de hoje.",
+        "estimate": "Estimativa aproximada para planeamento, não é uma decisão nem aconselhamento. A referência é o simulador oficial da Segurança Social Direta, que usa o seu registo de remunerações real.",
+        "limits": "Não abrange: carreiras iniciadas antes de 2002 (fórmula mista), funcionários públicos (CGA), regimes especiais e salários muito variáveis.",
+        "simulatorLink": "Abrir o simulador oficial",
+        "fireLink": "Calcule a poupança necessária com o simulador FIRE"
+      },
+      "nextStepHeadline": "Cubra a diferença com os seus investimentos",
+      "nextStepDescription": "A WonderMoney junta a sua carteira e o seu património num só lugar, para ver até onde os investimentos chegam para cobrir a diferença.",
+      "nextStepCta": "Acompanhe os investimentos necessários para cobrir a diferença",
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Alguém com um salário médio de {{gross}} por mês (euros de hoje, 14 pagamentos), com {{years}} anos de descontos, reforma-se com {{age}}. A pensão estatutária é de {{statutory}} por mês, uma taxa global de formação de {{rate}}. Reformar-se {{months}} meses antes da idade normal retira {{penalty}} e aplica o fator de sustentabilidade, ficando em {{monthly}} por mês, ou {{replacement}} do salário. Face a um salário líquido estimado de {{net}}, a diferença é de {{gap}} por mês.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodReference": "A remuneração de referência é a média das remunerações anuais de toda a carreira, revalorizadas com coeficientes ligados aos preços no consumidor e divididas por 14. O simulador trabalha em euros de hoje: indica um salário mensal médio real e o resultado também vem em euros de hoje.",
+        "methodRate": "A taxa anual depende dos escalões da remuneração de referência, em múltiplos do IAS ({{ias}} em 2026): {{rates}} para as parcelas até 1,1, até 2, até 4, até 8 e acima de 8 vezes o IAS. Carreiras até 20 anos usam 2% fixos. A taxa é multiplicada pelos anos de descontos, no máximo 40, e dá a taxa global de formação.",
+        "methodAges": "A idade normal de acesso à pensão de velhice é {{normal2026}} em 2026 e foi fixada em {{normal2027}} para 2027. O simulador usa o valor de 2026.",
+        "methodEarly": "Antes da idade normal, a partir dos 60 anos e com pelo menos 15 anos de descontos, cada mês de antecipação retira {{penalty}}, e aplica-se ainda o fator de sustentabilidade de 2026 ({{factor}}, um corte de 17,63%). Os dois multiplicam. Não estão modeladas exceções, como as carreiras muito longas.",
+        "methodLate": "Depois da idade normal, até aos 70 anos, cada mês acrescenta uma bonificação que depende dos anos de descontos: 0,33% desde 15 anos, 0,50% desde 25, 0,65% desde 35 e 1% desde 40. A pensão com bonificação não pode passar 92% da remuneração de referência.",
+        "methodMinimum": "Se a fórmula der menos do que a pensão mínima de 2026 para a sua carreira, mostra-se o mínimo: {{min15}} para 15 a 20 anos, {{min21}} para 21 a 30 e {{min31}} para 31 ou mais. O mínimo não se aplica à reforma antecipada.",
+        "methodGap": "A diferença compara a pensão bruta estimada, em 14 pagamentos, com o seu salário líquido de hoje: salário bruto menos 11% de Segurança Social e a retenção de IRS de 2026 para uma pessoa solteira sem dependentes no continente. A pensão também paga IRS, por isso a diferença real pode variar.",
+        "methodBudget": "Leia a diferença como o valor mensal que as suas poupanças e investimentos teriam de cobrir. Muda com cada pressuposto acima.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedMixed": "Carreiras iniciadas antes de 2002 (fórmula mista, com as regras antigas para os anos até 2001). Este simulador só cobre a fórmula de toda a carreira para quem começou a descontar em 2002 ou depois.",
+        "unsupportedSpecial": "Salários muito variáveis ao longo da carreira, lacunas nos descontos e carreiras com mais de 40 anos.",
+        "unsupportedCga": "Funcionários públicos da CGA, trabalhadores independentes e outros regimes especiais.",
+        "unsupportedOther": "Regimes de reforma antecipada sem penalização, pensões de invalidez e atualizações da pensão depois da reforma.",
+        "sourcesTitle": "Fontes",
+        "sourceGuide": "Guia da Segurança Social: pensão de velhice",
+        "sourceLaw": "Decreto-Lei n.º 187/2007, na redação em vigor (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: idade normal de 2027 e fator de sustentabilidade de 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: atualização das pensões de 2026 e pensões mínimas",
+        "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas."
       }
     }
   },

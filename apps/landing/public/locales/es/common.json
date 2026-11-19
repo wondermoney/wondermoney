@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney te muestra tu efectivo, tu gasto mensual y cuánto duran tus ahorros con unos ingresos menores.",
       "nextStepCta": "Estima cuánto durará tu colchón de efectivo"
     },
+    "sickPay": {
+      "title": "Calculadora de baja médica en Portugal 2026 (subsídio de doença)",
+      "shortName": "Baja médica",
+      "subtitle": "Estima el subsídio de doença de una baja médica: importe por tramo de duración, días de espera y la pérdida de ingresos.",
+      "description": "Estima la prestación por enfermedad en Portugal: importe diario, total, días de espera y diferencia con tu sueldo neto.",
+      "pageTitle": "Calculadora de Baja Médica Portugal 2026: Subsídio de Doença",
+      "pageDescription": "Estima el subsídio de doença en Portugal: remuneración de referencia a 180 días, del 55% al 75% según la duración, los 3 días de espera, el mínimo de 9,20 € y tu pérdida de ingresos durante la baja.",
+      "fields": {
+        "grossMonthly": "Salario bruto mensual",
+        "allowances": "Pagas extra",
+        "sickDays": "Días de baja",
+        "dependants": "Hijos hasta 16 años (o 24 con prestación familiar)",
+        "hospitalisation": "Ingreso hospitalario o cirugía ambulatoria"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagos (pagas de vacaciones y Navidad aparte)",
+        "twelfths": "Prorrateadas (el salario ya las incluye)"
+      },
+      "help": {
+        "gross": "El salario base de los meses considerados, antes de Seguridad Social e IRS. Las pagas de vacaciones y Navidad no forman parte de la remuneración de referencia.",
+        "allowances": "Prorrateadas, la calculadora quita las dos pagas para obtener el salario base que usa la remuneración de referencia.",
+        "sickDays": "Total de días del parte de baja (CIT), contados desde el primer día. Los trabajadores por cuenta ajena pueden cobrar hasta 1095 días.",
+        "dependants": "Se usa para el aumento de 5 puntos, que exige 3 o más hijos y una remuneración de referencia de 500 euros al mes o menos.",
+        "hospitalisation": "Con ingreso hospitalario o cirugía ambulatoria la prestación se paga desde el primer día, sin período de espera."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "total": "Total estimado que paga la Seguridad Social",
+        "paidDays": "Días pagados",
+        "waiting": "Días de espera (no los paga la Seguridad Social)",
+        "waitingValue": "{{days}} días, unos {{amount}} de sueldo neto",
+        "waitingNone": "Ninguno",
+        "reference": "Remuneración de referencia por día",
+        "netPay": "Sueldo neto normal al mes",
+        "firstGap": "Pérdida de ingresos en los primeros 30 días",
+        "averageGap": "Pérdida media mensual de ingresos durante toda la baja",
+        "bandsTitle": "Por tramo de duración",
+        "bandLabel": "Días {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} días pagados × {{daily}} = {{amount}}",
+        "increaseApplied": "Incluye el aumento de 5 puntos por remuneración baja y 3 o más hijos.",
+        "allWaiting": "Todos los días de esta baja son días de espera, así que la Seguridad Social no paga nada. Comprueba si tu contrato o convenio obliga a la empresa a pagarlos.",
+        "waitingNote": "La Seguridad Social no paga los 3 primeros días. Que la empresa los pague depende de tu contrato o convenio colectivo.",
+        "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real con tus remuneraciones registradas.",
+        "limit": {
+          "none": "El importe diario es el porcentaje de tu remuneración de referencia de cada tramo; sin límites aplicados.",
+          "minimum": "El importe diario se elevó al mínimo de {{min}} (30% del salario mínimo).",
+          "referencePay": "Tu remuneración de referencia es inferior a {{min}} al día, así que la prestación es igual a esa remuneración.",
+          "netCap": "El importe diario se limitó al valor neto estimado de tu remuneración de referencia."
+        }
+      },
+      "checklist": {
+        "title": "Condiciones a comprobar (no es una decisión)",
+        "certificate": "Tienes un parte de baja (CIT) de un médico, enviado por vía electrónica a la Seguridad Social.",
+        "guarantee": "Tienes 6 meses de remuneraciones registradas (no tienen que ser seguidos) el día que dejas de trabajar.",
+        "professionalIndex": "Trabajaste al menos 12 días en los cuatro primeros de los últimos seis meses, contando el mes en que dejas de trabajar.",
+        "waiting": "No hay período de espera con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y continúa después. La calculadora solo tiene opción para la primera.",
+        "note": "Solo la Seguridad Social decide si tienes derecho. Esta lista es un recordatorio, no un veredicto."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Un trabajador con {{gross}} al mes en 14 pagos, de baja {{days}} días y sin ingreso hospitalario. La remuneración de referencia es de {{reference}} al día. Los días 1 a 3 son de espera, así que el primer tramo paga 27 días al 55% y los 15 siguientes al 60%: {{total}} en total. El sueldo neto normal es de {{net}} al mes; durante la baja la pérdida media es de {{gap}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia (RR) es la suma de lo registrado en los 6 meses más antiguos de los 8 anteriores al mes en que empieza la baja, sin pagas de vacaciones ni Navidad, dividida entre 180. La calculadora usa tu salario mensual dividido entre 30.",
+        "methodBands": "La prestación diaria es un porcentaje de la RR que crece con la duración de la baja: 55% hasta 30 días, 60% del día 31 al 90, 70% del día 91 al 365 y 75% después, hasta 1095 días para trabajadores por cuenta ajena. Los días cuentan desde el primero de la baja, incluidos los de espera.",
+        "methodWaiting": "Los trabajadores por cuenta ajena tienen un período de espera de 3 días que la Seguridad Social no paga. Con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y va más allá, el pago empieza el día 1.",
+        "methodMinimum": "La prestación diaria no puede ser inferior a {{min}} (30% del salario mínimo de {{rmmg}}). Si la propia RR es menor, la prestación es igual a la RR.",
+        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando la RR es de 500 euros al mes como máximo y el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o hijos con bonificación por discapacidad. La calculadora solo modela el número de hijos.",
+        "methodNetCap": "La prestación diaria tampoco puede superar el valor neto de la RR. La calculadora lo estima con un 11% de Seguridad Social y la tasa de retención de IRS de 2026 del continente para un titular soltero.",
+        "methodGap": "La pérdida de ingresos compara tu sueldo neto normal (14 o 12 pagos, en promedio de 12 meses) con lo que paga la Seguridad Social. Las pagas de vacaciones y Navidad no se reponen por los días de baja.",
+        "methodBudget": "La diferencia es el ingreso que tienes que cubrir con ahorros o recortando gastos mientras estás de baja. Úsala para dimensionar tu colchón.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedTuberculosis": "Tuberculosis, pagada al 80% o al 100% de la RR según las personas a cargo, sin límite de tiempo.",
+        "unsupportedSelfEmployed": "Trabajadores autónomos (10 días de espera, hasta 365 días), seguro social voluntario y empleados del hogar.",
+        "unsupportedShort": "Ausencias cortas cubiertas por la autodeclaración de enfermedad del SNS 24: no hemos modelado sus reglas.",
+        "unsupportedOther": "Menos de 6 meses de remuneraciones registradas, remuneraciones muy variables, indemnizaciones por accidente de trabajo o enfermedad profesional y convenios que complementan la prestación.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de octubre de 2026), con el salario mínimo de 2026 de 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, en su redacción actual: el régimen de protección en la enfermedad",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 con la guía de la Segurança Social. El límite de 500 euros del aumento de 5 puntos procede de la ley consolidada y de fuentes secundarias, porque el texto de la guía no muestra la cifra. La estimación del sueldo neto detrás del límite neto es una simplificación nuestra."
+      },
+      "nextStepHeadline": "Planifica la caída temporal de ingresos",
+      "nextStepDescription": "WonderMoney muestra tu efectivo, tus gastos y cuánto tiempo te cubren los ahorros con unos ingresos menores.",
+      "nextStepCta": "Ajusta tu presupuesto a la caída temporal de ingresos"
+    },
     "vehicleTax": {
       "title": "Calculadora del IUC",
       "shortName": "IUC",
@@ -3273,6 +3363,176 @@
         "unsupportedOther": "Solo cuenta el salario base. Los complementos de antigüedad, otros conceptos retributivos, la extinción o suspensión del contrato durante el año, los convenios que paguen más y los costes de la empresa quedan fuera de esta estimación.",
         "sourceCode": "Código do Trabalho, arts. 239, 263 y 264: duración de las vacaciones, paga de Navidad y paga de vacaciones",
         "reviewed": "Reglas revisadas el 19 de noviembre de 2026. La retención por separado de cada pago del mes se comprobó en el texto original del Despacho n.º 233-A/2026, y los artículos del Código do Trabalho en copias del texto consolidado. La referencia de 22 días hábiles de la paga de vacaciones es práctica habitual, no figura en esos textos. Retener cada doceava al tipo efectivo de la paga completa (Lei n.º 11/2013, art. 3) es la práctica habitual de las empresas; esa ley no se comprobó con su texto. El 11% de Seguridad Social se comprobó en fuentes secundarias."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Calculadora de indemnización por despido en Portugal 2026",
+      "shortName": "Indemnización por despido",
+      "subtitle": "Estima la compensación por despido colectivo, extinción del puesto o inadaptación en un contrato indefinido, con los límites y las tasas según la fecha del contrato.",
+      "description": "Estima tu indemnización por despido en Portugal: tasas por fecha del contrato, límites y plan de cobro.",
+      "pageTitle": "Calculadora de Indemnización por Despido Portugal 2026: Estimación del art. 366",
+      "pageDescription": "Estima la compensación por despido (compensação por despedimento) en Portugal por despido colectivo o extinción del puesto: 12, 18, 20 o 30 días por año según la fecha del contrato, el límite de 12 meses y un plan de cobro.",
+      "fields": {
+        "baseMonthly": "Retribución base mensual (bruta)",
+        "seniorityPay": "Complementos mensuales de antigüedad (diuturnidades)",
+        "startDate": "Fecha de inicio del contrato",
+        "endDate": "Fecha de cese"
+      },
+      "help": {
+        "baseMonthly": "La retribución base (retribuição base) en euros al mes, antes de la Seguridad Social y del IRS. No incluyas pagas extra, bonus ni horas extra.",
+        "seniorityPay": "Las diuturnidades son complementos que se pagan por antigüedad. Indica 0 si no tienes.",
+        "startDate": "El día en que empezó el contrato indefinido. Si hubo grupo de empresas o un contrato anterior con el mismo empleador, comprueba cómo se cuenta tu antigüedad.",
+        "endDate": "El último día del contrato. Cuenta como día trabajado. Esta estimación cubre ceses en {{year}}."
+      },
+      "scope": "Cubre el despido colectivo, la extinción del puesto y la inadaptación en un contrato indefinido. No cubre contratos temporales, despido con justa causa, despido ilícito, cese por mutuo acuerdo ni el sector público.",
+      "errors": {
+        "required": "Introduce un valor válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "invalidDate": "Introduce una fecha válida.",
+        "endBeforeStart": "La fecha de cese no puede ser anterior a la de inicio.",
+        "startFuture": "El contrato no puede empezar en el futuro.",
+        "endOutsideYear": "Esta estimación cubre ceses en {{year}}, el año del salario mínimo que usan los límites.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "compensation": "Indemnización estimada",
+        "seniority": "Antigüedad",
+        "seniorityValue": "{{years}} años",
+        "regime": "Reglas aplicadas",
+        "regimes": {
+          "before2011": "Contrato anterior al 1 de noviembre de 2011",
+          "from2011": "Contrato del 1 de noviembre de 2011 al 30 de septiembre de 2013",
+          "from2013": "Contrato desde el 1 de octubre de 2013"
+        },
+        "usedMonthly": "Importe mensual usado",
+        "daily": "Importe diario (importe mensual dividido entre 30)",
+        "cap": "Límite global (12 importes mensuales)",
+        "breakdownTitle": "Desglose por periodo",
+        "periods": {
+          "oneMonth": "{{years}} años a {{days}} días por año",
+          "twentyDays": "{{years}} años a {{days}} días por año",
+          "eighteenDays": "{{years}} años a {{days}} días por año",
+          "twelveDays": "{{years}} años a {{days}} días por año",
+          "fourteenDays": "{{years}} años a {{days}} días por año"
+        },
+        "caps": {
+          "none": "No se aplicó ningún límite.",
+          "monthlyBase": "El importe mensual se limitó a 20 veces el salario mínimo ({{limit}}; el salario mínimo es {{rmmg}}).",
+          "total": "La indemnización se limitó a 12 importes mensuales ({{cap}}).",
+          "earlyPart": "La parte hasta el 30 de septiembre de 2013 ya alcanza el límite de {{cap}}, así que no se suma el periodo posterior."
+        },
+        "payoutTitle": "Cobro repartido en los próximos meses",
+        "payoutValue": "En {{months}} meses: {{amount}} al mes (antes de impuestos)",
+        "payoutNote": "Solo una sugerencia para planificar: el empleador suele pagar la indemnización al final del contrato, en un solo pago.",
+        "estimate": "Una estimación para aprender y planificar, no es asesoramiento jurídico. Tu empleador, un abogado, la inspección de trabajo (ACT) o tu sindicato pueden confirmar el importe."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Una persona que gana {{base}} al mes más {{seniorityPay}} de diuturnidades, con un contrato que empezó el {{start}} y terminó el {{end}}, tiene {{seniority}} años de antigüedad. El importe diario es {{daily}}. El contrato empezó entre el 1 de noviembre de 2011 y el 30 de septiembre de 2013, así que {{twentyYears}} años hasta el 30 de septiembre de 2013 cuentan 20 días ({{twentyAmount}}), {{eighteenYears}} años completan los tres primeros años a 18 días ({{eighteenAmount}}), {{twelveYears}} años hasta el 30 de abril de 2023 cuentan 12 días ({{twelveAmount}}) y los últimos {{fourteenYears}} años cuentan 14 días ({{fourteenAmount}}). El total es {{total}}, por debajo del límite de {{cap}}.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodBase": "La base es la retribución base mensual más las diuturnidades. El importe diario es ese importe mensual dividido entre 30.",
+        "methodRates": "Para la antigüedad desde el 1 de mayo de 2023, la indemnización es de 14 días de retribución base y diuturnidades por cada año completo (art. 366.1 del Código do Trabalho, según la Lei n.º 13/2023). La antigüedad anterior mantiene la tasa antigua: 12 días por año desde el 1 de octubre de 2013.",
+        "methodTransitional": "Los contratos anteriores mantienen las tasas antiguas por el tiempo ya trabajado (art. 5 de la Lei n.º 69/2013). Antes del 1 de noviembre de 2011: un mes por año hasta el 31 de octubre de 2012 y luego 20 días por año hasta el 30 de septiembre de 2013. Del 1 de noviembre de 2011 al 30 de septiembre de 2013: 20 días por año hasta el 30 de septiembre de 2013. Del 1 de octubre de 2013 al 30 de abril de 2023 todos los contratos cuentan 12 días por año, salvo que los tres primeros años de antigüedad cuentan 18 días cuando el contrato tenía menos de tres años el 1 de octubre de 2013. Desde el 1 de mayo de 2023 cada año cuenta 14 días.",
+        "methodCaps": "El importe mensual no puede superar 20 veces el salario mínimo ({{baseCap}} con el salario mínimo de {{rmmg}} de 2026) y la indemnización total no puede superar 12 importes mensuales, como máximo {{totalCapRmmg}} (240 veces el salario mínimo). Cuando la parte hasta el 30 de septiembre de 2013 ya alcanza ese límite, no se suman los periodos posteriores.",
+        "methodFraction": "Un año incompleto cuenta de forma proporcional: la calculadora cuenta los aniversarios completos de la fecha de inicio más los días desde el último, divididos entre los días de ese año. La fecha de cese cuenta como día trabajado.",
+        "methodTax": "Solo informativo, no entra en la cifra: parte de la indemnización puede quedar excluida del IRS según el art. 2.4 del CIRS, hasta un límite ligado a tu retribución regular de los últimos 12 meses y a tus años de antigüedad. El resto es renta sujeta a impuesto. Pregunta a la Autoridad Tributaria o a un contable por el límite exacto en tu caso.",
+        "methodBudget": "La indemnización es un importe único. Repartirla en los próximos meses, junto con la prestación por desempleo a la que tengas derecho, muestra cuánto tiempo cubre tus gastos.",
+        "supportedTitle": "Situaciones cubiertas",
+        "supported": "Despido colectivo, extinción del puesto e inadaptación del trabajador, en un contrato indefinido, con cese en 2026.",
+        "unsupportedTitle": "No cubierto",
+        "unsupportedFixedTerm": "La caducidad de contratos temporales (arts. 344 y 345 del Código do Trabalho), que tiene tasas y reglas transitorias propias.",
+        "unsupportedJustCause": "El despido con justa causa (disciplinario), que sigue otras reglas.",
+        "unsupportedUnlawful": "El despido ilícito, en el que el tribunal fija la indemnización, en general entre 15 y 45 días de retribución base por año de antigüedad.",
+        "unsupportedAgreement": "El cese por mutuo acuerdo, en el que el importe se negocia y no hay fórmula legal.",
+        "unsupportedPublic": "Los trabajadores del sector público, que siguen otras reglas.",
+        "sourcesTitle": "Fuentes",
+        "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y régimen transitorio del art. 5",
+        "sourceLaw13": "Guía de APEL sobre la Agenda do Trabalho Digno: Lei n.º 13/2023, que subió la tasa del art. 366.1 a 14 días desde el 1 de mayo de 2023",
+        "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344, 345 y 366",
+        "sourceDgert": "DGERT: compensación por despido colectivo (art. 366)",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 con el texto de la Lei n.º 69/2013, publicado por la Asamblea de la República, y el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días por año de la Lei n.º 13/2023, en vigor desde el 1 de mayo de 2023, y los 12 días y el límite del art. 366 proceden de los resúmenes de APEL y DGERT y del Código do Trabalho consolidado, no del texto del Diário da República. Aplicamos los 14 días solo a la antigüedad desde el 1 de mayo de 2023, la lectura habitual de la norma transitoria. Información para aprender, no es asesoramiento jurídico."
+      },
+      "nextStepHeadline": "Planifica el cobro antes de que llegue",
+      "nextStepDescription": "WonderMoney muestra tus cuentas y tus gastos mensuales juntos, para repartir una indemnización en los meses siguientes.",
+      "nextStepCta": "Planificar el cobro en tus próximos meses"
+    },
+    "statePension": {
+      "title": "Calculadora de pensión de jubilación en Portugal 2026",
+      "shortName": "Pensión de jubilación",
+      "subtitle": "Estima tu pensión de jubilación mensual en Portugal, la tasa de sustitución y la diferencia con tu sueldo neto actual.",
+      "description": "Estima tu pensión de jubilación en Portugal: importe mensual, tasa de sustitución y diferencia con tu sueldo.",
+      "pageTitle": "Calculadora de Pensión de Jubilación Portugal 2026: Estimación de la Reforma",
+      "pageDescription": "Estimación aproximada de la pensión de jubilación portuguesa (pensão de velhice) para carreras iniciadas en 2002 o después: fórmula de 2026, edad de jubilación, penalización por jubilación anticipada, pensiones mínimas y la diferencia con tu sueldo.",
+      "ageValue": "{{years}} años y {{months}} meses",
+      "fields": {
+        "grossMonthly": "Sueldo bruto mensual medio (euros de hoy)",
+        "years": "Años de cotización al jubilarte",
+        "ageYears": "Edad de jubilación: años",
+        "ageMonths": "Edad de jubilación: meses adicionales"
+      },
+      "help": {
+        "gross": "Tu sueldo bruto medio durante toda la carrera en euros de hoy, cobrado en 14 pagas al año (las pagas extra de vacaciones y Navidad aparte). Indica una media real, no el sueldo nominal de cada año.",
+        "years": "Años con remuneraciones registradas. Solo cuentan 40 años para la pensión; hacen falta al menos 15 para tener pensión de jubilación.",
+        "age": "La edad normal en 2026 es {{normal}}. Desde los 60 puedes jubilarte antes con penalización y, hasta los 70, más tarde con bonificación."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "belowMinimum": "La pensión de jubilación exige al menos {{min}} años de cotización. Con menos, esta estimación no se aplica.",
+        "tooLongForAge": "Las cotizaciones empiezan a los 16 años como pronto, así que con esta edad el máximo es {{max}} años.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "monthly": "Pensión bruta mensual estimada (14 pagas)",
+        "replacement": "Tasa de sustitución (pensión / sueldo bruto medio)",
+        "statutory": "Pensión antes del ajuste por anticipo o retraso",
+        "rate": "Tasa global de formación",
+        "netPay": "Tu sueldo neto hoy (por paga)",
+        "gap": "Diferencia mensual con tu sueldo neto",
+        "adjustment": {
+          "none": "Jubilación a la edad normal de 2026 ({{normal}}): sin penalización ni bonificación.",
+          "early": "Jubilarte {{months}} meses antes de la edad normal ({{normal}}) resta {{penalty}} (0,5 % al mes) y aplica el factor de sostenibilidad de 2026, de {{factor}}.",
+          "late": "Jubilarte {{months}} meses después de la edad normal ({{normal}}) añade una bonificación de {{bonus}}.",
+          "lateCapped": "Jubilarte {{months}} meses después de la edad normal ({{normal}}) añade una bonificación, que se queda en {{bonus}} porque la pensión no puede superar el 92 % de la remuneración de referencia."
+        },
+        "floorApplied": "La pensión se ha elevado al mínimo de 2026 que corresponde a tu carrera.",
+        "gapSome": "Para mantener tu nivel de vida necesitarías unos {{gap}} al mes procedentes de ahorros e inversiones (antes de impuestos).",
+        "gapNone": "A esta edad, la pensión estimada cubre tu sueldo neto actual.",
+        "estimate": "Estimación aproximada para planificar, no es una decisión ni un consejo. La referencia es el simulador oficial de Segurança Social Direta, que usa tu registro real de cotizaciones.",
+        "limits": "No cubre: carreras iniciadas antes de 2002 (fórmula mixta), funcionarios (CGA), regímenes especiales ni sueldos muy variables.",
+        "simulatorLink": "Abrir el simulador oficial",
+        "fireLink": "Calcula el ahorro necesario con la calculadora FIRE"
+      },
+      "nextStepHeadline": "Cubre la diferencia con tus propias inversiones",
+      "nextStepDescription": "WonderMoney reúne tu cartera y tu patrimonio en un solo lugar, para ver hasta dónde llegan tus inversiones a la hora de cubrir la diferencia.",
+      "nextStepCta": "Sigue las inversiones necesarias para cubrir tu diferencia",
+      "guide": {
+        "exampleTitle": "Ejemplo práctico",
+        "example": "Alguien con un sueldo medio de {{gross}} al mes (euros de hoy, 14 pagas), con {{years}} años de cotización, que se jubila a los {{age}}. La pensión estatutaria es de {{statutory}} al mes, una tasa global de formación del {{rate}}. Jubilarse {{months}} meses antes de la edad normal resta {{penalty}} y aplica el factor de sostenibilidad, y queda en {{monthly}} al mes, es decir, el {{replacement}} del sueldo. Frente a un sueldo neto estimado de {{net}}, la diferencia es de {{gap}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia es la media de las remuneraciones anuales de toda la carrera, revalorizadas con coeficientes ligados a los precios de consumo y divididas entre 14. La calculadora trabaja en euros de hoy: introduces un sueldo mensual medio real y el resultado también sale en euros de hoy.",
+        "methodRate": "La tasa anual depende de los tramos de la remuneración de referencia, en múltiplos del IAS ({{ias}} en 2026): {{rates}} para los tramos hasta 1,1, hasta 2, hasta 4, hasta 8 y por encima de 8 veces el IAS. Las carreras de hasta 20 años usan un 2 % fijo. La tasa se multiplica por los años de cotización, 40 como máximo, y da la tasa global de formación.",
+        "methodAges": "La edad normal de acceso a la pensión de jubilación es {{normal2026}} en 2026 y se ha fijado en {{normal2027}} para 2027. La calculadora usa el valor de 2026.",
+        "methodEarly": "Antes de la edad normal, desde los 60 años y con al menos 15 años de cotización, cada mes de anticipo resta {{penalty}}, y se aplica además el factor de sostenibilidad de 2026 ({{factor}}, un recorte del 17,63 %). Ambos se multiplican. No se modelan excepciones, como las carreras muy largas.",
+        "methodLate": "Después de la edad normal, hasta los 70 años, cada mes añade una bonificación que depende de los años de cotización: 0,33 % desde 15 años, 0,50 % desde 25, 0,65 % desde 35 y 1 % desde 40. La pensión con bonificación no puede superar el 92 % de la remuneración de referencia.",
+        "methodMinimum": "Si la fórmula da menos que la pensión mínima de 2026 para tu carrera, se muestra el mínimo: {{min15}} para 15 a 20 años, {{min21}} para 21 a 30 y {{min31}} para 31 o más. El mínimo no se aplica a la jubilación anticipada.",
+        "methodGap": "La diferencia compara la pensión bruta estimada, en 14 pagas, con tu sueldo neto de hoy: sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión también tributa IRS, así que la diferencia real puede variar.",
+        "methodBudget": "Lee la diferencia como el importe mensual que tus ahorros e inversiones tendrían que cubrir. Cambia con cada supuesto anterior.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedMixed": "Carreras iniciadas antes de 2002 (fórmula mixta, con las reglas antiguas para los años hasta 2001). Esta calculadora solo cubre la fórmula de toda la carrera para quien empezó a cotizar en 2002 o después.",
+        "unsupportedSpecial": "Sueldos muy variables a lo largo de la carrera, lagunas de cotización y carreras de más de 40 años.",
+        "unsupportedCga": "Funcionarios de la CGA, trabajadores autónomos y otros regímenes especiales.",
+        "unsupportedOther": "Regímenes de jubilación anticipada sin penalización, pensiones de invalidez y actualizaciones de la pensión después de jubilarte.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Guía de la Segurança Social: pensión de vejez",
+        "sourceLaw": "Decreto-Ley n.º 187/2007, en su redacción vigente (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1: edad normal de 2027 y factor de sostenibilidad de 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
+        "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras."
       }
     }
   },

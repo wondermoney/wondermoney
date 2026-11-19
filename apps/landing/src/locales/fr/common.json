@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney montre votre trésorerie, vos dépenses mensuelles et combien de temps vos économies tiennent avec un revenu plus bas.",
       "nextStepCta": "Estimez combien de temps durera votre réserve de trésorerie"
     },
+    "sickPay": {
+      "title": "Calculateur d'indemnités maladie au Portugal 2026 (subsídio de doença)",
+      "shortName": "Indemnités maladie",
+      "subtitle": "Estimez le subsídio de doença d'un arrêt maladie : montant par tranche de durée, jours de carence et perte de revenu.",
+      "description": "Estimez les indemnités maladie au Portugal : montant journalier, total, jours de carence et écart avec votre salaire net.",
+      "pageTitle": "Calculateur d'Indemnités Maladie Portugal 2026 : Baixa Médica",
+      "pageDescription": "Estimez le subsídio de doença au Portugal : rémunération de référence sur 180 jours, 55 % à 75 % selon la durée, les 3 jours de carence, le minimum de 9,20 € et votre perte de revenu pendant l'arrêt.",
+      "fields": {
+        "grossMonthly": "Salaire mensuel brut",
+        "allowances": "Primes de vacances et de Noël",
+        "sickDays": "Jours d'arrêt maladie",
+        "dependants": "Enfants jusqu'à 16 ans (ou 24 avec allocations familiales)",
+        "hospitalisation": "Hospitalisation ou chirurgie ambulatoire"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 paiements (primes de vacances et de Noël à part)",
+        "twelfths": "Étalées sur 12 mois (le salaire les inclut déjà)"
+      },
+      "help": {
+        "gross": "Le salaire de base des mois pris en compte, avant sécurité sociale et IRS. Les primes de vacances et de Noël ne font pas partie de la rémunération de référence.",
+        "allowances": "Étalées sur 12 mois, le calculateur retire les deux primes pour obtenir le salaire de base utilisé par la rémunération de référence.",
+        "sickDays": "Total des jours de l'arrêt (CIT), comptés dès le premier jour. Les salariés peuvent percevoir jusqu'à 1095 jours.",
+        "dependants": "Sert à la majoration de 5 points, qui exige 3 enfants ou plus et une rémunération de référence de 500 euros par mois ou moins.",
+        "hospitalisation": "Avec une hospitalisation ou une chirurgie ambulatoire, l'indemnité est versée dès le premier jour, sans délai de carence."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "total": "Total estimé versé par la Segurança Social",
+        "paidDays": "Jours payés",
+        "waiting": "Jours de carence (non payés par la Segurança Social)",
+        "waitingValue": "{{days}} jours, environ {{amount}} de salaire net",
+        "waitingNone": "Aucun",
+        "reference": "Rémunération de référence par jour",
+        "netPay": "Salaire net normal par mois",
+        "firstGap": "Perte de revenu sur les 30 premiers jours",
+        "averageGap": "Perte mensuelle moyenne de revenu sur toute la durée de l'arrêt",
+        "bandsTitle": "Par tranche de durée",
+        "bandLabel": "Jours {{from}} à {{to}} ({{percent}} %)",
+        "bandValue": "{{paid}} jours payés × {{daily}} = {{amount}}",
+        "increaseApplied": "La majoration de 5 points pour faible rémunération et 3 enfants ou plus est incluse.",
+        "allWaiting": "Chaque jour de cet arrêt est un jour de carence : la Segurança Social ne verse rien. Vérifiez si votre contrat ou votre convention collective oblige l'employeur à les payer.",
+        "waitingNote": "La Segurança Social ne paie pas les 3 premiers jours. Que l'employeur les paie dépend de votre contrat ou de votre convention collective.",
+        "estimate": "Une estimation pour planifier, pas une décision. La Segurança Social calcule le montant réel à partir de vos rémunérations enregistrées.",
+        "limit": {
+          "none": "Le montant journalier est le pourcentage de votre rémunération de référence de chaque tranche ; aucun plafond ou plancher appliqué.",
+          "minimum": "Le montant journalier a été relevé au minimum de {{min}} (30 % du salaire minimum).",
+          "referencePay": "Votre rémunération de référence est inférieure à {{min}} par jour : l'indemnité est égale à cette rémunération.",
+          "netCap": "Le montant journalier a été limité à la valeur nette estimée de votre rémunération de référence."
+        }
+      },
+      "checklist": {
+        "title": "Conditions à vérifier (pas une décision)",
+        "certificate": "Vous avez un certificat d'arrêt (CIT) d'un médecin, transmis par voie électronique à la Segurança Social.",
+        "guarantee": "Vous avez 6 mois de rémunérations enregistrées (pas forcément consécutifs) le jour où vous cessez de travailler.",
+        "professionalIndex": "Vous avez travaillé au moins 12 jours durant les quatre premiers des six derniers mois, en comptant le mois où vous cessez de travailler.",
+        "waiting": "Il n'y a pas de délai de carence en cas d'hospitalisation ou de chirurgie ambulatoire, de tuberculose, ou de maladie qui commence pendant l'allocation parentale et se prolonge après. Le calculateur n'a une option que pour la première.",
+        "note": "Seule la Segurança Social décide de vos droits. Cette liste est un rappel, pas un verdict."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Un salarié qui gagne {{gross}} par mois en 14 paiements, en arrêt pendant {{days}} jours sans hospitalisation. La rémunération de référence est de {{reference}} par jour. Les jours 1 à 3 sont des jours de carence : la première tranche paie donc 27 jours à 55 % et les 15 suivants à 60 % : {{total}} au total. Le salaire net normal est de {{net}} par mois ; pendant l'arrêt, la perte moyenne est de {{gap}} par mois.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodReference": "La rémunération de référence (RR) est la somme des rémunérations enregistrées durant les 6 plus anciens des 8 mois précédant le mois du début de l'arrêt, sans primes de vacances ni de Noël, divisée par 180. Le calculateur utilise votre salaire mensuel divisé par 30.",
+        "methodBands": "L'indemnité journalière est un pourcentage de la RR qui augmente avec la durée de l'arrêt : 55 % jusqu'à 30 jours, 60 % du jour 31 au 90, 70 % du jour 91 au 365 et 75 % au-delà, jusqu'à 1095 jours pour les salariés. Les jours comptent depuis le premier jour de l'arrêt, jours de carence compris.",
+        "methodWaiting": "Les salariés ont un délai de carence de 3 jours que la Segurança Social ne paie pas. En cas d'hospitalisation ou de chirurgie ambulatoire, de tuberculose, ou de maladie qui débute pendant l'allocation parentale et la dépasse, le paiement commence le jour 1.",
+        "methodMinimum": "L'indemnité journalière ne peut pas être inférieure à {{min}} (30 % du salaire minimum de {{rmmg}}). Si la RR elle-même est plus basse, l'indemnité est égale à la RR.",
+        "methodIncrease": "Aux tranches de 55 % et 60 %, le pourcentage augmente de 5 points quand la RR est d'au plus 500 euros par mois et que le foyer compte 3 enfants ou plus jusqu'à 16 ans (ou 24 avec allocations familiales), ou des enfants avec bonification pour handicap. Le calculateur ne modélise que le nombre d'enfants.",
+        "methodNetCap": "L'indemnité journalière ne peut pas non plus dépasser la valeur nette de la RR. Le calculateur l'estime avec 11 % de sécurité sociale et le taux de retenue d'IRS 2026 du continent pour un titulaire célibataire.",
+        "methodGap": "La perte de revenu compare votre salaire net normal (14 ou 12 paiements, en moyenne sur 12 mois) à ce que verse la Segurança Social. Les primes de vacances et de Noël ne sont pas reconstituées pour les jours d'arrêt.",
+        "methodBudget": "L'écart est le revenu à couvrir avec votre épargne ou en réduisant vos dépenses pendant l'arrêt. Servez-vous-en pour dimensionner votre coussin.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedTuberculosis": "La tuberculose, payée à 80 % ou 100 % de la RR selon les personnes à charge, sans limite de durée.",
+        "unsupportedSelfEmployed": "Les indépendants (10 jours de carence, jusqu'à 365 jours), l'assurance sociale volontaire et les employés de maison.",
+        "unsupportedShort": "Les absences courtes couvertes par l'auto-déclaration de maladie du SNS 24 : nous n'avons pas modélisé leurs règles.",
+        "unsupportedOther": "Moins de 6 mois de rémunérations enregistrées, rémunérations très variables, indemnisations pour accident du travail ou maladie professionnelle et conventions collectives qui complètent l'indemnité.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social : Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 octobre 2026), avec le salaire minimum 2026 de 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, dans sa rédaction actuelle : le régime de protection en cas de maladie",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 d'après le guide de la Segurança Social. Le plafond de 500 euros de la majoration de 5 points provient de la loi consolidée et de sources secondaires, car le texte du guide n'indique pas le chiffre. L'estimation du salaire net derrière le plafond net est une simplification de notre part."
+      },
+      "nextStepHeadline": "Préparez la baisse temporaire de revenu",
+      "nextStepDescription": "WonderMoney montre votre trésorerie, vos dépenses et combien de temps votre épargne couvre un revenu plus bas.",
+      "nextStepCta": "Ajustez votre budget à la baisse temporaire de revenu"
+    },
     "vehicleTax": {
       "title": "Calculateur de l'IUC",
       "shortName": "IUC",
@@ -3273,6 +3363,176 @@
         "unsupportedOther": "Seul le salaire de base compte. Les compléments d'ancienneté, les autres éléments de rémunération, la fin ou la suspension du contrat en cours d'année, les conventions collectives plus généreuses et les coûts de l'employeur sont hors de cette estimation.",
         "sourceCode": "Código do Trabalho, art. 239, 263 et 264 : durée des congés, prime de Noël et prime de vacances",
         "reviewed": "Règles vérifiées le 19 novembre 2026. La retenue séparée de chaque versement du mois a été vérifiée dans le texte original du Despacho n.º 233-A/2026, et les articles du Código do Trabalho dans des copies du texte consolidé. La référence de 22 jours ouvrables de la prime de vacances relève de la pratique courante et ne figure pas dans ces textes. Retenir chaque douzième au taux effectif de la prime entière (Lei n.º 11/2013, art. 3) est la pratique habituelle des employeurs ; cette loi n'a pas été vérifiée dans son texte. Le taux de 11 % de sécurité sociale a été confirmé par des sources secondaires."
+      }
+    },
+    "dismissalCompensation": {
+      "title": "Calculateur d'indemnité de licenciement au Portugal 2026",
+      "shortName": "Indemnité de licenciement",
+      "subtitle": "Estimez l'indemnité d'un licenciement collectif, d'une suppression de poste ou d'une inadaptation sur un contrat à durée indéterminée, avec les plafonds et les taux selon la date du contrat.",
+      "description": "Estimez votre indemnité de licenciement au Portugal : taux selon la date du contrat, plafonds et plan de versement.",
+      "pageTitle": "Calculateur d'Indemnité de Licenciement Portugal 2026 : Estimation de l'art. 366",
+      "pageDescription": "Estimez la compensation par licenciement (compensação por despedimento) au Portugal pour un licenciement collectif ou une suppression de poste : 12, 18, 20 ou 30 jours par an selon la date du contrat, le plafond de 12 mois et un plan de versement.",
+      "fields": {
+        "baseMonthly": "Salaire de base mensuel (brut)",
+        "seniorityPay": "Primes d'ancienneté mensuelles (diuturnidades)",
+        "startDate": "Date de début du contrat",
+        "endDate": "Date de fin du contrat"
+      },
+      "help": {
+        "baseMonthly": "Le salaire de base (retribuição base) en euros par mois, avant la Sécurité sociale et l'IRS. N'incluez pas les primes de vacances ou de Noël, les bonus ni les heures supplémentaires.",
+        "seniorityPay": "Les diuturnidades sont des compléments versés pour l'ancienneté. Indiquez 0 si vous n'en avez pas.",
+        "startDate": "Le jour où le CDI a commencé. En cas de groupe d'entreprises ou de contrat antérieur avec le même employeur, vérifiez comment votre ancienneté est comptée.",
+        "endDate": "Le dernier jour du contrat. Il compte comme un jour travaillé. Cette estimation couvre les fins de contrat en {{year}}."
+      },
+      "scope": "Couvre le licenciement collectif, la suppression de poste et l'inadaptation sur un contrat à durée indéterminée. Ne couvre pas les CDD, le licenciement pour faute grave, le licenciement illicite, la rupture d'un commun accord ni le secteur public.",
+      "errors": {
+        "required": "Saisissez une valeur valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "invalidDate": "Saisissez une date valide.",
+        "endBeforeStart": "La date de fin ne peut pas précéder la date de début.",
+        "startFuture": "Le contrat ne peut pas commencer dans le futur.",
+        "endOutsideYear": "Cette estimation couvre les fins de contrat en {{year}}, l'année du salaire minimum utilisé par les plafonds.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "compensation": "Indemnité estimée",
+        "seniority": "Ancienneté",
+        "seniorityValue": "{{years}} ans",
+        "regime": "Règles appliquées",
+        "regimes": {
+          "before2011": "Contrat antérieur au 1er novembre 2011",
+          "from2011": "Contrat du 1er novembre 2011 au 30 septembre 2013",
+          "from2013": "Contrat à partir du 1er octobre 2013"
+        },
+        "usedMonthly": "Montant mensuel retenu",
+        "daily": "Montant journalier (montant mensuel divisé par 30)",
+        "cap": "Plafond global (12 montants mensuels)",
+        "breakdownTitle": "Détail par période",
+        "periods": {
+          "oneMonth": "{{years}} ans à {{days}} jours par an",
+          "twentyDays": "{{years}} ans à {{days}} jours par an",
+          "eighteenDays": "{{years}} ans à {{days}} jours par an",
+          "twelveDays": "{{years}} ans à {{days}} jours par an",
+          "fourteenDays": "{{years}} ans à {{days}} jours par an"
+        },
+        "caps": {
+          "none": "Aucun plafond appliqué.",
+          "monthlyBase": "Le montant mensuel a été limité à 20 fois le salaire minimum ({{limit}} ; le salaire minimum est de {{rmmg}}).",
+          "total": "L'indemnité a été limitée à 12 montants mensuels ({{cap}}).",
+          "earlyPart": "La part jusqu'au 30 septembre 2013 atteint déjà le plafond de {{cap}}, la période suivante n'est donc pas ajoutée."
+        },
+        "payoutTitle": "Versement réparti sur les mois à venir",
+        "payoutValue": "Sur {{months}} mois : {{amount}} par mois (avant impôt)",
+        "payoutNote": "Une simple suggestion pour planifier : l'employeur verse normalement l'indemnité à la fin du contrat, en une seule fois.",
+        "estimate": "Une estimation pour apprendre et planifier, pas un conseil juridique. Votre employeur, un avocat, l'inspection du travail (ACT) ou votre syndicat peuvent confirmer le montant."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne qui gagne {{base}} par mois plus {{seniorityPay}} de diuturnidades, avec un contrat commencé le {{start}} et terminé le {{end}}, a {{seniority}} ans d'ancienneté. Le montant journalier est de {{daily}}. Le contrat a commencé entre le 1er novembre 2011 et le 30 septembre 2013 : {{twentyYears}} ans jusqu'au 30 septembre 2013 comptent 20 jours ({{twentyAmount}}), {{eighteenYears}} ans complètent les trois premières années à 18 jours ({{eighteenAmount}}), {{twelveYears}} ans jusqu'au 30 avril 2023 comptent 12 jours ({{twelveAmount}}) et les {{fourteenYears}} derniers ans comptent 14 jours ({{fourteenAmount}}). Le total est de {{total}}, sous le plafond de {{cap}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodBase": "La base est le salaire de base mensuel plus les diuturnidades. Le montant journalier est ce montant mensuel divisé par 30.",
+        "methodRates": "Pour l'ancienneté à partir du 1er mai 2023, l'indemnité est de 14 jours de salaire de base et de diuturnidades par année complète (art. 366, n° 1, du Código do Trabalho, tel que modifié par la Lei n.º 13/2023). L'ancienneté antérieure garde l'ancien taux : 12 jours par an depuis le 1er octobre 2013.",
+        "methodTransitional": "Les contrats plus anciens gardent les taux antérieurs pour le temps déjà travaillé (art. 5 de la Lei n.º 69/2013). Avant le 1er novembre 2011 : un mois par an jusqu'au 31 octobre 2012, puis 20 jours par an jusqu'au 30 septembre 2013. Du 1er novembre 2011 au 30 septembre 2013 : 20 jours par an jusqu'au 30 septembre 2013. Du 1er octobre 2013 au 30 avril 2023, tout contrat compte 12 jours par an, sauf que les trois premières années d'ancienneté comptent 18 jours si le contrat avait moins de trois ans au 1er octobre 2013. À partir du 1er mai 2023, chaque année compte 14 jours.",
+        "methodCaps": "Le montant mensuel ne peut dépasser 20 fois le salaire minimum ({{baseCap}} avec le salaire minimum de {{rmmg}} en 2026) et l'indemnité totale ne peut dépasser 12 montants mensuels, au plus {{totalCapRmmg}} (240 fois le salaire minimum). Quand la part jusqu'au 30 septembre 2013 atteint déjà ce plafond, les périodes suivantes ne sont pas ajoutées.",
+        "methodFraction": "Une année incomplète compte au prorata : le calculateur compte les anniversaires complets de la date de début plus les jours écoulés depuis le dernier, rapportés aux jours de cette année. La date de fin compte comme un jour travaillé.",
+        "methodTax": "À titre d'information, hors du résultat : une partie de l'indemnité peut être exclue de l'IRS selon l'art. 2, n° 4, du CIRS, jusqu'à une limite liée à votre rémunération régulière des 12 derniers mois et à vos années d'ancienneté. Le reste est un revenu imposable. Demandez à l'administration fiscale ou à un comptable la limite exacte pour votre cas.",
+        "methodBudget": "L'indemnité est un montant unique. La répartir sur les mois à venir, avec les allocations chômage auxquelles vous avez droit, montre combien de temps elle couvre vos dépenses.",
+        "supportedTitle": "Situations couvertes",
+        "supported": "Licenciement collectif, suppression de poste et inadaptation du salarié, sur un contrat à durée indéterminée, avec une fin de contrat en 2026.",
+        "unsupportedTitle": "Non couvert",
+        "unsupportedFixedTerm": "L'arrivée à terme des CDD (art. 344 et 345 du Código do Trabalho), qui a ses propres taux et règles transitoires.",
+        "unsupportedJustCause": "Le licenciement pour faute grave (disciplinaire), qui suit d'autres règles.",
+        "unsupportedUnlawful": "Le licenciement illicite, où le tribunal fixe l'indemnité, en général entre 15 et 45 jours de salaire de base par année d'ancienneté.",
+        "unsupportedAgreement": "La rupture d'un commun accord, où le montant est négocié sans formule légale.",
+        "unsupportedPublic": "Les agents du secteur public, qui suivent d'autres règles.",
+        "sourcesTitle": "Sources",
+        "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régime transitoire de l'art. 5",
+        "sourceLaw13": "Guide de l'APEL sur l'Agenda do Trabalho Digno : Lei n.º 13/2023, qui a porté le taux de l'art. 366, n° 1, à 14 jours depuis le 1er mai 2023",
+        "sourceCode": "Código do Trabalho, texte consolidé (PGDL) : art. 344, 345 et 366",
+        "sourceDgert": "DGERT : indemnité de licenciement collectif (art. 366)",
+        "reviewed": "Règles vérifiées le 19 novembre 2026 sur le texte de la Lei n.º 69/2013, publié par l'Assemblée de la République, et le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours par an de la Lei n.º 13/2023, en vigueur depuis le 1er mai 2023, ainsi que les 12 jours et le plafond de l'art. 366 proviennent des résumés de l'APEL et de la DGERT et du Código do Trabalho consolidé, pas du texte du Diário da República. Nous appliquons les 14 jours uniquement à l'ancienneté depuis le 1er mai 2023, la lecture habituelle de la règle transitoire. Information pédagogique, pas un conseil juridique."
+      },
+      "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",
+      "nextStepDescription": "WonderMoney réunit vos comptes et vos dépenses mensuelles, pour répartir une indemnité sur les mois à venir.",
+      "nextStepCta": "Planifier le versement sur vos prochains mois"
+    },
+    "statePension": {
+      "title": "Simulateur de pension de retraite au Portugal 2026",
+      "shortName": "Pension de retraite",
+      "subtitle": "Estimez votre pension de vieillesse mensuelle au Portugal, le taux de remplacement et l'écart avec votre salaire net actuel.",
+      "description": "Estimez votre pension de retraite au Portugal : montant mensuel, taux de remplacement et écart avec votre salaire.",
+      "pageTitle": "Simulateur de Pension de Retraite Portugal 2026 : Estimation de la Reforma",
+      "pageDescription": "Estimation approximative de la pension de vieillesse portugaise (pensão de velhice) pour les carrières commencées en 2002 ou après : formule 2026, âge de départ, décote en cas de départ anticipé, pensions minimales et écart avec votre salaire.",
+      "ageValue": "{{years}} ans et {{months}} mois",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel moyen (euros d'aujourd'hui)",
+        "years": "Années de cotisation au départ",
+        "ageYears": "Âge de départ : années",
+        "ageMonths": "Âge de départ : mois en plus"
+      },
+      "help": {
+        "gross": "Votre salaire brut moyen sur toute la carrière en euros d'aujourd'hui, versé en 14 mensualités par an (primes de vacances et de Noël à part). Indiquez une moyenne réelle, pas le salaire nominal de chaque année.",
+        "years": "Années avec rémunérations enregistrées. Seules 40 années comptent pour la pension ; il en faut au moins 15 pour avoir une pension de vieillesse.",
+        "age": "L'âge normal en 2026 est de {{normal}}. À partir de 60 ans, vous pouvez partir plus tôt avec une décote et, jusqu'à 70 ans, plus tard avec une surcote."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "belowMinimum": "Une pension de vieillesse exige au moins {{min}} années de cotisation. Avec moins, cette estimation ne s'applique pas.",
+        "tooLongForAge": "Les cotisations commencent à 16 ans au plus tôt, donc à cet âge le maximum est de {{max}} années.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "monthly": "Pension brute mensuelle estimée (14 versements)",
+        "replacement": "Taux de remplacement (pension / salaire brut moyen)",
+        "statutory": "Pension avant ajustement pour départ anticipé ou différé",
+        "rate": "Taux global de formation",
+        "netPay": "Votre salaire net aujourd'hui (par versement)",
+        "gap": "Écart mensuel avec votre salaire net",
+        "adjustment": {
+          "none": "Départ à l'âge normal de 2026 ({{normal}}) : ni décote ni surcote.",
+          "early": "Partir {{months}} mois avant l'âge normal ({{normal}}) retire {{penalty}} (0,5 % par mois) et applique le facteur de durabilité 2026 de {{factor}}.",
+          "late": "Partir {{months}} mois après l'âge normal ({{normal}}) ajoute une surcote de {{bonus}}.",
+          "lateCapped": "Partir {{months}} mois après l'âge normal ({{normal}}) ajoute une surcote, qui s'arrête à {{bonus}} car la pension ne peut pas dépasser 92 % de la rémunération de référence."
+        },
+        "floorApplied": "La pension a été relevée au minimum 2026 correspondant à la durée de votre carrière.",
+        "gapSome": "Pour garder votre niveau de vie, il vous faudrait environ {{gap}} par mois issus de l'épargne et des investissements (avant impôt).",
+        "gapNone": "À cet âge, la pension estimée couvre votre salaire net actuel.",
+        "estimate": "Estimation approximative pour planifier, ni décision ni conseil. La référence est le simulateur officiel de la Segurança Social Direta, qui utilise votre relevé réel de cotisations.",
+        "limits": "Non couvert : carrières commencées avant 2002 (formule mixte), fonctionnaires (CGA), régimes spéciaux et salaires très variables.",
+        "simulatorLink": "Ouvrir le simulateur officiel",
+        "fireLink": "Calculez l'épargne nécessaire avec le simulateur FIRE"
+      },
+      "nextStepHeadline": "Comblez l'écart avec vos propres investissements",
+      "nextStepDescription": "WonderMoney réunit votre portefeuille et votre patrimoine au même endroit, pour voir jusqu'où vos investissements permettent de combler l'écart.",
+      "nextStepCta": "Suivez les investissements nécessaires pour combler votre écart",
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne gagnant {{gross}} par mois en moyenne (euros d'aujourd'hui, 14 versements), avec {{years}} années de cotisation, part à {{age}}. La pension statutaire est de {{statutory}} par mois, soit un taux global de formation de {{rate}}. Partir {{months}} mois avant l'âge normal retire {{penalty}} et applique le facteur de durabilité, ce qui laisse {{monthly}} par mois, soit {{replacement}} du salaire. Face à un salaire net estimé de {{net}}, l'écart est de {{gap}} par mois.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodReference": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
+        "methodRate": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
+        "methodAges": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
+        "methodEarly": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation retire {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
+        "methodLate": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
+        "methodMinimum": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
+        "methodGap": "L'écart compare la pension brute estimée, sur 14 versements, à votre salaire net d'aujourd'hui : salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. Une pension est aussi soumise à l'IRS, l'écart réel peut donc différer.",
+        "methodBudget": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il bouge avec chaque hypothèse ci-dessus.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedMixed": "Les carrières commencées avant 2002 (formule mixte, avec les anciennes règles pour les années jusqu'en 2001). Ce simulateur ne couvre que la formule de toute la carrière pour ceux qui ont commencé à cotiser en 2002 ou après.",
+        "unsupportedSpecial": "Les salaires très variables sur la carrière, les trous de cotisation et les carrières de plus de 40 ans.",
+        "unsupportedCga": "Les fonctionnaires de la CGA, les indépendants et les autres régimes spéciaux.",
+        "unsupportedOther": "Les régimes de retraite anticipée sans décote, les pensions d'invalidité et les revalorisations de la pension après le départ.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Guide de la Segurança Social : pension de vieillesse",
+        "sourceLaw": "Décret-loi n.º 187/2007, tel que modifié (Diário da República)",
+        "sourceAges": "Portaria n.º 476/2025/1 : âge normal pour 2027 et facteur de durabilité pour 2026",
+        "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
+        "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres."
       }
     }
   },

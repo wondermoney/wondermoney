@@ -37,7 +37,8 @@ const stalePricePattern = /€(?:4[.,]99|39[.,]90|4[.,]15|3[.,]90|24[.,]90)|(?:4
 // excludes the /refer and /afiliados namespaces, which are explicitly out of
 // scope for this pass (see AGENTS-facing task notes) and still mention the
 // retired Founding Member tier.
-const staleTrialLanguagePattern = /14[- ]day|no credit card/i;
+// "14 days" (plural) is legitimate copy, e.g. the dismissal compensation rate; the retired offer said "14-day".
+const staleTrialLanguagePattern = /14[- ]day(?!s)|no credit card/i;
 const acquisitionKeyPattern = /trial|offer|acquisition/i;
 const flattenStrings = (value, prefix = "") =>
   Object.entries(value).flatMap(([key, child]) => {

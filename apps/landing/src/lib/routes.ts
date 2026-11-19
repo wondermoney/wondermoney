@@ -448,6 +448,30 @@ const ROUTE_SLUGS = {
 		de: "arbeitslosengeld-rechner-portugal",
 		it: "calcolatore-sussidio-disoccupazione-portogallo",
 	},
+	toolSickPay: {
+		pt: "simulador-subsidio-doenca",
+		en: "portugal-sick-pay-calculator",
+		es: "calculadora-baja-medica-portugal",
+		fr: "calculateur-indemnites-maladie-portugal",
+		de: "krankengeld-rechner-portugal",
+		it: "calcolatore-indennita-malattia-portogallo",
+	},
+	toolDismissalCompensation: {
+		pt: "simulador-compensacao-despedimento",
+		en: "portugal-dismissal-compensation-calculator",
+		es: "calculadora-indemnizacion-despido-portugal",
+		fr: "calculateur-indemnite-licenciement-portugal",
+		de: "abfindungsrechner-kuendigung-portugal",
+		it: "calcolatore-indennita-licenziamento-portogallo",
+	},
+	toolStatePension: {
+		pt: "simulador-pensao-reforma",
+		en: "portugal-state-pension-calculator",
+		es: "calculadora-pension-jubilacion-portugal",
+		fr: "calculateur-pension-retraite-portugal",
+		de: "rentenrechner-portugal",
+		it: "calcolatore-pensione-vecchiaia-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -576,8 +600,11 @@ export const TOOL_ROUTE_IDS = [
 	"toolHolidayAllowance",
 	"toolWithholdingTables",
 	"toolUnemploymentBenefit",
+	"toolSickPay",
+	"toolDismissalCompensation",
 	"toolVehicleTax",
 	"toolPropertyCapitalGains",
+	"toolStatePension",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -884,6 +911,14 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"unemployment-benefit-calculator": "toolUnemploymentBenefit",
 	"unemployment-benefit": "toolUnemploymentBenefit",
 	"subsidio-de-desemprego": "toolUnemploymentBenefit",
+	toolsickpay: "toolSickPay",
+	"sick-pay-calculator": "toolSickPay",
+	"sick-pay": "toolSickPay",
+	"subsidio-de-doenca": "toolSickPay",
+	"baixa-medica": "toolSickPay",
+	tooldismissalcompensation: "toolDismissalCompensation",
+	"dismissal-compensation": "toolDismissalCompensation",
+	"compensacao-por-despedimento": "toolDismissalCompensation",
 	toolvehicletax: "toolVehicleTax",
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",
@@ -891,6 +926,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolpropertycapitalgains: "toolPropertyCapitalGains",
 	"capital-gains-calculator": "toolPropertyCapitalGains",
 	"mais-valias": "toolPropertyCapitalGains",
+	toolstatepension: "toolStatePension",
+	"state-pension-calculator": "toolStatePension",
+	"state-pension": "toolStatePension",
+	"pensao-de-reforma": "toolStatePension",
 }
 
 function normalizeRouteLookupKey(value: string): string {

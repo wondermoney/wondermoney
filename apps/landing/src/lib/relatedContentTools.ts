@@ -72,12 +72,24 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolUnemploymentBenefit",
   },
   {
+    sources: ["toolUnemploymentBenefit", "toolEmergencyFund", "toolNetSalary"],
+    destination: "toolSickPay",
+  },
+  {
+    sources: ["toolUnemploymentBenefit", "toolNetSalary", "toolEmergencyFund"],
+    destination: "toolDismissalCompensation",
+  },
+  {
     sources: ["toolCarLoan", "toolHouseholdBudget", "toolSavingsGoal"],
     destination: "toolVehicleTax",
   },
   {
     sources: ["toolPurchaseTaxes", "toolPropertyTax", "toolMortgage"],
     destination: "toolPropertyCapitalGains",
+  },
+  {
+    sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"],
+    destination: "toolStatePension",
   },
 ];
 
