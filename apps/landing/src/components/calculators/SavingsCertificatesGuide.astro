@@ -36,7 +36,12 @@ const values = {
   minAmount: money(SAVINGS_CERTIFICATES_RULES.minAmount, 0),
   maxAmount: money(SAVINGS_CERTIFICATES_RULES.maxAmount, 0),
   rulesDate: t(k("rulesDateValue")),
+  referenceMonth: monthLabel(locale, SAVINGS_CERTIFICATES_RULES.referenceBaseRate.month),
+  referenceRate: pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate),
 };
+function monthLabel(lang: string, month: string) {
+  return new Intl.DateTimeFormat(lang, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${month}-01`));
+}
 const sheetSource = "https://www.ctt.pt/application/themes/pdfs/particulares/dinheiro-e-seguros/FPCA_Serie_F.pdf";
 const igcpSource = "https://www.aforronet.gov.pt/";
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";

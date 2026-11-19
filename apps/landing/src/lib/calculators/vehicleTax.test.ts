@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  computeVehicleTax, instalmentMonths, VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS, type VehicleTaxInput,
+  computeVehicleTax, instalmentMonths, transitionalMonths2027, VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS, type VehicleTaxInput,
 } from "./vehicleTax";
 
 function resultFor(overrides: Partial<VehicleTaxInput> = {}) {
@@ -14,7 +14,8 @@ describe("annual vehicle tax (IUC)", () => {
     expect(resultFor()).toEqual({
       category: "B", exempt: false, coefficient: 1.15, baseTax: 128.89, additionalTax: 0,
       dieselSurcharge: 10.07, annualTax: 158.29, monthlyProvision: 13.19, dueMonth: 3,
-      schedule2027: [{ month: 4, amount: 79.14 }, { month: 10, amount: 79.15 }],
+      schedule2027: [{ month: 10, amount: 158.29 }],
+      schedule2028: [{ month: 4, amount: 79.14 }, { month: 10, amount: 79.15 }],
     });
   });
 
@@ -41,7 +42,7 @@ describe("annual vehicle tax (IUC)", () => {
 
   it("uses coefficient 1.00 for July 2007 and 1.15 from 2010", () => {
     expect(resultFor({ fuel: "petrol", cc: 1250, co2: 120, year: 2007, month: 7 })).toMatchObject({
-      category: "B", coefficient: 1, annualTax: 96.92, schedule2027: [{ month: 4, amount: 96.92 }],
+      category: "B", coefficient: 1, annualTax: 96.92, schedule2028: [{ month: 4, amount: 96.92 }],
     });
     expect(resultFor({ cc: 1250, co2: 120, year: 2008 }).coefficient).toBe(1.05);
     expect(resultFor({ cc: 1250, co2: 120, year: 2009 }).coefficient).toBe(1.1);
@@ -66,19 +67,29 @@ describe("annual vehicle tax (IUC)", () => {
 
   it("exempts electric cars in category B and ignores cc and CO2", () => {
     expect(resultFor({ fuel: "electric", cc: NaN, co2: NaN })).toMatchObject({
-      exempt: true, annualTax: 0, monthlyProvision: 0, schedule2027: [],
+      exempt: true, annualTax: 0, monthlyProvision: 0, schedule2027: [], schedule2028: [],
     });
   });
 
-  it("splits the 2027 payment by the 100 and 500 euro thresholds", () => {
+  it("pays 2027 in October up to 500 euros and in July and October above (Decreto-Lei 161/2026, art. 6)", () => {
+    expect(transitionalMonths2027(0)).toEqual([]);
+    expect(transitionalMonths2027(100)).toEqual([10]);
+    expect(transitionalMonths2027(500)).toEqual([10]);
+    expect(transitionalMonths2027(500.01)).toEqual([7, 10]);
+    const big = resultFor({ cc: 3000, co2: 270 });
+    expect(big.schedule2027.map((row) => row.month)).toEqual([7, 10]);
+    expect(big.schedule2027.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(1061.1);
+  });
+
+  it("splits the payment from 2028 by the 100 and 500 euro thresholds", () => {
     expect(instalmentMonths(0)).toEqual([]);
     expect(instalmentMonths(100)).toEqual([4]);
     expect(instalmentMonths(100.01)).toEqual([4, 10]);
     expect(instalmentMonths(500)).toEqual([4, 10]);
     expect(instalmentMonths(500.01)).toEqual([4, 7, 10]);
     const big = resultFor({ cc: 3000, co2: 270 });
-    expect(big.schedule2027.map((row) => row.month)).toEqual([4, 7, 10]);
-    expect(big.schedule2027.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(1061.1);
+    expect(big.schedule2028.map((row) => row.month)).toEqual([4, 7, 10]);
+    expect(big.schedule2028.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(1061.1);
   });
 
   it("rejects empty, zero, negative and huge capacity and CO2 with clear codes", () => {

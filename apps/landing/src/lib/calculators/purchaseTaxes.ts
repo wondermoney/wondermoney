@@ -2,8 +2,8 @@
  * Portuguese property purchase taxes: IMT (CIMT art. 17) and Imposto do Selo.
  *
  * The table is versioned by tax year. Limits and rates are those of the CIMT as updated for
- * 2026 (Lei n.º 73-A/2025, Orçamento do Estado 2026), read from the Autoridade Tributária's
- * published CIMT text. Update PURCHASE_TAXES_TABLE and its review date each year.
+ * 2026 (Lei n.º 73-A/2025, Orçamento do Estado 2026), checked on 2026-11-19 against Ofício
+ * Circulado 40129/2026 (tables I to VI, mainland and Azores/Madeira). Update PURCHASE_TAXES_TABLE and its review date each year.
  *
  * Money is handled in integer cents. IMT and Imposto do Selo are each rounded to the cent,
  * as the AT assesses them.
@@ -13,6 +13,7 @@ export const PURCHASE_TAXES_TABLE = {
   reviewedOn: "2026-11-19",
   sources: {
     cimt: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimt/Pages/cimt17.aspx",
+    circular: "https://at.madeira.gov.pt/ficheiros/Oficio_circulado_40129_2026.pdf",
     stampDuty: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cis/Pages/cis.aspx",
   },
 } as const;
@@ -28,9 +29,6 @@ export const STAMP_PURCHASE_BP = 80;
 export const STAMP_LOAN_BP = 60;
 const RUSTIC_BP = 500;
 const OTHER_URBAN_BP = 650;
-/** Autonomous regions use the same rates with limits 25% higher, rounded to the euro. */
-const ISLANDS_FACTOR = 1.25;
-
 interface Band {
   /** Upper limit in whole euros, inclusive. */
   upTo: number;
@@ -39,13 +37,17 @@ interface Band {
   progressive: boolean;
 }
 
-const MAINLAND_BANDS: Record<"ownPermanent" | "secondary", Band[]> = {
+type HomeUse = "ownPermanent" | "secondary";
+type Table = Record<HomeUse, Band[]>;
+
+/** Tables I and III of Ofício Circulado 40129/2026 (6 January 2026). */
+const MAINLAND_BANDS: Table = {
   ownPermanent: [
     { upTo: 106_346, rateBp: 0, progressive: true },
     { upTo: 145_470, rateBp: 200, progressive: true },
     { upTo: 198_347, rateBp: 500, progressive: true },
     { upTo: 330_539, rateBp: 700, progressive: true },
-    { upTo: 660_982, rateBp: 800, progressive: false },
+    { upTo: 660_982, rateBp: 800, progressive: true },
     { upTo: 1_150_853, rateBp: 600, progressive: false },
     { upTo: Infinity, rateBp: 750, progressive: false },
   ],
@@ -54,34 +56,56 @@ const MAINLAND_BANDS: Record<"ownPermanent" | "secondary", Band[]> = {
     { upTo: 145_470, rateBp: 200, progressive: true },
     { upTo: 198_347, rateBp: 500, progressive: true },
     { upTo: 330_539, rateBp: 700, progressive: true },
-    { upTo: 633_931, rateBp: 800, progressive: false },
+    { upTo: 633_931, rateBp: 800, progressive: true },
     { upTo: 1_150_853, rateBp: 600, progressive: false },
     { upTo: Infinity, rateBp: 750, progressive: false },
   ],
 };
 
-const YOUNG_FULL_LIMIT = 330_539;
-const YOUNG_PARTIAL_LIMIT = 660_982;
+/** Tables IV and VI of the same circular, for the Azores and Madeira (Lei 21/90). */
+const ISLANDS_BANDS: Table = {
+  ownPermanent: [
+    { upTo: 132_933, rateBp: 0, progressive: true },
+    { upTo: 181_838, rateBp: 200, progressive: true },
+    { upTo: 247_934, rateBp: 500, progressive: true },
+    { upTo: 413_174, rateBp: 700, progressive: true },
+    { upTo: 826_228, rateBp: 800, progressive: true },
+    { upTo: 1_438_566, rateBp: 600, progressive: false },
+    { upTo: Infinity, rateBp: 750, progressive: false },
+  ],
+  secondary: [
+    { upTo: 132_933, rateBp: 100, progressive: true },
+    { upTo: 181_838, rateBp: 200, progressive: true },
+    { upTo: 247_934, rateBp: 500, progressive: true },
+    { upTo: 413_174, rateBp: 700, progressive: true },
+    { upTo: 792_414, rateBp: 800, progressive: true },
+    { upTo: 1_438_566, rateBp: 600, progressive: false },
+    { upTo: Infinity, rateBp: 750, progressive: false },
+  ],
+};
+
+const bandsFor = (use: HomeUse, region: Region) =>
+  (region === "islands" ? ISLANDS_BANDS : MAINLAND_BANDS)[use];
+
+/** Young-buyer tables II and V: full exemption limit, then 8% on the excess up to the partial limit. */
+const YOUNG_LIMITS_BY_REGION: Record<Region, { full: number; partial: number }> = {
+  mainland: { full: 330_539, partial: 660_982 },
+  islands: { full: 413_174, partial: 826_228 },
+};
 const YOUNG_PARTIAL_BP = 800;
 
-const scale = (euros: number, region: Region) =>
-  region === "islands" && Number.isFinite(euros) ? Math.round(euros * ISLANDS_FACTOR) : euros;
-
-export const YOUNG_LIMITS = (region: Region) => ({
-  full: scale(YOUNG_FULL_LIMIT, region),
-  partial: scale(YOUNG_PARTIAL_LIMIT, region),
-});
+export const YOUNG_LIMITS = (region: Region) => ({ ...YOUNG_LIMITS_BY_REGION[region] });
 
 export function ownPermanentExemptionLimit(region: Region) {
-  return scale(MAINLAND_BANDS.ownPermanent[0].upTo, region);
+  return bandsFor("ownPermanent", region)[0].upTo;
 }
 
 const centsOf = (euros: number) => Math.round(euros * 100);
 const taxCents = (valueCents: number, rateBp: number) => Math.round((valueCents * rateBp) / BP);
 
 /** The IMT "parcela a abater" of each progressive band, in cents, derived from the limits. */
-export function imtBands(use: "ownPermanent" | "secondary", region: Region) {
-  const bands = MAINLAND_BANDS[use].map((band) => ({ ...band, upTo: scale(band.upTo, region) }));
+export function imtBands(use: HomeUse, region: Region) {
+  const bands = bandsFor(use, region);
   let taxAtLower = 0;
   let lower = 0;
   return bands.map((band) => {

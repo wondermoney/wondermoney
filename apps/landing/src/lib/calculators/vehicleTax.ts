@@ -10,6 +10,10 @@ export const IUC_TABLES = {
   taxYear: 2026,
   reviewed: "2026-11-19",
   law: "Lei n.º 82/2023, de 29 de dezembro",
+  dieselSurchargeSource:
+    "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/iuc/Pages/iuc-adicional-lei82-b-2014.aspx",
+  schedule2027Source:
+    "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/diplomas_legislativos/Documents/decreto-lei-161-2026.pdf",
   /** Article 10(3): coefficients in hundredths, by year of first registration. */
   coefficients: { 2007: 100, 2008: 105, 2009: 110, 2010: 115 } as Record<number, number>,
   /** Article 10(1) table 1: cylinder capacity in cm3 (inclusive upper bound) and the rate in cents. */
@@ -58,8 +62,8 @@ export const IUC_TABLES = {
   /**
    * Diesel "adicional de IUC" (Lei n.º 82-B/2014, art. 216, kept in force each year by the State Budget,
    * for 2026 by art. 94 of Lei n.º 73-A/2025). Diesel only, categories A and B, never multiplied by
-   * the year coefficient. Amounts in cents, from the ACP tables: the Portal das Finanças page that
-   * names the surcharge shows no amounts.
+   * the year coefficient. Amounts in cents, as published in tables I and II of art. 216 on the
+   * Portal das Finanças (checked on 2026-11-19).
    */
   dieselSurcharge: {
     categoryA: [
@@ -80,7 +84,11 @@ export const IUC_TABLES = {
 export const VEHICLE_TAX_LIMITS = { cc: 10_000, co2: 1_000, firstYear: 1981, lastYear: 2026 } as const;
 /** Category A covers first registrations from 1981 up to June 2007; category B starts in July 2007. */
 export const CATEGORY_B_START = { year: 2007, month: 7 } as const;
-/** From 2027 (Decreto-Lei n.º 161/2026) the tax is settled by April and paid in instalments: thresholds in euros. */
+/**
+ * Decreto-Lei n.º 161/2026 (4 August 2026, effective 1 January 2027): from 2028 the tax is settled by
+ * April and paid in instalments, by these thresholds in euros of the taxpayer's total (art. 17(3)).
+ * 2027 is transitional (art. 6): one payment in October up to 500 euros, otherwise July and October.
+ */
 export const SINGLE_INSTALMENT_MAX = 100;
 export const TWO_INSTALMENTS_MAX = 500;
 
@@ -109,6 +117,13 @@ export const VEHICLE_TAX_EXAMPLE: VehicleTaxInput = {
 };
 
 export type InstalmentMonth = 4 | 7 | 10;
+export const TRANSITIONAL_2027_MAX = 500;
+
+/** The 2027 transitional months (Decreto-Lei n.º 161/2026, art. 6(1)). */
+export function transitionalMonths2027(annualEuros: number): InstalmentMonth[] {
+  if (annualEuros <= 0) return [];
+  return annualEuros <= TRANSITIONAL_2027_MAX ? [10] : [7, 10];
+}
 
 export function instalmentMonths(annualEuros: number): InstalmentMonth[] {
   if (annualEuros <= 0) return [];
@@ -186,9 +201,14 @@ export function computeVehicleTax(input: VehicleTaxInput) {
     annualCents = Math.round(((baseCents + additionalCents) * coefficientHundredths) / 100) + dieselCents;
   }
 
-  const months = instalmentMonths(annualCents / 100);
-  const count = months.length;
-  const share = count ? Math.floor(annualCents / count) : 0;
+  const split = (months: InstalmentMonth[]) => {
+    const count = months.length;
+    const share = count ? Math.floor(annualCents / count) : 0;
+    return months.map((m, index) => ({
+      month: m,
+      amount: (index === count - 1 ? annualCents - share * (count - 1) : share) / 100,
+    }));
+  };
   return {
     ok: true as const,
     result: {
@@ -202,11 +222,10 @@ export function computeVehicleTax(input: VehicleTaxInput) {
       monthlyProvision: Math.round(annualCents / 12) / 100,
       /** Month (1-12) the 2026 IUC is paid: the month of the registration anniversary. */
       dueMonth: month,
-      /** From 2027: settled by April and paid in instalments. */
-      schedule2027: months.map((m, index) => ({
-        month: m,
-        amount: (index === count - 1 ? annualCents - share * (count - 1) : share) / 100,
-      })),
+      /** 2027, transitional: October, or July and October above 500 euros. */
+      schedule2027: split(transitionalMonths2027(annualCents / 100)),
+      /** From 2028: settled by April and paid in April, July and October by instalment thresholds. */
+      schedule2028: split(instalmentMonths(annualCents / 100)),
     },
   };
 }

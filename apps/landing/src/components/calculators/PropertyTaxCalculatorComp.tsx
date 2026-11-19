@@ -153,7 +153,7 @@ function PropertyTaxCalculator() {
             <div>
               <p className="text-sm font-medium text-foreground">{t(k("result.scheduleTitle"))}</p>
               {result.schedule.length === 0 ? (
-                <p className="mt-2 text-sm text-muted-foreground">{t(k("result.nothingDue"))}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{t(k(result.belowMinimum ? "result.belowMinimum" : "result.nothingDue"))}</p>
               ) : (
                 <ul className="mt-2 divide-y divide-border text-sm">
                   {result.schedule.map((row) => (

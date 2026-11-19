@@ -84,7 +84,11 @@ function SavingsCertificatesCalculator() {
         <CalculatorInput
           id="savingsCertificates-baseRate"
           label={t(k("fields.baseRate"))}
-          helpText={t(k("fields.baseRateHelp"), { rate: formatPercent(locale, maxBaseRate, { decimals: 2 }) })}
+          helpText={t(k("fields.baseRateHelp"), {
+            rate: formatPercent(locale, maxBaseRate, { decimals: 2 }),
+            month: new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" })
+              .format(new Date(`${SAVINGS_CERTIFICATES_RULES.referenceBaseRate.month}-01`)),
+          })}
           value={input.baseRate}
           onChange={set("baseRate")}
           min={0}

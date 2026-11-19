@@ -13,7 +13,7 @@ function resultFor(overrides: Partial<PropertyTaxInput> = {}) {
 describe("annual property tax (IMI)", () => {
   it("applies the municipal rate to the VPT, splits it in three and provisions a twelfth", () => {
     expect(resultFor()).toEqual({
-      rate: 0.35, grossTax: 525, deduction: 0, annualTax: 525, monthlyProvision: 43.75,
+      rate: 0.35, grossTax: 525, deduction: 0, annualTax: 525, belowMinimum: false, monthlyProvision: 43.75,
       schedule: [
         { month: "may", amount: 175 },
         { month: "august", amount: 175 },
@@ -45,6 +45,18 @@ describe("annual property tax (IMI)", () => {
     expect(resultFor({ vpt: 20_000, dependants: 3 })).toMatchObject({
       grossTax: 70, deduction: 70, annualTax: 0, monthlyProvision: 0, schedule: [],
     });
+  });
+
+  it("charges nothing when the tax to collect is below 10 euros (CIMI art. 113(6))", () => {
+    expect(resultFor({ vpt: 2_000, rate: 0.35 })).toMatchObject({
+      grossTax: 7, annualTax: 0, belowMinimum: true, monthlyProvision: 0, schedule: [],
+    });
+    expect(resultFor({ vpt: 2_850, rate: 0.35 })).toMatchObject({ grossTax: 9.98, annualTax: 0, belowMinimum: true });
+    expect(resultFor({ vpt: 2_858, rate: 0.35 })).toMatchObject({ annualTax: 10, belowMinimum: false });
+    // The minimum applies to what is left after the IMI Familiar reduction.
+    expect(resultFor({ vpt: 20_000, dependants: 1 })).toMatchObject({ annualTax: 40, belowMinimum: false });
+    expect(resultFor({ vpt: 10_000, dependants: 1 })).toMatchObject({ grossTax: 35, deduction: 30, annualTax: 0, belowMinimum: true });
+    expect(resultFor({ vpt: 20_000, dependants: 3 }).belowMinimum).toBe(false);
   });
 
   it("keeps cents exact and puts the rounding remainder in the last instalment", () => {

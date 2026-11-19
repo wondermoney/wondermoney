@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   PERMANENCE_PREMIUM_STEPS,
+  SAVINGS_CERTIFICATES_EXAMPLE,
+  SAVINGS_CERTIFICATES_RULES,
   computeSavingsCertificates,
   permanencePremium,
 } from "./savingsCertificates";
@@ -84,5 +86,13 @@ describe("computeSavingsCertificates", () => {
     expect(e(1000, 5, 2.6)).toEqual({ baseRate: "baseRate" });
     expect(e(1000, 5, -1)).toEqual({ baseRate: "negative" });
     expect(e(NaN, NaN, NaN)).toEqual({ amount: "required", years: "required", baseRate: "required" });
+  });
+
+  it("defaults the base rate to the reference month within the 0% to 2.5% band", () => {
+    const { referenceBaseRate, maxBaseRate } = SAVINGS_CERTIFICATES_RULES;
+    expect(referenceBaseRate.month).toBe("2026-11");
+    expect(referenceBaseRate.rate).toBeGreaterThanOrEqual(0);
+    expect(referenceBaseRate.rate).toBeLessThanOrEqual(maxBaseRate);
+    expect(SAVINGS_CERTIFICATES_EXAMPLE.baseRate).toBe(referenceBaseRate.rate);
   });
 });

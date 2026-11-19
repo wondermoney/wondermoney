@@ -26,7 +26,9 @@ const values = {
 const sources = [
   ["sourceRates", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi112.aspx"],
   ["sourcePayment", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi120.aspx"],
-  ["sourceExemption", "https://www.portaldasfinancas.gov.pt/"],
+  ["sourceMinimum", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi113.aspx"],
+  ["sourceExemption", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi11a.aspx"],
+  ["sourceEbf", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/bf_rep/ra/Pages/ebf46_ra202310.aspx"],
 ] as const;
 ---
 
@@ -42,7 +44,7 @@ const sources = [
       {t(k("methodTitle"))}
     </h2>
     <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodTax", "methodFamily", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key))}</li>)}
+      {["methodTax", "methodFamily", "methodMinimum", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key))}</li>)}
     </ul>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
     <p class="mt-3">{t(k("exemption"))}</p>
