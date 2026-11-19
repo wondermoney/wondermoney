@@ -5914,7 +5914,11 @@
       "compass": "Dibujo lineal de una brújula de bolsillo sobre un mapa plegado, con la aguja apuntando a lo largo de una ruta discontinua hasta un punto marcado.",
       "cardindex": "Dibujo lineal de un fichero de madera con portaetiquetas y agujero para el dedo, lleno de fichas rayadas y separadores con pestañas.",
       "calendar": "Dibujo lineal de un calendario de sobremesa de pie, con espiral de alambre y la cuadrícula de un mes con un día marcado con un círculo.",
-      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz."
+      "riskdial": "Dibujo lineal de un indicador sobre una base, con la aguja recorriendo cinco segmentos, de prudente a audaz.",
+      "house": "Dibujo lineal de una casa pequeña en su parcela, con chimenea, puerta, ventanas y un camino de piedras, cuyas tejas se colocan a medida que se paga el préstamo.",
+      "deed": "Dibujo lineal de una escritura de propiedad con un sello de lacre y una cinta, y la llave de una casa encima.",
+      "car": "Dibujo lineal de un coche compacto en un tramo de carretera, con las ruedas girando mientras avanza.",
+      "payslip": "Dibujo lineal de una nómina con filas de importes junto a un sobre, con la parte neta de una fila guardada en el sobre como un billete."
     }
   }
 }

@@ -83,7 +83,9 @@ describe("article figure registry", () => {
     expect(figureForTool("toolNetWorth")).toBe("scale");
     expect(figureForTool("toolDebtToIncome")).toBe("scale");
     expect(figureForTool("toolInvestorProfile")).toBe("riskdial");
-    expect(figureForTool("toolMortgage")).toBe("calculator");
+    expect(figureForTool("toolMortgage")).toBe("house");
+    expect(figureForTool("toolNetSalary")).toBe("payslip");
+    expect(figureForTool("toolSomethingNew")).toBe("calculator");
     expect(figureForTool(undefined)).toBe("calculator");
   });
 });

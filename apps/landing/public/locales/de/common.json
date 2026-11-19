@@ -5914,7 +5914,11 @@
       "compass": "Strichzeichnung eines Taschenkompasses auf einer gefalteten Karte, dessen Nadel entlang einer gestrichelten Route zu einem markierten Punkt zeigt.",
       "cardindex": "Strichzeichnung eines Karteikastens aus Holz mit Etikettenhalter und Griffloch, gefüllt mit linierten Karteikarten und Trennkarten mit Reitern.",
       "calendar": "Strichzeichnung eines aufgestellten Tischkalenders mit Drahtbindung und einem Monatsraster, in dem ein Tag eingekreist ist.",
-      "riskdial": "Strichzeichnung einer Anzeige auf einem Sockel, deren Zeiger über fünf Segmente von vorsichtig bis mutig schwingt."
+      "riskdial": "Strichzeichnung einer Anzeige auf einem Sockel, deren Zeiger über fünf Segmente von vorsichtig bis mutig schwingt.",
+      "house": "Strichzeichnung eines kleinen Hauses auf seinem Grundstück, mit Schornstein, Tür, Fenstern und einem Weg aus Trittsteinen, dessen Dachziegel verlegt werden, während der Kredit abbezahlt wird.",
+      "deed": "Strichzeichnung einer Eigentumsurkunde mit Wachssiegel und Band, auf der ein Hausschlüssel liegt.",
+      "car": "Strichzeichnung eines kleinen Kompaktwagens auf einem Straßenstück, dessen Räder sich beim Rollen drehen.",
+      "payslip": "Strichzeichnung einer Gehaltsabrechnung mit Zeilen von Beträgen neben einer Lohntüte, in der der Nettoanteil einer Zeile als Geldschein steckt."
     }
   }
 }

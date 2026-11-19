@@ -5914,7 +5914,11 @@
       "compass": "Disegno al tratto di una bussola tascabile appoggiata su una mappa piegata, con l'ago che punta lungo un percorso tratteggiato verso un punto segnato.",
       "cardindex": "Disegno al tratto di uno schedario in legno con portaetichetta e foro per il dito, pieno di schede a righe e divisori con linguette.",
       "calendar": "Disegno al tratto di un calendario da tavolo in piedi, con rilegatura a spirale e la griglia di un mese con un giorno cerchiato.",
-      "riskdial": "Disegno al tratto di un indicatore su una base, con la lancetta che percorre cinque segmenti, da prudente ad audace."
+      "riskdial": "Disegno al tratto di un indicatore su una base, con la lancetta che percorre cinque segmenti, da prudente ad audace.",
+      "house": "Disegno al tratto di una piccola casa sul suo terreno, con camino, porta, finestre e un vialetto di pietre, le cui tegole vengono posate man mano che il mutuo viene pagato.",
+      "deed": "Disegno al tratto di un atto di proprietà con un sigillo di ceralacca e un nastro, con la chiave di una casa appoggiata sopra.",
+      "car": "Disegno al tratto di una piccola utilitaria su un tratto di strada, con le ruote che girano mentre avanza.",
+      "payslip": "Disegno al tratto di un cedolino dello stipendio con righe di importi accanto a una busta, dove la quota netta di una riga è infilata come una banconota."
     }
   }
 }

@@ -26,6 +26,10 @@ export const FIGURE_NAMES = [
   "cardindex",
   "calendar",
   "riskdial",
+  "house",
+  "deed",
+  "car",
+  "payslip",
 ] as const;
 
 export type FigureName = (typeof FIGURE_NAMES)[number];
@@ -109,6 +113,26 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolNetWorth: "scale",
   toolDebtToIncome: "scale",
   toolInvestorProfile: "riskdial",
+  toolMortgage: "house",
+  toolMortgageTransfer: "house",
+  toolEarlyRepayment: "house",
+  toolYouthMortgage: "house",
+  toolBorrowingCapacity: "house",
+  toolBuyVsRent: "house",
+  toolRateRevision: "house",
+  toolPurchaseTaxes: "deed",
+  toolPropertyTax: "deed",
+  toolPropertyCapitalGains: "deed",
+  toolCarLoan: "car",
+  toolVehicleTax: "car",
+  toolNetSalary: "payslip",
+  toolWithholdingTables: "payslip",
+  toolChristmasAllowance: "payslip",
+  toolHolidayAllowance: "payslip",
+  toolUnemploymentBenefit: "payslip",
+  toolSickPay: "payslip",
+  toolDismissalCompensation: "payslip",
+  toolStatePension: "payslip",
 };
 
 export function figureForTool(routeId: string | undefined): FigureName {
