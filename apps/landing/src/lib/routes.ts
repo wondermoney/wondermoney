@@ -15,6 +15,14 @@ const ROUTE_SLUGS = {
 		de: "ressourcen",
 		it: "risorse",
 	},
+	pageSavingsGuide: {
+		pt: "onde-guardar-poupancas",
+		en: "where-to-keep-savings-portugal",
+		es: "donde-guardar-ahorros-portugal",
+		fr: "ou-placer-epargne-portugal",
+		de: "wo-ersparnisse-anlegen-portugal",
+		it: "dove-tenere-risparmi-portogallo",
+	},
 	pagePricing: {
 		pt: "precos",
 		en: "pricing",
@@ -587,6 +595,7 @@ export type StandalonePageRouteId = (typeof STANDALONE_PAGE_ROUTE_IDS)[number]
 // the lead-magnet guide. Listed so the language switcher maps their slugs too.
 const OTHER_TOP_LEVEL_ROUTE_IDS = [
 	"pageResources",
+	"pageSavingsGuide",
 	"guideMoneyCheckin",
 ] as const satisfies ReadonlyArray<RouteId>
 

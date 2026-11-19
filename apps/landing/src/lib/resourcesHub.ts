@@ -29,6 +29,12 @@ export function buildResourcesHub(locale: Lang) {
     },
     ...links,
     {
+      destination: "savings_guide",
+      href: toLocalizedPath("pageSavingsGuide", locale),
+      title: t("savingsGuide.title"),
+      description: t("savingsGuide.hubDescription"),
+    },
+    {
       destination: "investor_profile",
       href: toLocalizedPath("toolInvestorProfile", locale),
       title: t("tools.investorProfile.title"),

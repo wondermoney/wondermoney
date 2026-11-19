@@ -4106,6 +4106,141 @@
       }
     }
   },
+  "savingsGuide": {
+    "metaTitle": "Dove tenere i risparmi in Portogallo: i prodotti a confronto | WonderMoney",
+    "metaDescription": "Confronta certificati di risparmio, certificati del tesoro, conti correnti remunerati, conti di risparmio, depositi vincolati e assicurazioni di capitalizzazione o PPR in Portogallo: garanzia, versamenti, prelievi, interessi e IRS.",
+    "breadcrumbLabel": "Dove tenere i risparmi",
+    "title": "Dove tenere i tuoi risparmi in Portogallo",
+    "intro": "Sette modi per tenere denaro in Portogallo, uno accanto all'altro: chi garantisce i soldi, se puoi aggiungerne altri, quando puoi prelevarli, come vengono pagati gli interessi e come si applica l'IRS. Solo a scopo informativo: questa pagina non raccomanda alcun prodotto né operatore.",
+    "checked": "Dati verificati su fonti ufficiali a {{date}}",
+    "tableTitle": "La tabella di confronto",
+    "tableCaption": "Prodotti di risparmio in Portogallo a confronto per garanzia, versamenti, prelievi, interessi e IRS",
+    "tableHint": "Tassi, costi e condizioni di ogni prodotto cambiano e variano tra operatori: leggi sempre le condizioni di quello che stai valutando.",
+    "productColumn": "Prodotto",
+    "columns": {
+      "guarantee": "Garanzia",
+      "topUp": "Versamenti",
+      "withdrawal": "Prelievi",
+      "interest": "Interessi",
+      "irs": "IRS"
+    },
+    "productsTitle": "I prodotti, uno per uno",
+    "products": {
+      "aforro": {
+        "name": "Certificati di risparmio (Certificados de Aforro)",
+        "text": "Debito pubblico emesso dallo Stato portoghese e gestito dall'IGCP, l'agenzia di tesoreria e debito pubblico, per chi ha un codice fiscale portoghese. La Serie F dura fino a 15 anni. Il tasso segue l'Euribor a 3 mesi e aggiunge un premio di permanenza che cresce più a lungo lo tieni. Gli interessi maturano ogni trimestre e si sommano al saldo già al netto dell'IRS. La prima sottoscrizione è di almeno 100 unità da 1 € e le successive di almeno 10. Puoi rimborsare dalla prima scadenza trimestrale degli interessi, perdendo gli interessi del trimestre in corso."
+      },
+      "tesouro": {
+        "name": "Certificati del tesoro (Certificados do Tesouro)",
+        "text": "Anch'essi debito dello Stato gestito dall'IGCP, e ancora in vendita nel 2026: la nuova Serie 5, aperta da luglio 2026, ha sostituito la serie Poupança Valor, che non accetta più sottoscrizioni. Al lancio pagava un tasso fisso crescente, dal 2,35 % del primo anno al 3,35 % del decimo, con interessi pagati ogni anno. Il minimo è di 1000 € e il massimo di 1 milione di euro per titolare. Puoi rimborsare dalla fine del primo anno, perdendo gli interessi dell'anno in corso. I tassi delle nuove sottoscrizioni possono cambiare."
+      },
+      "demand": {
+        "name": "Conto corrente remunerato",
+        "text": "Un conto corrente che paga interessi sul saldo. Il denaro è disponibile in qualsiasi momento senza perdere interessi, ma il tasso può cambiare e a volte dipende da condizioni fissate dalla banca. È coperto dal Fondo di garanzia dei depositi fino al limite."
+      },
+      "savings": {
+        "name": "Conto di risparmio",
+        "text": "Un conto di deposito per risparmiare, spesso collegato a un conto corrente. Alcuni accettano bonifici direttamente da un'altra banca, altri solo dal conto corrente collegato. La maggior parte consente prelievi in qualsiasi momento, e molti senza perdere interessi. È coperto dal Fondo di garanzia dei depositi fino al limite."
+      },
+      "term": {
+        "name": "Deposito vincolato",
+        "text": "Vincoli un importo per una durata fissa a un tasso concordato in anticipo. Non puoi aggiungere altro e la maggior parte paga gli interessi a fine durata. Solo alcuni consentono il prelievo anticipato, che di solito costa la metà o più degli interessi maturati. È coperto dal Fondo di garanzia dei depositi fino al limite."
+      },
+      "capitalisation": {
+        "name": "Assicurazione di capitalizzazione",
+        "text": "Un contratto di assicurazione sulla vita che accumula risparmio. La garanzia è dell'assicuratore e non del Fondo di garanzia dei depositi, e che il capitale sia garantito o meno dipende dal contratto, quindi verificalo. La maggior parte applica una commissione sul prelievo anticipato nei primi anni. Il guadagno è tassato al prelievo e l'aliquota scende più a lungo tieni il contratto."
+      },
+      "ppr": {
+        "name": "Assicurazione PPR (piano di risparmio pensionistico)",
+        "text": "Un piano di risparmio pensionistico venduto qui come assicurazione. Come per l'assicurazione di capitalizzazione, la garanzia è dell'assicuratore e dipende dal contratto. Il prelievo anticipato ha una commissione nei primi anni, salvo per un motivo previsto dalla legge, come pensionamento, disoccupazione di lunga durata, malattia grave o invalidità permanente. Dedurre i versamenti nella dichiarazione IRS ha condizioni: vedi la sezione sulle imposte."
+      }
+    },
+    "cells": {
+      "state": "Stato portoghese",
+      "noLimit": "Senza limite",
+      "fgd": "Fondo di garanzia dei depositi",
+      "fgdLimit": "100.000 € per banca e titolare",
+      "insurer": "L'assicuratore",
+      "certificatesTopUp": "Solo sottoscrizioni aggiuntive: pagamento con entità e riferimento nell'app CTT, pagamento allo Stato tramite AforroNet o a uno sportello CTT",
+      "demandTopUp": "Integrazione del saldo, direttamente con bonifico da un'altra banca",
+      "savingsTopUp": "Integrazione del saldo: alcuni conti accettano bonifici diretti da un'altra banca, altri solo tramite il conto corrente",
+      "notAllowed": "Non consentito",
+      "insuranceTopUp": "Alcuni consentono di integrare il saldo, con bonifico, pagamento con entità e riferimento o addebito sul conto corrente",
+      "aforroWithdrawal": "Dopo 3 mesi, con perdita degli interessi del trimestre in corso",
+      "tesouroWithdrawal": "Dopo 1 anno, con perdita degli interessi dell'anno in corso",
+      "demandWithdrawal": "In qualsiasi momento, senza perdita di interessi",
+      "savingsWithdrawal": "In qualsiasi momento, molti senza perdita di interessi",
+      "termWithdrawal": "Alcuni lo consentono, di solito con perdita del 50 % o più degli interessi maturati",
+      "capitalisationWithdrawal": "La maggior parte con commissione (% del saldo) nei primi anni",
+      "pprWithdrawal": "Con commissione (% del saldo) nei primi anni, salvo se per un motivo previsto dalla legge",
+      "quarterly": "Trimestrali",
+      "yearly": "Annuali",
+      "frequencyVaries": "Frequenza variabile",
+      "paidAtTermEnd": "La maggior parte, a fine durata",
+      "creditedBalanceNet": "Accreditati sul saldo dopo l'IRS",
+      "paidAccountNet": "Pagati sul conto corrente dopo l'IRS",
+      "creditedBalanceDomesticNet": "Accreditati sul saldo (dopo l'IRS, nelle banche portoghesi)",
+      "creditedBalanceOrAccountDomesticNet": "Accreditati sul saldo o sul conto corrente (dopo l'IRS, nelle banche portoghesi)",
+      "creditedAccountDomesticNet": "Accreditati sul conto corrente (dopo l'IRS, nelle banche portoghesi)",
+      "creditedBalanceGross": "Accreditati lordi sul saldo",
+      "irsAtPayment": "Al pagamento degli interessi",
+      "rate28": "28 %",
+      "domesticBanks": "Banche portoghesi",
+      "foreignBanks": "Banche estere",
+      "irsInReturn": "Nella dichiarazione IRS (dichiarazione obbligatoria)",
+      "irsOnWithdrawal": "Al prelievo",
+      "capitalisationRates": "11,2 % a 28 %, in base all'anzianità",
+      "pprRates": "8 % a 20 %, in base all'anzianità",
+      "pprLegalRate": "8 % se il prelievo è per un motivo previsto dalla legge"
+    },
+    "fgd": {
+      "title": "Il Fondo di garanzia dei depositi",
+      "p1": "Il Fundo de Garantia de Depósitos (FGD) rimborsa i depositi presso le banche aderenti, fino a 100.000 € per depositante e per banca, se una banca non può pagare.",
+      "p2": "Copre depositi in conto corrente, di risparmio e vincolati. Il limite è per banca: i saldi presso la stessa banca si sommano in un unico limite di 100.000 €, mentre i saldi presso banche diverse sono coperti ciascuno fino al proprio limite.",
+      "p3": "Non copre i certificati di risparmio né del tesoro, che sono debito dello Stato, né le assicurazioni, che dipendono dall'assicuratore. Un conto presso una banca di un altro paese di solito è coperto dal sistema di quel paese, non da quello portoghese."
+    },
+    "tax": {
+      "title": "Come si applica l'IRS",
+      "intro": "Interessi e guadagni dei risparmi sono redditi di capitale (categoria E dell'IRS). Le regole cambiano a seconda del prodotto.",
+      "domestic": {
+        "title": "Certificati e banche portoghesi",
+        "text": "Gli interessi sono tassati con ritenuta alla fonte del 28 %, un'aliquota liberatoria (CIRS, art. 71). Puoi scegliere di sommarli al resto dei redditi (englobamento); in tal caso l'importo trattenuto vale come acconto."
+      },
+      "foreign": {
+        "title": "Banche estere",
+        "text": "Una banca all'estero non trattiene imposte portoghesi. Se sei residente in Portogallo devi dichiarare gli interessi nella dichiarazione IRS, dove sono tassati al 28 % salvo che tu scelga l'englobamento (CIRS, art. 72)."
+      },
+      "insurance": {
+        "title": "Assicurazione di capitalizzazione",
+        "text": "Il guadagno è tassato al prelievo, al 28 %. Se hai tenuto il contratto per più di 5 e fino a 8 anni, un quinto del guadagno è escluso (22,4 %), e dopo 8 anni ne sono esclusi tre quinti (11,2 %). Queste riduzioni valgono solo se almeno il 35 % dei premi è stato pagato nella prima metà del contratto (CIRS, art. 5, comma 3)."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "Se prelevi per un motivo previsto dalla legge, il guadagno è tassato all'8 % (20 % su due quinti). Fuori da questi casi è tassato al 20 %, ridotto al 16 % dopo 5 anni e all'8 % dopo 8 anni se almeno il 35 % dei versamenti è stato fatto nella prima metà. Restituisci inoltre quanto hai dedotto nell'IRS, più il 10 % per ogni anno o frazione, salvo dopo 5 anni nei casi previsti dalla legge (EBF, art. 21)."
+      }
+    },
+    "sources": {
+      "title": "Fonti",
+      "intro": "Ogni affermazione su garanzie e imposte è stata verificata su queste pagine ufficiali. Le regole cambiano: conferma il testo in vigore prima di decidere.",
+      "checkedOn": "Consultato a {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: garanzia dei depositi",
+        "aforro": "IGCP: Certificados de Aforro, Serie F (condizioni in vigore da giugno 2026)",
+        "tesouro": "gov.pt: nuovi Certificados do Tesouro, Serie 5 (luglio 2026)",
+        "tesouroRedemption": "gov.pt: rimborso dei Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS art. 71: ritenuta del 28 % e opzione di englobamento",
+        "cirs72": "Portal das Finanças, CIRS art. 72: 28 % sui redditi senza ritenuta",
+        "cirs5": "Portal das Finanças, CIRS art. 5, comma 3: riscatti di assicurazioni sulla vita",
+        "ebf21": "Portal das Finanças, EBF art. 21: piani di risparmio pensionistico"
+      }
+    },
+    "related": {
+      "title": "Fai i calcoli",
+      "intro": "Dai dei numeri ai prodotti qui sopra con questi strumenti gratuiti."
+    },
+    "disclaimer": "Questa guida è informativa e non costituisce consulenza finanziaria o fiscale. Non nomina operatori e non raccomanda prodotti.",
+    "hubDescription": "Confronta certificati, depositi, conti di risparmio e assicurazioni su garanzia, prelievi e imposte."
+  },
   "learn": {
     "hub": {
       "pageTitle": "Impara — Guide alla finanza personale — WonderMoney",

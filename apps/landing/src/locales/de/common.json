@@ -4106,6 +4106,141 @@
       }
     }
   },
+  "savingsGuide": {
+    "metaTitle": "Wo Ersparnisse in Portugal anlegen: Produkte im Vergleich | WonderMoney",
+    "metaDescription": "Vergleiche Sparzertifikate, Schatzzertifikate, verzinste Girokonten, Sparkonten, Festgeld sowie Kapitalisierungs- und PPR-Versicherungen in Portugal: Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS.",
+    "breadcrumbLabel": "Wo Ersparnisse anlegen",
+    "title": "Wo du deine Ersparnisse in Portugal anlegen kannst",
+    "intro": "Sieben Wege, Geld in Portugal zu halten, nebeneinander: wer das Geld absichert, ob du nachzahlen kannst, wann du es abheben kannst, wie die Zinsen gezahlt werden und wie die IRS gilt. Nur zur Information: Diese Seite empfiehlt kein Produkt und keinen Anbieter.",
+    "checked": "Angaben mit offiziellen Quellen abgeglichen im {{date}}",
+    "tableTitle": "Die Vergleichstabelle",
+    "tableCaption": "Sparprodukte in Portugal im Vergleich nach Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS",
+    "tableHint": "Zinsen, Gebühren und Bedingungen jedes Produkts ändern sich und unterscheiden sich je nach Anbieter: Lies immer die Bedingungen des Produkts, das du in Betracht ziehst.",
+    "productColumn": "Produkt",
+    "columns": {
+      "guarantee": "Sicherung",
+      "topUp": "Einzahlungen",
+      "withdrawal": "Abhebungen",
+      "interest": "Zinsen",
+      "irs": "IRS"
+    },
+    "productsTitle": "Die Produkte einzeln",
+    "products": {
+      "aforro": {
+        "name": "Sparzertifikate (Certificados de Aforro)",
+        "text": "Staatsschuld des portugiesischen Staates, verwaltet vom IGCP, der Agentur für Staatskasse und Staatsschuld, für Personen mit portugiesischer Steuernummer. Die Serie F läuft bis zu 15 Jahre. Ihr Zins folgt dem 3-Monats-Euribor und erhält einen Treuebonus, der mit der Haltedauer steigt. Die Zinsen laufen vierteljährlich auf und werden nach IRS dem Guthaben gutgeschrieben. Die erste Zeichnung beträgt mindestens 100 Einheiten zu 1 €, spätere mindestens 10. Du kannst ab dem ersten vierteljährlichen Zinstermin zurückgeben und verlierst die Zinsen des laufenden Quartals."
+      },
+      "tesouro": {
+        "name": "Schatzzertifikate (Certificados do Tesouro)",
+        "text": "Ebenfalls Staatsschuld, vom IGCP verwaltet, und 2026 weiterhin im Verkauf: Die neue Serie 5, seit Juli 2026 offen, hat die Serie Poupança Valor ersetzt, die keine Zeichnungen mehr annimmt. Zum Start zahlte sie einen festen, jährlich steigenden Zins, von 2,35 % im ersten Jahr bis 3,35 % im zehnten, mit jährlicher Zinszahlung. Das Minimum beträgt 1000 €, das Maximum 1 Million Euro je Inhaber. Du kannst ab Ende des ersten Jahres zurückgeben und verlierst die Zinsen des laufenden Jahres. Die Zinsen neuer Zeichnungen können sich ändern."
+      },
+      "demand": {
+        "name": "Verzinstes Girokonto",
+        "text": "Ein Girokonto, das Zinsen auf das Guthaben zahlt. Das Geld ist jederzeit ohne Zinsverlust verfügbar, aber der Zins kann sich ändern und hängt manchmal von Bedingungen der Bank ab. Es ist bis zur Grenze durch den Einlagensicherungsfonds abgedeckt."
+      },
+      "savings": {
+        "name": "Sparkonto",
+        "text": "Ein Einlagenkonto zum Sparen, oft mit einem Girokonto verbunden. Manche nehmen Überweisungen direkt von einer anderen Bank an, andere nur vom verbundenen Girokonto. Die meisten erlauben Abhebungen jederzeit, viele ohne Zinsverlust. Es ist bis zur Grenze durch den Einlagensicherungsfonds abgedeckt."
+      },
+      "term": {
+        "name": "Festgeld",
+        "text": "Du bindest einen Betrag für eine feste Laufzeit zu einem vorab vereinbarten Zins. Nachzahlen ist nicht möglich, und die meisten zahlen die Zinsen am Laufzeitende. Nur manche erlauben die vorzeitige Abhebung, die meist die Hälfte oder mehr der aufgelaufenen Zinsen kostet. Es ist bis zur Grenze durch den Einlagensicherungsfonds abgedeckt."
+      },
+      "capitalisation": {
+        "name": "Kapitalisierungsversicherung",
+        "text": "Ein Lebensversicherungsvertrag, der Ersparnisse ansammelt. Die Sicherung liegt beim Versicherer, nicht beim Einlagensicherungsfonds, und ob das Kapital garantiert ist, hängt vom Vertrag ab, prüfe es also. Die meisten erheben in den ersten Jahren eine Gebühr bei vorzeitiger Abhebung. Der Gewinn wird bei der Abhebung besteuert, und der Satz sinkt mit der Haltedauer."
+      },
+      "ppr": {
+        "name": "PPR-Versicherung (Altersvorsorgeplan)",
+        "text": "Ein Altersvorsorgeplan, hier als Versicherung angeboten. Wie bei der Kapitalisierungsversicherung liegt die Sicherung beim Versicherer und hängt vom Vertrag ab. Eine vorzeitige Abhebung kostet in den ersten Jahren eine Gebühr, außer aus einem gesetzlich vorgesehenen Grund wie Ruhestand, Langzeitarbeitslosigkeit, schwerer Krankheit oder dauerhafter Erwerbsunfähigkeit. Die Absetzung der Einzahlungen in der IRS-Erklärung ist an Bedingungen geknüpft: siehe den Steuerabschnitt."
+      }
+    },
+    "cells": {
+      "state": "Portugiesischer Staat",
+      "noLimit": "Ohne Obergrenze",
+      "fgd": "Einlagensicherungsfonds",
+      "fgdLimit": "100.000 € je Bank und Inhaber",
+      "insurer": "Der Versicherer",
+      "certificatesTopUp": "Nur zusätzliche Zeichnungen: Zahlung per Entität und Referenz in der CTT-App, Zahlung an den Staat über AforroNet oder am CTT-Schalter",
+      "demandTopUp": "Aufstockung des Guthabens, direkt per Überweisung von einer anderen Bank",
+      "savingsTopUp": "Aufstockung des Guthabens: manche Konten nehmen Überweisungen direkt von einer anderen Bank an, andere nur über das Girokonto",
+      "notAllowed": "Nicht erlaubt",
+      "insuranceTopUp": "Manche erlauben Aufstockungen, per Überweisung, Zahlung per Entität und Referenz oder Lastschrift vom Girokonto",
+      "aforroWithdrawal": "Nach 3 Monaten, unter Verlust der Zinsen des laufenden Quartals",
+      "tesouroWithdrawal": "Nach 1 Jahr, unter Verlust der Zinsen des laufenden Jahres",
+      "demandWithdrawal": "Jederzeit, ohne Zinsverlust",
+      "savingsWithdrawal": "Jederzeit, viele ohne Zinsverlust",
+      "termWithdrawal": "Manche erlauben es, meist mit Verlust von 50 % oder mehr der aufgelaufenen Zinsen",
+      "capitalisationWithdrawal": "Die meisten mit Gebühr (% des Guthabens) in den ersten Jahren",
+      "pprWithdrawal": "Mit Gebühr (% des Guthabens) in den ersten Jahren, außer aus gesetzlich vorgesehenem Grund",
+      "quarterly": "Vierteljährlich",
+      "yearly": "Jährlich",
+      "frequencyVaries": "Häufigkeit unterschiedlich",
+      "paidAtTermEnd": "Die meisten am Laufzeitende",
+      "creditedBalanceNet": "Nach IRS dem Guthaben gutgeschrieben",
+      "paidAccountNet": "Nach IRS auf das Girokonto gezahlt",
+      "creditedBalanceDomesticNet": "Dem Guthaben gutgeschrieben (nach IRS, bei portugiesischen Banken)",
+      "creditedBalanceOrAccountDomesticNet": "Dem Guthaben gutgeschrieben oder aufs Girokonto gezahlt (nach IRS, bei portugiesischen Banken)",
+      "creditedAccountDomesticNet": "Aufs Girokonto gezahlt (nach IRS, bei portugiesischen Banken)",
+      "creditedBalanceGross": "Brutto dem Guthaben gutgeschrieben",
+      "irsAtPayment": "Bei Zahlung der Zinsen",
+      "rate28": "28 %",
+      "domesticBanks": "Portugiesische Banken",
+      "foreignBanks": "Ausländische Banken",
+      "irsInReturn": "In der IRS-Erklärung (Erklärung verpflichtend)",
+      "irsOnWithdrawal": "Bei der Abhebung",
+      "capitalisationRates": "11,2 % bis 28 %, je nach Haltedauer",
+      "pprRates": "8 % bis 20 %, je nach Haltedauer",
+      "pprLegalRate": "8 %, wenn die Abhebung aus gesetzlich vorgesehenem Grund erfolgt"
+    },
+    "fgd": {
+      "title": "Der Einlagensicherungsfonds",
+      "p1": "Der Fundo de Garantia de Depósitos (FGD) erstattet Einlagen bei seinen Mitgliedsbanken bis zu 100.000 € je Einleger und je Bank, falls eine Bank nicht zahlen kann.",
+      "p2": "Er deckt Giro-, Spar- und Festgeldeinlagen. Die Grenze gilt je Bank: Guthaben bei derselben Bank zählen zu einer Grenze von 100.000 € zusammen, Guthaben bei verschiedenen Banken sind jeweils bis zu ihrer eigenen Grenze gedeckt.",
+      "p3": "Er deckt weder Spar- noch Schatzzertifikate, die Staatsschuld sind, noch Versicherungen, die vom Versicherer abhängen. Ein Konto bei einer Bank in einem anderen Land ist meist durch das System dieses Landes gedeckt, nicht durch das portugiesische."
+    },
+    "tax": {
+      "title": "Wie die IRS gilt",
+      "intro": "Zinsen und Gewinne aus Ersparnissen sind Kapitaleinkünfte (Kategorie E der IRS). Die Regeln unterscheiden sich je nach Produkt.",
+      "domestic": {
+        "title": "Zertifikate und portugiesische Banken",
+        "text": "Zinsen werden per Quellensteuer von 28 % besteuert, einem abgeltenden Satz (CIRS, Art. 71). Du kannst wählen, sie stattdessen deinem übrigen Einkommen hinzuzurechnen (englobamento); die einbehaltene Steuer gilt dann als Vorauszahlung."
+      },
+      "foreign": {
+        "title": "Ausländische Banken",
+        "text": "Eine Bank im Ausland behält keine portugiesische Steuer ein. Bist du in Portugal ansässig, musst du die Zinsen in der IRS-Erklärung angeben, wo sie mit 28 % besteuert werden, außer du wählst das englobamento (CIRS, Art. 72)."
+      },
+      "insurance": {
+        "title": "Kapitalisierungsversicherung",
+        "text": "Der Gewinn wird bei der Abhebung mit 28 % besteuert. Hast du den Vertrag mehr als 5 und bis zu 8 Jahre gehalten, ist ein Fünftel des Gewinns ausgenommen (22,4 %), nach 8 Jahren drei Fünftel (11,2 %). Diese Minderungen gelten nur, wenn mindestens 35 % der Prämien in der ersten Vertragshälfte gezahlt wurden (CIRS, Art. 5 Abs. 3)."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "Hebst du aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 20 %, gesenkt auf 16 % nach 5 Jahren und auf 8 % nach 8 Jahren, wenn mindestens 35 % der Einzahlungen in der ersten Hälfte erfolgten. Außerdem gibst du den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer nach 5 Jahren in den gesetzlich vorgesehenen Fällen (EBF, Art. 21)."
+      }
+    },
+    "sources": {
+      "title": "Quellen",
+      "intro": "Jede Aussage zu Sicherung und Steuern wurde mit diesen offiziellen Seiten abgeglichen. Regeln ändern sich: Prüfe den aktuellen Text, bevor du entscheidest.",
+      "checkedOn": "Abgerufen im {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: Einlagensicherung",
+        "aforro": "IGCP: Certificados de Aforro, Serie F (Bedingungen seit Juni 2026)",
+        "tesouro": "gov.pt: neue Certificados do Tesouro, Serie 5 (Juli 2026)",
+        "tesouroRedemption": "gov.pt: Rückgabe von Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS Art. 71: 28 % Quellensteuer und Option des englobamento",
+        "cirs72": "Portal das Finanças, CIRS Art. 72: 28 % auf Einkünfte ohne Quellensteuer",
+        "cirs5": "Portal das Finanças, CIRS Art. 5 Abs. 3: Rückkäufe von Lebensversicherungen",
+        "ebf21": "Portal das Finanças, EBF Art. 21: Altersvorsorgepläne"
+      }
+    },
+    "related": {
+      "title": "Rechne nach",
+      "intro": "Hinterlege die obigen Produkte mit Zahlen, mit diesen kostenlosen Werkzeugen."
+    },
+    "disclaimer": "Dieser Leitfaden dient der Information und ist keine Finanz- oder Steuerberatung. Er nennt keine Anbieter und empfiehlt kein Produkt.",
+    "hubDescription": "Vergleiche Zertifikate, Einlagen, Sparkonten und Versicherungen bei Sicherung, Abhebung und Steuern."
+  },
   "learn": {
     "hub": {
       "pageTitle": "Lernen — Ratgeber zur persönlichen Finanzplanung — WonderMoney",

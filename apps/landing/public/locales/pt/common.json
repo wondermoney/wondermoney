@@ -4106,6 +4106,141 @@
       }
     }
   },
+  "savingsGuide": {
+    "metaTitle": "Onde guardar as tuas poupanças em Portugal: produtos comparados | WonderMoney",
+    "metaDescription": "Compara certificados de aforro, certificados do tesouro, contas à ordem remuneradas, contas poupança, depósitos a prazo e seguros de capitalização ou PPR em Portugal: garantia, reforço, levantamento, juros e IRS.",
+    "breadcrumbLabel": "Onde guardar as poupanças",
+    "title": "Onde guardar as tuas poupanças em Portugal",
+    "intro": "Sete formas de guardar dinheiro em Portugal, lado a lado: quem garante o dinheiro, se podes reforçar, quando podes levantar, como são pagos os juros e como se aplica o IRS. Conteúdo educativo: esta página não recomenda nenhum produto nem entidade.",
+    "checked": "Informação confirmada em fontes oficiais em {{date}}",
+    "tableTitle": "A tabela comparativa",
+    "tableCaption": "Produtos de poupança em Portugal comparados por garantia, reforço, levantamento, juros e IRS",
+    "tableHint": "As taxas, comissões e condições de cada produto mudam e variam entre entidades: lê sempre as condições do que estás a ponderar.",
+    "productColumn": "Produto",
+    "columns": {
+      "guarantee": "Garantia",
+      "topUp": "Reforço",
+      "withdrawal": "Levantamento",
+      "interest": "Juros",
+      "irs": "IRS"
+    },
+    "productsTitle": "Os produtos, um a um",
+    "products": {
+      "aforro": {
+        "name": "Certificados de aforro",
+        "text": "Dívida pública emitida pelo Estado Português e gerida pelo IGCP, a agência da tesouraria e da dívida pública, para quem tem NIF português. A Série F dura até 15 anos. A taxa acompanha a Euribor a 3 meses e soma um prémio de permanência que aumenta quanto mais tempo mantiveres. Os juros vencem todos os trimestres e são somados ao saldo já depois de IRS. A primeira subscrição é de pelo menos 100 unidades de 1 € e as seguintes de pelo menos 10. Podes resgatar a partir do primeiro vencimento trimestral de juros, perdendo os juros do trimestre em curso."
+      },
+      "tesouro": {
+        "name": "Certificados do tesouro",
+        "text": "Também dívida do Estado gerida pelo IGCP, e ainda à venda em 2026: a nova Série 5, aberta desde julho de 2026, substituiu a série Poupança Valor, que deixou de aceitar subscrições. No lançamento pagava uma taxa fixa crescente, de 2,35 % no primeiro ano a 3,35 % no décimo, com juros pagos anualmente. O mínimo é de 1000 € e o máximo de 1 milhão de euros por titular. Podes resgatar a partir do fim do primeiro ano, perdendo os juros do ano em curso. As taxas das novas subscrições podem mudar."
+      },
+      "demand": {
+        "name": "Conta à ordem remunerada",
+        "text": "Uma conta à ordem que paga juros sobre o saldo. O dinheiro está disponível a qualquer momento sem perder juros, mas a taxa pode mudar e por vezes depende de condições definidas pelo banco. Está coberta pelo Fundo de Garantia de Depósitos até ao limite."
+      },
+      "savings": {
+        "name": "Conta poupança",
+        "text": "Uma conta de depósito para poupar, muitas vezes associada a uma conta à ordem. Umas aceitam transferências diretamente de outro banco, outras só pela conta à ordem. A maioria permite levantar a qualquer momento, e muitas sem perda de juros. Está coberta pelo Fundo de Garantia de Depósitos até ao limite."
+      },
+      "term": {
+        "name": "Depósito a prazo",
+        "text": "Prendes um montante durante um prazo fixo a uma taxa acordada à partida. Não podes reforçar e a maioria paga os juros no final do prazo. Só alguns permitem o levantamento antecipado, e este costuma custar metade ou mais dos juros acumulados. Está coberto pelo Fundo de Garantia de Depósitos até ao limite."
+      },
+      "capitalisation": {
+        "name": "Seguro de capitalização",
+        "text": "Um contrato de seguro de vida que acumula poupança. A garantia é da seguradora e não do Fundo de Garantia de Depósitos, e o capital estar ou não garantido depende do contrato, por isso confirma-o. A maioria cobra comissão no levantamento antecipado nos primeiros anos. O ganho é tributado quando levantas, e a taxa desce quanto mais tempo mantiveres o contrato."
+      },
+      "ppr": {
+        "name": "Seguro PPR (plano de poupança-reforma)",
+        "text": "Um plano de poupança-reforma vendido aqui como seguro. Tal como no seguro de capitalização, a garantia é da seguradora e depende do contrato. O levantamento antecipado tem comissão nos primeiros anos, exceto por motivo previsto na lei, como reforma, desemprego de longa duração, doença grave ou incapacidade permanente. Deduzir as entregas no IRS tem condições: vê a secção de impostos."
+      }
+    },
+    "cells": {
+      "state": "Estado Português",
+      "noLimit": "Sem limite",
+      "fgd": "Fundo de Garantia de Depósitos",
+      "fgdLimit": "100 000 € por banco e titular",
+      "insurer": "A seguradora",
+      "certificatesTopUp": "Só subscrições adicionais: pagamento por entidade e referência na app dos CTT, pagamento ao Estado pelo AforroNet ou num balcão dos CTT",
+      "demandTopUp": "Reforço do saldo, diretamente por transferência de outro banco",
+      "savingsTopUp": "Reforço do saldo: umas contas aceitam transferência direta de outro banco, outras só pela conta à ordem",
+      "notAllowed": "Não permitido",
+      "insuranceTopUp": "Alguns permitem reforço do saldo, por transferência, pagamento por entidade e referência ou débito na conta à ordem",
+      "aforroWithdrawal": "Após 3 meses, com perda dos juros do trimestre em curso",
+      "tesouroWithdrawal": "Após 1 ano, com perda dos juros do ano em curso",
+      "demandWithdrawal": "A qualquer momento, sem perda de juros",
+      "savingsWithdrawal": "A qualquer momento, muitas sem perda de juros",
+      "termWithdrawal": "Alguns permitem, com perda normalmente de 50 % ou mais dos juros acumulados",
+      "capitalisationWithdrawal": "A maioria com comissão (% do saldo) nos primeiros anos",
+      "pprWithdrawal": "Com comissão (% do saldo) nos primeiros anos, exceto se por motivo previsto na lei",
+      "quarterly": "Trimestrais",
+      "yearly": "Anuais",
+      "frequencyVaries": "Frequência variável",
+      "paidAtTermEnd": "A maioria, no final do prazo",
+      "creditedBalanceNet": "Creditados no saldo após IRS",
+      "paidAccountNet": "Pagos em conta à ordem após IRS",
+      "creditedBalanceDomesticNet": "Creditados no saldo (após IRS, nos bancos nacionais)",
+      "creditedBalanceOrAccountDomesticNet": "Creditados no saldo ou na conta à ordem (após IRS, nos bancos nacionais)",
+      "creditedAccountDomesticNet": "Creditados na conta à ordem (após IRS, nos bancos nacionais)",
+      "creditedBalanceGross": "Creditados brutos no saldo",
+      "irsAtPayment": "No pagamento dos juros",
+      "rate28": "28 %",
+      "domesticBanks": "Bancos nacionais",
+      "foreignBanks": "Bancos estrangeiros",
+      "irsInReturn": "Na declaração de IRS (declaração obrigatória)",
+      "irsOnWithdrawal": "No levantamento",
+      "capitalisationRates": "11,2 % a 28 %, em função da antiguidade",
+      "pprRates": "8 % a 20 %, em função da antiguidade",
+      "pprLegalRate": "8 % se o levantamento for por motivo previsto na lei"
+    },
+    "fgd": {
+      "title": "O Fundo de Garantia de Depósitos",
+      "p1": "O Fundo de Garantia de Depósitos (FGD) reembolsa os depósitos nos bancos que dele fazem parte, até 100 000 € por depositante e por banco, se um banco não puder pagar.",
+      "p2": "Cobre depósitos à ordem, de poupança e a prazo. O limite é por banco: os saldos no mesmo banco somam-se num único limite de 100 000 €, enquanto os saldos em bancos diferentes estão cobertos cada um até ao seu limite.",
+      "p3": "Não cobre os certificados de aforro nem do tesouro, que são dívida do Estado, nem os seguros, que dependem da seguradora. Uma conta num banco de outro país costuma estar coberta pelo sistema desse país, não pelo português."
+    },
+    "tax": {
+      "title": "Como se aplica o IRS",
+      "intro": "Os juros e os ganhos das poupanças são rendimentos de capitais (categoria E do IRS). As regras mudam consoante o produto.",
+      "domestic": {
+        "title": "Certificados e bancos nacionais",
+        "text": "Os juros são tributados por retenção na fonte a 28 %, uma taxa liberatória (CIRS, art. 71.º). Podes optar por os juntar ao resto dos rendimentos (englobamento), caso em que o valor retido conta como pagamento por conta."
+      },
+      "foreign": {
+        "title": "Bancos estrangeiros",
+        "text": "Um banco no estrangeiro não retém imposto português. Se és residente em Portugal, tens de declarar os juros na declaração de IRS, onde são tributados a 28 %, salvo se optares pelo englobamento (CIRS, art. 72.º)."
+      },
+      "insurance": {
+        "title": "Seguro de capitalização",
+        "text": "O ganho é tributado quando levantas, a 28 %. Se mantiveste o contrato mais de 5 e até 8 anos, exclui-se um quinto do ganho (22,4 %), e depois de 8 anos excluem-se três quintos (11,2 %). Estas reduções só se aplicam se pelo menos 35 % dos prémios tiverem sido pagos na primeira metade do contrato (CIRS, art. 5.º, n.º 3)."
+      },
+      "ppr": {
+        "title": "PPR",
+        "text": "Se levantares por motivo previsto na lei, o ganho é tributado a 8 % (20 % sobre dois quintos). Fora desses casos o ganho é tributado a 20 %, reduzido para 16 % ao fim de 5 anos e para 8 % ao fim de 8 anos se pelo menos 35 % das entregas tiverem sido feitas na primeira metade. Devolves ainda o que deduziste no IRS, mais 10 % por cada ano ou fração, exceto passados 5 anos nos casos previstos na lei (EBF, art. 21.º)."
+      }
+    },
+    "sources": {
+      "title": "Fontes",
+      "intro": "Cada afirmação sobre garantias e impostos foi confirmada nestas páginas oficiais. As regras mudam, por isso confirma o texto em vigor antes de decidires.",
+      "checkedOn": "Consultado em {{date}}",
+      "items": {
+        "fgd": "Fundo de Garantia de Depósitos: garantia de depósitos",
+        "aforro": "IGCP: Certificados de Aforro, Série F (condições em vigor desde junho de 2026)",
+        "tesouro": "gov.pt: novos Certificados do Tesouro, Série 5 (julho de 2026)",
+        "tesouroRedemption": "gov.pt: resgatar Certificados do Tesouro",
+        "cirs71": "Portal das Finanças, CIRS art. 71.º: retenção de 28 % e opção pelo englobamento",
+        "cirs72": "Portal das Finanças, CIRS art. 72.º: 28 % sobre rendimentos sem retenção",
+        "cirs5": "Portal das Finanças, CIRS art. 5.º, n.º 3: resgates de seguros de vida",
+        "ebf21": "Portal das Finanças, EBF art. 21.º: planos de poupança-reforma"
+      }
+    },
+    "related": {
+      "title": "Faz as contas",
+      "intro": "Põe números nos produtos acima com estas ferramentas gratuitas."
+    },
+    "disclaimer": "Este guia é educativo e não constitui aconselhamento financeiro nem fiscal. Não nomeia entidades nem recomenda produtos.",
+    "hubDescription": "Compara certificados, depósitos, contas poupança e seguros em garantia, levantamento e impostos."
+  },
   "learn": {
     "hub": {
       "pageTitle": "Aprende — guias de finanças pessoais — WonderMoney",
