@@ -101,6 +101,7 @@ describe("deposit rate index tool page", () => {
 			"toolSavingsCertificates",
 			"toolInflation",
 			"toolTermDepositOffers",
+			"toolRemuneratedAccounts",
 		])
 	})
 

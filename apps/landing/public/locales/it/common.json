@@ -4340,6 +4340,229 @@
           "vehicleTaxBody": "Stima l'imposta annuale del veicolo, un altro costo dell'auto."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Prima di fare affidamento su questo elenco",
+      "educationalTitle": "Solo a scopo informativo",
+      "educational": "Questa pagina ha scopo informativo. Non è una raccomandazione né un'offerta, l'ordine non è una classifica e WonderMoney non consiglia nessuno di questi conti. In questa pagina non ci sono link di affiliazione.",
+      "confirm": "Le condizioni cambiano spesso. Conferma con la banca ogni tasso, limite e costo prima di aprire o cambiare conto.",
+      "source": "Condizioni compilate da WonderMoney dalle offerte pubblicate dalle banche.",
+      "asOf": "Condizioni al {{date}}",
+      "guarantee": {
+        "title": "Garanzia dei depositi",
+        "body": "In Portogallo il Fundo de Garantia de Depósitos rimborsa i depositi fino a {{amount}} per depositante e per banca. In un conto cointestato il saldo è ripartito tra i titolari. Le banche di un altro paese sono coperte dal sistema del loro paese d'origine, con lo stesso livello minimo nell'UE.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Banche estere e IRS",
+        "body": "Le banche portoghesi trattengono il 28% di IRS sugli interessi. Una banca con sede in un altro paese non lo fa: gli interessi li dichiari tu nella dichiarazione IRS, di norma tassati al 28%, a meno che tu scelga di sommarli agli altri redditi."
+      },
+      "originalLabel": "Condizioni originali, in portoghese",
+      "yes": "Sì",
+      "no": "No"
+    },
+    "freeBankAccounts": {
+      "title": "Conti bancari gratuiti in Portogallo: quali sono e a quali condizioni",
+      "shortName": "Conti bancari gratuiti",
+      "subtitle": "Conti correnti senza canone di tenuta, con le condizioni che li accompagnano, a una data indicata.",
+      "description": "Elenco datato di conti correnti gratuiti in Portogallo, con le condizioni di ciascuno e quali accettano due titolari.",
+      "pageTitle": "Conti Bancari Gratuiti in Portogallo: Condizioni e 2 Titolari",
+      "pageDescription": "Elenco datato di conti correnti gratuiti in Portogallo: quali banche hanno filiali, quali sono solo app o estere, chi accetta due titolari e le condizioni per mantenere il conto gratuito.",
+      "filters": {
+        "twoHolders": "Mostra solo i conti che accettano due titolari"
+      },
+      "count": "{{shown}} conti su {{total}}",
+      "empty": "Nessun conto corrisponde a questo filtro.",
+      "noNotes": "Nessuna condizione indicata.",
+      "foreignBadge": "Banca estera",
+      "columns": {
+        "account": "Banca e conto",
+        "twoHolders": "2 titolari",
+        "notes": "Note (in portoghese)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Banche con filiali",
+          "intro": "Conti per i quali la tabella non segnala l'assenza di filiali. Alcuni limitano l'assistenza di persona alle filiali di una banca partner."
+        },
+        "branchless": {
+          "title": "Banche solo app e online, comprese quelle estere",
+          "intro": "La tabella indica che non hanno filiali né versamento di contanti o assegni. Le banche estere sono segnalate: gli interessi li dichiari tu."
+        }
+      },
+      "nextStepHeadline": "Vedi tutti i tuoi conti in un solo posto",
+      "nextStepDescription": "I conti gratuiti sono più facili da confrontare che da gestire. Collegali in WonderMoney e segui tutti i saldi insieme.",
+      "nextStepCta": "Vedi tutti i tuoi conti in un solo posto",
+      "guide": {
+        "read": {
+          "title": "Come leggere questo elenco",
+          "what": "Una banca può far pagare la tenuta del conto corrente, la carta di debito o servizi come il versamento di contanti. Qui \"gratuito\" è ciò che dice l'offerta della banca stessa, di solito con condizioni: stipendio accreditato, saldo minimo o un numero minimo di acquisti con carta al mese.",
+          "notRec": "L'elenco non dice quale conto sia adatto a te. Non copre tutte le banche, e un conto gratuito oggi può iniziare a costare domani."
+        },
+        "method": {
+          "title": "Come è stato compilato l'elenco",
+          "intro": "Ogni riga è un conto e ciò che dice la sua offerta pubblicata. Le note sono mostrate come sono state compilate, in portoghese.",
+          "steps": {
+            "a": "Le banche sono divise in base alle note: quelle senza filiali compaiono tra le banche solo app o online.",
+            "b": "La colonna 2 titolari indica se il conto può avere due titolari.",
+            "c": "Una banca con sede all'estero è segnalata, perché i suoi interessi non sono tassati alla fonte in Portogallo."
+          }
+        },
+        "limits": {
+          "title": "Cosa non include l'elenco",
+          "items": {
+            "a": "Costi di carta e bonifici e condizioni che non compaiono nelle note.",
+            "b": "Quali banche accettano nuovi clienti in questo momento o non residenti.",
+            "c": "La qualità del servizio, dell'app e dell'assistenza.",
+            "d": "Qualsiasi modifica successiva alla data indicata nella pagina."
+          }
+        },
+        "related": {
+          "title": "Continua a esplorare",
+          "remuneratedLink": "Conti remunerati e di risparmio",
+          "remuneratedBody": "Tassi, limiti e interessi netti dei conti che pagano interessi.",
+          "budgetLink": "Budget familiare",
+          "budgetBody": "Guarda quanto spendi prima di scegliere dove tenerlo."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Conti remunerati e di risparmio in Portogallo: tassi, limiti e interessi netti",
+      "shortName": "Conti remunerati",
+      "subtitle": "Una tabella datata di ciò che le banche portoghesi ed estere pagano sul risparmio, con un calcolatore di interessi netti.",
+      "description": "Tabella datata di conti remunerati e di risparmio in Portogallo, con filtri e interessi netti dopo l'IRS.",
+      "pageTitle": "Conti Remunerati e di Risparmio in Portogallo: Tassi e Interessi Netti",
+      "pageDescription": "Tabella datata di conti remunerati, conti di risparmio, certificati e assicurazioni di risparmio in Portogallo: tasso lordo, limiti, IBAN, due titolari e IRS, con un calcolatore di interessi netti dopo il 28% di IRS.",
+      "calculator": {
+        "title": "Interessi netti in 12 mesi",
+        "intro": "Inserisci un importo per vedere gli interessi che ogni conto pagherebbe in 12 mesi dopo il {{tax}}% di IRS, contando gli interessi solo fino al massimo del conto. Le righe con più piani mostrano ogni piano."
+      },
+      "fields": {
+        "amount": "Importo risparmiato"
+      },
+      "help": {
+        "amount": "Mantenuto per 12 mesi, al tasso della tabella."
+      },
+      "errors": {
+        "amount": {
+          "required": "Inserisci un importo.",
+          "negative": "L'importo non può essere negativo.",
+          "tooLarge": "Inserisci un importo fino a {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Tipo",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Accetta 2 titolari",
+        "any": "Tutti"
+      },
+      "types": {
+        "ordem": "Conto corrente",
+        "poupancaComIban": "Risparmio con IBAN",
+        "poupancaSemIban": "Risparmio senza IBAN",
+        "dividaPublica": "Debito pubblico",
+        "seguro": "Assicurazione"
+      },
+      "iban": {
+        "any": "Tutti",
+        "withIban": "Con IBAN",
+        "withoutIban": "Senza IBAN"
+      },
+      "tax": {
+        "any": "Tutti",
+        "withheld": "Trattenuta dalla banca in Portogallo",
+        "foreign": "Estero: lo dichiari tu",
+        "foreignBadge": "Estero: da dichiarare nell'IRS",
+        "withheldBadge": "IRS trattenuta dalla banca"
+      },
+      "sort": {
+        "label": "Ordina per",
+        "tanbDesc": "Tasso, dal più alto",
+        "tanbAsc": "Tasso, dal più basso",
+        "netDesc": "Interessi netti, dal più alto"
+      },
+      "count": "{{shown}} conti su {{total}}",
+      "assumptions": "Gli interessi netti sono interessi semplici in 12 mesi al tasso lordo (TANB) della tabella, meno il {{tax}}% di IRS e qualsiasi canone mensile indicato nelle note. Gli sconti promozionali e le successive variazioni di tasso citate nelle note non sono applicati.",
+      "empty": "Nessun conto corrisponde a questi filtri.",
+      "caption": "Conti remunerati e di risparmio con tasso, limiti e interessi netti",
+      "columns": {
+        "tanb": "Tasso (TANB)",
+        "account": "Banca, prodotto e tipo",
+        "limits": "Minimo e massimo",
+        "term": "Durata",
+        "minimum": "Minimo",
+        "maximum": "Massimo",
+        "instant": "Bonifico istantaneo",
+        "holders": "2 titolari",
+        "tax": "IRS",
+        "net": "Interessi netti in 12 mesi dopo il {{tax}}% di IRS",
+        "notes": "Note (in portoghese)"
+      },
+      "rateRange": "da {{from}} a {{to}}",
+      "seeNotes": "vedi note",
+      "months": "{{count}} mesi",
+      "noLimit": "nessuno",
+      "holdersPaidPlan": "Con piano a pagamento",
+      "result": {
+        "belowMinimum": "Sotto il minimo di {{min}}: nessun interesse.",
+        "capped": "Gli interessi sono pagati solo fino a {{max}}.",
+        "shortTerm": "Il tasso dura {{count}} mesi; la cifra lo suppone per 12. Controlla le note.",
+        "termNotes": "La durata è spiegata nelle note."
+      },
+      "plans": {
+        "title": "Per piano, con il suo canone mensile",
+        "line": "{{plan}}: {{rate}}, {{fee}}, netto {{net}} all'anno",
+        "fee": "costo {{fee}} al mese",
+        "noFee": "senza costi"
+      },
+      "certificatesLink": "Apri lo strumento dei certificati di risparmio",
+      "nextStepHeadline": "Passa dal punto di riferimento a un piano di risparmio personale",
+      "nextStepDescription": "Una tabella mostra cosa offrono oggi le banche. Fissa un obiettivo in WonderMoney e segui come si confronta il tuo risparmio.",
+      "nextStepCta": "Fissa un obiettivo di risparmio",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa tabella",
+          "what": "Il tasso mostrato è il TANB: il tasso annuo nominale lordo, prima delle imposte. I conti di risparmio lo pagano sul saldo, di solito fino a un massimo; alcuni hanno un minimo, una durata o un tasso che cambia dopo un periodo iniziale. I certificati sono debito pubblico e l'opzione assicurativa non è un deposito.",
+          "notRec": "La tabella ha scopo informativo. Non è una raccomandazione, l'ordine non è una classifica, e il conto migliore per te dipende dal tuo saldo, dai tuoi altri conti e da quanto tolleri condizioni e costi."
+        },
+        "example": {
+          "title": "Esempio",
+          "setup": "Supponi di tenere {{amount}} per 12 mesi in {{product}} presso {{bank}}, al {{rate}} annuo. Rende {{gross}}; il 28% di IRS ne toglie {{tax}}, restano {{net}}.",
+          "capped": "Il massimo conta. {{product2}} presso {{bank2}} paga {{rate2}}, ma solo fino a {{cap}}. Con {{amount2}}, gli interessi sono {{gross2}} prima delle imposte e {{net2}} dopo, come se avessi risparmiato {{cap}}.",
+          "plans": "Contano anche i costi. {{product3}} presso {{bank3}} va da {{low}} a {{high}} a seconda del piano. Con {{amount}}, il piano Standard rende {{standardNet}} netti, mentre il piano Ultra, dopo {{ultraFees}} di costi all'anno, rende {{ultraNet}}."
+        },
+        "method": {
+          "title": "Metodo",
+          "intro": "Il calcolatore funziona allo stesso modo per ogni riga:",
+          "steps": {
+            "a": "Solo la parte dell'importo fino al massimo del conto produce interessi. Quando le note danno tassi per scaglione di saldo, ogni scaglione rende il proprio tasso.",
+            "b": "Gli interessi lordi sono quella parte per il TANB, in 12 mesi, senza capitalizzazione.",
+            "c": "Dagli interessi si toglie il 28% di IRS. Per le banche estere quell'imposta la dichiari tu; il calcolatore mostra lo stesso 28% perché le righe siano confrontabili.",
+            "d": "Quando le note indicano un canone mensile del piano, se ne sottraggono dodici mesi. Altri costi, promozioni e successive variazioni di tasso non sono applicati."
+          }
+        },
+        "limits": {
+          "title": "Cosa non include la tabella",
+          "items": {
+            "a": "Tassi, limiti e condizioni cambiano; la tabella è una fotografia di una data.",
+            "b": "Alcuni tassi scendono dopo un periodo iniziale o quando smettono di essere rispettate condizioni come l'accredito dello stipendio.",
+            "c": "La capitalizzazione, la ritenuta sui prelievi anticipati e la possibilità di sommare gli interessi agli altri redditi nell'IRS.",
+            "d": "La protezione dei depositi è uguale in ogni riga solo come regola: verifica il sistema di ciascuna banca."
+          }
+        },
+        "related": {
+          "title": "Continua a esplorare",
+          "depositLink": "Indice dei tassi sui depositi vincolati",
+          "depositBody": "I tassi medi pagati dalle banche in Portogallo sui nuovi depositi, a confronto con l'inflazione.",
+          "certificatesLink": "Certificati di risparmio",
+          "certificatesBody": "Debito pubblico, una delle righe qui sopra, nel suo calcolatore.",
+          "termLink": "Calcolatore di deposito vincolato",
+          "termBody": "Interessi e imposta di un deposito a durata fissa.",
+          "budgetLink": "Budget familiare",
+          "budgetBody": "Calcola quanto puoi lasciare nel risparmio."
+        }
+      }
     }
   },
   "resources": {

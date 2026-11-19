@@ -77,6 +77,10 @@ import ElectricityIndexComp from "@/components/calculators/ElectricityIndexComp"
 import ElectricityIndexGuide from "@/components/calculators/ElectricityIndexGuide.astro";
 import FuelPricesComp from "@/components/calculators/FuelPricesComp";
 import FuelPricesGuide from "@/components/calculators/FuelPricesGuide.astro";
+import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp";
+import FreeBankAccountsGuide from "@/components/calculators/FreeBankAccountsGuide.astro";
+import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccountsComp";
+import RemuneratedAccountsGuide from "@/components/calculators/RemuneratedAccountsGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -280,6 +284,18 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.fuelPrices.nextStepCta"),
     ctaHref: toLocalizedPath("featureBudgeting", locale),
   },
+  toolFreeBankAccounts: {
+    headline: t("tools.freeBankAccounts.nextStepHeadline"),
+    description: t("tools.freeBankAccounts.nextStepDescription"),
+    ctaText: t("tools.freeBankAccounts.nextStepCta"),
+    ctaHref: toLocalizedPath("featureAccounts", locale),
+  },
+  toolRemuneratedAccounts: {
+    headline: t("tools.remuneratedAccounts.nextStepHeadline"),
+    description: t("tools.remuneratedAccounts.nextStepDescription"),
+    ctaText: t("tools.remuneratedAccounts.nextStepCta"),
+    ctaHref: toLocalizedPath("featureGoals", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -406,6 +422,8 @@ const schema = {
     {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
     {routeId === "toolDepositRateIndex" && <DepositRateIndexComp locale={locale} client:load />}
     {routeId === "toolTermDepositOffers" && <TermDepositOffersComp locale={locale} client:load />}
+    {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
+    {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
     {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
     {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
   </div>
@@ -444,6 +462,8 @@ const schema = {
   {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
   {routeId === "toolDepositRateIndex" && <DepositRateIndexGuide locale={locale} />}
   {routeId === "toolTermDepositOffers" && <TermDepositOffersGuide locale={locale} />}
+  {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
+  {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
   {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
   {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
 

@@ -4340,6 +4340,229 @@
           "vehicleTaxBody": "Schätze die jährliche Fahrzeugsteuer, eine weitere Kostenposition des Autos."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Bevor Sie sich auf diese Liste verlassen",
+      "educationalTitle": "Nur zur Information",
+      "educational": "Diese Seite dient der Information. Sie ist keine Empfehlung und kein Angebot, die Reihenfolge ist kein Ranking, und WonderMoney empfiehlt keines der Konten. Auf dieser Seite gibt es keine Affiliate-Links.",
+      "confirm": "Die Konditionen ändern sich häufig. Lassen Sie sich jeden Zinssatz, jede Grenze und jede Gebühr von der Bank bestätigen, bevor Sie ein Konto eröffnen oder wechseln.",
+      "source": "Konditionen von WonderMoney aus den veröffentlichten Angeboten der Banken zusammengestellt.",
+      "asOf": "Konditionen vom {{date}}",
+      "guarantee": {
+        "title": "Einlagensicherung",
+        "body": "In Portugal erstattet der Fundo de Garantia de Depósitos Einlagen bis {{amount}} pro Einleger und Bank. Bei einem Gemeinschaftskonto wird das Guthaben auf die Inhaber aufgeteilt. Banken aus anderen Ländern fallen unter die Sicherung ihres Heimatlandes, die in der EU dasselbe Mindestniveau hat.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Banken im Ausland und IRS",
+        "body": "Portugiesische Banken behalten 28 % IRS auf die Zinsen ein. Eine Bank mit Sitz in einem anderen Land tut das nicht: Die Zinsen geben Sie selbst in Ihrer IRS-Erklärung an, in der Regel mit 28 % besteuert, sofern Sie sie nicht zu Ihren übrigen Einkünften hinzurechnen lassen."
+      },
+      "originalLabel": "Originalkonditionen, auf Portugiesisch",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "freeBankAccounts": {
+      "title": "Kostenlose Bankkonten in Portugal: welche es gibt und zu welchen Bedingungen",
+      "shortName": "Kostenlose Bankkonten",
+      "subtitle": "Girokonten ohne Kontoführungsgebühr, mit den daran geknüpften Bedingungen, zu einem angegebenen Stichtag.",
+      "description": "Datierte Liste kostenloser Girokonten in Portugal mit den Bedingungen jedes Kontos und der Angabe, welche zwei Inhaber erlauben.",
+      "pageTitle": "Kostenlose Bankkonten in Portugal: Bedingungen und 2 Inhaber",
+      "pageDescription": "Datierte Liste kostenloser Girokonten in Portugal: welche Banken Filialen haben, welche reine App- oder Auslandsbanken sind, wer zwei Inhaber erlaubt und welche Bedingungen für die Kostenfreiheit gelten.",
+      "filters": {
+        "twoHolders": "Nur Konten mit zwei möglichen Inhabern anzeigen"
+      },
+      "count": "{{shown}} von {{total}} Konten",
+      "empty": "Kein Konto entspricht diesem Filter.",
+      "noNotes": "Keine Bedingungen angegeben.",
+      "foreignBadge": "Ausländische Bank",
+      "columns": {
+        "account": "Bank und Konto",
+        "twoHolders": "2 Inhaber",
+        "notes": "Hinweise (auf Portugiesisch)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Banken mit Filialen",
+          "intro": "Konten, bei denen die Tabelle keinen Filialmangel vermerkt. Manche beschränken persönliche Services auf die Filialen eines Partnerinstituts."
+        },
+        "branchless": {
+          "title": "Reine App- und Onlinebanken, auch ausländische",
+          "intro": "Laut Tabelle haben sie keine Filialen und keine Bar- oder Scheckeinzahlung. Ausländische Banken sind gekennzeichnet: Die Zinsen geben Sie selbst an."
+        }
+      },
+      "nextStepHeadline": "Alle Ihre Konten an einem Ort",
+      "nextStepDescription": "Kostenlose Konten lassen sich leichter vergleichen als verwalten. Verbinden Sie sie in WonderMoney und behalten Sie alle Salden zusammen im Blick.",
+      "nextStepCta": "Alle Ihre Konten an einem Ort",
+      "guide": {
+        "read": {
+          "title": "So lesen Sie diese Liste",
+          "what": "Eine Bank kann für die Kontoführung, die Debitkarte oder Leistungen wie Bareinzahlungen Gebühren verlangen. \"Kostenlos\" heißt hier, was das Angebot der Bank selbst sagt, meist mit Bedingungen: ein Gehaltseingang, ein Mindestguthaben oder eine Mindestzahl an Kartenzahlungen pro Monat.",
+          "notRec": "Die Liste sagt nichts darüber, welches Konto zu Ihnen passt. Sie deckt nicht alle Banken ab, und ein heute kostenloses Konto kann morgen Gebühren verlangen."
+        },
+        "method": {
+          "title": "Wie die Liste entstanden ist",
+          "intro": "Jede Zeile ist ein Konto mit dem, was sein veröffentlichtes Angebot sagt. Die Hinweise stehen so, wie sie zusammengestellt wurden, auf Portugiesisch.",
+          "steps": {
+            "a": "Die Banken sind nach den Hinweisen aufgeteilt: Banken ohne Filialen stehen bei den App- oder Onlinebanken.",
+            "b": "Die Spalte 2 Inhaber vermerkt, ob das Konto zwei Inhaber haben kann.",
+            "c": "Eine Bank mit Sitz im Ausland ist gekennzeichnet, weil ihre Zinsen in Portugal nicht an der Quelle besteuert werden."
+          }
+        },
+        "limits": {
+          "title": "Was die Liste nicht enthält",
+          "items": {
+            "a": "Karten- und Überweisungsgebühren und Bedingungen, die nicht in den Hinweisen stehen.",
+            "b": "Welche Banken derzeit neue Kunden oder Nichtansässige aufnehmen.",
+            "c": "Die Qualität von Service, App und Kundensupport.",
+            "d": "Änderungen nach dem auf der Seite genannten Datum."
+          }
+        },
+        "related": {
+          "title": "Weiterlesen",
+          "remuneratedLink": "Verzinste Konten und Sparkonten",
+          "remuneratedBody": "Zinssätze, Grenzen und Nettozinsen für Konten, die Zinsen zahlen.",
+          "budgetLink": "Haushaltsbudget",
+          "budgetBody": "Sehen Sie, was Sie ausgeben, bevor Sie wählen, wo das Geld liegt."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Verzinste Konten und Sparkonten in Portugal: Zinsen, Grenzen und Nettozinsen",
+      "shortName": "Verzinste Konten",
+      "subtitle": "Eine datierte Tabelle dessen, was portugiesische und ausländische Banken auf Erspartes zahlen, mit einem Nettozins-Rechner.",
+      "description": "Datierte Tabelle verzinster Konten und Sparkonten in Portugal mit Filtern und Nettozinsen nach IRS.",
+      "pageTitle": "Verzinste Konten und Sparkonten in Portugal: Zinsen und Nettozinsen",
+      "pageDescription": "Datierte Tabelle verzinster Konten, Sparkonten, Zertifikate und Sparversicherungen in Portugal: Bruttozins, Grenzen, IBAN, zwei Inhaber und IRS, mit einem Rechner für Nettozinsen nach 28 % IRS.",
+      "calculator": {
+        "title": "Nettozinsen über 12 Monate",
+        "intro": "Geben Sie einen Betrag ein, um zu sehen, welche Zinsen jedes Konto über 12 Monate nach {{tax}} % IRS zahlen würde, wobei nur bis zur Höchstgrenze des Kontos verzinst wird. Zeilen mit mehreren Tarifen zeigen jeden Tarif."
+      },
+      "fields": {
+        "amount": "Gespartes Guthaben"
+      },
+      "help": {
+        "amount": "12 Monate gehalten, zum Zinssatz der Tabelle."
+      },
+      "errors": {
+        "amount": {
+          "required": "Geben Sie einen Betrag ein.",
+          "negative": "Der Betrag darf nicht negativ sein.",
+          "tooLarge": "Geben Sie einen Betrag bis {{max}} ein."
+        }
+      },
+      "filters": {
+        "type": "Art",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Erlaubt 2 Inhaber",
+        "any": "Alle"
+      },
+      "types": {
+        "ordem": "Girokonto",
+        "poupancaComIban": "Sparkonto mit IBAN",
+        "poupancaSemIban": "Sparkonto ohne IBAN",
+        "dividaPublica": "Staatsschuld",
+        "seguro": "Versicherung"
+      },
+      "iban": {
+        "any": "Alle",
+        "withIban": "Mit IBAN",
+        "withoutIban": "Ohne IBAN"
+      },
+      "tax": {
+        "any": "Alle",
+        "withheld": "Von der Bank in Portugal einbehalten",
+        "foreign": "Ausland: Sie erklären es selbst",
+        "foreignBadge": "Ausland: im IRS angeben",
+        "withheldBadge": "IRS von der Bank einbehalten"
+      },
+      "sort": {
+        "label": "Sortieren nach",
+        "tanbDesc": "Zinssatz, höchster zuerst",
+        "tanbAsc": "Zinssatz, niedrigster zuerst",
+        "netDesc": "Nettozinsen, höchste zuerst"
+      },
+      "count": "{{shown}} von {{total}} Konten",
+      "assumptions": "Die Nettozinsen sind einfache Zinsen über 12 Monate zum Bruttozins (TANB) der Tabelle, abzüglich {{tax}} % IRS und einer in den Hinweisen genannten Monatsgebühr. Aktionsrabatte und spätere Zinsänderungen aus den Hinweisen werden nicht angerechnet.",
+      "empty": "Kein Konto entspricht diesen Filtern.",
+      "caption": "Verzinste Konten und Sparkonten mit Zinssatz, Grenzen und Nettozinsen",
+      "columns": {
+        "tanb": "Zinssatz (TANB)",
+        "account": "Bank, Produkt und Art",
+        "limits": "Minimum und Maximum",
+        "term": "Laufzeit",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "instant": "Schnellüberweisung",
+        "holders": "2 Inhaber",
+        "tax": "IRS",
+        "net": "Nettozinsen in 12 Monaten nach {{tax}} % IRS",
+        "notes": "Hinweise (auf Portugiesisch)"
+      },
+      "rateRange": "{{from}} bis {{to}}",
+      "seeNotes": "siehe Hinweise",
+      "months": "{{count}} Monate",
+      "noLimit": "keine",
+      "holdersPaidPlan": "Mit bezahltem Tarif",
+      "result": {
+        "belowMinimum": "Unter dem Minimum von {{min}}: keine Zinsen.",
+        "capped": "Zinsen gibt es nur bis {{max}}.",
+        "shortTerm": "Der Zinssatz gilt {{count}} Monate; die Zahl nimmt ihn für 12 an. Siehe Hinweise.",
+        "termNotes": "Die Laufzeit wird in den Hinweisen erklärt."
+      },
+      "plans": {
+        "title": "Je Tarif, mit seiner Monatsgebühr",
+        "line": "{{plan}}: {{rate}}, {{fee}}, netto {{net}} pro Jahr",
+        "fee": "Gebühr {{fee}} pro Monat",
+        "noFee": "gebührenfrei"
+      },
+      "certificatesLink": "Das Tool für Sparzertifikate öffnen",
+      "nextStepHeadline": "Vom Richtwert zum persönlichen Sparplan",
+      "nextStepDescription": "Eine Tabelle zeigt, was Banken heute bieten. Setzen Sie sich in WonderMoney ein Ziel und verfolgen Sie, wie Ihre eigenen Ersparnisse im Vergleich stehen.",
+      "nextStepCta": "Sparziel festlegen",
+      "guide": {
+        "read": {
+          "title": "So lesen Sie diese Tabelle",
+          "what": "Der angezeigte Zinssatz ist der TANB: der nominale Bruttojahreszins vor Steuern. Sparkonten zahlen ihn auf das Guthaben, meist bis zu einer Höchstgrenze; manche haben ein Minimum, eine Laufzeit oder einen Zins, der sich nach einer Anfangsphase ändert. Zertifikate sind Staatsschulden, und die Versicherungsoption ist keine Einlage.",
+          "notRec": "Die Tabelle dient der Information. Sie ist keine Empfehlung, die Reihenfolge ist kein Ranking, und das beste Konto für Sie hängt von Ihrem Guthaben, Ihren anderen Konten und Ihrer Toleranz für Bedingungen und Gebühren ab."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Angenommen, Sie legen {{amount}} für 12 Monate bei {{bank}} auf {{product}} an, zu {{rate}} pro Jahr. Das bringt {{gross}}; die 28 % IRS nehmen {{tax}}, es bleiben {{net}}.",
+          "capped": "Die Höchstgrenze zählt. {{product2}} bei {{bank2}} zahlt {{rate2}}, aber nur bis {{cap}}. Bei {{amount2}} betragen die Zinsen {{gross2}} vor Steuern und {{net2}} danach, als hätten Sie {{cap}} gespart.",
+          "plans": "Auch Gebühren zählen. {{product3}} bei {{bank3}} reicht je nach Tarif von {{low}} bis {{high}}. Bei {{amount}} bringt der Tarif Standard {{standardNet}} netto, der Tarif Ultra nach {{ultraFees}} Gebühren pro Jahr dagegen {{ultraNet}}."
+        },
+        "method": {
+          "title": "Methode",
+          "intro": "Der Rechner arbeitet für jede Zeile gleich:",
+          "steps": {
+            "a": "Nur der Teil des Betrags bis zur Höchstgrenze des Kontos wird verzinst. Nennen die Hinweise Zinssätze je Guthabenstufe, bringt jede Stufe ihren eigenen Zins.",
+            "b": "Die Bruttozinsen sind dieser Teil mal TANB über 12 Monate, ohne Zinseszins.",
+            "c": "Von den Zinsen werden 28 % IRS abgezogen. Bei ausländischen Banken erklären Sie diese Steuer selbst; der Rechner zeigt dieselben 28 %, damit die Zeilen vergleichbar sind.",
+            "d": "Nennen die Hinweise eine monatliche Tarifgebühr, werden zwölf Monate davon abgezogen. Andere Kosten, Aktionen und spätere Zinsänderungen werden nicht angerechnet."
+          }
+        },
+        "limits": {
+          "title": "Was die Tabelle nicht enthält",
+          "items": {
+            "a": "Zinsen, Grenzen und Bedingungen ändern sich; die Tabelle ist eine Momentaufnahme.",
+            "b": "Manche Zinsen sinken nach einer Anfangsphase oder wenn Bedingungen wie ein Gehaltseingang nicht mehr erfüllt sind.",
+            "c": "Zinseszins, Einbehalt bei vorzeitiger Entnahme und die Möglichkeit, Zinsen im IRS zu den übrigen Einkünften hinzuzurechnen.",
+            "d": "Die Einlagensicherung ist nur grundsätzlich in jeder Zeile gleich: Prüfen Sie das System der jeweiligen Bank."
+          }
+        },
+        "related": {
+          "title": "Weiterlesen",
+          "depositLink": "Festgeldzins-Index",
+          "depositBody": "Die Durchschnittszinsen, die Banken in Portugal auf neue Einlagen zahlten, im Vergleich zur Inflation.",
+          "certificatesLink": "Sparzertifikate",
+          "certificatesBody": "Staatsschulden, eine der Zeilen oben, in einem eigenen Rechner.",
+          "termLink": "Festgeld-Rechner",
+          "termBody": "Zinsen und Steuer einer Einlage mit fester Laufzeit.",
+          "budgetLink": "Haushaltsbudget",
+          "budgetBody": "Ermitteln Sie, wie viel Sie sparen können."
+        }
+      }
     }
   },
   "resources": {

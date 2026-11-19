@@ -4340,6 +4340,229 @@
           "vehicleTaxBody": "Estimez la taxe annuelle du véhicule, un autre coût de la voiture."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Avant de vous fier à cette liste",
+      "educationalTitle": "À titre éducatif uniquement",
+      "educational": "Cette page est éducative. Ce n'est ni une recommandation ni une offre, l'ordre n'est pas un classement et WonderMoney ne recommande aucun de ces comptes. Il n'y a aucun lien d'affiliation sur cette page.",
+      "confirm": "Les conditions changent souvent. Confirmez chaque taux, plafond et frais auprès de la banque avant d'ouvrir ou de changer de compte.",
+      "source": "Conditions compilées par WonderMoney à partir des offres publiées par les banques.",
+      "asOf": "Conditions au {{date}}",
+      "guarantee": {
+        "title": "Garantie des dépôts",
+        "body": "Au Portugal, le Fundo de Garantia de Depósitos rembourse les dépôts jusqu'à {{amount}} par déposant et par banque. Un compte joint est réparti entre ses titulaires. Les banques d'un autre pays relèvent du système de leur pays d'origine, avec le même niveau minimal dans l'UE.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Banques étrangères et IRS",
+        "body": "Les banques portugaises retiennent 28 % d'IRS sur les intérêts. Une banque établie dans un autre pays ne le fait pas : vous déclarez vous-même les intérêts dans votre déclaration d'IRS, en général imposés à 28 %, sauf si vous choisissez de les ajouter à vos autres revenus."
+      },
+      "originalLabel": "Conditions d'origine, en portugais",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "freeBankAccounts": {
+      "title": "Comptes bancaires gratuits au Portugal : lesquels et à quelles conditions",
+      "shortName": "Comptes bancaires gratuits",
+      "subtitle": "Des comptes courants sans frais de tenue de compte, avec les conditions qui y sont attachées, à une date indiquée.",
+      "description": "Liste datée de comptes courants gratuits au Portugal, avec les conditions de chacun et ceux qui acceptent deux titulaires.",
+      "pageTitle": "Comptes Bancaires Gratuits au Portugal : Conditions et 2 Titulaires",
+      "pageDescription": "Liste datée de comptes courants gratuits au Portugal : quelles banques ont des agences, lesquelles sont uniquement mobiles ou étrangères, qui accepte deux titulaires et les conditions pour garder le compte gratuit.",
+      "filters": {
+        "twoHolders": "Afficher seulement les comptes qui acceptent deux titulaires"
+      },
+      "count": "{{shown}} comptes sur {{total}}",
+      "empty": "Aucun compte ne correspond à ce filtre.",
+      "noNotes": "Aucune condition indiquée.",
+      "foreignBadge": "Banque étrangère",
+      "columns": {
+        "account": "Banque et compte",
+        "twoHolders": "2 titulaires",
+        "notes": "Notes (en portugais)"
+      },
+      "groups": {
+        "branches": {
+          "title": "Banques avec agences",
+          "intro": "Comptes pour lesquels le tableau ne signale pas d'absence d'agences. Certaines limitent l'accueil en personne aux agences d'une banque partenaire."
+        },
+        "branchless": {
+          "title": "Banques mobiles et en ligne, y compris étrangères",
+          "intro": "Le tableau indique qu'elles n'ont ni agences ni dépôt d'espèces ou de chèques. Les banques étrangères sont signalées : les intérêts, c'est à vous de les déclarer."
+        }
+      },
+      "nextStepHeadline": "Voyez tous vos comptes au même endroit",
+      "nextStepDescription": "Les comptes gratuits sont plus faciles à comparer qu'à gérer. Connectez-les dans WonderMoney et suivez tous les soldes ensemble.",
+      "nextStepCta": "Voyez tous vos comptes au même endroit",
+      "guide": {
+        "read": {
+          "title": "Comment lire cette liste",
+          "what": "Une banque peut facturer la tenue d'un compte courant, la carte de débit ou des services comme les dépôts d'espèces. Ici, « gratuit » signifie ce que dit l'offre de la banque elle-même, en général avec des conditions : salaire domicilié, solde minimal ou nombre minimal d'achats par carte par mois.",
+          "notRec": "La liste ne dit pas quel compte vous convient. Elle ne couvre pas toutes les banques, et un compte gratuit aujourd'hui peut devenir payant demain."
+        },
+        "method": {
+          "title": "Comment la liste a été établie",
+          "intro": "Chaque ligne est un compte et ce que dit son offre publiée. Les notes sont affichées telles qu'elles ont été compilées, en portugais.",
+          "steps": {
+            "a": "Les banques sont réparties selon les notes : celles sans agences figurent parmi les banques mobiles ou en ligne.",
+            "b": "La colonne 2 titulaires indique si le compte peut avoir deux titulaires.",
+            "c": "Une banque établie à l'étranger est signalée, car ses intérêts ne sont pas imposés à la source au Portugal."
+          }
+        },
+        "limits": {
+          "title": "Ce que la liste ne couvre pas",
+          "items": {
+            "a": "Les frais de carte et de virement et les conditions absentes des notes.",
+            "b": "Les banques ouvertes aux nouveaux clients en ce moment, ou aux non-résidents.",
+            "c": "La qualité du service, de l'application et de l'assistance.",
+            "d": "Tout changement postérieur à la date affichée sur la page."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "remuneratedLink": "Comptes rémunérés et d'épargne",
+          "remuneratedBody": "Taux, plafonds et intérêts nets des comptes qui versent des intérêts.",
+          "budgetLink": "Budget du foyer",
+          "budgetBody": "Voyez ce que vous dépensez avant de choisir où le placer."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Comptes rémunérés et d'épargne au Portugal : taux, plafonds et intérêts nets",
+      "shortName": "Comptes rémunérés",
+      "subtitle": "Un tableau daté de ce que paient les banques portugaises et étrangères sur l'épargne, avec un calculateur d'intérêts nets.",
+      "description": "Tableau daté des comptes rémunérés et d'épargne au Portugal, avec filtres et intérêts nets après IRS.",
+      "pageTitle": "Comptes Rémunérés et d'Épargne au Portugal : Taux et Intérêts Nets",
+      "pageDescription": "Tableau daté des comptes rémunérés, comptes d'épargne, certificats et assurances d'épargne au Portugal : taux brut, plafonds, IBAN, deux titulaires et IRS, avec un calculateur d'intérêts nets après 28 % d'IRS.",
+      "calculator": {
+        "title": "Intérêts nets sur 12 mois",
+        "intro": "Saisissez un montant pour voir les intérêts que chaque compte verserait sur 12 mois après {{tax}} % d'IRS, en comptant les intérêts seulement jusqu'au plafond du compte. Les lignes à plusieurs formules affichent chaque formule."
+      },
+      "fields": {
+        "amount": "Montant épargné"
+      },
+      "help": {
+        "amount": "Conservé pendant 12 mois, au taux du tableau."
+      },
+      "errors": {
+        "amount": {
+          "required": "Saisissez un montant.",
+          "negative": "Le montant ne peut pas être négatif.",
+          "tooLarge": "Saisissez un montant jusqu'à {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Type",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Accepte 2 titulaires",
+        "any": "Tous"
+      },
+      "types": {
+        "ordem": "Compte courant",
+        "poupancaComIban": "Épargne avec IBAN",
+        "poupancaSemIban": "Épargne sans IBAN",
+        "dividaPublica": "Dette publique",
+        "seguro": "Assurance"
+      },
+      "iban": {
+        "any": "Tous",
+        "withIban": "Avec IBAN",
+        "withoutIban": "Sans IBAN"
+      },
+      "tax": {
+        "any": "Tous",
+        "withheld": "Retenu par la banque au Portugal",
+        "foreign": "Étranger : à déclarer vous-même",
+        "foreignBadge": "Étranger : à déclarer à l'IRS",
+        "withheldBadge": "IRS retenu par la banque"
+      },
+      "sort": {
+        "label": "Trier par",
+        "tanbDesc": "Taux, du plus élevé au plus bas",
+        "tanbAsc": "Taux, du plus bas au plus élevé",
+        "netDesc": "Intérêts nets, du plus élevé au plus bas"
+      },
+      "count": "{{shown}} comptes sur {{total}}",
+      "assumptions": "Les intérêts nets sont des intérêts simples sur 12 mois au taux brut (TANB) du tableau, moins {{tax}} % d'IRS et toute mensualité indiquée dans les notes. Les remises promotionnelles et les changements de taux ultérieurs mentionnés dans les notes ne sont pas appliqués.",
+      "empty": "Aucun compte ne correspond à ces filtres.",
+      "caption": "Comptes rémunérés et d'épargne avec taux, plafonds et intérêts nets",
+      "columns": {
+        "tanb": "Taux (TANB)",
+        "account": "Banque, produit et type",
+        "limits": "Minimum et maximum",
+        "term": "Durée",
+        "minimum": "Minimum",
+        "maximum": "Maximum",
+        "instant": "Virement instantané",
+        "holders": "2 titulaires",
+        "tax": "IRS",
+        "net": "Intérêts nets sur 12 mois après {{tax}} % d'IRS",
+        "notes": "Notes (en portugais)"
+      },
+      "rateRange": "{{from}} à {{to}}",
+      "seeNotes": "voir les notes",
+      "months": "{{count}} mois",
+      "noLimit": "aucun",
+      "holdersPaidPlan": "Avec formule payante",
+      "result": {
+        "belowMinimum": "En dessous du minimum de {{min}} : pas d'intérêts.",
+        "capped": "Les intérêts ne sont versés que jusqu'à {{max}}.",
+        "shortTerm": "Le taux dure {{count}} mois ; le chiffre le suppose pendant 12. Voyez les notes.",
+        "termNotes": "La durée est expliquée dans les notes."
+      },
+      "plans": {
+        "title": "Par formule, avec son coût mensuel",
+        "line": "{{plan}} : {{rate}}, {{fee}}, net {{net}} par an",
+        "fee": "coût {{fee}} par mois",
+        "noFee": "sans frais"
+      },
+      "certificatesLink": "Ouvrir l'outil des certificats d'épargne",
+      "nextStepHeadline": "Passez du repère à un plan d'épargne personnel",
+      "nextStepDescription": "Un tableau montre ce que les banques proposent aujourd'hui. Fixez un objectif dans WonderMoney et suivez comment votre épargne se compare.",
+      "nextStepCta": "Fixer un objectif d'épargne",
+      "guide": {
+        "read": {
+          "title": "Comment lire ce tableau",
+          "what": "Le taux affiché est le TANB : le taux annuel nominal brut, avant impôt. Les comptes d'épargne le versent sur le solde, en général jusqu'à un plafond ; certains ont un minimum, une durée ou un taux qui change après une période initiale. Les certificats sont de la dette publique et l'option assurance n'est pas un dépôt.",
+          "notRec": "Le tableau est éducatif. Ce n'est pas une recommandation, l'ordre n'est pas un classement, et le meilleur compte pour vous dépend de votre solde, de vos autres comptes et de votre tolérance aux conditions et aux frais."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Supposons que vous gardiez {{amount}} pendant 12 mois sur {{product}} chez {{bank}}, à {{rate}} par an. Il rapporte {{gross}} ; l'IRS de 28 % prélève {{tax}}, il reste {{net}}.",
+          "capped": "Le plafond compte. {{product2}} chez {{bank2}} paie {{rate2}}, mais seulement jusqu'à {{cap}}. Avec {{amount2}}, les intérêts sont de {{gross2}} avant impôt et de {{net2}} après, comme si vous aviez épargné {{cap}}.",
+          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}."
+        },
+        "method": {
+          "title": "Méthode",
+          "intro": "Le calculateur fonctionne de la même façon pour toutes les lignes :",
+          "steps": {
+            "a": "Seule la part du montant jusqu'au plafond du compte rapporte des intérêts. Quand les notes donnent des taux par tranche de solde, chaque tranche rapporte son propre taux.",
+            "b": "Les intérêts bruts sont cette part multipliée par le TANB, sur 12 mois, sans capitalisation.",
+            "c": "L'IRS de 28 % est déduit des intérêts. Pour les banques étrangères, cet impôt est à déclarer par vous ; le calculateur affiche les mêmes 28 % pour que les lignes soient comparables.",
+            "d": "Quand les notes indiquent une mensualité de formule, douze mois en sont déduits. Les autres coûts, promotions et changements de taux ultérieurs ne sont pas appliqués."
+          }
+        },
+        "limits": {
+          "title": "Ce que le tableau ne couvre pas",
+          "items": {
+            "a": "Les taux, plafonds et conditions changent ; le tableau est une photographie à une date.",
+            "b": "Certains taux baissent après une période initiale ou quand des conditions comme le salaire domicilié ne sont plus remplies.",
+            "c": "La capitalisation, la retenue en cas de retrait anticipé et l'option d'ajouter les intérêts à vos autres revenus pour l'IRS.",
+            "d": "La protection des dépôts n'est identique sur toutes les lignes qu'en principe : vérifiez le système de chaque banque."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "depositLink": "Indice des taux de dépôts à terme",
+          "depositBody": "Les taux moyens payés par les banques au Portugal sur les nouveaux dépôts, face à l'inflation.",
+          "certificatesLink": "Certificats d'épargne",
+          "certificatesBody": "De la dette publique, l'une des lignes ci-dessus, dans son propre calculateur.",
+          "termLink": "Calculateur de dépôt à terme",
+          "termBody": "Intérêts et impôt d'un dépôt à durée fixe.",
+          "budgetLink": "Budget du foyer",
+          "budgetBody": "Calculez combien vous pouvez laisser en épargne."
+        }
+      }
     }
   },
   "resources": {

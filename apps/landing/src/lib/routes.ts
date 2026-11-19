@@ -520,6 +520,22 @@ const ROUTE_SLUGS = {
 		de: "kraftstoffpreise-portugal",
 		it: "prezzi-carburanti-portogallo",
 	},
+	toolFreeBankAccounts: {
+		pt: "contas-bancarias-gratuitas",
+		en: "free-bank-accounts-portugal",
+		es: "cuentas-bancarias-gratuitas-portugal",
+		fr: "comptes-bancaires-gratuits-portugal",
+		de: "kostenlose-bankkonten-portugal",
+		it: "conti-bancari-gratuiti-portogallo",
+	},
+	toolRemuneratedAccounts: {
+		pt: "contas-remuneradas",
+		en: "savings-accounts-portugal-comparison",
+		es: "cuentas-remuneradas-portugal",
+		fr: "comptes-remuneres-portugal",
+		de: "verzinste-konten-portugal",
+		it: "conti-remunerati-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -668,6 +684,8 @@ export const TOOL_ROUTE_IDS = [
 	"toolTermDepositOffers",
 	"toolElectricityIndex",
 	"toolFuelPrices",
+	"toolFreeBankAccounts",
+	"toolRemuneratedAccounts",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -1005,6 +1023,12 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	tooltermdepositoffers: "toolTermDepositOffers",
 	"term-deposit-offers": "toolTermDepositOffers",
 	"comparador-depositos-a-prazo": "toolTermDepositOffers",
+	toolfreebankaccounts: "toolFreeBankAccounts",
+	"free-bank-accounts": "toolFreeBankAccounts",
+	"contas-gratuitas": "toolFreeBankAccounts",
+	toolremuneratedaccounts: "toolRemuneratedAccounts",
+	"savings-accounts": "toolRemuneratedAccounts",
+	"contas-poupanca": "toolRemuneratedAccounts",
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",

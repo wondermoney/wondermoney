@@ -4340,6 +4340,229 @@
           "vehicleTaxBody": "Estima o imposto anual do veículo, mais um custo de ter carro."
         }
       }
+    },
+    "bankAccountsShared": {
+      "noticesTitle": "Antes de te basares nesta lista",
+      "educationalTitle": "Apenas educativo",
+      "educational": "Esta página é educativa. Não é uma recomendação nem uma oferta, a ordem não é um ranking e a WonderMoney não recomenda nenhuma das contas. Não há links de afiliados nesta página.",
+      "confirm": "As condições mudam com frequência. Confirma com o banco cada taxa, limite e comissão antes de abrires ou mudares de conta.",
+      "source": "Condições compiladas pela WonderMoney a partir das ofertas publicadas pelos bancos.",
+      "asOf": "Condições à data de {{date}}",
+      "guarantee": {
+        "title": "Garantia de depósitos",
+        "body": "Em Portugal, o Fundo de Garantia de Depósitos reembolsa depósitos até {{amount}} por depositante e por banco. Numa conta conjunta, o saldo reparte-se entre os titulares. Os bancos de outro país ficam abrangidos pelo sistema do país de origem, com o mesmo nível mínimo na UE.",
+        "link": "Fundo de Garantia de Depósitos (fgd.pt)"
+      },
+      "foreignTax": {
+        "title": "Bancos estrangeiros e IRS",
+        "body": "Os bancos portugueses retêm 28% de IRS sobre os juros. Um banco sediado noutro país não retém: declaras tu os juros no IRS, em regra tributados a 28%, a menos que optes por os englobar com os restantes rendimentos."
+      },
+      "originalLabel": "Condições originais, em português",
+      "yes": "Sim",
+      "no": "Não"
+    },
+    "freeBankAccounts": {
+      "title": "Contas bancárias gratuitas em Portugal: quais são e as condições",
+      "shortName": "Contas bancárias gratuitas",
+      "subtitle": "Contas à ordem sem comissão de manutenção, com as condições que trazem associadas, numa data indicada.",
+      "description": "Lista datada de contas à ordem gratuitas em Portugal, com as condições de cada uma e quais aceitam dois titulares.",
+      "pageTitle": "Contas Bancárias Gratuitas em Portugal: Condições e 2 Titulares",
+      "pageDescription": "Lista datada de contas à ordem gratuitas em Portugal: que bancos têm balcões, quais são só digitais ou estrangeiros, quais aceitam dois titulares e as condições para a conta ficar grátis.",
+      "filters": {
+        "twoHolders": "Mostrar só contas que aceitam dois titulares"
+      },
+      "count": "A mostrar {{shown}} de {{total}} contas",
+      "empty": "Nenhuma conta corresponde a este filtro.",
+      "noNotes": "Sem condições indicadas.",
+      "foreignBadge": "Banco estrangeiro",
+      "columns": {
+        "account": "Banco e conta",
+        "twoHolders": "2 titulares",
+        "notes": "Notas"
+      },
+      "groups": {
+        "branches": {
+          "title": "Bancos com balcões",
+          "intro": "Contas em que a tabela não refere falta de balcões. Algumas limitam o atendimento presencial aos balcões de um banco parceiro."
+        },
+        "branchless": {
+          "title": "Bancos só digitais e online, incluindo estrangeiros",
+          "intro": "A tabela indica que não têm balcões nem depósito de numerário ou cheque. Os bancos estrangeiros estão assinalados: os juros são para declarares tu."
+        }
+      },
+      "nextStepHeadline": "Vê todas as tuas contas num só sítio",
+      "nextStepDescription": "As contas gratuitas são mais fáceis de comparar do que de gerir. Liga-as na WonderMoney e acompanha todos os saldos em conjunto.",
+      "nextStepCta": "Vê todas as tuas contas num só sítio",
+      "guide": {
+        "read": {
+          "title": "Como ler esta lista",
+          "what": "Um banco pode cobrar pela manutenção da conta à ordem, pelo cartão de débito ou por serviços como depósitos de numerário. Aqui, \"gratuita\" é o que diz a oferta do próprio banco, normalmente com condições: ordenado domiciliado, saldo mínimo ou um número mínimo de compras com cartão por mês.",
+          "notRec": "A lista não diz qual é a conta certa para ti. Não cobre todos os bancos e uma conta gratuita hoje pode passar a ter custos amanhã."
+        },
+        "method": {
+          "title": "Como a lista foi feita",
+          "intro": "Cada linha é uma conta e o que a oferta publicada diz. As notas aparecem tal como foram compiladas, em português.",
+          "steps": {
+            "a": "Os bancos dividem-se pelo que dizem as notas: os que não têm balcões ficam nos bancos só digitais ou online.",
+            "b": "A coluna de 2 titulares regista se a conta pode ter dois titulares.",
+            "c": "Um banco sediado no estrangeiro fica assinalado, porque os juros não sofrem retenção na fonte em Portugal."
+          }
+        },
+        "limits": {
+          "title": "O que a lista não inclui",
+          "items": {
+            "a": "Comissões de cartão e de transferências e condições que não estejam nas notas.",
+            "b": "Que bancos aceitam novos clientes neste momento ou não residentes.",
+            "c": "A qualidade do serviço, da aplicação e do apoio ao cliente.",
+            "d": "Qualquer alteração posterior à data indicada na página."
+          }
+        },
+        "related": {
+          "title": "Continua a explorar",
+          "remuneratedLink": "Contas remuneradas e poupança",
+          "remuneratedBody": "Taxas, limites e juros líquidos das contas que pagam juros.",
+          "budgetLink": "Orçamento familiar",
+          "budgetBody": "Vê o que gastas antes de escolheres onde o guardas."
+        }
+      }
+    },
+    "remuneratedAccounts": {
+      "title": "Contas remuneradas e de poupança em Portugal: taxas, limites e juros líquidos",
+      "shortName": "Contas remuneradas",
+      "subtitle": "Uma tabela datada do que bancos portugueses e estrangeiros pagam na poupança, com uma calculadora de juros líquidos.",
+      "description": "Tabela datada de contas remuneradas e de poupança em Portugal, com filtros e juros líquidos depois de IRS.",
+      "pageTitle": "Contas Remuneradas e Poupança em Portugal: Taxas e Juros Líquidos",
+      "pageDescription": "Tabela datada de contas remuneradas, contas poupança, certificados e seguros de poupança em Portugal: taxa bruta, limites, IBAN, dois titulares e IRS, com uma calculadora de juros líquidos após 28% de IRS.",
+      "calculator": {
+        "title": "Juros líquidos em 12 meses",
+        "intro": "Indica um montante para veres os juros que cada conta pagaria em 12 meses depois de {{tax}}% de IRS, contando juros só até ao máximo da conta. As linhas com vários planos mostram cada plano."
+      },
+      "fields": {
+        "amount": "Montante poupado"
+      },
+      "help": {
+        "amount": "Mantido durante 12 meses, à taxa da tabela."
+      },
+      "errors": {
+        "amount": {
+          "required": "Indica um montante.",
+          "negative": "O montante não pode ser negativo.",
+          "tooLarge": "Indica um montante até {{max}}."
+        }
+      },
+      "filters": {
+        "type": "Tipo",
+        "iban": "IBAN",
+        "tax": "IRS",
+        "twoHolders": "Aceita 2 titulares",
+        "any": "Todos"
+      },
+      "types": {
+        "ordem": "Conta à ordem",
+        "poupancaComIban": "Poupança com IBAN",
+        "poupancaSemIban": "Poupança sem IBAN",
+        "dividaPublica": "Dívida pública",
+        "seguro": "Seguro"
+      },
+      "iban": {
+        "any": "Todos",
+        "withIban": "Com IBAN",
+        "withoutIban": "Sem IBAN"
+      },
+      "tax": {
+        "any": "Todos",
+        "withheld": "Retido pelo banco em Portugal",
+        "foreign": "Estrangeiro: declaras tu",
+        "foreignBadge": "Estrangeiro: declarar no IRS",
+        "withheldBadge": "IRS retido pelo banco"
+      },
+      "sort": {
+        "label": "Ordenar por",
+        "tanbDesc": "Taxa, da mais alta para a mais baixa",
+        "tanbAsc": "Taxa, da mais baixa para a mais alta",
+        "netDesc": "Juros líquidos, do maior para o menor"
+      },
+      "count": "A mostrar {{shown}} de {{total}} contas",
+      "assumptions": "Os juros líquidos são juros simples em 12 meses à taxa bruta (TANB) da tabela, menos {{tax}}% de IRS e qualquer mensalidade que as notas indiquem. Descontos promocionais e alterações posteriores de taxa indicadas nas notas não são aplicados.",
+      "empty": "Nenhuma conta corresponde a estes filtros.",
+      "caption": "Contas remuneradas e de poupança com taxa, limites e juros líquidos",
+      "columns": {
+        "tanb": "Taxa (TANB)",
+        "account": "Banco, produto e tipo",
+        "limits": "Mínimo e máximo",
+        "term": "Prazo",
+        "minimum": "Mínimo",
+        "maximum": "Máximo",
+        "instant": "Transferência imediata",
+        "holders": "2 titulares",
+        "tax": "IRS",
+        "net": "Juros líquidos em 12 meses após {{tax}}% de IRS",
+        "notes": "Notas"
+      },
+      "rateRange": "{{from}} a {{to}}",
+      "seeNotes": "ver notas",
+      "months": "{{count}} meses",
+      "noLimit": "sem limite",
+      "holdersPaidPlan": "Em plano pago",
+      "result": {
+        "belowMinimum": "Abaixo do mínimo de {{min}}: sem juros.",
+        "capped": "Só pagam juros até {{max}}.",
+        "shortTerm": "A taxa vigora durante {{count}} meses; o valor assume-a durante 12. Vê as notas.",
+        "termNotes": "O prazo está explicado nas notas."
+      },
+      "plans": {
+        "title": "Por plano, com a respetiva mensalidade",
+        "line": "{{plan}}: {{rate}}, {{fee}}, líquido {{net}} por ano",
+        "fee": "custo {{fee}} por mês",
+        "noFee": "sem custo"
+      },
+      "certificatesLink": "Abre a ferramenta de certificados de aforro",
+      "nextStepHeadline": "Passa do ponto de referência a um plano de poupança pessoal",
+      "nextStepDescription": "Uma tabela mostra o que os bancos oferecem hoje. Define um objetivo na WonderMoney e acompanha como a tua poupança se compara.",
+      "nextStepCta": "Definir um objetivo de poupança",
+      "guide": {
+        "read": {
+          "title": "Como ler esta tabela",
+          "what": "A taxa apresentada é a TANB: a taxa anual nominal bruta, antes de impostos. As contas poupança pagam-na sobre o saldo, em geral até um máximo; algumas têm mínimo, prazo ou uma taxa que muda depois de um período inicial. Os certificados são dívida pública e a opção de seguro não é um depósito.",
+          "notRec": "A tabela é educativa. Não é uma recomendação, a ordem não é um ranking e a melhor conta para ti depende do teu saldo, das tuas outras contas e da tua tolerância a condições e comissões."
+        },
+        "example": {
+          "title": "Exemplo",
+          "setup": "Imagina que guardas {{amount}} durante 12 meses em {{product}} no {{bank}}, a {{rate}} ao ano. Rende {{gross}}; o IRS de 28% leva {{tax}} e ficam {{net}}.",
+          "capped": "O máximo conta. {{product2}} no {{bank2}} paga {{rate2}}, mas só até {{cap}}. Com {{amount2}}, os juros são {{gross2}} antes de impostos e {{net2}} depois, como se tivesses poupado {{cap}}.",
+          "plans": "As comissões também contam. {{product3}} no {{bank3}} vai de {{low}} a {{high}} consoante o plano. Com {{amount}}, o plano Standard rende {{standardNet}} líquidos, enquanto o plano Ultra, depois de {{ultraFees}} por ano de custos, rende {{ultraNet}}."
+        },
+        "method": {
+          "title": "Método",
+          "intro": "A calculadora funciona da mesma forma para todas as linhas:",
+          "steps": {
+            "a": "Só a parte do montante até ao máximo da conta rende juros. Quando as notas indicam taxas por escalão de saldo, cada escalão rende a taxa respetiva.",
+            "b": "Os juros brutos são essa parte vezes a TANB, em 12 meses, sem capitalização.",
+            "c": "Retira-se 28% de IRS aos juros. Nos bancos estrangeiros esse imposto é para declarares tu; a calculadora mostra os mesmos 28% para as linhas serem comparáveis.",
+            "d": "Quando as notas indicam uma mensalidade do plano, subtraem-se doze meses dela. Outros custos, promoções e alterações posteriores de taxa não são aplicados."
+          }
+        },
+        "limits": {
+          "title": "O que a tabela não inclui",
+          "items": {
+            "a": "Taxas, limites e condições mudam; a tabela é uma fotografia de uma data.",
+            "b": "Algumas taxas descem depois de um período inicial ou quando deixam de se cumprir condições como o ordenado domiciliado.",
+            "c": "Capitalização, retenção em levantamentos antecipados e a opção de englobar os juros com os outros rendimentos no IRS.",
+            "d": "A proteção dos depósitos só é igual em todas as linhas como regra: confirma o sistema de cada banco."
+          }
+        },
+        "related": {
+          "title": "Continua a explorar",
+          "depositLink": "Índice de taxas de depósitos a prazo",
+          "depositBody": "As taxas médias que os bancos em Portugal pagaram em novos depósitos, face à inflação.",
+          "certificatesLink": "Certificados de aforro",
+          "certificatesBody": "Dívida pública, uma das linhas acima, numa calculadora à parte.",
+          "termLink": "Simulador de depósito a prazo",
+          "termBody": "Juros e imposto de um depósito com prazo fixo.",
+          "budgetLink": "Orçamento familiar",
+          "budgetBody": "Calcula quanto podes deixar na poupança."
+        }
+      }
     }
   },
   "resources": {

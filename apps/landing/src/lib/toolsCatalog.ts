@@ -44,7 +44,7 @@ export const TOOLS_CATALOG = [
 		key: "householdBudget",
 		routeId: "toolHouseholdBudget",
 		group: "budgetAndSave",
-		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest"],
+		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolFreeBankAccounts", "toolRemuneratedAccounts"],
 	},
 	{
 		key: "savingsRate",
@@ -123,6 +123,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolFuelPrices",
 		group: "budgetAndSave",
 		related: ["toolHouseholdBudget", "toolCarLoan", "toolVehicleTax"],
+	},
+	{
+		key: "freeBankAccounts",
+		routeId: "toolFreeBankAccounts",
+		group: "budgetAndSave",
+		related: ["toolRemuneratedAccounts", "toolHouseholdBudget", "toolEmergencyFund", "toolSavingsRate"],
 	},
 	// Borrow and buy a home
 	{
@@ -252,12 +258,14 @@ export const TOOLS_CATALOG = [
 		routeId: "toolTermDeposit",
 		group: "investAndGrow",
 		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund", "toolDepositRateIndex", "toolTermDepositOffers"],
+		related: ["toolCompoundInterest", "toolSavingsGoal", "toolEmergencyFund", "toolDepositRateIndex", "toolRemuneratedAccounts"],
 	},
 	{
 		key: "savingsCertificates",
 		routeId: "toolSavingsCertificates",
 		group: "investAndGrow",
 		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex", "toolTermDepositOffers"],
+		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex", "toolRemuneratedAccounts"],
 	},
 	{
 		key: "depositRateIndex",
@@ -270,6 +278,13 @@ export const TOOLS_CATALOG = [
 		routeId: "toolTermDepositOffers",
 		group: "investAndGrow",
 		related: ["toolTermDeposit", "toolDepositRateIndex", "toolSavingsCertificates"],
+		related: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation", "toolRemuneratedAccounts"],
+	},
+	{
+		key: "remuneratedAccounts",
+		routeId: "toolRemuneratedAccounts",
+		group: "investAndGrow",
+		related: ["toolDepositRateIndex", "toolSavingsCertificates", "toolTermDeposit", "toolHouseholdBudget"],
 	},
 	// Track your wealth
 	{
