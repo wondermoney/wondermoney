@@ -496,6 +496,14 @@ const ROUTE_SLUGS = {
 		de: "strompreisindex-portugal",
 		it: "indice-prezzo-elettricita-portogallo",
 	},
+	toolFuelPrices: {
+		pt: "preco-dos-combustiveis",
+		en: "fuel-prices-portugal",
+		es: "precio-combustibles-portugal",
+		fr: "prix-carburants-portugal",
+		de: "kraftstoffpreise-portugal",
+		it: "prezzi-carburanti-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -641,6 +649,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolEuribor",
 	"toolDepositRateIndex",
 	"toolElectricityIndex",
+	"toolFuelPrices",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -978,6 +987,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",
+	toolfuelprices: "toolFuelPrices",
+	"fuel-prices": "toolFuelPrices",
+	"preco-dos-combustiveis": "toolFuelPrices",
 }
 
 function normalizeRouteLookupKey(value: string): string {

@@ -4072,6 +4072,127 @@
           "inflationBody": "Vê como a subida dos preços muda o que o teu dinheiro compra ao longo do tempo."
         }
       }
+    },
+    "fuelPrices": {
+      "title": "Preço dos combustíveis em Portugal e custo mensal",
+      "shortName": "Preço dos combustíveis",
+      "subtitle": "Vê o preço médio oficial do gasóleo, da gasolina e do GPL em Portugal, o histórico e quanto te custa conduzir por mês.",
+      "description": "Preços médios oficiais da DGEG dos combustíveis em Portugal continental, com variação semanal e histórico, e uma calculadora do custo mensal de combustível.",
+      "pageTitle": "Preço dos Combustíveis em Portugal: Média Oficial e Custo Mensal",
+      "pageDescription": "O último preço médio da DGEG do gasóleo, da gasolina 95 e do GPL em Portugal, com a variação face à semana anterior e cinco anos de histórico, e uma calculadora do teu custo mensal de combustível. Dados oficiais, sem previsões.",
+      "fuels": {
+        "diesel": "Gasóleo simples",
+        "gasoline95": "Gasolina simples 95",
+        "lpg": "GPL auto"
+      },
+      "fields": {
+        "fuel": "Combustível",
+        "period": "A distância que indicas é",
+        "periodMonth": "Por mês",
+        "periodWeek": "Por semana",
+        "periodTrip": "Por viagem",
+        "distance": "Distância",
+        "trips": "Viagens por mês",
+        "consumption": "Consumo de combustível",
+        "price": "Preço por litro",
+        "resetPrice": "Usar a média mais recente ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Quilómetros no período escolhido acima. Uma semana conta como 52/12 semanas por mês.",
+        "trips": "Quantas vezes por mês fazes esta viagem.",
+        "consumption": "Litros por 100 km, do computador de bordo ou da ficha técnica do carro. O consumo real costuma ser superior ao oficial.",
+        "price": "Começa na última média nacional da DGEG, {{price}}/L em {{date}}. Altera para o preço que realmente pagas."
+      },
+      "errors": {
+        "required": "Indica um número válido.",
+        "negative": "Não pode ser negativo.",
+        "tooLarge": "Indica {{max}} ou menos.",
+        "zero": "Indica um valor superior a zero.",
+        "notWhole": "Indica um número inteiro de viagens.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Custo estimado de combustível por mês",
+        "week": "Custo da distância semanal",
+        "trip": "Custo de uma viagem",
+        "litres": "Combustível usado por mês",
+        "yearly": "Cerca de doze meses assim",
+        "per100": "Custo por 100 km",
+        "nothing": "Sem distância percorrida, não há custo de combustível.",
+        "budget": "{{amount}} por mês é a linha do combustível no teu orçamento de transportes. Junta ao lado os outros custos do carro para ver o quadro todo."
+      },
+      "notes": {
+        "assumptions": "Estimativa: distância vezes consumo vezes preço por litro. Assume o mesmo consumo em todas as viagens e o mesmo preço durante o mês. Não é aconselhamento."
+      },
+      "latest": {
+        "title": "Último preço médio nacional",
+        "asOf": "Dados a {{date}} (DGEG). A variação é face a {{previous}}, uma semana antes.",
+        "change": "{{amount}}/L ({{percent}}) numa semana",
+        "flat": "Sem variação numa semana",
+        "note": "Média diária de Portugal continental, ponderada pelas quantidades vendidas e com os descontos dos postos. É uma média do passado, não uma previsão: esta página não prevê o preço da próxima semana."
+      },
+      "history": {
+        "title": "Preços dos combustíveis nos últimos cinco anos",
+        "intro": "Preço médio por litro da DGEG, um valor por semana para cada combustível.",
+        "chartLabel": "Gráfico de linhas do preço médio semanal por litro do gasóleo, da gasolina 95 e do GPL em Portugal ao longo de cinco anos",
+        "tableCaption": "As últimas semanas: preço médio por litro de cada combustível",
+        "date": "Data",
+        "asOf": "Dados a {{date}}, o último dia publicado pela DGEG. Um valor por semana, desde {{first}}. A cópia desta página foi criada a {{fetched}}. Fonte: DGEG, Preço Médio Diário (Portugal continental)."
+      },
+      "nextStepHeadline": "Põe o combustível no teu orçamento",
+      "nextStepDescription": "O combustível faz parte do que custa deslocares-te. Junta-o a um orçamento WonderMoney com os outros custos de transporte e vê o que sobra por mês.",
+      "nextStepCta": "Revê a verba de transportes no teu orçamento",
+      "guide": {
+        "read": {
+          "title": "Como ler esta página",
+          "prices": "No topo da página está o último preço médio nacional por litro do gasóleo, da gasolina 95 e do GPL, tal como a DGEG o publicou para {{asOf}}, e quanto cada um variou numa semana: gasóleo {{dieselChange}} e gasolina {{gasolineChange}} face à semana anterior.",
+          "calculator": "A calculadora transforma a tua condução num custo mensal de combustível. Indicas a distância, o consumo em litros por 100 km e o combustível; o preço começa na média mais recente e podes alterá-lo para o que realmente pagas.",
+          "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Um carro a gasóleo com {{distance}} por mês e um consumo de {{consumption}}, à média mais recente de {{price}}. Combustível usado: {{distance}} vezes {{consumption}} a dividir por 100 dá {{litres}}. Custo: {{litres}} vezes {{price}} dá {{monthly}} por mês, cerca de {{yearly}} por ano, ou {{per100}} por cada 100 km.",
+          "trips": "A distância também pode ser uma viagem. Uma ida e volta de 40 km feita 20 vezes por mês com o mesmo carro custa {{tripCost}} de cada vez, {{tripMonthly}} por mês."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "A calculadora faz quatro coisas:",
+          "steps": {
+            "a": "Distância por mês: a distância que indicas, uma semana contada como 52 a dividir por 12 semanas por mês, ou uma viagem multiplicada pelas viagens por mês.",
+            "b": "Litros: distância vezes consumo a dividir por 100.",
+            "c": "Custo: litros vezes o preço por litro que indicas, arredondado ao cêntimo.",
+            "d": "Ano: doze meses assim."
+          },
+          "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "dgeg": "Preços: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dos combustíveis rodoviários em Portugal continental, para gasóleo simples, gasolina simples 95 e GPL auto. O último dia é {{asOf}}; a cópia desta página foi criada a {{fetched}}. O histórico é um valor da DGEG de sete em sete dias até {{first}}, copiado tal como a DGEG o publica.",
+          "terms": "A DGEG indica que esta informação é gratuita e pode ser usada livremente, desde que a DGEG seja identificada como fonte, se indique a data da última atualização e a informação seja reproduzida fielmente. Os preços são comunicados pelos postos, que são responsáveis por eles.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "A página lê um ficheiro de dados guardado e nunca chama a DGEG enquanto a usas. O ficheiro é atualizado por um script que recusa dados desatualizados ou implausíveis, por isso uma atualização falhada mantém os últimos números bons e a respetiva data ({{asOf}})."
+        },
+        "limits": {
+          "title": "O que estes valores não incluem",
+          "items": {
+            "noForecast": "Sem previsão: nada aqui prevê preços futuros, e os movimentos passados não dizem para onde o preço vai a seguir.",
+            "average": "Média nacional: junta todos os postos de Portugal continental e é ponderada pelas vendas. O preço no teu posto pode ser mais alto ou mais baixo, e os Açores e a Madeira não estão incluídos.",
+            "stations": "Sem postos: esta página não nomeia nem ordena nenhum posto. O site da DGEG lista os preços por posto, se quiseres ver.",
+            "consumption": "Consumo: o mesmo valor em todas as viagens. O consumo real muda com a velocidade, a carga, o trânsito e a estação do ano, e costuma ser superior ao oficial.",
+            "scope": "Só combustível: portagens, seguro, imposto, manutenção e estacionamento não estão incluídos. O carregamento elétrico não é coberto e outros combustíveis não são mostrados.",
+            "education": "Apenas para fins educativos, não é aconselhamento."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "householdBudgetLink": "Calculadora de orçamento familiar",
+          "householdBudgetBody": "Põe o combustível ao lado dos outros custos mensais e vê o que sobra.",
+          "carLoanLink": "Simulador de crédito automóvel",
+          "carLoanBody": "Junta a prestação ao combustível para ver quanto custa o carro no total.",
+          "vehicleTaxLink": "Simulador de IUC",
+          "vehicleTaxBody": "Estima o imposto anual do veículo, mais um custo de ter carro."
+        }
+      }
     }
   },
   "resources": {
