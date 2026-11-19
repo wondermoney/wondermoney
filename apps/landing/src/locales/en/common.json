@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney shows your cash, your monthly spending and how long your savings last on a lower income.",
       "nextStepCta": "Estimate how long your cash buffer will last"
     },
+    "sickPay": {
+      "title": "Portugal sick pay calculator 2026 (subsídio de doença)",
+      "shortName": "Sick pay",
+      "subtitle": "Estimate the subsídio de doença for a baixa médica: amount by duration band, waiting days and the income gap.",
+      "description": "Estimate sick pay in Portugal: daily amount, total, waiting days and the gap against your net pay.",
+      "pageTitle": "Sick Pay Calculator Portugal 2026: Baixa Médica and Subsídio de Doença",
+      "pageDescription": "Estimate the subsídio de doença in Portugal: reference pay over 180 days, 55% to 75% by duration, the 3 waiting days, the 9.20 minimum and your income gap while on sick leave.",
+      "fields": {
+        "grossMonthly": "Gross monthly salary",
+        "allowances": "Allowances",
+        "sickDays": "Days of sick leave",
+        "dependants": "Children up to 16 (or 24 with child benefit)",
+        "hospitalisation": "Hospital stay or outpatient surgery"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 payments (holiday and Christmas paid separately)",
+        "twelfths": "In twelfths (the salary already includes them)"
+      },
+      "help": {
+        "gross": "The base salary in the months counted, before Social Security and IRS. Holiday and Christmas allowances are not part of the reference pay.",
+        "allowances": "In twelfths, the calculator takes out the two allowances to get the base salary the reference pay uses.",
+        "sickDays": "Total days on the sick note (CIT), counted from the first day. Employees can receive up to 1,095 days.",
+        "dependants": "Used for the 5-point increase, which needs 3 or more children and a reference pay of 500 euros a month or less.",
+        "hospitalisation": "With a hospital stay or outpatient surgery the benefit is paid from day 1, with no waiting period."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "tooSmall": "Enter a value of at least {{min}}.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "whole": "Enter a whole number.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "total": "Estimated total paid by Segurança Social",
+        "paidDays": "Days paid",
+        "waiting": "Waiting days (not paid by Segurança Social)",
+        "waitingValue": "{{days}} days, about {{amount}} of net pay",
+        "waitingNone": "None",
+        "reference": "Reference pay per day",
+        "netPay": "Normal net pay per month",
+        "firstGap": "Income gap in the first 30 days",
+        "averageGap": "Average monthly income gap over the whole leave",
+        "bandsTitle": "By duration band",
+        "bandLabel": "Days {{from}} to {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} paid days × {{daily}} = {{amount}}",
+        "increaseApplied": "The 5-point increase for low pay and 3 or more children is included.",
+        "allWaiting": "Every day of this leave is a waiting day, so Segurança Social pays nothing. Check whether your contract or collective agreement makes your employer pay these days.",
+        "waitingNote": "Segurança Social does not pay the first 3 days. Whether your employer pays them depends on your contract or collective agreement.",
+        "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
+        "limit": {
+          "none": "The daily amount is the percentage of your reference pay for each band; no limit applied.",
+          "minimum": "The daily amount was raised to the minimum of {{min}} (30% of the minimum wage).",
+          "referencePay": "Your reference pay is below {{min}} a day, so the benefit equals the reference pay.",
+          "netCap": "The daily amount was limited to the estimated net value of your reference pay."
+        }
+      },
+      "checklist": {
+        "title": "Conditions to check (not a decision)",
+        "certificate": "You have a sick note (CIT) from a doctor, sent electronically to Segurança Social.",
+        "guarantee": "You have 6 months of registered pay (they do not have to be consecutive) on the day you stop working.",
+        "professionalIndex": "You worked at least 12 days in the first four of the last six months, counting the month you stop.",
+        "waiting": "There is no waiting period for a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it. The calculator only has a switch for the first.",
+        "note": "Only Segurança Social decides whether you are entitled. This list is a reminder, not a verdict."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "An employee earning {{gross}} a month in 14 payments, on sick leave for {{days}} days with no hospital stay. The reference pay is {{reference}} a day. Days 1 to 3 are waiting days, so the first band pays 27 days at 55% and the next 15 days at 60%: {{total}} in total. Normal net pay is {{net}} a month; over the leave the average shortfall is {{gap}} a month.",
+        "methodTitle": "How the estimate works",
+        "methodReference": "The reference pay (RR) is the pay registered in the 6 oldest of the 8 months before the month the sick leave starts, without holiday and Christmas allowances, divided by 180. The calculator uses your monthly salary divided by 30.",
+        "methodBands": "The daily benefit is a percentage of the RR that grows with the length of the leave: 55% up to 30 days, 60% from day 31 to 90, 70% from day 91 to 365 and 75% beyond that, up to 1,095 days for employees. The days count from the first day of the leave, waiting days included.",
+        "methodWaiting": "Employees have a waiting period of 3 days that Segurança Social does not pay. With a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it, payment starts on day 1.",
+        "methodMinimum": "The daily benefit cannot be below {{min}} (30% of the {{rmmg}} minimum wage). If the RR itself is lower, the benefit equals the RR.",
+        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when the RR is at most 500 euros a month and the household has 3 or more children up to 16 (or 24 with child benefit), or children with the disability bonus. The calculator only models the children count.",
+        "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
+        "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
+        "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
+        "unsupportedTitle": "Not supported",
+        "unsupportedTuberculosis": "Tuberculosis, paid at 80% or 100% of the RR depending on dependants, with no time limit.",
+        "unsupportedSelfEmployed": "Self-employed workers (10 days of waiting, up to 365 days), voluntary social insurance and domestic workers.",
+        "unsupportedShort": "Short absences covered by the SNS 24 self-declaration of illness: we did not model their rules.",
+        "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide. The 500 euro limit for the 5-point increase comes from the consolidated law and secondary sources, because the guide text does not show the figure. The estimate of net pay behind the net cap is our simplification."
+      },
+      "nextStepHeadline": "Plan for the temporary income gap",
+      "nextStepDescription": "WonderMoney shows your cash, your spending and how long your savings cover a lower income.",
+      "nextStepCta": "Adjust your budget to the temporary income gap"
+    },
     "vehicleTax": {
       "title": "Vehicle tax (IUC) calculator",
       "shortName": "Vehicle tax (IUC)",

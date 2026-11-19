@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney mostra la tua liquidità, le spese mensili e quanto durano i risparmi con un reddito più basso.",
       "nextStepCta": "Stima quanto durerà il tuo cuscinetto di liquidità"
     },
+    "sickPay": {
+      "title": "Calcolatore indennità di malattia Portogallo 2026 (subsídio de doença)",
+      "shortName": "Indennità di malattia",
+      "subtitle": "Stima il subsídio de doença per un periodo di malattia: importo per fascia di durata, giorni di carenza e perdita di reddito.",
+      "description": "Stima l'indennità di malattia in Portogallo: importo giornaliero, totale, giorni di carenza e differenza con lo stipendio netto.",
+      "pageTitle": "Calcolatore Indennità di Malattia Portogallo 2026: Baixa Médica",
+      "pageDescription": "Stima il subsídio de doença in Portogallo: retribuzione di riferimento su 180 giorni, dal 55% al 75% in base alla durata, i 3 giorni di carenza, il minimo di 9,20 € e la perdita di reddito durante la malattia.",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile",
+        "allowances": "Tredicesima e quattordicesima",
+        "sickDays": "Giorni di malattia",
+        "dependants": "Figli fino a 16 anni (o 24 con assegno familiare)",
+        "hospitalisation": "Ricovero ospedaliero o chirurgia ambulatoriale"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamenti (mensilità aggiuntive a parte)",
+        "twelfths": "In dodicesimi (lo stipendio le include già)"
+      },
+      "help": {
+        "gross": "Lo stipendio base dei mesi considerati, prima di previdenza e IRS. Le mensilità aggiuntive non fanno parte della retribuzione di riferimento.",
+        "allowances": "In dodicesimi, il calcolatore toglie le due mensilità per ottenere lo stipendio base usato dalla retribuzione di riferimento.",
+        "sickDays": "Totale dei giorni del certificato (CIT), contati dal primo giorno. I lavoratori dipendenti possono ricevere fino a 1095 giorni.",
+        "dependants": "Serve per la maggiorazione di 5 punti, che richiede 3 o più figli e una retribuzione di riferimento di 500 euro al mese o meno.",
+        "hospitalisation": "Con ricovero ospedaliero o chirurgia ambulatoriale l'indennità è pagata dal primo giorno, senza periodo di carenza."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "total": "Totale stimato pagato dalla Segurança Social",
+        "paidDays": "Giorni pagati",
+        "waiting": "Giorni di carenza (non pagati dalla Segurança Social)",
+        "waitingValue": "{{days}} giorni, circa {{amount}} di stipendio netto",
+        "waitingNone": "Nessuno",
+        "reference": "Retribuzione di riferimento al giorno",
+        "netPay": "Stipendio netto normale al mese",
+        "firstGap": "Perdita di reddito nei primi 30 giorni",
+        "averageGap": "Perdita media mensile di reddito durante tutta la malattia",
+        "bandsTitle": "Per fascia di durata",
+        "bandLabel": "Giorni da {{from}} a {{to}} ({{percent}}%)",
+        "bandValue": "{{paid}} giorni pagati × {{daily}} = {{amount}}",
+        "increaseApplied": "Inclusa la maggiorazione di 5 punti per retribuzione bassa e 3 o più figli.",
+        "allWaiting": "Ogni giorno di questa malattia è di carenza, quindi la Segurança Social non paga nulla. Verifica se il contratto o il contratto collettivo obbliga il datore di lavoro a pagarli.",
+        "waitingNote": "La Segurança Social non paga i primi 3 giorni. Se li paga il datore di lavoro dipende dal contratto o dal contratto collettivo.",
+        "estimate": "Una stima per pianificare, non una decisione. La Segurança Social calcola l'importo reale dalle retribuzioni registrate.",
+        "limit": {
+          "none": "L'importo giornaliero è la percentuale della retribuzione di riferimento di ogni fascia; nessun limite applicato.",
+          "minimum": "L'importo giornaliero è stato portato al minimo di {{min}} (30% del salario minimo).",
+          "referencePay": "La retribuzione di riferimento è inferiore a {{min}} al giorno, quindi l'indennità è uguale a tale retribuzione.",
+          "netCap": "L'importo giornaliero è stato limitato al valore netto stimato della retribuzione di riferimento."
+        }
+      },
+      "checklist": {
+        "title": "Condizioni da verificare (non è una decisione)",
+        "certificate": "Hai un certificato di malattia (CIT) rilasciato da un medico e inviato per via telematica alla Segurança Social.",
+        "guarantee": "Hai 6 mesi di retribuzioni registrate (anche non consecutivi) il giorno in cui smetti di lavorare.",
+        "professionalIndex": "Hai lavorato almeno 12 giorni nei primi quattro degli ultimi sei mesi, contando il mese in cui smetti di lavorare.",
+        "waiting": "Non c'è periodo di carenza con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e prosegue oltre. Il calcolatore ha un'opzione solo per la prima.",
+        "note": "Solo la Segurança Social decide se hai diritto. Questo elenco è un promemoria, non un verdetto."
+      },
+      "guide": {
+        "exampleTitle": "Esempio pratico",
+        "example": "Un dipendente con {{gross}} al mese in 14 pagamenti, in malattia per {{days}} giorni senza ricovero. La retribuzione di riferimento è di {{reference}} al giorno. I giorni da 1 a 3 sono di carenza, quindi la prima fascia paga 27 giorni al 55% e i 15 successivi al 60%: {{total}} in totale. Lo stipendio netto normale è di {{net}} al mese; durante la malattia la perdita media è di {{gap}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento (RR) è la somma delle retribuzioni registrate nei 6 mesi più vecchi degli 8 precedenti il mese in cui inizia la malattia, senza mensilità aggiuntive, divisa per 180. Il calcolatore usa il tuo stipendio mensile diviso per 30.",
+        "methodBands": "L'indennità giornaliera è una percentuale della RR che cresce con la durata: 55% fino a 30 giorni, 60% dal giorno 31 al 90, 70% dal giorno 91 al 365 e 75% oltre, fino a 1095 giorni per i dipendenti. I giorni contano dal primo giorno, carenza inclusa.",
+        "methodWaiting": "I dipendenti hanno 3 giorni di carenza che la Segurança Social non paga. Con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e lo supera, il pagamento parte dal giorno 1.",
+        "methodMinimum": "L'indennità giornaliera non può essere inferiore a {{min}} (30% del salario minimo di {{rmmg}}). Se la RR stessa è più bassa, l'indennità è uguale alla RR.",
+        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando la RR è al massimo di 500 euro al mese e la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure figli con bonus per disabilità. Il calcolatore considera solo il numero di figli.",
+        "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di previdenza e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
+        "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive non vengono ricostituite per i giorni di malattia.",
+        "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedTuberculosis": "Tubercolosi, pagata all'80% o al 100% della RR in base ai familiari a carico, senza limite di tempo.",
+        "unsupportedSelfEmployed": "Lavoratori autonomi (10 giorni di carenza, fino a 365 giorni), assicurazione sociale volontaria e lavoratori domestici.",
+        "unsupportedShort": "Assenze brevi coperte dall'autodichiarazione di malattia dell'SNS 24: non ne abbiamo modellato le regole.",
+        "unsupportedOther": "Meno di 6 mesi di retribuzioni registrate, retribuzioni molto variabili, indennizzi per infortunio sul lavoro o malattia professionale e contratti collettivi che integrano l'indennità.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, nel testo vigente: il regime di protezione in caso di malattia",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della Segurança Social. Il limite di 500 euro della maggiorazione di 5 punti proviene dalla legge consolidata e da fonti secondarie, perché il testo della guida non mostra la cifra. La stima dello stipendio netto dietro il limite netto è una nostra semplificazione."
+      },
+      "nextStepHeadline": "Pianifica il calo temporaneo di reddito",
+      "nextStepDescription": "WonderMoney mostra la tua liquidità, le tue spese e per quanto tempo i risparmi coprono un reddito più basso.",
+      "nextStepCta": "Adatta il tuo budget al calo temporaneo di reddito"
+    },
     "vehicleTax": {
       "title": "Calcolo del bollo auto portoghese (IUC)",
       "shortName": "IUC",

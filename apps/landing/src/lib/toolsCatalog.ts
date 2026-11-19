@@ -56,7 +56,7 @@ export const TOOLS_CATALOG = [
 		key: "emergencyFund",
 		routeId: "toolEmergencyFund",
 		group: "budgetAndSave",
-		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolUnemploymentBenefit"],
+		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolUnemploymentBenefit", "toolSickPay"],
 	},
 	{
 		key: "savingsGoal",
@@ -98,7 +98,13 @@ export const TOOLS_CATALOG = [
 		key: "unemploymentBenefit",
 		routeId: "toolUnemploymentBenefit",
 		group: "budgetAndSave",
-		related: ["toolEmergencyFund", "toolHouseholdBudget", "toolNetSalary"],
+		related: ["toolEmergencyFund", "toolHouseholdBudget", "toolNetSalary", "toolSickPay"],
+	},
+	{
+		key: "sickPay",
+		routeId: "toolSickPay",
+		group: "budgetAndSave",
+		related: ["toolNetSalary", "toolEmergencyFund", "toolHouseholdBudget"],
 	},
 	// Borrow and buy a home
 	{

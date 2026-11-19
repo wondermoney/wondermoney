@@ -3012,6 +3012,96 @@
       "nextStepDescription": "WonderMoney zeigt Ihr Bargeld, Ihre monatlichen Ausgaben und wie lange Ihre Ersparnisse bei geringerem Einkommen reichen.",
       "nextStepCta": "Schätzen Sie, wie lange Ihr Bargeldpolster reicht"
     },
+    "sickPay": {
+      "title": "Krankengeld-Rechner Portugal 2026 (subsídio de doença)",
+      "shortName": "Krankengeld",
+      "subtitle": "Schätzen Sie das subsídio de doença bei einer Krankschreibung: Betrag je Dauerstufe, Karenztage und Einkommenslücke.",
+      "description": "Krankengeld in Portugal schätzen: Tagessatz, Gesamtbetrag, Karenztage und Lücke zum Nettogehalt.",
+      "pageTitle": "Krankengeld-Rechner Portugal 2026: Baixa Médica und Subsídio de Doença",
+      "pageDescription": "Schätzen Sie das subsídio de doença in Portugal: Referenzentgelt über 180 Tage, 55 % bis 75 % je nach Dauer, die 3 Karenztage, das Minimum von 9,20 € und Ihre Einkommenslücke während der Krankschreibung.",
+      "fields": {
+        "grossMonthly": "Monatsbruttogehalt",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "sickDays": "Tage der Krankschreibung",
+        "dependants": "Kinder bis 16 Jahre (oder 24 mit Kindergeld)",
+        "hospitalisation": "Krankenhausaufenthalt oder ambulante Operation"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
+        "twelfths": "In Zwölfteln (das Gehalt enthält sie bereits)"
+      },
+      "help": {
+        "gross": "Das Grundgehalt der berücksichtigten Monate, vor Sozialversicherung und IRS. Urlaubs- und Weihnachtsgeld zählen nicht zum Referenzentgelt.",
+        "allowances": "In Zwölfteln rechnet der Rechner die zwei Zahlungen heraus, um das Grundgehalt für das Referenzentgelt zu erhalten.",
+        "sickDays": "Gesamtzahl der Tage laut Krankschreibung (CIT), ab dem ersten Tag gezählt. Arbeitnehmer erhalten bis zu 1095 Tage.",
+        "dependants": "Für die Erhöhung um 5 Punkte, die 3 oder mehr Kinder und ein Referenzentgelt von höchstens 500 Euro im Monat voraussetzt.",
+        "hospitalisation": "Bei Krankenhausaufenthalt oder ambulanter Operation wird ab dem ersten Tag gezahlt, ohne Karenzzeit."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Geschätzte Gesamtzahlung der Segurança Social",
+        "paidDays": "Bezahlte Tage",
+        "waiting": "Karenztage (nicht von der Segurança Social bezahlt)",
+        "waitingValue": "{{days}} Tage, etwa {{amount}} Nettogehalt",
+        "waitingNone": "Keine",
+        "reference": "Referenzentgelt pro Tag",
+        "netPay": "Normales Nettogehalt pro Monat",
+        "firstGap": "Einkommenslücke in den ersten 30 Tagen",
+        "averageGap": "Durchschnittliche monatliche Einkommenslücke über die ganze Krankschreibung",
+        "bandsTitle": "Nach Dauerstufe",
+        "bandLabel": "Tage {{from}} bis {{to}} ({{percent}} %)",
+        "bandValue": "{{paid}} bezahlte Tage × {{daily}} = {{amount}}",
+        "increaseApplied": "Die Erhöhung um 5 Punkte bei niedrigem Entgelt und 3 oder mehr Kindern ist enthalten.",
+        "allWaiting": "Jeder Tag dieser Krankschreibung ist ein Karenztag, die Segurança Social zahlt daher nichts. Prüfen Sie, ob Ihr Vertrag oder Tarifvertrag den Arbeitgeber zur Zahlung verpflichtet.",
+        "waitingNote": "Die Segurança Social zahlt die ersten 3 Tage nicht. Ob der Arbeitgeber sie zahlt, hängt von Ihrem Vertrag oder Tarifvertrag ab.",
+        "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Segurança Social berechnet den tatsächlichen Betrag aus Ihren gemeldeten Entgelten.",
+        "limit": {
+          "none": "Der Tagessatz ist der Prozentsatz Ihres Referenzentgelts je Stufe; keine Grenze angewendet.",
+          "minimum": "Der Tagessatz wurde auf das Minimum von {{min}} angehoben (30 % des Mindestlohns).",
+          "referencePay": "Ihr Referenzentgelt liegt unter {{min}} pro Tag, daher entspricht das Krankengeld dem Referenzentgelt.",
+          "netCap": "Der Tagessatz wurde auf den geschätzten Nettowert Ihres Referenzentgelts begrenzt."
+        }
+      },
+      "checklist": {
+        "title": "Voraussetzungen zum Prüfen (keine Entscheidung)",
+        "certificate": "Sie haben eine ärztliche Krankschreibung (CIT), die elektronisch an die Segurança Social übermittelt wurde.",
+        "guarantee": "Sie haben am Tag, an dem Sie die Arbeit einstellen, 6 Monate gemeldetes Entgelt (nicht zwingend am Stück).",
+        "professionalIndex": "Sie haben in den ersten vier der letzten sechs Monate mindestens 12 Tage gearbeitet, den Monat des Arbeitsendes mitgezählt.",
+        "waiting": "Keine Karenzzeit gibt es bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht. Der Rechner hat nur für die erste Möglichkeit einen Schalter.",
+        "note": "Nur die Segurança Social entscheidet über Ihren Anspruch. Diese Liste ist eine Erinnerung, kein Urteil."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Ein Arbeitnehmer mit {{gross}} im Monat in 14 Zahlungen, {{days}} Tage krankgeschrieben und ohne Krankenhausaufenthalt. Das Referenzentgelt beträgt {{reference}} pro Tag. Die Tage 1 bis 3 sind Karenztage, daher zahlt die erste Stufe 27 Tage zu 55 % und die nächsten 15 Tage zu 60 %: insgesamt {{total}}. Das normale Nettogehalt beträgt {{net}} im Monat; über die Krankschreibung liegt die durchschnittliche Lücke bei {{gap}} im Monat.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodReference": "Das Referenzentgelt (RR) ist die Summe der gemeldeten Entgelte in den 6 ältesten der 8 Monate vor dem Monat des Krankheitsbeginns, ohne Urlaubs- und Weihnachtsgeld, geteilt durch 180. Der Rechner nutzt Ihr Monatsgehalt geteilt durch 30.",
+        "methodBands": "Das Tagesgeld ist ein Prozentsatz der RR, der mit der Dauer steigt: 55 % bis 30 Tage, 60 % von Tag 31 bis 90, 70 % von Tag 91 bis 365 und danach 75 %, für Arbeitnehmer bis 1095 Tage. Die Tage zählen ab dem ersten Tag, Karenztage eingeschlossen.",
+        "methodWaiting": "Arbeitnehmer haben 3 Karenztage, die die Segurança Social nicht zahlt. Bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht, beginnt die Zahlung am ersten Tag.",
+        "methodMinimum": "Das Tagesgeld darf nicht unter {{min}} liegen (30 % des Mindestlohns von {{rmmg}}). Liegt die RR selbst darunter, entspricht das Krankengeld der RR.",
+        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn die RR höchstens 500 Euro im Monat beträgt und der Haushalt 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder Kinder mit Behinderungszuschlag hat. Der Rechner berücksichtigt nur die Kinderzahl.",
+        "methodNetCap": "Das Tagesgeld darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Abzugssatz 2026 des Festlands für einen Alleinstehenden.",
+        "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
+        "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
+        "unsupportedTitle": "Nicht abgedeckt",
+        "unsupportedTuberculosis": "Tuberkulose, bezahlt mit 80 % oder 100 % der RR je nach Angehörigen, ohne Zeitlimit.",
+        "unsupportedSelfEmployed": "Selbstständige (10 Karenztage, bis 365 Tage), freiwillige Sozialversicherung und Hausangestellte.",
+        "unsupportedShort": "Kurze Abwesenheiten mit der Selbstauskunft über Krankheit des SNS 24: Wir haben ihre Regeln nicht abgebildet.",
+        "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
+        "sourcesTitle": "Quellen",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
+        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime",
+        "reviewed": "Regeln und Werte für 2026 am 19. November 2026 anhand des Leitfadens der Segurança Social geprüft. Die Grenze von 500 Euro für die Erhöhung um 5 Punkte stammt aus dem konsolidierten Gesetz und Sekundärquellen, weil der Leitfaden die Zahl nicht zeigt. Die Nettogehaltsschätzung hinter der Nettogrenze ist eine Vereinfachung von uns."
+      },
+      "nextStepHeadline": "Planen Sie die vorübergehende Einkommenslücke",
+      "nextStepDescription": "WonderMoney zeigt Ihr Geld, Ihre Ausgaben und wie lange Ihre Ersparnisse ein geringeres Einkommen decken.",
+      "nextStepCta": "Passen Sie Ihr Budget an die vorübergehende Einkommenslücke an"
+    },
     "vehicleTax": {
       "title": "Kfz-Steuer-Rechner (IUC)",
       "shortName": "Kfz-Steuer (IUC)",
