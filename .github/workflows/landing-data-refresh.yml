@@ -1,7 +1,8 @@
 name: Landing data refresh
 
 # Regenerates the dated market-data snapshots behind the landing tools (Euribor from BPstat,
-# deposit rates from the ECB, household electricity prices from Eurostat) and, when the figures
+# deposit rates from the ECB, household electricity prices from Eurostat, fuel prices from DGEG)
+# and, when the figures
 # changed, opens or updates ONE pull request into develop from the fixed branch
 # bot/landing-data-refresh. A run with no new figures opens nothing.
 #
@@ -56,7 +57,7 @@ jobs:
           set -euo pipefail
           # Each script writes its module only after the fetch and the parse succeed, and a
           # failure stops the job here, so a failed run leaves the data as it was.
-          for script in build-euribor build-deposit-rates build-electricity-prices; do
+          for script in build-euribor build-deposit-rates build-electricity-prices build-fuel-prices; do
             echo "::group::$script"
             node "scripts/$script.mjs" || { echo "::error::scripts/$script.mjs failed: the source did not answer or its format changed. The data was left as it was."; exit 1; }
             echo "::endgroup::"
@@ -81,7 +82,7 @@ jobs:
         working-directory: apps/landing
         run: |
           set -euo pipefail
-          VITEST_MAX_WORKERS=$(nproc) pnpm exec vitest run euribor depositRate electricity termDeposit rateRevision
+          VITEST_MAX_WORKERS=$(nproc) pnpm exec vitest run euribor depositRate electricity fuel termDeposit rateRevision
       - name: Open or update the pull request
         if: steps.changes.outputs.changed == 'true'
         env:
@@ -104,6 +105,7 @@ jobs:
           row "Euribor (BPstat)" euribor.ts lastMonth fetchedOn
           row "Deposit rates (ECB MIR)" depositRates.ts lastMonth retrievedOn
           row "Electricity prices (Eurostat)" electricityPrices.ts lastPeriod updatedOn
+          row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
 
           body_file=$(mktemp)
           {
@@ -112,7 +114,7 @@ jobs:
             echo
             printf '%s' "$summary"
             echo
-            echo "The related landing tests (Euribor, deposit rates, electricity, term deposit, rate revision) passed in the workflow."
+            echo "The related landing tests (Euribor, deposit rates, electricity, fuel, term deposit, rate revision) passed in the workflow."
             echo
             echo "This pull request was opened with the workflow token, so CI did not start. Close and reopen it to run CI before merging."
             echo "Review the diff for plausible figures: the scripts only check the shape of the response."

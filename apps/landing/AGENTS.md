@@ -98,6 +98,7 @@ the calendar below. Run the commands from `apps/landing`.
 | `data/euribor.ts` | BPstat, Euribor monthly averages | monthly, automated | `node scripts/build-euribor.mjs` |
 | `data/depositRates.ts` | ECB MIR deposit rates | monthly, automated | `node scripts/build-deposit-rates.mjs` |
 | `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
+| `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
 | `data/sp500History.ts` | Damodaran `histretSP.xls` and Shiller `ie_data.xls`, downloaded by hand | each January, after the year-end data is out | `node scripts/build-sp500-history.mjs <histretSP.xls> <date> <ie_data.xls> <date>` |
 | `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
 | `data/erseTariffs.ts` | ERSE tariff documents (diretivas, price simulator) | quarterly: check in the first week of January, April, July and October | Edit by hand, bump `version`, update the "downloaded on" date |
