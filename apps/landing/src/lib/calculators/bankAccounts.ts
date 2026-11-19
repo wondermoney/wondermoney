@@ -90,13 +90,12 @@ export function sortRemuneratedAccounts<T extends { account: RemuneratedAccount;
 	sort: SortKey,
 ): T[] {
 	const index = new Map(rows.map((row, position) => [row, position]))
-	const compare = (a: T, b: T) => {
-		let diff = 0
-		if (sort === "tanbDesc") diff = b.account.tanbMax - a.account.tanbMax || b.account.tanbMin - a.account.tanbMin
-		else if (sort === "tanbAsc") diff = a.account.tanbMin - b.account.tanbMin || a.account.tanbMax - b.account.tanbMax
-		else diff = (b.netHigh ?? Number.NEGATIVE_INFINITY) - (a.netHigh ?? Number.NEGATIVE_INFINITY)
-		return diff || (index.get(a) as number) - (index.get(b) as number)
+	const primary = (a: T, b: T) => {
+		if (sort === "tanbDesc") return b.account.tanbMax - a.account.tanbMax || b.account.tanbMin - a.account.tanbMin
+		if (sort === "tanbAsc") return a.account.tanbMin - b.account.tanbMin || a.account.tanbMax - b.account.tanbMax
+		return (b.netHigh ?? Number.NEGATIVE_INFINITY) - (a.netHigh ?? Number.NEGATIVE_INFINITY)
 	}
+	const compare = (a: T, b: T) => primary(a, b) || (index.get(a) as number) - (index.get(b) as number)
 	return rows.slice().sort(compare)
 }
 
