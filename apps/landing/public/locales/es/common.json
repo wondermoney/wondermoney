@@ -3935,6 +3935,143 @@
           "debtToIncomeBody": "Comprueba si una cuota más alta mantiene tus deudas en una parte cómoda de tus ingresos."
         }
       }
+    },
+    "electricityIndex": {
+      "title": "Índice de la electricidad y estimador de factura (Portugal)",
+      "shortName": "Índice de electricidad",
+      "subtitle": "Estima la factura mensual de electricidad con la tarifa regulada y mira cómo se compara el precio de los hogares portugueses con la media de la UE.",
+      "description": "Estimador de la factura de electricidad con la tarifa regulada para hogares portugueses, con el precio por kWh de Portugal frente a la UE a lo largo del tiempo.",
+      "pageTitle": "Índice de la electricidad en Portugal: estimador de factura con tarifa regulada",
+      "pageDescription": "Estima tu factura mensual de electricidad con la tarifa regulada de la ERSE (potencia contratada, kWh, simple o bihoraria, IVA y otros cargos) y compara el precio por kWh de los hogares de Portugal con la media de la UE. Datos: ERSE y Eurostat.",
+      "fields": {
+        "power": "Potencia contratada",
+        "period": "Consumo indicado",
+        "periodMonth": "Por mes",
+        "periodYear": "Por año",
+        "consumption": "Consumo de electricidad",
+        "option": "Opción tarifaria",
+        "optionSimple": "Simple",
+        "optionBi": "Bihoraria",
+        "offPeak": "Parte del consumo en horas de vacío",
+        "largeFamily": "Hogar de cinco o más personas"
+      },
+      "help": {
+        "power": "Hogares en baja tensión en Portugal continental: 3,45, 4,6, 5,75 o 6,9 kVA. Figura en tu factura.",
+        "consumption": "kWh en el periodo elegido arriba. Un año se reparte en doce meses iguales.",
+        "offPeak": "Vacío es el periodo más barato de la tarifa bihoraria. Tu factura o los datos del contador muestran el reparto.",
+        "largeFamily": "Sube el límite del IVA reducido de 200 a 300 kWh al mes, si se lo has pedido a tu comercializadora."
+      },
+      "errors": {
+        "required": "Introduce un valor válido.",
+        "notAllowed": "Elige una de las potencias contratadas de la lista.",
+        "negative": "El consumo no puede ser negativo.",
+        "tooLarge": "Introduce {{max}} o menos.",
+        "percentRange": "Introduce un porcentaje de 0% a 100%.",
+        "summary": "Revisa los campos marcados para ver la estimación."
+      },
+      "result": {
+        "total": "Factura mensual estimada (IVA incluido)",
+        "yearly": "Unos doce meses así",
+        "effective": "Coste real por kWh, con los cargos fijos incluidos",
+        "breakdown": "Desglose de la factura: importe sin IVA y tipo de IVA de cada concepto",
+        "item": "Concepto",
+        "beforeVat": "Sin IVA",
+        "vatRate": "IVA",
+        "power": "Potencia contratada ({{kva}} kVA, {{days}} días)",
+        "energyReduced": "Energía con IVA reducido ({{kwh}})",
+        "energyStandard": "Energía por encima del límite de IVA reducido ({{kwh}})",
+        "cav": "Contribución audiovisual (CAV)",
+        "iec": "Impuesto especial sobre el consumo de electricidad (IEC)",
+        "subtotal": "Total sin IVA",
+        "vat": "IVA",
+        "comparisonSame": "Con la opción {{other}}, el mismo mes costaría más o menos lo mismo.",
+        "comparisonCheaper": "Con la opción {{other}}, el mismo mes costaría {{amount}}, {{difference}} menos.",
+        "comparisonDearer": "Con la opción {{other}}, el mismo mes costaría {{amount}}, {{difference}} más.",
+        "breakEven": "Solo por el precio de la energía, la bihoraria cuesta menos que la simple cuando más del {{percent}}% del consumo es en horas de vacío.",
+        "noConsumption": "Sin consumo, la factura son solo los cargos fijos."
+      },
+      "notes": {
+        "tariffs": "Tarifas del mercado regulado de la ERSE para hogares en baja tensión en Portugal continental, en vigor desde {{date}} (leídas en los documentos de la ERSE el {{checked}}). La ERSE puede actualizarlas cada trimestre.",
+        "dgeg": "No incluido: la pequeña tasa mensual de la DGEG, cuyo importe no hemos podido confirmar en un documento de la ERSE, ni ningún otro cargo de contador. Tu factura real puede diferir unos céntimos.",
+        "freeMarket": "La mayoría de los hogares compra en el mercado libre, donde las ofertas varían: unas son más baratas que la tarifa regulada y otras más caras. Esta página no cita ni recomienda ninguna comercializadora. Para comparar ofertas reales, usa el",
+        "simulatorLink": "simulador de precios oficial de la ERSE."
+      },
+      "index": {
+        "title": "Portugal frente a la UE: precio por kWh a lo largo del tiempo",
+        "intro": "Precio semestral de Eurostat para un hogar que consume entre 2500 y 4999 kWh al año (banda DC), con todos los impuestos y tasas, para Portugal y para la media de la UE de los 27.",
+        "chartLabel": "Gráfico de líneas del precio de la electricidad por kWh para los hogares en Portugal y en la UE, por semestre",
+        "portugal": "Portugal",
+        "eu": "Media de la UE",
+        "below": "En {{period}}, Portugal pagó {{portugal}} frente a {{eu}} en la UE: {{gap}} por debajo de la media de la UE.",
+        "above": "En {{period}}, Portugal pagó {{portugal}} frente a {{eu}} en la UE: {{gap}} por encima de la media de la UE.",
+        "equal": "En {{period}}, Portugal pagó {{portugal}} frente a {{eu}} en la UE: prácticamente lo mismo.",
+        "tableCaption": "Los últimos semestres: Portugal, media de la UE y la diferencia",
+        "period": "Semestre",
+        "gap": "Portugal frente a la UE",
+        "asOf": "Datos hasta {{last}} (el último semestre disponible). Eurostat actualizó el conjunto de datos el {{updated}}; la copia de esta página se generó el {{fetched}}. Fuente: Eurostat, tabla nrg_pc_204. Solo con fines educativos."
+      },
+      "nextStepHeadline": "Compara las facturas del hogar con un presupuesto realista",
+      "nextStepDescription": "Añade la electricidad, el agua, el gas y las demás facturas del hogar a un presupuesto en WonderMoney y mira lo que te queda cada mes.",
+      "nextStepCta": "Planifica tu presupuesto",
+      "guide": {
+        "read": {
+          "title": "Cómo leer esta página",
+          "estimator": "El estimador calcula un mes de 30 días con la tarifa regulada: la potencia contratada, la energía que consumes, la contribución audiovisual y el impuesto de la electricidad, y suma el IVA concepto por concepto, al tipo que corresponde a cada uno.",
+          "index": "El índice mira las facturas de todos los hogares, no solo la tarifa regulada: el precio medio por kWh de Eurostat en Portugal y en la UE, con impuestos, para que sean comparables.",
+          "market": "La tarifa regulada es solo una opción. La mayoría de los hogares está en el mercado libre, donde las comercializadoras fijan sus precios y las ofertas pueden ser más baratas o más caras que la tarifa regulada. El estimador es un punto de referencia, no una recomendación."
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Un hogar con {{kva}} kVA contratados que consume {{kwh}} kWh en un mes con la tarifa simple. Potencia: {{powerPrice}} durante 30 días. Energía: {{kwh}} kWh a {{energySimple}}. Más la contribución audiovisual ({{cav}}) y el impuesto de la electricidad ({{iec}}). Con IVA ({{vatSimple}} en total), el mes cuesta {{totalSimple}}, o {{effective}} una vez repartidos los cargos fijos entre los kWh.",
+          "bi": "Con la tarifa bihoraria ({{energyPeak}} fuera de vacío, {{energyValley}} en vacío) y la mitad del consumo en horas de vacío, el mismo mes cuesta {{totalBi}}.",
+          "power": "La potencia contratada también cuenta: con 6,9 kVA y 300 kWh el mes cuesta {{totalBigger}}, porque una potencia mayor tiene un precio diario mayor y su término de potencia paga el tipo de IVA normal."
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "Para un mes de 30 días, el estimador hace siempre las mismas cinco cosas:",
+          "steps": {
+            "a": "Potencia: el precio diario de tu potencia contratada, por 30 días.",
+            "b": "Energía: tus kWh al precio simple, o repartidos entre los dos precios de la bihoraria según el porcentaje que indiques.",
+            "c": "Contribución audiovisual (CAV): un importe mensual fijo, con IVA reducido.",
+            "d": "Impuesto especial sobre el consumo de electricidad (IEC): un importe fijo por kWh, con IVA al tipo normal.",
+            "e": "IVA en cada concepto y, al final, la suma. El resultado se redondea al céntimo al final."
+          },
+          "vat": "Reglas del IVA, tal como las explica la ERSE: el tipo reducido ({{reduced}}) se aplica a los primeros {{allowance}} kWh de energía en 30 días ({{allowanceLarge}} kWh para hogares de cinco o más personas) con potencia contratada de hasta 6,9 kVA, al término de potencia con potencia contratada de hasta 3,45 kVA y a la contribución audiovisual. Todo lo demás paga {{standard}}. La regla del tipo reducido se aplica igual en el mercado regulado y en el libre.",
+          "bi": "Bihoraria frente a simple: el precio simple es {{energySimple}}, frente a {{energyPeak}} fuera de vacío y {{energyValley}} en vacío. Solo por la energía, las dos cuestan lo mismo cuando el {{breakEven}}% del consumo es en horas de vacío. Con una parte menor, la simple es más barata; con una mayor, la bihoraria.",
+          "days": "El límite del IVA reducido es por 30 días, el periodo usado aquí. En una factura real de un periodo mayor o menor, el límite se ajusta al número de días."
+        },
+        "data": {
+          "title": "Datos y fuentes",
+          "tariffs": "Tarifas reguladas: ERSE (Entidade Reguladora dos Serviços Energéticos), tarifas transitorias de venta a clientes finales en baja tensión hasta 20,7 kVA en Portugal continental, en vigor desde {{from}}, y la contribución audiovisual, el impuesto de la electricidad y las reglas del IVA, de los documentos de la propia ERSE. Leídas el {{checked}}. La ERSE puede cambiar el precio de la energía cada trimestre.",
+          "eurostat": "Índice de precios: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), banda DC (2500 a 4999 kWh al año), con todos los impuestos y tasas, en euros por kWh, de {{firstPeriod}} a {{lastPeriod}}. Eurostat actualizó el conjunto de datos el {{updated}} y la copia de esta página se generó el {{fetched}}.",
+          "tariffsLink": "ERSE, tarifas y precios para 2026 (Directiva 4/2026)",
+          "chargesLink": "ERSE, manual del simulador de precios (cargos de la factura)",
+          "vatLink": "ERSE, IVA en la factura de electricidad",
+          "eurostatLink": "Eurostat, tabla nrg_pc_204",
+          "refresh": "La página lee dos archivos de datos guardados y nunca consulta estas fuentes mientras la usas. Ambos llevan su fecha y se actualizan a mano."
+        },
+        "limits": {
+          "title": "Lo que estas cifras no incluyen",
+          "items": {
+            "market": "Mercado libre: la mayoría de las ofertas no es la tarifa regulada. Pueden ser más baratas o más caras, con precios, descuentos y condiciones distintos. Compara con un simulador real antes de decidir.",
+            "dgeg": "La pequeña tasa mensual de la DGEG no está incluida porque no hemos podido confirmar su importe en un documento de la ERSE, ni tampoco ningún otro cargo de contador. Consulta tu factura para el total exacto.",
+            "scope": "El estimador cubre Portugal continental y potencias contratadas de 3,45 a 6,9 kVA. Las potencias superiores, las Azores y Madeira tienen otras tarifas y tipos de IVA.",
+            "social": "La tarifa social de electricidad, un descuento para hogares con derecho a ella, no se aplica. Pregunta a tu comercializadora o a la ERSE si puedes tener derecho.",
+            "average": "El índice compara medias de una banda de consumo. Tu precio depende de tu contrato, tu potencia y tus horas de uso, y la media de Portugal mezcla contratos del mercado regulado y del libre.",
+            "education": "Solo con fines educativos, no es un consejo para elegir o cambiar de comercializadora."
+          },
+          "simulatorLink": "Compara ofertas reales en el simulador de precios oficial de la ERSE"
+        },
+        "related": {
+          "title": "Sigue con",
+          "householdBudgetLink": "Calculadora de presupuesto del hogar",
+          "householdBudgetBody": "Pon la factura de la luz junto a los demás gastos del hogar y mira lo que queda.",
+          "emergencyFundLink": "Calculadora de fondo de emergencia",
+          "emergencyFundBody": "Calcula cuántos meses de gastos esenciales, energía incluida, cubrirían tus ahorros.",
+          "inflationLink": "Calculadora de inflación",
+          "inflationBody": "Mira cómo la subida de precios cambia lo que compra tu dinero con el tiempo."
+        }
+      }
     }
   },
   "resources": {

@@ -488,6 +488,14 @@ const ROUTE_SLUGS = {
 		de: "festgeldzins-index-portugal",
 		it: "indice-tassi-depositi-vincolati-portogallo",
 	},
+	toolElectricityIndex: {
+		pt: "indice-da-eletricidade",
+		en: "electricity-price-index-portugal",
+		es: "indice-precio-electricidad-portugal",
+		fr: "indice-prix-electricite-portugal",
+		de: "strompreisindex-portugal",
+		it: "indice-prezzo-elettricita-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -632,6 +640,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolSp500History",
 	"toolEuribor",
 	"toolDepositRateIndex",
+	"toolElectricityIndex",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -966,6 +975,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	tooldepositrateindex: "toolDepositRateIndex",
 	"deposit-rate-index": "toolDepositRateIndex",
 	"indice-depositos-a-prazo": "toolDepositRateIndex",
+	toolelectricityindex: "toolElectricityIndex",
+	"electricity-price-index": "toolElectricityIndex",
+	"indice-da-eletricidade": "toolElectricityIndex",
 }
 
 function normalizeRouteLookupKey(value: string): string {

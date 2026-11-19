@@ -3935,6 +3935,143 @@
           "debtToIncomeBody": "Vê se uma prestação mais alta mantém as tuas dívidas numa fração confortável do rendimento."
         }
       }
+    },
+    "electricityIndex": {
+      "title": "Índice da eletricidade e simulador da fatura (Portugal)",
+      "shortName": "Índice da eletricidade",
+      "subtitle": "Estima a fatura mensal de eletricidade na tarifa regulada e vê como o preço pago pelas famílias portuguesas se compara com a média da UE.",
+      "description": "Simulador da fatura de eletricidade na tarifa regulada para famílias portuguesas, com o preço por kWh de Portugal face à UE ao longo do tempo.",
+      "pageTitle": "Índice da eletricidade em Portugal: simulador da fatura na tarifa regulada",
+      "pageDescription": "Estima a fatura mensal de eletricidade na tarifa regulada da ERSE (potência contratada, kWh, simples ou bi-horário, IVA e outras taxas) e compara o preço por kWh das famílias em Portugal com a média da UE. Dados: ERSE e Eurostat.",
+      "fields": {
+        "power": "Potência contratada",
+        "period": "Consumo indicado",
+        "periodMonth": "Por mês",
+        "periodYear": "Por ano",
+        "consumption": "Consumo de eletricidade",
+        "option": "Opção tarifária",
+        "optionSimple": "Simples",
+        "optionBi": "Bi-horário",
+        "offPeak": "Parte do consumo em horas de vazio",
+        "largeFamily": "Agregado com cinco ou mais pessoas"
+      },
+      "help": {
+        "power": "Famílias em baixa tensão no continente: 3,45, 4,6, 5,75 ou 6,9 kVA. Está na tua fatura.",
+        "consumption": "kWh no período escolhido acima. Um ano é repartido por doze meses iguais.",
+        "offPeak": "Vazio é o período mais barato da tarifa bi-horária. A tua fatura ou os dados do contador mostram a repartição.",
+        "largeFamily": "Sobe o limite do IVA reduzido de 200 para 300 kWh por mês, se o tiveres pedido ao teu comercializador."
+      },
+      "errors": {
+        "required": "Introduz um valor válido.",
+        "notAllowed": "Escolhe uma das potências contratadas da lista.",
+        "negative": "O consumo não pode ser negativo.",
+        "tooLarge": "Introduz {{max}} ou menos.",
+        "percentRange": "Introduz uma percentagem de 0% a 100%.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "total": "Fatura mensal estimada (IVA incluído)",
+        "yearly": "Cerca de doze meses assim",
+        "effective": "Custo real por kWh, com os encargos fixos incluídos",
+        "breakdown": "Detalhe da fatura: valor sem IVA e taxa de IVA de cada parcela",
+        "item": "Parcela",
+        "beforeVat": "Sem IVA",
+        "vatRate": "IVA",
+        "power": "Potência contratada ({{kva}} kVA, {{days}} dias)",
+        "energyReduced": "Energia com IVA reduzido ({{kwh}})",
+        "energyStandard": "Energia acima do limite de IVA reduzido ({{kwh}})",
+        "cav": "Contribuição para o audiovisual (CAV)",
+        "iec": "Imposto especial de consumo de eletricidade (IEC)",
+        "subtotal": "Total sem IVA",
+        "vat": "IVA",
+        "comparisonSame": "Na opção {{other}}, o mesmo mês custaria cerca do mesmo.",
+        "comparisonCheaper": "Na opção {{other}}, o mesmo mês custaria {{amount}}, menos {{difference}}.",
+        "comparisonDearer": "Na opção {{other}}, o mesmo mês custaria {{amount}}, mais {{difference}}.",
+        "breakEven": "Só pelo preço da energia, o bi-horário custa menos do que o simples quando mais de {{percent}}% do consumo é em horas de vazio.",
+        "noConsumption": "Sem consumo, a fatura tem apenas os encargos fixos."
+      },
+      "notes": {
+        "tariffs": "Tarifas do mercado regulado da ERSE para famílias em baixa tensão no continente, em vigor desde {{date}} (lidas nos documentos da ERSE a {{checked}}). A ERSE pode atualizá-las todos os trimestres.",
+        "dgeg": "Não incluído: a pequena taxa mensal da DGEG, cujo valor não conseguimos confirmar num documento da ERSE, nem qualquer outro encargo de contador. A fatura real pode diferir uns cêntimos.",
+        "freeMarket": "A maioria das famílias compra no mercado livre, onde as ofertas variam: umas são mais baratas do que a tarifa regulada, outras mais caras. Esta página não indica nem recomenda nenhum comercializador. Para comparar ofertas reais, usa o",
+        "simulatorLink": "simulador de preços oficial da ERSE."
+      },
+      "index": {
+        "title": "Portugal face à UE: preço por kWh ao longo do tempo",
+        "intro": "Preço semestral do Eurostat para uma família que consome entre 2500 e 4999 kWh por ano (escalão DC), com todos os impostos e taxas, para Portugal e para a média da UE a 27.",
+        "chartLabel": "Gráfico de linhas do preço da eletricidade por kWh para as famílias em Portugal e na UE, por semestre",
+        "portugal": "Portugal",
+        "eu": "Média da UE",
+        "below": "No {{period}}, Portugal pagou {{portugal}} contra {{eu}} na UE: {{gap}} abaixo da média da UE.",
+        "above": "No {{period}}, Portugal pagou {{portugal}} contra {{eu}} na UE: {{gap}} acima da média da UE.",
+        "equal": "No {{period}}, Portugal pagou {{portugal}} contra {{eu}} na UE: praticamente o mesmo.",
+        "tableCaption": "Os semestres mais recentes: Portugal, média da UE e a diferença",
+        "period": "Semestre",
+        "gap": "Portugal vs UE",
+        "asOf": "Dados até {{last}} (o último semestre disponível). O Eurostat atualizou o conjunto de dados a {{updated}}; a cópia desta página foi gerada a {{fetched}}. Fonte: Eurostat, tabela nrg_pc_204. Apenas educativo."
+      },
+      "nextStepHeadline": "Compara as faturas da casa com um orçamento realista",
+      "nextStepDescription": "Junta a eletricidade, a água, o gás e as outras faturas da casa a um orçamento no WonderMoney e vê o que sobra todos os meses.",
+      "nextStepCta": "Planeia o teu orçamento",
+      "guide": {
+        "read": {
+          "title": "Como ler esta página",
+          "estimator": "O simulador calcula um mês de 30 dias na tarifa regulada: a potência contratada, a energia que consomes, a contribuição para o audiovisual e o imposto da eletricidade, e soma o IVA parcela a parcela, à taxa que se aplica a cada uma.",
+          "index": "O índice olha para as faturas de todas as famílias, não só para a tarifa regulada: o preço médio por kWh do Eurostat em Portugal e na UE, com impostos, para que os dois sejam comparáveis.",
+          "market": "A tarifa regulada é apenas uma opção. A maioria das famílias está no mercado livre, onde os comercializadores definem os preços e as ofertas podem ser mais baratas ou mais caras do que a tarifa regulada. O simulador é um ponto de referência, não uma recomendação."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Uma família com {{kva}} kVA contratados que consome {{kwh}} kWh num mês na tarifa simples. Potência: {{powerPrice}} durante 30 dias. Energia: {{kwh}} kWh a {{energySimple}}. Mais a contribuição para o audiovisual ({{cav}}) e o imposto da eletricidade ({{iec}}). Com IVA ({{vatSimple}} no total), o mês custa {{totalSimple}}, ou {{effective}} depois de repartir os encargos fixos pelos kWh.",
+          "bi": "Na tarifa bi-horária ({{energyPeak}} fora de vazio, {{energyValley}} em vazio), com metade do consumo em horas de vazio, o mesmo mês custa {{totalBi}}.",
+          "power": "A potência contratada também conta: com 6,9 kVA e 300 kWh o mês custa {{totalBigger}}, porque uma potência maior tem um preço diário maior e o termo de potência paga a taxa de IVA normal."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "Para um mês de 30 dias, o simulador faz sempre as mesmas cinco coisas:",
+          "steps": {
+            "a": "Potência: o preço diário da tua potência contratada, vezes 30 dias.",
+            "b": "Energia: os teus kWh ao preço simples, ou repartidos pelos dois preços do bi-horário segundo a percentagem que indicas.",
+            "c": "Contribuição para o audiovisual (CAV): um valor mensal fixo, com IVA reduzido.",
+            "d": "Imposto especial de consumo de eletricidade (IEC): um valor fixo por kWh, com IVA à taxa normal.",
+            "e": "IVA em cada parcela e, no fim, a soma. O resultado é arredondado ao cêntimo no fim."
+          },
+          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, ao termo de potência com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
+          "bi": "Bi-horário contra simples: o preço simples é {{energySimple}}, contra {{energyPeak}} fora de vazio e {{energyValley}} em vazio. Só pela energia, os dois custam o mesmo quando {{breakEven}}% do consumo é em horas de vazio. Com uma parte menor, o simples é mais barato; com uma maior, o bi-horário.",
+          "days": "O limite do IVA reduzido é por 30 dias, o período usado aqui. Numa fatura real de um período maior ou menor, o limite ajusta-se ao número de dias."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "tariffs": "Tarifas reguladas: ERSE (Entidade Reguladora dos Serviços Energéticos), tarifas transitórias de venda a clientes finais em baixa tensão até 20,7 kVA no continente, em vigor desde {{from}}, e a contribuição para o audiovisual, o imposto da eletricidade e as regras do IVA, dos documentos da própria ERSE. Lidas a {{checked}}. A ERSE pode alterar o preço da energia todos os trimestres.",
+          "eurostat": "Índice de preços: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), escalão DC (2500 a 4999 kWh por ano), com todos os impostos e taxas, em euros por kWh, de {{firstPeriod}} a {{lastPeriod}}. O Eurostat atualizou o conjunto de dados a {{updated}} e a cópia desta página foi gerada a {{fetched}}.",
+          "tariffsLink": "ERSE, tarifas e preços para 2026 (Diretiva 4/2026)",
+          "chargesLink": "ERSE, manual do simulador de preços (encargos da fatura)",
+          "vatLink": "ERSE, IVA na fatura de eletricidade",
+          "eurostatLink": "Eurostat, tabela nrg_pc_204",
+          "refresh": "A página lê dois ficheiros de dados guardados e nunca consulta estas fontes enquanto a usas. Ambos indicam a data e são atualizados à mão."
+        },
+        "limits": {
+          "title": "O que estes valores deixam de fora",
+          "items": {
+            "market": "Mercado livre: a maioria das ofertas não é a tarifa regulada. Podem ser mais baratas ou mais caras, com preços, descontos e condições diferentes. Compara com um simulador a sério antes de decidires.",
+            "dgeg": "A pequena taxa mensal da DGEG não está incluída porque não conseguimos confirmar o montante num documento da ERSE, nem qualquer outro encargo de contador. Confirma o total exato na tua fatura.",
+            "scope": "O simulador cobre o continente e potências contratadas de 3,45 a 6,9 kVA. Potências superiores, os Açores e a Madeira têm outras tarifas e taxas de IVA.",
+            "social": "A tarifa social de eletricidade, um desconto para agregados elegíveis, não é aplicada. Pergunta ao teu comercializador ou à ERSE se podes ter direito.",
+            "average": "O índice compara médias de um escalão de consumo. O teu preço depende do contrato, da potência e das horas de utilização, e a média de Portugal mistura contratos do mercado regulado e do livre.",
+            "education": "Uso apenas educativo, não é aconselhamento para escolher ou mudar de comercializador."
+          },
+          "simulatorLink": "Compara ofertas reais no simulador de preços oficial da ERSE"
+        },
+        "related": {
+          "title": "Continua",
+          "householdBudgetLink": "Simulador de orçamento familiar",
+          "householdBudgetBody": "Põe a fatura da eletricidade ao lado das outras despesas da casa e vê o que sobra.",
+          "emergencyFundLink": "Simulador de fundo de emergência",
+          "emergencyFundBody": "Calcula quantos meses de despesas essenciais, energia incluída, as tuas poupanças cobririam.",
+          "inflationLink": "Simulador de inflação",
+          "inflationBody": "Vê como a subida dos preços muda o que o teu dinheiro compra ao longo do tempo."
+        }
+      }
     }
   },
   "resources": {

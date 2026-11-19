@@ -103,6 +103,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     sources: ["toolTermDeposit", "toolSavingsCertificates", "toolInflation"],
     destination: "toolDepositRateIndex",
   },
+  {
+    sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
+    destination: "toolElectricityIndex",
+  },
 ];
 
 export function getRelatedContentTools(

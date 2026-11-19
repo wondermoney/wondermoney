@@ -3935,6 +3935,143 @@
           "debtToIncomeBody": "Sieh, ob eine höhere Rate deine Schulden in einem komfortablen Anteil des Einkommens hält."
         }
       }
+    },
+    "electricityIndex": {
+      "title": "Strompreisindex und Rechnungsschätzer (Portugal)",
+      "shortName": "Strompreisindex",
+      "subtitle": "Schätze eine monatliche Stromrechnung im regulierten Tarif und sieh, wie der Preis portugiesischer Haushalte zum EU-Durchschnitt liegt.",
+      "description": "Schätzer für die Stromrechnung im regulierten Tarif für portugiesische Haushalte, mit dem Preis je kWh in Portugal im Vergleich zur EU im Zeitverlauf.",
+      "pageTitle": "Strompreisindex Portugal: Rechnungsschätzer für den regulierten Tarif",
+      "pageDescription": "Schätze deine monatliche Stromrechnung im regulierten ERSE-Tarif (vertraglich vereinbarte Leistung, kWh, einfach oder zweizeitig, Mehrwertsteuer und weitere Posten) und vergleiche den Haushaltspreis je kWh in Portugal mit dem EU-Durchschnitt. Daten: ERSE und Eurostat.",
+      "fields": {
+        "power": "Vertraglich vereinbarte Leistung",
+        "period": "Verbrauch angegeben",
+        "periodMonth": "Pro Monat",
+        "periodYear": "Pro Jahr",
+        "consumption": "Stromverbrauch",
+        "option": "Tarifoption",
+        "optionSimple": "Einfach",
+        "optionBi": "Zweizeitig",
+        "offPeak": "Anteil des Verbrauchs in der Schwachlastzeit",
+        "largeFamily": "Haushalt mit fünf oder mehr Personen"
+      },
+      "help": {
+        "power": "Haushalte in Niederspannung auf dem portugiesischen Festland: 3,45, 4,6, 5,75 oder 6,9 kVA. Sie steht auf deiner Rechnung.",
+        "consumption": "kWh im oben gewählten Zeitraum. Ein Jahr wird auf zwölf gleiche Monate verteilt.",
+        "offPeak": "Die Schwachlastzeit (\"vazio\") ist der günstigere Zeitraum des zweizeitigen Tarifs. Deine Rechnung oder die Zählerdaten zeigen die Aufteilung.",
+        "largeFamily": "Hebt die Grenze für den ermäßigten Mehrwertsteuersatz von 200 auf 300 kWh im Monat, wenn du sie bei deinem Versorger beantragt hast."
+      },
+      "errors": {
+        "required": "Gib einen gültigen Wert ein.",
+        "notAllowed": "Wähle eine der aufgeführten Leistungen.",
+        "negative": "Der Verbrauch darf nicht negativ sein.",
+        "tooLarge": "Gib {{max}} oder weniger ein.",
+        "percentRange": "Gib einen Anteil von 0 % bis 100 % ein.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "total": "Geschätzte Monatsrechnung (inkl. Mehrwertsteuer)",
+        "yearly": "Etwa zwölf solche Monate",
+        "effective": "Tatsächliche Kosten je kWh, Fixkosten eingerechnet",
+        "breakdown": "Aufschlüsselung der Rechnung: Betrag ohne Mehrwertsteuer und Steuersatz je Posten",
+        "item": "Posten",
+        "beforeVat": "Ohne MwSt.",
+        "vatRate": "MwSt.",
+        "power": "Vertraglich vereinbarte Leistung ({{kva}} kVA, {{days}} Tage)",
+        "energyReduced": "Energie mit ermäßigter Mehrwertsteuer ({{kwh}})",
+        "energyStandard": "Energie über der Grenze für den ermäßigten Satz ({{kwh}})",
+        "cav": "Rundfunkbeitrag (CAV)",
+        "iec": "Stromverbrauchsteuer (IEC)",
+        "subtotal": "Summe ohne Mehrwertsteuer",
+        "vat": "Mehrwertsteuer",
+        "comparisonSame": "Mit der Option {{other}} würde derselbe Monat etwa gleich viel kosten.",
+        "comparisonCheaper": "Mit der Option {{other}} würde derselbe Monat {{amount}} kosten, also {{difference}} weniger.",
+        "comparisonDearer": "Mit der Option {{other}} würde derselbe Monat {{amount}} kosten, also {{difference}} mehr.",
+        "breakEven": "Allein nach dem Energiepreis ist zweizeitig günstiger als einfach, wenn mehr als {{percent}} % des Verbrauchs in der Schwachlastzeit liegen.",
+        "noConsumption": "Ohne Verbrauch besteht die Rechnung nur aus den Fixkosten."
+      },
+      "notes": {
+        "tariffs": "Tarife des regulierten Marktes der ERSE für Niederspannungshaushalte auf dem portugiesischen Festland, gültig seit {{date}} (am {{checked}} aus den ERSE-Dokumenten gelesen). Die ERSE kann sie jedes Quartal anpassen.",
+        "dgeg": "Nicht enthalten: die kleine monatliche DGEG-Gebühr, deren Höhe wir in keinem ERSE-Dokument bestätigen konnten, sowie sonstige Zählerkosten. Deine tatsächliche Rechnung kann um wenige Cent abweichen.",
+        "freeMarket": "Die meisten Haushalte kaufen im freien Markt, wo die Angebote variieren: Manche sind günstiger als der regulierte Tarif, andere teurer. Diese Seite nennt keinen Anbieter und empfiehlt keinen. Um echte Angebote zu vergleichen, nutze den",
+        "simulatorLink": "offiziellen Preissimulator der ERSE."
+      },
+      "index": {
+        "title": "Portugal im Vergleich zur EU: Preis je kWh im Zeitverlauf",
+        "intro": "Halbjahrespreis von Eurostat für einen Haushalt mit 2.500 bis 4.999 kWh Jahresverbrauch (Band DC), inklusive aller Steuern und Abgaben, für Portugal und den Durchschnitt der EU-27.",
+        "chartLabel": "Liniendiagramm des Haushaltsstrompreises je kWh in Portugal und in der EU, halbjährlich",
+        "portugal": "Portugal",
+        "eu": "EU-Durchschnitt",
+        "below": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: {{gap}} unter dem EU-Durchschnitt.",
+        "above": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: {{gap}} über dem EU-Durchschnitt.",
+        "equal": "Im {{period}} zahlte Portugal {{portugal}} gegenüber {{eu}} in der EU: etwa dasselbe.",
+        "tableCaption": "Die letzten Halbjahre: Portugal, EU-Durchschnitt und der Abstand",
+        "period": "Halbjahr",
+        "gap": "Portugal gegenüber EU",
+        "asOf": "Daten bis {{last}} (das neueste verfügbare Halbjahr). Eurostat hat den Datensatz am {{updated}} aktualisiert; die Kopie dieser Seite wurde am {{fetched}} erstellt. Quelle: Eurostat, Tabelle nrg_pc_204. Nur zu Bildungszwecken."
+      },
+      "nextStepHeadline": "Vergleiche die Haushaltsrechnungen mit einem realistischen Budget",
+      "nextStepDescription": "Trage Strom, Wasser, Gas und die anderen Haushaltsrechnungen in ein WonderMoney-Budget ein und sieh, was jeden Monat übrig bleibt.",
+      "nextStepCta": "Budget planen",
+      "guide": {
+        "read": {
+          "title": "So liest du diese Seite",
+          "estimator": "Der Schätzer rechnet einen Monat mit 30 Tagen im regulierten Tarif: die vertraglich vereinbarte Leistung, die verbrauchte Energie, den Rundfunkbeitrag und die Stromsteuer, und addiert die Mehrwertsteuer Posten für Posten mit dem jeweils geltenden Satz.",
+          "index": "Der Index betrachtet die Rechnungen aller Haushalte, nicht nur den regulierten Tarif: den durchschnittlichen Preis je kWh laut Eurostat in Portugal und in der EU, inklusive Steuern, damit beide vergleichbar sind.",
+          "market": "Der regulierte Tarif ist nur eine Möglichkeit. Die meisten Haushalte sind im freien Markt, wo die Anbieter ihre Preise selbst festlegen und die Angebote günstiger oder teurer als der regulierte Tarif sein können. Der Schätzer ist ein Richtwert, keine Empfehlung."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Haushalt mit {{kva}} kVA vertraglich vereinbarter Leistung, der in einem Monat {{kwh}} kWh im einfachen Tarif verbraucht. Leistung: {{powerPrice}} für 30 Tage. Energie: {{kwh}} kWh zu {{energySimple}}. Dazu der Rundfunkbeitrag ({{cav}}) und die Stromsteuer ({{iec}}). Mit Mehrwertsteuer ({{vatSimple}} insgesamt) kostet der Monat {{totalSimple}}, also {{effective}}, wenn man die Fixkosten auf die kWh verteilt.",
+          "bi": "Im zweizeitigen Tarif ({{energyPeak}} außerhalb der Schwachlastzeit, {{energyValley}} in der Schwachlastzeit) kostet derselbe Monat bei der Hälfte des Verbrauchs in der Schwachlastzeit {{totalBi}}.",
+          "power": "Auch die Leistung zählt: Bei 6,9 kVA und 300 kWh kostet der Monat {{totalBigger}}, weil eine höhere Leistung einen höheren Tagespreis hat und ihr Leistungsanteil den vollen Mehrwertsteuersatz zahlt."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Für einen Monat mit 30 Tagen macht der Schätzer immer dieselben fünf Dinge:",
+          "steps": {
+            "a": "Leistung: der Tagespreis deiner vertraglich vereinbarten Leistung mal 30 Tage.",
+            "b": "Energie: deine kWh zum einfachen Preis oder nach dem eingegebenen Anteil auf die zwei Preise des zweizeitigen Tarifs verteilt.",
+            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer.",
+            "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
+            "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+          },
+          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Leistungsanteil bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "bi": "Zweizeitig gegen einfach: Der einfache Preis liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist einfach günstiger, bei einem größeren zweizeitig.",
+          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "tariffs": "Regulierte Tarife: ERSE (Entidade Reguladora dos Serviços Energéticos), die Übergangstarife für den Verkauf an Endkunden in Niederspannung bis 20,7 kVA auf dem portugiesischen Festland, gültig seit {{from}}, dazu Rundfunkbeitrag, Stromsteuer und Mehrwertsteuerregeln aus ERSE-eigenen Dokumenten. Gelesen am {{checked}}. Die ERSE kann den Energiepreis jedes Quartal ändern.",
+          "eurostat": "Preisindex: Eurostat, \"Electricity prices for household consumers - bi-annual data\" (nrg_pc_204), Band DC (2.500 bis 4.999 kWh pro Jahr), inklusive aller Steuern und Abgaben, in Euro je kWh, von {{firstPeriod}} bis {{lastPeriod}}. Eurostat hat den Datensatz am {{updated}} aktualisiert, die Kopie dieser Seite wurde am {{fetched}} erstellt.",
+          "tariffsLink": "ERSE, Tarife und Preise für 2026 (Richtlinie 4/2026)",
+          "chargesLink": "ERSE, Handbuch des Preissimulators (Rechnungsposten)",
+          "vatLink": "ERSE, Mehrwertsteuer auf der Stromrechnung",
+          "eurostatLink": "Eurostat, Tabelle nrg_pc_204",
+          "refresh": "Die Seite liest zwei gespeicherte Datendateien und fragt diese Quellen nie ab, während du sie nutzt. Beide tragen ihr Datum und werden von Hand aktualisiert."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "market": "Freier Markt: Die meisten Angebote sind nicht der regulierte Tarif. Sie können günstiger oder teurer sein, mit anderen Preisen, Rabatten und Bedingungen. Vergleiche mit einem echten Simulator, bevor du dich entscheidest.",
+            "dgeg": "Die kleine monatliche DGEG-Gebühr ist nicht enthalten, weil wir ihre Höhe in keinem ERSE-Dokument bestätigen konnten, ebenso wenig sonstige Zählerkosten. Den genauen Gesamtbetrag findest du auf deiner Rechnung.",
+            "scope": "Der Schätzer deckt das portugiesische Festland und vertraglich vereinbarte Leistungen von 3,45 bis 6,9 kVA ab. Höhere Leistungen, die Azoren und Madeira haben andere Tarife und Mehrwertsteuersätze.",
+            "social": "Der Sozialtarif für Strom, ein Nachlass für berechtigte Haushalte, ist nicht berücksichtigt. Frage deinen Versorger oder die ERSE, ob du Anspruch haben könntest.",
+            "average": "Der Index vergleicht Durchschnitte für ein Verbrauchsband. Dein Preis hängt von Vertrag, Leistung und Nutzungszeiten ab, und der Durchschnitt Portugals mischt Verträge des regulierten und des freien Marktes.",
+            "education": "Nur zu Bildungszwecken, keine Beratung zur Wahl oder zum Wechsel des Versorgers."
+          },
+          "simulatorLink": "Echte Angebote im offiziellen Preissimulator der ERSE vergleichen"
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "householdBudgetLink": "Haushaltsbudget-Rechner",
+          "householdBudgetBody": "Stelle die Stromrechnung neben deine anderen Haushaltskosten und sieh, was übrig bleibt.",
+          "emergencyFundLink": "Notgroschen-Rechner",
+          "emergencyFundBody": "Berechne, wie viele Monate an notwendigen Ausgaben, Energie eingeschlossen, deine Ersparnisse decken würden.",
+          "inflationLink": "Inflationsrechner",
+          "inflationBody": "Sieh, wie steigende Preise verändern, was dein Geld im Zeitverlauf kaufen kann."
+        }
+      }
     }
   },
   "resources": {
