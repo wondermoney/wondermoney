@@ -37,7 +37,7 @@
     "test": "tsx scripts/render-handoff.ts --check && pnpm check:copy && pnpm check:lib"
   },
   "dependencies": {
-    "@react-email/render": "2.2.0",
+    "@react-email/render": "2.3.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -46,7 +46,7 @@
     "@types/node": "26.6.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "next": "16.4.5",
+    "next": "16.4.6",
     "react-email": "6.11.16",
     "tsup": "9.0.0",
     "tsx": "4.23.15",
