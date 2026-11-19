@@ -5910,7 +5910,11 @@
       "timer": "Line drawing of a kitchen timer set to ten minutes.",
       "containers": "Line drawing of a shelf of containers, from an open bowl to a locked safe.",
       "booklets": "Line drawing of guide booklets leaning in a stand.",
-      "calculator": "Line drawing of a desk calculator."
+      "calculator": "Line drawing of a desk calculator.",
+      "compass": "Line drawing of a pocket compass lying on a folded map, its needle pointing along a dashed route to a marked spot.",
+      "cardindex": "Line drawing of a wooden card index box with a label holder and a finger hole, filled with ruled cards and tabbed dividers.",
+      "calendar": "Line drawing of a desk calendar standing on its fold, with a wire binding and a month grid with one day circled.",
+      "riskdial": "Line drawing of a gauge on a base, its needle swinging across five segments from cautious to bold."
     }
   }
 }

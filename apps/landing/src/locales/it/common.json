@@ -5910,7 +5910,11 @@
       "timer": "Disegno al tratto di un timer da cucina impostato su dieci minuti.",
       "containers": "Disegno al tratto di uno scaffale di contenitori, da una ciotola aperta a una cassaforte chiusa.",
       "booklets": "Disegno al tratto di guide appoggiate in un espositore.",
-      "calculator": "Disegno al tratto di una calcolatrice da tavolo."
+      "calculator": "Disegno al tratto di una calcolatrice da tavolo.",
+      "compass": "Disegno al tratto di una bussola tascabile appoggiata su una mappa piegata, con l'ago che punta lungo un percorso tratteggiato verso un punto segnato.",
+      "cardindex": "Disegno al tratto di uno schedario in legno con portaetichetta e foro per il dito, pieno di schede a righe e divisori con linguette.",
+      "calendar": "Disegno al tratto di un calendario da tavolo in piedi, con rilegatura a spirale e la griglia di un mese con un giorno cerchiato.",
+      "riskdial": "Disegno al tratto di un indicatore su una base, con la lancetta che percorre cinque segmenti, da prudente ad audace."
     }
   }
 }
