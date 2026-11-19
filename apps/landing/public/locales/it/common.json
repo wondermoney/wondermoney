@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Scopri con quante oscillazioni di mercato come queste riesci a convivere."
         }
       }
+    },
+    "euribor": {
+      "title": "Euribor oggi: tassi attuali e impatto sulla rata",
+      "shortName": "Euribor oggi",
+      "subtitle": "Gli ultimi Euribor a 3, 6 e 12 mesi, la variazione sul mese precedente, lo storico dal 2000 e cosa fa una variazione alla rata di un mutuo a tasso variabile.",
+      "description": "Medie mensili attuali dell'Euribor a 3, 6 e 12 mesi, storico dal 2000 e un simulatore dell'effetto di una variazione sulla rata del tuo mutuo.",
+      "pageTitle": "Euribor oggi: tassi a 3, 6 e 12 mesi e impatto sulla rata",
+      "pageDescription": "Le ultime medie mensili dell'Euribor a 3, 6 e 12 mesi della Banca del Portogallo, la variazione sul mese precedente, un grafico dal 2000 e un simulatore di cosa fa un aumento o un calo alla rata di un mutuo a tasso variabile.",
+      "asOf": "Dati di {{month}}: medie mensili, recuperati il {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 mesi",
+        "6": "Euribor 6 mesi",
+        "12": "Euribor 12 mesi"
+      },
+      "current": {
+        "title": "Tassi Euribor attuali",
+        "change": "{{change}} punti rispetto a {{previous}}",
+        "note": "Ogni tasso è la media di {{month}}, non una rilevazione giornaliera. Un mutuo si adegua alla rilevazione della data prevista dal contratto, che può differire dalla media mensile."
+      },
+      "calc": {
+        "title": "Cosa fa una variazione dell'Euribor alla tua rata"
+      },
+      "fields": {
+        "balance": "Capitale residuo",
+        "termYears": "Anni rimanenti",
+        "termMonths": "Mesi rimanenti",
+        "spread": "Il tuo spread",
+        "tenor": "Euribor a cui è legato il tuo mutuo",
+        "change": "Variazione dell'Euribor (punti)"
+      },
+      "help": {
+        "spread": "Il margine della banca sopra l'Euribor, in percentuale. È nel tuo contratto.",
+        "change": "Usa un numero negativo per un calo. 1 è un punto percentuale: dal 3% al 4%."
+      },
+      "errors": {
+        "summary": "La nuova rata appare quando ogni campo ha un valore valido.",
+        "balance": {
+          "required": "Inserisci il capitale che devi ancora.",
+          "tooSmall": "Inserisci un capitale di almeno {{min}}.",
+          "tooLarge": "Inserisci un capitale fino a {{max}}."
+        },
+        "termYears": {
+          "required": "Inserisci il tempo rimanente, almeno un mese.",
+          "negative": "Gli anni non possono essere negativi.",
+          "tooLarge": "Inserisci fino a {{max}} anni in tutto."
+        },
+        "termMonths": {
+          "negative": "I mesi non possono essere negativi.",
+          "tooLarge": "Inserisci da 0 a 11 mesi; gli anni interi vanno nel campo degli anni."
+        },
+        "spread": {
+          "required": "Inserisci lo spread, o 0% se non c'è.",
+          "negative": "Lo spread non può essere negativo.",
+          "tooLarge": "Inserisci uno spread fino a {{max}}."
+        },
+        "change": {
+          "required": "Inserisci una variazione in punti, o 0 se non c'è.",
+          "tooSmall": "Inserisci una variazione di {{min}} o più.",
+          "tooLarge": "Inserisci una variazione di {{max}} o meno."
+        }
+      },
+      "result": {
+        "revised": "Rata mensile dopo la variazione",
+        "current": "Rata mensile oggi",
+        "monthlyChange": "Differenza al mese",
+        "nextYear": "Differenza sulle prossime {{payments}} rate",
+        "assumptions": "Parte dal tasso a {{tenor}} del {{index}} (media di {{month}}) e lo porta al {{newIndex}}, con il tuo spread sopra, sui mesi rimanenti.",
+        "floored": "Indice più spread è sotto lo 0%, quindi il tasso è preso come 0%. I contratti differiscono: alcuni hanno un pavimento, altri no.",
+        "termRounded": "La durata rimanente è stata arrotondata a mesi interi.",
+        "noChange": "Senza variazione dell'Euribor la rata resta uguale.",
+        "caveat": "Stima a scopo educativo. Assume che il nuovo tasso valga dalla prossima rata fino alla fine del mutuo; il tuo contratto fissa date di revisione, tetti e pavimenti."
+      },
+      "history": {
+        "title": "Storico dell'Euribor",
+        "from": "Mostra dall'anno",
+        "label": "Grafico a linee delle medie mensili dell'Euribor a 3, 6 e 12 mesi"
+      },
+      "sourceNote": "Fonte: Banco de Portugal, BPstat, medie mensili dell'Euribor, ultimo mese {{month}}, recuperate il {{fetched}}. Euribor è un marchio registrato di EMMI. Solo a scopo educativo.",
+      "nextStepHeadline": "Collega le variazioni dei tassi al budget dei tuoi debiti",
+      "nextStepDescription": "Aggiungi il tuo mutuo a WonderMoney e guarda come una variazione dell'Euribor sposta la rata mensile e cosa lascia al resto del budget.",
+      "nextStepCta": "Collega i tuoi debiti",
+      "guide": {
+        "read": {
+          "title": "Come leggere i tassi",
+          "intro": "L'Euribor è il tasso a cui le banche dell'area euro si prestano denaro per una durata: 3, 6 o 12 mesi. Molti mutui a tasso variabile pagano Euribor più uno spread fisso, quindi quando si muove, si muove la rata.",
+          "monthly": "I valori sono medie mensili, l'ultima è quella di {{month}}. Non sono il tasso del giorno: quello che fissa la tua rata è il valore della data usata dal tuo contratto."
+        },
+        "example": {
+          "title": "Esempio",
+          "setup": "Un mutuo con {{balance}} residui su {{years}} anni, spread del {{spread}} ed Euribor a 12 mesi del {{index}} (l'ultima media mensile). L'Euribor sale di {{change}} punto al {{newIndex}}.",
+          "result": "La rata passa da {{current}} a {{revised}}, una differenza di {{difference}} al mese. È lo stesso calcolo del simulatore di revisione del tasso."
+        },
+        "data": {
+          "title": "Dati e metodo",
+          "source": "I tassi sono le medie mensili dell'Euribor a 3, 6 e 12 mesi pubblicate dalla Banca del Portogallo in BPstat, recuperate il {{fetched}}. L'ultimo mese dei dati è {{month}}. Ogni variazione è l'ultima media meno quella del mese precedente, in punti percentuali.",
+          "link": "Tassi Euribor per durata su BPstat",
+          "daily": "BPstat pubblica medie mensili, non rilevazioni giornaliere, quindi questa pagina mostra solo medie mensili. Per il valore di oggi consulta EMMI o la tua banca.",
+          "trademark": "Euribor è un marchio registrato di EMMI. Questa pagina non è affiliata né approvata da EMMI o dalla Banca del Portogallo."
+        },
+        "limits": {
+          "title": "Cosa non includono questi valori",
+          "items": {
+            "average": "Una media mensile leviga il mese: il tasso di un giorno preciso può essere sopra o sotto.",
+            "reset": "Il tuo mutuo segue l'Euribor di una data di revisione del contratto, spesso ogni 3, 6 o 12 mesi, non ogni mese.",
+            "terms": "Tetti, pavimenti e uno spread diverso dopo alcuni anni dipendono dal contratto e non sono inclusi.",
+            "advice": "Informazione educativa, non una previsione dell'Euribor né una consulenza finanziaria."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "rateRevisionLink": "Simulatore di revisione del tasso",
+          "rateRevisionBody": "Prova il tuo indice, spread e capitale, e guarda la rata come quota del reddito.",
+          "mortgageLink": "Calcolatore del mutuo",
+          "mortgageBody": "Calcola rata e interessi di un mutuo prima di qualsiasi variazione del tasso.",
+          "debtToIncomeLink": "Calcolatore del rapporto debito-reddito",
+          "debtToIncomeBody": "Guarda se una rata più alta mantiene i tuoi debiti in una quota comoda del reddito."
+        }
+      }
     }
   },
   "resources": {

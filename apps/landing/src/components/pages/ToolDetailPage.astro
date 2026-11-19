@@ -66,6 +66,8 @@ import StatePensionCalculatorComp from "@/components/calculators/StatePensionCal
 import StatePensionGuide from "@/components/calculators/StatePensionGuide.astro";
 import Sp500HistoryCalculatorComp from "@/components/calculators/Sp500HistoryCalculatorComp";
 import Sp500HistoryGuide from "@/components/calculators/Sp500HistoryGuide.astro";
+import EuriborCalculatorComp from "@/components/calculators/EuriborCalculatorComp";
+import EuriborGuide from "@/components/calculators/EuriborGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -239,6 +241,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.sp500History.nextStepCta"),
     ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
+  toolEuribor: {
+    headline: t("tools.euribor.nextStepHeadline"),
+    description: t("tools.euribor.nextStepDescription"),
+    ctaText: t("tools.euribor.nextStepCta"),
+    ctaHref: toLocalizedPath("featureCredits", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -351,6 +359,7 @@ const schema = {
     {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsCalculatorComp locale={locale} client:load />}
     {routeId === "toolStatePension" && <StatePensionCalculatorComp locale={locale} client:load />}
     {routeId === "toolSp500History" && <Sp500HistoryCalculatorComp locale={locale} client:load />}
+    {routeId === "toolEuribor" && <EuriborCalculatorComp locale={locale} client:load />}
   </div>
 
   {routeId === "toolCompoundInterest" && <CompoundInterestGuide locale={locale} />}
@@ -384,6 +393,7 @@ const schema = {
   {routeId === "toolPropertyCapitalGains" && <PropertyCapitalGainsGuide locale={locale} />}
   {routeId === "toolStatePension" && <StatePensionGuide locale={locale} />}
   {routeId === "toolSp500History" && <Sp500HistoryGuide locale={locale} />}
+  {routeId === "toolEuribor" && <EuriborGuide locale={locale} />}
 
   <div class="mt-8">
     <FinancialDisclaimer locale={locale} client:idle />

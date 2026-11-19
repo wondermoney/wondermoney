@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Finde heraus, mit wie viel Marktschwankung dieser Art du leben kannst."
         }
       }
+    },
+    "euribor": {
+      "title": "Euribor aktuell: Zinssätze und Auswirkung auf die Rate",
+      "shortName": "Euribor aktuell",
+      "subtitle": "Die neuesten Euribor-Sätze für 3, 6 und 12 Monate, ihre Veränderung zum Vormonat, der Verlauf seit 2000 und was eine Änderung bei der Rate eines variabel verzinsten Baukredits bewirkt.",
+      "description": "Aktuelle Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate, Verlauf seit 2000 und ein Rechner für die Wirkung einer Änderung auf deine Kreditrate.",
+      "pageTitle": "Euribor aktuell: 3, 6 und 12 Monate und Wirkung auf die Rate",
+      "pageDescription": "Die neuesten Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate von der Banco de Portugal, die Veränderung zum Vormonat, ein Verlaufsdiagramm seit 2000 und ein Rechner, was ein Anstieg oder Rückgang bei der Rate eines variablen Baukredits bewirkt.",
+      "asOf": "Daten für {{month}}: Monatsdurchschnitte, abgerufen am {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 Monate",
+        "6": "Euribor 6 Monate",
+        "12": "Euribor 12 Monate"
+      },
+      "current": {
+        "title": "Aktuelle Euribor-Sätze",
+        "change": "{{change}} Punkte gegenüber {{previous}}",
+        "note": "Jeder Satz ist der Durchschnitt von {{month}}, keine Tagesfixierung. Ein Kredit wird zur Fixierung am Stichtag deines Vertrags angepasst, die vom Monatsdurchschnitt abweichen kann."
+      },
+      "calc": {
+        "title": "Was eine Euribor-Änderung mit deiner Rate macht"
+      },
+      "fields": {
+        "balance": "Restschuld",
+        "termYears": "Verbleibende Jahre",
+        "termMonths": "Verbleibende Monate",
+        "spread": "Dein Aufschlag",
+        "tenor": "Euribor, an den dein Kredit gebunden ist",
+        "change": "Änderung des Euribor (Punkte)"
+      },
+      "help": {
+        "spread": "Der Aufschlag der Bank auf den Euribor, in Prozent. Er steht in deinem Vertrag.",
+        "change": "Verwende eine negative Zahl für einen Rückgang. 1 ist ein Prozentpunkt: von 3 % auf 4 %."
+      },
+      "errors": {
+        "summary": "Die neue Rate erscheint, sobald jedes Feld einen gültigen Wert hat.",
+        "balance": {
+          "required": "Gib die Restschuld ein.",
+          "tooSmall": "Gib eine Restschuld von mindestens {{min}} ein.",
+          "tooLarge": "Gib eine Restschuld bis {{max}} ein."
+        },
+        "termYears": {
+          "required": "Gib die Restlaufzeit ein, mindestens einen Monat.",
+          "negative": "Jahre dürfen nicht negativ sein.",
+          "tooLarge": "Gib insgesamt bis zu {{max}} Jahre ein."
+        },
+        "termMonths": {
+          "negative": "Monate dürfen nicht negativ sein.",
+          "tooLarge": "Gib 0 bis 11 Monate ein; volle Jahre gehören in das Jahresfeld."
+        },
+        "spread": {
+          "required": "Gib den Aufschlag ein, oder 0 %, falls es keinen gibt.",
+          "negative": "Der Aufschlag darf nicht negativ sein.",
+          "tooLarge": "Gib einen Aufschlag bis {{max}} ein."
+        },
+        "change": {
+          "required": "Gib eine Änderung in Punkten ein, oder 0, falls es keine gibt.",
+          "tooSmall": "Gib eine Änderung von {{min}} oder mehr ein.",
+          "tooLarge": "Gib eine Änderung von {{max}} oder weniger ein."
+        }
+      },
+      "result": {
+        "revised": "Monatsrate nach der Änderung",
+        "current": "Monatsrate heute",
+        "monthlyChange": "Unterschied pro Monat",
+        "nextYear": "Unterschied über die nächsten {{payments}} Raten",
+        "assumptions": "Ausgangspunkt ist der {{tenor}}-Satz von {{index}} (Durchschnitt {{month}}), der auf {{newIndex}} geändert wird, mit deinem Aufschlag obendrauf, über die verbleibenden Monate.",
+        "floored": "Index plus Aufschlag liegen unter 0 %, deshalb wird der Satz mit 0 % angesetzt. Verträge unterscheiden sich: manche haben eine Untergrenze, andere nicht.",
+        "termRounded": "Die Restlaufzeit wurde auf ganze Monate gerundet.",
+        "noChange": "Ohne Änderung des Euribor bleibt die Rate gleich.",
+        "caveat": "Lehrreiche Schätzung. Sie nimmt an, dass der neue Satz ab der nächsten Rate bis zum Ende des Kredits gilt; dein Vertrag legt Anpassungstermine, Ober- und Untergrenzen fest."
+      },
+      "history": {
+        "title": "Euribor-Verlauf",
+        "from": "Anzeigen ab Jahr",
+        "label": "Liniendiagramm der Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate"
+      },
+      "sourceNote": "Quelle: Banco de Portugal, BPstat, Euribor-Monatsdurchschnitte, letzter Monat {{month}}, abgerufen am {{fetched}}. Euribor ist eine eingetragene Marke der EMMI. Nur zu Bildungszwecken.",
+      "nextStepHeadline": "Verbinde Zinsänderungen mit dem Budget deiner Schulden",
+      "nextStepDescription": "Füge deinen Kredit zu WonderMoney hinzu und sieh, wie eine Euribor-Änderung deine Monatsrate verschiebt und was für den Rest deines Budgets bleibt.",
+      "nextStepCta": "Verbinde deine Schulden",
+      "guide": {
+        "read": {
+          "title": "So liest du die Sätze",
+          "intro": "Der Euribor ist der Zinssatz, zu dem sich Banken im Euroraum untereinander Geld für eine feste Dauer leihen: 3, 6 oder 12 Monate. Viele variable Kredite zahlen Euribor plus einen festen Aufschlag, daher bewegt sich die Rate mit.",
+          "monthly": "Die Zahlen sind Monatsdurchschnitte, der neueste ist der von {{month}}. Es ist nicht der Tageswert: Deine Rate bestimmt der Wert am Stichtag deines Vertrags."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Kredit mit {{balance}} Restschuld über {{years}} Jahre, einem Aufschlag von {{spread}} und einem 12-Monats-Euribor von {{index}} (dem letzten Monatsdurchschnitt). Der Euribor steigt um {{change}} Punkt auf {{newIndex}}.",
+          "result": "Die Rate steigt von {{current}} auf {{revised}}, ein Unterschied von {{difference}} im Monat. Es ist dieselbe Rechnung wie im Zinsanpassungsrechner."
+        },
+        "data": {
+          "title": "Daten und Methode",
+          "source": "Die Sätze sind die Monatsdurchschnitte des Euribor für 3, 6 und 12 Monate, die die Banco de Portugal in BPstat veröffentlicht, abgerufen am {{fetched}}. Der letzte Monat der Daten ist {{month}}. Jede Änderung ist der letzte Durchschnitt minus der des Vormonats, in Prozentpunkten.",
+          "link": "Euribor-Sätze nach Laufzeit bei BPstat",
+          "daily": "BPstat veröffentlicht Monatsdurchschnitte, keine Tagesfixierungen, deshalb zeigt diese Seite nur Monatsdurchschnitte. Für den heutigen Wert siehe EMMI oder deine Bank.",
+          "trademark": "Euribor ist eine eingetragene Marke der EMMI. Diese Seite ist weder mit EMMI oder der Banco de Portugal verbunden noch von ihnen unterstützt."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "average": "Ein Monatsdurchschnitt glättet den Monat: Der Satz eines bestimmten Tages kann darüber oder darunter liegen.",
+            "reset": "Dein Kredit folgt dem Euribor eines Anpassungstermins im Vertrag, oft alle 3, 6 oder 12 Monate, nicht jeden Monat.",
+            "terms": "Ober- und Untergrenzen und ein anderer Aufschlag nach einigen Jahren hängen vom Vertrag ab und sind nicht enthalten.",
+            "advice": "Lehrreiche Information, keine Prognose des Euribor und keine Finanzberatung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht es",
+          "rateRevisionLink": "Rechner für variable Kreditraten",
+          "rateRevisionBody": "Probiere deinen eigenen Index, Aufschlag und Saldo aus und sieh die Rate als Anteil deines Einkommens.",
+          "mortgageLink": "Baukreditrechner",
+          "mortgageBody": "Berechne Rate und Zinsen eines Kredits vor jeder Zinsänderung.",
+          "debtToIncomeLink": "Rechner für das Verhältnis Schulden zu Einkommen",
+          "debtToIncomeBody": "Sieh, ob eine höhere Rate deine Schulden in einem komfortablen Anteil des Einkommens hält."
+        }
+      }
     }
   },
   "resources": {

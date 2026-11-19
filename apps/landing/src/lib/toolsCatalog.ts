@@ -156,6 +156,12 @@ export const TOOLS_CATALOG = [
 		related: ["toolMortgage", "toolDebtToIncome", "toolEarlyRepayment"],
 	},
 	{
+		key: "euribor",
+		routeId: "toolEuribor",
+		group: "borrowAndBuyHome",
+		related: ["toolRateRevision", "toolMortgage", "toolDebtToIncome"],
+	},
+	{
 		key: "carLoan",
 		routeId: "toolCarLoan",
 		group: "borrowAndBuyHome",

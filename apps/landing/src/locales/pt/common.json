@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Descobre com quantas oscilações de mercado destas consegues viver."
         }
       }
+    },
+    "euribor": {
+      "title": "Euribor hoje: taxas atuais e impacto na prestação",
+      "shortName": "Euribor hoje",
+      "subtitle": "As Euribor a 3, 6 e 12 meses mais recentes, a variação face ao mês anterior, o histórico desde 2000 e o que uma subida ou descida faz à prestação de um crédito à habitação de taxa variável.",
+      "description": "Médias mensais atuais da Euribor a 3, 6 e 12 meses, histórico desde 2000 e um simulador do efeito de uma variação na prestação do teu crédito.",
+      "pageTitle": "Euribor hoje: taxas a 3, 6 e 12 meses e impacto na prestação",
+      "pageDescription": "As médias mensais mais recentes da Euribor a 3, 6 e 12 meses do Banco de Portugal, a variação face ao mês anterior, o gráfico desde 2000 e um simulador do que uma subida ou descida faz à prestação do crédito à habitação de taxa variável.",
+      "asOf": "Dados de {{month}}: médias mensais, obtidos em {{fetched}}",
+      "tenor": {
+        "3": "Euribor a 3 meses",
+        "6": "Euribor a 6 meses",
+        "12": "Euribor a 12 meses"
+      },
+      "current": {
+        "title": "Taxas Euribor atuais",
+        "change": "{{change}} pontos face a {{previous}}",
+        "note": "Cada taxa é a média de {{month}}, não uma taxa diária. O crédito revê a taxa na data que o contrato define, que pode diferir da média mensal."
+      },
+      "calc": {
+        "title": "O que uma variação da Euribor faz à tua prestação"
+      },
+      "fields": {
+        "balance": "Capital em dívida",
+        "termYears": "Anos que faltam",
+        "termMonths": "Meses que faltam",
+        "spread": "O teu spread",
+        "tenor": "Euribor do teu crédito",
+        "change": "Variação da Euribor (pontos)"
+      },
+      "help": {
+        "spread": "A margem do banco sobre a Euribor, em percentagem. Consta do teu contrato.",
+        "change": "Usa um número negativo para uma descida. 1 é um ponto percentual: de 3% para 4%."
+      },
+      "errors": {
+        "summary": "A nova prestação aparece quando todos os campos tiverem um valor válido.",
+        "balance": {
+          "required": "Indica o capital que ainda deves.",
+          "tooSmall": "Indica um capital de pelo menos {{min}}.",
+          "tooLarge": "Indica um capital até {{max}}."
+        },
+        "termYears": {
+          "required": "Indica o tempo que falta, pelo menos um mês.",
+          "negative": "Os anos não podem ser negativos.",
+          "tooLarge": "Indica até {{max}} anos no total."
+        },
+        "termMonths": {
+          "negative": "Os meses não podem ser negativos.",
+          "tooLarge": "Indica de 0 a 11 meses; os anos completos vão no campo dos anos."
+        },
+        "spread": {
+          "required": "Indica o spread, ou 0% se não houver.",
+          "negative": "O spread não pode ser negativo.",
+          "tooLarge": "Indica um spread até {{max}}."
+        },
+        "change": {
+          "required": "Indica uma variação em pontos, ou 0 se não houver.",
+          "tooSmall": "Indica uma variação de {{min}} ou mais.",
+          "tooLarge": "Indica uma variação de {{max}} ou menos."
+        }
+      },
+      "result": {
+        "revised": "Prestação mensal depois da variação",
+        "current": "Prestação mensal hoje",
+        "monthlyChange": "Diferença por mês",
+        "nextYear": "Diferença nas próximas {{payments}} prestações",
+        "assumptions": "Parte da taxa a {{tenor}} de {{index}} (média de {{month}}) e passa-a para {{newIndex}}, com o teu spread por cima, durante os meses que faltam.",
+        "floored": "O indexante mais o spread fica abaixo de 0%, por isso a taxa é tomada como 0%. Os contratos diferem: alguns têm piso, outros não.",
+        "termRounded": "O prazo que falta foi arredondado para meses inteiros.",
+        "noChange": "Sem variação da Euribor, a prestação mantém-se.",
+        "caveat": "Estimativa educativa. Assume que a nova taxa se aplica da próxima prestação até ao fim do crédito; o teu contrato define as datas de revisão, limites e pisos."
+      },
+      "history": {
+        "title": "Histórico da Euribor",
+        "from": "Mostrar desde o ano",
+        "label": "Gráfico de linhas das médias mensais da Euribor a 3, 6 e 12 meses"
+      },
+      "sourceNote": "Fonte: Banco de Portugal, BPstat, médias mensais da Euribor, último mês {{month}}, obtidas em {{fetched}}. Euribor é uma marca registada da EMMI. Apenas educativo.",
+      "nextStepHeadline": "Liga as variações de taxa ao orçamento das tuas dívidas",
+      "nextStepDescription": "Adiciona o teu crédito ao WonderMoney e vê como uma variação da Euribor mexe na prestação mensal e no que sobra para o resto do orçamento.",
+      "nextStepCta": "Liga as tuas dívidas",
+      "guide": {
+        "read": {
+          "title": "Como ler as taxas",
+          "intro": "A Euribor é a taxa a que os bancos da zona euro se emprestam dinheiro entre si por um prazo: 3, 6 ou 12 meses. Muitos créditos à habitação de taxa variável pagam a Euribor mais um spread fixo, por isso, quando ela sobe ou desce, a prestação acompanha.",
+          "monthly": "Os valores aqui são médias mensais, e o mais recente é o de {{month}}. Não são a taxa diária: a que define a tua prestação é a fixada na data que o teu contrato usa."
+        },
+        "example": {
+          "title": "Exemplo",
+          "setup": "Um crédito com {{balance}} em dívida a {{years}} anos, spread de {{spread}} e Euribor a 12 meses de {{index}} (a média mensal mais recente). A Euribor sobe {{change}} ponto para {{newIndex}}.",
+          "result": "A prestação passa de {{current}} para {{revised}}, uma diferença de {{difference}} por mês. É o mesmo cálculo do simulador de revisão da taxa."
+        },
+        "data": {
+          "title": "Dados e método",
+          "source": "As taxas são as médias mensais da Euribor a 3, 6 e 12 meses publicadas pelo Banco de Portugal no BPstat, obtidas em {{fetched}}. O último mês dos dados é {{month}}. Cada variação é a última média menos a do mês anterior, em pontos percentuais.",
+          "link": "Taxas Euribor por prazo no BPstat",
+          "daily": "O BPstat publica médias mensais, não taxas diárias, por isso esta página mostra só médias mensais. Para a taxa de hoje, consulta a EMMI ou o teu banco.",
+          "trademark": "Euribor é uma marca registada da EMMI. Esta página não é afiliada nem patrocinada pela EMMI ou pelo Banco de Portugal."
+        },
+        "limits": {
+          "title": "O que estes valores não incluem",
+          "items": {
+            "average": "Uma média mensal suaviza o mês: a taxa de um dia concreto pode estar acima ou abaixo.",
+            "reset": "O teu crédito segue a Euribor de uma data de revisão do contrato, muitas vezes a cada 3, 6 ou 12 meses, não todos os meses.",
+            "terms": "Limites, pisos e um spread diferente passados alguns anos dependem do contrato e não estão incluídos.",
+            "advice": "Informação educativa, não uma previsão da Euribor nem aconselhamento financeiro."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "rateRevisionLink": "Simulador de revisão da taxa do crédito",
+          "rateRevisionBody": "Experimenta o teu indexante, spread e capital, e vê a prestação como parte do rendimento.",
+          "mortgageLink": "Simulador de crédito habitação",
+          "mortgageBody": "Calcula a prestação e os juros de um crédito antes de qualquer variação da taxa.",
+          "debtToIncomeLink": "Simulador de taxa de esforço",
+          "debtToIncomeBody": "Vê se uma prestação mais alta mantém as tuas dívidas numa fração confortável do rendimento."
+        }
+      }
     }
   },
   "resources": {

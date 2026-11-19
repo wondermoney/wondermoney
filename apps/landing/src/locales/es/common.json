@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Descubre con cuántas oscilaciones de mercado como estas puedes vivir."
         }
       }
+    },
+    "euribor": {
+      "title": "Euríbor hoy: tipos actuales e impacto en la cuota",
+      "shortName": "Euríbor hoy",
+      "subtitle": "Los últimos euríbor a 3, 6 y 12 meses, su variación sobre el mes anterior, el histórico desde 2000 y lo que un cambio hace a la cuota de una hipoteca variable.",
+      "description": "Medias mensuales actuales del euríbor a 3, 6 y 12 meses, histórico desde 2000 y un simulador del efecto de un cambio en la cuota de tu hipoteca.",
+      "pageTitle": "Euríbor hoy: tipos a 3, 6 y 12 meses e impacto en la cuota",
+      "pageDescription": "Las últimas medias mensuales del euríbor a 3, 6 y 12 meses del Banco de Portugal, la variación sobre el mes anterior, un gráfico desde 2000 y un simulador de lo que una subida o bajada hace a la cuota de una hipoteca variable.",
+      "asOf": "Datos de {{month}}: medias mensuales, obtenidos el {{fetched}}",
+      "tenor": {
+        "3": "Euríbor a 3 meses",
+        "6": "Euríbor a 6 meses",
+        "12": "Euríbor a 12 meses"
+      },
+      "current": {
+        "title": "Euríbor actual",
+        "change": "{{change}} puntos sobre {{previous}}",
+        "note": "Cada tipo es la media de {{month}}, no un valor diario. Un préstamo se revisa con el valor de la fecha que fija su contrato, que puede diferir de la media mensual."
+      },
+      "calc": {
+        "title": "Qué hace un cambio del euríbor a tu cuota"
+      },
+      "fields": {
+        "balance": "Capital pendiente",
+        "termYears": "Años restantes",
+        "termMonths": "Meses restantes",
+        "spread": "Tu diferencial",
+        "tenor": "Euríbor al que está referenciado tu préstamo",
+        "change": "Cambio del euríbor (puntos)"
+      },
+      "help": {
+        "spread": "El margen del banco sobre el euríbor, en porcentaje. Figura en tu contrato.",
+        "change": "Usa un número negativo para una bajada. 1 es un punto porcentual: del 3% al 4%."
+      },
+      "errors": {
+        "summary": "La nueva cuota aparece cuando todos los campos tengan un valor válido.",
+        "balance": {
+          "required": "Introduce el capital que aún debes.",
+          "tooSmall": "Introduce un capital de al menos {{min}}.",
+          "tooLarge": "Introduce un capital de hasta {{max}}."
+        },
+        "termYears": {
+          "required": "Introduce el tiempo restante, al menos un mes.",
+          "negative": "Los años no pueden ser negativos.",
+          "tooLarge": "Introduce hasta {{max}} años en total."
+        },
+        "termMonths": {
+          "negative": "Los meses no pueden ser negativos.",
+          "tooLarge": "Introduce de 0 a 11 meses; los años completos van en el campo de años."
+        },
+        "spread": {
+          "required": "Introduce el diferencial, o 0% si no hay.",
+          "negative": "El diferencial no puede ser negativo.",
+          "tooLarge": "Introduce un diferencial de hasta {{max}}."
+        },
+        "change": {
+          "required": "Introduce un cambio en puntos, o 0 si no hay.",
+          "tooSmall": "Introduce un cambio de {{min}} o más.",
+          "tooLarge": "Introduce un cambio de {{max}} o menos."
+        }
+      },
+      "result": {
+        "revised": "Cuota mensual tras el cambio",
+        "current": "Cuota mensual hoy",
+        "monthlyChange": "Diferencia al mes",
+        "nextYear": "Diferencia en las próximas {{payments}} cuotas",
+        "assumptions": "Parte del tipo a {{tenor}} de {{index}} (media de {{month}}) y lo lleva a {{newIndex}}, con tu diferencial encima, durante los meses restantes.",
+        "floored": "El índice más el diferencial queda por debajo del 0%, así que el tipo se toma como 0%. Los contratos difieren: algunos tienen suelo y otros no.",
+        "termRounded": "El plazo restante se redondeó a meses enteros.",
+        "noChange": "Sin cambio del euríbor, la cuota no varía.",
+        "caveat": "Estimación educativa. Supone que el nuevo tipo se aplica desde la próxima cuota hasta el final del préstamo; tu contrato fija las fechas de revisión, techos y suelos."
+      },
+      "history": {
+        "title": "Histórico del euríbor",
+        "from": "Mostrar desde el año",
+        "label": "Gráfico de líneas de las medias mensuales del euríbor a 3, 6 y 12 meses"
+      },
+      "sourceNote": "Fuente: Banco de Portugal, BPstat, medias mensuales del euríbor, último mes {{month}}, obtenidas el {{fetched}}. Euribor es una marca registrada de EMMI. Solo con fines educativos.",
+      "nextStepHeadline": "Conecta los cambios de tipo con el presupuesto de tus deudas",
+      "nextStepDescription": "Añade tu préstamo a WonderMoney y mira cómo un cambio del euríbor mueve tu cuota mensual y lo que deja para el resto del presupuesto.",
+      "nextStepCta": "Conecta tus deudas",
+      "guide": {
+        "read": {
+          "title": "Cómo leer los tipos",
+          "intro": "El euríbor es el tipo al que los bancos de la zona euro se prestan dinero entre sí a un plazo: 3, 6 o 12 meses. Muchas hipotecas variables pagan euríbor más un diferencial fijo, así que cuando se mueve, la cuota se mueve.",
+          "monthly": "Las cifras son medias mensuales, y la más reciente es la de {{month}}. No son el valor diario: el que fija tu cuota es el de la fecha que usa tu contrato."
+        },
+        "example": {
+          "title": "Ejemplo",
+          "setup": "Un préstamo con {{balance}} pendientes a {{years}} años, diferencial de {{spread}} y euríbor a 12 meses de {{index}} (la última media mensual). El euríbor sube {{change}} punto hasta {{newIndex}}.",
+          "result": "La cuota pasa de {{current}} a {{revised}}, una diferencia de {{difference}} al mes. Es el mismo cálculo del simulador de revisión del tipo."
+        },
+        "data": {
+          "title": "Datos y método",
+          "source": "Los tipos son las medias mensuales del euríbor a 3, 6 y 12 meses que publica el Banco de Portugal en BPstat, obtenidas el {{fetched}}. El último mes de los datos es {{month}}. Cada variación es la última media menos la del mes anterior, en puntos porcentuales.",
+          "link": "Euríbor por plazo en BPstat",
+          "daily": "BPstat publica medias mensuales, no valores diarios, así que esta página muestra solo medias mensuales. Para el valor de hoy, consulta EMMI o tu banco.",
+          "trademark": "Euribor es una marca registrada de EMMI. Esta página no está afiliada ni respaldada por EMMI ni por el Banco de Portugal."
+        },
+        "limits": {
+          "title": "Lo que estas cifras no incluyen",
+          "items": {
+            "average": "Una media mensual suaviza el mes: el tipo de un día concreto puede quedar por encima o por debajo.",
+            "reset": "Tu préstamo sigue el euríbor de una fecha de revisión del contrato, a menudo cada 3, 6 o 12 meses, no cada mes.",
+            "terms": "Techos, suelos y un diferencial distinto pasados unos años dependen del contrato y no se incluyen.",
+            "advice": "Información educativa, no una previsión del euríbor ni asesoramiento financiero."
+          }
+        },
+        "related": {
+          "title": "Sigue con",
+          "rateRevisionLink": "Simulador de revisión del tipo de interés",
+          "rateRevisionBody": "Prueba tu propio índice, diferencial y capital, y mira la cuota como parte de tus ingresos.",
+          "mortgageLink": "Calculadora de hipoteca",
+          "mortgageBody": "Calcula la cuota y los intereses de un préstamo antes de cualquier cambio de tipo.",
+          "debtToIncomeLink": "Calculadora de ratio deuda-ingresos",
+          "debtToIncomeBody": "Comprueba si una cuota más alta mantiene tus deudas en una parte cómoda de tus ingresos."
+        }
+      }
     }
   },
   "resources": {

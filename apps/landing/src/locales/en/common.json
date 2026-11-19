@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Find out how much market swings like these you can live with."
         }
       }
+    },
+    "euribor": {
+      "title": "Euribor today: current rates and mortgage impact",
+      "shortName": "Euribor today",
+      "subtitle": "The latest Euribor 3, 6 and 12 month rates, how they moved on the month before, the history since 2000 and what a change does to a variable-rate mortgage payment.",
+      "description": "Current Euribor 3, 6 and 12 month monthly averages, the history since 2000 and a calculator for the effect of a change on your mortgage payment.",
+      "pageTitle": "Euribor Today: 3, 6 and 12 Month Rates and Mortgage Impact",
+      "pageDescription": "Latest Euribor 3, 6 and 12 month monthly averages from Banco de Portugal, the change on the month before, a history chart since 2000 and a calculator showing what a rise or fall does to a variable-rate mortgage payment.",
+      "asOf": "Data as of {{month}}: monthly averages, fetched {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 months",
+        "6": "Euribor 6 months",
+        "12": "Euribor 12 months"
+      },
+      "current": {
+        "title": "Current Euribor rates",
+        "change": "{{change}} points on {{previous}}",
+        "note": "Each rate is the average of {{month}}, not a daily fixing. A loan resets on the fixing of the date its contract sets, which can differ from the monthly average."
+      },
+      "calc": {
+        "title": "What a change in Euribor does to your payment"
+      },
+      "fields": {
+        "balance": "Balance you still owe",
+        "termYears": "Years left",
+        "termMonths": "Months left",
+        "spread": "Your spread",
+        "tenor": "Euribor your loan follows",
+        "change": "Change in Euribor (points)"
+      },
+      "help": {
+        "spread": "The lender's margin on top of Euribor, in percent. It is in your contract.",
+        "change": "Use a negative number for a fall. 1 means one percentage point: from 3% to 4%."
+      },
+      "errors": {
+        "summary": "The new payment appears once every field has a valid value.",
+        "balance": {
+          "required": "Enter the balance you still owe.",
+          "tooSmall": "Enter a balance of at least {{min}}.",
+          "tooLarge": "Enter a balance up to {{max}}."
+        },
+        "termYears": {
+          "required": "Enter the time left, at least one month.",
+          "negative": "Years can't be negative.",
+          "tooLarge": "Enter up to {{max}} years in all."
+        },
+        "termMonths": {
+          "negative": "Months can't be negative.",
+          "tooLarge": "Enter 0 to 11 months; whole years go in the years field."
+        },
+        "spread": {
+          "required": "Enter the spread, or 0% if there is none.",
+          "negative": "The spread can't be negative.",
+          "tooLarge": "Enter a spread up to {{max}}."
+        },
+        "change": {
+          "required": "Enter a change in points, or 0 for none.",
+          "tooSmall": "Enter a change of {{min}} or more.",
+          "tooLarge": "Enter a change of {{max}} or less."
+        }
+      },
+      "result": {
+        "revised": "Monthly payment after the change",
+        "current": "Monthly payment today",
+        "monthlyChange": "Change per month",
+        "nextYear": "Change over the next {{payments}} payments",
+        "assumptions": "Starts from the {{tenor}} rate of {{index}} ({{month}} average) and moves it to {{newIndex}}, with your spread on top, over the months left.",
+        "floored": "Index plus spread is below 0%, so the rate is taken as 0%. Contracts differ: some floor the rate, some do not.",
+        "termRounded": "The time left was rounded to whole months.",
+        "noChange": "With no change in Euribor the payment stays the same.",
+        "caveat": "Educational estimate. It assumes the new rate applies from the next payment to the end of the loan; your contract sets reset dates, caps and floors."
+      },
+      "history": {
+        "title": "Euribor history",
+        "from": "Show from year",
+        "label": "Line chart of the monthly average Euribor 3, 6 and 12 month rates"
+      },
+      "sourceNote": "Source: Banco de Portugal, BPstat, Euribor monthly averages, latest month {{month}}, fetched {{fetched}}. Euribor is a registered trademark of EMMI. Educational only.",
+      "nextStepHeadline": "Connect rate changes to your debt budget",
+      "nextStepDescription": "Add your loan to WonderMoney and see how a change in Euribor moves your monthly payment and what it leaves for the rest of your budget.",
+      "nextStepCta": "Connect your debts",
+      "guide": {
+        "read": {
+          "title": "How to read the rates",
+          "intro": "Euribor is the interest rate at which euro-area banks lend to each other for a set period: 3, 6 or 12 months. Many variable-rate mortgages in Portugal and Spain pay Euribor plus a fixed spread, so when it moves, the payment moves.",
+          "monthly": "The figures here are monthly averages, with the latest for {{month}}. They are not the daily rate: the rate that sets your payment is the one fixed on the date your contract uses."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A loan with {{balance}} left over {{years}} years, a spread of {{spread}} and a 12 month Euribor of {{index}} (the latest monthly average). Euribor rises by {{change}} point to {{newIndex}}.",
+          "result": "The payment goes from {{current}} to {{revised}}, a difference of {{difference}} a month. It is the same calculation as the rate revision calculator."
+        },
+        "data": {
+          "title": "Data and method",
+          "source": "The rates are the Euribor 3, 6 and 12 month monthly averages published by Banco de Portugal in BPstat, fetched on {{fetched}}. The latest month in the data is {{month}}. Each change is the latest average minus the month before, in percentage points.",
+          "link": "Euribor rates by tenor on BPstat",
+          "daily": "BPstat publishes monthly averages, not daily fixings, so this page shows monthly averages only. For today's fixing, see EMMI or your bank.",
+          "trademark": "Euribor is a registered trademark of EMMI. This page is not affiliated with or endorsed by EMMI or Banco de Portugal."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "average": "A monthly average smooths the month: the rate on a given day can be above or below it.",
+            "reset": "Your loan follows the Euribor of a reset date in the contract, often every 3, 6 or 12 months, not every month.",
+            "terms": "Caps, floors and a different spread after some years depend on the contract and are not included.",
+            "advice": "This is educational information, not a forecast of Euribor or financial advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "rateRevisionLink": "Variable-rate payment calculator",
+          "rateRevisionBody": "Try your own index, spread and balance, and see the payment as a share of your income.",
+          "mortgageLink": "Mortgage calculator",
+          "mortgageBody": "Work out the payment and the interest of a loan before any rate change.",
+          "debtToIncomeLink": "Debt-to-income calculator",
+          "debtToIncomeBody": "See whether a higher payment keeps your debts within a comfortable share of income."
+        }
+      }
     }
   },
   "resources": {

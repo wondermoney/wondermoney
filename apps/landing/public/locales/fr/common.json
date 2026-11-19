@@ -3666,6 +3666,124 @@
           "investorProfileBody": "Découvrez avec quelles fluctuations de marché de ce type vous pouvez vivre."
         }
       }
+    },
+    "euribor": {
+      "title": "Euribor aujourd'hui : taux actuels et impact sur la mensualité",
+      "shortName": "Euribor aujourd'hui",
+      "subtitle": "Les derniers Euribor à 3, 6 et 12 mois, leur variation sur le mois précédent, l'historique depuis 2000 et l'effet d'un changement sur la mensualité d'un prêt immobilier à taux variable.",
+      "description": "Moyennes mensuelles actuelles de l'Euribor à 3, 6 et 12 mois, historique depuis 2000 et simulateur de l'effet d'une variation sur la mensualité de ton prêt.",
+      "pageTitle": "Euribor aujourd'hui : taux à 3, 6 et 12 mois et impact sur la mensualité",
+      "pageDescription": "Les dernières moyennes mensuelles de l'Euribor à 3, 6 et 12 mois de la Banque du Portugal, la variation sur le mois précédent, un graphique depuis 2000 et un simulateur de l'effet d'une hausse ou d'une baisse sur la mensualité d'un prêt à taux variable.",
+      "asOf": "Données de {{month}} : moyennes mensuelles, récupérées le {{fetched}}",
+      "tenor": {
+        "3": "Euribor 3 mois",
+        "6": "Euribor 6 mois",
+        "12": "Euribor 12 mois"
+      },
+      "current": {
+        "title": "Taux Euribor actuels",
+        "change": "{{change}} point par rapport à {{previous}}",
+        "note": "Chaque taux est la moyenne de {{month}}, pas un fixing quotidien. Un prêt est révisé sur le fixing de la date prévue au contrat, qui peut différer de la moyenne mensuelle."
+      },
+      "calc": {
+        "title": "Ce qu'un changement de l'Euribor fait à ta mensualité"
+      },
+      "fields": {
+        "balance": "Capital restant dû",
+        "termYears": "Années restantes",
+        "termMonths": "Mois restants",
+        "spread": "Ta marge",
+        "tenor": "Euribor suivi par ton prêt",
+        "change": "Variation de l'Euribor (points)"
+      },
+      "help": {
+        "spread": "La marge de la banque au-dessus de l'Euribor, en pourcentage. Elle figure dans ton contrat.",
+        "change": "Utilise un nombre négatif pour une baisse. 1 est un point de pourcentage : de 3 % à 4 %."
+      },
+      "errors": {
+        "summary": "La nouvelle mensualité apparaît quand chaque champ a une valeur valide.",
+        "balance": {
+          "required": "Indique le capital que tu dois encore.",
+          "tooSmall": "Indique un capital d'au moins {{min}}.",
+          "tooLarge": "Indique un capital jusqu'à {{max}}."
+        },
+        "termYears": {
+          "required": "Indique le temps restant, au moins un mois.",
+          "negative": "Les années ne peuvent pas être négatives.",
+          "tooLarge": "Indique jusqu'à {{max}} ans au total."
+        },
+        "termMonths": {
+          "negative": "Les mois ne peuvent pas être négatifs.",
+          "tooLarge": "Indique de 0 à 11 mois ; les années entières vont dans le champ des années."
+        },
+        "spread": {
+          "required": "Indique la marge, ou 0 % s'il n'y en a pas.",
+          "negative": "La marge ne peut pas être négative.",
+          "tooLarge": "Indique une marge jusqu'à {{max}}."
+        },
+        "change": {
+          "required": "Indique une variation en points, ou 0 s'il n'y en a pas.",
+          "tooSmall": "Indique une variation de {{min}} ou plus.",
+          "tooLarge": "Indique une variation de {{max}} ou moins."
+        }
+      },
+      "result": {
+        "revised": "Mensualité après la variation",
+        "current": "Mensualité aujourd'hui",
+        "monthlyChange": "Écart par mois",
+        "nextYear": "Écart sur les {{payments}} prochaines mensualités",
+        "assumptions": "Part du taux à {{tenor}} de {{index}} (moyenne de {{month}}) et le porte à {{newIndex}}, avec ta marge en plus, sur les mois restants.",
+        "floored": "L'indice plus la marge passe sous 0 %, le taux est donc pris à 0 %. Les contrats diffèrent : certains ont un plancher, d'autres non.",
+        "termRounded": "La durée restante a été arrondie à des mois entiers.",
+        "noChange": "Sans variation de l'Euribor, la mensualité reste la même.",
+        "caveat": "Estimation pédagogique. Elle suppose que le nouveau taux s'applique dès la prochaine mensualité jusqu'à la fin du prêt ; ton contrat fixe les dates de révision, les plafonds et les planchers."
+      },
+      "history": {
+        "title": "Historique de l'Euribor",
+        "from": "Afficher à partir de l'année",
+        "label": "Graphique en lignes des moyennes mensuelles de l'Euribor à 3, 6 et 12 mois"
+      },
+      "sourceNote": "Source : Banque du Portugal, BPstat, moyennes mensuelles de l'Euribor, dernier mois {{month}}, récupérées le {{fetched}}. Euribor est une marque déposée d'EMMI. À titre pédagogique uniquement.",
+      "nextStepHeadline": "Relie les variations de taux au budget de tes dettes",
+      "nextStepDescription": "Ajoute ton prêt à WonderMoney et vois comment une variation de l'Euribor change ta mensualité et ce qu'il reste pour le reste de ton budget.",
+      "nextStepCta": "Connecte tes dettes",
+      "guide": {
+        "read": {
+          "title": "Comment lire les taux",
+          "intro": "L'Euribor est le taux auquel les banques de la zone euro se prêtent de l'argent pour une durée donnée : 3, 6 ou 12 mois. Beaucoup de prêts à taux variable paient l'Euribor plus une marge fixe : quand il bouge, la mensualité bouge.",
+          "monthly": "Les chiffres sont des moyennes mensuelles, la plus récente étant celle de {{month}}. Ce n'est pas le taux du jour : celui qui fixe ta mensualité est celui de la date prévue au contrat."
+        },
+        "example": {
+          "title": "Exemple",
+          "setup": "Un prêt avec {{balance}} restant dus sur {{years}} ans, une marge de {{spread}} et un Euribor 12 mois de {{index}} (la dernière moyenne mensuelle). L'Euribor monte de {{change}} point à {{newIndex}}.",
+          "result": "La mensualité passe de {{current}} à {{revised}}, soit {{difference}} de plus par mois. C'est le même calcul que le simulateur de révision de taux."
+        },
+        "data": {
+          "title": "Données et méthode",
+          "source": "Les taux sont les moyennes mensuelles de l'Euribor à 3, 6 et 12 mois publiées par la Banque du Portugal dans BPstat, récupérées le {{fetched}}. Le dernier mois des données est {{month}}. Chaque variation est la dernière moyenne moins celle du mois précédent, en points de pourcentage.",
+          "link": "Taux Euribor par durée sur BPstat",
+          "daily": "BPstat publie des moyennes mensuelles, pas des fixings quotidiens : cette page n'affiche donc que des moyennes mensuelles. Pour le fixing du jour, consulte l'EMMI ou ta banque.",
+          "trademark": "Euribor est une marque déposée d'EMMI. Cette page n'est ni affiliée à EMMI ou à la Banque du Portugal, ni approuvée par eux."
+        },
+        "limits": {
+          "title": "Ce que ces chiffres ne comprennent pas",
+          "items": {
+            "average": "Une moyenne mensuelle lisse le mois : le taux d'un jour donné peut être au-dessus ou en dessous.",
+            "reset": "Ton prêt suit l'Euribor d'une date de révision du contrat, souvent tous les 3, 6 ou 12 mois, pas chaque mois.",
+            "terms": "Les plafonds, les planchers et une marge différente après quelques années dépendent du contrat et ne sont pas inclus.",
+            "advice": "Information pédagogique, pas une prévision de l'Euribor ni un conseil financier."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "rateRevisionLink": "Simulateur de révision de taux",
+          "rateRevisionBody": "Essaie ton propre indice, ta marge et ton capital, et vois la mensualité en part de ton revenu.",
+          "mortgageLink": "Simulateur de prêt immobilier",
+          "mortgageBody": "Calcule la mensualité et les intérêts d'un prêt avant toute variation de taux.",
+          "debtToIncomeLink": "Calculateur du taux d'endettement",
+          "debtToIncomeBody": "Vois si une mensualité plus élevée garde tes dettes dans une part confortable du revenu."
+        }
+      }
     }
   },
   "resources": {
