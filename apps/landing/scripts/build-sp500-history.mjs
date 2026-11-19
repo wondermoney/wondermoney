@@ -1,110 +1,125 @@
 #!/usr/bin/env node
 // One-off generator for src/lib/calculators/data/sp500History.ts.
 //
-// Reads Robert Shiller's public dataset (Yale, "U.S. Stock Markets 1871-Present and CAPE Ratio",
-// ie_data.xls, sheet "Data": monthly S&P Composite price P, dividend D and CPI) and derives, for
-// every complete calendar year:
+// Two free, attributable sources, both downloaded by hand and not committed:
 //
-//   price     P(Dec of the year) / P(Dec of the previous year) - 1
-//   total     the product of the monthly total returns (P_m + D_m / 12) / P_(m-1), minus 1.
-//             D is Shiller's annualised dividend rate, so D / 12 is a month's dividend, assumed
-//             reinvested at the month's price: the same total return construction Shiller's own
-//             "Real Total Return Price" column uses.
-//   inflation CPI(Dec) / CPI(Dec of the previous year) - 1
+// 1. Aswath Damodaran (NYU Stern), "Historical Returns on Stocks, Bonds and Bills", file
+//    histretSP.xls, sheet "S&P 500 & Raw Data": the year-end S&P 500 level and the dividends
+//    for each year since 1928 (the yield on the year-end level times that level).
+//    https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histret.html
+//    From them we compute, for each year t, ourselves:
+//      price = level_t / level_(t-1) - 1
+//      total = (level_t + dividends_t) / level_(t-1) - 1    (dividends reinvested at year end)
+//    His own return column ("Returns by year", "S&P 500 (includes dividends)") is not used as the
+//    source: the script asserts that our total return is within 0.1 percentage point of it.
 //
-// Shiller's P is the average of each month's daily closes, not a month-end close, so a calendar
-// year here runs from one December's average to the next. That smooths very volatile years by a
-// few points against the year-end-to-year-end figures indices publish (see the spot checks in
-// sp500History.test.ts). The first complete year is 1872: 1871 has no December 1870 to start from.
+// 2. Robert J. Shiller (Yale), "U.S. Stock Markets 1871-Present and CAPE Ratio", ie_data.xls,
+//    sheet "Data": monthly consumer prices (CPI). Inflation for a year is December's CPI over the
+//    previous December's.  http://www.econ.yale.edu/~shiller/data.htm
 //
-// The xls itself is not committed. Usage (xlsx is installed in the workspace through
-// packages/shared; run from apps/landing):
+// Usage (xlsx is installed in the workspace through packages/shared; run from apps/landing):
 //
-//   node scripts/build-sp500-history.mjs <ie_data.xls> <download date, YYYY-MM-DD>
-//
-// Source: http://www.econ.yale.edu/~shiller/data.htm (also https://shillerdata.com).
+//   node scripts/build-sp500-history.mjs <histretSP.xls> <damodaran download date> \
+//        <ie_data.xls> <shiller download date>     (dates as YYYY-MM-DD)
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-export const SOURCE = {
-  name: "Robert J. Shiller, U.S. Stock Markets 1871-Present and CAPE Ratio (ie_data.xls), Yale University",
-  url: "http://www.econ.yale.edu/~shiller/data.htm",
+export const SOURCES = {
+  damodaran: {
+    name: "Aswath Damodaran, Historical Returns on Stocks, Bonds and Bills (histretSP.xls), NYU Stern",
+    url: "https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/histret.html",
+  },
+  shiller: {
+    name: "Robert J. Shiller, U.S. Stock Markets 1871-Present and CAPE Ratio (ie_data.xls), Yale University",
+    url: "http://www.econ.yale.edu/~shiller/data.htm",
+  },
 };
+
+/** Largest accepted gap, in percentage points, to Damodaran's own published total return. */
+export const CHECK_TOLERANCE = 0.1;
 
 const round = (value, decimals) => Number(value.toFixed(decimals));
 
 /**
- * Turn monthly rows into one record per complete calendar year (those with a December and a
- * previous December). A row is { date, price, dividend, cpi } where date is Shiller's year.month
- * float (2008.1 is October 2008). Returns [{ year, price, total, inflation }] in percent, 2 decimals.
+ * Year-end rows { year, level, dividends, published? } (published is Damodaran's own total
+ * return as a fraction) in consecutive years to [{ year, price, total }] in percent, 2 decimals,
+ * starting with the second row's year. Throws when a total return is more than CHECK_TOLERANCE
+ * points from the published one.
  */
-export function deriveAnnualReturns(rows) {
-  const monthly = rows
-    .map(({ date, price, dividend, cpi }) => ({
-      year: Math.floor(date + 1e-9),
-      month: Math.round((date - Math.floor(date + 1e-9)) * 100),
-      price,
-      dividend,
-      cpi,
-    }))
-    .sort((a, b) => a.year - b.year || a.month - b.month);
-
-  const byYear = new Map();
-  let previous = null;
-  for (const row of monthly) {
-    if (previous) {
-      const consecutive =
-        row.year * 12 + row.month === previous.year * 12 + previous.month + 1;
-      if (!consecutive) throw new Error(`Gap in the monthly series before ${row.year}-${row.month}`);
-      if (typeof row.dividend === "number" && typeof previous.price === "number") {
-        row.monthlyTotal = (row.price + row.dividend / 12) / previous.price;
-      }
-      row.monthlyPrice = row.price / previous.price;
-    }
-    previous = row;
-    const entry = byYear.get(row.year) ?? [];
-    entry.push(row);
-    byYear.set(row.year, entry);
-  }
-
+export function deriveYearEndReturns(rows) {
+  const sorted = [...rows].sort((a, b) => a.year - b.year);
   const result = [];
-  for (const [year, months] of [...byYear].sort((a, b) => a[0] - b[0]).filter(([y]) => y > monthly[0].year)) {
-    const december = months.find((m) => m.month === 12);
-    const priorDecember = byYear.get(year - 1)?.find((m) => m.month === 12);
-    if (!december || !priorDecember || months.length !== 12) continue;
-    if (months.some((m) => typeof m.monthlyTotal !== "number")) {
-      throw new Error(`Missing dividend or price data in ${year}`);
+  for (let i = 1; i < sorted.length; i++) {
+    const { year, level, dividends, published } = sorted[i];
+    const previous = sorted[i - 1];
+    if (year !== previous.year + 1) throw new Error(`Gap in the yearly series before ${year}`);
+    if (![level, dividends, previous.level].every((v) => typeof v === "number" && v > 0)) {
+      throw new Error(`Missing level or dividends in ${year}`);
     }
-    const total = months.reduce((factor, m) => factor * m.monthlyTotal, 1) - 1;
-    result.push({
-      year,
-      price: round((december.price / priorDecember.price - 1) * 100, 2),
-      total: round(total * 100, 2),
-      inflation: round((december.cpi / priorDecember.cpi - 1) * 100, 2),
-    });
+    const price = (level / previous.level - 1) * 100;
+    const total = ((level + dividends) / previous.level - 1) * 100;
+    if (typeof published === "number" && Math.abs(total - published * 100) > CHECK_TOLERANCE) {
+      throw new Error(
+        `${year}: total return ${total.toFixed(2)}% is more than ${CHECK_TOLERANCE} points from the published ${(published * 100).toFixed(2)}%`,
+      );
+    }
+    result.push({ year, price: round(price, 2), total: round(total, 2) });
   }
   return result;
 }
 
-export function renderModule(records, { downloadedOn, savedOn }) {
+/**
+ * Shiller's monthly rows { date, cpi } (date is his year.month float, 2008.1 is October) to
+ * Map(year -> December-to-December CPI inflation in percent, 2 decimals), for complete years.
+ */
+export function deriveInflation(rows) {
+  const december = new Map();
+  for (const { date, cpi } of rows) {
+    const year = Math.floor(date + 1e-9);
+    if (Math.round((date - year) * 100) === 12) december.set(year, cpi);
+  }
+  const inflation = new Map();
+  for (const [year, cpi] of december) {
+    const previous = december.get(year - 1);
+    if (previous) inflation.set(year, round((cpi / previous - 1) * 100, 2));
+  }
+  return inflation;
+}
+
+export function mergeYears(returns, inflation) {
+  return returns.map(({ year, price, total }) => {
+    const value = inflation.get(year);
+    if (value === undefined) throw new Error(`No CPI inflation for ${year}`);
+    return { year, price, total, inflation: value };
+  });
+}
+
+export function renderModule(records, { damodaranDownloadedOn, shillerDownloadedOn }) {
   const first = records[0].year;
   const last = records[records.length - 1].year;
   const lines = records.map((r) => `  [${r.year}, ${r.price}, ${r.total}, ${r.inflation}],`);
   return `// Generated by scripts/build-sp500-history.mjs. Do not edit by hand: rerun the script.
 //
-// Yearly values only, derived from Robert Shiller's public dataset; the method is in the script
-// header and on the calculator page. Educational data, not investment advice.
+// Yearly values only. Price and total returns are computed from year-end S&P 500 levels and
+// dividends (Damodaran); inflation from December CPI (Shiller). The method is in the script header
+// and on the calculator page. Educational data, not investment advice.
 
 export const SP500_HISTORY_SOURCE = {
-  name: ${JSON.stringify(SOURCE.name)},
-  url: ${JSON.stringify(SOURCE.url)},
-  /** The day the dataset was downloaded. */
-  downloadedOn: ${JSON.stringify(downloadedOn)},
-  /** When the workbook says it was last saved. */
-  datasetSavedOn: ${JSON.stringify(savedOn)},
+  /** Year-end S&P 500 level and dividends. */
+  returns: {
+    name: ${JSON.stringify(SOURCES.damodaran.name)},
+    url: ${JSON.stringify(SOURCES.damodaran.url)},
+    downloadedOn: ${JSON.stringify(damodaranDownloadedOn)},
+  },
+  /** Monthly consumer prices. */
+  inflation: {
+    name: ${JSON.stringify(SOURCES.shiller.name)},
+    url: ${JSON.stringify(SOURCES.shiller.url)},
+    downloadedOn: ${JSON.stringify(shillerDownloadedOn)},
+  },
   /** Bump when the derivation changes, not when new years are appended. */
-  version: 1,
+  version: 2,
   firstYear: ${first},
   lastYear: ${last},
 } as const;
@@ -119,23 +134,36 @@ ${lines.join("\n")}
 }
 
 async function main() {
-  const [file, downloadedOn] = process.argv.slice(2);
-  if (!file || !/^\d{4}-\d{2}-\d{2}$/.test(downloadedOn ?? "")) {
-    console.error("Usage: node scripts/build-sp500-history.mjs <ie_data.xls> <download date, YYYY-MM-DD>");
+  const [damodaranFile, damodaranDate, shillerFile, shillerDate] = process.argv.slice(2);
+  const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? "");
+  if (!damodaranFile || !shillerFile || !isDate(damodaranDate) || !isDate(shillerDate)) {
+    console.error(
+      "Usage: node scripts/build-sp500-history.mjs <histretSP.xls> <YYYY-MM-DD> <ie_data.xls> <YYYY-MM-DD>",
+    );
     process.exit(1);
   }
   const { read, utils } = (await import("xlsx")).default ?? (await import("xlsx"));
-  const workbook = read(readFileSync(file), { type: "buffer", cellDates: true });
-  const sheet = utils.sheet_to_json(workbook.Sheets.Data, { header: 1, raw: true });
-  const rows = sheet
-    .filter((row) => typeof row[0] === "number" && typeof row[1] === "number")
-    .map((row) => ({ date: row[0], price: row[1], dividend: row[2], cpi: row[4] }));
-  const savedOn = workbook.Props?.ModifiedDate
-    ? new Date(workbook.Props.ModifiedDate).toISOString().slice(0, 10)
-    : downloadedOn;
-  const records = deriveAnnualReturns(rows);
+  const sheetRows = (file, name) =>
+    utils.sheet_to_json(read(readFileSync(file), { type: "buffer" }).Sheets[name], { header: 1, raw: true });
+
+  const published = new Map(
+    sheetRows(damodaranFile, "Returns by year")
+      .filter((row) => typeof row[0] === "number" && typeof row[1] === "number" && row[0] >= 1928)
+      .map((row) => [row[0], row[1]]),
+  );
+  const levels = sheetRows(damodaranFile, "S&P 500 & Raw Data")
+    .filter((row) => typeof row[0] === "number" && typeof row[1] === "number" && row[0] >= 1927)
+    .map((row) => ({ year: row[0], level: row[1], dividends: row[2], published: published.get(row[0]) }));
+  const cpi = sheetRows(shillerFile, "Data")
+    .filter((row) => typeof row[0] === "number" && typeof row[4] === "number")
+    .map((row) => ({ date: row[0], cpi: row[4] }));
+
+  const records = mergeYears(deriveYearEndReturns(levels), deriveInflation(cpi));
   const out = fileURLToPath(new URL("../src/lib/calculators/data/sp500History.ts", import.meta.url));
-  writeFileSync(out, renderModule(records, { downloadedOn, savedOn }));
+  writeFileSync(
+    out,
+    renderModule(records, { damodaranDownloadedOn: damodaranDate, shillerDownloadedOn: shillerDate }),
+  );
   console.log(`Wrote ${records.length} years (${records[0].year}-${records.at(-1).year}) to ${out}`);
 }
 

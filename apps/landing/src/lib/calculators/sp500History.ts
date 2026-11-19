@@ -8,15 +8,6 @@ export const SP500_HISTORY_LIMITS = {
   maxAmount: 1_000_000_000,
 } as const;
 
-/**
- * Widely published S&P 500 total returns (year-end to year-end closes, rounded to whole percent)
- * the guide sets beside this data's own figures, so the method difference is on the page.
- */
-export const SP500_HISTORY_SPOT_CHECKS = [
-  { year: 2008, published: -37 },
-  { year: 2013, published: 32 },
-] as const;
-
 export interface Sp500HistoryInput {
   /** The money goes in on 1 January of this year. */
   startYear: number;

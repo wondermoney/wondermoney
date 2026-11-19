@@ -187,7 +187,10 @@ function Sp500HistoryCalculator() {
           <ValueChart result={result} usd={usd} />
           <YearTable result={result} usd={usd} />
           <p className="text-xs text-muted-foreground">
-            {t(k("sourceNote"), { date: SP500_HISTORY_SOURCE.downloadedOn })}
+            {t(k("sourceNote"), {
+              date: SP500_HISTORY_SOURCE.returns.downloadedOn,
+              shillerDate: SP500_HISTORY_SOURCE.inflation.downloadedOn,
+            })}
           </p>
         </section>
       )}

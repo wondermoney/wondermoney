@@ -3541,7 +3541,7 @@
       "subtitle": "Sieh, was eine Anlage im S&P 500 (S&P-Composite-Index) zwischen zwei beliebigen Jahren wert gewesen wäre, mit oder ohne Dividenden und Inflation.",
       "description": "Simuliere die Rendite des S&P 500 zwischen zwei vergangenen Jahren: Dividenden, Inflation, jährliche Einzahlungen, CAGR und das Ergebnis jedes Jahres.",
       "pageTitle": "S&P 500 historische Rendite: Rechner mit Dividenden und Inflation",
-      "pageDescription": "Wähle ein Start- und ein Endjahr und sieh, was der S&P 500 gebracht hat: Gesamt- oder Kursrendite, real oder nominal, mit optionalen jährlichen Einzahlungen, CAGR, bestem und schlechtestem Jahr und einer Tabelle Jahr für Jahr. Daten: Robert Shiller (Yale).",
+      "pageDescription": "Wähle ein Start- und ein Endjahr und sieh, was der S&P 500 gebracht hat: Gesamt- oder Kursrendite, real oder nominal, mit optionalen jährlichen Einzahlungen, CAGR, bestem und schlechtestem Jahr und einer Tabelle Jahr für Jahr. Daten: Aswath Damodaran (NYU Stern) und Robert Shiller (Yale).",
       "fields": {
         "startYear": "Startjahr (Anlage am 1. Januar)",
         "endYear": "Endjahr (bis 31. Dezember)",
@@ -3598,14 +3598,14 @@
         "contributed": "Insgesamt angelegt"
       },
       "currencyNote": "Die Renditen sind in US-Dollar. Wenn du in Euro anlegst, kommt zum Marktrisiko ein Währungsrisiko durch den Euro-Dollar-Kurs hinzu: Es kann das Ergebnis um mehrere Prozentpunkte pro Jahr erhöhen oder senken.",
-      "sourceNote": "Quelle: Daten zum S&P 500 / S&P-Composite-Index von Robert Shiller (Yale), heruntergeladen am {{date}}. Jahreswerte von WonderMoney abgeleitet. Nur zu Bildungszwecken.",
+      "sourceNote": "Quelle: Daten zum S&P 500 / S&P-Composite-Index von Aswath Damodaran (NYU Stern, heruntergeladen am {{date}}) und Verbraucherpreise von Robert Shiller (Yale, heruntergeladen am {{shillerDate}}). Jahreswerte von WonderMoney berechnet. Nur zu Bildungszwecken.",
       "nextStepHeadline": "Vergleiche historische Szenarien mit deinem Portfolioplan",
       "nextStepDescription": "Füge deine Positionen zu WonderMoney hinzu, lege einen Plan fest und sieh, wie sich dein echtes Portfolio zu den hier ausprobierten historischen Szenarien verhält.",
       "nextStepCta": "Portfolio planen",
       "guide": {
         "read": {
           "title": "So liest du das Ergebnis",
-          "intro": "Dieser Rechner blickt zurück. Er nimmt die Jahresrenditen des S&P 500 (in Robert Shillers Daten der S&P-Composite-Index) zwischen den gewählten Jahren und wendet sie auf deinen Betrag an. Die Daten reichen von {{first}} bis {{last}}.",
+          "intro": "Dieser Rechner blickt zurück. Er nimmt die Jahresrenditen des S&P 500 (Daten des S&P-Composite-Index) zwischen den gewählten Jahren und wendet sie auf deinen Betrag an. Die Daten reichen von {{first}} bis {{last}}.",
           "future": "Es ist keine Prognose. Um einen Index mit eigenen Annahmen zu Rendite und Kosten in die Zukunft fortzuschreiben, nutze die Indexprojektion auf der Seite zur Anlagerendite."
         },
         "example": {
@@ -3626,18 +3626,15 @@
           },
           "cagr": "Die CAGR ist das geometrische Mittel der Jahresrenditen im Zeitraum, in den gewählten Größen. Sie beschreibt den Index in diesen Jahren und hängt nicht davon ab, wie viel du einzahlst.",
           "contributions": "Jährliche Einzahlungen kommen am 1. Januar hinzu, vor der Rendite des Jahres, und verdienen so das ganze Jahr mit.",
-          "limits": "Das erste vollständige Jahr in den Daten ist {{first}}, weil ein Jahr den vorherigen Dezember als Ausgangspunkt braucht, das letzte ist {{last}}. Jeder Betrag ist auf {{maxAmount}} begrenzt."
+          "limits": "Das erste Jahr in den Daten ist {{first}}, das letzte vollständige Jahr {{last}}. Jeder Betrag ist auf {{maxAmount}} begrenzt."
         },
         "data": {
-          "title": "Daten und Methodenunterschiede",
-          "source": "Die Jahresrenditen sind aus Robert J. Shillers öffentlichem Datensatz „U.S. Stock Markets 1871-Present and CAPE Ratio“ (Yale University) abgeleitet, heruntergeladen am {{downloaded}}. Er liefert monatliche Kurse des S&P-Composite-Index, Dividenden und Verbraucherpreise seit 1871.",
-          "sourceLink": "Shillers Datenseite",
-          "method": "Für jedes Kalenderjahr verketten wir die monatlichen Gesamtrenditen: der Kurs plus ein Zwölftel der Jahresdividende, geteilt durch den Kurs des Vormonats, was jede Dividende als zum Kurs dieses Monats wiederangelegt behandelt. Die Kursrendite vergleicht den Dezember mit dem Vorjahresdezember, und die Inflation ist die Veränderung des CPI zwischen denselben beiden Dezembern.",
-          "differences": "Shillers Kurse sind Monatsdurchschnitte der Tagesschlusskurse, keine Monatsschlusskurse. Ein Jahr reicht hier also vom Durchschnitt eines Dezembers zu dem des nächsten, und ein einzelnes Jahr kann um einige Prozentpunkte von den Jahresend-zu-Jahresend-Zahlen abweichen, die Indizes veröffentlichen. Über viele Jahre nähern sich beide an, weil nur die beiden Endpunkte abweichen. Zum Beispiel:",
-          "tableCaption": "Gesamtrendite ausgewählter Jahre in diesen Daten im Vergleich zu weit verbreiteten Zahlen",
-          "year": "Jahr",
-          "ours": "Diese Daten",
-          "published": "Veröffentlicht (ca.)",
+          "title": "Daten und Methode",
+          "source": "Die Renditen berechnet WonderMoney aus dem S&P-500-Stand zum Jahresende und den Dividenden im Datensatz „Historical Returns on Stocks, Bonds and Bills“ von Aswath Damodaran (NYU Stern), heruntergeladen am {{downloaded}}. Die Inflation stammt vom Verbraucherpreisindex (CPI) in Robert J. Shillers öffentlichem Datensatz „U.S. Stock Markets 1871-Present and CAPE Ratio“ (Yale University), heruntergeladen am {{shillerDownloaded}}.",
+          "returnsLink": "Damodarans Datenseite",
+          "inflationLink": "Shillers Datenseite",
+          "method": "Für jedes Kalenderjahr ist die Kursrendite der Stand zum Jahresende geteilt durch den Stand zum Vorjahresende, minus eins. Die Gesamtrendite addiert vor der Division die Dividenden des Jahres zum Stand am Jahresende, was die Dividenden als zum Jahresende wiederangelegt behandelt. Die Inflation ist die Veränderung des CPI zwischen denselben beiden Dezembern.",
+          "check": "Zur Kontrolle wurde die Gesamtrendite jedes Jahres mit der verglichen, die Damodaran selbst veröffentlicht, und keine weicht um mehr als 0,1 Prozentpunkte ab. Da die Jahre von Jahresende zu Jahresende laufen, passen sie zu den Kalenderjahreszahlen, die für den Index üblicherweise genannt werden.",
           "trademark": "„S&P 500“ und „S&P Composite“ bezeichnen nur den Index. Diese Seite zeigt aus öffentlichen akademischen Daten abgeleitete Jahreswerte und keine Tageskurse und ist weder mit S&P Dow Jones Indices verbunden noch von ihnen empfohlen."
         },
         "limits": {

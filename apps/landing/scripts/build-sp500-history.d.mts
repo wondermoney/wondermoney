@@ -1,21 +1,29 @@
-export const SOURCE: { name: string; url: string };
+export const SOURCES: Record<"damodaran" | "shiller", { name: string; url: string }>;
+export const CHECK_TOLERANCE: number;
 
-export interface MonthlyRow {
+export interface YearEndRow {
+  year: number;
+  level: number;
+  dividends?: number;
+  published?: number;
+}
+export interface MonthlyCpiRow {
   date: number;
-  price: number;
-  dividend?: number;
   cpi: number;
 }
-
-export interface AnnualRecord {
+export interface YearReturn {
   year: number;
   price: number;
   total: number;
+}
+export interface AnnualRecord extends YearReturn {
   inflation: number;
 }
 
-export function deriveAnnualReturns(rows: readonly MonthlyRow[]): AnnualRecord[];
+export function deriveYearEndReturns(rows: readonly YearEndRow[]): YearReturn[];
+export function deriveInflation(rows: readonly MonthlyCpiRow[]): Map<number, number>;
+export function mergeYears(returns: readonly YearReturn[], inflation: Map<number, number>): AnnualRecord[];
 export function renderModule(
   records: readonly AnnualRecord[],
-  dates: { downloadedOn: string; savedOn: string },
+  dates: { damodaranDownloadedOn: string; shillerDownloadedOn: string },
 ): string;

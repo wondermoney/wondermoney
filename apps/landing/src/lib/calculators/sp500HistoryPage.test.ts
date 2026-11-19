@@ -128,12 +128,15 @@ describe("S&P 500 historical returns tool page", () => {
 				result: { pastPerformance: string }
 				guide: { data: { source: string }; limits: { items: { fx: string } } }
 			}
+			expect(copy.sourceNote).toContain("Damodaran")
 			expect(copy.sourceNote).toContain("Shiller")
+			expect(copy.sourceNote).toContain("{{shillerDate}}")
 			expect(copy.sourceNote).toContain("{{date}}")
 			expect(copy.currencyNote).toMatch(/USD|\$|dollar|Dollar|dólar|dollaro/)
 			expect(copy.guide.limits.items.fx).toBeTruthy()
 			expect(copy.result.pastPerformance).toBeTruthy()
 			expect(copy.guide.data.source).toContain("{{downloaded}}")
+			expect(copy.guide.data.source).toContain("{{shillerDownloaded}}")
 		}
 	})
 

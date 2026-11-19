@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveAnnualReturns, type MonthlyRow } from "../../../scripts/build-sp500-history.mjs";
+import { deriveInflation, deriveYearEndReturns, mergeYears } from "../../../scripts/build-sp500-history.mjs";
 import {
   SP500_HISTORY,
   SP500_HISTORY_EXAMPLE,
@@ -111,7 +111,7 @@ describe("computeSp500History", () => {
       SP500_HISTORY,
     );
     expect(Number.isFinite(result.finalValue)).toBe(true);
-    expect(result.years).toHaveLength(154);
+    expect(result.years).toHaveLength(98);
   });
 
   it("answers the example from the committed data", () => {
@@ -128,8 +128,12 @@ describe("committed Shiller data", () => {
     expect(years[0]).toBe(SP500_HISTORY_SOURCE.firstYear);
     expect(years.at(-1)).toBe(SP500_HISTORY_SOURCE.lastYear);
     expect(years).toEqual(Array.from({ length: years.length }, (_, i) => years[0] + i));
-    expect(SP500_HISTORY_SOURCE.downloadedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(SP500_HISTORY_SOURCE.name).toContain("Shiller");
+    for (const source of [SP500_HISTORY_SOURCE.returns, SP500_HISTORY_SOURCE.inflation]) {
+      expect(source.downloadedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+    expect(SP500_HISTORY_SOURCE.returns.name).toContain("Damodaran");
+    expect(SP500_HISTORY_SOURCE.inflation.name).toContain("Shiller");
+    expect(SP500_HISTORY_SOURCE.firstYear).toBe(1928);
   });
 
   it("never has dividends take away from the price return, or implausible values", () => {
@@ -141,77 +145,79 @@ describe("committed Shiller data", () => {
     }
   });
 
-  // Published calendar-year total returns of the S&P 500 (year-end to year-end closes). Shiller's
-  // monthly prices are averages of daily closes, so single years differ by a few points; the
-  // tolerance reflects that, and long ranges converge because only the two end points differ.
-  it("matches widely published annual total returns within the method difference", () => {
+  // Damodaran's own published total return column ("Returns by year", histretSP.xls, rounded to
+  // two decimals), not the source of the data: the script derives the returns from year-end
+  // levels and dividends and refuses to run when any year is more than 0.1 point from it.
+  it("matches the published annual total returns within half a point", () => {
     const published: Array<[year: number, total: number]> = [
-      [1995, 37.58],
-      [2000, -9.1],
-      [2008, -37.0],
-      [2013, 32.39],
-      [2019, 31.49],
-      [2020, 18.4],
-      [2021, 28.71],
-      [2022, -18.11],
-      [2023, 26.29],
+      [1995, 37.2],
+      [2000, -9.03],
+      [2008, -36.55],
+      [2013, 32.15],
+      [2019, 31.21],
+      [2021, 28.47],
+      [2022, -18.04],
+      [2023, 26.06],
     ];
     for (const [year, total] of published) {
       const row = SP500_HISTORY.find(([y]) => y === year);
-      expect(Math.abs((row?.[2] ?? NaN) - total), String(year)).toBeLessThan(6);
+      expect(Math.abs((row?.[2] ?? NaN) - total), String(year)).toBeLessThan(0.5);
     }
   });
 
-  it("gives a long-run total CAGR close to the published 10 percent since 1928", () => {
+  it("gives a long-run total CAGR close to the published 10.0 percent since 1928", () => {
     const outcome = computeSp500History(
       { ...base, startYear: 1928, endYear: SP500_HISTORY_SOURCE.lastYear },
       SP500_HISTORY,
     );
     if (!outcome.ok) throw new Error("range must be valid");
-    expect(outcome.result.cagrPct).toBeGreaterThan(9.3);
-    expect(outcome.result.cagrPct).toBeLessThan(10.6);
+    expect(outcome.result.cagrPct).toBeGreaterThan(9.9);
+    expect(outcome.result.cagrPct).toBeLessThan(10.2);
   });
 });
 
-describe("deriveAnnualReturns", () => {
-  const month = (year: number, m: number, price: number, dividend: number, cpi: number): MonthlyRow => ({
-    date: year + m / 100,
-    price,
-    dividend,
-    cpi,
-  });
-  const flatYear = (year: number, price: number, cpi: number) =>
-    Array.from({ length: 12 }, (_, i) => month(year, i + 1, price, 12, cpi));
+describe("deriveYearEndReturns", () => {
+  const rows = [
+    { year: 2000, level: 100, dividends: 2 },
+    { year: 2001, level: 110, dividends: 3 },
+    { year: 2002, level: 88, dividends: 3.3 },
+  ];
 
-  it("chains monthly total returns and compares December with the previous December", () => {
-    const rows = [...flatYear(2000, 100, 100), ...flatYear(2001, 110, 103)];
-    const [record] = deriveAnnualReturns(rows);
-    expect(record.year).toBe(2001);
-    expect(record.price).toBe(10);
-    expect(record.inflation).toBe(3);
-    // Jan 2001: (110 + 12/12) / 100; the other eleven months: (110 + 1) / 110.
-    const expected = ((111 / 100) * Math.pow(111 / 110, 11) - 1) * 100;
-    expect(record.total).toBeCloseTo(expected, 2);
+  it("computes price and total return from year-end levels and dividends", () => {
+    expect(deriveYearEndReturns(rows)).toEqual([
+      { year: 2001, price: 10, total: 13 },
+      { year: 2002, price: -20, total: -17 },
+    ]);
   });
 
-  it("reads Shiller's year.month floats, where 2008.1 is October", () => {
-    const rows = [...flatYear(2007, 100, 100), ...flatYear(2008, 100, 100)];
-    rows[12 + 9] = { ...rows[12 + 9], date: 2008.1, price: 50 };
-    rows[12 + 10] = { ...rows[12 + 10], price: 60 };
-    const [record] = deriveAnnualReturns(rows);
-    expect(record.price).toBe(0);
-    // The October crash is in the chain: the total return is not the flat-price one.
-    expect(Math.abs(record.total - 12)).toBeGreaterThan(1);
+  it("checks the total against the published return and refuses a gap or missing data", () => {
+    const published = rows.map((row, i) => ({ ...row, published: [0, 0.13, -0.17][i] }));
+    expect(deriveYearEndReturns(published)).toHaveLength(2);
+    published[1].published = 0.135;
+    expect(() => deriveYearEndReturns(published)).toThrow(/more than 0.1 points/);
+    expect(() => deriveYearEndReturns([rows[0], rows[2]])).toThrow(/Gap/);
+    expect(() => deriveYearEndReturns([rows[0], { year: 2001, level: 110 }])).toThrow(/Missing/);
+  });
+});
+
+describe("deriveInflation", () => {
+  const month = (year: number, m: number, cpi: number) => ({ date: year + m / 100, cpi });
+
+  it("compares December with the previous December, reading 2008.1 as October", () => {
+    const inflation = deriveInflation([
+      month(2000, 12, 100),
+      month(2001, 10, 90),
+      { date: 2001.1, cpi: 90 },
+      month(2001, 12, 103),
+      month(2002, 6, 104),
+    ]);
+    expect(inflation.get(2001)).toBe(3);
+    expect(inflation.has(2002)).toBe(false);
   });
 
-  it("skips partial years and refuses a missing month or dividend", () => {
-    const partial = [...flatYear(2000, 100, 100), ...flatYear(2001, 100, 100).slice(0, 9)];
-    expect(deriveAnnualReturns(partial)).toEqual([]);
-    const gap = [...flatYear(2000, 100, 100), ...flatYear(2001, 100, 100)];
-    gap.splice(14, 1);
-    expect(() => deriveAnnualReturns(gap)).toThrow(/Gap/);
-    const noDividend = [...flatYear(2000, 100, 100), ...flatYear(2001, 100, 100)];
-    noDividend[15] = { ...noDividend[15], dividend: undefined };
-    expect(() => deriveAnnualReturns(noDividend)).toThrow(/Missing/);
+  it("is merged by year and refuses a year without inflation", () => {
+    const returns = [{ year: 2001, price: 10, total: 13 }];
+    expect(mergeYears(returns, new Map([[2001, 3]]))).toEqual([{ year: 2001, price: 10, total: 13, inflation: 3 }]);
+    expect(() => mergeYears(returns, new Map())).toThrow(/No CPI/);
   });
 });

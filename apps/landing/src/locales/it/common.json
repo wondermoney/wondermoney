@@ -3541,7 +3541,7 @@
       "subtitle": "Scopri quanto varrebbe un investimento nell'S&P 500 (indice S&P Composite) tra due anni qualsiasi, con o senza dividendi e inflazione.",
       "description": "Simula il rendimento dell'S&P 500 tra due anni passati: dividendi, inflazione, versamenti annuali, CAGR e il risultato di ogni anno.",
       "pageTitle": "Rendimento storico dell'S&P 500: calcolatore con dividendi e inflazione",
-      "pageDescription": "Scegli un anno iniziale e uno finale e vedi quanto ha reso l'S&P 500: rendimento totale o di prezzo, reale o nominale, con versamenti annuali facoltativi, CAGR, anno migliore e peggiore e una tabella anno per anno. Dati: Robert Shiller (Yale).",
+      "pageDescription": "Scegli un anno iniziale e uno finale e vedi quanto ha reso l'S&P 500: rendimento totale o di prezzo, reale o nominale, con versamenti annuali facoltativi, CAGR, anno migliore e peggiore e una tabella anno per anno. Dati: Aswath Damodaran (NYU Stern) e Robert Shiller (Yale).",
       "fields": {
         "startYear": "Anno iniziale (investi il 1° gennaio)",
         "endYear": "Anno finale (fino al 31 dicembre)",
@@ -3598,14 +3598,14 @@
         "contributed": "Totale investito"
       },
       "currencyNote": "I rendimenti sono in dollari statunitensi. Se investi in euro, il cambio euro-dollaro aggiunge un rischio di cambio a quello del mercato: può aumentare o ridurre il risultato di diversi punti l'anno.",
-      "sourceNote": "Fonte: dati dell'indice S&P 500 / S&P Composite di Robert Shiller (Yale), scaricati il {{date}}. Valori annuali derivati da WonderMoney. Solo a scopo educativo.",
+      "sourceNote": "Fonte: dati dell'indice S&P 500 / S&P Composite di Aswath Damodaran (NYU Stern, scaricati il {{date}}) e prezzi al consumo di Robert Shiller (Yale, scaricati il {{shillerDate}}). Valori annuali calcolati da WonderMoney. Solo a scopo educativo.",
       "nextStepHeadline": "Confronta scenari storici con il tuo piano di portafoglio",
       "nextStepDescription": "Aggiungi le tue posizioni a WonderMoney, definisci un piano e vedi come si confronta il tuo portafoglio reale con gli scenari storici provati qui.",
       "nextStepCta": "Pianifica il tuo portafoglio",
       "guide": {
         "read": {
           "title": "Come leggere il risultato",
-          "intro": "Questo calcolatore guarda indietro. Prende i rendimenti annuali dell'S&P 500 (l'indice S&P Composite nei dati di Robert Shiller) tra gli anni scelti e li applica al tuo importo. I dati vanno dal {{first}} al {{last}}.",
+          "intro": "Questo calcolatore guarda indietro. Prende i rendimenti annuali dell'S&P 500 (dati dell'indice S&P Composite) tra gli anni scelti e li applica al tuo importo. I dati vanno dal {{first}} al {{last}}.",
           "future": "Non è una previsione. Per proiettare un indice in avanti con le tue ipotesi di rendimento e costi, usa la proiezione di indici nella pagina sul rendimento degli investimenti."
         },
         "example": {
@@ -3626,18 +3626,15 @@
           },
           "cagr": "Il CAGR è la media geometrica dei rendimenti annuali dell'intervallo, nei termini scelti. Descrive l'indice in quegli anni e non dipende da quanto versi.",
           "contributions": "I versamenti annuali sono aggiunti il 1° gennaio, prima del rendimento di quell'anno, quindi rendono l'anno intero.",
-          "limits": "Il primo anno completo nei dati è il {{first}}, perché un anno ha bisogno del dicembre precedente come punto di partenza, e l'ultimo è il {{last}}. Ogni importo è limitato a {{maxAmount}}."
+          "limits": "Il primo anno nei dati è il {{first}} e l'ultimo anno completo è il {{last}}. Ogni importo è limitato a {{maxAmount}}."
         },
         "data": {
-          "title": "Dati e differenze di metodo",
-          "source": "I rendimenti annuali derivano dal dataset pubblico di Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Università di Yale), scaricato il {{downloaded}}. Fornisce i prezzi mensili dell'indice S&P Composite, i dividendi e i prezzi al consumo dal 1871.",
-          "sourceLink": "Pagina dei dati di Shiller",
-          "method": "Per ogni anno solare concateniamo i rendimenti totali mensili: il prezzo più un dodicesimo del dividendo annuo, diviso per il prezzo del mese precedente, il che tratta ogni dividendo come reinvestito al prezzo di quel mese. Il rendimento di prezzo confronta dicembre con il dicembre precedente, e l'inflazione è la variazione del CPI tra gli stessi due dicembri.",
-          "differences": "I prezzi di Shiller sono medie mensili delle chiusure giornaliere, non chiusure di fine mese. Un anno qui va quindi dalla media di un dicembre a quella del successivo, e un singolo anno può differire di qualche punto dalle cifre di fine anno su fine anno pubblicate dagli indici. Su molti anni i due valori convergono, perché differiscono solo i due estremi. Per esempio:",
-          "tableCaption": "Rendimento totale di anni selezionati in questi dati a confronto con le cifre ampiamente pubblicate",
-          "year": "Anno",
-          "ours": "Questi dati",
-          "published": "Pubblicato (circa)",
+          "title": "Dati e metodo",
+          "source": "I rendimenti sono calcolati da WonderMoney dal livello dell'S&P 500 a fine anno e dai dividendi del dataset \"Historical Returns on Stocks, Bonds and Bills\" di Aswath Damodaran (NYU Stern), scaricato il {{downloaded}}. L'inflazione deriva dall'indice dei prezzi al consumo (CPI) del dataset pubblico di Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Università di Yale), scaricato il {{shillerDownloaded}}.",
+          "returnsLink": "Pagina dei dati di Damodaran",
+          "inflationLink": "Pagina dei dati di Shiller",
+          "method": "Per ogni anno solare il rendimento di prezzo è il livello di fine anno diviso per quello di fine anno precedente, meno uno. Il rendimento totale somma i dividendi dell'anno al livello di fine anno prima di dividere, il che tratta i dividendi come reinvestiti a fine anno. L'inflazione è la variazione del CPI tra gli stessi due dicembri.",
+          "check": "Come verifica, il rendimento totale di ogni anno è stato confrontato con quello che pubblica lo stesso Damodaran, e nessuno differisce di più di 0,1 punti percentuali. Poiché gli anni vanno da fine anno a fine anno, coincidono con le cifre annuali di solito citate per l'indice.",
           "trademark": "\"S&P 500\" e \"S&P Composite\" nominano soltanto l'indice. Questa pagina mostra valori annuali derivati da dati accademici pubblici e nessuna quotazione giornaliera, e non è affiliata né approvata da S&P Dow Jones Indices."
         },
         "limits": {

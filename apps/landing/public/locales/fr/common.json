@@ -3541,7 +3541,7 @@
       "subtitle": "Voyez ce que vaudrait un investissement dans le S&P 500 (indice S&P Composite) entre deux années quelconques, avec ou sans dividendes et inflation.",
       "description": "Simulez le rendement du S&P 500 entre deux années passées : dividendes, inflation, versements annuels, TCAC et résultat de chaque année.",
       "pageTitle": "Rendement historique du S&P 500 : calculateur avec dividendes et inflation",
-      "pageDescription": "Choisissez une année de début et de fin et voyez ce qu'a rapporté le S&P 500 : rendement total ou de prix, réel ou nominal, avec versements annuels facultatifs, TCAC, meilleure et pire année et tableau année par année. Données : Robert Shiller (Yale).",
+      "pageDescription": "Choisissez une année de début et de fin et voyez ce qu'a rapporté le S&P 500 : rendement total ou de prix, réel ou nominal, avec versements annuels facultatifs, TCAC, meilleure et pire année et tableau année par année. Données : Aswath Damodaran (NYU Stern) et Robert Shiller (Yale).",
       "fields": {
         "startYear": "Année de début (investi le 1er janvier)",
         "endYear": "Année de fin (jusqu'au 31 décembre)",
@@ -3598,14 +3598,14 @@
         "contributed": "Total investi"
       },
       "currencyNote": "Les rendements sont en dollars américains. Si vous investissez en euros, le taux de change euro-dollar ajoute un risque de change à celui du marché : il peut augmenter ou réduire le résultat de plusieurs points par an.",
-      "sourceNote": "Source : données de l'indice S&P 500 / S&P Composite de Robert Shiller (Yale), téléchargées le {{date}}. Valeurs annuelles dérivées par WonderMoney. À titre éducatif uniquement.",
+      "sourceNote": "Source : données de l'indice S&P 500 / S&P Composite d'Aswath Damodaran (NYU Stern, téléchargées le {{date}}) et prix à la consommation de Robert Shiller (Yale, téléchargés le {{shillerDate}}). Valeurs annuelles calculées par WonderMoney. À titre éducatif uniquement.",
       "nextStepHeadline": "Comparez des scénarios historiques à votre plan de portefeuille",
       "nextStepDescription": "Ajoutez vos positions à WonderMoney, définissez un plan et voyez comment votre portefeuille réel se compare aux scénarios historiques essayés ici.",
       "nextStepCta": "Planifier mon portefeuille",
       "guide": {
         "read": {
           "title": "Comment lire le résultat",
-          "intro": "Ce calculateur regarde en arrière. Il prend les rendements annuels du S&P 500 (l'indice S&P Composite dans les données de Robert Shiller) entre les années choisies et les applique à votre montant. Les données couvrent de {{first}} à {{last}}.",
+          "intro": "Ce calculateur regarde en arrière. Il prend les rendements annuels du S&P 500 (données de l'indice S&P Composite) entre les années choisies et les applique à votre montant. Les données couvrent de {{first}} à {{last}}.",
           "future": "Ce n'est pas une prévision. Pour projeter un indice vers l'avenir avec vos propres hypothèses de rendement et de frais, utilisez la projection d'indice de la page rendement d'un investissement."
         },
         "example": {
@@ -3626,18 +3626,15 @@
           },
           "cagr": "Le TCAC est la moyenne géométrique des rendements annuels de la période, dans les termes choisis. Il décrit l'indice sur ces années et ne dépend pas de ce que vous versez.",
           "contributions": "Les versements annuels sont ajoutés le 1er janvier, avant le rendement de l'année, et rapportent donc l'année entière.",
-          "limits": "La première année complète des données est {{first}}, car une année a besoin du mois de décembre précédent comme point de départ, et la dernière est {{last}}. Chaque montant est plafonné à {{maxAmount}}."
+          "limits": "La première année des données est {{first}} et la dernière année complète est {{last}}. Chaque montant est plafonné à {{maxAmount}}."
         },
         "data": {
-          "title": "Données et écarts de méthode",
-          "source": "Les rendements annuels sont dérivés du jeu de données public de Robert J. Shiller, « U.S. Stock Markets 1871-Present and CAPE Ratio » (université Yale), téléchargé le {{downloaded}}. Il donne les prix mensuels de l'indice S&P Composite, les dividendes et les prix à la consommation depuis 1871.",
-          "sourceLink": "Page de données de Shiller",
-          "method": "Pour chaque année civile, nous enchaînons les rendements totaux mensuels : le prix plus un douzième du dividende annuel, divisé par le prix du mois précédent, ce qui traite chaque dividende comme réinvesti au prix de ce mois. Le rendement de prix compare décembre au décembre précédent, et l'inflation est la variation de l'IPC entre les mêmes deux décembres.",
-          "differences": "Les prix de Shiller sont des moyennes mensuelles des clôtures quotidiennes, pas des clôtures de fin de mois. Une année court donc ici de la moyenne d'un décembre à celle du suivant, et une seule année peut s'écarter de quelques points des chiffres de fin d'année à fin d'année publiés par les indices. Sur de nombreuses années, les deux convergent, car seules les deux extrémités diffèrent. Par exemple :",
-          "tableCaption": "Rendement total d'années choisies dans ces données face aux chiffres largement publiés",
-          "year": "Année",
-          "ours": "Ces données",
-          "published": "Publié (environ)",
+          "title": "Données et méthode",
+          "source": "Les rendements sont calculés par WonderMoney à partir du niveau du S&P 500 en fin d'année et des dividendes du jeu de données « Historical Returns on Stocks, Bonds and Bills » d'Aswath Damodaran (NYU Stern), téléchargé le {{downloaded}}. L'inflation provient de l'indice des prix à la consommation (IPC) du jeu de données public de Robert J. Shiller, « U.S. Stock Markets 1871-Present and CAPE Ratio » (université Yale), téléchargé le {{shillerDownloaded}}.",
+          "returnsLink": "Page de données de Damodaran",
+          "inflationLink": "Page de données de Shiller",
+          "method": "Pour chaque année civile, le rendement de prix est le niveau de fin d'année divisé par celui de la fin de l'année précédente, moins un. Le rendement total ajoute les dividendes de l'année au niveau de fin d'année avant de diviser, ce qui traite les dividendes comme réinvestis en fin d'année. L'inflation est la variation de l'IPC entre les mêmes deux décembres.",
+          "check": "À titre de contrôle, le rendement total de chaque année a été comparé à celui que publie Damodaran lui-même, et aucun ne s'en écarte de plus de 0,1 point de pourcentage. Les années allant de fin d'année à fin d'année, elles correspondent aux chiffres annuels habituellement cités pour l'indice.",
           "trademark": "« S&P 500 » et « S&P Composite » désignent seulement l'indice. Cette page montre des valeurs annuelles dérivées de données académiques publiques et aucun cours quotidien, et n'est ni affiliée à S&P Dow Jones Indices ni approuvée par elle."
         },
         "limits": {

@@ -3541,7 +3541,7 @@
       "subtitle": "Vê quanto valeria um investimento no S&P 500 (índice S&P Composite) entre dois anos quaisquer, com ou sem dividendos e inflação.",
       "description": "Simula a rentabilidade do S&P 500 entre dois anos passados: dividendos, inflação, entregas anuais, TCAC e o resultado de cada ano.",
       "pageTitle": "Rentabilidade histórica do S&P 500: simulador com dividendos e inflação",
-      "pageDescription": "Escolhe um ano inicial e um final e vê quanto rendeu o S&P 500: retorno total ou só de preço, real ou nominal, com entregas anuais opcionais, TCAC, melhor e pior ano e uma tabela ano a ano. Dados: Robert Shiller (Yale).",
+      "pageDescription": "Escolhe um ano inicial e um final e vê quanto rendeu o S&P 500: retorno total ou só de preço, real ou nominal, com entregas anuais opcionais, TCAC, melhor e pior ano e uma tabela ano a ano. Dados: Aswath Damodaran (NYU Stern) e Robert Shiller (Yale).",
       "fields": {
         "startYear": "Ano inicial (investes a 1 de janeiro)",
         "endYear": "Ano final (até 31 de dezembro)",
@@ -3598,14 +3598,14 @@
         "contributed": "Total investido"
       },
       "currencyNote": "As rentabilidades são em dólares norte-americanos. Se investes em euros, a taxa de câmbio euro-dólar junta um risco cambial ao do mercado: pode aumentar ou reduzir o resultado em vários pontos por ano.",
-      "sourceNote": "Fonte: dados do índice S&P 500 / S&P Composite de Robert Shiller (Yale), descarregados em {{date}}. Valores anuais derivados pela WonderMoney. Só para fins educativos.",
+      "sourceNote": "Fonte: dados do índice S&P 500 / S&P Composite de Aswath Damodaran (NYU Stern, descarregados em {{date}}) e preços no consumidor de Robert Shiller (Yale, descarregados em {{shillerDate}}). Valores anuais calculados pela WonderMoney. Só para fins educativos.",
       "nextStepHeadline": "Compara cenários históricos com o teu plano de carteira",
       "nextStepDescription": "Junta as tuas posições à WonderMoney, define um plano e vê como a tua carteira real se compara com os cenários históricos que experimentaste aqui.",
       "nextStepCta": "Planeia a tua carteira",
       "guide": {
         "read": {
           "title": "Como ler o resultado",
-          "intro": "Este simulador olha para trás. Pega nas rentabilidades anuais do S&P 500 (o índice S&P Composite nos dados de Robert Shiller) entre os anos que escolheres e aplica-as ao teu montante. Os dados vão de {{first}} a {{last}}.",
+          "intro": "Este simulador olha para trás. Pega nas rentabilidades anuais do S&P 500 (dados do índice S&P Composite) entre os anos que escolheres e aplica-as ao teu montante. Os dados vão de {{first}} a {{last}}.",
           "future": "Não é uma previsão. Para projetar um índice para a frente com os teus próprios pressupostos de rentabilidade e comissões, usa a projeção de índices na página de rentabilidade de investimentos."
         },
         "example": {
@@ -3626,18 +3626,15 @@
           },
           "cagr": "A TCAC é a média geométrica das rentabilidades anuais do intervalo, nos termos que escolheste. Descreve o índice nesses anos e não depende do que entregas.",
           "contributions": "As entregas anuais são somadas a 1 de janeiro, antes da rentabilidade desse ano, por isso rendem o ano inteiro.",
-          "limits": "O primeiro ano completo nos dados é {{first}}, porque um ano precisa do dezembro anterior como ponto de partida, e o último é {{last}}. Cada montante tem um limite de {{maxAmount}}."
+          "limits": "O primeiro ano nos dados é {{first}} e o último ano completo é {{last}}. Cada montante tem um limite de {{maxAmount}}."
         },
         "data": {
-          "title": "Dados e diferenças de método",
-          "source": "As rentabilidades anuais derivam do conjunto de dados público de Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Universidade de Yale), descarregado em {{downloaded}}. Dá os preços mensais do índice S&P Composite, os dividendos e os preços no consumidor desde 1871.",
-          "sourceLink": "Página de dados de Shiller",
-          "method": "Para cada ano civil encadeamos os retornos totais mensais: o preço mais um doze avos do dividendo anual, a dividir pelo preço do mês anterior, o que trata cada dividendo como reinvestido ao preço desse mês. O retorno do preço compara dezembro com o dezembro anterior, e a inflação é a variação do IPC entre os mesmos dois dezembros.",
-          "differences": "Os preços de Shiller são médias mensais dos fechos diários, não fechos de fim de mês. Um ano aqui vai por isso da média de um dezembro à do seguinte, e um só ano pode diferir em alguns pontos dos valores de fim de ano a fim de ano que os índices publicam. Em muitos anos os dois convergem, porque só os dois extremos diferem. Por exemplo:",
-          "tableCaption": "Retorno total de anos selecionados nestes dados face a valores amplamente publicados",
-          "year": "Ano",
-          "ours": "Estes dados",
-          "published": "Publicado (aprox.)",
+          "title": "Dados e método",
+          "source": "As rentabilidades são calculadas pela WonderMoney a partir do nível do S&P 500 no fim de cada ano e dos dividendos do conjunto de dados \"Historical Returns on Stocks, Bonds and Bills\" de Aswath Damodaran (NYU Stern), descarregado em {{downloaded}}. A inflação vem do índice de preços no consumidor (IPC) do conjunto de dados público de Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Universidade de Yale), descarregado em {{shillerDownloaded}}.",
+          "returnsLink": "Página de dados de Damodaran",
+          "inflationLink": "Página de dados de Shiller",
+          "method": "Em cada ano civil, o retorno do preço é o nível no fim do ano a dividir pelo nível no fim do ano anterior, menos um. O retorno total soma os dividendos do ano ao nível do fim do ano antes de dividir, o que trata os dividendos como reinvestidos no fim do ano. A inflação é a variação do IPC entre os mesmos dois dezembros.",
+          "check": "Como verificação, o retorno total de cada ano foi comparado com o que o próprio Damodaran publica, e nenhum difere mais de 0,1 pontos percentuais. Como os anos vão de fim de ano a fim de ano, alinham-se com os valores anuais normalmente citados para o índice.",
           "trademark": "\"S&P 500\" e \"S&P Composite\" só nomeiam o índice. Esta página mostra valores anuais derivados de dados académicos públicos e nenhuma cotação diária, e não é afiliada nem aprovada pela S&P Dow Jones Indices."
         },
         "limits": {

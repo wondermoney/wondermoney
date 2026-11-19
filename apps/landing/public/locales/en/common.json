@@ -3541,7 +3541,7 @@
       "subtitle": "See what an investment in the S&P 500 (S&P Composite index) would have been worth between any two years, with or without dividends and inflation.",
       "description": "Simulate S&P 500 returns between two past years: dividends, inflation, contributions, CAGR and every year's result.",
       "pageTitle": "S&P 500 Historical Returns Calculator: Dividends and Inflation",
-      "pageDescription": "Choose a start and end year and see what the S&P 500 returned: total or price return, real or nominal, with optional yearly contributions, CAGR, best and worst year and a year-by-year table. Data: Robert Shiller (Yale).",
+      "pageDescription": "Choose a start and end year and see what the S&P 500 returned: total or price return, real or nominal, with optional yearly contributions, CAGR, best and worst year and a year-by-year table. Data: Aswath Damodaran (NYU Stern) and Robert Shiller (Yale).",
       "fields": {
         "startYear": "Start year (invest on 1 January)",
         "endYear": "End year (to 31 December)",
@@ -3598,14 +3598,14 @@
         "contributed": "Total invested"
       },
       "currencyNote": "Returns are in US dollars. If you invest in euros, the euro-dollar exchange rate adds a currency risk on top of the market's: it can raise or cut the result by several points a year.",
-      "sourceNote": "Source: S&P 500 / S&P Composite index data from Robert Shiller (Yale), downloaded {{date}}. Yearly values derived by WonderMoney. Educational only.",
+      "sourceNote": "Source: S&P 500 / S&P Composite index data from Aswath Damodaran (NYU Stern, downloaded {{date}}) and consumer prices from Robert Shiller (Yale, downloaded {{shillerDate}}). Yearly values computed by WonderMoney. Educational only.",
       "nextStepHeadline": "Compare historical scenarios with your portfolio plan",
       "nextStepDescription": "Add your holdings to WonderMoney, set a plan and see how your real portfolio compares with the historical scenarios you tried here.",
       "nextStepCta": "Plan your portfolio",
       "guide": {
         "read": {
           "title": "How to read the result",
-          "intro": "This calculator looks backwards. It takes the yearly returns of the S&P 500 (the S&P Composite index in Robert Shiller's data) between the years you choose and applies them to your amount. The data covers {{first}} to {{last}}.",
+          "intro": "This calculator looks backwards. It takes the yearly returns of the S&P 500 (S&P Composite index data) between the years you choose and applies them to your amount. The data covers {{first}} to {{last}}.",
           "future": "It is not a forecast. To project an index forward with your own return and fee assumptions, use the index projection on the investment return page."
         },
         "example": {
@@ -3626,18 +3626,15 @@
           },
           "cagr": "The CAGR is the geometric mean of the yearly returns in the range, in the terms you chose. It describes the index over those years and does not depend on how much you contribute.",
           "contributions": "Yearly contributions are added on 1 January, before that year's return, so they earn the whole year.",
-          "limits": "The first complete year in the data is {{first}}, because a year needs the previous December as its starting point, and the last is {{last}}. Each amount is capped at {{maxAmount}}."
+          "limits": "The first year in the data is {{first}} and the last complete year is {{last}}. Each amount is capped at {{maxAmount}}."
         },
         "data": {
-          "title": "Data and method differences",
-          "source": "Yearly returns are derived from Robert J. Shiller's public dataset \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Yale University), downloaded on {{downloaded}}. It gives monthly S&P Composite index prices, dividends and consumer prices back to 1871.",
-          "sourceLink": "Shiller's data page",
-          "method": "For each calendar year we chain the monthly total returns: the price plus one twelfth of the annual dividend, divided by the previous month's price, which treats each dividend as reinvested at that month's price. The price return compares December with the previous December, and inflation is the change in the CPI between the same two Decembers.",
-          "differences": "Shiller's prices are monthly averages of daily closes, not month-end closes. A year here therefore runs from one December's average to the next, and a single year can differ from the year-end to year-end figures that indices publish by a few points. Over many years the two converge, because only the two end points differ. For example:",
-          "tableCaption": "Total return of selected years in this data against widely published figures",
-          "year": "Year",
-          "ours": "This data",
-          "published": "Published (about)",
+          "title": "Data and method",
+          "source": "Returns are computed by WonderMoney from the year-end S&P 500 level and the dividends in Aswath Damodaran's dataset \"Historical Returns on Stocks, Bonds and Bills\" (NYU Stern), downloaded on {{downloaded}}. Inflation comes from the consumer price index (CPI) in Robert J. Shiller's public dataset \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Yale University), downloaded on {{shillerDownloaded}}.",
+          "returnsLink": "Damodaran's data page",
+          "inflationLink": "Shiller's data page",
+          "method": "For each calendar year the price return is the year-end level divided by the previous year-end level, minus one. The total return adds the year's dividends to the year-end level before dividing, which treats the dividends as reinvested at the year end. Inflation is the change in the CPI between the same two Decembers.",
+          "check": "As a check, every year's total return was compared with the total return Damodaran publishes himself, and none differs by more than 0.1 percentage point. Because years run from year-end to year-end, they line up with the calendar-year figures usually quoted for the index.",
           "trademark": "\"S&P 500\" and \"S&P Composite\" only name the index. This page shows yearly values derived from public academic data and no daily prices, and is not affiliated with or endorsed by S&P Dow Jones Indices."
         },
         "limits": {
