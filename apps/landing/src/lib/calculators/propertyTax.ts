@@ -8,6 +8,8 @@ export const URBAN_RATE_MAX = 0.45;
 export const RUSTIC_RATE = 0.8;
 /** CIMI art. 112-A: fixed deduction in euros by number of dependants (3 means three or more). */
 export const FAMILY_DEDUCTIONS = { 0: 0, 1: 30, 2: 70, 3: 140 } as const;
+/** CIMI art. 113(6): no assessment when the tax to collect is below this many euros. */
+export const MINIMUM_COLLECTED = 10;
 /** CIMI art. 120(1): instalment thresholds in euros of tax owed. */
 export const SINGLE_PAYMENT_MAX = 100;
 export const TWO_PAYMENTS_MAX = 500;
@@ -65,7 +67,9 @@ export function computePropertyTax(input: PropertyTaxInput) {
   const deductionCents = urban
     ? Math.min(grossCents, FAMILY_DEDUCTIONS[input.dependants as Dependants] * 100)
     : 0;
-  const annualCents = grossCents - deductionCents;
+  const dueCents = grossCents - deductionCents;
+  const belowMinimum = dueCents > 0 && dueCents < MINIMUM_COLLECTED * 100;
+  const annualCents = belowMinimum ? 0 : dueCents;
   const count = instalmentCount(annualCents / 100);
   const base = count ? Math.floor(annualCents / count) : 0;
   const schedule = count
@@ -82,6 +86,8 @@ export function computePropertyTax(input: PropertyTaxInput) {
       grossTax: grossCents / 100,
       deduction: deductionCents / 100,
       annualTax: annualCents / 100,
+      /** True when the tax is below the legal minimum and so is not assessed. */
+      belowMinimum,
       monthlyProvision: Math.round(annualCents / 12) / 100,
       schedule,
     },

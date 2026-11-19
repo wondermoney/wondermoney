@@ -195,17 +195,21 @@ function VehicleTaxCalculator() {
                     {t(k("result.dueMonthValue"), { month: monthName(result.dueMonth) })}
                   </span>
                 </p>
-                <div>
-                  <p className="font-medium text-foreground">{t(k("result.scheduleTitle"))}</p>
-                  <ul className="mt-2 divide-y divide-border">
-                    {result.schedule2027.map((row) => (
-                      <li key={row.month} className="flex justify-between py-2">
-                        <span className="text-muted-foreground">{monthName(row.month)}</span>
-                        <span className="font-mono font-semibold">{money(row.amount)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                {([["scheduleTitle", result.schedule2027], ["scheduleTitle2028", result.schedule2028]] as const).map(
+                  ([title, rows]) => (
+                    <div key={title}>
+                      <p className="font-medium text-foreground">{t(k(`result.${title}`))}</p>
+                      <ul className="mt-2 divide-y divide-border">
+                        {rows.map((row) => (
+                          <li key={row.month} className="flex justify-between py-2">
+                            <span className="text-muted-foreground">{monthName(row.month)}</span>
+                            <span className="font-mono font-semibold">{money(row.amount)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ),
+                )}
               </div>
             )}
           </>

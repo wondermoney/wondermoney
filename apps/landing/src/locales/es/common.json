@@ -548,7 +548,8 @@
         "grossTax": "IMI antes de la reducción",
         "deduction": "Reducción del IMI Familiar",
         "scheduleTitle": "Calendario de pago",
-        "nothingDue": "Nada que pagar: la reducción cubre todo el impuesto."
+        "nothingDue": "Nada que pagar: la reducción cubre todo el impuesto.",
+        "belowMinimum": "Nada que cobrar: el IMI inferior a 10 € no se liquida (artículo 113 del Código do IMI)."
       },
       "months": {
         "may": "Mayo",
@@ -564,7 +565,7 @@
         "methodPayment": "El impuesto se paga en un plazo en mayo hasta 100 €, en dos en mayo y noviembre entre 100 € y 500 €, y en tres en mayo, agosto y noviembre por encima de 500 €. Los plazos son iguales; el céntimo de redondeo, si lo hay, va al último.",
         "methodBudget": "La reserva mensual divide el impuesto anual entre 12 para tener el dinero listo cuando venza cada plazo.",
         "exemptionTitle": "Exención para la vivienda habitual",
-        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI, durante un tiempo limitado tras la compra o mientras los ingresos del hogar y el VPT queden por debajo de los límites del Estatuto de los Beneficios Fiscales. Los límites cambian y hay condiciones, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
+        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI. El artículo 46 del Estatuto de los Beneficios Fiscales (EBF) concede tres años de exención tras comprar o construir una vivienda con VPT de hasta 125 000 €, si los ingresos brutos del hogar del año anterior no superaron 153 300 €; hay que destinarla a vivienda habitual en seis meses y solicitar la exención en plazo. El artículo 11-A del Código do IMI exime, sin límite de tiempo, la vivienda de un hogar con ingresos brutos de hasta 2,3 veces 14 IAS (unos 17 300 € con el IAS de 2026, de 537,13 €) y cuyos inmuebles sumen un VPT de hasta 10 veces 14 IAS (75 198,20 € con el IAS de 2026). Hay otras condiciones y los límites pueden cambiar, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
         "assumptionsTitle": "Supuestos",
         "assumptionRate": "El tipo municipal lo introduces tú. Esta página no incluye una tabla de tipos municipales, y los municipios pueden subir o bajar el tipo en casos concretos, como edificios vacíos o degradados, que la calculadora ignora.",
         "assumptionScope": "La estimación cubre un único inmueble con las reglas generales. No incluye el IMI adicional (AIMI), las exenciones temporales ni otras deducciones municipales.",
@@ -572,8 +573,11 @@
         "sourcesTitle": "Fuentes",
         "sourceRates": "Código do IMI, artículo 112: tipos (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IMI, artículo 120: pago a plazos (consultado el 19 de noviembre de 2026)",
-        "sourceExemption": "Portal das Finanças: exenciones del IMI e IMI Familiar",
-        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI, según bancos y municipios portugueses."
+        "sourceExemption": "Código do IMI, artículo 11-A: exención por bajos ingresos (consultado el 19 de noviembre de 2026)",
+        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI (Portal das Finanças).",
+        "methodMinimum": "Si el impuesto a cobrar, tras cualquier reducción del IMI Familiar, es inferior a 10 €, no se liquida IMI y la calculadora muestra 0 € con una nota (artículo 113.6 del Código do IMI).",
+        "sourceMinimum": "Código do IMI, artículo 113: liquidación, sin IMI por debajo de 10 € (consultado el 19 de noviembre de 2026)",
+        "sourceEbf": "Estatuto de los Beneficios Fiscales, artículo 46: exención de tres años (consultado el 19 de noviembre de 2026, redacción de la Lei 12/2022; comprueba modificaciones posteriores)"
       },
       "nextStepHeadline": "Que el IMI no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del IMI cada mes, para que los plazos ya estén cubiertos.",
@@ -2473,7 +2477,7 @@
         "tableLimit": "Valor hasta",
         "tableRate": "Tipo",
         "tableDeduct": "Deducción",
-        "tableNote": "Hasta {{exempt}} el primer tramo es del 0 %. La segunda vivienda tiene su propia tabla, con el 1 % desde el primer euro, y Azores y Madeira usan los mismos tipos con límites un 25 % más altos.",
+        "tableNote": "Hasta {{exempt}} el primer tramo es del 0%. La vivienda secundaria tiene su propia tabla, con el 1% desde el primer euro. Azores y Madeira tienen tablas propias, con límites más altos.",
         "sourceImt": "CIMT, artículo 17 (Portal das Finanças)",
         "sourceStamp": "Código del impuesto de timbre (Portal das Finanças)",
         "review": "Reglas y límites de {{year}}, revisados por última vez el {{date}}. Compruébalos de nuevo antes de firmar.",
@@ -2482,7 +2486,8 @@
         "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. La exención del timbre de la compra es una deducción limitada al 0,8 % del límite de la exención total, así que por encima pagas el 0,8 % solo sobre el exceso. El timbre de la hipoteca se sigue cobrando.",
         "assumptionLoan": "El timbre de la hipoteca supone un préstamo de cinco años o más y se cobra siempre. No se incluyen comisiones de la hipoteca, tasación ni gastos de notaría o registro.",
         "assumptionUnsupported": "No admitido: no residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT.",
-        "assumptionIslands": "Para Azores y Madeira los límites son los del continente aumentados un 25 % y redondeados al euro, con los mismos tipos. Confirma los límites regionales con la autoridad tributaria."
+        "assumptionIslands": "Para Azores y Madeira, la calculadora usa los límites regionales de las tablas IV a VI del Ofício Circulado 40129/2026, con los mismos tipos que el continente.",
+        "sourceCircular": "Ofício Circulado 40129/2026: tablas del IMT (Autoridad Tributaria)"
       },
       "nextStepHeadline": "Planifica el efectivo que necesitas para comprar",
       "nextStepDescription": "Suma el IMT y el timbre al ahorro que necesitas antes de comprar y sigue tu progreso en WonderMoney.",
@@ -2697,7 +2702,7 @@
         "amount": "Importe suscrito",
         "years": "Años de permanencia",
         "baseRate": "Tipo base (supuesto)",
-        "baseRateHelp": "Tipo anual bruto, hasta {{rate}} (el límite de las normas). Edítalo para probar otros escenarios."
+        "baseRateHelp": "Tipo anual bruto, de 0% hasta {{rate}} (el límite de las normas). El valor por defecto es el tipo comunicado para {{month}}; el tipo real cambia cada mes. Edítalo para probar otros escenarios."
       },
       "errors": {
         "required": "Introduce un número válido.",
@@ -2729,7 +2734,7 @@
         "rulesTitle": "Normas de la Série F que sigue la calculadora",
         "rulesIntro": "Normas publicadas por el IGCP en la ficha de producto de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Las normas pueden cambiar y cuentan las condiciones vigentes del emisor.",
         "ruleTerm": "Plazo de {{termYears}} años. Puedes reembolsar, total o parcialmente, desde el primer vencimiento de intereses; la calculadora usa años completos de permanencia.",
-        "ruleRate": "Cada trimestre rinde el tipo base vigente al inicio del trimestre más la prima de permanencia del año de suscripción. El tipo base sigue el Euríbor a 3 meses, con máximo de {{maxBase}} y mínimo de 0%.",
+        "ruleRate": "Cada trimestre rinde el tipo base vigente al inicio del trimestre más la prima de permanencia del año de suscripción. El tipo base es E3, la media del Euríbor a 3 meses de los 10 días hábiles anteriores, redondeada a tres decimales, sin margen añadido. Se fija el antepenúltimo día hábil de cada mes para el mes siguiente, y está limitado entre 0% y {{maxBase}}.",
         "ruleTax": "Los intereses vencen trimestralmente y se capitalizan automáticamente después de IRS, retenido en origen al {{irsRate}}.",
         "ruleRedeem": "Solo pueden ser titulares personas físicas. El límite es {{maxAmount}} por cuenta aforro en la Série F, con un mínimo de {{minAmount}}.",
         "premiumTitle": "Prima de permanencia por año de suscripción",
@@ -2745,7 +2750,7 @@
         "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
         "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
-        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. El tipo real se revisa cada mes, por lo que los intereses efectivos serán distintos.",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo comunicado para {{referenceMonth}} ({{referenceRate}}, el máximo), que el IGCP vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en AforroNet.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
         "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
       },
@@ -3150,9 +3155,10 @@
         "coefficient": "Coeficiente del año",
         "dueMonth": "A pagar en 2026:",
         "dueMonthValue": "En {{month}}, el mes del aniversario de la matriculación.",
-        "scheduleTitle": "Desde 2027: calendario de pago",
+        "scheduleTitle": "2027 (transitorio): calendario de pago",
         "exempt": "Los coches totalmente eléctricos de la categoría B están exentos de IUC.",
-        "dieselSurcharge": "Recargo diésel (no se multiplica por el coeficiente)"
+        "dieselSurcharge": "Recargo diésel (no se multiplica por el coeficiente)",
+        "scheduleTitle2028": "Desde 2028: calendario de pago"
       },
       "guide": {
         "exampleTitle": "Ejemplo práctico",
@@ -3162,7 +3168,7 @@
         "methodB": "Categoría B (coches matriculados desde julio de 2007): se suman la tasa de cilindrada y la de CO2 y se multiplica por un coeficiente según el año de matriculación (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 desde 2010). El CO2 se lee en la columna WLTP o NEDC según el ciclo de ensayo de tu documento.",
         "methodAdditional": "Los coches de la categoría B matriculados después del 1 de enero de 2017 pagan una tasa adicional si las emisiones son altas: 31,77 € por encima de 205 g/km (WLTP) o 180 g/km (NEDC) y 63,74 € por encima de 260 g/km (WLTP) o 250 g/km (NEDC). La tasa adicional también se multiplica por el coeficiente. El texto legal no la limita por combustible, así que la calculadora la aplica a todos.",
         "methodDiesel": "Los coches diésel pagan además el adicional de IUC (artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por los Presupuestos del Estado). Depende de la cilindrada, se aplica a las categorías A y B y se suma después del coeficiente, sin multiplicarse por él.",
-        "methodPayment": "Hasta 2026 el IUC se paga en el mes del aniversario de la matriculación. Desde 2027, según el Decreto-Ley n.º 161/2026, se liquida hasta abril y se paga en abril hasta 100 €, en abril y octubre de 100 € a 500 €, y en abril, julio y octubre por encima de 500 €.",
+        "methodPayment": "Hasta 2026 el IUC se paga en el mes del aniversario de la matriculación. El Decreto-Ley n.º 161/2026 (4 de agosto de 2026) pasa a una liquidación anual por contribuyente, que abarca todos los vehículos. 2027 es un año transitorio: un pago en octubre hasta 500 €, o dos en julio y octubre (o todo en julio). Desde 2028 se liquida hasta abril y se paga en abril hasta 100 €, en abril y octubre de 100 € a 500 €, y en abril, julio y octubre por encima de 500 €. Los umbrales se aplican al total de todos tus vehículos.",
         "methodBudget": "La reserva mensual divide el importe anual entre 12, para que el dinero esté listo cuando llegue el cobro.",
         "exemptionTitle": "Coches eléctricos",
         "exemption": "Los coches totalmente eléctricos de la categoría B están exentos de IUC y la calculadora muestra cero. Los híbridos enchufables y otros vehículos tributan según su cilindrada y CO2 del documento, así que introduce esos valores.",
@@ -3171,14 +3177,15 @@
         "scopeUnsupported": "No admitido: vehículos de mercancías y más pesados (categorías C y D), motocicletas (E), embarcaciones de recreo (F), aeronaves (G) y coches matriculados antes de 1981.",
         "assumptionsTitle": "Supuestos",
         "assumptionYear": "Las tasas son las tablas de {{taxYear}} del Código do IUC (artículos 9 y 10), en la redacción de la {{law}}. El Portal das Finanças no indica cambios posteriores en estas tasas.",
-        "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación. El Portal das Finanças muestra el nuevo calendario de abril desde 2027, pero no la redacción anterior, así que confirma tu fecha en el Portal das Finanças. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
+        "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación, que el preámbulo del Decreto-Ley n.º 161/2026 confirma como la regla vigente. Los calendarios de 2027 y 2028 son solo para este coche: la ley aplica los umbrales al total de todos tus vehículos, por lo que el reparto real puede ser distinto. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
         "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Cuenta el importe de la notificación de la Autoridad Tributaria.",
         "sourcesTitle": "Fuentes",
         "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
         "sourceCategoryB": "Código do IUC, artículo 10: tasas de la categoría B, tasas adicionales y coeficientes (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IUC, artículo 17: pago (consultado el 19 de noviembre de 2026)",
-        "sourceDiesel": "Portal das Finanças: recargo diésel, artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por el artículo 94 de la Ley n.º 73-A/2025 (consultado el 19 de noviembre de 2026). La página no indica importes, así que los importes salen de las tablas publicadas por el ACP.",
-        "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}."
+        "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 19 de noviembre de 2026). Su continuidad en 2026 por el artículo 94 de la Ley n.º 73-A/2025 no se ha vuelto a comprobar aquí.",
+        "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}.",
+        "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)"
       },
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",

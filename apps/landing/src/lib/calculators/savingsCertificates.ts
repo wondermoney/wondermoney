@@ -4,8 +4,9 @@
  * The rules the page states and this module models:
  * - Term of 15 years. Interest accrues quarterly and is capitalised automatically, net of IRS.
  * - The rate of a quarter is the base rate at the start of that quarter plus the permanence
- *   premium for the subscription year the quarter falls in. The base rate is set monthly from
- *   the 3-month Euribor and cannot exceed 2.50% or go below 0%.
+ *   premium for the subscription year the quarter falls in. The base rate is E3, the average of
+ *   the 3-month Euribor over the previous 10 business days rounded to three decimals, set on the
+ *   third-to-last business day of a month for the next month (no margin), within 0% to 2.50%.
  * - Premium, in percentage points: 0 in year 1, 0.25 in years 2 to 5, 0.50 in years 6 to 9,
  *   1.00 in years 10 and 11, 1.50 in years 12 and 13, 1.75 in years 14 and 15.
  * - IRS withheld at source (liberatória) at 28% of each quarter's interest.
@@ -22,6 +23,12 @@ export const SAVINGS_CERTIFICATES_RULES = {
   maxBaseRate: 2.5,
   /** Rule date of the IGCP sheet the premiums come from. */
   rulesDate: "2026-04",
+  /**
+   * The base rate in force in the month below, used as the calculator default. It was at the 2.50%
+   * ceiling for September to November 2026 (press reports of the IGCP announcements; AforroNet
+   * has the current value). The December rate is set on 26 November 2026.
+   */
+  referenceBaseRate: { rate: 2.5, month: "2026-11" },
   /** IRS withheld at source on the interest, in percent. */
   irsRate: 28,
   /** Euros (one unit is 1 euro). */
@@ -52,8 +59,8 @@ export const PERMANENCE_PREMIUM_STEPS = [
 export const SAVINGS_CERTIFICATES_EXAMPLE = {
   amount: 10_000,
   years: 5,
-  /** The ceiling the rules allow; the visitor can change it. */
-  baseRate: 2.5,
+  /** The base rate of the reference month (currently the ceiling); the visitor can change it. */
+  baseRate: SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate,
 } as const;
 
 export type SavingsCertificatesInput = { amount: number; years: number; baseRate: number };
