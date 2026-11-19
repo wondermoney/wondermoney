@@ -3534,6 +3534,132 @@
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
         "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas."
       }
+    },
+    "sp500History": {
+      "title": "Simulador de rentabilidade histórica do S&P 500",
+      "shortName": "S&P 500 histórico",
+      "subtitle": "Vê quanto valeria um investimento no S&P 500 (índice S&P Composite) entre dois anos quaisquer, com ou sem dividendos e inflação.",
+      "description": "Simula a rentabilidade do S&P 500 entre dois anos passados: dividendos, inflação, entregas anuais, TCAC e o resultado de cada ano.",
+      "pageTitle": "Rentabilidade histórica do S&P 500: simulador com dividendos e inflação",
+      "pageDescription": "Escolhe um ano inicial e um final e vê quanto rendeu o S&P 500: retorno total ou só de preço, real ou nominal, com entregas anuais opcionais, TCAC, melhor e pior ano e uma tabela ano a ano. Dados: Robert Shiller (Yale).",
+      "fields": {
+        "startYear": "Ano inicial (investes a 1 de janeiro)",
+        "endYear": "Ano final (até 31 de dezembro)",
+        "initial": "Montante inicial",
+        "annualContribution": "Entrega anual (opcional)",
+        "reinvest": "Reinvestir os dividendos (retorno total)",
+        "real": "Ajustar à inflação (valor real)"
+      },
+      "help": {
+        "years": "Os dados vão de {{first}} a {{last}}. Os dois anos contam por inteiro.",
+        "initial": "Em dólares norte-americanos, investidos a 1 de janeiro do ano inicial.",
+        "contribution": "Somada a 1 de janeiro de cada ano do intervalo, o primeiro incluído. Deixa 0 se não houver.",
+        "reinvest": "Ligado: variação do preço mais os dividendos reinvestidos. Desligado: só a variação do preço, como se gastasses todos os dividendos.",
+        "real": "Ligado: todos os valores estão em dólares de {{year}}, sem a inflação dos EUA. Desligado: dólares nominais de cada ano."
+      },
+      "errors": {
+        "required": "Introduz um valor válido.",
+        "whole": "Introduz um ano inteiro.",
+        "outOfRange": "Escolhe um ano entre {{min}} e {{max}}.",
+        "tooSmall": "Introduz {{min}} ou mais.",
+        "tooLarge": "Introduz {{max}} ou menos, ou escolhe um intervalo mais curto: o resultado excederia o que este simulador consegue mostrar.",
+        "beforeStart": "O ano final tem de ser {{start}} ou posterior.",
+        "nothingInvested": "Introduz um montante inicial ou uma entrega anual superior a zero.",
+        "summary": "Verifica os campos assinalados para ver o resultado."
+      },
+      "result": {
+        "finalNominal": "Valor final (dólares nominais)",
+        "finalReal": "Valor final (em dólares de {{year}})",
+        "contributed": "Total investido",
+        "gain": "Ganho ou perda",
+        "cagr": "TCAC (taxa de crescimento anual composta)",
+        "best": "Melhor ano do intervalo",
+        "worst": "Pior ano do intervalo",
+        "basisTotal": "retorno total com dividendos reinvestidos",
+        "basisPrice": "só o retorno do preço, sem dividendos",
+        "termsNominal": "dólares nominais",
+        "termsReal": "dólares de {{year}}, sem inflação",
+        "assumptions": "A mostrar {{basis}}, em {{terms}}, ao longo de {{years}} anos, de 1 de janeiro de {{start}} a 31 de dezembro de {{end}}.",
+        "singleYear": "Um único ano mostra a sorte desse ano, não o que esperar. Experimenta um intervalo de 10 anos ou mais.",
+        "pastPerformance": "A rentabilidade passada não garante rentabilidades futuras. Só para fins educativos, não é aconselhamento de investimento."
+      },
+      "table": {
+        "title": "Ano a ano",
+        "caption": "Rentabilidade anual, inflação, dinheiro entregue e valor no fim de cada ano",
+        "year": "Ano",
+        "return": "Rentabilidade",
+        "inflation": "Inflação nos EUA",
+        "contribution": "Dinheiro entregue",
+        "value": "Valor no fim do ano"
+      },
+      "chart": {
+        "label": "Gráfico de linhas do valor no fim de cada ano face ao total investido",
+        "value": "Valor",
+        "contributed": "Total investido"
+      },
+      "currencyNote": "As rentabilidades são em dólares norte-americanos. Se investes em euros, a taxa de câmbio euro-dólar junta um risco cambial ao do mercado: pode aumentar ou reduzir o resultado em vários pontos por ano.",
+      "sourceNote": "Fonte: dados do índice S&P 500 / S&P Composite de Robert Shiller (Yale), descarregados em {{date}}. Valores anuais derivados pela WonderMoney. Só para fins educativos.",
+      "nextStepHeadline": "Compara cenários históricos com o teu plano de carteira",
+      "nextStepDescription": "Junta as tuas posições à WonderMoney, define um plano e vê como a tua carteira real se compara com os cenários históricos que experimentaste aqui.",
+      "nextStepCta": "Planeia a tua carteira",
+      "guide": {
+        "read": {
+          "title": "Como ler o resultado",
+          "intro": "Este simulador olha para trás. Pega nas rentabilidades anuais do S&P 500 (o índice S&P Composite nos dados de Robert Shiller) entre os anos que escolheres e aplica-as ao teu montante. Os dados vão de {{first}} a {{last}}.",
+          "future": "Não é uma previsão. Para projetar um índice para a frente com os teus próprios pressupostos de rentabilidade e comissões, usa a projeção de índices na página de rentabilidade de investimentos."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Investe {{initial}} a 1 de janeiro de {{start}} e deixa até 31 de dezembro de {{end}} ({{years}} anos), com os dividendos reinvestidos e sem mais entregas. Segundo os dados, passa a valer {{finalTotal}}, uma taxa de crescimento anual composta (TCAC) de {{cagrTotal}}.",
+          "price": "Sem dividendos (só o retorno do preço) o mesmo montante termina em {{finalPrice}}, ou {{cagrPrice}} por ano. A diferença é o que os dividendos reinvestidos acrescentaram.",
+          "real": "Medido em dólares de {{start}}, sem a inflação dos EUA, o valor final é {{finalReal}}, ou {{cagrReal}} por ano.",
+          "range": "O caminho foi acidentado: o melhor ano do intervalo foi {{bestYear}} ({{bestReturn}}) e o pior {{worstYear}} ({{worstReturn}})."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "Para cada ano do intervalo, o simulador faz as mesmas quatro coisas:",
+          "steps": {
+            "a": "Soma o dinheiro investido a 1 de janeiro: o montante inicial no primeiro ano e a entrega anual em todos os anos.",
+            "b": "Faz crescer o saldo com a rentabilidade desse ano: o retorno total se os dividendos forem reinvestidos, o retorno do preço se não.",
+            "c": "Se pedires valores ajustados à inflação, divide pelos preços no consumidor dos EUA (IPC), e todos os valores ficam em dólares do ano inicial. As entregas são deflacionadas com os preços do dia em que são feitas.",
+            "d": "Regista o valor a 31 de dezembro para a tabela e para o gráfico."
+          },
+          "cagr": "A TCAC é a média geométrica das rentabilidades anuais do intervalo, nos termos que escolheste. Descreve o índice nesses anos e não depende do que entregas.",
+          "contributions": "As entregas anuais são somadas a 1 de janeiro, antes da rentabilidade desse ano, por isso rendem o ano inteiro.",
+          "limits": "O primeiro ano completo nos dados é {{first}}, porque um ano precisa do dezembro anterior como ponto de partida, e o último é {{last}}. Cada montante tem um limite de {{maxAmount}}."
+        },
+        "data": {
+          "title": "Dados e diferenças de método",
+          "source": "As rentabilidades anuais derivam do conjunto de dados público de Robert J. Shiller, \"U.S. Stock Markets 1871-Present and CAPE Ratio\" (Universidade de Yale), descarregado em {{downloaded}}. Dá os preços mensais do índice S&P Composite, os dividendos e os preços no consumidor desde 1871.",
+          "sourceLink": "Página de dados de Shiller",
+          "method": "Para cada ano civil encadeamos os retornos totais mensais: o preço mais um doze avos do dividendo anual, a dividir pelo preço do mês anterior, o que trata cada dividendo como reinvestido ao preço desse mês. O retorno do preço compara dezembro com o dezembro anterior, e a inflação é a variação do IPC entre os mesmos dois dezembros.",
+          "differences": "Os preços de Shiller são médias mensais dos fechos diários, não fechos de fim de mês. Um ano aqui vai por isso da média de um dezembro à do seguinte, e um só ano pode diferir em alguns pontos dos valores de fim de ano a fim de ano que os índices publicam. Em muitos anos os dois convergem, porque só os dois extremos diferem. Por exemplo:",
+          "tableCaption": "Retorno total de anos selecionados nestes dados face a valores amplamente publicados",
+          "year": "Ano",
+          "ours": "Estes dados",
+          "published": "Publicado (aprox.)",
+          "trademark": "\"S&P 500\" e \"S&P Composite\" só nomeiam o índice. Esta página mostra valores anuais derivados de dados académicos públicos e nenhuma cotação diária, e não é afiliada nem aprovada pela S&P Dow Jones Indices."
+        },
+        "limits": {
+          "title": "O que estes valores deixam de fora",
+          "items": {
+            "fx": "Moeda: as rentabilidades são em dólares norte-americanos. Se investes a partir da zona euro, a taxa de câmbio euro-dólar soma ou subtrai a estes valores, por vezes vários pontos por ano. O risco cambial é separado do risco de mercado.",
+            "fees": "Custos: comissões de fundos, corretagem e spreads não são deduzidos. Um fundo que replica o índice rende o índice menos os custos do próprio fundo.",
+            "taxes": "Impostos: o imposto sobre dividendos e mais-valias não está incluído e depende do país onde vives.",
+            "sequence": "Retrospetiva: é um grande índice dos EUA na história de um só país. Outros mercados e períodos correram bem pior, e mover o início ou o fim alguns anos pode mudar muito o resultado.",
+            "past": "A rentabilidade passada não garante rentabilidades futuras. Esta ferramenta é educativa e não é aconselhamento de investimento."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "investmentReturnLink": "Rentabilidade de investimentos e projeção de índices",
+          "investmentReturnBody": "Mede a tua própria rentabilidade, ou projeta um fundo de índice para a frente com os teus pressupostos de rentabilidade e comissões.",
+          "compoundInterestLink": "Simulador de juros compostos",
+          "compoundInterestBody": "Vê como as entregas regulares e o tempo se compõem a uma taxa que escolhas.",
+          "investorProfileLink": "Questionário de perfil de investidor",
+          "investorProfileBody": "Descobre com quantas oscilações de mercado destas consegues viver."
+        }
+      }
     }
   },
   "resources": {
