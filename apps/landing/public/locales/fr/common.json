@@ -2488,6 +2488,98 @@
       "nextStepDescription": "Ajoutez l'IMT et le timbre à l'épargne nécessaire avant d'acheter, puis suivez votre progression dans WonderMoney.",
       "nextStepCta": "Intégrez les taxes à votre objectif d'apport immobilier"
     },
+    "youthMortgage": {
+      "title": "Simulateur de crédit immobilier jeune (Portugal)",
+      "shortName": "Crédit jeune",
+      "subtitle": "Voyez quelles conditions de la garantie publique vos réponses remplissent, puis estimez la mensualité, les taxes d'achat et la somme à avoir le jour de la signature.",
+      "description": "Estimez un crédit immobilier jeune au Portugal : mensualité, taxes et apport en espèces.",
+      "pageTitle": "Simulateur de Crédit Immobilier Jeune au Portugal : Garantie et Mensualité",
+      "pageDescription": "Vérifiez les conditions 2026 de la garantie publique pour les jeunes au Portugal et estimez la mensualité, l'IMT et l'impôt du timbre avec et sans exonération jeune, ainsi que la somme à avoir à la signature.",
+      "checkTitle": "1. Garantie publique : les conditions que vos réponses remplissent",
+      "checkIntro": "À titre informatif seulement. Cette liste montre quelles conditions vos réponses remplissent ; elle ne dit pas si vous y avez droit. La banque et l'État décident.",
+      "checkSummary": "{{met}} conditions sur {{total}} remplies d'après vos réponses.",
+      "checkNote": "Conditions vérifiées le {{date}}. La garantie couvre jusqu'à {{percent}} % de la valeur de la transaction, ce qui permet de financer jusqu'à 100 %. Elle ne change pas le taux d'intérêt.",
+      "estimateTitle": "2. Estimez le crédit et la somme nécessaire",
+      "years": "ans",
+      "fields": {
+        "age": "Votre âge à la date du contrat",
+        "income": "Revenu imposable annuel, facultatif",
+        "ownHome": "Le logement sera ma résidence principale",
+        "otherProperty": "Je possède tout ou partie d'un autre bien à usage d'habitation",
+        "price": "Prix d'achat",
+        "deposit": "Apport",
+        "annualRate": "Taux d'intérêt (TAN)",
+        "termYears": "Durée du crédit"
+      },
+      "help": {
+        "income": "Utilisé uniquement pour la liste de conditions. La limite est le haut de la 8e tranche de l'IRS.",
+        "price": "Le prix de l'acte. La liste de conditions utilise aussi cette valeur.",
+        "deposit": "La somme que vous apportez. Elle peut être nulle.",
+        "annualRate": "Taux annuel nominal. La garantie ne le réduit pas.",
+        "termYears": "Jusqu'à 40 ans."
+      },
+      "status": {
+        "met": "Remplie",
+        "notMet": "Non remplie",
+        "unknown": "Sans réponse"
+      },
+      "conditions": {
+        "age": "Avoir entre {{minAge}} et {{maxAge}} ans.",
+        "ownHome": "Le logement est votre résidence principale.",
+        "otherProperty": "Ne pas posséder, en tout ou en partie, un autre bien à usage d'habitation.",
+        "price": "Le logement coûte au plus {{maxPrice}}.",
+        "income": "Revenu imposable annuel jusqu'à la 8e tranche de l'IRS ({{maxIncome}} en 2026)."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "zero": "Saisissez un prix supérieur à zéro.",
+        "negative": "Saisissez zéro ou une valeur positive.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "depositTooLarge": "L'apport ne peut pas dépasser le prix.",
+        "loanTooSmall": "Le crédit serait inférieur à 100 euros. Réduisez l'apport ou considérez un achat comptant.",
+        "summary": "Vérifiez les champs signalés pour voir l'estimation."
+      },
+      "result": {
+        "monthly": "Mensualité (capital et intérêts)",
+        "noLoan": "L'apport couvre tout le prix, il n'y a donc pas de crédit.",
+        "loan": "Montant du crédit",
+        "ltv": "Quotité de financement (LTV)",
+        "interest": "Intérêts totaux sur la durée",
+        "taxesWithout": "IMT et impôt du timbre sans exonération jeune",
+        "taxesWith": "IMT et impôt du timbre avec exonération jeune",
+        "cashWithout": "Somme à la signature sans exonération (apport et taxes)",
+        "cashWith": "Somme à la signature avec exonération jeune",
+        "exemptionNote": "L'exonération jeune (IMT Jovem) suppose d'avoir 35 ans ou moins et d'acheter votre première résidence principale. L'impôt du timbre de 0,6 % sur le crédit reste dû.",
+        "bankNote": "Les banques décident d'accorder le crédit, à quel taux et avec quelle quotité. Estimation pédagogique, pas une offre. Frais de dossier, assurance, expertise et frais de notaire ne sont pas inclus."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Acheter un logement à {{price}} sans apport, avec un taux de {{rate}} sur {{years}} ans, revient à emprunter {{loan}} pour environ {{monthly}} par mois. L'IMT et l'impôt du timbre s'élèvent à {{taxesWithout}} sans exonération jeune et {{taxesWith}} avec elle (il ne reste que le timbre du crédit). Avec l'exonération, la somme à avoir à la signature est de {{cash}}.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodPayment": "Crédit = prix moins apport. La mensualité est celle d'un crédit à taux fixe à mensualités constantes, le même moteur que le simulateur de crédit immobilier. La LTV est le crédit divisé par le prix.",
+        "methodTaxes": "L'IMT et l'impôt du timbre viennent du simulateur de taxes d'achat, pour une résidence principale au Portugal continental : l'exonération jeune supprime les deux jusqu'à la limite totale et applique 8 % d'IMT sur l'excédent jusqu'à la limite partielle.",
+        "methodCash": "La somme à la signature est l'apport plus les taxes. Nous l'affichons avec et sans exonération jeune.",
+        "methodGuarantee": "La garantie n'entre pas dans la mensualité : elle aide seulement la banque à accepter une LTV plus élevée, jusqu'à 100 %, et le taux est fixé par la banque.",
+        "conditionsTitle": "Conditions de la garantie publique vérifiées (décret-loi n° 44/2024)",
+        "conditionAge": "Avoir entre {{minAge}} et {{maxAge}} ans à la date du contrat et un domicile fiscal au Portugal.",
+        "conditionHome": "Le logement est acheté comme résidence principale.",
+        "conditionProperty": "Ne pas posséder, en tout ou en partie, un autre bien à usage d'habitation.",
+        "conditionPrice": "Le logement coûte au plus {{maxPrice}} (l'expertise de la banque peut réduire la valeur de la transaction).",
+        "conditionIncome": "Revenu jusqu'à la 8e tranche de l'IRS : {{maxIncome}} par an en 2026 (83 696 euros en 2025).",
+        "conditionDate": "Seuls les contrats de crédit signés jusqu'au 31 décembre 2026 peuvent en bénéficier, et la garantie couvre jusqu'à {{percent}} % de la valeur de la transaction pendant 10 ans au plus.",
+        "sourceGovernment": "Gouvernement portugais : Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira : Crédito habitação jovem",
+        "review": "Conditions vérifiées pour la dernière fois le {{date}}. La limite de revenu 2026 est la limite supérieure de la 8e tranche de l'IRS de l'article 68 du code de l'IRS, revalorisée de 3,51 % par la loi 73-A/2025 (budget de l'État 2026). Les banques décident de chaque demande.",
+        "assumptionsTitle": "Hypothèses et limites",
+        "assumptionBanks": "Les banques évaluent votre risque de crédit et peuvent refuser le prêt ou proposer d'autres conditions, quelle que soit la liste. Pour un prêt à deux emprunteurs, les deux doivent remplir les conditions.",
+        "assumptionRate": "Le taux est celui que vous saisissez. La garantie ne change pas le taux d'intérêt.",
+        "assumptionTaxes": "Les taxes concernent une résidence principale au Portugal continental et, dans les montants avec exonération, supposent que vous remplissez les conditions de l'IMT Jovem.",
+        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique."
+      },
+      "nextStepHeadline": "Planifiez l'apport et le coût de votre logement",
+      "nextStepDescription": "Fixez un objectif d'apport et budgétez la mensualité, les taxes et les charges du logement dans WonderMoney.",
+      "nextStepCta": "Planifiez votre apport et vos coûts de logement"
+    },
     "personalLoan": {
       "title": "Simulateur de prêt personnel",
       "shortName": "Prêt personnel",

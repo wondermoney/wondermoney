@@ -44,6 +44,8 @@ import PropertyTaxCalculatorComp from "@/components/calculators/PropertyTaxCalcu
 import PropertyTaxGuide from "@/components/calculators/PropertyTaxGuide.astro";
 import PurchaseTaxesCalculatorComp from "@/components/calculators/PurchaseTaxesCalculatorComp";
 import PurchaseTaxesGuide from "@/components/calculators/PurchaseTaxesGuide.astro";
+import YouthMortgageCalculatorComp from "@/components/calculators/YouthMortgageCalculatorComp";
+import YouthMortgageGuide from "@/components/calculators/YouthMortgageGuide.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import RelatedContent from "@/components/shared/RelatedContent";
@@ -156,6 +158,11 @@ const nextStepCtaByRouteId: Partial<
     description: t("tools.purchaseTaxes.nextStepDescription"),
     ctaText: t("tools.purchaseTaxes.nextStepCta"),
   },
+  toolYouthMortgage: {
+    headline: t("tools.youthMortgage.nextStepHeadline"),
+    description: t("tools.youthMortgage.nextStepDescription"),
+    ctaText: t("tools.youthMortgage.nextStepCta"),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -254,6 +261,7 @@ const schema = {
       <SavingsCertificatesCalculatorComp locale={locale} client:load />
     )}
     {routeId === "toolPurchaseTaxes" && <PurchaseTaxesCalculatorComp locale={locale} client:load />}
+    {routeId === "toolYouthMortgage" && <YouthMortgageCalculatorComp locale={locale} client:load />}
     {routeId === "toolPersonalLoan" && <PersonalLoanCalculatorComp locale={locale} client:load />}
     {routeId === "toolPropertyTax" && <PropertyTaxCalculatorComp locale={locale} client:load />}
   </div>
@@ -275,6 +283,7 @@ const schema = {
   {routeId === "toolInflation" && <InflationGuide locale={locale} />}
   {routeId === "toolSavingsCertificates" && <SavingsCertificatesGuide locale={locale} />}
   {routeId === "toolPurchaseTaxes" && <PurchaseTaxesGuide locale={locale} />}
+  {routeId === "toolYouthMortgage" && <YouthMortgageGuide locale={locale} />}
   {routeId === "toolPersonalLoan" && <PersonalLoanGuide locale={locale} />}
   {routeId === "toolPropertyTax" && <PropertyTaxGuide locale={locale} />}
 

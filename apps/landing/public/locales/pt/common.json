@@ -2488,6 +2488,98 @@
       "nextStepDescription": "Soma o IMT e o Imposto do Selo à poupança de que precisas antes de comprar e acompanha o progresso no WonderMoney.",
       "nextStepCta": "Inclui os impostos na meta da entrada da casa"
     },
+    "youthMortgage": {
+      "title": "Simulador de crédito habitação jovem",
+      "shortName": "Crédito habitação jovem",
+      "subtitle": "Veja que condições da garantia pública as suas respostas cumprem e estime a prestação, os impostos da compra e o dinheiro necessário na escritura.",
+      "description": "Estime um crédito habitação jovem: prestação, impostos e dinheiro na escritura.",
+      "pageTitle": "Simulador de Crédito Habitação Jovem: Garantia Pública e Prestação",
+      "pageDescription": "Veja as condições da garantia pública para jovens em 2026 e estime a prestação, o IMT e o Imposto do Selo com e sem isenção jovem, e o dinheiro necessário na escritura.",
+      "checkTitle": "1. Garantia pública: que condições as suas respostas cumprem",
+      "checkIntro": "Apenas informativo. Esta lista mostra que condições as respostas abaixo cumprem; não diz se tem direito à garantia. Quem decide são o banco e o Estado.",
+      "checkSummary": "{{met}} de {{total}} condições cumpridas pelas suas respostas.",
+      "checkNote": "Condições revistas em {{date}}. A garantia cobre até {{percent}}% do valor da transação, pelo que o financiamento pode chegar a 100%. Não altera a taxa de juro.",
+      "estimateTitle": "2. Estime o crédito e o dinheiro necessário",
+      "years": "anos",
+      "fields": {
+        "age": "A sua idade na data do contrato",
+        "income": "Rendimento coletável anual, opcional",
+        "ownHome": "A casa será a minha habitação própria e permanente",
+        "otherProperty": "Sou proprietário, total ou parcial, de outro imóvel para habitação",
+        "price": "Preço de compra",
+        "deposit": "Entrada",
+        "annualRate": "Taxa de juro (TAN)",
+        "termYears": "Prazo do crédito"
+      },
+      "help": {
+        "income": "Usado apenas na lista de condições. O limite é o topo do 8.º escalão de IRS.",
+        "price": "O preço da escritura. A lista de condições também usa este valor.",
+        "deposit": "O dinheiro que entra de seu bolso. Pode ser zero.",
+        "annualRate": "Taxa anual nominal. A garantia não a reduz.",
+        "termYears": "Até 40 anos."
+      },
+      "status": {
+        "met": "Cumprida",
+        "notMet": "Não cumprida",
+        "unknown": "Sem resposta"
+      },
+      "conditions": {
+        "age": "Ter entre {{minAge}} e {{maxAge}} anos.",
+        "ownHome": "A casa destina-se a habitação própria e permanente.",
+        "otherProperty": "Não ser proprietário, total ou parcial, de outro imóvel para habitação.",
+        "price": "A casa custa até {{maxPrice}}.",
+        "income": "Rendimento coletável anual até ao 8.º escalão de IRS ({{maxIncome}} em 2026)."
+      },
+      "errors": {
+        "required": "Introduza um número válido.",
+        "zero": "Introduza um preço superior a zero.",
+        "negative": "Introduza zero ou um valor positivo.",
+        "tooLarge": "Introduza um valor até {{max}}.",
+        "depositTooLarge": "A entrada não pode ser superior ao preço.",
+        "loanTooSmall": "O crédito seria inferior a 100 euros. Reduza a entrada ou trate-o como compra a pronto.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Prestação mensal (capital e juros)",
+        "noLoan": "A entrada cobre o preço todo, por isso não há crédito.",
+        "loan": "Montante do crédito",
+        "ltv": "Financiamento sobre o valor (LTV)",
+        "interest": "Juros totais no prazo",
+        "taxesWithout": "IMT e Imposto do Selo sem isenção jovem",
+        "taxesWith": "IMT e Imposto do Selo com isenção jovem",
+        "cashWithout": "Dinheiro na escritura sem isenção (entrada e impostos)",
+        "cashWith": "Dinheiro na escritura com isenção jovem",
+        "exemptionNote": "A isenção jovem (IMT Jovem) pressupõe ter até 35 anos e comprar a primeira habitação própria e permanente. O Imposto do Selo de 0,6% sobre o crédito continua a ser cobrado.",
+        "bankNote": "Os bancos decidem se concedem crédito, a que taxa e com que LTV. Estimativa educativa, não é uma proposta. Comissões, seguros, avaliação e custos de notário ou registo não estão incluídos."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo prático",
+        "example": "Comprar uma casa de {{price}} sem entrada, com taxa de {{rate}} e prazo de {{years}} anos, implica pedir {{loan}} e pagar cerca de {{monthly}} por mês. O IMT e o Imposto do Selo somam {{taxesWithout}} sem isenção jovem e {{taxesWith}} com ela (fica só o selo do crédito). Com a isenção, o dinheiro necessário na escritura é {{cash}}.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodPayment": "Crédito = preço menos entrada. A prestação mensal é a de um crédito de taxa fixa com prestações constantes, o mesmo motor do simulador de crédito habitação. O LTV é o crédito a dividir pelo preço.",
+        "methodTaxes": "O IMT e o Imposto do Selo vêm do simulador de impostos de compra de casa, para habitação própria e permanente no continente: a isenção jovem elimina ambos até ao limite total e cobra IMT a 8% sobre o excedente até ao limite parcial.",
+        "methodCash": "O dinheiro na escritura é a entrada mais os impostos. Mostramos com e sem isenção jovem.",
+        "methodGuarantee": "A garantia não entra na prestação: apenas ajuda o banco a aceitar um LTV mais alto, até 100%, e a taxa é definida pelo banco.",
+        "conditionsTitle": "Condições da garantia pública verificadas (Decreto-Lei n.º 44/2024)",
+        "conditionAge": "Ter entre {{minAge}} e {{maxAge}} anos na data do contrato e domicílio fiscal em Portugal.",
+        "conditionHome": "A casa é comprada como habitação própria e permanente.",
+        "conditionProperty": "Não ser proprietário, total ou parcial, de outro imóvel para habitação.",
+        "conditionPrice": "A casa custa até {{maxPrice}} (a avaliação do banco pode reduzir o valor da transação).",
+        "conditionIncome": "Rendimento até ao 8.º escalão de IRS: {{maxIncome}} por ano em 2026 (eram 83 696 euros em 2025).",
+        "conditionDate": "Só contratos de crédito celebrados até 31 de dezembro de 2026 podem beneficiar, e a garantia cobre até {{percent}}% do valor da transação durante um máximo de 10 anos.",
+        "sourceGovernment": "Governo de Portugal: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Condições revistas pela última vez em {{date}}. O limite de rendimento de 2026 é o limite superior do 8.º escalão de IRS do artigo 68.º do Código do IRS, atualizado em 3,51% pela Lei n.º 73-A/2025 (Orçamento do Estado para 2026). Os bancos decidem cada pedido.",
+        "assumptionsTitle": "Pressupostos e limites",
+        "assumptionBanks": "Os bancos avaliam o seu risco de crédito e podem recusar o crédito ou propor outras condições, independentemente da lista. Num crédito com dois titulares, ambos têm de cumprir as condições.",
+        "assumptionRate": "A taxa é a que introduzir. A garantia não altera a taxa de juro.",
+        "assumptionTaxes": "Os impostos são para habitação própria e permanente no continente e, nos valores com isenção, assumem que cumpre as condições do IMT Jovem.",
+        "assumptionScope": "Apenas educativo: não é aconselhamento financeiro, fiscal ou jurídico."
+      },
+      "nextStepHeadline": "Planeie a entrada e o custo de viver na sua casa",
+      "nextStepDescription": "Defina um objetivo para a entrada e orce a prestação, os impostos e as despesas da casa no WonderMoney.",
+      "nextStepCta": "Planeie a sua entrada e os custos de habitação"
+    },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
       "shortName": "Crédito pessoal",

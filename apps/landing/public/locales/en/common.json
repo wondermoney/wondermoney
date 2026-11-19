@@ -2488,6 +2488,98 @@
       "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
       "nextStepCta": "Include taxes in your house-deposit target"
     },
+    "youthMortgage": {
+      "title": "Youth mortgage calculator (Portugal)",
+      "shortName": "Youth mortgage",
+      "subtitle": "Check which State guarantee conditions your answers meet, then estimate the monthly payment, the upfront taxes and the cash you need at signing.",
+      "description": "Estimate a youth mortgage in Portugal: payment, taxes and cash at signing.",
+      "pageTitle": "Youth Mortgage Calculator Portugal: Guarantee Checklist and Payment",
+      "pageDescription": "Check the 2026 public guarantee conditions for young buyers in Portugal and estimate the payment, IMT and stamp duty with and without the young exemption, and the cash needed at signing.",
+      "checkTitle": "1. State guarantee: which conditions your answers meet",
+      "checkIntro": "Informational only. This list shows which conditions the answers below meet; it does not say whether you are eligible. The bank and the State decide.",
+      "checkSummary": "{{met}} of {{total}} conditions met by your answers.",
+      "checkNote": "Conditions reviewed on {{date}}. The guarantee covers up to {{percent}}% of the transaction value, so financing can reach 100%. It does not change the interest rate.",
+      "estimateTitle": "2. Estimate your mortgage and cash needed",
+      "years": "years",
+      "fields": {
+        "age": "Your age on the contract date",
+        "income": "Annual taxable income, optional",
+        "ownHome": "The home will be my own permanent home",
+        "otherProperty": "I own all or part of another residential property",
+        "price": "Purchase price",
+        "deposit": "Deposit",
+        "annualRate": "Interest rate (TAN)",
+        "termYears": "Loan term"
+      },
+      "help": {
+        "income": "Used only for the checklist. The limit is the top of the 8th IRS bracket.",
+        "price": "The price on the deed. The checklist uses this value too.",
+        "deposit": "Cash you put in. It can be zero.",
+        "annualRate": "Nominal annual rate. The guarantee does not lower it.",
+        "termYears": "Up to 40 years."
+      },
+      "status": {
+        "met": "Met",
+        "notMet": "Not met",
+        "unknown": "Not answered"
+      },
+      "conditions": {
+        "age": "Aged {{minAge}} to {{maxAge}}.",
+        "ownHome": "The home is for your own permanent home.",
+        "otherProperty": "You do not own, in whole or in part, another residential property.",
+        "price": "The home costs up to {{maxPrice}}.",
+        "income": "Annual taxable income up to the 8th IRS bracket ({{maxIncome}} in 2026)."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "zero": "Enter a price above zero.",
+        "negative": "Enter zero or a positive value.",
+        "tooLarge": "Enter a value up to {{max}}.",
+        "depositTooLarge": "The deposit cannot be more than the price.",
+        "loanTooSmall": "The loan would be under 100 euros. Lower the deposit or treat it as a cash purchase.",
+        "summary": "Check the highlighted fields to see your estimate."
+      },
+      "result": {
+        "monthly": "Monthly payment (principal and interest)",
+        "noLoan": "The deposit covers the whole price, so there is no mortgage.",
+        "loan": "Loan amount",
+        "ltv": "Loan to value (LTV)",
+        "interest": "Total interest over the term",
+        "taxesWithout": "IMT and stamp duty without the young exemption",
+        "taxesWith": "IMT and stamp duty with the young exemption",
+        "cashWithout": "Cash at signing without the exemption (deposit and taxes)",
+        "cashWith": "Cash at signing with the young exemption",
+        "exemptionNote": "The young exemption (IMT Jovem) assumes you are 35 or younger and buy your first own permanent home. The 0.6% stamp duty on the mortgage is still charged.",
+        "bankNote": "Banks decide whether to lend and at what rate and LTV. This is an educational estimate, not an offer. Mortgage fees, insurance, valuation and notary costs are not included."
+      },
+      "guide": {
+        "exampleTitle": "Worked example",
+        "example": "Buying a {{price}} home with no deposit, a {{rate}} rate and a {{years}}-year term means borrowing {{loan}} at about {{monthly}} a month. IMT and stamp duty come to {{taxesWithout}} without the young exemption and {{taxesWith}} with it (only the mortgage stamp duty remains). With the exemption, the cash needed at signing is {{cash}}.",
+        "methodTitle": "How the estimate works",
+        "methodPayment": "Loan = price minus deposit. The monthly payment is the level payment of a fixed-rate loan, the same engine as the mortgage calculator. LTV is the loan divided by the price.",
+        "methodTaxes": "IMT and stamp duty come from the property purchase taxes calculator for an own permanent home on the mainland: the young exemption removes both up to the full limit and charges IMT at 8% on the excess up to the partial limit.",
+        "methodCash": "Cash at signing is the deposit plus the taxes. We show it with and without the young exemption.",
+        "methodGuarantee": "The guarantee does not enter the payment: it only helps the bank accept a higher LTV, up to 100%, and the rate is set by the bank.",
+        "conditionsTitle": "State guarantee conditions checked (Decreto-Lei n.º 44/2024)",
+        "conditionAge": "Age {{minAge}} to {{maxAge}} on the contract date, with tax residence in Portugal.",
+        "conditionHome": "The home is bought as your own permanent home.",
+        "conditionProperty": "You do not own, in whole or in part, another residential property.",
+        "conditionPrice": "The home costs up to {{maxPrice}} (the bank valuation can lower the transaction value).",
+        "conditionIncome": "Income up to the 8th IRS bracket: {{maxIncome}} a year in 2026 (it was 83,696 euros in 2025).",
+        "conditionDate": "Only loan contracts signed by 31 December 2026 qualify, and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
+        "sourceGovernment": "Portuguese Government: Garantia Pública",
+        "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "review": "Conditions last reviewed on {{date}}. The 2026 income limit is the upper limit of the 8th IRS bracket in article 68 of the IRS Code, updated by 3.51% by Lei 73-A/2025 (State Budget 2026). Banks decide on each application.",
+        "assumptionsTitle": "Assumptions and limits",
+        "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
+        "assumptionRate": "The rate is the one you enter. The guarantee does not change the interest rate.",
+        "assumptionTaxes": "Taxes are for an own permanent home on mainland Portugal and assume you meet the IMT Jovem conditions in the with-exemption figures.",
+        "assumptionScope": "Educational only: not financial, tax or legal advice."
+      },
+      "nextStepHeadline": "Plan the deposit and the cost of living in your home",
+      "nextStepDescription": "Set a deposit goal and budget the mortgage, taxes and running costs in WonderMoney.",
+      "nextStepCta": "Plan your deposit and ongoing housing costs"
+    },
     "personalLoan": {
       "title": "Personal Loan Calculator",
       "shortName": "Personal loan",

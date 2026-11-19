@@ -384,6 +384,14 @@ const ROUTE_SLUGS = {
 		de: "immobilienkaufsteuern-portugal-rechner",
 		it: "calcolo-imposte-acquisto-casa-portogallo",
 	},
+	toolYouthMortgage: {
+		pt: "simulador-credito-habitacao-jovem",
+		en: "youth-mortgage-calculator-portugal",
+		es: "calculadora-hipoteca-joven-portugal",
+		fr: "simulateur-credit-immobilier-jeune-portugal",
+		de: "jugend-immobilienkredit-portugal-rechner",
+		it: "calcolo-mutuo-giovani-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -506,6 +514,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolSavingsCertificates",
 	"toolPropertyTax",
 	"toolPurchaseTaxes",
+	"toolYouthMortgage",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -782,6 +791,8 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolpurchasetaxes: "toolPurchaseTaxes",
 	"imt-calculator": "toolPurchaseTaxes",
 	"simulador-imt": "toolPurchaseTaxes",
+	toolyouthmortgage: "toolYouthMortgage",
+	"credito-habitacao-jovem": "toolYouthMortgage",
 	toolpersonalloan: "toolPersonalLoan",
 	personalloancalculator: "toolPersonalLoan",
 	"personal-loan-calculator": "toolPersonalLoan",
