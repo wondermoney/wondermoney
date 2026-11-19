@@ -3222,7 +3222,8 @@
           "none": "O valor diário é a percentagem da remuneração de referência de cada escalão; sem limites aplicados.",
           "minimum": "O valor diário foi elevado ao mínimo de {{min}} (30% da retribuição mínima mensal garantida).",
           "referencePay": "A remuneração de referência é inferior a {{min}} por dia, por isso o subsídio é igual a essa remuneração.",
-          "netCap": "O valor diário foi limitado ao valor líquido estimado da remuneração de referência."
+          "netCap": "O valor diário foi limitado ao valor líquido estimado da remuneração de referência.",
+          "floor": "O valor diário foi elevado ao piso do art. 17.º, n.º 2: acima de 500 euros de remuneração de referência, os escalões de 55% e 60% nunca ficam abaixo do subsídio majorado (60% e 65%) calculado sobre 500 euros."
         }
       },
       "checklist": {
@@ -3252,8 +3253,9 @@
         "unsupportedOther": "Menos de 6 meses de remunerações registadas, remunerações muito variáveis, indemnizações por acidente de trabalho ou doença profissional e acordos coletivos que complementam o subsídio.",
         "sourcesTitle": "Fontes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de outubro de 2026), com a retribuição mínima mensal garantida de 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, na sua redação atual: o regime de proteção na doença",
-        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social e ao texto do art. 17.º do Decreto-Lei n.º 28/2004. As três condições alternativas do acréscimo de 5 pontos vêm desse texto; a lei prevê que o valor de 500 euros seja revisto periodicamente e não conseguimos confirmar o valor atual num texto oficial, por isso mantemos 500. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa."
+        "sourceLaw": "Decreto-Lei n.º 28/2004, na sua redação atual: o regime de proteção na doença (art. 17.º na redação do art. 9.º do Decreto-Lei n.º 133/2012, publicado pela CITE)",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social e ao texto do art. 17.º do Decreto-Lei n.º 28/2004 na redação do Decreto-Lei n.º 133/2012. As três condições alternativas do acréscimo de 5 pontos e o piso acima de 500 euros vêm desse texto. O n.º 4 do art. 17.º diz que o valor de 500 euros é atualizado com o IAS; o guia em vigor (ISS 5001 v4.55, de 23 de outubro de 2026) continua a indicar 500,00 euros, por isso mantemos 500. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa.",
+        "methodFloor": "Acima de uma remuneração de referência de 500 euros por mês, o subsídio diário a 55% e 60% não pode ser inferior ao subsídio majorado calculado sobre 500 euros: 60% e 65% de 500 a dividir por 30, ou seja, {{floor55}} e {{floor60}} por dia (art. 17.º, n.º 2, do Decreto-Lei n.º 28/2004). Só conta para uma remuneração de referência pouco acima de 500 euros, até cerca de 545 euros, quando não há majoração. Não se aplica aos escalões de 70% e 75%."
       },
       "nextStepHeadline": "Planeie a quebra temporária de rendimento",
       "nextStepDescription": "O WonderMoney mostra o seu dinheiro, as suas despesas e durante quanto tempo as poupanças cobrem um rendimento mais baixo.",
@@ -3272,7 +3274,8 @@
         "year": "Ano da primeira matrícula",
         "month": "Mês da primeira matrícula",
         "co2": "Emissões oficiais de CO2",
-        "standard": "Ciclo de ensaio de CO2"
+        "standard": "Ciclo de ensaio de CO2",
+        "otherIuc": "Outro IUC que pagas este ano (opcional)"
       },
       "fuels": {
         "petrol": "Gasolina",
@@ -3310,7 +3313,9 @@
         "scheduleTitle": "2027 (transitório): calendário de pagamento",
         "exempt": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC.",
         "dieselSurcharge": "Adicional de gasóleo (não multiplicado pelo coeficiente)",
-        "scheduleTitle2028": "A partir de 2028: calendário de pagamento"
+        "scheduleTitle2028": "A partir de 2028: calendário de pagamento",
+        "totalAnnualTax": "IUC total para os limites das prestações",
+        "scheduleShareNote": "Os meses seguem o teu total de {{total}} em todos os veículos; os valores são a parte deste automóvel em cada prestação."
       },
       "guide": {
         "exampleTitle": "Exemplo prático",
@@ -3329,7 +3334,7 @@
         "scopeUnsupported": "Não suportado: veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
         "assumptionsTitle": "Pressupostos",
         "assumptionYear": "As taxas são as tabelas de {{taxYear}} do Código do IUC (artigos 9.º e 10.º), na redação da {{law}}. O Portal das Finanças não indica alterações posteriores a estas taxas.",
-        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula, que o preâmbulo do Decreto-Lei n.º 161/2026 confirma ser a regra atualmente em vigor. Os calendários de 2027 e 2028 são só para este automóvel: a lei aplica os limites ao total de todos os teus veículos, por isso a divisão real pode ser diferente. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
+        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula, que o preâmbulo do Decreto-Lei n.º 161/2026 confirma ser a regra atualmente em vigor. Os calendários de 2027 e 2028 mostram a parte deste automóvel em cada prestação; os meses seguem o total de todos os teus veículos, que podes indicar como outro IUC (a lei aplica os limites a esse total). Sem isso, o simulador assume que este é o teu único veículo. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
         "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. Conta o valor da nota de cobrança da Autoridade Tributária.",
         "sourcesTitle": "Fontes",
         "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
@@ -3341,7 +3346,8 @@
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
-      "nextStepCta": "Reserva um doze avos do teu imposto automóvel anual"
+      "nextStepCta": "Reserva um doze avos do teu imposto automóvel anual",
+      "otherIucHelp": "O IUC anual de todos os teus outros veículos, em euros. A partir de 2027 os meses de pagamento dependem do total de todos os veículos. Indica 0 se este é o teu único veículo."
     },
     "propertyCapitalGains": {
       "title": "Simulador de mais-valias na venda de casa",
@@ -3527,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Simulador de compensação por despedimento 2026",
       "shortName": "Compensação por despedimento",
-      "subtitle": "Estima a compensação por despedimento coletivo, extinção do posto de trabalho ou inadaptação num contrato sem termo, com os limites e as taxas por data do contrato.",
-      "description": "Estima a tua compensação por despedimento em Portugal: taxas por data do contrato, limites e plano de recebimento.",
+      "subtitle": "Estima a compensação por despedimento coletivo, extinção do posto de trabalho ou inadaptação num contrato sem termo, ou pela caducidade de um contrato a termo, com os limites e as taxas.",
+      "description": "Estima a tua compensação por despedimento ou por caducidade de contrato a termo em Portugal: taxas, limites e plano de recebimento.",
       "pageTitle": "Simulador de Compensação por Despedimento 2026: Estimativa do art. 366.º",
-      "pageDescription": "Estima a compensação por despedimento coletivo ou extinção do posto de trabalho: 12, 18, 20 ou 30 dias por ano consoante a data do contrato, o limite de 12 meses e um plano de recebimento.",
+      "pageDescription": "Estima a compensação por despedimento coletivo ou extinção do posto de trabalho (12, 18, 20 ou 30 dias por ano consoante a data do contrato) ou por caducidade de contrato a termo (24 dias por ano), com o limite de 12 meses e um plano de recebimento.",
       "fields": {
         "baseMonthly": "Retribuição base mensal (bruta)",
         "seniorityPay": "Diuturnidades mensais",
         "startDate": "Data de início do contrato",
-        "endDate": "Data de cessação"
+        "endDate": "Data de cessação",
+        "contractType": "Tipo de cessação"
       },
       "help": {
         "baseMonthly": "A retribuição base em euros por mês, antes da Segurança Social e do IRS. Não incluas subsídios, prémios nem horas extra.",
         "seniorityPay": "As diuturnidades são complementos pagos pela antiguidade. Indica 0 se não tiveres.",
         "startDate": "O dia em que o contrato sem termo começou. Se houve grupo de empresas ou um contrato anterior com o mesmo empregador, confirma como conta a tua antiguidade.",
-        "endDate": "O último dia do contrato. Conta como dia trabalhado. Esta estimativa cobre cessações em {{year}}."
+        "endDate": "O último dia do contrato. Conta como dia trabalhado. Esta estimativa cobre cessações em {{year}}.",
+        "contractType": "O despedimento cobre o despedimento coletivo, a extinção do posto de trabalho e a inadaptação. A caducidade é o fim de um contrato a termo, certo ou incerto (arts. 344.º e 345.º do Código do Trabalho). Não é devida quando o contrato termina porque declaraste que não o querias renovar.",
+        "startDateFixedTerm": "O dia em que o contrato a termo começou. Se foi renovado, conta desde o primeiro dia: toda a duração, renovações incluídas, é paga a 24 dias por ano."
       },
-      "scope": "Cobre despedimento coletivo, extinção do posto de trabalho e inadaptação num contrato sem termo. Não cobre contratos a termo, despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública.",
+      "scope": "Cobre despedimento coletivo, extinção do posto de trabalho e inadaptação num contrato sem termo. Não cobre despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública. Para o fim de um contrato a termo, escolhe caducidade de contrato a termo.",
       "errors": {
         "required": "Indica um valor válido.",
         "tooSmall": "Indica um valor de pelo menos {{min}}.",
@@ -3562,7 +3571,8 @@
         "regimes": {
           "before2011": "Contrato anterior a 1 de novembro de 2011",
           "from2011": "Contrato de 1 de novembro de 2011 a 30 de setembro de 2013",
-          "from2013": "Contrato a partir de 1 de outubro de 2013"
+          "from2013": "Contrato a partir de 1 de outubro de 2013",
+          "fixedTerm": "Caducidade de contrato a termo, 24 dias por ano"
         },
         "usedMonthly": "Valor mensal usado",
         "daily": "Valor diário (valor mensal a dividir por 30)",
@@ -3573,7 +3583,8 @@
           "twentyDays": "{{years}} anos a {{days}} dias por ano",
           "eighteenDays": "{{years}} anos a {{days}} dias por ano",
           "twelveDays": "{{years}} anos a {{days}} dias por ano",
-          "fourteenDays": "{{years}} anos a {{days}} dias por ano"
+          "fourteenDays": "{{years}} anos a {{days}} dias por ano",
+          "twentyFourDays": "{{years}} anos a {{days}} dias por ano"
         },
         "caps": {
           "none": "Não foi aplicado nenhum limite.",
@@ -3598,9 +3609,9 @@
         "methodTax": "Só como informação, não entra no valor: parte da indemnização pode ficar excluída de IRS ao abrigo do art. 2.º, n.º 4, do CIRS, até um limite ligado à remuneração regular dos últimos 12 meses e aos anos de antiguidade. O resto é rendimento tributável. Pergunta à Autoridade Tributária ou a um contabilista qual é o limite exato no teu caso.",
         "methodBudget": "A compensação é um valor único. Repartires o valor pelos próximos meses, juntamente com o subsídio de desemprego a que tenhas direito, mostra quanto tempo cobre as tuas despesas.",
         "supportedTitle": "Situações cobertas",
-        "supported": "Despedimento coletivo, extinção do posto de trabalho e inadaptação do trabalhador, num contrato sem termo, com cessação em 2026.",
+        "supported": "Despedimento coletivo, extinção do posto de trabalho e inadaptação do trabalhador num contrato sem termo, e caducidade de contrato a termo, certo ou incerto, com cessação em 2026.",
         "unsupportedTitle": "Não cobre",
-        "unsupportedFixedTerm": "A caducidade de contratos a termo (arts. 344.º e 345.º do Código do Trabalho), que tem taxas e regras transitórias próprias.",
+        "unsupportedFixedTerm": "Contratos a termo que caducaram antes de 1 de maio de 2023 (18 dias por ano no texto anterior), cessação antecipada de contrato a termo e caducidade provocada por declaração do próprio trabalhador.",
         "unsupportedJustCause": "O despedimento com justa causa (disciplinar), que segue outras regras.",
         "unsupportedUnlawful": "O despedimento ilícito, em que o tribunal fixa a indemnização, em geral entre 15 e 45 dias de retribuição base por ano de antiguidade.",
         "unsupportedAgreement": "A cessação por acordo, em que o valor é negociado e não há fórmula legal.",
@@ -3610,11 +3621,19 @@
         "sourceLaw13": "Guia da APEL sobre a Agenda do Trabalho Digno: Lei n.º 13/2023, que subiu a taxa do art. 366.º, n.º 1, para 14 dias desde 1 de maio de 2023",
         "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344.º, 345.º e 366.º",
         "sourceDgert": "DGERT: compensação por despedimento coletivo (art. 366.º)",
-        "reviewed": "Regras revistas a 19 de novembro de 2026 com o texto da Lei n.º 69/2013, publicado pela Assembleia da República, e o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias por ano da Lei n.º 13/2023, em vigor desde 1 de maio de 2023, e os 12 dias e o limite do art. 366.º vêm dos resumos da APEL e da DGERT e do Código do Trabalho consolidado, não do texto do Diário da República. Aplicamos os 14 dias só à antiguidade desde 1 de maio de 2023, a leitura habitual da norma transitória. Informação para aprender, não é aconselhamento jurídico."
+        "reviewed": "Regras revistas a 19 de novembro de 2026 com o texto da Lei n.º 69/2013, publicado pela Assembleia da República, e o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias por ano da Lei n.º 13/2023, em vigor desde 1 de maio de 2023, e os 12 dias e o limite do art. 366.º vêm dos resumos da APEL e da DGERT e do Código do Trabalho consolidado, não do texto do Diário da República. Aplicamos os 14 dias só à antiguidade desde 1 de maio de 2023, a leitura habitual da norma transitória. Os 24 dias da caducidade de contrato a termo e a sua aplicação a todos os contratos que caduquem a partir de 1 de maio de 2023 vêm do texto da Lei n.º 13/2023 reproduzido pela PGDL (arts. 344.º, 345.º e 35.º) e da nota do IGeFE, não da página do Diário da República. Informação para aprender, não é aconselhamento jurídico.",
+        "methodFixedTerm": "Caducidade de contrato a termo (arts. 344.º, n.º 2, e 345.º, n.º 4, do Código do Trabalho, na redação da Lei n.º 13/2023): 24 dias de retribuição base e diuturnidades por cada ano completo de antiguidade, calculados como no art. 366.º. Aplicam-se o valor diário, o limite de 20 vezes o salário mínimo para o valor mensal, o limite de 12 valores mensais e a fração proporcional de um ano. O art. 35.º, n.º 1, da Lei n.º 13/2023 sujeita ao novo texto os contratos celebrados antes de 1 de maio de 2023, e a nota do IGeFE de 5 de julho de 2023 lê-o como 24 dias para todos os contratos que caduquem a partir de 1 de maio de 2023. Assim, toda a duração conta a 24 dias, seja qual for a data de início, e as taxas dos contratos sem termo (12, 14, 18 e 20 dias) não se aplicam.",
+        "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril: nova redação dos arts. 344.º, n.º 2, e 345.º, n.º 4, do Código do Trabalho e art. 35.º sobre a aplicação no tempo (reprodução da PGDL do texto do Diário da República)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julho de 2023): 24 dias para todos os contratos a termo que caduquem a partir de 1 de maio de 2023, seja qual for a data de celebração"
       },
       "nextStepHeadline": "Planeia o recebimento antes de ele chegar",
       "nextStepDescription": "A WonderMoney mostra as tuas contas e as despesas mensais em conjunto, para repartires uma indemnização pelos meses seguintes.",
-      "nextStepCta": "Planear o recebimento pelos próximos meses"
+      "nextStepCta": "Planear o recebimento pelos próximos meses",
+      "contractTypes": {
+        "permanent": "Despedimento num contrato sem termo",
+        "fixedTerm": "Caducidade de contrato a termo"
+      },
+      "scopeFixedTerm": "Cobre a caducidade de contrato a termo, certo ou incerto, com cessação em {{year}}: 24 dias de retribuição base e diuturnidades por ano de toda a duração do contrato, com o valor diário e os limites do art. 366.º. Não cobre contratos que caducaram antes de 1 de maio de 2023, cessação antecipada, despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública."
     },
     "statePension": {
       "title": "Simulador da pensão de reforma 2026",
@@ -4070,6 +4089,127 @@
           "emergencyFundBody": "Calcula quantos meses de despesas essenciais, energia incluída, as tuas poupanças cobririam.",
           "inflationLink": "Simulador de inflação",
           "inflationBody": "Vê como a subida dos preços muda o que o teu dinheiro compra ao longo do tempo."
+        }
+      }
+    },
+    "fuelPrices": {
+      "title": "Preço dos combustíveis em Portugal e custo mensal",
+      "shortName": "Preço dos combustíveis",
+      "subtitle": "Vê o preço médio oficial do gasóleo, da gasolina e do GPL em Portugal, o histórico e quanto te custa conduzir por mês.",
+      "description": "Preços médios oficiais da DGEG dos combustíveis em Portugal continental, com variação semanal e histórico, e uma calculadora do custo mensal de combustível.",
+      "pageTitle": "Preço dos Combustíveis em Portugal: Média Oficial e Custo Mensal",
+      "pageDescription": "O último preço médio da DGEG do gasóleo, da gasolina 95 e do GPL em Portugal, com a variação face à semana anterior e cinco anos de histórico, e uma calculadora do teu custo mensal de combustível. Dados oficiais, sem previsões.",
+      "fuels": {
+        "diesel": "Gasóleo simples",
+        "gasoline95": "Gasolina simples 95",
+        "lpg": "GPL auto"
+      },
+      "fields": {
+        "fuel": "Combustível",
+        "period": "A distância que indicas é",
+        "periodMonth": "Por mês",
+        "periodWeek": "Por semana",
+        "periodTrip": "Por viagem",
+        "distance": "Distância",
+        "trips": "Viagens por mês",
+        "consumption": "Consumo de combustível",
+        "price": "Preço por litro",
+        "resetPrice": "Usar a média mais recente ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Quilómetros no período escolhido acima. Uma semana conta como 52/12 semanas por mês.",
+        "trips": "Quantas vezes por mês fazes esta viagem.",
+        "consumption": "Litros por 100 km, do computador de bordo ou da ficha técnica do carro. O consumo real costuma ser superior ao oficial.",
+        "price": "Começa na última média nacional da DGEG, {{price}}/L em {{date}}. Altera para o preço que realmente pagas."
+      },
+      "errors": {
+        "required": "Indica um número válido.",
+        "negative": "Não pode ser negativo.",
+        "tooLarge": "Indica {{max}} ou menos.",
+        "zero": "Indica um valor superior a zero.",
+        "notWhole": "Indica um número inteiro de viagens.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Custo estimado de combustível por mês",
+        "week": "Custo da distância semanal",
+        "trip": "Custo de uma viagem",
+        "litres": "Combustível usado por mês",
+        "yearly": "Cerca de doze meses assim",
+        "per100": "Custo por 100 km",
+        "nothing": "Sem distância percorrida, não há custo de combustível.",
+        "budget": "{{amount}} por mês é a linha do combustível no teu orçamento de transportes. Junta ao lado os outros custos do carro para ver o quadro todo."
+      },
+      "notes": {
+        "assumptions": "Estimativa: distância vezes consumo vezes preço por litro. Assume o mesmo consumo em todas as viagens e o mesmo preço durante o mês. Não é aconselhamento."
+      },
+      "latest": {
+        "title": "Último preço médio nacional",
+        "asOf": "Dados a {{date}} (DGEG). A variação é face a {{previous}}, uma semana antes.",
+        "change": "{{amount}}/L ({{percent}}) numa semana",
+        "flat": "Sem variação numa semana",
+        "note": "Média diária de Portugal continental, ponderada pelas quantidades vendidas e com os descontos dos postos. É uma média do passado, não uma previsão: esta página não prevê o preço da próxima semana."
+      },
+      "history": {
+        "title": "Preços dos combustíveis nos últimos cinco anos",
+        "intro": "Preço médio por litro da DGEG, um valor por semana para cada combustível.",
+        "chartLabel": "Gráfico de linhas do preço médio semanal por litro do gasóleo, da gasolina 95 e do GPL em Portugal ao longo de cinco anos",
+        "tableCaption": "As últimas semanas: preço médio por litro de cada combustível",
+        "date": "Data",
+        "asOf": "Dados a {{date}}, o último dia publicado pela DGEG. Um valor por semana, desde {{first}}. A cópia desta página foi criada a {{fetched}}. Fonte: DGEG, Preço Médio Diário (Portugal continental)."
+      },
+      "nextStepHeadline": "Põe o combustível no teu orçamento",
+      "nextStepDescription": "O combustível faz parte do que custa deslocares-te. Junta-o a um orçamento WonderMoney com os outros custos de transporte e vê o que sobra por mês.",
+      "nextStepCta": "Revê a verba de transportes no teu orçamento",
+      "guide": {
+        "read": {
+          "title": "Como ler esta página",
+          "prices": "No topo da página está o último preço médio nacional por litro do gasóleo, da gasolina 95 e do GPL, tal como a DGEG o publicou para {{asOf}}, e quanto cada um variou numa semana: gasóleo {{dieselChange}} e gasolina {{gasolineChange}} face à semana anterior.",
+          "calculator": "A calculadora transforma a tua condução num custo mensal de combustível. Indicas a distância, o consumo em litros por 100 km e o combustível; o preço começa na média mais recente e podes alterá-lo para o que realmente pagas.",
+          "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Um carro a gasóleo com {{distance}} por mês e um consumo de {{consumption}}, à média mais recente de {{price}}. Combustível usado: {{distance}} vezes {{consumption}} a dividir por 100 dá {{litres}}. Custo: {{litres}} vezes {{price}} dá {{monthly}} por mês, cerca de {{yearly}} por ano, ou {{per100}} por cada 100 km.",
+          "trips": "A distância também pode ser uma viagem. Uma ida e volta de 40 km feita 20 vezes por mês com o mesmo carro custa {{tripCost}} de cada vez, {{tripMonthly}} por mês."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "A calculadora faz quatro coisas:",
+          "steps": {
+            "a": "Distância por mês: a distância que indicas, uma semana contada como 52 a dividir por 12 semanas por mês, ou uma viagem multiplicada pelas viagens por mês.",
+            "b": "Litros: distância vezes consumo a dividir por 100.",
+            "c": "Custo: litros vezes o preço por litro que indicas, arredondado ao cêntimo.",
+            "d": "Ano: doze meses assim."
+          },
+          "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "dgeg": "Preços: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dos combustíveis rodoviários em Portugal continental, para gasóleo simples, gasolina simples 95 e GPL auto. O último dia é {{asOf}}; a cópia desta página foi criada a {{fetched}}. O histórico é um valor da DGEG de sete em sete dias até {{first}}, copiado tal como a DGEG o publica.",
+          "terms": "A DGEG indica que esta informação é gratuita e pode ser usada livremente, desde que a DGEG seja identificada como fonte, se indique a data da última atualização e a informação seja reproduzida fielmente. Os preços são comunicados pelos postos, que são responsáveis por eles.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "A página lê um ficheiro de dados guardado e nunca chama a DGEG enquanto a usas. O ficheiro é atualizado por um script que recusa dados desatualizados ou implausíveis, por isso uma atualização falhada mantém os últimos números bons e a respetiva data ({{asOf}})."
+        },
+        "limits": {
+          "title": "O que estes valores não incluem",
+          "items": {
+            "noForecast": "Sem previsão: nada aqui prevê preços futuros, e os movimentos passados não dizem para onde o preço vai a seguir.",
+            "average": "Média nacional: junta todos os postos de Portugal continental e é ponderada pelas vendas. O preço no teu posto pode ser mais alto ou mais baixo, e os Açores e a Madeira não estão incluídos.",
+            "stations": "Sem postos: esta página não nomeia nem ordena nenhum posto. O site da DGEG lista os preços por posto, se quiseres ver.",
+            "consumption": "Consumo: o mesmo valor em todas as viagens. O consumo real muda com a velocidade, a carga, o trânsito e a estação do ano, e costuma ser superior ao oficial.",
+            "scope": "Só combustível: portagens, seguro, imposto, manutenção e estacionamento não estão incluídos. O carregamento elétrico não é coberto e outros combustíveis não são mostrados.",
+            "education": "Apenas para fins educativos, não é aconselhamento."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "householdBudgetLink": "Calculadora de orçamento familiar",
+          "householdBudgetBody": "Põe o combustível ao lado dos outros custos mensais e vê o que sobra.",
+          "carLoanLink": "Simulador de crédito automóvel",
+          "carLoanBody": "Junta a prestação ao combustível para ver quanto custa o carro no total.",
+          "vehicleTaxLink": "Simulador de IUC",
+          "vehicleTaxBody": "Estima o imposto anual do veículo, mais um custo de ter carro."
         }
       }
     }

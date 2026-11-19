@@ -1,0 +1,140 @@
+name: Landing data refresh
+
+# Regenerates the dated market-data snapshots behind the landing tools (Euribor from BPstat,
+# deposit rates from the ECB, household electricity prices from Eurostat, fuel prices from DGEG)
+# and, when the figures
+# changed, opens or updates ONE pull request into develop from the fixed branch
+# bot/landing-data-refresh. A run with no new figures opens nothing.
+#
+# The sources publish monthly, so it runs on the 6th. The data modules and their other refresh
+# paths (S&P 500, Portugal CPI, ERSE, the tax tables) are listed in apps/landing/AGENTS.md.
+#
+# A fetch or parse failure fails the job before anything is committed: the data stays as it is.
+#
+# The pull request is opened with GITHUB_TOKEN, and events made with that token start no
+# workflows, so CI does not run on it. A maintainer starts it: close and reopen the pull request,
+# or push an empty commit to the branch from a clone. Branch protection on develop needs that run.
+#
+# Creating the pull request needs the repository setting "Allow GitHub Actions to create and
+# approve pull requests" (Settings > Actions > General). Without it the push still happens and the
+# job fails at the pull request step; open it by hand (gh pr create --base develop --head
+# bot/landing-data-refresh) and later runs keep it current.
+on:
+  schedule:
+    - cron: '17 6 6 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# One run at a time; the branch is rebuilt from develop on every run.
+concurrency:
+  group: landing-data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh the landing data snapshots
+    # Only the main repository; forks have no develop to open the pull request against.
+    if: github.repository == 'wondermoney/wondermoney'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BRANCH: bot/landing-data-refresh
+      DATA_DIR: apps/landing/src/lib/calculators/data
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: develop
+          # The token is kept: the job pushes the branch with it.
+          persist-credentials: true
+      - id: setup
+        uses: ./.github/actions/setup-workspace
+      - name: Fetch the snapshots
+        working-directory: apps/landing
+        run: |
+          set -euo pipefail
+          # Each script writes its module only after the fetch and the parse succeed, and a
+          # failure stops the job here, so a failed run leaves the data as it was.
+          for script in build-euribor build-deposit-rates build-electricity-prices build-fuel-prices; do
+            echo "::group::$script"
+            node "scripts/$script.mjs" || { echo "::error::scripts/$script.mjs failed: the source did not answer or its format changed. The data was left as it was."; exit 1; }
+            echo "::endgroup::"
+          done
+      - name: Check for new figures
+        id: changes
+        run: |
+          set -euo pipefail
+          # The scripts stamp today's date as the fetch date on every run, so a date-only diff is
+          # not a data change: put those modules back.
+          ignore='^[[:space:]]*(fetchedOn|retrievedOn):'
+          if [ -z "$(git diff -I"$ignore" --numstat -- "$DATA_DIR")" ]; then
+            git checkout -- "$DATA_DIR"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No new figures; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          git diff --stat -- "$DATA_DIR"
+      - name: Run the related landing tests
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: apps/landing
+        run: |
+          set -euo pipefail
+          VITEST_MAX_WORKERS=$(nproc) pnpm exec vitest run euribor depositRate electricity fuel termDeposit rateRevision
+      - name: Open or update the pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"
+
+          # As-of dates and the latest period, old (develop) and new (working tree), per module.
+          field() { grep -m1 -E "^[[:space:]]*$2:" | sed -E 's/^[^"]*"([^"]*)".*/\1/'; }
+          summary="| Data | Latest period | Source updated or retrieved |"$'\n'"|---|---|---|"$'\n'
+          row() { # label file period-field date-field
+            local file="$DATA_DIR/$2" old_p new_p old_d new_d
+            old_p=$(git show "HEAD:$file" | field x "$3"); new_p=$(field x "$3" < "$file")
+            old_d=$(git show "HEAD:$file" | field x "$4"); new_d=$(field x "$4" < "$file")
+            if [ -n "$(git diff --numstat -I'^[[:space:]]*(fetchedOn|retrievedOn):' -- "$file")" ]; then
+              summary+="| $1 | ${old_p} to **${new_p}** | ${old_d} to **${new_d}** |"$'\n'
+            fi
+          }
+          row "Euribor (BPstat)" euribor.ts lastMonth fetchedOn
+          row "Deposit rates (ECB MIR)" depositRates.ts lastMonth retrievedOn
+          row "Electricity prices (Eurostat)" electricityPrices.ts lastPeriod updatedOn
+          row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
+
+          body_file=$(mktemp)
+          {
+            echo "Scheduled refresh of the landing market-data snapshots, generated by"
+            echo "\`.github/workflows/landing-data-refresh.yml\` (run $GITHUB_SERVER_URL/$repo/actions/runs/$GITHUB_RUN_ID)."
+            echo
+            printf '%s' "$summary"
+            echo
+            echo "The related landing tests (Euribor, deposit rates, electricity, fuel, term deposit, rate revision) passed in the workflow."
+            echo
+            echo "This pull request was opened with the workflow token, so CI did not start. Close and reopen it to run CI before merging."
+            echo "Review the diff for plausible figures: the scripts only check the shape of the response."
+          } > "$body_file"
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -C "$BRANCH"
+          git add -- "$DATA_DIR"
+          git commit -m "chore(landing): refresh the market-data snapshots"
+          # The branch belongs to this workflow and is rebuilt from develop on every run.
+          git push --force origin "$BRANCH"
+
+          existing=$(gh pr list --repo "$repo" --head "$BRANCH" --base develop --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --repo "$repo" --body-file "$body_file"
+            echo "Updated pull request #$existing" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            url=$(gh pr create --repo "$repo" --base develop --head "$BRANCH" \
+              --title "chore(landing): refresh the market-data snapshots" \
+              --body-file "$body_file" --label skip-release-notes)
+            echo "Opened $url" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi

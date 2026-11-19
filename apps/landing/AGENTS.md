@@ -18,7 +18,7 @@ src/components/shared/ # Layout, SEO, structured data
 src/lib/               # Locale, routes, static paths, Sanity clients
 src/content/           # Local content/config
 src/locales/           # Translation catalogues (mirrored in public/locales/)
-scripts/               # Offer and claims alignment checks
+scripts/               # Offer and claims alignment checks, and the data-snapshot refresh scripts
 public/                # Static assets
 ```
 
@@ -81,6 +81,31 @@ src/pages/index.astro         # Root redirect only
   generates Vercel HTTP 301 redirects from those maps. `pnpm build` checks each rule in
   Vercel output and verifies that the sitemap lists its destination only.
 - Verify generated URLs for all six locales, not only the default route.
+
+## CALCULATOR DATA REFRESH
+
+Dated data modules live in `src/lib/calculators/data/` (plus a few tables inside the calculator
+modules). Each carries its own "as of" date, which the page shows. The three open-API snapshots
+refresh themselves: `.github/workflows/landing-data-refresh.yml` runs on the 6th of every month
+(and by hand: Actions > Landing data refresh), runs their scripts and opens or updates one pull
+request from `bot/landing-data-refresh` into `develop` when the figures changed. That pull request
+gets no CI run (it is opened with `GITHUB_TOKEN`): close and reopen it before merging. A script
+that fails fails the job and leaves the data as it was. Everything else is refreshed by hand, on
+the calendar below. Run the commands from `apps/landing`.
+
+| Module | Source | Cadence | Refresh |
+|---|---|---|---|
+| `data/euribor.ts` | BPstat, Euribor monthly averages | monthly, automated | `node scripts/build-euribor.mjs` |
+| `data/depositRates.ts` | ECB MIR deposit rates | monthly, automated | `node scripts/build-deposit-rates.mjs` |
+| `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
+| `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
+| `data/sp500History.ts` | Damodaran `histretSP.xls` and Shiller `ie_data.xls`, downloaded by hand | each January, after the year-end data is out | `node scripts/build-sp500-history.mjs <histretSP.xls> <date> <ie_data.xls> <date>` |
+| `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
+| `data/erseTariffs.ts` | ERSE tariff documents (diretivas, price simulator) | quarterly: check in the first week of January, April, July and October | Edit by hand, bump `version`, update the "downloaded on" date |
+| IMT and stamp duty (`purchaseTaxes.ts`), IMI (`propertyTax.ts`), IUC (`vehicleTax.ts`), IRS withholding and Social Security (`payroll.ts`), IAS and benefits (`unemploymentBenefit.ts`, `statePension.ts`, `sickPay.ts`) | Portal das Finanças, Diário da República, Segurança Social | each January, and again when the State Budget or a Portaria changes them | Edit by hand against the official table, update the module's year and review date, run the calculator's tests |
+
+When the data changes a number a page quotes in prose, update the pages in all six locales in the
+same pull request.
 
 ## ANTI-PATTERNS
 

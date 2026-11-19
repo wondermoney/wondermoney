@@ -2,7 +2,8 @@ import { REFERENCE_DATE, RMMG_2026_CENTS } from "./unemploymentBenefit";
 
 /**
  * Compensation for a collective dismissal, the extinction of a post or the unsuitability of the worker, on a permanent
- * contract (Código do Trabalho, art. 366, as amended by Lei n.º 69/2013, and its transitional regime, art. 5).
+ * contract (Código do Trabalho, art. 366, as amended by Lei n.º 69/2013, and its transitional regime, art. 5), or for the
+ * expiry of a fixed-term contract at the employer's initiative (arts. 344(2) and 345(4), as amended by Lei n.º 13/2023).
  * Amounts in cents, dates as ISO `YYYY-MM-DD` strings.
  */
 export { REFERENCE_DATE, RMMG_2026_CENTS };
@@ -22,13 +23,25 @@ export const MAY_2023 = "2023-05-01";
 /** The only year whose minimum wage (RMMG) the caps use. */
 export const SUPPORTED_END_YEAR = 2026;
 
+/**
+ * Fixed-term expiry: 24 days of base pay and diuturnidades per full year of seniority (arts. 344(2) and 345(4) CT, Lei
+ * n.º 13/2023), "calculada nos termos do artigo 366.º": same daily value, caps and proportional fraction. Art. 35(1) of
+ * Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text when they expire from that date on (IGeFE
+ * nota informativa 10/2023), so the rate depends on the expiry date, not the contract date. Every expiry this
+ * calculator accepts is in 2026, so the earlier 18 days a year (expiry up to 30 April 2023) is never used.
+ */
+export const FIXED_TERM_DAYS_PER_YEAR = 24;
+
 export const DISMISSAL_LIMITS = { monthly: 1_000_000 } as const;
 
+export type ContractType = "permanent" | "fixedTerm";
 export type DismissalField = "baseMonthly" | "seniorityPay" | "startDate" | "endDate";
 export type DismissalError =
   | "required" | "tooSmall" | "tooLarge" | "invalidDate" | "endBeforeStart" | "startFuture" | "endOutsideYear";
 
 export interface DismissalCompensationInput {
+  /** `permanent`: dismissal under art. 366 or 367 to 379; `fixedTerm`: expiry of a fixed-term contract, arts. 344 and 345. */
+  contractType: ContractType;
   /** Monthly base pay (retribuição base) in euros. */
   baseMonthly: number;
   /** Monthly seniority supplements (diuturnidades) in euros; 0 when there are none. */
@@ -40,12 +53,12 @@ export interface DismissalCompensationInput {
 }
 
 export const DISMISSAL_EXAMPLE: DismissalCompensationInput = {
-  baseMonthly: 1500, seniorityPay: 50, startDate: "2012-03-01", endDate: "2026-12-31",
+  contractType: "permanent", baseMonthly: 1500, seniorityPay: 50, startDate: "2012-03-01", endDate: "2026-12-31",
 };
 
-export type PeriodKey = "oneMonth" | "twentyDays" | "eighteenDays" | "twelveDays" | "fourteenDays";
+export type PeriodKey = "oneMonth" | "twentyDays" | "eighteenDays" | "twelveDays" | "fourteenDays" | "twentyFourDays";
 /** The rule behind each line of the breakdown: days of pay per year of seniority. */
-const DAYS_PER_YEAR: Record<PeriodKey, number> = { oneMonth: 30, twentyDays: 20, eighteenDays: 18, twelveDays: 12, fourteenDays: 14 };
+const DAYS_PER_YEAR: Record<PeriodKey, number> = { oneMonth: 30, twentyDays: 20, eighteenDays: 18, twelveDays: 12, fourteenDays: 14, twentyFourDays: FIXED_TERM_DAYS_PER_YEAR };
 
 export interface PeriodLine {
   key: PeriodKey;
@@ -56,8 +69,8 @@ export interface PeriodLine {
 }
 
 export interface DismissalCompensationResult {
-  /** `before2011`, `from2011` (1 Nov 2011 to 30 Sep 2013) or `from2013`, by the contract start date. */
-  regime: "before2011" | "from2011" | "from2013";
+  /** `before2011`, `from2011` (1 Nov 2011 to 30 Sep 2013) or `from2013`, by the contract start date; `fixedTerm` for an expiry. */
+  regime: "before2011" | "from2011" | "from2013" | "fixedTerm";
   seniorityYears: number;
   /** Base plus supplements the calculation used, after the 20 x minimum wage cap, in cents. */
   usedMonthlyCents: number;
@@ -132,8 +145,10 @@ export function computeDismissalCompensation(input: DismissalCompensationInput, 
 
   const start = parseDate(input.startDate)!;
   const endExclusive = parseDate(input.endDate)! + DAY_MS; // the end date counts as a day worked
-  const regime: DismissalCompensationResult["regime"] =
-    start < parseDate(NOV_2011)! ? "before2011" : start < parseDate(OCT_2013)! ? "from2011" : "from2013";
+  const fixedTerm = input.contractType === "fixedTerm";
+  const regime: DismissalCompensationResult["regime"] = fixedTerm
+    ? "fixedTerm"
+    : start < parseDate(NOV_2011)! ? "before2011" : start < parseDate(OCT_2013)! ? "from2011" : "from2013";
 
   const baseCents = Math.round((input.baseMonthly + input.seniorityPay) * 100);
   const baseCapCents = BASE_CAP_RMMG_MULTIPLE * RMMG_2026_CENTS;
@@ -149,13 +164,15 @@ export function computeDismissalCompensation(input: DismissalCompensationInput, 
     lines.push({ key, daysPerYear: DAYS_PER_YEAR[key], years, amountCents: Math.round(years * DAYS_PER_YEAR[key] * dailyCents) });
   };
   const farFuture = "9999-12-31";
-  if (regime === "before2011") {
+  if (fixedTerm) {
+    push("twentyFourDays", seniority(start, endExclusive));
+  } else if (regime === "before2011") {
     push("oneMonth", yearsBetween(input.startDate, NOV_2012));
     push("twentyDays", yearsBetween(NOV_2012, OCT_2013));
   } else if (regime === "from2011") {
     push("twentyDays", yearsBetween(input.startDate, OCT_2013));
   }
-  const earlyCents = lines.reduce((sum, line) => sum + line.amountCents, 0);
+  const earlyCents = fixedTerm ? 0 : lines.reduce((sum, line) => sum + line.amountCents, 0);
   // From 1 Oct 2013 to 30 Apr 2023 every year counts 12 days, except that the first three years of seniority count 18 days
   // when the contract was less than three years old on 1 Oct 2013 (seniority below 3 then). Seniority from 1 May 2023
   // counts 14 days (Lei n.º 13/2023); earlier time keeps its rate.
@@ -165,14 +182,16 @@ export function computeDismissalCompensation(input: DismissalCompensationInput, 
   const seniorityAtMay2023 = seniority(start, at(MAY_2023));
   const seniorityAtEnd = seniority(start, endExclusive);
   const first3 = regime === "from2013" ? 0 : Math.max(0, Math.min(seniorityAtMay2023, 3) - Math.min(seniorityAtOct2013, 3));
-  push("eighteenDays", first3);
-  push("twelveDays", middle - first3);
-  push("fourteenDays", yearsBetween(MAY_2023, farFuture));
+  if (!fixedTerm) {
+    push("eighteenDays", first3);
+    push("twelveDays", middle - first3);
+    push("fourteenDays", yearsBetween(MAY_2023, farFuture));
+  }
 
   const uncappedCents = lines.reduce((sum, line) => sum + line.amountCents, 0);
   const capCents = TOTAL_CAP_MONTHS * usedMonthlyCents;
   // Art. 5(5)-(6) of Lei 69/2013: when the part up to 30 Sep 2013 alone reaches the cap, nothing is added after it.
-  const earlyPartExceedsCap = regime !== "from2013" && earlyCents >= capCents;
+  const earlyPartExceedsCap = !fixedTerm && regime !== "from2013" && earlyCents >= capCents;
   // The 3-month minimum for contracts before 1 Nov 2011 (art. 5(2)) cannot bind: the end date is in 2026, so such a
   // contract has at least 14 years of seniority.
   const compensationCents = earlyPartExceedsCap ? earlyCents : Math.min(uncappedCents, capCents);

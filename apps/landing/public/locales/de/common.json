@@ -3222,7 +3222,8 @@
           "none": "Der Tagessatz ist der Prozentsatz Ihres Referenzentgelts je Stufe; keine Grenze angewendet.",
           "minimum": "Der Tagessatz wurde auf das Minimum von {{min}} angehoben (30 % des Mindestlohns).",
           "referencePay": "Ihr Referenzentgelt liegt unter {{min}} pro Tag, daher entspricht das Krankengeld dem Referenzentgelt.",
-          "netCap": "Der Tagessatz wurde auf den geschätzten Nettowert Ihres Referenzentgelts begrenzt."
+          "netCap": "Der Tagessatz wurde auf den geschätzten Nettowert Ihres Referenzentgelts begrenzt.",
+          "floor": "Der Tagessatz wurde auf die Untergrenze nach Art. 17 Abs. 2 angehoben: Über 500 Euro Referenzentgelt liegen die Stufen 55 % und 60 % nie unter dem erhöhten Krankengeld (60 % und 65 %), berechnet auf 500 Euro."
         }
       },
       "checklist": {
@@ -3252,8 +3253,9 @@
         "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
         "sourcesTitle": "Quellen",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime",
-        "reviewed": "Regeln und Werte für 2026 am 19. November 2026 anhand des Leitfadens der Segurança Social und des Textes von Art. 17 des Gesetzesdekrets 28/2004 geprüft. Die drei alternativen Bedingungen der Erhöhung um 5 Punkte stammen aus diesem Text; das Gesetz sieht vor, dass der Betrag von 500 Euro regelmäßig angepasst wird, und wir konnten den aktuellen Betrag in keinem amtlichen Text bestätigen, daher bleiben wir bei 500. Die Nettogehaltsschätzung hinter der Nettogrenze ist eine Vereinfachung von uns."
+        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012, veröffentlicht von der CITE)",
+        "reviewed": "Regeln und Werte 2026 am 19. November 2026 geprüft anhand des Leitfadens der Segurança Social und des Textes von Art. 17 des Decreto-Lei 28/2004 in der Fassung des Decreto-Lei n.º 133/2012. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus diesem Text. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird; der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
+        "methodFloor": "Über einem Referenzentgelt von 500 Euro im Monat darf das Tagesgeld bei 55 % und 60 % nicht unter dem erhöhten Krankengeld liegen, das auf 500 Euro berechnet wird: 60 % und 65 % von 500 geteilt durch 30, also {{floor55}} und {{floor60}} pro Tag (Art. 17 Abs. 2 des Decreto-Lei 28/2004). Das spielt nur bei einem Referenzentgelt knapp über 500 Euro eine Rolle, bis etwa 545 Euro, wenn keine Erhöhung gilt. Für die Stufen 70 % und 75 % gilt es nicht."
       },
       "nextStepHeadline": "Planen Sie die vorübergehende Einkommenslücke",
       "nextStepDescription": "WonderMoney zeigt Ihr Geld, Ihre Ausgaben und wie lange Ihre Ersparnisse ein geringeres Einkommen decken.",
@@ -3272,7 +3274,8 @@
         "year": "Jahr der Erstzulassung",
         "month": "Monat der Erstzulassung",
         "co2": "Offizieller CO2-Ausstoß",
-        "standard": "CO2-Prüfzyklus"
+        "standard": "CO2-Prüfzyklus",
+        "otherIuc": "Weitere IUC, die du dieses Jahr zahlst (optional)"
       },
       "fuels": {
         "petrol": "Benzin",
@@ -3310,7 +3313,9 @@
         "scheduleTitle": "2027 (Übergang): Zahlungsplan",
         "exempt": "Reine Elektroautos der Kategorie B sind von der IUC befreit.",
         "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)",
-        "scheduleTitle2028": "Ab 2028: Zahlungsplan"
+        "scheduleTitle2028": "Ab 2028: Zahlungsplan",
+        "totalAnnualTax": "Gesamt-IUC für die Raten-Grenzen",
+        "scheduleShareNote": "Die Monate folgen deiner Summe von {{total}} über alle Fahrzeuge; die Beträge sind der Anteil dieses Autos an jeder Rate."
       },
       "guide": {
         "exampleTitle": "Rechenbeispiel",
@@ -3329,7 +3334,7 @@
         "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
-        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Die Zahlungspläne für 2027 und 2028 gelten nur für dieses Auto: Das Gesetz wendet die Grenzen auf die Summe aller Ihrer Fahrzeuge an, die tatsächliche Aufteilung kann daher abweichen. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Die Zahlungspläne für 2027 und 2028 zeigen den Anteil dieses Autos an jeder Rate; die Monate folgen der Summe all deiner Fahrzeuge, die du als weitere IUC eingeben kannst (das Gesetz wendet die Grenzen auf diese Summe an). Ohne sie nimmt der Rechner an, dass dies dein einziges Fahrzeug ist. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
         "assumptionEducational": "Das ist eine Schätzung zu Bildungszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
         "sourcesTitle": "Quellen",
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
@@ -3341,7 +3346,8 @@
       },
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
-      "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück"
+      "nextStepCta": "Lege ein Zwölftel deiner jährlichen Kfz-Steuer zurück",
+      "otherIucHelp": "Die jährliche IUC all deiner anderen Fahrzeuge in Euro. Ab 2027 hängen die Zahlungsmonate von deiner Summe über alle Fahrzeuge ab. Gib 0 ein, wenn dies dein einziges Fahrzeug ist."
     },
     "propertyCapitalGains": {
       "title": "Rechner für den Veräußerungsgewinn beim Hausverkauf",
@@ -3527,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Abfindungsrechner Kündigung Portugal 2026",
       "shortName": "Abfindung bei Kündigung",
-      "subtitle": "Schätze die Entschädigung bei Massenentlassung, Wegfall der Stelle oder Nichteignung in einem unbefristeten Vertrag, mit Obergrenzen und Sätzen nach Vertragsdatum.",
-      "description": "Schätze deine Abfindung bei Kündigung in Portugal: Sätze nach Vertragsdatum, Obergrenzen und Auszahlungsplan.",
+      "subtitle": "Schätze die Abfindung bei Massenentlassung, Wegfall des Arbeitsplatzes oder Nichteignung in einem unbefristeten Vertrag oder beim Auslaufen eines befristeten Vertrags, mit Obergrenzen und Sätzen.",
+      "description": "Schätze deine Abfindung bei Kündigung oder beim Auslaufen eines befristeten Vertrags in Portugal: Sätze, Obergrenzen und Auszahlungsplan.",
       "pageTitle": "Abfindungsrechner Portugal 2026: Schätzung nach Art. 366",
-      "pageDescription": "Schätze die compensação por despedimento in Portugal bei Massenentlassung oder Wegfall der Stelle: 12, 18, 20 oder 30 Tage pro Jahr je nach Vertragsdatum, die Grenze von 12 Monatsbeträgen und ein Auszahlungsplan.",
+      "pageDescription": "Schätze die compensação por despedimento in Portugal bei Massenentlassung oder Wegfall des Arbeitsplatzes (12, 18, 20 oder 30 Tage pro Jahr je nach Vertragsdatum) oder beim Auslaufen eines befristeten Vertrags (24 Tage pro Jahr), mit der 12-Monats-Grenze und einem Auszahlungsplan.",
       "fields": {
         "baseMonthly": "Monatliches Grundgehalt (brutto)",
         "seniorityPay": "Monatliche Dienstalterszulagen (diuturnidades)",
         "startDate": "Vertragsbeginn",
-        "endDate": "Datum der Beendigung"
+        "endDate": "Datum der Beendigung",
+        "contractType": "Art der Beendigung"
       },
       "help": {
         "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
         "seniorityPay": "Diuturnidades sind Zulagen für die Betriebszugehörigkeit. Gib 0 ein, wenn du keine hast.",
         "startDate": "Der Tag, an dem der unbefristete Vertrag begann. Bei einem Konzern oder einem früheren Vertrag mit demselben Arbeitgeber prüfe, wie deine Betriebszugehörigkeit gezählt wird.",
-        "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}."
+        "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}.",
+        "contractType": "Kündigung umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung. Das Auslaufen ist das Ende eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer (Art. 344 und 345 des Código do Trabalho). Es steht dir nicht zu, wenn der Vertrag endet, weil du erklärt hast, ihn nicht verlängern zu wollen.",
+        "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zähle ab dem ersten Tag: die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet."
       },
-      "scope": "Gilt für Massenentlassung, Wegfall der Stelle und Nichteignung in einem unbefristeten Vertrag. Nicht abgedeckt: befristete Verträge, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und der öffentliche Dienst.",
+      "scope": "Umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung in einem unbefristeten Vertrag. Nicht umfasst: Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst. Für das Ende eines befristeten Vertrags wähle Auslaufen eines befristeten Vertrags.",
       "errors": {
         "required": "Gib einen gültigen Wert ein.",
         "tooSmall": "Gib einen Wert von mindestens {{min}} ein.",
@@ -3562,7 +3571,8 @@
         "regimes": {
           "before2011": "Vertrag vor dem 1. November 2011",
           "from2011": "Vertrag vom 1. November 2011 bis 30. September 2013",
-          "from2013": "Vertrag ab dem 1. Oktober 2013"
+          "from2013": "Vertrag ab dem 1. Oktober 2013",
+          "fixedTerm": "Auslaufen eines befristeten Vertrags, 24 Tage pro Jahr"
         },
         "usedMonthly": "Verwendeter Monatsbetrag",
         "daily": "Tagesbetrag (Monatsbetrag geteilt durch 30)",
@@ -3573,7 +3583,8 @@
           "twentyDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
           "eighteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
           "twelveDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
-          "fourteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr"
+          "fourteenDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr",
+          "twentyFourDays": "{{years}} Jahre zu {{days}} Tagen pro Jahr"
         },
         "caps": {
           "none": "Keine Grenze angewandt.",
@@ -3598,9 +3609,9 @@
         "methodTax": "Nur zur Information, nicht Teil der Zahl: Ein Teil der Abfindung kann nach Art. 2 Abs. 4 des CIRS von der IRS ausgenommen sein, bis zu einer Grenze, die an dein reguläres Entgelt der letzten 12 Monate und deine Dienstjahre gebunden ist. Der Rest ist steuerpflichtiges Einkommen. Frage die Steuerbehörde oder einen Steuerberater nach der genauen Grenze in deinem Fall.",
         "methodBudget": "Die Abfindung ist ein einmaliger Betrag. Verteilst du sie auf die kommenden Monate, zusammen mit einem möglichen Arbeitslosengeld, siehst du, wie lange sie deine Ausgaben deckt.",
         "supportedTitle": "Abgedeckt",
-        "supported": "Massenentlassung, Wegfall der Stelle und Nichteignung des Arbeitnehmers, in einem unbefristeten Vertrag, mit Beendigung im Jahr 2026.",
+        "supported": "Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung des Arbeitnehmers in einem unbefristeten Vertrag sowie das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr 2026.",
         "unsupportedTitle": "Nicht abgedeckt",
-        "unsupportedFixedTerm": "Das Auslaufen befristeter Verträge (Art. 344 und 345 des Código do Trabalho), das eigene Sätze und Übergangsregeln hat.",
+        "unsupportedFixedTerm": "Befristete Verträge, die vor dem 1. Mai 2023 ausgelaufen sind (18 Tage pro Jahr im früheren Text), vorzeitige Beendigung eines befristeten Vertrags und ein Auslaufen, das durch die Erklärung des Arbeitnehmers selbst verursacht wird.",
         "unsupportedJustCause": "Kündigung aus wichtigem Grund (disziplinarisch), die anderen Regeln folgt.",
         "unsupportedUnlawful": "Rechtswidrige Kündigung, bei der das Gericht die Entschädigung festlegt, in der Regel zwischen 15 und 45 Tagen Grundgehalt pro Dienstjahr.",
         "unsupportedAgreement": "Aufhebungsvertrag, bei dem der Betrag verhandelt wird und es keine gesetzliche Formel gibt.",
@@ -3610,11 +3621,19 @@
         "sourceLaw13": "APEL-Leitfaden zur Agenda do Trabalho Digno: Lei n.º 13/2023, die den Satz des Art. 366 Abs. 1 ab 1. Mai 2023 auf 14 Tage erhöhte",
         "sourceCode": "Código do Trabalho, konsolidierter Text (PGDL): Art. 344, 345 und 366",
         "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
-        "reviewed": "Regeln am 19. November 2026 geprüft anhand des Textes der Lei n.º 69/2013, veröffentlicht von der Assembleia da República, und des Mindestlohns 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage pro Jahr der Lei n.º 13/2023, in Kraft seit 1. Mai 2023, sowie die 12 Tage und die Grenze des Art. 366 stammen aus den Zusammenfassungen von APEL und DGERT und dem konsolidierten Código do Trabalho, nicht aus dem Text des Diário da República. Wir wenden die 14 Tage nur auf die Betriebszugehörigkeit ab 1. Mai 2023 an, die übliche Lesart der Übergangsregel. Zur Information, keine Rechtsberatung."
+        "reviewed": "Regeln am 19. November 2026 geprüft anhand des Textes der Lei n.º 69/2013, veröffentlicht von der Assembleia da República, und des Mindestlohns 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage pro Jahr der Lei n.º 13/2023, in Kraft seit dem 1. Mai 2023, sowie die 12 Tage und die Obergrenze von Art. 366 stammen aus den Zusammenfassungen von APEL und DGERT und dem konsolidierten Código do Trabalho, nicht aus dem Text des Diário da República. Wir wenden die 14 Tage nur auf die Betriebszugehörigkeit ab dem 1. Mai 2023 an, die übliche Lesart der Übergangsregel. Die 24 Tage beim Auslaufen eines befristeten Vertrags und ihre Anwendung auf alle Verträge, die ab dem 1. Mai 2023 auslaufen, stammen aus dem von der PGDL wiedergegebenen Text der Lei n.º 13/2023 (Art. 344, 345 und 35) und der IGeFE-Note, nicht von der Seite des Diário da República. Lehrzwecke, keine Rechtsberatung.",
+        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen. Die gesamte Dauer zählt also mit 24 Tagen, egal wann der Vertrag begann, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht.",
+        "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April: neue Fassung von Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung (PGDL-Wiedergabe des Textes aus dem Diário da República)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum"
       },
       "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
       "nextStepDescription": "WonderMoney zeigt deine Konten und monatlichen Ausgaben zusammen, damit du eine Abfindung auf die kommenden Monate verteilen kannst.",
-      "nextStepCta": "Die Auszahlung auf deine kommenden Monate verteilen"
+      "nextStepCta": "Die Auszahlung auf deine kommenden Monate verteilen",
+      "contractTypes": {
+        "permanent": "Kündigung in einem unbefristeten Vertrag",
+        "fixedTerm": "Auslaufen eines befristeten Vertrags"
+      },
+      "scopeFixedTerm": "Umfasst das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr {{year}}: 24 Tage Grundgehalt und diuturnidades pro Jahr der gesamten Vertragsdauer, mit dem Tagessatz und den Obergrenzen von Art. 366. Nicht umfasst: Verträge, die vor dem 1. Mai 2023 ausgelaufen sind, vorzeitige Beendigung, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst."
     },
     "statePension": {
       "title": "Rentenrechner Portugal 2026",
@@ -4070,6 +4089,127 @@
           "emergencyFundBody": "Berechne, wie viele Monate an notwendigen Ausgaben, Energie eingeschlossen, deine Ersparnisse decken würden.",
           "inflationLink": "Inflationsrechner",
           "inflationBody": "Sieh, wie steigende Preise verändern, was dein Geld im Zeitverlauf kaufen kann."
+        }
+      }
+    },
+    "fuelPrices": {
+      "title": "Spritpreise in Portugal und monatliche Tankkosten",
+      "shortName": "Spritpreise",
+      "subtitle": "Sieh den offiziellen Durchschnittspreis für Diesel, Benzin und Autogas in Portugal, seinen Verlauf und was dein Fahren im Monat kostet.",
+      "description": "Offizielle DGEG-Durchschnittspreise für Kraftstoffe in Festlandportugal mit Wochenänderung und Verlauf sowie ein Rechner für die monatlichen Tankkosten.",
+      "pageTitle": "Spritpreise in Portugal: Offizieller Durchschnitt und Monatskosten",
+      "pageDescription": "Der aktuelle DGEG-Durchschnittspreis für Diesel, Benzin 95 und Autogas in Portugal mit Änderung zur Vorwoche und fünf Jahren Verlauf, plus ein Rechner für deine monatlichen Tankkosten. Offizielle Daten, keine Prognose.",
+      "fuels": {
+        "diesel": "Diesel (gasóleo simples)",
+        "gasoline95": "Benzin 95 (gasolina simples 95)",
+        "lpg": "Autogas (GPL auto)"
+      },
+      "fields": {
+        "fuel": "Kraftstoff",
+        "period": "Die eingegebene Strecke gilt",
+        "periodMonth": "Pro Monat",
+        "periodWeek": "Pro Woche",
+        "periodTrip": "Pro Fahrt",
+        "distance": "Strecke",
+        "trips": "Fahrten pro Monat",
+        "consumption": "Kraftstoffverbrauch",
+        "price": "Preis pro Liter",
+        "resetPrice": "Aktuellen Durchschnitt verwenden ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Kilometer im oben gewählten Zeitraum. Eine Woche zählt als 52/12 Wochen pro Monat.",
+        "trips": "Wie oft du diese Fahrt im Monat machst.",
+        "consumption": "Liter pro 100 km, aus dem Bordcomputer oder dem Datenblatt deines Autos. Der reale Verbrauch liegt meist über dem offiziellen.",
+        "price": "Beginnt beim aktuellen nationalen DGEG-Durchschnitt, {{price}}/L am {{date}}. Ändere ihn auf den Preis, den du wirklich zahlst."
+      },
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "negative": "Das darf nicht negativ sein.",
+        "tooLarge": "Gib {{max}} oder weniger ein.",
+        "zero": "Gib einen Wert über null ein.",
+        "notWhole": "Gib eine ganze Zahl an Fahrten ein.",
+        "summary": "Prüfe die markierten Felder, um die Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Geschätzte Tankkosten pro Monat",
+        "week": "Kosten der Wochenstrecke",
+        "trip": "Kosten einer Fahrt",
+        "litres": "Kraftstoffverbrauch pro Monat",
+        "yearly": "Etwa zwölf solche Monate",
+        "per100": "Kosten pro 100 km",
+        "nothing": "Ohne gefahrene Strecke fallen keine Tankkosten an.",
+        "budget": "{{amount}} im Monat sind die Spritzeile deines Verkehrsbudgets. Setze die übrigen Autokosten daneben, um das ganze Bild zu sehen."
+      },
+      "notes": {
+        "assumptions": "Schätzung: Strecke mal Verbrauch mal Literpreis. Sie nimmt auf jeder Fahrt denselben Verbrauch und den ganzen Monat denselben Preis an. Keine Beratung."
+      },
+      "latest": {
+        "title": "Aktueller nationaler Durchschnittspreis",
+        "asOf": "Stand der Daten: {{date}} (DGEG). Die Änderung bezieht sich auf den {{previous}}, eine Woche früher.",
+        "change": "{{amount}}/L ({{percent}}) in einer Woche",
+        "flat": "Keine Änderung in einer Woche",
+        "note": "Tagesdurchschnitt für Festlandportugal, nach Verkaufsmengen gewichtet und inklusive Rabatten der Tankstellen. Er ist ein Durchschnitt der Vergangenheit, keine Prognose: Diese Seite sagt den Preis der nächsten Woche nicht voraus."
+      },
+      "history": {
+        "title": "Spritpreise der letzten fünf Jahre",
+        "intro": "Durchschnittspreis pro Liter der DGEG, ein Wert pro Woche für jeden Kraftstoff.",
+        "chartLabel": "Liniendiagramm des wöchentlichen Durchschnittspreises pro Liter für Diesel, Benzin 95 und Autogas in Portugal über fünf Jahre",
+        "tableCaption": "Die letzten Wochen: Durchschnittspreis pro Liter je Kraftstoff",
+        "date": "Datum",
+        "asOf": "Stand der Daten: {{date}}, der letzte von der DGEG veröffentlichte Tag. Ein Wert pro Woche, ab {{first}}. Die Kopie dieser Seite wurde am {{fetched}} erstellt. Quelle: DGEG, Preço Médio Diário (Festlandportugal)."
+      },
+      "nextStepHeadline": "Nimm den Sprit in dein Budget auf",
+      "nextStepDescription": "Sprit gehört zu dem, was Mobilität kostet. Trage ihn mit den anderen Verkehrskosten in ein WonderMoney-Budget ein und sieh, was jeden Monat übrig bleibt.",
+      "nextStepCta": "Prüfe den Verkehrsposten in deinem Budget",
+      "guide": {
+        "read": {
+          "title": "So liest du diese Seite",
+          "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
+          "calculator": "Der Rechner macht aus deinem Fahren monatliche Tankkosten. Du gibst Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und du kannst ihn auf den Preis ändern, den du wirklich zahlst.",
+          "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was dein Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Dieselauto, {{distance}} im Monat gefahren, mit einem Verbrauch von {{consumption}}, beim aktuellen Durchschnitt von {{price}}. Verbrauchter Kraftstoff: {{distance}} mal {{consumption}} geteilt durch 100 ergibt {{litres}}. Kosten: {{litres}} mal {{price}} ergibt {{monthly}} im Monat, etwa {{yearly}} im Jahr oder {{per100}} je 100 km.",
+          "trips": "Die Strecke kann auch eine Fahrt sein. Eine Hin- und Rückfahrt von 40 km, 20-mal im Monat mit demselben Auto gefahren, kostet {{tripCost}} pro Fahrt, {{tripMonthly}} im Monat."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Der Rechner macht vier Dinge:",
+          "steps": {
+            "a": "Strecke pro Monat: die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat.",
+            "b": "Liter: Strecke mal Verbrauch geteilt durch 100.",
+            "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
+            "d": "Jahr: zwölf solche Monate."
+          },
+          "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "dgeg": "Preise: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário der Straßenkraftstoffe in Festlandportugal, für gasóleo simples, gasolina simples 95 und GPL auto. Der letzte Tag ist der {{asOf}}; die Kopie dieser Seite wurde am {{fetched}} erstellt. Der Verlauf ist ein DGEG-Wert alle sieben Tage bis zum {{first}}, so übernommen, wie die DGEG ihn veröffentlicht.",
+          "terms": "Die DGEG erklärt, diese Informationen seien kostenlos und frei nutzbar, sofern die DGEG als Quelle genannt, das Datum der letzten Aktualisierung angegeben und die Information originalgetreu wiedergegeben wird. Die Preise melden die Tankstellen, die dafür verantwortlich sind.",
+          "dgegLink": "DGEG, Preço Médio Diário",
+          "refresh": "Die Seite liest eine gespeicherte Datendatei und ruft die DGEG nie auf, während du sie nutzt. Die Datei wird von einem Skript aktualisiert, das veraltete oder unplausible Daten ablehnt; eine fehlgeschlagene Aktualisierung behält daher die letzten guten Zahlen mit ihrem Datum ({{asOf}})."
+        },
+        "limits": {
+          "title": "Was diese Zahlen nicht enthalten",
+          "items": {
+            "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
+            "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an deiner Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
+            "stations": "Keine Tankstellen: Diese Seite nennt und bewertet keine Tankstelle. Die Website der DGEG listet die Preise je Tankstelle, falls du nachsehen willst.",
+            "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
+            "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
+            "education": "Nur zu Bildungszwecken, keine Beratung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "householdBudgetLink": "Haushaltsbudget-Rechner",
+          "householdBudgetBody": "Stelle den Sprit neben deine anderen Monatskosten und sieh, was übrig bleibt.",
+          "carLoanLink": "Autokredit-Rechner",
+          "carLoanBody": "Addiere die Rate zum Sprit, um zu sehen, was das Auto insgesamt kostet.",
+          "vehicleTaxLink": "Kfz-Steuer-Rechner (IUC)",
+          "vehicleTaxBody": "Schätze die jährliche Fahrzeugsteuer, eine weitere Kostenposition des Autos."
         }
       }
     }

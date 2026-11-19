@@ -9,6 +9,7 @@ import {
   SUPPORTED_END_YEAR,
   computeDismissalCompensation,
   splitPayout,
+  type ContractType,
   type DismissalCompensationInput,
   type DismissalField,
 } from "@/lib/calculators/dismissalCompensation";
@@ -18,9 +19,12 @@ import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 
 const k = (key: string) => `tools.dismissalCompensation.${key}`;
+const selectClass =
+  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const dateClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive";
 const PAYOUT_MONTHS = [6, 12] as const;
+const CONTRACT_TYPES: readonly ContractType[] = ["permanent", "fixedTerm"];
 
 export default function DismissalCompensationCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -94,9 +98,28 @@ function DismissalCompensationCalculator() {
       : undefined;
   const years = (value: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
 
+  const fixedTerm = input.contractType === "fixedTerm";
+
   return (
     <CalculatorLayout>
       <div className="space-y-5 rounded-card border border-border bg-background p-6">
+        <div className="space-y-1.5">
+          <label htmlFor="dismissal-contract-type" className="block text-sm font-medium text-foreground">
+            {t(k("fields.contractType"))}
+          </label>
+          <select
+            id="dismissal-contract-type"
+            value={input.contractType}
+            onChange={(event) => update("contractType", event.currentTarget.value as ContractType)}
+            className={selectClass}
+            aria-describedby="dismissal-contract-type-help"
+          >
+            {CONTRACT_TYPES.map((type) => (
+              <option key={type} value={type}>{t(k(`contractTypes.${type}`))}</option>
+            ))}
+          </select>
+          <p id="dismissal-contract-type-help" className="text-sm text-muted-foreground">{t(k("help.contractType"))}</p>
+        </div>
         <CalculatorInput
           id="dismissal-base"
           label={t(k("fields.baseMonthly"))}
@@ -124,7 +147,7 @@ function DismissalCompensationCalculator() {
           label={t(k("fields.startDate"))}
           value={input.startDate}
           onChange={(value) => update("startDate", value)}
-          help={t(k("help.startDate"))}
+          help={t(k(fixedTerm ? "help.startDateFixedTerm" : "help.startDate"))}
           error={err("startDate")}
         />
         <DateField
@@ -135,7 +158,9 @@ function DismissalCompensationCalculator() {
           help={t(k("help.endDate"), { year: String(SUPPORTED_END_YEAR) })}
           error={err("endDate")}
         />
-        <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">{t(k("scope"))}</p>
+        <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
+          {fixedTerm ? t(k("scopeFixedTerm"), { year: String(SUPPORTED_END_YEAR) }) : t(k("scope"))}
+        </p>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
         <div aria-live="polite" aria-atomic="true">

@@ -13,7 +13,7 @@ describe("annual vehicle tax (IUC)", () => {
   it("adds the cylinder and CO2 rates and applies the year coefficient (category B)", () => {
     expect(resultFor()).toEqual({
       category: "B", exempt: false, coefficient: 1.15, baseTax: 128.89, additionalTax: 0,
-      dieselSurcharge: 10.07, annualTax: 158.29, monthlyProvision: 13.19, dueMonth: 3,
+      dieselSurcharge: 10.07, annualTax: 158.29, totalAnnualTax: 158.29, monthlyProvision: 13.19, dueMonth: 3,
       schedule2027: [{ month: 10, amount: 158.29 }],
       schedule2028: [{ month: 4, amount: 79.14 }, { month: 10, amount: 79.15 }],
     });
@@ -90,6 +90,51 @@ describe("annual vehicle tax (IUC)", () => {
     const big = resultFor({ cc: 3000, co2: 270 });
     expect(big.schedule2028.map((row) => row.month)).toEqual([4, 7, 10]);
     expect(big.schedule2028.reduce((sum, row) => Math.round(sum * 100 + row.amount * 100) / 100, 0)).toBe(1061.1);
+  });
+
+  it("computes the instalment months on the taxpayer's total across all vehicles (Decreto-Lei 161/2026, arts. 6 and 17(3))", () => {
+    const alone = resultFor(); // 158.29 euros
+    const withOthers = resultFor({ otherIucEuros: 400 }); // total 558.29
+    expect(withOthers.annualTax).toBe(alone.annualTax);
+    expect(withOthers.monthlyProvision).toBe(alone.monthlyProvision);
+    expect(withOthers.totalAnnualTax).toBe(558.29);
+    expect(alone.totalAnnualTax).toBe(alone.annualTax);
+    expect(alone.schedule2027.map((row) => row.month)).toEqual([10]);
+    expect(withOthers.schedule2027.map((row) => row.month)).toEqual([7, 10]);
+    expect(alone.schedule2028.map((row) => row.month)).toEqual([4, 10]);
+    expect(withOthers.schedule2028.map((row) => row.month)).toEqual([4, 7, 10]);
+    // The rows are this car's share, so they still add up to its own tax.
+    const sum = (rows: { amount: number }[]) => Math.round(rows.reduce((total, row) => total + row.amount * 100, 0)) / 100;
+    expect(sum(withOthers.schedule2028)).toBe(158.29);
+    expect(sum(withOthers.schedule2027)).toBe(158.29);
+  });
+
+  it("uses the 100 euro and 500 euro thresholds on the total, inclusively", () => {
+    const cheap = resultFor({ fuel: "petrol", cc: 998, year: 1992, month: 1 }); // category A, 12.55 euros
+    expect(cheap.annualTax).toBe(12.55);
+    expect(cheap.schedule2028.map((row) => row.month)).toEqual([4]);
+    expect(resultFor({ fuel: "petrol", cc: 998, year: 1992, month: 1, otherIucEuros: 87.45 }).schedule2028.map((r) => r.month)).toEqual([4]);
+    expect(resultFor({ fuel: "petrol", cc: 998, year: 1992, month: 1, otherIucEuros: 87.46 }).schedule2028.map((r) => r.month)).toEqual([4, 10]);
+    expect(resultFor({ fuel: "petrol", cc: 998, year: 1992, month: 1, otherIucEuros: 487.45 }).schedule2028.map((r) => r.month)).toEqual([4, 10]);
+    expect(resultFor({ fuel: "petrol", cc: 998, year: 1992, month: 1, otherIucEuros: 487.46 }).schedule2028.map((r) => r.month)).toEqual([4, 7, 10]);
+  });
+
+  it("gives an exempt car no instalments whatever the other IUC", () => {
+    const electric = resultFor({ fuel: "electric", year: 2022, otherIucEuros: 900 });
+    expect(electric.schedule2027).toEqual([]);
+    expect(electric.schedule2028).toEqual([]);
+    expect(electric.totalAnnualTax).toBe(900);
+  });
+
+  it("validates the other IUC amount", () => {
+    const errors = (otherIucEuros: number) => {
+      const calculation = computeVehicleTax({ ...VEHICLE_TAX_EXAMPLE, otherIucEuros });
+      return calculation.ok ? null : calculation.errors;
+    };
+    expect(errors(Number.NaN)).toEqual({ otherIucEuros: "required" });
+    expect(errors(-1)).toEqual({ otherIucEuros: "negative" });
+    expect(errors(VEHICLE_TAX_LIMITS.otherIuc + 1)).toEqual({ otherIucEuros: "tooLarge" });
+    expect(errors(0)).toBeNull();
   });
 
   it("rejects empty, zero, negative and huge capacity and CO2 with clear codes", () => {

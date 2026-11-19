@@ -20,12 +20,20 @@ export const MAX_SICK_DAYS = 1095;
 /**
  * +5 points on the 55% and 60% bands (art. 17 DL 28/2004): when the reference pay is at or below this monthly
  * value, OR the household has 3 or more descendants (the conditions are alternatives, not cumulative). The
- * law says the 500 euro figure is revised periodically with the minimum wage; the current value could not
- * be confirmed in an official text, so 500 is kept.
+ * law (art. 17(4)) says the 500 euro figure is updated with the IAS, but the Segurança Social guide in force
+ * (ISS 5001 v4.55, 23 October 2026) still states "igual ou inferior a 500,00" euros, so 500 is kept.
  */
 export const INCREASE_POINTS = 5;
 export const INCREASE_MAX_REFERENCE_MONTHLY_CENTS = 50_000;
 export const INCREASE_MIN_DESCENDANTS = 3;
+/**
+ * Art. 17(2) DL 28/2004 (wording of art. 9 of DL 133/2012): above that 500 euro reference pay, the daily benefit at 55%
+ * and 60% cannot be lower than the increased benefit (60% and 65%) computed on a reference pay of 500 euros a month.
+ */
+export const FLOOR_REFERENCE_MONTHLY_CENTS = INCREASE_MAX_REFERENCE_MONTHLY_CENTS;
+/** The art. 17(2) floor in cents a day for a 55% or 60% band: the increased percentage applied to 500 euros a month. */
+export const floorDailyCents = (percent: number) =>
+  Math.round(((FLOOR_REFERENCE_MONTHLY_CENTS / 30) * (percent + INCREASE_POINTS)) / 100);
 
 export interface SickBand { fromDay: number; toDay: number; percent: number }
 export const SICK_BANDS: readonly SickBand[] = [
@@ -93,7 +101,7 @@ export interface SickPayResult {
   waitingNetPayCents: number;
   increaseApplied: boolean;
   /** True when the minimum of 9.20 a day was applied (or the reference pay is lower and is paid in full). */
-  limit: "none" | "minimum" | "referencePay" | "netCap";
+  limit: "none" | "minimum" | "referencePay" | "netCap" | "floor";
   netMonthlyCents: number;
   /** Net pay of a 30-day month minus what the first 30 days pay. */
   firstMonthGapCents: number;
@@ -133,9 +141,17 @@ export function computeSickPay(input: SickPayInput) {
       // Reference pay below the minimum: the benefit is the reference pay itself.
       daily = referenceDailyCents;
       limit = "referencePay";
-    } else if (daily < MIN_DAILY_CENTS) {
-      daily = MIN_DAILY_CENTS;
-      limit = "minimum";
+    } else {
+      // Art. 17(2): above 500 euros, the 55% and 60% bands are never below the increased benefit on 500 euros.
+      const floor = percent <= 60 && baseMonthlyCents > FLOOR_REFERENCE_MONTHLY_CENTS ? floorDailyCents(percent) : 0;
+      if (daily < floor) {
+        daily = floor;
+        limit = "floor";
+      }
+      if (daily < MIN_DAILY_CENTS) {
+        daily = MIN_DAILY_CENTS;
+        limit = "minimum";
+      }
     }
     if (daily > netReferenceDailyCents && netReferenceDailyCents >= MIN_DAILY_CENTS) {
       daily = netReferenceDailyCents;

@@ -152,6 +152,17 @@ function VehicleTaxCalculator() {
             </div>
           </>
         )}
+        <CalculatorInput
+          id="vehicleTax-other"
+          label={t(k("fields.otherIuc"))}
+          value={input.otherIucEuros}
+          onChange={(value) => setInput((current) => ({ ...current, otherIucEuros: value }))}
+          min={0}
+          max={VEHICLE_TAX_LIMITS.otherIuc}
+          prefix="€"
+          helpText={t(k("otherIucHelp"))}
+          error={err(errors.otherIucEuros, { max: formatMoney(locale, VEHICLE_TAX_LIMITS.otherIuc, { decimals: 0 }) })}
+        />
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
         <div aria-live="polite" aria-atomic="true">
@@ -185,6 +196,9 @@ function VehicleTaxCalculator() {
                 ...(result.dieselSurcharge > 0
                   ? [{ label: t(k("result.dieselSurcharge")), value: money(result.dieselSurcharge) }]
                   : []),
+                ...(input.otherIucEuros > 0
+                  ? [{ label: t(k("result.totalAnnualTax")), value: money(result.totalAnnualTax) }]
+                  : []),
               ]}
             />
             {!result.exempt && (
@@ -195,6 +209,11 @@ function VehicleTaxCalculator() {
                     {t(k("result.dueMonthValue"), { month: monthName(result.dueMonth) })}
                   </span>
                 </p>
+                {input.otherIucEuros > 0 && (
+                  <p className="text-muted-foreground">
+                    {t(k("result.scheduleShareNote"), { total: money(result.totalAnnualTax) })}
+                  </p>
+                )}
                 {([["scheduleTitle", result.schedule2027], ["scheduleTitle2028", result.schedule2028]] as const).map(
                   ([title, rows]) => (
                     <div key={title}>

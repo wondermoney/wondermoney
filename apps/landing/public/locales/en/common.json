@@ -3222,7 +3222,8 @@
           "none": "The daily amount is the percentage of your reference pay for each band; no limit applied.",
           "minimum": "The daily amount was raised to the minimum of {{min}} (30% of the minimum wage).",
           "referencePay": "Your reference pay is below {{min}} a day, so the benefit equals the reference pay.",
-          "netCap": "The daily amount was limited to the estimated net value of your reference pay."
+          "netCap": "The daily amount was limited to the estimated net value of your reference pay.",
+          "floor": "The daily amount was raised to the floor of art. 17(2): above 500 euros of reference pay, the 55% and 60% bands are never below the increased benefit (60% and 65%) computed on 500 euros."
         }
       },
       "checklist": {
@@ -3252,8 +3253,9 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004. The three alternative conditions for the 5-point increase come from that text; the law says the 500 euro figure is revised periodically, and we could not confirm the current figure in an official text, so we keep 500. The estimate of net pay behind the net cap is our simplification."
+        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, as published by CITE)",
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004 in the wording of Decreto-Lei n.º 133/2012. The three alternative conditions for the 5-point increase and the floor above 500 euros come from that text. Art. 17(4) says the 500 euro figure is updated with the IAS; the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
+        "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },
       "nextStepHeadline": "Plan for the temporary income gap",
       "nextStepDescription": "WonderMoney shows your cash, your spending and how long your savings cover a lower income.",
@@ -3272,7 +3274,8 @@
         "year": "Year of first registration",
         "month": "Month of first registration",
         "co2": "Official CO2 emissions",
-        "standard": "CO2 test cycle"
+        "standard": "CO2 test cycle",
+        "otherIuc": "Other IUC you pay this year (optional)"
       },
       "fuels": {
         "petrol": "Petrol",
@@ -3310,7 +3313,9 @@
         "scheduleTitle": "2027 (transitional): payment schedule",
         "exempt": "Fully electric cars in category B are exempt from IUC.",
         "dieselSurcharge": "Diesel surcharge (not multiplied by the coefficient)",
-        "scheduleTitle2028": "From 2028: payment schedule"
+        "scheduleTitle2028": "From 2028: payment schedule",
+        "totalAnnualTax": "Total IUC for the instalment thresholds",
+        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment."
       },
       "guide": {
         "exampleTitle": "Worked example",
@@ -3329,7 +3334,7 @@
         "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
-        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 are for this car alone: the law applies its thresholds to the total of all your vehicles, so the real split can differ. In the year of registration the tax is paid within 30 days of the registration deadline.",
+        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 give this car's share of each instalment; the months follow the total of all your vehicles, which you can enter as other IUC (the law applies its thresholds to that total). Without it, the calculator assumes this is your only vehicle. In the year of registration the tax is paid within 30 days of the registration deadline.",
         "assumptionEducational": "This is an educational estimate, not tax advice. The amount on the notice from the Tax Authority is the one that counts.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
@@ -3341,7 +3346,8 @@
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
-      "nextStepCta": "Set aside one twelfth of your annual car tax"
+      "nextStepCta": "Set aside one twelfth of your annual car tax",
+      "otherIucHelp": "The yearly IUC of all your other vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if this is your only vehicle."
     },
     "propertyCapitalGains": {
       "title": "Property capital gains calculator",
@@ -3527,23 +3533,26 @@
     "dismissalCompensation": {
       "title": "Portugal dismissal compensation calculator 2026",
       "shortName": "Dismissal compensation",
-      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, with the caps and the rates by contract date.",
-      "description": "Estimate your dismissal compensation in Portugal: rates by contract date, caps and a payout plan.",
+      "subtitle": "Estimate the compensation for a collective dismissal, extinction of the post or unsuitability on a permanent contract, or for the expiry of a fixed-term contract, with the caps and the rates.",
+      "description": "Estimate your dismissal or fixed-term expiry compensation in Portugal: rates, caps and a payout plan.",
       "pageTitle": "Dismissal Compensation Calculator Portugal 2026: Art. 366 Estimate",
-      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post: 12, 18, 20 or 30 days per year by contract date, the 12-month cap and a payout plan.",
+      "pageDescription": "Estimate the compensação por despedimento in Portugal for a collective dismissal or extinction of the post (12, 18, 20 or 30 days per year by contract date) or for the expiry of a fixed-term contract (24 days per year), with the 12-month cap and a payout plan.",
       "fields": {
         "baseMonthly": "Monthly base pay (gross)",
         "seniorityPay": "Monthly seniority supplements (diuturnidades)",
         "startDate": "Contract start date",
-        "endDate": "Termination date"
+        "endDate": "Termination date",
+        "contractType": "Type of termination"
       },
       "help": {
         "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
         "seniorityPay": "Diuturnidades are supplements paid for length of service. Enter 0 if you have none.",
         "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
-        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}."
+        "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}.",
+        "contractType": "Dismissal covers a collective dismissal, extinction of the post or unsuitability. Expiry is the end of a fixed-term contract, of certain or uncertain term (arts. 344 and 345 of the Código do Trabalho). It is not due when the contract ends because you declared you would not renew it.",
+        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year."
       },
-      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: fixed-term contracts, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: dismissal with just cause, unlawful dismissal, mutual agreement and the public sector. For the end of a fixed-term contract, choose expiry of a fixed-term contract.",
       "errors": {
         "required": "Enter a valid value.",
         "tooSmall": "Enter a value of at least {{min}}.",
@@ -3562,7 +3571,8 @@
         "regimes": {
           "before2011": "Contract before 1 November 2011",
           "from2011": "Contract from 1 November 2011 to 30 September 2013",
-          "from2013": "Contract from 1 October 2013"
+          "from2013": "Contract from 1 October 2013",
+          "fixedTerm": "Fixed-term contract expiry, 24 days a year"
         },
         "usedMonthly": "Monthly amount used",
         "daily": "Daily amount (monthly amount divided by 30)",
@@ -3573,7 +3583,8 @@
           "twentyDays": "{{years}} years at {{days}} days a year",
           "eighteenDays": "{{years}} years at {{days}} days a year",
           "twelveDays": "{{years}} years at {{days}} days a year",
-          "fourteenDays": "{{years}} years at {{days}} days a year"
+          "fourteenDays": "{{years}} years at {{days}} days a year",
+          "twentyFourDays": "{{years}} years at {{days}} days a year"
         },
         "caps": {
           "none": "No cap applied.",
@@ -3598,9 +3609,9 @@
         "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
         "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
         "supportedTitle": "Supported",
-        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker, on a permanent contract, with termination in 2026.",
+        "supported": "Collective dismissal, extinction of the post and unsuitability of the worker on a permanent contract, and the expiry of a fixed-term contract of certain or uncertain term, with termination in 2026.",
         "unsupportedTitle": "Not supported",
-        "unsupportedFixedTerm": "Expiry of fixed-term contracts (arts. 344 and 345 of the Código do Trabalho), which has its own rates and transitional rules.",
+        "unsupportedFixedTerm": "Fixed-term contracts that expired before 1 May 2023 (18 days a year under the earlier text), early termination of a fixed-term contract, and expiry caused by the worker's own declaration.",
         "unsupportedJustCause": "Dismissal with just cause (disciplinary), which follows different rules.",
         "unsupportedUnlawful": "Unlawful dismissal, where the court sets the compensation, in general between 15 and 45 days of base pay per year of seniority.",
         "unsupportedAgreement": "Termination by mutual agreement, where the amount is negotiated and there is no legal formula.",
@@ -3610,11 +3621,19 @@
         "sourceLaw13": "APEL guide to the Agenda do Trabalho Digno: Lei n.º 13/2023, which raised the rate of art. 366(1) to 14 days from 1 May 2023",
         "sourceCode": "Código do Trabalho, consolidated text (PGDL): arts. 344, 345 and 366",
         "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
-        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. Educational, not legal advice."
+        "reviewed": "Rules reviewed on 19 November 2026 against the text of Lei n.º 69/2013, published by the Assembleia da República, and the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days a year of Lei n.º 13/2023, in force from 1 May 2023, and the 12 days and cap of art. 366 come from the APEL and DGERT summaries and the consolidated Código do Trabalho, not from the Diário da República text. We apply the 14 days only to seniority from 1 May 2023, the usual reading of the transitional rule. The fixed-term rate of 24 days and its application to every contract that expires from 1 May 2023 come from the text of Lei n.º 13/2023 reproduced by PGDL (arts. 344, 345 and 35) and the IGeFE note, not from the Diário da República page. Educational, not legal advice.",
+        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and the IGeFE note of 5 July 2023 reads it as 24 days for every contract that expires from 1 May 2023. So the whole duration counts at 24 days whatever the start date, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply.",
+        "sourceLaw13Text": "Lei n.º 13/2023, of 3 April: new wording of arts. 344(2) and 345(4) of the Código do Trabalho and art. 35 on its application in time (PGDL reproduction of the Diário da República text)",
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date"
       },
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
-      "nextStepCta": "Plan the payout across your upcoming months"
+      "nextStepCta": "Plan the payout across your upcoming months",
+      "contractTypes": {
+        "permanent": "Dismissal on a permanent contract",
+        "fixedTerm": "Expiry of a fixed-term contract"
+      },
+      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector."
     },
     "statePension": {
       "title": "Portugal state pension estimate 2026",
@@ -4070,6 +4089,127 @@
           "emergencyFundBody": "Work out how many months of essential bills, energy included, your savings would cover.",
           "inflationLink": "Inflation calculator",
           "inflationBody": "See how rising prices change what your money buys over time."
+        }
+      }
+    },
+    "fuelPrices": {
+      "title": "Fuel prices in Portugal and monthly fuel cost",
+      "shortName": "Fuel prices",
+      "subtitle": "See the official average price of diesel, petrol and LPG in Portugal, its history, and what your driving costs a month.",
+      "description": "Official DGEG average fuel prices in mainland Portugal with weekly change and history, plus a monthly fuel cost calculator.",
+      "pageTitle": "Fuel Prices in Portugal: Official Average and Monthly Cost",
+      "pageDescription": "The latest DGEG average price of diesel, petrol 95 and LPG in Portugal with week-on-week change and five-year history, and a calculator for your monthly fuel cost. Official data, no forecast.",
+      "fuels": {
+        "diesel": "Diesel (gasóleo simples)",
+        "gasoline95": "Petrol 95 (gasolina simples 95)",
+        "lpg": "Autogas (GPL auto)"
+      },
+      "fields": {
+        "fuel": "Fuel",
+        "period": "The distance you enter is",
+        "periodMonth": "Per month",
+        "periodWeek": "Per week",
+        "periodTrip": "Per trip",
+        "distance": "Distance",
+        "trips": "Trips per month",
+        "consumption": "Fuel consumption",
+        "price": "Price per litre",
+        "resetPrice": "Use the latest average ({{price}}/L)"
+      },
+      "help": {
+        "distance": "Kilometres in the period chosen above. A week is counted as 52/12 weeks a month.",
+        "trips": "How many times a month you make this trip.",
+        "consumption": "Litres per 100 km, from your car's trip computer or its data sheet. A real figure is usually higher than the official one.",
+        "price": "Starts at the latest DGEG national average, {{price}}/L on {{date}}. Change it to the price you actually pay."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "This cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "zero": "Enter a value above zero.",
+        "notWhole": "Enter a whole number of trips.",
+        "summary": "Check the highlighted fields to see the estimate."
+      },
+      "result": {
+        "monthly": "Estimated fuel cost per month",
+        "week": "Cost of the weekly distance",
+        "trip": "Cost of one trip",
+        "litres": "Fuel used per month",
+        "yearly": "About twelve such months",
+        "per100": "Cost per 100 km",
+        "nothing": "With no distance driven there is no fuel cost.",
+        "budget": "{{amount}} a month is the fuel line of your transport budget. Add the other car costs next to it to see the whole picture."
+      },
+      "notes": {
+        "assumptions": "Estimate: distance times consumption times price per litre. It assumes the same consumption on every trip and the same price all month. Not advice."
+      },
+      "latest": {
+        "title": "Latest national average price",
+        "asOf": "Data as of {{date}} (DGEG). Change is against {{previous}}, a week earlier.",
+        "change": "{{amount}}/L ({{percent}}) in a week",
+        "flat": "No change in a week",
+        "note": "Daily average of mainland Portugal, weighted by quantities sold and including station discounts. It is an average of the past, not a forecast: this page does not predict next week's price."
+      },
+      "history": {
+        "title": "Fuel prices over the last five years",
+        "intro": "DGEG's average price per litre, one value a week for each fuel.",
+        "chartLabel": "Line chart of the weekly average price per litre of diesel, petrol 95 and autogas in Portugal over five years",
+        "tableCaption": "The latest weeks: average price per litre of each fuel",
+        "date": "Date",
+        "asOf": "Data as of {{date}}, the latest day DGEG published. One value a week, from {{first}}. This page's copy was built on {{fetched}}. Source: DGEG, Preço Médio Diário (mainland Portugal)."
+      },
+      "nextStepHeadline": "Put fuel in your budget",
+      "nextStepDescription": "Fuel is part of what getting around costs. Add it to a WonderMoney budget with the other transport costs and see what is left each month.",
+      "nextStepCta": "Review the transport allowance in your budget",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
+          "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
+          "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A diesel car driven {{distance}} a month using {{consumption}}, at the latest average of {{price}}. Fuel used: {{distance}} times {{consumption}} divided by 100 is {{litres}}. Cost: {{litres}} times {{price}} is {{monthly}} a month, about {{yearly}} a year, or {{per100}} for every 100 km.",
+          "trips": "Distance can also be a trip. A 40 km round trip made 20 times a month with the same car costs {{tripCost}} each time, {{tripMonthly}} a month."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The calculator does four things:",
+          "steps": {
+            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
+            "b": "Litres: distance times consumption divided by 100.",
+            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
+            "d": "Year: twelve such months."
+          },
+          "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price."
+        },
+        "data": {
+          "title": "Data and sources",
+          "dgeg": "Prices: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário of road fuels in mainland Portugal, for gasóleo simples, gasolina simples 95 and GPL auto. The latest day is {{asOf}}; this page's copy was built on {{fetched}}. The history is one DGEG value every seven days back to {{first}}, copied as DGEG publishes it.",
+          "terms": "DGEG states that this information is free and may be used freely, provided DGEG is named as the source, the date of the latest update is shown and the information is reproduced faithfully. The prices are reported by the stations, which are responsible for them.",
+          "dgegLink": "DGEG, daily average price (Preço Médio Diário)",
+          "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}})."
+        },
+        "limits": {
+          "title": "What these figures leave out",
+          "items": {
+            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
+            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
+            "stations": "No stations: this page names no station and ranks none. DGEG's own site lists prices by station if you want to look.",
+            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
+            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
+            "education": "Educational use only, not advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "householdBudgetLink": "Household budget calculator",
+          "householdBudgetBody": "Put fuel next to your other monthly costs and see what is left.",
+          "carLoanLink": "Car loan calculator",
+          "carLoanBody": "Add the instalment to fuel to see what the car costs in total.",
+          "vehicleTaxLink": "Vehicle tax calculator",
+          "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
         }
       }
     }
