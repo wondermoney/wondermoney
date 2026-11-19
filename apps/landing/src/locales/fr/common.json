@@ -4754,6 +4754,17 @@
       "reviewed": "Vérifié",
       "glossaryTerms": "Termes du glossaire",
       "result": "Résultat"
+    },
+    "monthly": {
+      "comingSoon": "Les bilans mensuels arrivent bientôt.",
+      "methodology": "Méthodologie",
+      "snapshotTable": "Les chiffres du mois",
+      "changeVsPrevious": "Évolution par rapport à la période précédente",
+      "whatChanged": "Ce qui a changé",
+      "whoShouldCare": "Qui est concerné",
+      "trendChart": "Tendance",
+      "chartType": "Type de graphique",
+      "dataSources": "Sources des données"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Un glossaire complet des termes financiers et d'investissement.",
       "description": "Chaque terme financier et d'investissement expliqué en langage clair. Parcourez par lettre ou recherchez un concept précis.",
       "searchPlaceholder": "Rechercher des termes...",
-      "comingSoon": "Termes du glossaire bientôt disponibles."
+      "comingSoon": "Termes du glossaire bientôt disponibles.",
+      "letterNav": "Termes par lettre"
     },
     "term": {
       "whyItMatters": "Pourquoi c'est important",

@@ -4754,6 +4754,17 @@
       "reviewed": "Revisto",
       "glossaryTerms": "Termos do glossário",
       "result": "Resultado"
+    },
+    "monthly": {
+      "comingSoon": "As atualizações mensais chegam em breve.",
+      "methodology": "Metodologia",
+      "snapshotTable": "Os números do mês",
+      "changeVsPrevious": "Mudança face ao período anterior",
+      "whatChanged": "O que mudou",
+      "whoShouldCare": "A quem interessa",
+      "trendChart": "Tendência",
+      "chartType": "Tipo de gráfico",
+      "dataSources": "Fontes de dados"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "Glossário completo de termos financeiros e de investimento.",
       "description": "Todos os termos financeiros e de investimento explicados de forma simples.",
       "searchPlaceholder": "Pesquisar termos...",
-      "comingSoon": "Glossário em breve disponível."
+      "comingSoon": "Glossário em breve disponível.",
+      "letterNav": "Termos por letra"
     },
     "term": {
       "whyItMatters": "Porque importa",

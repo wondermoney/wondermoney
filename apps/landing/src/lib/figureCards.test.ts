@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { guideKeepReading } from "./figureCards";
+import { glossaryTermCards, guideKeepReading } from "./figureCards";
 import { toLocalizedPath, toToolsHubPath } from "./routes";
 import { getTranslations } from "./translations";
 
@@ -55,5 +55,32 @@ describe("guideKeepReading", () => {
 
   it("is empty with nothing to link", () => {
     expect(guideKeepReading({ locale: "en", t })).toEqual([]);
+  });
+});
+
+describe("glossaryTermCards", () => {
+  const t = getTranslations("pt");
+
+  it("leads with the named calculator, then the guide, then the paired calculators", () => {
+    const cards = glossaryTermCards({
+      locale: "pt",
+      t,
+      relatedCalculator: "loan-calculator",
+      relatedGuide: { slug: "plano-para-pagar-dividas", title: "Plano para pagar dívidas" },
+    });
+    expect(cards[0]).toMatchObject({ href: toLocalizedPath("toolMortgage", "pt"), title: t("tools.mortgage.title"), kind: "Calculadora" });
+    expect(cards[1]).toMatchObject({ href: "/pt/learn/plano-para-pagar-dividas", figure: "snowball", kind: "Guia" });
+    expect(cards.length).toBeGreaterThan(2);
+    expect(new Set(cards.map((card) => card.href)).size).toBe(cards.length);
+  });
+
+  it("names a calculator the catalog does not know after the tools hub", () => {
+    expect(glossaryTermCards({ locale: "pt", t, relatedCalculator: "nope" })).toEqual([
+      expect.objectContaining({ href: toToolsHubPath("pt"), title: t("resources.links.tools.title") }),
+    ]);
+  });
+
+  it("is empty with nothing to link", () => {
+    expect(glossaryTermCards({ locale: "en", t: getTranslations("en") })).toEqual([]);
   });
 });

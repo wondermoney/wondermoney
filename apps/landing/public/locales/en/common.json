@@ -4754,6 +4754,17 @@
       "reviewed": "Reviewed",
       "glossaryTerms": "Glossary Terms",
       "result": "Result"
+    },
+    "monthly": {
+      "comingSoon": "Monthly updates are coming soon.",
+      "methodology": "Methodology",
+      "snapshotTable": "This month's figures",
+      "changeVsPrevious": "Change from the previous period",
+      "whatChanged": "What changed",
+      "whoShouldCare": "Who should pay attention",
+      "trendChart": "Trend",
+      "chartType": "Chart type",
+      "dataSources": "Data sources"
     }
   },
   "category": {
@@ -4773,7 +4784,8 @@
       "schemaDescription": "A comprehensive glossary of financial and investing terms.",
       "description": "Every financial and investing term explained in plain language. Browse by letter or search for a specific concept.",
       "searchPlaceholder": "Search terms...",
-      "comingSoon": "Glossary terms coming soon."
+      "comingSoon": "Glossary terms coming soon.",
+      "letterNav": "Terms by letter"
     },
     "term": {
       "whyItMatters": "Why It Matters",
