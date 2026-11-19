@@ -416,6 +416,14 @@ const ROUTE_SLUGS = {
 		de: "irs-quellensteuer-tabellen-portugal",
 		it: "tabelle-ritenuta-irs-portogallo",
 	},
+	toolUnemploymentBenefit: {
+		pt: "simulador-subsidio-desemprego",
+		en: "portugal-unemployment-benefit-calculator",
+		es: "calculadora-subsidio-desempleo-portugal",
+		fr: "calculateur-allocation-chomage-portugal",
+		de: "arbeitslosengeld-rechner-portugal",
+		it: "calcolatore-sussidio-disoccupazione-portogallo",
+	},
 	pagePersonalFinanceApp: {
 		pt: "app-de-financas-pessoais",
 		en: "personal-finance-app",
@@ -541,6 +549,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolYouthMortgage",
 	"toolNetSalary",
 	"toolWithholdingTables",
+	"toolUnemploymentBenefit",
 	"toolVehicleTax",
 ] as const satisfies ReadonlyArray<RouteId>
 
@@ -838,6 +847,10 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	"irs-withholding-tables": "toolWithholdingTables",
 	"tabelas-de-irs": "toolWithholdingTables",
 	"tabelas-irs": "toolWithholdingTables",
+	toolunemploymentbenefit: "toolUnemploymentBenefit",
+	"unemployment-benefit-calculator": "toolUnemploymentBenefit",
+	"unemployment-benefit": "toolUnemploymentBenefit",
+	"subsidio-de-desemprego": "toolUnemploymentBenefit",
 	toolvehicletax: "toolVehicleTax",
 	"iuc-calculator": "toolVehicleTax",
 	"vehicle-tax": "toolVehicleTax",

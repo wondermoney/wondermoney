@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney convierte tu neto estimado en un plan, para que cada euro tenga un destino antes de empezar el mes.",
       "nextStepCta": "Usa la estimación neta en un plan mensual"
     },
+    "unemploymentBenefit": {
+      "title": "Calculadora del subsidio de desempleo en Portugal 2026",
+      "shortName": "Subsidio de desempleo",
+      "subtitle": "Estima el subsidio de desempleo mensual, cuánto dura y el total, con los límites de 2026.",
+      "description": "Estima tu subsidio de desempleo en Portugal: importe mensual, duración y total.",
+      "pageTitle": "Calculadora del Subsidio de Desempleo en Portugal 2026: Importe y Duración",
+      "pageDescription": "Estima el subsidio de desempleo en Portugal: 65% de la remuneración de referencia, los límites del IAS de 2026, la duración según edad y cotización y una cifra de ingresos reducidos para tu presupuesto.",
+      "fields": {
+        "grossMonthly": "Salario bruto mensual",
+        "allowances": "Pagas extra",
+        "age": "Edad al quedarte en paro",
+        "contributionMonths": "Meses con remuneración registrada",
+        "years20": "Años con remuneración registrada en los últimos 20",
+        "household": "Hogar",
+        "dependants": "Hijos o personas a cargo"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagos (pagas de vacaciones y Navidad aparte)",
+        "twelfths": "Prorrateadas (el salario ya las incluye)"
+      },
+      "households": {
+        "alone": "Vivo solo/a o mi pareja no da derecho al aumento",
+        "partnerWorking": "Mi pareja trabaja",
+        "partnerUnemployed": "Mi pareja también está en paro (inscrita en el IEFP)",
+        "singleParent": "Soy el único progenitor del hogar"
+      },
+      "help": {
+        "gross": "El salario base de los últimos meses, antes de la Seguridad Social y el IRS. Los 12 meses contados incluyen las pagas de vacaciones y Navidad.",
+        "allowances": "Con 14 pagos la calculadora cuenta 14 veces el salario; prorrateadas cuenta 12, porque las pagas ya están dentro.",
+        "age": "Tu edad el día en que te quedaste en paro.",
+        "months": "Meses con remuneración registrada desde la última vez que cobraste el subsidio de desempleo. La tabla empieza en 12 meses.",
+        "years20": "Años completos con remuneración registrada en los últimos 20. Cada 5 años añaden días.",
+        "household": "El aumento del 10% exige hijos o personas a cargo y que ambos miembros de la pareja estén en paro e inscritos, o un hogar monoparental. Hay que solicitarlo."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "tooSmall": "Introduce un valor de al menos {{min}}.",
+        "tooLarge": "Introduce un valor de hasta {{max}}.",
+        "whole": "Introduce un número entero.",
+        "belowTable": "La tabla de duración empieza en {{min}} meses con remuneración registrada. Con menos, esta estimación no se aplica.",
+        "summary": "Revisa los campos marcados para ver tu estimación."
+      },
+      "result": {
+        "monthly": "Subsidio mensual estimado (30 días)",
+        "daily": "Subsidio por día",
+        "duration": "Duración estimada",
+        "durationValue": "{{days}} días (unos {{months}} meses)",
+        "durationParts": "De ellos, periodo base y días adicionales",
+        "durationPartsValue": "{{base}} + {{extra}} días",
+        "total": "Total estimado en todo el periodo",
+        "netBefore": "Remuneración de referencia neta estimada al mes",
+        "drop": "Caída de ingresos mensual para tu presupuesto",
+        "increaseApplied": "Incluye el aumento del 10% para hogares con hijos.",
+        "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real a partir de tus remuneraciones registradas.",
+        "limit": {
+          "none": "El importe es el 65% de la remuneración de referencia; no se aplicó ningún límite.",
+          "max": "El importe alcanzó el máximo de 2,5 veces el IAS ({{max}} al mes).",
+          "netCap": "El importe quedó limitado al 75% de la remuneración de referencia neta estimada.",
+          "minimum": "El importe se elevó al mínimo, 1 IAS ({{ias}} al mes).",
+          "minimumWage": "El importe se elevó a 1,15 veces el IAS, el mínimo cuando las remuneraciones usadas alcanzan el salario mínimo."
+        }
+      },
+      "checklist": {
+        "title": "Condiciones que conviene comprobar (no es una decisión)",
+        "involuntary": "El desempleo es involuntario, por ejemplo un despido o el fin de un contrato temporal.",
+        "contributions": "Tienes al menos 360 días de remuneración registrada en los 24 meses anteriores al desempleo.",
+        "registration": "Estás inscrito/a en el centro de empleo (IEFP).",
+        "ready": "Vives en Portugal y puedes y estás disponible para trabajar.",
+        "deadline": "Solicitas el subsidio en los 90 días siguientes a quedarte en paro.",
+        "note": "Solo la Seguridad Social decide si tienes derecho. Esta lista es un recordatorio, no un veredicto."
+      },
+      "guide": {
+        "exampleTitle": "Ejemplo",
+        "example": "Una persona de {{age}} años, con {{gross}} al mes en 14 pagos, con {{months}} meses y {{years}} años de remuneración registrada en los últimos 20, que vive sola. La remuneración de referencia es de {{reference}} al día, así que el 65% durante 30 días da {{monthly}} al mes ({{daily}} al día). El periodo es de {{base}} días más {{extra}} días adicionales, {{days}} días en total, es decir, unos {{total}} en todo el periodo. Frente a una remuneración neta estimada de {{net}} al mes, la caída de ingresos es de {{drop}} al mes.",
+        "methodTitle": "Cómo funciona la estimación",
+        "methodReference": "La remuneración de referencia (RR) es el total de las remuneraciones registradas en los 12 meses más antiguos de los 14 anteriores al mes del desempleo, incluidas las pagas de vacaciones y Navidad, dividido entre 360. La calculadora usa 14 o 12 veces tu salario mensual.",
+        "methodAmount": "El subsidio diario es el 65% de la RR. La cifra mensual son 30 días.",
+        "methodLimits": "El subsidio mensual no puede superar 2,5 veces el IAS ({{max}} en 2026) ni el 75% de la RR neta, ni ser inferior a 1 IAS ({{ias}}), salvo que la RR neta sea inferior al IAS. Cuando las remuneraciones usadas son al menos iguales al salario mínimo ({{rmmg}}), el mínimo es 1,15 IAS.",
+        "methodNet": "La RR neta es la RR menos el 11% de Seguridad Social y el tipo de retención de IRS. La calculadora estima ese tipo con las tablas de retención de 2026 del continente para tu salario mensual, como soltero/a, o como casado/a con dos perceptores si tu pareja está en el hogar.",
+        "methodIncrease": "El subsidio sube un 10% cuando ambos miembros de la pareja están en paro e inscritos, o eres el único progenitor, y hay hijos o personas a cargo. Hay que solicitarlo. La calculadora lo aplica al importe ya limitado y nunca por encima de 2,5 IAS.",
+        "methodDuration": "La duración depende de tu edad y de los meses con remuneración registrada, más días extra por cada 5 años completos con registro en los últimos 20: 30 días hasta los 39 años, 45 días de 40 a 49 y 60 días desde los 50.",
+        "methodNoReduction": "No se aplica el antiguo recorte del 10% tras 180 días de cobro: la guía de la Seguridad Social de 2026 no lo recoge.",
+        "methodTax": "La guía de la Seguridad Social indica que el subsidio no hay que declararlo en el IRS. Confirma tu caso con la Autoridad Tributaria.",
+        "methodBudget": "El subsidio mensual es el ingreso con el que debes planificar. Compáralo con tu salario neto para ver la caída y después mira cuánto tiempo tus ahorros cubren la diferencia.",
+        "unsupportedTitle": "No admitido",
+        "unsupportedTransitional": "La tabla transitoria para quien ya cumplía el requisito de cotización el 31 de marzo de 2012 y no ha estado en paro desde entonces. La calculadora usa solo la tabla general.",
+        "unsupportedSocial": "El subsidio social de desempleo, que según la guía solo puede solicitarse hasta el 30 de diciembre de 2026.",
+        "unsupportedSelfEmployed": "Autónomos, gerentes y administradores, subsidio de desempleo parcial, docentes con reglas propias y antiguos pensionistas de invalidez.",
+        "unsupportedOther": "Salarios que variaron mucho en los 12 meses contados, periodos sin remuneración registrada dentro de ellos, otros ingresos y el pago único para crear tu propio empleo.",
+        "sourcesTitle": "Fuentes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 de octubre de 2026), que recoge también el IAS de 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) y el salario mínimo de 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, en su redacción actual: régimen de protección por desempleo",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: aumento del 10% para hogares con hijos y mínimo de 1,15 IAS",
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente a la guía de la Seguridad Social y al texto del Decreto-Lei n.º 119/2021 en el Diário da República. El tipo de IRS detrás del límite del 75% y el orden del aumento del 10% son simplificaciones nuestras, y el fin del recorte del 10% tras 180 días procede de la guía y de la prensa, no de la ley consolidada."
+      },
+      "nextStepHeadline": "Antes de que bajen los ingresos, planifica el colchón",
+      "nextStepDescription": "WonderMoney te muestra tu efectivo, tu gasto mensual y cuánto duran tus ahorros con unos ingresos menores.",
+      "nextStepCta": "Estima cuánto durará tu colchón de efectivo"
+    },
     "vehicleTax": {
       "title": "Calculadora del IUC",
       "shortName": "IUC",

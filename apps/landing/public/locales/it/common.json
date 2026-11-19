@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney trasforma il tuo netto stimato in un piano, così ogni euro ha un compito prima che il mese inizi.",
       "nextStepCta": "Usa la stima netta in un piano mensile"
     },
+    "unemploymentBenefit": {
+      "title": "Calcolatore del sussidio di disoccupazione in Portogallo 2026",
+      "shortName": "Sussidio di disoccupazione",
+      "subtitle": "Stima il sussidio di disoccupazione mensile (subsídio de desemprego), quanto dura e il totale, con i limiti del 2026.",
+      "description": "Stima il tuo sussidio di disoccupazione in Portogallo: importo mensile, durata e totale.",
+      "pageTitle": "Calcolatore Sussidio di Disoccupazione Portogallo 2026: Importo e Durata",
+      "pageDescription": "Stima il sussidio di disoccupazione in Portogallo: 65% della retribuzione di riferimento, i limiti dello IAS 2026, la durata per età e contributi e un reddito ridotto per il tuo budget.",
+      "fields": {
+        "grossMonthly": "Stipendio lordo mensile",
+        "allowances": "Tredicesima e quattordicesima",
+        "age": "Età al momento della disoccupazione",
+        "contributionMonths": "Mesi con retribuzione registrata",
+        "years20": "Anni con retribuzione registrata negli ultimi 20",
+        "household": "Nucleo familiare",
+        "dependants": "Figli o persone a carico"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamenti (ferie e Natale a parte)",
+        "twelfths": "In dodicesimi (lo stipendio le include già)"
+      },
+      "households": {
+        "alone": "Vivo da solo/a o il/la partner non dà diritto alla maggiorazione",
+        "partnerWorking": "Il/la mio/a partner lavora",
+        "partnerUnemployed": "Anche il/la mio/a partner è disoccupato/a (iscritto/a all'IEFP)",
+        "singleParent": "Sono l'unico genitore del nucleo"
+      },
+      "help": {
+        "gross": "Lo stipendio base degli ultimi mesi, prima di previdenza sociale e IRS. I 12 mesi conteggiati includono le mensilità aggiuntive di ferie e Natale.",
+        "allowances": "Con 14 pagamenti il calcolatore conta 14 volte lo stipendio; in dodicesimi ne conta 12, perché le mensilità aggiuntive sono già incluse.",
+        "age": "La tua età il giorno in cui sei diventato disoccupato.",
+        "months": "Mesi con retribuzione registrata dall'ultima volta che hai percepito il sussidio. La tabella parte da 12 mesi.",
+        "years20": "Anni completi con retribuzione registrata negli ultimi 20. Ogni 5 anni aggiungono giorni.",
+        "household": "La maggiorazione del 10% richiede figli o persone a carico e che entrambi i partner siano disoccupati e iscritti, oppure un nucleo monoparentale. Va richiesta."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "tooSmall": "Inserisci un valore di almeno {{min}}.",
+        "tooLarge": "Inserisci un valore fino a {{max}}.",
+        "whole": "Inserisci un numero intero.",
+        "belowTable": "La tabella della durata parte da {{min}} mesi con retribuzione registrata. Con meno, questa stima non si applica.",
+        "summary": "Controlla i campi evidenziati per vedere la stima."
+      },
+      "result": {
+        "monthly": "Sussidio mensile stimato (30 giorni)",
+        "daily": "Sussidio al giorno",
+        "duration": "Durata stimata",
+        "durationValue": "{{days}} giorni (circa {{months}} mesi)",
+        "durationParts": "Di cui periodo base e giorni aggiuntivi",
+        "durationPartsValue": "{{base}} + {{extra}} giorni",
+        "total": "Totale stimato nell'intero periodo",
+        "netBefore": "Retribuzione di riferimento netta stimata al mese",
+        "drop": "Calo di reddito mensile per il tuo budget",
+        "increaseApplied": "Include la maggiorazione del 10% per i nuclei con figli.",
+        "estimate": "Una stima per pianificare, non una decisione. La previdenza sociale calcola l'importo reale dalle tue retribuzioni registrate.",
+        "limit": {
+          "none": "L'importo è il 65% della retribuzione di riferimento; nessun limite applicato.",
+          "max": "L'importo ha raggiunto il massimo di 2,5 volte lo IAS ({{max}} al mese).",
+          "netCap": "L'importo è stato limitato al 75% della retribuzione di riferimento netta stimata.",
+          "minimum": "L'importo è stato portato al minimo, 1 IAS ({{ias}} al mese).",
+          "minimumWage": "L'importo è stato portato a 1,15 volte lo IAS, il minimo quando le retribuzioni usate raggiungono il salario minimo."
+        }
+      },
+      "checklist": {
+        "title": "Condizioni da verificare (non è una decisione)",
+        "involuntary": "La disoccupazione è involontaria, per esempio un licenziamento o la fine di un contratto a termine.",
+        "contributions": "Hai almeno 360 giorni di retribuzione registrata nei 24 mesi precedenti la disoccupazione.",
+        "registration": "Sei iscritto al centro per l'impiego (IEFP).",
+        "ready": "Vivi in Portogallo e sei in grado e disponibile a lavorare.",
+        "deadline": "Richiedi il sussidio entro 90 giorni dall'inizio della disoccupazione.",
+        "note": "Solo la previdenza sociale decide se hai diritto. Questo elenco è un promemoria, non un verdetto."
+      },
+      "guide": {
+        "exampleTitle": "Esempio",
+        "example": "Una persona di {{age}} anni, con {{gross}} al mese in 14 pagamenti, con {{months}} mesi e {{years}} anni di retribuzione registrata negli ultimi 20, che vive da sola. La retribuzione di riferimento è {{reference}} al giorno, quindi il 65% per 30 giorni dà {{monthly}} al mese ({{daily}} al giorno). Il periodo è di {{base}} giorni più {{extra}} giorni aggiuntivi, {{days}} giorni in totale, cioè circa {{total}} nell'intero periodo. Rispetto a una retribuzione netta stimata di {{net}} al mese, il calo di reddito è di {{drop}} al mese.",
+        "methodTitle": "Come funziona la stima",
+        "methodReference": "La retribuzione di riferimento (RR) è il totale delle retribuzioni registrate nei 12 mesi più vecchi dei 14 precedenti il mese della disoccupazione, comprese le mensilità aggiuntive di ferie e Natale, diviso 360. Il calcolatore usa 14 o 12 volte lo stipendio mensile.",
+        "methodAmount": "Il sussidio giornaliero è il 65% della RR. L'importo mensile corrisponde a 30 giorni.",
+        "methodLimits": "Il sussidio mensile non può superare 2,5 volte lo IAS ({{max}} nel 2026) né il 75% della RR netta, e non può essere inferiore a 1 IAS ({{ias}}), salvo che la RR netta sia inferiore allo IAS. Quando le retribuzioni usate sono almeno pari al salario minimo ({{rmmg}}), il minimo è 1,15 IAS.",
+        "methodNet": "La RR netta è la RR meno l'11% di previdenza sociale e l'aliquota di ritenuta IRS. Il calcolatore stima quell'aliquota con le tabelle di ritenuta 2026 del continente per il tuo stipendio mensile, come single, o come sposato con due redditi se il partner è nel nucleo.",
+        "methodIncrease": "Il sussidio aumenta del 10% quando entrambi i partner sono disoccupati e iscritti, o sei l'unico genitore, e ci sono figli o persone a carico. Va richiesto. Il calcolatore lo applica all'importo già limitato e mai oltre 2,5 IAS.",
+        "methodDuration": "La durata dipende dall'età e dai mesi con retribuzione registrata, più giorni extra per ogni 5 anni completi con retribuzione negli ultimi 20: 30 giorni fino a 39 anni, 45 giorni da 40 a 49 e 60 giorni dai 50.",
+        "methodNoReduction": "La vecchia riduzione del 10% dopo 180 giorni di pagamento non è applicata: la guida della previdenza sociale del 2026 non la menziona.",
+        "methodTax": "La guida della previdenza sociale dice che il sussidio non va dichiarato ai fini IRS. Verifica il tuo caso con l'Autorità Tributaria.",
+        "methodBudget": "Il sussidio mensile è il reddito con cui pianificare. Confrontalo con lo stipendio netto per vedere il calo e poi guarda quanto a lungo i risparmi coprono la differenza.",
+        "unsupportedTitle": "Non supportato",
+        "unsupportedTransitional": "La tabella transitoria per chi soddisfaceva già il requisito contributivo al 31 marzo 2012 e non è stato disoccupato da allora. Il calcolatore usa solo la tabella generale.",
+        "unsupportedSocial": "Il sussidio sociale di disoccupazione (subsídio social de desemprego), che secondo la guida può essere richiesto solo fino al 30 dicembre 2026.",
+        "unsupportedSelfEmployed": "Lavoratori autonomi, amministratori e gerenti, sussidio di disoccupazione parziale, insegnanti con regole proprie ed ex pensionati di invalidità.",
+        "unsupportedOther": "Stipendi molto variabili nei 12 mesi conteggiati, periodi senza retribuzione registrata al loro interno, altri redditi e il pagamento unico per avviare un'attività.",
+        "sourcesTitle": "Fonti",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 ottobre 2026), che riporta anche lo IAS 2026 di 537,13 euro (Portaria n.º 480-A/2025/1) e il salario minimo di 920 euro (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, nel testo vigente: regime di protezione in caso di disoccupazione",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: maggiorazione del 10% per i nuclei con figli e minimo di 1,15 IAS",
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 sulla guida della previdenza sociale e sul testo del Decreto-Lei n.º 119/2021 nel Diário da República. L'aliquota IRS dietro il limite del 75% e l'ordine della maggiorazione del 10% sono nostre semplificazioni, e la fine della riduzione del 10% dopo 180 giorni deriva dalla guida e dalla stampa, non dalla legge consolidata."
+      },
+      "nextStepHeadline": "Prima che il reddito scenda, pianifica il cuscinetto",
+      "nextStepDescription": "WonderMoney mostra la tua liquidità, le spese mensili e quanto durano i risparmi con un reddito più basso.",
+      "nextStepCta": "Stima quanto durerà il tuo cuscinetto di liquidità"
+    },
     "vehicleTax": {
       "title": "Calcolo del bollo auto portoghese (IUC)",
       "shortName": "IUC",

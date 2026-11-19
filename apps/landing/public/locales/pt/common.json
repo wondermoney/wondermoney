@@ -2913,6 +2913,105 @@
       "nextStepDescription": "A WonderMoney transforma o teu líquido estimado num plano, para que cada euro tenha uma função antes de o mês começar.",
       "nextStepCta": "Usa a estimativa líquida num plano mensal"
     },
+    "unemploymentBenefit": {
+      "title": "Simulador de subsídio de desemprego 2026",
+      "shortName": "Subsídio de desemprego",
+      "subtitle": "Estime o subsídio de desemprego mensal, durante quanto tempo o recebe e o total, com os limites de 2026.",
+      "description": "Estime o seu subsídio de desemprego em Portugal: valor mensal, duração e total.",
+      "pageTitle": "Simulador de Subsídio de Desemprego 2026: Valor e Duração",
+      "pageDescription": "Estime o subsídio de desemprego em Portugal: 65% da remuneração de referência, os limites do IAS de 2026, a duração por idade e descontos e um valor de rendimento reduzido para o orçamento.",
+      "fields": {
+        "grossMonthly": "Salário bruto mensal",
+        "allowances": "Subsídios de férias e de Natal",
+        "age": "Idade quando ficou desempregado",
+        "contributionMonths": "Meses com registo de remunerações",
+        "years20": "Anos com registo de remunerações nos últimos 20",
+        "household": "Agregado familiar",
+        "dependants": "Filhos ou dependentes"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
+        "twelfths": "Em duodécimos (o salário já os inclui)"
+      },
+      "households": {
+        "alone": "Vivo sozinho/a ou o/a parceiro/a não dá direito ao aumento",
+        "partnerWorking": "O/a meu/minha parceiro/a trabalha",
+        "partnerUnemployed": "O/a meu/minha parceiro/a também está desempregado/a (inscrito/a no IEFP)",
+        "singleParent": "Sou o único responsável do agregado"
+      },
+      "help": {
+        "gross": "O salário base dos últimos meses, antes de Segurança Social e IRS. Os 12 meses contados incluem os subsídios de férias e de Natal.",
+        "allowances": "Com 14 pagamentos o simulador conta 14 vezes o salário; em duodécimos conta 12 vezes, porque os subsídios já estão incluídos.",
+        "age": "A sua idade no dia em que ficou desempregado/a.",
+        "months": "Meses com registo de remunerações desde a última vez que recebeu subsídio de desemprego. A tabela começa nos 12 meses.",
+        "years20": "Anos completos com registo de remunerações nos últimos 20. Cada 5 anos acrescentam dias.",
+        "household": "O aumento de 10% exige filhos ou dependentes e que ambos os elementos do casal estejam desempregados e inscritos, ou um agregado monoparental. Tem de ser pedido."
+      },
+      "errors": {
+        "required": "Indique um número válido.",
+        "tooSmall": "Indique um valor de pelo menos {{min}}.",
+        "tooLarge": "Indique um valor até {{max}}.",
+        "whole": "Indique um número inteiro.",
+        "belowTable": "A tabela de duração começa nos {{min}} meses com registo de remunerações. Com menos, esta estimativa não se aplica.",
+        "summary": "Verifique os campos assinalados para ver a estimativa."
+      },
+      "result": {
+        "monthly": "Subsídio mensal estimado (30 dias)",
+        "daily": "Subsídio por dia",
+        "duration": "Duração estimada",
+        "durationValue": "{{days}} dias (cerca de {{months}} meses)",
+        "durationParts": "Dos quais período base e dias de acréscimo",
+        "durationPartsValue": "{{base}} + {{extra}} dias",
+        "total": "Total estimado em todo o período",
+        "netBefore": "Remuneração de referência líquida estimada por mês",
+        "drop": "Quebra de rendimento mensal para o orçamento",
+        "increaseApplied": "Inclui o aumento de 10% para agregados com filhos.",
+        "estimate": "Uma estimativa para planear, não uma decisão. A Segurança Social calcula o valor real a partir das remunerações registadas.",
+        "limit": {
+          "none": "O valor é 65% da remuneração de referência; nenhum limite se aplicou.",
+          "max": "O valor atingiu o máximo de 2,5 vezes o IAS ({{max}} por mês).",
+          "netCap": "O valor ficou limitado a 75% da remuneração de referência líquida estimada.",
+          "minimum": "O valor foi elevado ao mínimo, 1 IAS ({{ias}} por mês).",
+          "minimumWage": "O valor foi elevado a 1,15 vezes o IAS, o mínimo quando as remunerações usadas atingem o salário mínimo."
+        }
+      },
+      "checklist": {
+        "title": "Condições a confirmar (não é uma decisão)",
+        "involuntary": "O desemprego é involuntário, por exemplo um despedimento ou o fim de um contrato a termo.",
+        "contributions": "Tem pelo menos 360 dias de registo de remunerações nos 24 meses antes de ficar desempregado/a.",
+        "registration": "Está inscrito/a no centro de emprego (IEFP).",
+        "ready": "Vive em Portugal e tem capacidade e disponibilidade para trabalhar.",
+        "deadline": "Pede o subsídio até 90 dias depois de ficar desempregado/a.",
+        "note": "Só a Segurança Social decide se tem direito. Esta lista é um lembrete, não um veredito."
+      },
+      "guide": {
+        "exampleTitle": "Exemplo",
+        "example": "Uma pessoa de {{age}} anos, com {{gross}} por mês em 14 pagamentos, com {{months}} meses e {{years}} anos de registo de remunerações nos últimos 20 e que vive sozinha. A remuneração de referência é {{reference}} por dia, pelo que 65% durante 30 dias dá {{monthly}} por mês ({{daily}} por dia). O período é de {{base}} dias mais {{extra}} dias de acréscimo, {{days}} dias no total, ou seja, cerca de {{total}} em todo o período. Face a uma remuneração líquida estimada de {{net}} por mês, a quebra de rendimento é de {{drop}} por mês.",
+        "methodTitle": "Como funciona a estimativa",
+        "methodReference": "A remuneração de referência (RR) é o total das remunerações registadas nos 12 meses mais antigos dos 14 meses anteriores ao mês do desemprego, incluindo os subsídios de férias e de Natal, a dividir por 360. O simulador usa 14 ou 12 vezes o salário mensal.",
+        "methodAmount": "O subsídio diário é 65% da RR. O valor mensal corresponde a 30 dias.",
+        "methodLimits": "O subsídio mensal não pode ultrapassar 2,5 vezes o IAS ({{max}} em 2026) nem 75% da RR líquida, nem ser inferior a 1 IAS ({{ias}}), exceto se a RR líquida for inferior ao IAS. Quando as remunerações usadas são pelo menos iguais ao salário mínimo ({{rmmg}}), o mínimo é 1,15 IAS.",
+        "methodNet": "A RR líquida é a RR menos 11% de Segurança Social e a taxa de retenção de IRS. O simulador estima essa taxa com as tabelas de retenção de 2026 do continente para o seu salário mensal, como solteiro/a, ou como casado/a com dois titulares se o/a parceiro/a estiver no agregado.",
+        "methodIncrease": "O subsídio aumenta 10% quando ambos os elementos do casal estão desempregados e inscritos, ou é o único responsável, e há filhos ou dependentes. Tem de ser pedido. O simulador aplica-o ao valor já limitado e nunca acima de 2,5 IAS.",
+        "methodDuration": "A duração depende da idade e dos meses com registo de remunerações, com dias a mais por cada 5 anos completos com registo nos últimos 20: 30 dias até aos 39 anos, 45 dias dos 40 aos 49 e 60 dias a partir dos 50.",
+        "methodNoReduction": "A antiga redução de 10% ao fim de 180 dias não é aplicada: o guia prático da Segurança Social de 2026 não a refere.",
+        "methodTax": "O guia da Segurança Social diz que o subsídio não tem de ser declarado em IRS. Confirme o seu caso junto da Autoridade Tributária.",
+        "methodBudget": "O subsídio mensal é o rendimento com que deve planear. Compare-o com o salário líquido para ver a quebra e depois veja durante quanto tempo as poupanças cobrem a diferença.",
+        "unsupportedTitle": "Não suportado",
+        "unsupportedTransitional": "A tabela transitória para quem já cumpria o prazo de garantia a 31 de março de 2012 e não esteve desempregado desde então. O simulador usa só a tabela geral.",
+        "unsupportedSocial": "O subsídio social de desemprego, que segundo o guia só pode ser pedido até 30 de dezembro de 2026.",
+        "unsupportedSelfEmployed": "Trabalhadores independentes, gerentes e administradores, subsídio de desemprego parcial, professores com regras próprias e ex-pensionistas de invalidez.",
+        "unsupportedOther": "Salários que variaram muito nos 12 meses contados, períodos sem remunerações registadas nesse intervalo, outros rendimentos e o pagamento único para criar o próprio emprego.",
+        "sourcesTitle": "Fontes",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16 de outubro de 2026), que refere também o IAS de 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) e o salário mínimo de 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, na redação atual: regime de proteção no desemprego",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: majoração de 10% para agregados com filhos e mínimo de 1,15 IAS",
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social e ao texto do Decreto-Lei n.º 119/2021 no Diário da República. A taxa de IRS por trás do limite de 75% e a ordem da majoração de 10% são simplificações nossas, e o fim da redução de 10% ao fim de 180 dias vem do guia e da imprensa, não da lei consolidada."
+      },
+      "nextStepHeadline": "Antes de o rendimento baixar, planeie a almofada",
+      "nextStepDescription": "A WonderMoney mostra o seu dinheiro, a despesa mensal e quanto tempo duram as poupanças com um rendimento mais baixo.",
+      "nextStepCta": "Estime quanto tempo dura a sua reserva de dinheiro"
+    },
     "vehicleTax": {
       "title": "Simulador de IUC",
       "shortName": "IUC",

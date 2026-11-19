@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney transforme votre net estimé en plan, pour que chaque euro ait un rôle avant le début du mois.",
       "nextStepCta": "Utiliser l'estimation nette dans un plan mensuel"
     },
+    "unemploymentBenefit": {
+      "title": "Calculateur de l'allocation chômage au Portugal 2026",
+      "shortName": "Allocation chômage",
+      "subtitle": "Estimez l'allocation chômage mensuelle (subsídio de desemprego), sa durée et le total, avec les plafonds de 2026.",
+      "description": "Estimez votre allocation chômage au Portugal : montant mensuel, durée et total.",
+      "pageTitle": "Calculateur d'Allocation Chômage Portugal 2026 : Montant et Durée",
+      "pageDescription": "Estimez l'allocation chômage au Portugal : 65 % de la rémunération de référence, les limites de l'IAS 2026, la durée selon l'âge et les cotisations, et un revenu réduit pour votre budget.",
+      "fields": {
+        "grossMonthly": "Salaire brut mensuel",
+        "allowances": "Primes de vacances et de Noël",
+        "age": "Âge au moment du chômage",
+        "contributionMonths": "Mois avec rémunération déclarée",
+        "years20": "Années avec rémunération déclarée sur les 20 dernières",
+        "household": "Foyer",
+        "dependants": "Enfants ou personnes à charge"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 versements (primes de vacances et de Noël à part)",
+        "twelfths": "Lissées (le salaire les inclut déjà)"
+      },
+      "households": {
+        "alone": "Je vis seul(e) ou mon conjoint ne donne pas droit à la majoration",
+        "partnerWorking": "Mon conjoint travaille",
+        "partnerUnemployed": "Mon conjoint est aussi au chômage (inscrit à l'IEFP)",
+        "singleParent": "Je suis le seul parent du foyer"
+      },
+      "help": {
+        "gross": "Le salaire de base des derniers mois, avant sécurité sociale et IRS. Les 12 mois pris en compte incluent les primes de vacances et de Noël.",
+        "allowances": "Avec 14 versements, le calculateur compte 14 fois le salaire ; lissées, il en compte 12, car les primes sont déjà incluses.",
+        "age": "Votre âge le jour où vous êtes devenu chômeur.",
+        "months": "Mois avec rémunération déclarée depuis la dernière fois où vous avez perçu l'allocation. Le tableau commence à 12 mois.",
+        "years20": "Années complètes avec rémunération déclarée sur les 20 dernières. Chaque tranche de 5 ans ajoute des jours.",
+        "household": "La majoration de 10 % exige des enfants ou personnes à charge et soit les deux conjoints au chômage et inscrits, soit un foyer monoparental. Elle doit être demandée."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "tooSmall": "Saisissez une valeur d'au moins {{min}}.",
+        "tooLarge": "Saisissez une valeur jusqu'à {{max}}.",
+        "whole": "Saisissez un nombre entier.",
+        "belowTable": "Le tableau de durée commence à {{min}} mois avec rémunération déclarée. En dessous, cette estimation ne s'applique pas.",
+        "summary": "Vérifiez les champs signalés pour voir votre estimation."
+      },
+      "result": {
+        "monthly": "Allocation mensuelle estimée (30 jours)",
+        "daily": "Allocation par jour",
+        "duration": "Durée estimée",
+        "durationValue": "{{days}} jours (environ {{months}} mois)",
+        "durationParts": "Dont période de base et jours supplémentaires",
+        "durationPartsValue": "{{base}} + {{extra}} jours",
+        "total": "Total estimé sur toute la période",
+        "netBefore": "Rémunération de référence nette estimée par mois",
+        "drop": "Baisse de revenu mensuelle pour votre budget",
+        "increaseApplied": "La majoration de 10 % pour les foyers avec enfants est incluse.",
+        "estimate": "Une estimation pour planifier, pas une décision. La sécurité sociale calcule le montant réel à partir de vos rémunérations déclarées.",
+        "limit": {
+          "none": "Le montant est 65 % de la rémunération de référence ; aucune limite appliquée.",
+          "max": "Le montant a atteint le maximum de 2,5 fois l'IAS ({{max}} par mois).",
+          "netCap": "Le montant a été limité à 75 % de la rémunération de référence nette estimée.",
+          "minimum": "Le montant a été relevé au minimum, 1 IAS ({{ias}} par mois).",
+          "minimumWage": "Le montant a été relevé à 1,15 fois l'IAS, le minimum lorsque les rémunérations retenues atteignent le salaire minimum."
+        }
+      },
+      "checklist": {
+        "title": "Conditions à vérifier (pas une décision)",
+        "involuntary": "Votre chômage est involontaire, par exemple un licenciement ou la fin d'un contrat à durée déterminée.",
+        "contributions": "Vous avez au moins 360 jours de rémunération déclarée dans les 24 mois précédant le chômage.",
+        "registration": "Vous êtes inscrit au centre pour l'emploi (IEFP).",
+        "ready": "Vous vivez au Portugal et êtes apte et disponible pour travailler.",
+        "deadline": "Vous demandez l'allocation dans les 90 jours suivant le début du chômage.",
+        "note": "Seule la sécurité sociale décide de votre droit. Cette liste est un rappel, pas un verdict."
+      },
+      "guide": {
+        "exampleTitle": "Exemple chiffré",
+        "example": "Une personne de {{age}} ans, à {{gross}} par mois en 14 versements, avec {{months}} mois et {{years}} ans de rémunération déclarée sur les 20 dernières années, vivant seule. La rémunération de référence est de {{reference}} par jour : 65 % sur 30 jours donnent {{monthly}} par mois ({{daily}} par jour). La période est de {{base}} jours plus {{extra}} jours supplémentaires, soit {{days}} jours au total, donc environ {{total}} sur toute la période. Face à une rémunération nette estimée de {{net}} par mois, la baisse de revenu est de {{drop}} par mois.",
+        "methodTitle": "Comment fonctionne l'estimation",
+        "methodReference": "La rémunération de référence (RR) est le total des rémunérations déclarées sur les 12 plus anciens des 14 mois précédant le mois du chômage, primes de vacances et de Noël comprises, divisé par 360. Le calculateur prend 14 ou 12 fois votre salaire mensuel.",
+        "methodAmount": "L'allocation journalière est 65 % de la RR. Le montant mensuel correspond à 30 jours.",
+        "methodLimits": "L'allocation mensuelle ne peut dépasser 2,5 fois l'IAS ({{max}} en 2026) ni 75 % de la RR nette, ni être inférieure à 1 IAS ({{ias}}), sauf si la RR nette est inférieure à l'IAS. Quand les rémunérations retenues atteignent au moins le salaire minimum ({{rmmg}}), le minimum est de 1,15 IAS.",
+        "methodNet": "La RR nette est la RR moins 11 % de sécurité sociale et le taux de retenue d'IRS. Le calculateur estime ce taux avec les barèmes de retenue 2026 du continent pour votre salaire mensuel, en célibataire, ou en marié à deux revenus si votre conjoint est dans le foyer.",
+        "methodIncrease": "L'allocation augmente de 10 % lorsque les deux conjoints sont au chômage et inscrits, ou que vous êtes le seul parent, et qu'il y a des enfants ou personnes à charge. Elle doit être demandée. Le calculateur l'applique au montant déjà plafonné et jamais au-delà de 2,5 IAS.",
+        "methodDuration": "La durée dépend de votre âge et des mois avec rémunération déclarée, plus des jours supplémentaires pour chaque tranche complète de 5 ans avec rémunération sur les 20 dernières années : 30 jours jusqu'à 39 ans, 45 jours de 40 à 49 ans et 60 jours à partir de 50 ans.",
+        "methodNoReduction": "L'ancienne réduction de 10 % après 180 jours de versement n'est pas appliquée : le guide 2026 de la sécurité sociale ne la mentionne pas.",
+        "methodTax": "Le guide de la sécurité sociale indique que l'allocation n'a pas à être déclarée à l'IRS. Vérifiez votre cas auprès de l'administration fiscale.",
+        "methodBudget": "L'allocation mensuelle est le revenu avec lequel planifier. Comparez-la à votre salaire net pour voir la baisse, puis voyez combien de temps vos économies couvrent l'écart.",
+        "unsupportedTitle": "Non pris en charge",
+        "unsupportedTransitional": "Le tableau transitoire pour les personnes qui remplissaient déjà la condition de cotisation au 31 mars 2012 et n'ont pas été au chômage depuis. Le calculateur n'utilise que le tableau général.",
+        "unsupportedSocial": "L'allocation sociale de chômage (subsídio social de desemprego), qui selon le guide ne peut être demandée que jusqu'au 30 décembre 2026.",
+        "unsupportedSelfEmployed": "Indépendants, gérants et administrateurs, allocation de chômage partiel, enseignants à règles propres et anciens bénéficiaires d'une pension d'invalidité.",
+        "unsupportedOther": "Salaires très variables sur les 12 mois pris en compte, périodes sans rémunération déclarée dans cet intervalle, autres revenus et versement unique pour créer son emploi.",
+        "sourcesTitle": "Sources",
+        "sourceGuide": "Segurança Social : Guia Prático Subsídio de Desemprego (v4.79, 16 octobre 2026), qui indique aussi l'IAS 2026 de 537,13 euros (Portaria n.º 480-A/2025/1) et le salaire minimum de 920 euros (Decreto-Lei n.º 139/2025)",
+        "sourceLaw": "Decreto-Lei n.º 220/2006, dans sa rédaction actuelle : régime de protection du chômage",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021 : majoration de 10 % pour les foyers avec enfants et minimum de 1,15 IAS",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 d'après le guide de la sécurité sociale et le texte du Decreto-Lei n.º 119/2021 au Diário da República. Le taux d'IRS derrière le plafond de 75 % et l'ordre de la majoration de 10 % sont des simplifications de notre part, et la fin de la réduction de 10 % après 180 jours provient du guide et de la presse, pas de la loi consolidée."
+      },
+      "nextStepHeadline": "Avant la baisse de revenu, préparez le coussin",
+      "nextStepDescription": "WonderMoney montre votre trésorerie, vos dépenses mensuelles et combien de temps vos économies tiennent avec un revenu plus bas.",
+      "nextStepCta": "Estimez combien de temps durera votre réserve de trésorerie"
+    },
     "vehicleTax": {
       "title": "Calculateur de l'IUC",
       "shortName": "IUC",

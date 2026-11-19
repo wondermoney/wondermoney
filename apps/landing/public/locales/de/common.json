@@ -2913,6 +2913,105 @@
       "nextStepDescription": "WonderMoney macht aus Ihrem geschätzten Netto einen Plan, damit jeder Euro vor Monatsbeginn eine Aufgabe hat.",
       "nextStepCta": "Die Netto-Schätzung in einem Monatsplan nutzen"
     },
+    "unemploymentBenefit": {
+      "title": "Arbeitslosengeld-Rechner Portugal 2026",
+      "shortName": "Arbeitslosengeld",
+      "subtitle": "Schätzen Sie das monatliche Arbeitslosengeld (subsídio de desemprego), die Bezugsdauer und die Gesamtsumme mit den Grenzen für 2026.",
+      "description": "Schätzen Sie Ihr Arbeitslosengeld in Portugal: Monatsbetrag, Dauer und Gesamtsumme.",
+      "pageTitle": "Arbeitslosengeld-Rechner Portugal 2026: Betrag und Bezugsdauer",
+      "pageDescription": "Schätzen Sie das Arbeitslosengeld in Portugal: 65 % des Referenzentgelts, die IAS-Grenzen 2026, die Dauer nach Alter und Beitragszeit und ein reduziertes Einkommen für Ihr Budget.",
+      "fields": {
+        "grossMonthly": "Monatliches Bruttogehalt",
+        "allowances": "Urlaubs- und Weihnachtsgeld",
+        "age": "Alter bei Eintritt der Arbeitslosigkeit",
+        "contributionMonths": "Monate mit gemeldetem Entgelt",
+        "years20": "Jahre mit gemeldetem Entgelt in den letzten 20",
+        "household": "Haushalt",
+        "dependants": "Kinder oder Unterhaltsberechtigte"
+      },
+      "allowanceOptions": {
+        "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
+        "twelfths": "In Zwölfteln (im Gehalt enthalten)"
+      },
+      "households": {
+        "alone": "Ich lebe allein oder mein Partner begründet keinen Zuschlag",
+        "partnerWorking": "Mein Partner arbeitet",
+        "partnerUnemployed": "Mein Partner ist ebenfalls arbeitslos (beim IEFP gemeldet)",
+        "singleParent": "Ich bin der einzige Elternteil im Haushalt"
+      },
+      "help": {
+        "gross": "Das Grundgehalt der letzten Monate vor Sozialversicherung und IRS. Die 12 gezählten Monate enthalten Urlaubs- und Weihnachtsgeld.",
+        "allowances": "Bei 14 Zahlungen zählt der Rechner das 14-Fache des Gehalts, in Zwölfteln das 12-Fache, weil die Zuschläge schon enthalten sind.",
+        "age": "Ihr Alter an dem Tag, an dem Sie arbeitslos wurden.",
+        "months": "Monate mit gemeldetem Entgelt seit dem letzten Bezug von Arbeitslosengeld. Die Tabelle beginnt bei 12 Monaten.",
+        "years20": "Volle Jahre mit gemeldetem Entgelt in den letzten 20 Jahren. Je 5 Jahre kommen zusätzliche Tage hinzu.",
+        "household": "Der Zuschlag von 10 % setzt Kinder oder Unterhaltsberechtigte voraus und entweder beide Partner arbeitslos und gemeldet oder einen Haushalt mit nur einem Elternteil. Er muss beantragt werden."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "tooSmall": "Geben Sie einen Wert von mindestens {{min}} ein.",
+        "tooLarge": "Geben Sie einen Wert bis {{max}} ein.",
+        "whole": "Geben Sie eine ganze Zahl ein.",
+        "belowTable": "Die Dauertabelle beginnt bei {{min}} Monaten mit gemeldetem Entgelt. Bei weniger gilt diese Schätzung nicht.",
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+      },
+      "result": {
+        "monthly": "Geschätztes Arbeitslosengeld pro Monat (30 Tage)",
+        "daily": "Betrag pro Tag",
+        "duration": "Geschätzte Bezugsdauer",
+        "durationValue": "{{days}} Tage (etwa {{months}} Monate)",
+        "durationParts": "Davon Grundzeit und zusätzliche Tage",
+        "durationPartsValue": "{{base}} + {{extra}} Tage",
+        "total": "Geschätzte Gesamtsumme über den ganzen Zeitraum",
+        "netBefore": "Geschätztes Netto-Referenzentgelt pro Monat",
+        "drop": "Monatlicher Einkommensrückgang für Ihr Budget",
+        "increaseApplied": "Der Zuschlag von 10 % für Haushalte mit Kindern ist enthalten.",
+        "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Sozialversicherung berechnet den tatsächlichen Betrag aus Ihrem gemeldeten Entgelt.",
+        "limit": {
+          "none": "Der Betrag ist 65 % des Referenzentgelts; keine Grenze wurde angewendet.",
+          "max": "Der Betrag hat das Maximum von 2,5 IAS erreicht ({{max}} pro Monat).",
+          "netCap": "Der Betrag wurde auf 75 % des geschätzten Netto-Referenzentgelts begrenzt.",
+          "minimum": "Der Betrag wurde auf das Minimum von 1 IAS angehoben ({{ias}} pro Monat).",
+          "minimumWage": "Der Betrag wurde auf das 1,15-Fache des IAS angehoben, das Minimum, wenn das zugrunde liegende Entgelt mindestens dem Mindestlohn entspricht."
+        }
+      },
+      "checklist": {
+        "title": "Voraussetzungen zum Prüfen (keine Entscheidung)",
+        "involuntary": "Ihre Arbeitslosigkeit ist unfreiwillig, zum Beispiel durch Kündigung oder das Ende eines befristeten Vertrags.",
+        "contributions": "Sie haben mindestens 360 Tage gemeldetes Entgelt in den 24 Monaten vor der Arbeitslosigkeit.",
+        "registration": "Sie sind beim Arbeitsamt (IEFP) gemeldet.",
+        "ready": "Sie leben in Portugal und sind arbeitsfähig und verfügbar.",
+        "deadline": "Sie beantragen die Leistung innerhalb von 90 Tagen nach Eintritt der Arbeitslosigkeit.",
+        "note": "Nur die Sozialversicherung entscheidet über Ihren Anspruch. Diese Liste ist eine Erinnerung, kein Urteil."
+      },
+      "guide": {
+        "exampleTitle": "Rechenbeispiel",
+        "example": "Eine {{age}}-jährige Person mit {{gross}} im Monat in 14 Zahlungen, mit {{months}} Monaten und {{years}} Jahren gemeldetem Entgelt in den letzten 20 Jahren, die allein lebt. Das Referenzentgelt beträgt {{reference}} pro Tag, 65 % für 30 Tage ergeben also {{monthly}} im Monat ({{daily}} pro Tag). Die Dauer beträgt {{base}} Tage plus {{extra}} zusätzliche Tage, insgesamt {{days}} Tage, also etwa {{total}} über den gesamten Zeitraum. Gegenüber einem geschätzten Nettoentgelt von {{net}} im Monat beträgt der Einkommensrückgang {{drop}} im Monat.",
+        "methodTitle": "So funktioniert die Schätzung",
+        "methodReference": "Das Referenzentgelt (RR) ist die Summe des gemeldeten Entgelts der ältesten 12 der 14 Monate vor dem Monat der Arbeitslosigkeit, einschließlich Urlaubs- und Weihnachtsgeld, geteilt durch 360. Der Rechner nimmt das 14- oder 12-Fache Ihres Monatsgehalts.",
+        "methodAmount": "Das Tagesgeld beträgt 65 % der RR. Der Monatsbetrag sind 30 Tage davon.",
+        "methodLimits": "Das monatliche Arbeitslosengeld darf 2,5 IAS ({{max}} im Jahr 2026) und 75 % der Netto-RR nicht überschreiten und nicht unter 1 IAS ({{ias}}) liegen, außer die Netto-RR liegt unter dem IAS. Entspricht das zugrunde liegende Entgelt mindestens dem Mindestlohn ({{rmmg}}), liegt das Minimum bei 1,15 IAS.",
+        "methodNet": "Die Netto-RR ist die RR abzüglich 11 % Sozialversicherung und des IRS-Abzugssatzes. Der Rechner schätzt diesen Satz anhand der Quellensteuertabellen 2026 für das Festland für Ihr Monatsgehalt, als Alleinstehender oder als Verheirateter mit zwei Verdienern, wenn Ihr Partner im Haushalt lebt.",
+        "methodIncrease": "Das Arbeitslosengeld steigt um 10 %, wenn beide Partner arbeitslos und gemeldet sind oder Sie der einzige Elternteil sind und Kinder oder Unterhaltsberechtigte vorhanden sind. Der Zuschlag muss beantragt werden. Der Rechner wendet ihn auf den bereits begrenzten Betrag an, nie über 2,5 IAS.",
+        "methodDuration": "Die Dauer hängt von Ihrem Alter und den Monaten mit gemeldetem Entgelt ab, plus Zusatztage für jede vollen 5 Jahre mit Entgelt in den letzten 20: 30 Tage bis 39 Jahre, 45 Tage von 40 bis 49 und 60 Tage ab 50.",
+        "methodNoReduction": "Die frühere Kürzung um 10 % nach 180 Bezugstagen wird nicht angewendet: Der Leitfaden der Sozialversicherung von 2026 nennt sie nicht.",
+        "methodTax": "Laut Leitfaden der Sozialversicherung muss die Leistung nicht in der IRS-Erklärung angegeben werden. Klären Sie Ihren Fall mit der Steuerbehörde.",
+        "methodBudget": "Der Monatsbetrag ist das Einkommen, mit dem Sie planen. Vergleichen Sie ihn mit Ihrem Nettogehalt, um den Rückgang zu sehen, und prüfen Sie dann, wie lange Ihre Ersparnisse die Lücke decken.",
+        "unsupportedTitle": "Nicht unterstützt",
+        "unsupportedTransitional": "Die Übergangstabelle für Personen, die die Beitragsvoraussetzung schon am 31. März 2012 erfüllten und seitdem nicht arbeitslos waren. Der Rechner nutzt nur die allgemeine Tabelle.",
+        "unsupportedSocial": "Das soziale Arbeitslosengeld (subsídio social de desemprego), das laut Leitfaden nur bis zum 30. Dezember 2026 beantragt werden kann.",
+        "unsupportedSelfEmployed": "Selbstständige, Geschäftsführer und Vorstände, Teilarbeitslosengeld, Lehrkräfte mit eigenen Regeln und frühere Invaliditätsrentner.",
+        "unsupportedOther": "Stark schwankende Gehälter in den 12 gezählten Monaten, Zeiten ohne gemeldetes Entgelt darin, sonstige Einkünfte und die einmalige Auszahlung für eine Existenzgründung.",
+        "sourcesTitle": "Quellen",
+        "sourceGuide": "Segurança Social: Guia Prático Subsídio de Desemprego (v4.79, 16. Oktober 2026), der auch den IAS 2026 von 537,13 Euro (Portaria n.º 480-A/2025/1) und den Mindestlohn von 920 Euro (Decreto-Lei n.º 139/2025) nennt",
+        "sourceLaw": "Decreto-Lei n.º 220/2006 in der geltenden Fassung: Regelung des Schutzes bei Arbeitslosigkeit",
+        "sourceIncrease": "Decreto-Lei n.º 119/2021: Zuschlag von 10 % für Haushalte mit Kindern und Minimum von 1,15 IAS",
+        "reviewed": "Regeln und Werte für 2026 am 19. November 2026 mit dem Leitfaden der Sozialversicherung und dem Text des Decreto-Lei n.º 119/2021 im Diário da República abgeglichen. Der IRS-Satz hinter der 75-%-Grenze und die Reihenfolge des 10-%-Zuschlags sind unsere Vereinfachungen, und das Ende der 10-%-Kürzung nach 180 Tagen stammt aus dem Leitfaden und der Presse, nicht aus dem konsolidierten Gesetz."
+      },
+      "nextStepHeadline": "Planen Sie das Polster, bevor das Einkommen sinkt",
+      "nextStepDescription": "WonderMoney zeigt Ihr Bargeld, Ihre monatlichen Ausgaben und wie lange Ihre Ersparnisse bei geringerem Einkommen reichen.",
+      "nextStepCta": "Schätzen Sie, wie lange Ihr Bargeldpolster reicht"
+    },
     "vehicleTax": {
       "title": "Kfz-Steuer-Rechner (IUC)",
       "shortName": "Kfz-Steuer (IUC)",
