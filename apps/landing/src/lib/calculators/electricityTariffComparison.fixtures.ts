@@ -72,6 +72,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -102,6 +104,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-10-01",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -132,6 +136,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-19",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0.684, powerPercent: 0.02, energyPercent: 0.02, energyPerKwh: 2e-05},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -162,6 +168,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-19",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 83.88,
     refunds: {fixedPerYear: 0.684, powerPercent: 0.02, energyPercent: 0.02, energyPerKwh: 2e-05},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -192,6 +200,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-07-07",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -221,6 +231,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-10-06",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 100, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -250,6 +262,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-10-06",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 70.8,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 100, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -279,6 +293,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 73.19,
     refunds: {fixedPerYear: 79, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -309,6 +325,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 35, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -339,6 +357,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 30, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -369,6 +389,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 30, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -399,6 +421,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-11-06",
     validTo: "2026-12-05",
+    minAnnualKwh: null,
+    maxAnnualKwh: 20000,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -412,6 +436,7 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
       6.9: {simple: {powerPerDay: 0.3436, energy: 0.295729393740785}, biHourly: {powerPerDay: 0.3436, offValley: 0.285305962867516, valley: 0.297342196963362}, triHourly: {powerPerDay: 0.3436, peak: 0.462105120529586, shoulder: 0.236966299802688, valley: 0.297342196963362}},
       10.35: {simple: {powerPerDay: 0.5154, energy: 0.295729393740785}, biHourly: {powerPerDay: 0.5154, offValley: 0.285305962867516, valley: 0.297342196963362}, triHourly: {powerPerDay: 0.5154, peak: 0.462105120529586, shoulder: 0.236966299802688, valley: 0.297342196963362}},
       13.8: {simple: {powerPerDay: 0.6872, energy: 0.295729393740785}, biHourly: {powerPerDay: 0.6872, offValley: 0.285305962867516, valley: 0.297342196963362}, triHourly: {powerPerDay: 0.6872, peak: 0.462105120529586, shoulder: 0.236966299802688, valley: 0.297342196963362}},
+      20.7: {simple: {powerPerDay: 1.0309, energy: 0.295729393740785}, biHourly: {powerPerDay: 1.0309, offValley: 0.285305962867516, valley: 0.297342196963362}, triHourly: {powerPerDay: 1.0309, peak: 0.462105120529586, shoulder: 0.236966299802688, valley: 0.297342196963362}},
     },
   },
   {
@@ -429,6 +454,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-11-01",
     validTo: "2026-12-05",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -459,6 +486,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-11-06",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 3.021, powerPercent: 0.0833333333333333, energyPercent: 0.0833333333333333, energyPerKwh: 0.001},
     newClient: {fixedPerYear: 24.6, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -487,6 +516,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-11-06",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 17.781, powerPercent: 0.0833333333333333, energyPercent: 0.0833333333333333, energyPerKwh: 0.001},
     newClient: {fixedPerYear: 24.6, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -515,6 +546,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-10-01",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 58.8,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -545,6 +578,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-11-01",
     validTo: "2026-12-05",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 100, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -572,6 +607,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 3,
     validFrom: "2026-10-06",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 120, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -598,6 +635,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-08-10",
     validTo: "2026-12-31",
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -626,6 +665,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-11-16",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -654,6 +695,8 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
     durationMonths: 12,
     validFrom: "2026-11-16",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
     newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
@@ -665,6 +708,7 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
       3.45: {simple: {powerPerDay: 1.8156, energy: 0.163}, biHourly: {powerPerDay: 1.8156, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 1.8156, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
       6.9: {simple: {powerPerDay: 1.9874, energy: 0.163}, biHourly: {powerPerDay: 1.9874, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 1.9874, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
       13.8: {simple: {powerPerDay: 2.331, energy: 0.163}, biHourly: {powerPerDay: 2.331, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 2.331, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
+      20.7: {simple: {powerPerDay: 2.6747, energy: 0.163}, biHourly: {powerPerDay: 2.6747, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 2.6747, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
     },
   },
 ];
@@ -685,6 +729,19 @@ const consumer3 = { electSupply: "7", electPonta: "6540", electCheias: "4360" };
 const plain = { filtro_SemReembolsos: "0", filtro_NovosClientes: "0" };
 /** Loyalty offers left out (the page's HTML value, before its script sets 1): read so on 2026-11-20. */
 const noLoyalty = { filtro_Fidelizacao: "0" };
+/**
+ * Audax at 20,7 kVA, simple, loyalty offers left out: AUDAX_09 (ConsFim_ELE 20000) is then Audax's
+ * only offer at this power, so ERSE lists it inside its band and nothing outside it (#567).
+ */
+const audaxBand = (kwh: number, form: ErseReading["form"] = {}) => ({
+  filtro_comercializadores: "AUDAX",
+  electSupply: "9",
+  cycle: "1",
+  electPonta: String(kwh),
+  electCheias: "",
+  ...noLoyalty,
+  ...form,
+});
 const turSimple = (kwh: number, form: ErseReading["form"] = {}) => ({
   filtro_comercializadores: "TUR",
   cycle: "1",
@@ -772,6 +829,16 @@ export const ERSE_READINGS: ErseReading[] = [
   { name: "TUR 6,9 kVA", form: turSimple(1900, { electSupply: "5" }), offer: "TUR", option: "simple", erse: [240.74, 217.9, 88.81, 0, 0, 547.45] },
   { name: "TUR 6,9 kVA, social tariff and large family", form: turSimple(1900, { electSupply: "5", socialOffer: "2", filtro_FamiliasNumerosas: "1" }), offer: "TUR", option: "simple", erse: [72.76, 217.9, 39.43, 0, 0, 330.09] },
   { name: "TUR 10,35 kVA", form: turSimple(1900, { electSupply: "6" }), offer: "TUR", option: "simple", erse: [303.45, 218.63, 158.67, 0, 0, 680.75] },
+  // Consumption band (#567): AUDAX_09 is for up to 20 000 kWh a year, that limit included, counted
+  // on the year's total (both periods) and on the consumption scaled to a year (1 666 kWh in one
+  // month is 19 992 a year). ERSE_OUT_OF_BAND has the same requests just past the limit.
+  { name: "band, Audax indexed at 19 000 kWh", form: audaxBand(19000), offer: "AUDAX_09", option: "simple", erse: [1529.58, 4465.56, 1438.5, 0, 0, 7433.64] },
+  { name: "band, Audax indexed at 20 000 kWh, the limit", form: audaxBand(20000), offer: "AUDAX_09", option: "simple", erse: [1590.28, 4700.59, 1507.75, 0, 0, 7798.62] },
+  { name: "band, Audax indexed at 1 666 kWh in one month", form: audaxBand(1666, { electCalendar: "0" }), offer: "AUDAX_09", option: "simple", erse: [1589.79, 4698.71, 1507.2, 0, 0, 7795.7] },
+  { name: "band, Audax indexed at 10 000 + 10 000 kWh bi-hourly", form: audaxBand(10000, { cycle: "2", electCheias: "10000" }), offer: "AUDAX_09", option: "biHourly", erse: [1369.28, 4833.48, 1487.49, 0, 0, 7690.25] },
+  // With loyalty offers in, as on ERSE's page, Audax's cheapest at 20,7 kVA is TOP T4 on both sides.
+  { name: "band, Audax TOP T4 at 19 000 kWh with loyalty", form: audaxBand(19000, { filtro_Fidelizacao: "1" }), offer: "AUDAX_05", option: "simple", erse: [1529.58, 2543.69, 996.47, 0, 0, 5069.74] },
+  { name: "band, Audax TOP T4 at 21 000 kWh with loyalty", form: audaxBand(21000, { filtro_Fidelizacao: "1" }), offer: "AUDAX_05", option: "simple", erse: [1650.98, 2748.29, 1073.91, 0, 0, 5473.18] },
   { name: "TUR bi-hourly 2 000 + 1 666 kWh: thresholds rounded per period", form: { filtro_comercializadores: "TUR", electPonta: "2000", electCheias: "1666" }, offer: "TUR", option: "biHourly", erse: [256.03, 413.36, 116.4, 0, 0, 785.79] },
 ];
 
@@ -787,6 +854,18 @@ export const ERSE_NEGATIVE_BILL: ErseReading = {
   option: "simple",
   erse: [20.91, 42.75, -7.61, 0, -81.3, -25.25],
 };
+
+/**
+ * ERSE's requests just past AUDAX_09's band (ConsFim_ELE 20000), read on 2026-11-20: each lists no
+ * Audax offer at all. So was tri-hourly 5 000 + 10 000 + 5 001 kWh, where 5 000 + 10 000 + 5 000
+ * listed AUDAX_09.
+ */
+export const ERSE_OUT_OF_BAND: ReadonlyArray<{ name: string; form: ErseReading["form"]; results: 0 }> = [
+  { name: "20 001 kWh", form: audaxBand(20001), results: 0 },
+  { name: "21 000 kWh", form: audaxBand(21000), results: 0 },
+  { name: "1 667 kWh in one month (20 004 a year)", form: audaxBand(1667, { electCalendar: "0" }), results: 0 },
+  { name: "10 000 + 10 001 kWh bi-hourly", form: audaxBand(10000, { cycle: "2", electCheias: "10001" }), results: 0 },
+];
 
 /** Asked for 10,35 kVA with the social tariff (socialOffer 2), ERSE lists no regulated offer at all. */
 export const ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9 = { form: turSimple(1900, { electSupply: "6", socialOffer: "2" }), results: 0 } as const;

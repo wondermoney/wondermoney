@@ -10,6 +10,7 @@ import { ERSE_TARIFFS, CONTRACTED_POWERS_KVA } from "./data/erseTariffs";
 import {
   CONDITIONS_COLUMNS,
   MULTI_OPTION_FILTERS,
+  consumptionBand,
   YES_NO_FILTERS,
   decodeOptions,
   decodeYesNo,
@@ -30,11 +31,12 @@ const MODULE = fileURLToPath(new URL("./data/electricityOffers.ts", import.meta.
 const FIXTURES = fileURLToPath(new URL("../../../scripts/fixtures/erse-offers/", import.meta.url));
 
 /**
- * The fixture: nine offers and their price rows cut, byte for byte, from ERSE's 17 November 2026
+ * The fixture: ten offers and their price rows cut, byte for byte, from ERSE's 17 November 2026
  * export (BOM, CRLF, decimal comma): the TUR, an indexed offer (ALFAENERGIA_04), a dual offer
  * with a new-customer discount and mandatory services (EDPC_72), refunds as fractions (END_68,
- * GALP_109) and in scientific notation (REPSOL_09), a loyalty offer (AUDAX_01), a business-only
- * offer (ACCIONA_01) and a gas offer (CUR), the last two to be dropped.
+ * GALP_109) and in scientific notation (REPSOL_09), a loyalty offer (AUDAX_01), an offer for up to
+ * 20 MWh a year (AUDAX_09, ConsFim_ELE 20000), a business-only offer (ACCIONA_01) and a gas offer
+ * (CUR), the last two to be dropped.
  */
 const fixture = {
   conditions: readFileSync(join(FIXTURES, "CondComerciais.csv"), "utf8"),
@@ -260,6 +262,7 @@ describe("build-electricity-offers: offers", () => {
       "TUR",
       "ALFAENERGIA_04",
       "AUDAX_01",
+      "AUDAX_09",
       "EDPC_72",
       "END_68",
       "GALP_109",
@@ -325,6 +328,25 @@ describe("build-electricity-offers: offers", () => {
     expect(byId(offers, "EDPC_72")?.prices[6.9]?.triHourly).toBeUndefined();
   });
 
+  it("reads the consumption band, null where ERSE gives none", () => {
+    const offers = derive();
+    expect(byId(offers, "AUDAX_09")).toMatchObject({
+      indexed: true,
+      conditioned: true,
+      conditions: "<20MWh/ano",
+      minAnnualKwh: null,
+      maxAnnualKwh: 20000,
+    });
+    for (const offer of offers.filter((candidate) => candidate.id !== "AUDAX_09")) {
+      expect([offer.id, offer.minAnnualKwh, offer.maxAnnualKwh]).toEqual([offer.id, null, null]);
+    }
+    const band = (min: string, max: string) => byId(derive(withCells("END_68", { ConsIni_ELE: min, ConsFim_ELE: max })), "END_68");
+    expect(band("7000", "")).toMatchObject({ minAnnualKwh: 7000, maxAnnualKwh: null });
+    expect(band("0", "1500,5")).toMatchObject({ minAnnualKwh: 0, maxAnnualKwh: 1500.5 });
+    expect(band("20000", "20000")).toMatchObject({ minAnnualKwh: 20000, maxAnnualKwh: 20000 });
+    expect(consumptionBand({ COD_Proposta: "X", ConsIni_ELE: " ", ConsFim_ELE: "" })).toEqual({ minAnnualKwh: null, maxAnnualKwh: null });
+  });
+
   it("keeps an offer from its first to its last day, inclusive", () => {
     expect(byId(derive(fixture, "2026-11-30"), "EDPC_72")).toBeDefined();
     expect(byId(derive(fixture, "2026-12-01"), "EDPC_72")).toBeUndefined();
@@ -366,6 +388,19 @@ describe("build-electricity-offers: refusing a bad export", () => {
     expect(() => derive(withPrice("TUR", "3,45", "1", "Pot_Cont", "3,3"))).toThrow(/Unknown contracted power 3,3 for TUR/);
   });
 
+  it("refuses a consumption band that is not a number, is negative or ends below its start", () => {
+    expect(() => derive(withCell("AUDAX_09", "ConsFim_ELE", "20 MWh"))).toThrow(/Unreadable ConsFim_ELE of AUDAX_09/);
+    expect(() => derive(withCell("AUDAX_09", "ConsFim_ELE", "20.000"))).toThrow(/Unreadable ConsFim_ELE of AUDAX_09/);
+    expect(() => derive(withCell("AUDAX_09", "ConsIni_ELE", "-1"))).toThrow(/Implausible ConsIni_ELE -1 for AUDAX_09/);
+    expect(() => derive(withCell("AUDAX_09", "ConsIni_ELE", "20001"))).toThrow(
+      /ConsIni_ELE 20001 is above ConsFim_ELE 20000 for AUDAX_09/,
+    );
+    // Rows the snapshot drops (business-only, gas-only) are not read.
+    expect(() => derive(withCells("ACCIONA_01", { ConsIni_ELE: "x", ConsFim_ELE: "-5" }))).not.toThrow();
+    const conditions = fixture.conditions.replace("ConsFim_ELE;", "ConsFimELE;");
+    expect(() => derive({ ...fixture, conditions })).toThrow(/Missing columns in CondComerciais.csv: ConsFim_ELE/);
+  });
+
   it("refuses implausible amounts and dates", () => {
     expect(() => derive(withCell("END_68", "ReembTF_ELE (%)", "1,5"))).toThrow(/Implausible ReembTF_ELE/);
     expect(() => derive(withCell("END_68", "ReembFixo (€/ano)", "-5"))).toThrow(/Implausible ReembFixo/);
@@ -387,7 +422,7 @@ describe("build-electricity-offers: refusing a bad export", () => {
     expect(() => derive({ ...fixture, conditions: twice })).toThrow(/END_68 appears twice/);
     const header = fixture.conditions.split("\r\n")[0];
     expect(() => derive({ ...fixture, conditions: header })).toThrow(/Only 0 electricity offers/);
-    expect(() => deriveOffers(fixture, { date: DATE })).toThrow(/Only 7 electricity offers valid on 2026-11-17: refusing to write/);
+    expect(() => deriveOffers(fixture, { date: DATE })).toThrow(/Only 8 electricity offers valid on 2026-11-17: refusing to write/);
     expect(() => deriveOffers(fixture, { date: "17/11/2026" })).toThrow(/YYYY-MM-DD/);
   });
 
@@ -444,6 +479,12 @@ describe("the committed electricity offers", () => {
       expect(offer.validFrom <= fetchedOn).toBe(true);
       if (offer.validTo !== null) expect(offer.validTo >= fetchedOn).toBe(true);
       expect(Object.keys(offer.prices).length).toBeGreaterThan(0);
+      for (const bound of [offer.minAnnualKwh, offer.maxAnnualKwh]) {
+        if (bound !== null) expect(bound).toBeGreaterThanOrEqual(0);
+      }
+      if (offer.minAnnualKwh !== null && offer.maxAnnualKwh !== null) {
+        expect(offer.minAnnualKwh).toBeLessThanOrEqual(offer.maxAnnualKwh);
+      }
       for (const link of Object.values(offer.links)) expect(link).toMatch(/^https?:\/\//);
     }
   });

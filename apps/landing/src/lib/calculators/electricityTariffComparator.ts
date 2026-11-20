@@ -267,6 +267,8 @@ export function myTariffOffer(
     durationMonths: null,
     validFrom: "2000-01-01",
     validTo: null,
+    minAnnualKwh: null,
+    maxAnnualKwh: null,
     mandatoryServicesPerYear: 0,
     refunds: none,
     newClient: none,
