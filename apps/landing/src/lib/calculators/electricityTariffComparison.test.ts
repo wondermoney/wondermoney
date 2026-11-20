@@ -9,6 +9,7 @@ import {
 } from "./electricityTariffComparison";
 import {
   ERSE_FORM,
+  ERSE_NEGATIVE_BILL,
   ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9,
   ERSE_READINGS,
   FIXTURE_OFFERS,
@@ -88,7 +89,18 @@ describe("compareElectricityOffers against ERSE's simulator (read on 2026-11-20)
     expect(Math.abs(priced.firstYear.total - (total + erseRepeat))).toBeLessThanOrEqual(ROUNDING);
     expect(priced.firstYear.power + priced.firstYear.energy).toBeCloseTo(network + energy, 1);
     expect(priced.firstYear.services).toBeCloseTo(services, 2);
-    expect(priced.firstYear.refunds + priced.firstYear.newClientDiscount).toBeCloseTo(discounts + erseRepeat, 1);
+    // When a discount is more than the 23% base, ERSE lets that VAT go negative; the engine moves the
+    // rest to the 6% base (and its 23% VAT is then zero), so the total is the same but the discount
+    // before VAT differs.
+    if (priced.firstYear.vatStandard > 1e-9) {
+      expect(priced.firstYear.refunds + priced.firstYear.newClientDiscount).toBeCloseTo(discounts + erseRepeat, 1);
+    }
+  });
+
+  it("stops at zero where ERSE shows a negative bill", () => {
+    const priced = only(run([offer(ERSE_NEGATIVE_BILL.offer)], inputFor(ERSE_NEGATIVE_BILL)).results);
+    expect(ERSE_NEGATIVE_BILL.erse[5]).toBeLessThan(0);
+    expect(priced.firstYear.total).toBe(0);
   });
 
   it("matches the three standard consumers' regulated tariff and two market offers to the cent", () => {
@@ -112,14 +124,18 @@ describe("compareElectricityOffers against ERSE's simulator (read on 2026-11-20)
     }
   });
 
-  it("lists nothing on the social tariff above 6.9 kVA in ERSE, and gives no social discount here", () => {
-    expect(ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9.results).toBe(0);
-    const kwh = periodKwh(365, { simple: 1900 });
-    const social = run([offer("TUR")], { contractedPower: 10.35, kwh, options: ["simple"], socialTariff: true });
-    const regular = run([offer("TUR")], { contractedPower: 10.35, kwh, options: ["simple"] });
+  it("gives no social discount above 6.9 kVA, where ERSE lists no regulated offer for it", () => {
+    // ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9 records ERSE's empty answer for this request.
+    const request = { name: "", form: ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9.form, offer: "TUR", option: "simple" } as ErseReading;
+    const input = inputFor(request);
+    expect(input).toMatchObject({ contractedPower: 10.35, socialTariff: true });
+    const social = run([offer("TUR")], input);
+    const regular = run([offer("TUR")], { ...input, socialTariff: false });
     expect(social.socialTariffApplied).toBe(false);
+    expect(regular.socialTariffApplied).toBe(false);
     expect(only(social.results).firstYear).toEqual(only(regular.results).firstYear);
-    expect(only(regular.results).firstYear.total).toBe(680.75);
+    expect(only(social.results).firstYear.total).toBe(680.75);
+    expect(run([offer("TUR")], { ...input, contractedPower: 6.9 }).socialTariffApplied).toBe(true);
   });
 });
 
@@ -224,7 +240,10 @@ describe("periods, discounts and the ranking", () => {
   it("takes the new-client discount off the first year only, and only when asked", () => {
     const edp = offer("EDPC_14");
     const asNew = only(run([edp], { kwh: typeOne, options: ["simple"], newClient: true }).results);
-    expect(asNew.firstYear.newClientDiscount).toBeCloseTo(-100 / 1.23, 6);
+    // 100 EUR with VAT: 81.30 before VAT at 23%, more where part of it comes off the 6% base.
+    expect(-asNew.firstYear.newClientDiscount).toBeGreaterThanOrEqual(100 / 1.23 - 1e-9);
+    expect(-asNew.firstYear.newClientDiscount).toBeLessThanOrEqual(100 / 1.06);
+    expect(asNew.firstYear.vatStandard).toBeGreaterThanOrEqual(0);
     expect(asNew.laterYears.newClientDiscount).toBe(0);
     // 100 EUR including VAT comes off the total.
     expect(asNew.laterYears.total - asNew.firstYear.total).toBeCloseTo(100, 1);
@@ -286,6 +305,81 @@ describe("periods, discounts and the ranking", () => {
     const { peak, shoulder, valley } = offer("TUR").prices[3.45]!.triHourly!;
     expect(onDaily.firstYear.energy).toBeCloseTo(300 * peak + 840 * shoulder + 760 * valley, 6);
     expect(onWeekly.firstYear.energy).toBeCloseTo(250 * peak + 750 * shoulder + 900 * valley, 6);
+  });
+
+  it("never lets discounts take a bill below zero", () => {
+    const none = periodKwh(365, { simple: 0 });
+    const flags = { kwh: none, options: ["simple"] as const, newClient: true, includeRefunds: true, includeDual: true };
+    // EDPC_36 at 1.15 kVA (ERSE: -25.25 EUR) and EDPC_126 (dual, 120 EUR new-client) at 3.45 kVA.
+    for (const [id, contractedPower] of [["EDPC_36", 1.15], ["EDPC_126", 3.45]] as const) {
+      const priced = only(run([offer(id)], { ...flags, contractedPower }).results);
+      for (const bill of [priced.firstYear, priced.period]) {
+        expect(bill.total, id).toBe(0);
+        expect(bill.subtotal).toBeCloseTo(0, 9);
+        expect(bill.vatReduced).toBeGreaterThanOrEqual(-1e-9);
+        expect(bill.vatStandard).toBeGreaterThanOrEqual(-1e-9);
+        // What is taken off is what there was to take off.
+        expect(bill.refunds + bill.newClientDiscount).toBeCloseTo(-(bill.power + bill.energy + bill.cav + bill.iec + bill.services), 9);
+      }
+      // Without the new-client discount the later years pay the fixed charges.
+      expect(priced.laterYears.total).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps both VAT lines at zero or above when a fixed discount is more than the 23% base", () => {
+    // EDPC_14 at 3.45 kVA, no consumption: 100 EUR off, but only 0.1173 EUR/day of the power term
+    // pays 23%. The rest of the discount comes off the 6% base, for the same amount with VAT.
+    const priced = only(
+      run([offer("EDPC_14")], { kwh: periodKwh(365, { simple: 0 }), options: ["simple"], newClient: true }).results,
+    );
+    const { powerPerDay } = offer("EDPC_14").prices[3.45]!.simple!;
+    const tar = 0.1718 * 365;
+    const gross = tar * 1.06 + (powerPerDay * 365 - tar) * 1.23;
+    expect(priced.firstYear.vatStandard).toBeCloseTo(0, 9);
+    expect(priced.firstYear.vatReduced).toBeGreaterThan(0);
+    expect(priced.firstYear.total).toBe(Math.round((gross - 100) * 100) / 100);
+    // ERSE, 1 kWh: 19.31 EUR, that is 0.1671 x 1.06 + 0.001 x 1.23 = 0.18 EUR more.
+    expect(priced.firstYear.total).toBe(19.13);
+  });
+
+  it("never takes a price below zero with the social discount", () => {
+    const cheap: ElectricityOffer = {
+      ...offer("TUR"),
+      id: "CHEAP",
+      regulated: false,
+      prices: { 3.45: { simple: { powerPerDay: 0.05, energy: 0.03 } } },
+    };
+    const bill = only(run([cheap], { kwh: periodKwh(365, { simple: 1900 }), options: ["simple"], socialTariff: true }).results)
+      .firstYear;
+    expect(bill.power).toBe(0);
+    expect(bill.energy).toBe(0);
+    expect(bill.socialDiscount).toBeCloseTo(0.05 * 365 + 0.03 * 1900, 6);
+    expect(bill.total).toBeGreaterThanOrEqual(0);
+    // Only the reduced CAV (1 EUR a month with 6% VAT) is left.
+    expect(bill.total).toBe(12.72);
+  });
+
+  it("puts the whole power term at 6% when its price is below the TAR fixed term", () => {
+    // ENIPLENITUDE_15/16 charge 0.1717 EUR/day at 3.45 kVA, a hundredth of a cent below the TAR.
+    const below: ElectricityOffer = {
+      ...offer("TUR"),
+      id: "BELOW_TAR",
+      regulated: false,
+      prices: { 3.45: { simple: { powerPerDay: 0.1717, energy: 0.1711 } } },
+    };
+    const bill = only(run([below], { kwh: periodKwh(365, { simple: 0 }), options: ["simple"] }).results).firstYear;
+    expect(bill.power).toBeCloseTo(0.1717 * 365, 9);
+    expect(bill.vatReduced).toBeCloseTo(0.1717 * 365 * 0.06, 9);
+    expect(bill.vatStandard).toBe(0);
+  });
+
+  it("takes the annual kWh from the periods priced", () => {
+    const disagree: PeriodKwh = { ...typeOne, simple: { energy: Number.NaN } };
+    const bi = run([offer("TUR")], { kwh: disagree, options: ["biHourly"] });
+    expect(bi.annualKwh).toBe(1900);
+    const scaled = run([offer("TUR")], { kwh: { ...typeOne, days: 73, simple: { energy: 500 } }, options: ["biHourly", "triHourly"] });
+    expect(scaled.annualKwh).toBeCloseTo(1900 * 5, 9);
+    expect(run([offer("TUR")], { kwh: typeOne, options: [] }).annualKwh).toBe(0);
   });
 
   it("prices every offer in the current snapshot to a finite total", async () => {

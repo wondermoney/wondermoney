@@ -526,6 +526,59 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
       13.8: {simple: {powerPerDay: 0.908070859522575, energy: 0.167698045660602}, biHourly: {powerPerDay: 0.908070859522575, offValley: 0.181893682141161, valley: 0.121596240386095}},
     },
   },
+  {
+    id: "EDPC_36",
+    supplier: "EDPC",
+    name: "Eletricidade Indexada média DD + FE Oferta 100€",
+    regulated: false,
+    dual: false,
+    segment: "domestic",
+    indexed: true,
+    renewable: true,
+    conditioned: false,
+    loyalty: false,
+    socialTariff: true,
+    durationMonths: 3,
+    validFrom: "2026-11-01",
+    validTo: "2026-12-05",
+    mandatoryServicesPerYear: 0,
+    refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    newClient: {fixedPerYear: 100, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    requirements: {directDebit: true, eInvoice: true},
+    conditions: "desconto por débito direto e fatura eletrónica",
+    notes: "",
+    links: {terms: "https://www.edp.pt/particulares/apoio-cliente/perguntas-frequentes/pt/contratos/novo-contrato/quais-sao-as-condicoes-do-meu-novo-contrato/faq-5056/", supplier: "https://www.edp.pt/particulares/"},
+    prices: {
+      1.15: {simple: {powerPerDay: 0.1744, energy: 0.273774933333333}},
+      3.45: {simple: {powerPerDay: 0.2889, energy: 0.273774933333333}, biHourly: {powerPerDay: 0.2889, offValley: 0.296574933333333, valley: 0.228874933333333}, triHourly: {powerPerDay: 0.2889, peak: 0.458274933333333, shoulder: 0.254274933333333, valley: 0.228874933333333}},
+    },
+  },
+  {
+    id: "EDPC_126",
+    supplier: "EDPC",
+    name: "Gás + Eletricidade DD+FE - Oferta 120€",
+    regulated: false,
+    dual: true,
+    segment: "domestic",
+    indexed: false,
+    renewable: true,
+    conditioned: false,
+    loyalty: false,
+    socialTariff: true,
+    durationMonths: 3,
+    validFrom: "2026-10-06",
+    validTo: "2026-12-31",
+    mandatoryServicesPerYear: 0,
+    refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    newClient: {fixedPerYear: 120, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    requirements: {directDebit: true, eInvoice: true},
+    conditions: "desconto por débito direto e fatura eletrónica",
+    notes: "",
+    links: {offer: "https://www.edp.pt/particulares/energia/gas-eletricidade/", standardSheet: "https://www.edp.pt/particulares/energia/tarifarios/", terms: "https://www.edp.pt/particulares/apoio-cliente/perguntas-frequentes/pt/contratos/novo-contrato/quais-sao-as-condicoes-do-meu-novo-contrato/faq-5056/", supplier: "https://www.edp.pt/particulares/"},
+    prices: {
+      3.45: {simple: {powerPerDay: 0.2891, energy: 0.1671}, biHourly: {powerPerDay: 0.4253, offValley: 0.1935, valley: 0.1119}, triHourly: {powerPerDay: 0.4253, peak: 0.2856, shoulder: 0.1394, valley: 0.1119}},
+    },
+  },
 ];
 
 export interface ErseReading {
@@ -592,6 +645,12 @@ export const ERSE_READINGS: ErseReading[] = [
   { name: "Endesa refunds and new client", form: { filtro_comercializadores: "END", filtro_SemRestricoesAdicionais: "0", cycle: "1", electPonta: "1900", electCheias: "" }, offer: "END_68", option: "simple", erse: [178.04, 243.72, 67.19, 0, -61.4, 427.55] },
   // Social tariff (TAR discount, IEC exemption, reduced CAV).
   { name: "social tariff, EDP", form: { socialOffer: "2", cycle: "1", electPonta: "1900", electCheias: "" }, offer: "EDPC_14", option: "simple", erse: [49.59, 244.97, 18.97, 0, -81.3, 232.23] },
+  // Social tariff with a percentage refund: ERSE takes the refund off the offer's own prices, before
+  // the social discount (the same 8.57 EUR as without the social tariff).
+  { name: "social tariff, Repsol refunds", form: { socialOffer: "2", filtro_comercializadores: "REPSOL", filtro_NovosClientes: "0" }, offer: "REPSOL_125", option: "biHourly", erse: [41.46, 229.12, 37.86, 0, -8.57, 299.87] },
+  { name: "social tariff, Repsol, no refunds", form: { socialOffer: "2", filtro_comercializadores: "REPSOL", ...plain }, offer: "REPSOL_125", option: "biHourly", erse: [41.46, 229.12, 38.88, 0, 0, 309.46] },
+  // No consumption: the fixed charges and the new-client discount only.
+  { name: "no consumption, EDP indexed with new-client 100 EUR, 3,45 kVA", form: { filtro_comercializadores: "EDPC", filtro_SemRestricoesAdicionais: "0", cycle: "1", electPonta: "0", electCheias: "" }, offer: "EDPC_36", option: "simple", erse: [62.71, 42.74, -5.11, 0, -81.3, 19.04] },
   // Regulated tariff probes, simple, 12 months unless noted.
   { name: "TUR 1 kWh: no CAV below 400 kWh a year", form: turSimple(1), offer: "TUR", option: "simple", erse: [62.77, 7.37, 5.44, 0, 0, 75.58] },
   { name: "TUR 399 kWh: still no CAV", form: turSimple(399), offer: "TUR", option: "simple", erse: [86.93, 51.31, 10.02, 0, 0, 148.26] },
@@ -613,6 +672,19 @@ export const ERSE_READINGS: ErseReading[] = [
   { name: "TUR 10,35 kVA", form: turSimple(1900, { electSupply: "6" }), offer: "TUR", option: "simple", erse: [303.45, 218.63, 158.67, 0, 0, 680.75] },
   { name: "TUR bi-hourly 2 000 + 1 666 kWh: thresholds rounded per period", form: { filtro_comercializadores: "TUR", electPonta: "2000", electCheias: "1666" }, offer: "TUR", option: "biHourly", erse: [256.03, 413.36, 116.4, 0, 0, 785.79] },
 ];
+
+/**
+ * ERSE does not floor a bill at zero: with no consumption at 1,15 kVA, EDPC_36's 100 EUR new-client
+ * discount (81.30 EUR before VAT) is more than the year's charges, and ERSE shows a negative total
+ * and negative taxes. The engine stops at zero.
+ */
+export const ERSE_NEGATIVE_BILL: ErseReading = {
+  name: "no consumption, EDP indexed with new-client 100 EUR, 1,15 kVA",
+  form: { filtro_comercializadores: "EDPC", cycle: "1", electSupply: "0", electPonta: "0", electCheias: "" },
+  offer: "EDPC_36",
+  option: "simple",
+  erse: [20.91, 42.75, -7.61, 0, -81.3, -25.25],
+};
 
 /** Asked for 10,35 kVA with the social tariff (socialOffer 2), ERSE lists no regulated offer at all. */
 export const ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9 = { form: turSimple(1900, { electSupply: "6", socialOffer: "2" }), results: 0 } as const;

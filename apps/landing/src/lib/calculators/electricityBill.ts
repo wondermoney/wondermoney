@@ -95,7 +95,8 @@ export type ElectricityBillOutcome =
   | { ok: true; result: ElectricityBillResult }
   | { ok: false; errors: Partial<Record<ElectricityBillField, ElectricityBillError>> };
 
-const cents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+/** Rounds to the cent; the nudge keeps an exact half cent from rounding down on float error. */
+const cents = (value: number) => Math.round(value * 100 + 1e-7) / 100;
 
 function validate(input: ElectricityBillInput) {
   const errors: Partial<Record<ElectricityBillField, ElectricityBillError>> = {};

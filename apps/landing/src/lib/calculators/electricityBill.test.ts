@@ -111,6 +111,14 @@ describe("computeElectricityBill", () => {
     expect(r.breakdown.energyReduced.net).toBe(0);
   });
 
+  it("rounds an exact half cent up", () => {
+    // 6.9 kVA, 1 000 kWh, bi-hourly with 1% off-peak, large family: the subtotal is 218.425 EUR
+    // exactly (power 10.977, energy 300 x 0.2045 x 0.99 + 300 x 0.1143 x 0.01 at 6% and the rest at
+    // 23%, CAV 2.85, IEC 1), which floating point can land a hair below.
+    const r = run({ contractedPower: 6.9, consumption: 1000, option: "biHourly", offPeakPercent: 1, largeFamily: true });
+    expect(r.subtotal).toBe(218.43);
+  });
+
   it("explains every invalid input instead of guessing", () => {
     const bad = (overrides: Partial<ElectricityBillInput>) => {
       const outcome = computeElectricityBill({ ...ELECTRICITY_BILL_EXAMPLE, ...overrides });

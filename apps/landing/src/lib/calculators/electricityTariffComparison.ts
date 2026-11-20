@@ -15,7 +15,12 @@
 //   64.23 EUR before VAT and 14.77 EUR of VAT), so the breakdown splits it that way too.
 // - The percentage columns are fractions, as ERSE gives them (0.02 is 2%). A percentage of the power
 //   term comes off at 23%; a percentage of the energy term and an amount per kWh come off at the
-//   energy's own mix of 6% and 23%, as in ERSE's simulator.
+//   energy's own mix of 6% and 23%, as in ERSE's simulator. Percentages apply to the offer's own
+//   prices, before the social discount, as ERSE's simulator does.
+// - Where a discount is more than the base it comes off (a fixed amount at 23% against a small
+//   power term, say), the rest comes off the other VAT base for the same amount with VAT, so the
+//   total is exact and no VAT line goes negative (ERSE's simulator lets it go negative instead).
+//   Discounts never take a bill below zero, and the social discount never takes a price below zero.
 // - On dual offers (electricity with gas) the fixed amounts may cover the gas contract too. They are
 //   not split; dual results are flagged and left out unless asked for, as in ERSE's electricity
 //   simulation.
@@ -123,7 +128,10 @@ export interface OfferComparison {
 export interface TariffComparisonResult {
   /** Sorted by `sortBy`, cheapest first. */
   results: OfferComparison[];
-  /** The consumption scaled to 365 days. */
+  /**
+   * The consumption scaled to 365 days, from the first option priced (simple, then bi-hourly, then
+   * tri-hourly). Each result's own is `firstYear.kwh`.
+   */
   annualKwh: number;
   /** False when the social tariff was asked for above 6.9 kVA, where it does not apply. */
   socialTariffApplied: boolean;
@@ -139,7 +147,8 @@ export type TariffComparisonOutcome =
 /** Longest period accepted, in days: two years, enough for any bill or meter download. */
 export const TARIFF_COMPARISON_LIMITS = { maxDays: 731 } as const;
 
-const cents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+/** Rounds to the cent; the nudge keeps an exact half cent from rounding down on float error. */
+const cents = (value: number) => Math.round(value * 100 + 1e-7) / 100;
 
 /** The kWh of each of `option`'s periods, in the order of the offer's prices. */
 export function kwhByPeriod(kwh: PeriodKwh, cycle: HourlyCycle, option: TariffOption): number[] {
@@ -209,6 +218,31 @@ interface BillTerms {
   includeRefunds: boolean;
 }
 
+const VAT_FACTOR = { reduced: 1 + ERSE_TARIFFS.vat.reduced, standard: 1 + ERSE_TARIFFS.vat.standard };
+const withVat = (split: VatSplit) => split.reduced * VAT_FACTOR.reduced + split.standard * VAT_FACTOR.standard;
+
+/**
+ * Takes a discount off the bill's two VAT bases (amounts before VAT) and returns what it really
+ * takes off each. Each part comes off the base ERSE books it on, but no base goes below zero: what a
+ * part would take beyond its base moves to the other base, for the same amount with VAT, so the
+ * total stays exact and neither VAT line turns negative. What is left once both bases are at zero is
+ * dropped: a bill never goes below zero. ERSE's simulator does not floor it (on 2026-11-20 it showed
+ * -25.25 EUR a year for EDPC_36 at 1.15 kVA and no consumption, with negative taxes), but a discount
+ * spread over the bills cannot pay out more than the bills.
+ */
+function applyDiscount(base: VatSplit, discount: VatSplit): VatSplit {
+  let { reduced, standard } = discount;
+  if (standard > base.standard) {
+    reduced += ((standard - base.standard) * VAT_FACTOR.standard) / VAT_FACTOR.reduced;
+    standard = base.standard;
+  }
+  if (reduced > base.reduced) {
+    standard += ((reduced - base.reduced) * VAT_FACTOR.reduced) / VAT_FACTOR.standard;
+    reduced = base.reduced;
+  }
+  return { reduced, standard: Math.min(standard, base.standard) };
+}
+
 function priceBill(
   offer: ElectricityOffer,
   prices: { powerPerDay: number; energy: readonly number[] },
@@ -218,10 +252,15 @@ function priceBill(
   const { vat, socialTariff: social } = ERSE_TARIFFS;
   const kwh = kwhByPeriod.reduce((sum, value) => sum + value, 0);
 
-  const powerDiscount = socialTariff ? (social.powerPerDay[contractedPower] ?? 0) : 0;
-  const energyDiscount = socialTariff ? social.energyPerKwh : 0;
+  // The social discount never takes a price below zero.
+  const powerDiscount = socialTariff
+    ? Math.min(social.powerPerDay[contractedPower] ?? 0, Math.max(0, prices.powerPerDay))
+    : 0;
+  const energyDiscounts = prices.energy.map((price) =>
+    socialTariff ? Math.min(social.energyPerKwh, Math.max(0, price)) : 0,
+  );
   const powerNet = (prices.powerPerDay - powerDiscount) * days;
-  const energyPrices = prices.energy.map((price) => price - energyDiscount);
+  const energyPrices = prices.energy.map((price, index) => price - energyDiscounts[index]);
 
   const reducedKwh = reducedVatKwhByPeriod(kwhByPeriod, {
     contractedPower,
@@ -233,15 +272,34 @@ function priceBill(
   const power = powerTermVatSplit(powerNet, { contractedPower, days, socialTariff });
   const cav = cavNet({ days, annualKwh: (kwh * DAYS_PER_YEAR) / days, reduced: socialTariff });
   const iec = iecNet(kwh, socialTariff);
-  const services = ((offer.mandatoryServicesPerYear / (1 + vat.standard)) * days) / DAYS_PER_YEAR;
+  const services = ((offer.mandatoryServicesPerYear / VAT_FACTOR.standard) * days) / DAYS_PER_YEAR;
+  const base: VatSplit = {
+    reduced: power.reduced + energy.reduced + cav,
+    standard: power.standard + energy.standard + iec + services,
+  };
 
+  // ERSE takes refund and discount percentages off the offer's own prices, before the social
+  // discount (REPSOL_125 refunds 8.57 EUR a year with or without the social tariff).
+  const discountBase = {
+    days,
+    kwh,
+    powerNet: prices.powerPerDay * days,
+    energy: energyVatSplit(kwhByPeriod, prices.energy, reducedKwh),
+  };
   const none: VatSplit = { reduced: 0, standard: 0 };
-  const base = { days, kwh, powerNet, energy };
-  const refunds = terms.includeRefunds ? discountSplit(offer.refunds, base) : none;
-  const newClient = terms.newClient ? discountSplit(offer.newClient, base) : none;
+  const refunds = terms.includeRefunds ? discountSplit(offer.refunds, discountBase) : none;
+  const newClient = terms.newClient ? discountSplit(offer.newClient, discountBase) : none;
+  const applied = applyDiscount(base, {
+    reduced: refunds.reduced + newClient.reduced,
+    standard: refunds.standard + newClient.standard,
+  });
+  // What was taken off, shared between refunds and new-client discount by what each asked for.
+  const appliedNet = applied.reduced + applied.standard;
+  const asked = withVat(refunds) + withVat(newClient);
+  const refundsShare = asked > 0 ? withVat(refunds) / asked : 0;
 
-  const reducedNet = power.reduced + energy.reduced + cav - refunds.reduced - newClient.reduced;
-  const standardNet = power.standard + energy.standard + iec + services - refunds.standard - newClient.standard;
+  const reducedNet = base.reduced - applied.reduced;
+  const standardNet = base.standard - applied.standard;
   const vatReduced = reducedNet * vat.reduced;
   const vatStandard = standardNet * vat.standard;
   const subtotal = reducedNet + standardNet;
@@ -251,12 +309,13 @@ function priceBill(
     kwh,
     power: powerNet,
     energy: energy.reduced + energy.standard,
-    socialDiscount: powerDiscount * days + energyDiscount * kwh,
+    socialDiscount:
+      powerDiscount * days + energyDiscounts.reduce((sum, discount, index) => sum + discount * kwhByPeriod[index], 0),
     cav,
     iec,
     services,
-    refunds: 0 - (refunds.reduced + refunds.standard),
-    newClientDiscount: 0 - (newClient.reduced + newClient.standard),
+    refunds: 0 - appliedNet * refundsShare,
+    newClientDiscount: 0 - appliedNet * (1 - refundsShare),
     subtotal,
     vatReduced,
     vatStandard,
@@ -345,6 +404,8 @@ export function compareElectricityOffers(
   );
   const kept = input.cheapestPerSupplier ? cheapestOfEachSupplier(results) : results;
 
-  const annualKwh = input.kwh.simple.energy * scale;
+  // From the periods priced: the first option's (simple, then bi-hourly, then tri-hourly).
+  const pricedKwh = options.length > 0 ? kwhByPeriod(input.kwh, input.cycle, options[0]) : [];
+  const annualKwh = pricedKwh.reduce((sum, kwh) => sum + kwh, 0) * scale;
   return { ok: true, result: { results: kept, annualKwh, socialTariffApplied: socialTariff } };
 }

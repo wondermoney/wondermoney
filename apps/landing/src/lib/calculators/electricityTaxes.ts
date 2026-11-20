@@ -15,8 +15,6 @@ export interface VatSplit {
   standard: number;
 }
 
-export const vatOf = (split: VatSplit) => split.reduced * vat.reduced + split.standard * vat.standard;
-
 /** kWh that get the reduced rate in a period of `days` (Lista I, verba 2.38; ERSExplica p. 7). */
 export function reducedVatAllowanceKwh(contractedPower: number, days: number, largeFamily: boolean) {
   if (contractedPower > vat.energyReducedUpToKva) return 0;
