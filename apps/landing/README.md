@@ -29,7 +29,7 @@ The build is Vercel SSR output (`@astrojs/vercel`); localized pages are prerende
 - `src/pages/`: mirrored locale route wrappers
 - `src/components/pages/`: shared page compositions
 - `src/components/shared/`: layout, SEO and structured data
-- `src/lib/`: locale, routes, static paths and Sanity clients
+- `src/lib/`: locale, routes, static paths and Sanity queries
 - `src/content/` and `public/`: local content/configuration and static assets
 
 See `AGENTS.md` for conventions and `DESIGN.md` for the design contract.
