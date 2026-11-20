@@ -4,7 +4,9 @@ import type { CuratedList } from "./types";
 export const PODCASTS = {
   id: "podcasts",
   routeId: "resourcePodcasts",
-  format: "podcast",
+  formats: ["podcast"],
+  criteria: ["active", "independent", "noHype", "free", "market"],
+  review: "halfYearly",
   figure: "cardindex",
   reviewed: "2026-11-20",
   entries: {

@@ -49,6 +49,38 @@ const ROUTE_SLUGS = {
 		de: "finanz-youtube-kanaele",
 		it: "canali-youtube-finanza-personale",
 	},
+	resourceBooks: {
+		pt: "livros-financas-pessoais",
+		en: "personal-finance-books",
+		es: "libros-finanzas-personales",
+		fr: "livres-finances-personnelles",
+		de: "finanzbuecher",
+		it: "libri-finanza-personale",
+	},
+	resourceCourses: {
+		pt: "cursos-literacia-financeira",
+		en: "financial-education-courses",
+		es: "cursos-educacion-financiera",
+		fr: "formations-education-financiere",
+		de: "finanzbildung-kurse",
+		it: "corsi-educazione-finanziaria",
+	},
+	resourceForums: {
+		pt: "foruns-financas-pessoais",
+		en: "personal-finance-forums",
+		es: "foros-finanzas-personales",
+		fr: "forums-finances-personnelles",
+		de: "finanz-foren",
+		it: "forum-finanza-personale",
+	},
+	resourceEvents: {
+		pt: "eventos-literacia-financeira",
+		en: "financial-education-events",
+		es: "eventos-educacion-financiera",
+		fr: "evenements-education-financiere",
+		de: "finanzbildung-veranstaltungen",
+		it: "eventi-educazione-finanziaria",
+	},
 	pagePricing: {
 		pt: "precos",
 		en: "pricing",
@@ -689,13 +721,17 @@ const OTHER_TOP_LEVEL_ROUTE_IDS = [
 	"guideMoneyCheckin",
 ] as const satisfies ReadonlyArray<RouteId>
 
-// Curated lists of outside resources (podcasts, newsletters…), each a page under the
+// Curated lists of outside resources (podcasts, newsletters, books, events…), each a page under the
 // resources hub: `/{lang}/{pageResources slug}/{slug}`. One dynamic route file per
 // locale tree serves them all (`src/pages/{lang}/{resources}/[list].astro`).
 export const CURATED_LIST_ROUTE_IDS = [
 	"resourcePodcasts",
 	"resourceNewsletters",
 	"resourceYoutube",
+	"resourceBooks",
+	"resourceCourses",
+	"resourceForums",
+	"resourceEvents",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type CuratedListRouteId = (typeof CURATED_LIST_ROUTE_IDS)[number]

@@ -4,7 +4,9 @@ import type { CuratedList } from "./types";
 export const NEWSLETTERS = {
   id: "newsletters",
   routeId: "resourceNewsletters",
-  format: "newsletter",
+  formats: ["newsletter"],
+  criteria: ["active", "independent", "noHype", "free", "market"],
+  review: "halfYearly",
   figure: "envelopes",
   reviewed: "2026-11-20",
   entries: {

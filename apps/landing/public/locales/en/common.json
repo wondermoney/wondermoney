@@ -5717,7 +5717,19 @@
         "independent": "It is independent education. Regulators and central banks count; the sales channels of banks, brokers and fund houses do not.",
         "noHype": "No get-rich-quick promises, promotion of speculative digital coins or paid trading signals.",
         "free": "You can follow it for free.",
-        "market": "It was chosen for people in the UK, Ireland and elsewhere in English, not translated from another country's list."
+        "market": "It was chosen for people in the UK, Ireland and elsewhere in English, not translated from another country's list.",
+        "activeCommunity": "It has had new posts in the last month, checked on the community itself.",
+        "openModerated": "Anyone can read it and join for free, and it has written rules and active moderators.",
+        "independentCommunity": "No bank, broker or fund house runs it, and it is not there to sell a product.",
+        "noSignals": "It is not about trading signals, day trading or speculative digital coins.",
+        "inPrint": "Its publisher lists an edition in English, and we link that page, not a shop.",
+        "publicProvider": "A public body, a consumer organisation, a public university or another non-commercial organisation runs it.",
+        "freeOrPriced": "It is free, or we state its price.",
+        "noFunnel": "It does not lead into a sales pitch for a paid programme or a financial product.",
+        "open": "It was open to follow or enrol in when we checked.",
+        "officialOrganiser": "A national financial education plan, a central bank or regulator, a consumer organisation, a public library or a university organises it.",
+        "freeToAttend": "It is free to attend or follow.",
+        "upcoming": "Dated events show until they end. Recurring programmes have held an edition in the last year."
       },
       "order": "Entries are in alphabetical order, not ranked. We have no commercial relationship with any of them, and the links carry no affiliate or tracking codes.",
       "owner": "The WonderMoney team keeps this list and re-checks every entry every six months. An entry can come off the list at any review.",
@@ -5728,12 +5740,46 @@
       "formats": {
         "podcast": "Podcast",
         "newsletter": "Newsletter",
-        "youtube": "YouTube channel"
+        "youtube": "YouTube channel",
+        "forum": "Community",
+        "book": "Book",
+        "course": "Course",
+        "event": "Event",
+        "programme": "Programme"
       },
       "staleTitle": "This list is due for a review",
       "stale": "We last checked these entries on {{date}}, more than six months ago. Some may have stopped publishing or changed since; check each one before you rely on it.",
       "practiceTitle": "Put one idea into practice",
-      "practiceIntro": "Take one thing you heard or read and try it with your own numbers."
+      "practiceIntro": "Take one thing you heard or read and try it with your own numbers.",
+      "orderEvents": "Dated events are in date order and programmes in alphabetical order, not ranked. We have no commercial relationship with any of the organisers, and the links carry no affiliate or tracking codes.",
+      "ownerMonthly": "The WonderMoney team keeps this list and checks the organisers' calendars every month. Past events drop off the page on their own.",
+      "staleMonthly": "We last checked these calendars on {{date}}, more than six weeks ago. New events may have been announced and dates may have changed; check the organiser's page before you go.",
+      "platforms": {
+        "subreddit": "Subreddit",
+        "forum": "Forum",
+        "discord": "Discord server",
+        "telegram": "Telegram group"
+      },
+      "moderation": "Moderation and rules",
+      "edition": "Edition",
+      "translatedFrom": "translation of “{{title}}”",
+      "courseFacts": "Level, format and cost",
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced",
+        "all": "All levels"
+      },
+      "deliveries": {
+        "selfPaced": "Online, at your own pace",
+        "liveOnline": "Live online",
+        "inPerson": "In person",
+        "blended": "Online and in person"
+      },
+      "free": "Free",
+      "when": "When",
+      "nextEdition": "next edition {{dates}}",
+      "lastHeld": "Last edition {{date}}"
     },
     "lists": {
       "podcasts": {
@@ -5762,6 +5808,41 @@
         "hubDescription": "Active, independent channels that explain saving, investing and everyday money.",
         "listTitle": "The channels",
         "latest": "Latest video {{date}}"
+      },
+      "books": {
+        "title": "Personal finance books",
+        "metaTitle": "Personal finance books (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of personal finance books on saving, debt, investing and retirement for readers in the UK and Ireland, with who each one suits and how to use what it teaches.",
+        "dek": "Books on saving, investing and making better money decisions, with who each one suits and a tool to try what you read with your own numbers.",
+        "hubDescription": "Books on saving, debt, investing and retirement, by reader goal.",
+        "listTitle": "The books"
+      },
+      "courses": {
+        "title": "Financial education courses",
+        "metaTitle": "Financial education courses (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of financial education courses from public bodies, regulators and universities for the UK and Ireland, with level, format, cost and who each one suits.",
+        "dek": "Courses on budgeting, credit, saving and investing from public and non-commercial providers, with level, format and cost, and a tool to try what you learn.",
+        "hubDescription": "Courses from public bodies and universities, with level, format and cost.",
+        "listTitle": "The courses"
+      },
+      "forums": {
+        "title": "Personal finance forums and communities",
+        "metaTitle": "Personal finance forums and communities (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of active, moderated communities on saving, tax and investing in the UK and Ireland, with each one's rules and who it suits.",
+        "dek": "Active, moderated places to ask questions and compare notes on money, with each one's rules and a tool to run your own numbers.",
+        "hubDescription": "Active, moderated communities on saving, tax and investing.",
+        "listTitle": "The communities",
+        "latest": "Latest post {{date}}"
+      },
+      "events": {
+        "title": "Financial education events",
+        "metaTitle": "Financial education events (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed calendar of financial education events and programmes in the UK and Ireland from official bodies and consumer organisations, with upcoming dates only.",
+        "dek": "Sessions, weeks and days of financial education run by public bodies and consumer organisations, with the dates still to come.",
+        "hubDescription": "Official financial education events and programmes, with the next dates.",
+        "listTitle": "Upcoming events",
+        "programmesTitle": "Recurring programmes",
+        "noUpcoming": "None of these organisers has a dated event coming up right now. The recurring programmes below run every year; their pages announce the next dates."
       }
     }
   },

@@ -5717,7 +5717,19 @@
         "independent": "É educação independente. Reguladores e bancos centrais contam; canais de venda de bancos, corretoras ou gestoras de fundos não.",
         "noHype": "Sem promessas de enriquecer depressa, promoção de moedas digitais especulativas nem sinais de trading pagos.",
         "free": "Podes acompanhar sem pagar.",
-        "market": "Foi escolhida para quem vive em Portugal ou fala português, e não traduzida da lista de outro país."
+        "market": "Foi escolhida para quem vive em Portugal ou fala português, e não traduzida da lista de outro país.",
+        "activeCommunity": "Teve publicações novas no último mês, confirmado na própria comunidade.",
+        "openModerated": "Qualquer pessoa pode ler e entrar sem pagar, e tem regras escritas e moderação ativa.",
+        "independentCommunity": "Não é gerida por um banco, uma corretora ou uma gestora de fundos, nem existe para vender um produto.",
+        "noSignals": "Não gira à volta de sinais de trading, trading diário ou moedas digitais especulativas.",
+        "inPrint": "A editora tem uma edição em português no catálogo, e ligamos para essa página, não para uma loja.",
+        "publicProvider": "É dado por uma entidade pública, uma associação de consumidores, uma universidade pública ou outra organização sem fins comerciais.",
+        "freeOrPriced": "É gratuito, ou indicamos o preço.",
+        "noFunnel": "Não serve para te encaminhar para um programa pago nem para um produto financeiro.",
+        "open": "Estava disponível para seguir, ou com inscrições abertas, quando verificámos.",
+        "officialOrganiser": "É organizado por um plano nacional de formação financeira, um banco central ou regulador, uma associação de consumidores, uma biblioteca pública ou uma universidade.",
+        "freeToAttend": "A participação é gratuita.",
+        "upcoming": "Os eventos com data só aparecem até terminarem. Os programas regulares tiveram uma edição no último ano."
       },
       "order": "As entradas estão por ordem alfabética, sem classificação. Não temos relação comercial com nenhuma delas e as ligações não levam códigos de afiliado nem de seguimento.",
       "owner": "A equipa do WonderMoney mantém esta lista e volta a verificar cada entrada de seis em seis meses. Uma entrada pode sair da lista em qualquer revisão.",
@@ -5728,12 +5740,46 @@
       "formats": {
         "podcast": "Podcast",
         "newsletter": "Newsletter",
-        "youtube": "Canal de YouTube"
+        "youtube": "Canal de YouTube",
+        "forum": "Comunidade",
+        "book": "Livro",
+        "course": "Curso",
+        "event": "Evento",
+        "programme": "Programa"
       },
       "staleTitle": "Esta lista precisa de ser revista",
       "stale": "Verificámos estas entradas pela última vez a {{date}}, há mais de seis meses. Algumas podem ter deixado de publicar ou mudado; confirma cada uma antes de confiares nela.",
       "practiceTitle": "Põe uma ideia em prática",
-      "practiceIntro": "Pega numa coisa que ouviste ou leste e experimenta-a com os teus números."
+      "practiceIntro": "Pega numa coisa que ouviste ou leste e experimenta-a com os teus números.",
+      "orderEvents": "Os eventos estão por ordem de data e os programas por ordem alfabética, sem classificação. Não temos relação comercial com nenhum dos organizadores e as ligações não levam códigos de afiliado nem de seguimento.",
+      "ownerMonthly": "A equipa do WonderMoney mantém esta lista e consulta os calendários dos organizadores todos os meses. Os eventos que já passaram saem da página sozinhos.",
+      "staleMonthly": "Consultámos estes calendários pela última vez a {{date}}, há mais de seis semanas. Pode haver eventos novos ou datas alteradas; confirma na página do organizador antes de ires.",
+      "platforms": {
+        "subreddit": "Subreddit",
+        "forum": "Fórum",
+        "discord": "Servidor de Discord",
+        "telegram": "Grupo de Telegram"
+      },
+      "moderation": "Moderação e regras",
+      "edition": "Edição",
+      "translatedFrom": "tradução de «{{title}}»",
+      "courseFacts": "Nível, formato e custo",
+      "levels": {
+        "beginner": "Iniciação",
+        "intermediate": "Intermédio",
+        "advanced": "Avançado",
+        "all": "Todos os níveis"
+      },
+      "deliveries": {
+        "selfPaced": "Online, ao teu ritmo",
+        "liveOnline": "Online, em direto",
+        "inPerson": "Presencial",
+        "blended": "Online e presencial"
+      },
+      "free": "Gratuito",
+      "when": "Quando",
+      "nextEdition": "próxima edição: {{dates}}",
+      "lastHeld": "Última edição a {{date}}"
     },
     "lists": {
       "podcasts": {
@@ -5762,6 +5808,41 @@
         "hubDescription": "Canais ativos e independentes que explicam poupança, investimento e dinheiro do dia a dia.",
         "listTitle": "Os canais",
         "latest": "Último vídeo a {{date}}"
+      },
+      "books": {
+        "title": "Livros de finanças pessoais",
+        "metaTitle": "Livros de finanças pessoais em português | WonderMoney",
+        "metaDescription": "Lista verificada de livros sobre poupança, dívidas, investimento e reforma com edição em português, com o leitor a quem cada um serve e como aplicar o que ensina.",
+        "dek": "Livros sobre poupar, investir e decidir melhor com o dinheiro, editados em português, com o leitor a quem cada um serve e uma ferramenta para pores em prática o que lês.",
+        "hubDescription": "Livros com edição em português sobre poupança, dívidas, investimento e reforma.",
+        "listTitle": "Os livros"
+      },
+      "courses": {
+        "title": "Cursos de literacia financeira",
+        "metaTitle": "Cursos de literacia financeira em português | WonderMoney",
+        "metaDescription": "Lista verificada de cursos de literacia financeira de entidades públicas, reguladores e universidades, com o nível, o formato, o custo e o público de cada um.",
+        "dek": "Cursos sobre orçamento, crédito, poupança e investimento dados por entidades públicas e sem fins comerciais, com nível, formato e custo, e uma ferramenta para pores em prática o que aprendes.",
+        "hubDescription": "Cursos de entidades públicas e universidades, com nível, formato e custo.",
+        "listTitle": "Os cursos"
+      },
+      "forums": {
+        "title": "Fóruns e comunidades de finanças pessoais",
+        "metaTitle": "Fóruns e comunidades de finanças pessoais em Portugal | WonderMoney",
+        "metaDescription": "Lista verificada de comunidades ativas e moderadas onde se discutem poupança, impostos e investimento em Portugal, com as regras e o público de cada uma.",
+        "dek": "Sítios ativos e moderados para tirar dúvidas e trocar experiências sobre dinheiro em Portugal, com as regras de cada um e uma ferramenta para fazeres as contas.",
+        "hubDescription": "Comunidades ativas e moderadas para discutir poupança, impostos e investimento.",
+        "listTitle": "As comunidades",
+        "latest": "Última publicação a {{date}}"
+      },
+      "events": {
+        "title": "Eventos de literacia financeira",
+        "metaTitle": "Eventos de literacia financeira em Portugal | WonderMoney",
+        "metaDescription": "Calendário verificado de eventos e programas de literacia financeira em Portugal, de entidades oficiais e associações de consumidores, só com datas por vir.",
+        "dek": "Sessões, semanas e dias de formação financeira organizados por entidades públicas e associações de consumidores, com as datas que ainda estão por vir.",
+        "hubDescription": "Eventos e programas oficiais de formação financeira, com as próximas datas.",
+        "listTitle": "Próximos eventos",
+        "programmesTitle": "Programas regulares",
+        "noUpcoming": "De momento, estes organizadores não têm eventos com data marcada. Os programas regulares abaixo repetem-se todos os anos; as páginas deles anunciam as próximas datas."
       }
     }
   },

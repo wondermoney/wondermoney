@@ -5717,7 +5717,19 @@
         "independent": "Er ist unabhängige Bildung. Aufsichtsbehörden und Zentralbanken zählen dazu, Verkaufskanäle von Banken, Brokern und Fondsgesellschaften nicht.",
         "noHype": "Keine Versprechen vom schnellen Reichtum, keine Werbung für spekulative Digitalwährungen und keine bezahlten Trading-Signale.",
         "free": "Sie können ihn kostenlos verfolgen.",
-        "market": "Er wurde für Menschen in Deutschland, Österreich und der Schweiz ausgewählt, nicht aus der Liste eines anderen Landes übersetzt."
+        "market": "Er wurde für Menschen in Deutschland, Österreich und der Schweiz ausgewählt, nicht aus der Liste eines anderen Landes übersetzt.",
+        "activeCommunity": "Dort gab es im letzten Monat neue Beiträge, geprüft in der Community selbst.",
+        "openModerated": "Alle können sie kostenlos lesen und beitreten, und es gibt schriftliche Regeln und eine aktive Moderation.",
+        "independentCommunity": "Keine Bank, kein Broker und keine Fondsgesellschaft betreibt sie, und sie dient nicht dem Verkauf eines Produkts.",
+        "noSignals": "Es geht nicht um Tradingsignale, Daytrading oder spekulative Digitalwährungen.",
+        "inPrint": "Der Verlag führt eine deutsche Ausgabe im Programm, und wir verlinken diese Seite, keinen Shop.",
+        "publicProvider": "Eine öffentliche Stelle, eine Verbraucherorganisation, eine öffentliche Hochschule oder eine andere nicht kommerzielle Einrichtung bietet ihn an.",
+        "freeOrPriced": "Er ist kostenlos, oder wir nennen den Preis.",
+        "noFunnel": "Er führt nicht zum Verkauf eines kostenpflichtigen Programms oder eines Finanzprodukts.",
+        "open": "Er war bei unserer Prüfung frei zugänglich oder offen für Anmeldungen.",
+        "officialOrganiser": "Veranstalter ist eine nationale Finanzbildungsstrategie, eine Zentralbank oder Aufsichtsbehörde, eine Verbraucherorganisation, eine öffentliche Bibliothek oder eine Hochschule.",
+        "freeToAttend": "Die Teilnahme ist kostenlos.",
+        "upcoming": "Termine erscheinen nur, bis sie vorbei sind. Wiederkehrende Programme fanden im letzten Jahr statt."
       },
       "order": "Die Einträge stehen in alphabetischer Reihenfolge, ohne Rangfolge. Wir haben mit keinem eine geschäftliche Beziehung, und die Links enthalten keine Affiliate- oder Tracking-Codes.",
       "owner": "Das WonderMoney-Team pflegt diese Liste und prüft jeden Eintrag alle sechs Monate erneut. Bei jeder Prüfung kann ein Eintrag wegfallen.",
@@ -5728,12 +5740,46 @@
       "formats": {
         "podcast": "Podcast",
         "newsletter": "Newsletter",
-        "youtube": "YouTube-Kanal"
+        "youtube": "YouTube-Kanal",
+        "forum": "Community",
+        "book": "Buch",
+        "course": "Kurs",
+        "event": "Veranstaltung",
+        "programme": "Programm"
       },
       "staleTitle": "Diese Liste ist fällig für eine Prüfung",
       "stale": "Wir haben diese Einträge zuletzt am {{date}} geprüft, vor mehr als sechs Monaten. Manche erscheinen vielleicht nicht mehr oder haben sich verändert; prüfen Sie jeden, bevor Sie sich darauf verlassen.",
       "practiceTitle": "Eine Idee in die Praxis umsetzen",
-      "practiceIntro": "Nehmen Sie eine Sache, die Sie gehört oder gelesen haben, und probieren Sie sie mit Ihren eigenen Zahlen aus."
+      "practiceIntro": "Nehmen Sie eine Sache, die Sie gehört oder gelesen haben, und probieren Sie sie mit Ihren eigenen Zahlen aus.",
+      "orderEvents": "Termine stehen nach Datum, Programme alphabetisch, ohne Rangfolge. Wir haben keine Geschäftsbeziehung zu den Veranstaltern, und die Links enthalten keine Affiliate- oder Tracking-Codes.",
+      "ownerMonthly": "Das WonderMoney-Team pflegt diese Liste und prüft die Kalender der Veranstalter jeden Monat. Vergangene Termine verschwinden von selbst von der Seite.",
+      "staleMonthly": "Wir haben diese Kalender zuletzt am {{date}} geprüft, vor mehr als sechs Wochen. Inzwischen können neue Termine angekündigt oder Daten geändert worden sein; prüfen Sie die Seite des Veranstalters, bevor Sie hingehen.",
+      "platforms": {
+        "subreddit": "Subreddit",
+        "forum": "Forum",
+        "discord": "Discord-Server",
+        "telegram": "Telegram-Gruppe"
+      },
+      "moderation": "Moderation und Regeln",
+      "edition": "Ausgabe",
+      "translatedFrom": "Übersetzung von „{{title}}“",
+      "courseFacts": "Niveau, Format und Kosten",
+      "levels": {
+        "beginner": "Für Einsteiger",
+        "intermediate": "Mit Vorkenntnissen",
+        "advanced": "Für Fortgeschrittene",
+        "all": "Für alle Niveaus"
+      },
+      "deliveries": {
+        "selfPaced": "Online, im eigenen Tempo",
+        "liveOnline": "Live online",
+        "inPerson": "Vor Ort",
+        "blended": "Online und vor Ort"
+      },
+      "free": "Kostenlos",
+      "when": "Wann",
+      "nextEdition": "nächster Termin: {{dates}}",
+      "lastHeld": "Zuletzt am {{date}}"
     },
     "lists": {
       "podcasts": {
@@ -5762,6 +5808,41 @@
         "hubDescription": "Aktive, unabhängige Kanäle, die Sparen, Geldanlage und Alltagsfinanzen erklären.",
         "listTitle": "Die Kanäle",
         "latest": "Neuestes Video am {{date}}"
+      },
+      "books": {
+        "title": "Bücher über persönliche Finanzen",
+        "metaTitle": "Bücher über Geld und Geldanlage auf Deutsch | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste von Büchern über Sparen, Schulden, Geldanlage und Altersvorsorge mit deutscher Ausgabe, mit der Leserschaft, für die jedes passt, und wie Sie es anwenden.",
+        "dek": "Bücher, die beim Sparen, Anlegen und besseren Entscheiden helfen, auf Deutsch erschienen, mit der Leserschaft, für die jedes passt, und einem Rechner, um das Gelesene umzusetzen.",
+        "hubDescription": "Bücher mit deutscher Ausgabe über Sparen, Schulden, Geldanlage und Altersvorsorge.",
+        "listTitle": "Die Bücher"
+      },
+      "courses": {
+        "title": "Kurse zur Finanzbildung",
+        "metaTitle": "Kurse zur Finanzbildung (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste von Finanzbildungskursen öffentlicher Stellen, Verbraucherorganisationen und Hochschulen, mit Niveau, Format, Kosten und Zielgruppe.",
+        "dek": "Kurse zu Haushaltsbudget, Kredit, Sparen und Geldanlage von öffentlichen und nicht kommerziellen Anbietern, mit Niveau, Format und Kosten und einem Rechner, um das Gelernte umzusetzen.",
+        "hubDescription": "Kurse öffentlicher Stellen und Hochschulen, mit Niveau, Format und Kosten.",
+        "listTitle": "Die Kurse"
+      },
+      "forums": {
+        "title": "Finanzforen und Communitys",
+        "metaTitle": "Finanzforen und Communitys (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste aktiver, moderierter Communitys zu Sparen, Steuern und Geldanlage im deutschsprachigen Raum, mit den Regeln und der Zielgruppe jeder einzelnen.",
+        "dek": "Aktive, moderierte Orte, um Fragen zu stellen und Erfahrungen mit Geld auszutauschen, mit den Regeln jeder Community und einem Rechner für Ihre eigenen Zahlen.",
+        "hubDescription": "Aktive, moderierte Communitys zu Sparen, Steuern und Geldanlage.",
+        "listTitle": "Die Communitys",
+        "latest": "Neuester Beitrag am {{date}}"
+      },
+      "events": {
+        "title": "Veranstaltungen zur Finanzbildung",
+        "metaTitle": "Veranstaltungen zur Finanzbildung (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Ein geprüfter Kalender mit Veranstaltungen und Programmen zur Finanzbildung von öffentlichen Stellen und Verbraucherorganisationen, nur mit kommenden Terminen.",
+        "dek": "Vorträge, Aktionswochen und Thementage zur Finanzbildung von öffentlichen Stellen und Verbraucherorganisationen, mit den Terminen, die noch bevorstehen.",
+        "hubDescription": "Offizielle Veranstaltungen und Programme zur Finanzbildung, mit den nächsten Terminen.",
+        "listTitle": "Kommende Veranstaltungen",
+        "programmesTitle": "Wiederkehrende Programme",
+        "noUpcoming": "Diese Veranstalter haben gerade keinen datierten Termin angekündigt. Die wiederkehrenden Programme unten finden jedes Jahr statt; auf ihren Seiten stehen die nächsten Termine."
       }
     }
   },
