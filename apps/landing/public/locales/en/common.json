@@ -4213,6 +4213,316 @@
         }
       }
     },
+    "electricityTariffComparison": {
+      "title": "Electricity tariff comparison in Portugal",
+      "shortName": "Electricity tariffs",
+      "subtitle": "Compare every supplier's household electricity offer on your own consumption, with every charge and tax, from ERSE's official data.",
+      "description": "Rank every household electricity offer in mainland Portugal by what it would cost you a year, from ERSE's official offer data.",
+      "pageTitle": "Electricity Tariff Comparison in Portugal: Every Offer, ERSE Data",
+      "pageDescription": "Compare all household electricity offers in mainland Portugal on your bill, your kWh or your E-REDES consumption file. Taxes included, official ERSE data, nothing uploaded.",
+      "nextStepHeadline": "Put the new electricity bill in your budget",
+      "nextStepDescription": "Once you know what electricity should cost, track it next to your other household bills and see the saving month by month.",
+      "nextStepCta": "Plan the household budget",
+      "formLabel": "Your consumption and contract",
+      "loading": "Loading ERSE's offers…",
+      "loadError": "The offers could not be loaded. Check your connection and reload the page.",
+      "regulatedSupplier": "Regulated tariff",
+      "mode": {
+        "legend": "How do you want to compare?",
+        "quick": "Quick",
+        "full": "Full",
+        "quickHelp": "From your monthly bill or kWh. The split across periods follows the standard household profile.",
+        "fullHelp": "From your kWh per period, a total for any number of days, or your E-REDES consumption file."
+      },
+      "fields": {
+        "power": "Contracted power",
+        "option": "Tariff option",
+        "cycle": "Hourly cycle",
+        "quickUnit": "I know my",
+        "unitBill": "Monthly bill in euro",
+        "unitKwh": "Monthly consumption in kWh",
+        "bill": "Monthly bill",
+        "monthlyKwh": "Monthly consumption",
+        "source": "Consumption",
+        "period": "The consumption covers",
+        "days": "Number of days",
+        "total": "Total consumption",
+        "periodsLegend": "Consumption per period"
+      },
+      "options": {
+        "simple": "Simple",
+        "biHourly": "Bi-hourly",
+        "triHourly": "Tri-hourly"
+      },
+      "cycles": {
+        "daily": "Daily cycle",
+        "weekly": "Weekly cycle"
+      },
+      "sources": {
+        "periods": "kWh per period",
+        "total": "A total, split by the standard profile",
+        "diagram": "E-REDES consumption file"
+      },
+      "periodChoices": {
+        "month": "One month",
+        "year": "One year",
+        "days": "A number of days"
+      },
+      "periods": {
+        "simple": "Energy",
+        "offValley": "Off-valley hours (fora de vazio)",
+        "valley": "Valley hours (vazio)",
+        "peak": "Peak hours (ponta)",
+        "shoulder": "Shoulder hours (cheias)"
+      },
+      "help": {
+        "power": "On your invoice, in kVA. Most homes have 3.45, 4.6 or 6.9 kVA.",
+        "option": "Simple has one energy price; bi-hourly and tri-hourly price the hours differently. The list shows offers on this option.",
+        "cycle": "Your meter's cycle, on the invoice. The weekly cycle moves the valley hours at weekends.",
+        "bill": "What you pay a month, VAT included. It is turned into kWh as if you were on the regulated tariff, as ERSE's quick simulation does.",
+        "billKwh": "On the regulated tariff this bill is about {{kwh}} a month.",
+        "monthlyKwh": "On the invoice, or the yearly consumption divided by 12.",
+        "days": "The days your kWh cover, from 1 to 731, as on a bill or a meter download.",
+        "total": "All the kWh in the period above. The split across periods follows the E-REDES profile for your power and consumption.",
+        "periods": "As on your invoice or meter reading. Other options are priced with the same kWh, split with the standard profile where needed."
+      },
+      "household": {
+        "legend": "Your household",
+        "socialTariff": "I have the social tariff",
+        "socialTariffHelp": "A discount on power and energy, up to 6.9 kVA. Offers that do not take social-tariff customers are left out.",
+        "largeFamily": "Household of five or more",
+        "largeFamilyHelp": "Reduced VAT on up to 300 kWh every 30 days instead of 200.",
+        "newClient": "I would be a new client",
+        "newClientHelp": "Counts the discounts suppliers give new clients in the first year."
+      },
+      "filters": {
+        "title": "Filters",
+        "summary": "(price type, supplier, conditions)",
+        "pricing": "Price type",
+        "pricingChoices": {
+          "all": "Fixed and indexed",
+          "fixed": "Fixed price only",
+          "indexed": "Indexed price only"
+        },
+        "supplier": "Supplier",
+        "supplierAll": "All suppliers",
+        "sortBy": "Rank by",
+        "sortChoices": {
+          "firstYear": "First year",
+          "laterYears": "Later years (no new-client discount)"
+        },
+        "includeConditioned": "Include conditioned offers",
+        "includeConditionedHelp": "Offers only some people can sign up for, such as members of a club or holders of a card.",
+        "includeRefunds": "Count refunds and discounts any client gets",
+        "includeRefundsHelp": "Amounts the supplier gives back on every bill, as ERSE counts them.",
+        "mandatoryServices": "Include offers with paid mandatory services",
+        "mandatoryServicesHelp": "Some offers require a paid service, such as assistance. Its cost is in the total.",
+        "directDebit": "Include offers that require direct debit",
+        "eInvoice": "Include offers that require an electronic invoice",
+        "renewableOnly": "Only 100% renewable energy",
+        "noLoyalty": "Only offers without a loyalty period",
+        "includeDual": "Include dual offers (electricity and gas)",
+        "includeDualHelp": "They need a gas contract with the same supplier, and their fixed amounts may cover gas too.",
+        "cheapestPerSupplier": "Only each supplier's cheapest offer"
+      },
+      "myTariff": {
+        "title": "Compare with my tariff",
+        "intro": "Enter your current prices and every offer shows what it saves you against them, on the same consumption and taxes.",
+        "toggle": "Use my prices",
+        "legend": "My prices on the {{option}} option",
+        "power": "Power price",
+        "powerUnit": "€/day",
+        "energy": "Energy price, {{period}}",
+        "energySimple": "Energy price",
+        "help": "Before VAT, as on your invoice, for the {{option}} option chosen above.",
+        "errors": {
+          "outOfRange": "Enter a price from 0 to 5 euro."
+        },
+        "incomplete": "Enter all your prices to see the saving of each offer.",
+        "resultTitle": "Your tariff on this consumption",
+        "yearly": "In the first year, taxes included.",
+        "yearlyLater": "In a year, taxes included.",
+        "cheaper": "{{count}} offers cost less. The cheapest saves you {{saving}} a year.",
+        "noneCheaper": "No offer in the list costs less than your tariff."
+      },
+      "diagram": {
+        "label": "E-REDES consumption file",
+        "help": "In E-REDES's Balcão Digital, open your installation's consumption, choose the period and download it as a spreadsheet (xlsx). The 15-minute readings give your real kWh in each period.",
+        "privacy": "The file is read in your browser and never leaves it: nothing is uploaded.",
+        "reading": "Reading the file…",
+        "loaded": "{{first}} to {{last}}: {{days}} days, {{kwh}}.",
+        "missing": "{{count}} quarter-hours have no reading and count as zero.",
+        "clear": "Remove the file",
+        "errors": {
+          "unreadable": "This file could not be read as a spreadsheet. Download it again from E-REDES as xlsx.",
+          "notERedesExport": "This does not look like an E-REDES consumption file: there is no date column next to a consumption column in kW.",
+          "noReadings": "The file has no consumption readings. Choose a period with readings and download it again.",
+          "invalidRow": "Row {{row}} has no valid date, quarter-hour or consumption.",
+          "duplicateReading": "Row {{row}} repeats a quarter-hour that is already in the file."
+        }
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "This cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "outOfRange": "Enter a number of days from 1 to {{max}}.",
+        "notAllowed": "Choose a contracted power from the list.",
+        "days": "Enter a whole number of days from 1 to {{max}}.",
+        "belowFixed": "A month on the regulated tariff costs at least {{minimum}} at this power, before any consumption. Check the bill or the power.",
+        "billTooLarge": "Enter a bill of {{maximum}} or less.",
+        "noRegulatedPrice": "The regulated tariff has no price for this power and option, so a bill cannot be turned into kWh. Enter the kWh instead.",
+        "noDiagram": "Choose your E-REDES consumption file.",
+        "summary": "Check the highlighted fields to see the offers."
+      },
+      "compare": {
+        "title": "Simple, bi-hourly or tri-hourly?",
+        "intro": "The cheapest offer of each option on the same consumption, split by your hourly cycle.",
+        "yours": "(your option)",
+        "perFirstYear": "in the first year",
+        "perLaterYear": "a year from the second year",
+        "cheapest": "Cheapest option",
+        "more": "{{amount}} more a year",
+        "unavailable": "No offer at this power."
+      },
+      "results": {
+        "title": "Offers on the {{option}} option",
+        "count": "{{count}} offers, priced on {{kwh}} a year.",
+        "none": "No offer matches. Loosen the filters or change the option.",
+        "listLabel": "Offers, cheapest first",
+        "showMore": "Show {{count}} more",
+        "firstYear": "First year",
+        "laterYears": "Later years",
+        "period": "Your {{days}} days",
+        "periodMonth": "One month",
+        "periodYear": "One year",
+        "saving": "Saves you {{amount}} a year",
+        "dearer": "Costs {{amount}} more a year",
+        "same": "Costs the same as your tariff",
+        "details": "Breakdown and links",
+        "estimatedNote": "Indexed price: ERSE's estimate for the coming months. What you pay follows the market.",
+        "conditionsLabel": "Conditions, in ERSE's words",
+        "links": {
+          "offer": "Offer page",
+          "standardSheet": "Standard sheet",
+          "terms": "Contract terms"
+        },
+        "breakdownCaption": "Breakdown of {{offer}}",
+        "socialNotApplied": "The social tariff applies up to {{kva}} kVA only, so it is not counted at this power."
+      },
+      "badges": {
+        "label": "Offer features",
+        "estimated": "Estimated price",
+        "regulated": "Regulated",
+        "conditioned": "Conditioned",
+        "dual": "With gas",
+        "loyalty": "Loyalty period",
+        "renewable": "100% renewable",
+        "directDebit": "Direct debit",
+        "eInvoice": "E-invoice",
+        "services": "Paid services"
+      },
+      "lines": {
+        "item": "Item",
+        "power": "Power",
+        "energy": "Energy",
+        "socialDiscount": "of which social tariff discount",
+        "cav": "Audiovisual contribution (CAV)",
+        "iec": "Electricity tax (IEC)",
+        "services": "Mandatory services",
+        "refunds": "Refunds and discounts",
+        "newClientDiscount": "New-client discount",
+        "subtotal": "Before VAT",
+        "vatReduced": "VAT at 6%",
+        "vatStandard": "VAT at 23%",
+        "total": "Total"
+      },
+      "export": {
+        "button": "Download CSV",
+        "filename": "electricity-offers",
+        "columns": {
+          "rank": "Rank",
+          "supplier": "Supplier",
+          "offer": "Offer",
+          "option": "Option",
+          "firstYear": "First year (EUR)",
+          "laterYears": "Later years (EUR)",
+          "period": "Your period (EUR)",
+          "estimated": "Estimated price",
+          "saving": "Saving a year (EUR)",
+          "link": "Link"
+        },
+        "yes": "yes",
+        "no": "no"
+      },
+      "source": {
+        "asOf": "Offers: ERSE, export of {{date}} ({{offers}} offers from {{suppliers}} suppliers and the regulated tariff).",
+        "negotiation": "Prices are the published ones, before any personal negotiation. Confirm the offer with the supplier before you sign.",
+        "indexed": "Indexed prices are ERSE's estimates for the coming months, not a fixed price.",
+        "taxes": "Totals include power, energy, the audiovisual contribution, the electricity tax and VAT.",
+        "dgeg": "The DGEG fee (a few cents a month) is not included.",
+        "educational": "Educational estimate, not advice. WonderMoney has no commercial relationship with any supplier.",
+        "simulatorLink": "ERSE's official price simulator"
+      },
+      "guide": {
+        "use": {
+          "title": "How to use the comparison",
+          "quick": "Quick mode needs only your contracted power and your monthly bill or kWh. A bill in euro is turned into kWh by working back the regulated tariff's bill, taxes included, as ERSE's quick simulation does.",
+          "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
+          "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
+          "mine": "Under \"Compare with my tariff\" you enter the prices on your invoice. Your tariff then goes through the same calculation as every offer, so the saving shown on each one is like for like.",
+          "options": "At the top of the results, the cheapest simple, bi-hourly and tri-hourly offers on the same consumption show whether another option would pay off. The filters narrow the list, and the CSV button downloads it."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A home with 3.45 kVA on the simple option uses {{kwh}} a month. On ERSE's export of {{date}} there are {{count}} offers for it, including the regulated tariff.",
+          "result": "The regulated tariff comes to {{regulated}} in the first year, taxes included. The cheapest offer comes to {{cheapest}}, {{difference}} less. {{cheaper}} offers cost less than the regulated tariff.",
+          "bill": "In quick mode, a monthly bill of {{bill}} gives back the same {{kwh}}: that is the regulated tariff's bill for that consumption."
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "Each offer is priced the way ERSE's simulator does it (Manual do Simulador de Preços de Energia, June 2026):",
+          "steps": {
+            "a": "Power: the price per day times the days.",
+            "b": "Energy: the kWh of each period times its price.",
+            "c": "Social tariff: ERSE's discount on power and energy, up to 6.9 kVA.",
+            "d": "The audiovisual contribution and the electricity tax, at their legal amounts.",
+            "e": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE.",
+            "f": "VAT at the reduced and standard rates, as set out below.",
+            "g": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+          },
+          "vat": "VAT is {{reduced}} on the audiovisual contribution, on the network-access part of the power price up to 3.45 kVA, and on the first {{allowance}} kWh every 30 days up to 6.9 kVA ({{allowanceLarge}} kWh for a household of five or more). Everything else pays {{standard}}.",
+          "month": "A month is a twelfth of a year, {{days}} days, as in ERSE's simulator, so a year is exactly twelve months.",
+          "split": "When only a total is known, it is split across the periods with the E-REDES consumption profile of the household's class: A above 13.8 kVA, otherwise B above 7,140 kWh a year and C below it."
+        },
+        "data": {
+          "title": "Data and sources",
+          "erse": "Offers: ERSE's price simulator, the export of {{date}}, with {{offers}} offers from {{suppliers}} suppliers and the regulated tariff. Suppliers must report their household offers to ERSE. Prices are before VAT and taxes; the page adds them.",
+          "refresh": "The page takes a new export from ERSE every week. Offers that have ended by then are left out.",
+          "names": "ERSE gives each supplier as a code; the page shows the brand name each supplier uses on its own website.",
+          "simulatorLink": "ERSE price simulator",
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (June 2026)"
+        },
+        "limits": {
+          "title": "What the totals leave out",
+          "items": {
+            "a": "The DGEG fee, a few cents a month, and any meter or other charges.",
+            "b": "Personal negotiation: the prices are the published ones.",
+            "c": "Indexed offers are priced at ERSE's estimate for the coming months; what you pay follows the market.",
+            "d": "Dual offers can include gas in their fixed amounts; they are left out unless you include them.",
+            "e": "With a bill or a total, the split across periods is the standard profile, not your own. The E-REDES file gives your real split.",
+            "f": "This is an educational estimate, not advice. Check the offer's standard sheet and terms before you sign."
+          },
+          "simulatorLink": "Check a result in ERSE's official simulator"
+        },
+        "related": {
+          "title": "Keep going",
+          "electricityIndexLink": "Electricity price index",
+          "electricityIndexBody": "How Portugal's household electricity price compares with the EU, and what the regulated tariff bill is made of.",
+          "householdBudgetLink": "Household budget",
+          "householdBudgetBody": "Put the electricity bill next to the rest of your monthly costs."
+        }
+      }
+    },
     "fuelPrices": {
       "title": "Fuel prices in Portugal and monthly fuel cost",
       "shortName": "Fuel prices",

@@ -75,6 +75,8 @@ import TermDepositOffersComp from "@/components/calculators/TermDepositOffersCom
 import TermDepositOffersGuide from "@/components/calculators/TermDepositOffersGuide.astro";
 import ElectricityIndexComp from "@/components/calculators/ElectricityIndexComp";
 import ElectricityIndexGuide from "@/components/calculators/ElectricityIndexGuide.astro";
+import ElectricityTariffComparisonComp from "@/components/calculators/ElectricityTariffComparisonComp";
+import ElectricityTariffComparisonGuide from "@/components/calculators/ElectricityTariffComparisonGuide.astro";
 import FuelPricesComp from "@/components/calculators/FuelPricesComp";
 import FuelPricesGuide from "@/components/calculators/FuelPricesGuide.astro";
 import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp";
@@ -284,6 +286,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.electricityIndex.nextStepCta"),
     ctaHref: toLocalizedPath("featureBudgeting", locale),
   },
+  toolElectricityTariffComparison: {
+    headline: t("tools.electricityTariffComparison.nextStepHeadline"),
+    description: t("tools.electricityTariffComparison.nextStepDescription"),
+    ctaText: t("tools.electricityTariffComparison.nextStepCta"),
+    ctaHref: toLocalizedPath("featureBudgeting", locale),
+  },
   toolFuelPrices: {
     headline: t("tools.fuelPrices.nextStepHeadline"),
     description: t("tools.fuelPrices.nextStepDescription"),
@@ -451,6 +459,7 @@ const schema = {
         {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
         {routeId === "toolBrokerFees" && <BrokerFeesComp locale={locale} client:load />}
         {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
+        {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonComp locale={locale} client:load />}
         {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
       </div>
 
@@ -495,6 +504,7 @@ const schema = {
           {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
           {routeId === "toolBrokerFees" && <BrokerFeesGuide locale={locale} />}
           {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
+          {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonGuide locale={locale} />}
           {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
         </div>
       )}
