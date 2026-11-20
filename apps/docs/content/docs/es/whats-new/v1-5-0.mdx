@@ -1,0 +1,41 @@
+---
+title: WonderMoney 1.5.0
+description: Hogares compartidos con roles, calendarios de recibos y tarjetas, muchos formatos de importación nuevos, informes de inversión más completos, llaves de acceso e inicio de sesión único, y un chart Helm para el autoalojamiento.
+---
+
+[Notas de la versión en GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.5.0)
+
+## Actualizar
+
+Haz una copia de seguridad de PostgreSQL antes de actualizar desde la 1.4.0. La API aplica las migraciones de esta versión al arrancar: añaden tablas y restricciones y eliminan la tabla `lifecycle_delivery`, que ya no se usaba. Consulta [Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup).
+
+Las nuevas integraciones son todas opcionales y siguen desactivadas hasta que las configures: inicio de sesión único (OIDC), SimpleFIN, notificaciones push en la app móvil, exploradores de cripto, proveedores adicionales de datos de mercado, credenciales de Enable Banking para toda la instancia y la demo pública. En [Configurar](/es/docs/self-hosting/configure) están los ajustes de cada una. Las integraciones que ya tienes siguen funcionando igual.
+
+Nuevas formas de ejecutar WonderMoney: un [chart Helm](/es/docs/self-hosting/kubernetes), un Render Blueprint, un instalador de una línea, despliegues en un solo dominio y copias de seguridad programadas con copia externa opcional.
+
+Si usas el servicio alojado, no tienes que hacer nada.
+
+## Nuevo
+
+- **Hogares:** invita a miembros con el rol de propietario, administrador, miembro o lector, elige quién ve o edita cada cuenta, atribuye gastos a miembros y mantén presupuestos personales.
+- **Gastos compartidos:** saldos de grupo y liquidaciones.
+- **Panel e informes:** tasa de ahorro, comparaciones mensuales, avisos de gastos fuera de lo normal, ritmo del presupuesto, una bandeja de revisión y un panel personalizable. Las páginas se han reorganizado en el ordenador y en el móvil para poner tus registros primero.
+- **Recibos y tarjetas:** calendario de próximos recibos con un feed privado, previsiones de saldo, ciclos y extractos de tarjeta de crédito, recordatorios de pago y planes de cuotas.
+- **Movimientos:** plantillas, adjuntos, acciones en bloque, importación y exportación de reglas, y categorización que funciona en local, sin proveedor de IA.
+- **Importaciones:** archivos OFX/QFX, CSV genérico, QIF, CAMT.053, YNAB y Actual Budget, con aviso de duplicados y un paso de revisión.
+- **Préstamos:** cuadros de amortización, simulación de amortizaciones anticipadas, tipos variables y enlace al bien que financia el préstamo.
+- **Inversiones:** coste FIFO o medio, posiciones por lote, plusvalías realizadas, rentabilidades ponderadas por tiempo y por dinero, índices de referencia, asignaciones objetivo y dividendos.
+- **Integraciones:** tokens de API personales, una interfaz MCP de solo lectura, saldos de carteras cripto a partir de direcciones públicas, e historial y estado de la sincronización bancaria.
+- **Inicio de sesión:** llaves de acceso en la web y en el móvil, inicio de sesión único y códigos de recuperación de la autenticación en dos pasos.
+- **Demo:** prueba un hogar de demostración, de solo lectura y sin cuenta, directamente desde wonder.money.
+
+## Correcciones
+
+- Los totales de la cartera respetan las exclusiones, y Top Movers y las listas de seguimiento usan la moneda de cada valor.
+- Vincular un pago en la página de Préstamos vuelve a funcionar.
+- Las actualizaciones bancarias programadas siguen ejecutándose cuando aún existe la conexión bancaria antigua de un usuario eliminado.
+- La exportación y la restauración del hogar conservan los planes de cuotas, los ciclos de tarjeta y los tipos ajustados a mano.
+
+## Agradecimientos
+
+- @nip10

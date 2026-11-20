@@ -23,7 +23,7 @@ stack and waits up to three minutes for the API. It asks for the web app and the
 
 | Flag | What it does |
 |---|---|
-| `--version 1.4.0` | Install a specific release instead of the latest |
+| `--version 1.5.0` | Install a specific release instead of the latest |
 | `--dir /srv/wondermoney` | Where to install (default `./wondermoney`) |
 | `--yes` | No questions: default addresses, and upgrade an existing install |
 | `--app-url`, `--api-url` | The addresses the web app and the API are served at |
@@ -47,8 +47,8 @@ sh install.sh
 Or do the same steps by hand, from the release tag:
 
 ```sh
-# v1.4.0 here: the release you want
-git clone --depth 1 --branch v1.4.0 https://github.com/wondermoney/wondermoney.git
+# v1.5.0 here: the release you want
+git clone --depth 1 --branch v1.5.0 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh        # writes .env with fresh secrets (refuses to overwrite an existing one)
 docker compose up -d
