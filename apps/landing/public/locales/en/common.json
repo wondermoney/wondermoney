@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} offers cost less. The cheapest saves you {{saving}} a year.",
         "noneCheaper": "No offer in the list costs less than your tariff."
       },
+      "invoice": {
+        "title": "Read my invoice (PDF)",
+        "intro": "Choose your supplier's PDF invoice and the comparator reads your contracted power, tariff option, kWh, days and prices.",
+        "label": "Invoice PDF",
+        "privacy": "The file stays on your device: it is read in this browser and never uploaded.",
+        "supported": "Reads PDF invoices from these suppliers: {{suppliers}}. Use the PDF the supplier sends, not a scan or a photo.",
+        "reading": "Reading the invoice…",
+        "found": "Read from the invoice ({{supplier}}):",
+        "fields": {
+          "power": "Contracted power",
+          "option": "Tariff option",
+          "cycle": "Hourly cycle",
+          "days": "Days billed",
+          "kwhSimple": "Consumption",
+          "kwh": "Consumption, {{period}}",
+          "powerPrice": "Power price",
+          "energyPriceSimple": "Energy price",
+          "energyPrice": "Energy price, {{period}}"
+        },
+        "check": "check",
+        "checkHelp": "Figures marked “check” were worked out, or come from an invoice layout we have no sample of: compare them with the invoice.",
+        "notes": "Prices before VAT and before discounts. Anything not listed stays as it is in the form.",
+        "apply": "Fill in the form",
+        "discard": "Discard",
+        "applied": "The form now holds your invoice's figures. Check them below and change any that differ.",
+        "errors": {
+          "unsupported": "We can't read this invoice's layout yet. The form was left as it was: enter the figures from the invoice below. We read invoices from these suppliers: {{suppliers}}.",
+          "noElectricity": "No household electricity figures were found in this invoice (it may be for gas or electric mobility only). The form was left as it was.",
+          "unreadable": "This file could not be read as a PDF. The form was left as it was.",
+          "encrypted": "This PDF is password-protected. Open it, save a copy without the password and choose that copy, or enter the figures below.",
+          "noText": "This PDF has no text to read (it may be a scan or a photo). Use the PDF the supplier sent, or enter the figures below.",
+          "tooLarge": "This file is larger than {{max}} MB, more than an invoice. The form was left as it was."
+        }
+      },
       "solar": {
         "title": "Solar panels",
         "intro": "Estimate what panels in your area produce and compare the offers on what you still buy from the grid.",

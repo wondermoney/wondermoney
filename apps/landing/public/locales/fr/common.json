@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} offres coûtent moins cher. La moins chère vous fait économiser {{saving}} par an.",
         "noneCheaper": "Aucune offre de la liste ne coûte moins cher que votre tarif."
       },
+      "invoice": {
+        "title": "Lire ma facture (PDF)",
+        "intro": "Choisissez la facture PDF de votre fournisseur et le comparateur y lit la puissance souscrite, l'option tarifaire, les kWh, les jours et les prix.",
+        "label": "Facture PDF",
+        "privacy": "Le fichier reste sur votre appareil : il est lu dans ce navigateur et n'est jamais envoyé.",
+        "supported": "Lit les factures PDF de ces fournisseurs : {{suppliers}}. Utilisez le PDF envoyé par le fournisseur, pas un scan ni une photo.",
+        "reading": "Lecture de la facture…",
+        "found": "Lu sur la facture ({{supplier}}) :",
+        "fields": {
+          "power": "Puissance souscrite",
+          "option": "Option tarifaire",
+          "cycle": "Cycle horaire",
+          "days": "Jours facturés",
+          "kwhSimple": "Consommation",
+          "kwh": "Consommation, {{period}}",
+          "powerPrice": "Prix de la puissance",
+          "energyPriceSimple": "Prix de l'énergie",
+          "energyPrice": "Prix de l'énergie, {{period}}"
+        },
+        "check": "à vérifier",
+        "checkHelp": "Les chiffres marqués « à vérifier » ont été déduits ou viennent d'un modèle de facture dont nous n'avons pas d'exemple : comparez-les à la facture.",
+        "notes": "Prix hors TVA et avant remises. Ce qui n'est pas dans la liste reste tel quel dans le formulaire.",
+        "apply": "Remplir le formulaire",
+        "discard": "Ignorer",
+        "applied": "Le formulaire contient maintenant les chiffres de votre facture. Vérifiez-les ci-dessous et modifiez ceux qui diffèrent.",
+        "errors": {
+          "unsupported": "Nous ne savons pas encore lire ce modèle de facture. Le formulaire est resté tel quel : saisissez ci-dessous les chiffres de la facture. Nous lisons les factures de ces fournisseurs : {{suppliers}}.",
+          "noElectricity": "Aucun chiffre d'électricité du logement n'a été trouvé sur cette facture (elle concerne peut-être seulement le gaz ou la mobilité électrique). Le formulaire est resté tel quel.",
+          "unreadable": "Ce fichier n'a pas pu être lu comme un PDF. Le formulaire est resté tel quel.",
+          "encrypted": "Ce PDF est protégé par un mot de passe. Ouvrez-le, enregistrez une copie sans mot de passe et choisissez cette copie, ou saisissez les chiffres ci-dessous.",
+          "noText": "Ce PDF ne contient pas de texte à lire (c'est peut-être un scan ou une photo). Utilisez le PDF envoyé par le fournisseur, ou saisissez les chiffres ci-dessous.",
+          "tooLarge": "Ce fichier dépasse {{max}} Mo, plus qu'une facture. Le formulaire est resté tel quel."
+        }
+      },
       "solar": {
         "title": "Panneaux solaires",
         "intro": "Estimez ce que des panneaux produisent dans votre région et comparez les offres sur ce que vous achetez encore au réseau.",

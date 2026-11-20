@@ -163,6 +163,23 @@ describe("electricity tariff comparison page", () => {
 		for (const source of files) expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest/)
 	})
 
+	it("reads the invoice PDF in the browser, with pdf.js loaded only when a file is chosen and nothing sent", () => {
+		const reader = readSource("./invoicePdf.ts")
+		expect(reader).toContain('import("pdfjs-dist/legacy/build/pdf.mjs")')
+		expect(reader).toContain('import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")')
+		expect(reader).not.toMatch(/cMapUrl|standardFontDataUrl|wasmUrl|iccUrl/)
+		const sources = [
+			reader,
+			readSource("./electricityInvoice.ts"),
+			readSource("../../components/calculators/ElectricityInvoiceUpload.tsx"),
+			readSource("../../components/calculators/ElectricityTariffComparisonComp.tsx"),
+		]
+		for (const source of sources) {
+			expect(source).not.toMatch(/^import[^;]*pdfjs-dist/m)
+			expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|sendBeacon/)
+		}
+	})
+
 	it("uses no data or text from tiagofelicia.pt", () => {
 		const root = fileURLToPath(new URL("../../../", import.meta.url))
 		const files = (dir: string): string[] =>

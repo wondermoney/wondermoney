@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} offerte costano meno. La più economica ti fa risparmiare {{saving}} all'anno.",
         "noneCheaper": "Nessuna offerta dell'elenco costa meno della tua tariffa."
       },
+      "invoice": {
+        "title": "Leggi la mia bolletta (PDF)",
+        "intro": "Scegli la bolletta PDF del tuo fornitore e il comparatore legge la potenza impegnata, l'opzione tariffaria, i kWh, i giorni e i prezzi.",
+        "label": "Bolletta in PDF",
+        "privacy": "Il file resta sul tuo dispositivo: viene letto in questo browser e non viene mai caricato.",
+        "supported": "Legge le bollette PDF di questi fornitori: {{suppliers}}. Usa il PDF che invia il fornitore, non una scansione né una foto.",
+        "reading": "Lettura della bolletta…",
+        "found": "Letto dalla bolletta ({{supplier}}):",
+        "fields": {
+          "power": "Potenza impegnata",
+          "option": "Opzione tariffaria",
+          "cycle": "Ciclo orario",
+          "days": "Giorni fatturati",
+          "kwhSimple": "Consumo",
+          "kwh": "Consumo, {{period}}",
+          "powerPrice": "Prezzo della potenza",
+          "energyPriceSimple": "Prezzo dell'energia",
+          "energyPrice": "Prezzo dell'energia, {{period}}"
+        },
+        "check": "da verificare",
+        "checkHelp": "I valori segnati «da verificare» sono stati dedotti o provengono da un formato di bolletta di cui non abbiamo un esempio: confrontali con la bolletta.",
+        "notes": "Prezzi IVA esclusa e prima degli sconti. Ciò che non è nell'elenco resta com'è nel modulo.",
+        "apply": "Compila il modulo",
+        "discard": "Ignora",
+        "applied": "Il modulo contiene ora i valori della tua bolletta. Controllali qui sotto e cambia quelli diversi.",
+        "errors": {
+          "unsupported": "Non sappiamo ancora leggere questo formato di bolletta. Il modulo è rimasto com'era: inserisci qui sotto i valori della bolletta. Leggiamo le bollette di questi fornitori: {{suppliers}}.",
+          "noElectricity": "In questa bolletta non abbiamo trovato valori di elettricità della casa (forse riguarda solo il gas o la mobilità elettrica). Il modulo è rimasto com'era.",
+          "unreadable": "Questo file non può essere letto come PDF. Il modulo è rimasto com'era.",
+          "encrypted": "Questo PDF è protetto da password. Aprilo, salva una copia senza password e scegli quella copia, oppure inserisci i valori qui sotto.",
+          "noText": "Questo PDF non ha testo da leggere (forse è una scansione o una foto). Usa il PDF inviato dal fornitore, oppure inserisci i valori qui sotto.",
+          "tooLarge": "Questo file supera {{max}} MB, più di una bolletta. Il modulo è rimasto com'era."
+        }
+      },
       "solar": {
         "title": "Pannelli solari",
         "intro": "Stima quanto producono dei pannelli nella tua zona e confronta le offerte su ciò che compri ancora dalla rete.",
