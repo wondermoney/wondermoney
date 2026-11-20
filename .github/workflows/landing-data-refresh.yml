@@ -5,10 +5,12 @@ name: Landing data refresh
 # opens nothing. Two sets, each with its own fixed branch:
 #
 #   market  Euribor from BPstat, deposit rates from the ECB, household electricity prices from
-#           Eurostat, fuel prices from DGEG. The sources publish monthly, so it runs on the 6th.
-#           Also the committed fallback of the two daily snapshots, the cheapest fuel stations
-#           (DGEG) and the gold price (NBP, ECB), which every production build refreshes anyway
-#           (landing-daily-deploy.yml). Branch bot/landing-data-refresh.
+#           Eurostat, fuel prices from DGEG, and OMIE's Portuguese day-ahead prices (the last 13
+#           full months, with the E-REDES and REN profiles they are weighted by). The sources
+#           publish monthly, so it runs on the 6th. Also the committed fallback of the two daily
+#           snapshots, the cheapest fuel stations (DGEG) and the gold price (NBP, ECB), which every
+#           production build refreshes anyway (landing-daily-deploy.yml). Branch
+#           bot/landing-data-refresh.
 #   offers  Every supplier's electricity offer, from ERSE's price simulator export. Offers start
 #           and end every week, so it runs every Monday. Branch bot/landing-offers-refresh.
 #
@@ -60,6 +62,8 @@ jobs:
     timeout-minutes: 20
     env:
       DATA_DIR: apps/landing/src/lib/calculators/data
+      # Static data the page fetches (the OMIE quarter-hour prices), refreshed with the market set.
+      PUBLIC_DATA_DIR: apps/landing/public/data
     steps:
       - name: Pick the snapshots
         id: set
@@ -82,10 +86,10 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           else
             {
-              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices build-fuel-stations build-gold-price"
+              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices build-fuel-stations build-gold-price build-omie-prices"
               echo "branch=bot/landing-data-refresh"
               echo "title=chore(landing): refresh the market-data snapshots"
-              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision gold CheapestStations"
+              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision gold CheapestStations indexedPricing omiePrices"
             } >> "$GITHUB_OUTPUT"
           fi
           echo "set=$set" >> "$GITHUB_OUTPUT"
@@ -117,14 +121,14 @@ jobs:
           # The scripts stamp today's date as the fetch date on every run, so a date-only diff is
           # not a data change: put those modules back.
           ignore='^[[:space:]]*(fetchedOn|retrievedOn):'
-          if [ -z "$(git diff -I"$ignore" --numstat -- "$DATA_DIR")" ]; then
-            git checkout -- "$DATA_DIR"
+          if [ -z "$(git diff -I"$ignore" --numstat -- "$DATA_DIR" "$PUBLIC_DATA_DIR")" ]; then
+            git checkout -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No new figures; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          git diff --stat -- "$DATA_DIR"
+          git diff --stat -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
       - name: Run the related landing tests
         if: steps.changes.outputs.changed == 'true'
         working-directory: apps/landing
@@ -162,6 +166,7 @@ jobs:
           row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
           row "Fuel stations (DGEG)" fuelStations/index.ts asOf fetchedAt
           row "Gold price (NBP, ECB)" goldPrice.ts asOf fetchedOn
+          row "OMIE prices (Portugal)" omiePrices.ts lastMonth fetchedOn
           row "Electricity offers (ERSE export date)" electricityOffers.ts exportedOn fetchedOn
 
           body_file=$(mktemp)
@@ -180,7 +185,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C "$BRANCH"
-          git add -- "$DATA_DIR"
+          git add -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
           git commit -m "$TITLE"
           # The branch belongs to this workflow and is rebuilt from develop on every run.
           git push --force origin "$BRANCH"

@@ -15,7 +15,9 @@
 // 2. ERSE, Diretiva n.º 1/2026 (Diário da República, 2.ª série, n.º 4, 7 January 2026), tariffs for
 //    2026. Diretiva n.º 4/2026 leaves both of these articles unchanged:
 //    - article 15.º, n.º 1, alínea f), "Tarifa de Acesso às Redes em BTN (<= 20,7 kVA)": the fixed
-//      (power) term of the network-access tariff (TAR), EUR per day by contracted power (page 16);
+//      (power) term of the network-access tariff (TAR), EUR per day by contracted power (page 16),
+//      and its energy term, EUR per kWh by option and period (page 16; above 20,7 kVA, alínea e),
+//      page 15), read on 2026-11-20;
 //    - article 41.º, n.º 2, "Desconto tarifa social em BTN (<= 6,9 kVA)": the social-tariff discount,
 //      EUR per day by contracted power and EUR per kWh, the same for every period (page 44).
 //    https://files.diariodarepublica.pt/2s/2026/01/004000000/0018600288.pdf
@@ -118,6 +120,15 @@ export const ERSE_TARIFFS = {
    * Only the powers whose TAR fixed term pays the reduced VAT rate are kept.
    */
   tarPowerPerDay: { 1.15: 0.0573, 2.3: 0.1145, 3.45: 0.1718 } as Readonly<Record<number, number>>,
+  /**
+   * Energy term of the network-access tariff (TAR), EUR per kWh, by option and period: BTN <= 20,7 kVA
+   * (Diretiva n.º 1/2026, artigo 15.º, n.º 1, f), page 16) and BTN > 20,7 kVA, tri-hourly only
+   * (alínea e), page 15). Indexed offers add it to their market price (data/indexedFormulas.ts).
+   */
+  tarEnergyPerKwh: {
+    upTo20_7: { simple: 0.0607, offValley: 0.0835, valley: 0.0158, peak: 0.2452, shoulder: 0.0412, triValley: 0.0158 },
+    above20_7: { peak: 0.2457, shoulder: 0.0524, triValley: 0.015 },
+  },
   /** Social-tariff discount on the TAR, BTN <= 6,9 kVA (Diretiva n.º 1/2026, artigo 41.º, n.º 2). */
   socialTariff: {
     /** Contracted power up to which the social tariff applies, kVA (Decreto-Lei n.º 15/2022). */
