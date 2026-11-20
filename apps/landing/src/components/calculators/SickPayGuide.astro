@@ -6,6 +6,7 @@ import {
   SICK_PAY_EXAMPLE,
   computeSickPay,
   floorDailyCents,
+  SICK_PAY_SOURCES,
 } from "@/lib/calculators/sickPay";
 import { formatMoney } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
@@ -60,12 +61,13 @@ const methods = [
     </ul>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
     <ul class="mt-3 list-disc space-y-2 pl-6">
-      <li>
-        <a href="https://www.seg-social.pt/subsidio-de-doenca" rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
-          {t(k("sourceGuide"))}
-        </a>
-      </li>
-      <li>{t(k("sourceLaw"))}</li>
+      {([["sourceGuide", SICK_PAY_SOURCES.guide], ["sourceLaw", SICK_PAY_SOURCES.law]] as const).map(([key, href]) => (
+        <li>
+          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
+            {t(k(key))}
+          </a>
+        </li>
+      ))}
     </ul>
     <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
   </section>
