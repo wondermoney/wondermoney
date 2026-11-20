@@ -26,7 +26,7 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
   expect(document.getElementById("state-pension-monthly")?.textContent).toBe(euros(outcome.result.monthlyCents));
   expect(screen.getAllByText(/rough estimate/i).length).toBeGreaterThan(0);
   expect(screen.getByRole("link", { name: "Open the official simulator" }).getAttribute("href")).toBe(
-    "https://www.seg-social.pt/reforma",
+    "https://www.seg-social.pt/ptss/pssd/menu/simuladores/simulador-pensoes",
   );
   expect(screen.getByRole("link", { name: /FIRE calculator/ }).getAttribute("href")).toBe("/en/fire-calculator");
   expect(pushGtmEvent).not.toHaveBeenCalled();
