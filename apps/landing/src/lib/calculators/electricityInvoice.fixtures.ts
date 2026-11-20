@@ -1,0 +1,193 @@
+// Synthetic invoice text for electricityInvoice.test.ts: each fixture is the text lines pdf.js would
+// give for an invoice laid out as the supplier's own sample invoice (sources in
+// electricityInvoice.ts), with made-up figures. No customer invoice was used. They carry no
+// names, addresses, tax numbers, CPEs or account numbers: those lines are left out, as the reader
+// does not use them. Not used by any page.
+
+/** EDP Comercial, simple option, electricity with a credit note for an earlier month. */
+export const EDP_SIMPLE = [
+  "Documento emitido a: 30 de setembro 2026",
+  "Período de faturação: 1 de setembro a 30 de setembro 2026",
+  "Eletricidade Gás Natural Serviços Taxas, Impostos e Outros Encargos",
+  "40,10 € 0,00 € 0,00 € 6,20 €",
+  "O que marca o meu contador",
+  "Vazio 1 2 0 Leitura real",
+  "Os meus dados",
+  "Potência",
+  "4,6 kVA (simples)",
+  "EDP Comercial - Comercialização de Energia, S.A.",
+  "1 de 4",
+  "Eletricidade",
+  "Fatura nº FT0000 X0000/0000000000 De: 30 de setembro 2026 Valor: 46,30 €",
+  "Descrição Quantidade x Preço = Valor Desconto Total s/IVA IVA",
+  "Consumo real",
+  "Simples",
+  "1 set a 28 set 2026 90 kWh 0,1900 € 17,10 € 4% (-0,68 €) 16,42 € 6%",
+  "1 set a 28 set 2026 70 kWh 0,1900 € 13,30 € 4% (-0,53 €) 12,77 € 23%",
+  "Potência (4,6 kVA)",
+  "1 set a 30 set 2026 30 dias 0,2900 € 8,70 € 4% (-0,35 €) 8,35 € 23%",
+  "O total da fatura inclui os encargos relativos ao acesso às redes no valor de 16,00 € (antes de IVA), dos quais:",
+  "Potência 6,00 € (0,2000 € x 30dias)",
+  "Energia Simples 9,60 € (0,0600 € x 160kWh)",
+  "Total 37,54 € sem IVA",
+  "Taxas, Impostos e Outros Encargos",
+  "IEC 160 kWh 0,001 € 0,16 € 0,16 € 23 %",
+  "Eletricidade",
+  "Nota de crédito nº NC0000 X0000/0000000000 De: 30 de setembro 2026 Valor: 3,00 €",
+  "Consumo real",
+  "Simples",
+  "20 ago a 31 ago 2026 15 kWh 0,1900 € 2,85 € 4% (-0,11 €) 2,74 € 6%",
+  "EDP Comercial - Comercialização de Energia, S.A.",
+  "2 de 4",
+];
+
+/** EDP Comercial on bi-hourly: the period headings EDP's mobility invoice uses, on an electricity invoice. */
+export const EDP_BI_HOURLY = [
+  "Os meus dados",
+  "Potência",
+  "6,9 kVA (bi-horária)",
+  "Ciclo diário",
+  "EDP Comercial - Comercialização de Energia, S.A.",
+  "Eletricidade",
+  "Fatura nº FT0000 X0000/0000000001 De: 31 de outubro 2026 Valor: 70,00 €",
+  "Consumo real",
+  "Fora vazio",
+  "1 out a 31 out 2026 140 kWh 0,2300 € 32,20 € 23%",
+  "Vazio",
+  "1 out a 31 out 2026 110 kWh 0,1200 € 13,20 € 23%",
+  "Potência (6,9 kVA)",
+  "1 out a 31 out 2026 31 dias 0,4100 € 12,71 € 23%",
+  "Taxas, Impostos e Outros Encargos",
+  "IEC 250 kWh 0,001 € 0,25 € 23 %",
+];
+
+/** EDP Comercial, an electric mobility invoice only: no home electricity to read. */
+export const EDP_MOBILITY_ONLY = [
+  "Documento emitido a: 3 de novembro 2026",
+  "Eletricidade Gás Natural Serviços Mobilidade Elétrica Taxas, Impostos e Outros Encargos",
+  "Aderir Aderir 20,00 € 5,00 €",
+  "Mobilidade elétrica EDP",
+  "Fatura nº FT0000 X0000/0000000002 De: 3 de novembro 2026 Valor: 5,00 €",
+  "Energia",
+  "Fora vazio 0,000 kWh 0,2500 € 0,00 € 0,00 € 23 %",
+  "Vazio 10,000 kWh 0,1700 € 1,70 € 1,70 € 23 %",
+  "Taxas, Impostos e Outros Encargos",
+  "IEC 10,000 kWh 0,001 € 0,01 € 0,01 € 23 %",
+  "EDP Comercial - Comercialização de Energia, S.A.",
+];
+
+/** Galp, simple option: the electricity bar, the supplier and access blocks and "Informações de preço". */
+export const GALP_SIMPLE = [
+  "Fatura: FT X0000/000000000 ATCUD: XXXX-000000000",
+  "Eletricidade Tarifa 5.75 kVA Simples",
+  "Comercialização 30,00€",
+  "Período de Fornecimento Descrição Quantidade x Preço x Fator/Dias = Valor - Desconto = Total s/ IVA IVA",
+  "01/09/2026 - 30/09/2026 Potência Contratada 5,75kVA 1 0,20000000 € 30 6,00€ 0,00€ 6,00€ 23%",
+  "01/09/2026 - 30/09/2026 Desconto Potencia -1,00€ 23%",
+  "01/09/2026 - 30/09/2026 Energia Simples (medida) 150 kWh 0,10000000 €/kWh 1 15,00€ 0,00€ 15,00€ 6%",
+  "01/09/2026 - 30/09/2026 Energia Simples (medida) 90 kWh 0,10000000 €/kWh 1 9,00€ 0,00€ 9,00€ 23%",
+  "01/09/2026 - 30/09/2026 Desconto Energia -1,50€ 6%",
+  "Tarifas de Acesso 20,40€",
+  "01/09/2026 - 30/09/2026 Potência Contratada 5,75kVA 1 0,26000000 € 30 7,80€ 0,00€ 7,80€ 23%",
+  "01/09/2026 - 30/09/2026 Energia Simples (medida) 150 kWh 0,05000000 €/kWh 1 7,50€ 0,00€ 7,50€ 6%",
+  "01/09/2026 - 30/09/2026 Energia Simples (medida) 90 kWh 0,05000000 €/kWh 1 4,50€ 0,00€ 4,50€ 23%",
+  "Taxas e Impostos 3,00€",
+  "01/09/2026 - 30/09/2026 ISPE 240 kWh 0,00100000 €/kWh 1 0,24€ 0,00€ 0,24€ 23%",
+  "O Consumo médio de eletricidade é de 230 kWh/mês Informações de preço",
+  "480 Energia Simples: 0.15000000 €/kWh",
+  "420 Potência Contratada: 0.46000000 €/dia",
+  "O Preço contratado corresponde ao somatório do preço dos termos de comercialização e da tarifa de acesso às redes, no último dia faturado.",
+  "Galp Energia",
+];
+
+/** Goldenergy, simple option on a meter that registers vazio, ponta and cheias, measured then estimated. */
+export const GOLDENERGY_SIMPLE = [
+  "Período de Faturação 01/09/2026 a 30/09/2026",
+  "Documento Nº XX0000000 DATA EMISSÃO 05/10/2026",
+  "Eletricidade Gás Débitos e Créditos Taxas e Impostos",
+  "35,00€ 0,00€ 0,00€ 3,00€",
+  "GOLD ENERGY - COMERCIALIZADORA DE ENERGIA, S.A.",
+  "ELETRICIDADE",
+  "Potência:",
+  "3,45 kVA/Simples",
+  "Contador Periodo Data kWh Tipo Data kWh Tipo",
+  "Fatura nº XX 0000/00000",
+  "Data Emissão: 05/10/2026 Início Fim Qtd. Unid. Preço (€) Valor (€) IVA (%)",
+  "Potência Contratada 3,45 kVA 01/09/2026 30/09/2026 30 DIA 0,0500 1,50 23",
+  "Acesso às Redes Potência Contratada 3,45 kVA 01/09/2026 30/09/2026 30 DIA 0,1600 4,80 23",
+  "Consumo Eletricidade Vazio medido 01/09/2026 10/09/2026 20 KWH 0,1700 3,40 6",
+  "Campanha Parceria (Desconto 10,5% já incluído)",
+  "Consumo Eletricidade Ponta medido 01/09/2026 10/09/2026 10 KWH 0,1700 1,70 6",
+  "Consumo Eletricidade Cheia medido 01/09/2026 10/09/2026 25 KWH 0,1700 4,25 6",
+  "Consumo Eletricidade Vazio estimado 11/09/2026 30/09/2026 40 KWH 0,1700 6,80 6",
+  "Consumo Eletricidade Ponta estimado 11/09/2026 30/09/2026 20 KWH 0,1700 3,40 6",
+  "Consumo Eletricidade Cheia estimado 11/09/2026 30/09/2026 50 KWH 0,1700 8,50 6",
+  "Eletricidade 34,85€ s/IVA",
+  "O total da Fatura (sem IVA) inclui os encargos relativos aos acessos às redes da componente de energia no valor de 9,90€, dos quais:",
+  "Acessos de Energia Vazio (Desde 01/09/2026 a 30/09/2026) 3,60€ (0,0600 €/kWh * 60 kWh)",
+  "TAXAS, IMPOSTOS E OUTROS ENCARGOS Início Fim Qtd. Unid. Preço (€) Valor (€) IVA (%)",
+  "Imposto Especial de Consumo Electricidade medido 01/09/2026 10/09/2026 55 KWH 0,001 0,06 23",
+  "Encargo Tarifa Social (DL 104/2023, 17/11) estimado 11/09/2026 30/09/2026 110 KWH 0,0016574 0,18 23",
+  "Nota de Crédito nº NC 0000/00000",
+  "Data Emissão: 21/09/2026 Início Fim Quantidade Preço (€) Valor (€) IVA (%)",
+  "Consumo Eletricidade Vazio estimado 01/08/2026 31/08/2026 30 KWH 0,1700 5,10 6",
+  "Página 3 de 5",
+];
+
+/** Endesa, simple ("Sem ciclo"), as in its 2021 article's sample. */
+export const ENDESA_SIMPLE = [
+  "Dados da Conta",
+  "Plano: Exemplo Luz",
+  "CPE (Código Ponto Entrega) Potência Ciclo horário",
+  "4,6kVA Sem ciclo",
+  "Consumos",
+  "Simples",
+  "000210kWh",
+  "LUZ Fatura: FAC 000000000/000000000 Data: 01 out 2026 Período de Faturação: 01 set 2026 a 30 set 2026",
+  "Descrição Quantidade X Preço = Valor - Desconto* = Total ** IVA",
+  "Luz (Consumo)",
+  "Termo de Energia (Real) 210 kWh 0,160000 € 33,60 € -3,36 € 30,24 € 23% (c)",
+  "01 set a 30 set",
+  "* Desconto 1 Ano (33,60 € x 10,00%)",
+  "Termo de Potência (4.6 kVA) 30 dias 0,070000 € 2,10 € -0,21 € 1,89 € 23% (c)",
+  "01 set a 30 set",
+  "Termo Fixo Acesso às Redes 30 dias 0,200000 € 6,00 € 0,00 € 6,00 € 6% (b)",
+  "TOTAL Luz (Consumo) 38,13 €",
+  "Endesa Energia, S.A. - Sucursal Portugal",
+];
+
+/** Iberdrola, simple, with an adjustment of an earlier bill and the taxes, which are not this month's prices. */
+export const IBERDROLA_SIMPLE = [
+  "DADOS DO SEU CONTRATO",
+  "Nº Contrato Potência Contratada",
+  "6,9 kVa",
+  "O seu Plano Plano Exemplo",
+  "Data fim de contrato Tipo de Tarifa",
+  "-- Simples",
+  "Periodo de Fidelização Ciclo Horário",
+  "Esta oferta não tem fidelização Diário",
+  "DETALHE DE FATURA DE ELETRICIDADE",
+  "Plano Exemplo Quantidade x Valor = Total sem IVA IVA",
+  "POTÊNCIA CONTRATADA 6,9 KVA",
+  "Data: 1 Set a 30 Set",
+  "Potência Contratada 30 Dias 0,4000€ 12,00€ 23%",
+  "10% sobre termo de potência contratada 10% 12,00€ -1,20€ 23%",
+  "CONSUMO DE ENERGIA",
+  "Data: 1 Set a 30 Set",
+  "Energia simples real (>100kWh) 160 kWh 0,1500€/kWh 24,00€ 23%",
+  "10% sobre termo de energia 10% 24,00€ -2,40€ 23%",
+  "Energia Simples estimada (>100kWh) 40 kWh 0,1500€/kWh 6,00€ 23%",
+  "ACERTOS DE VALORES FATURADOS ANTERIORMENTE",
+  "Data: 1 Ago a 31 Ago",
+  "Energia Simples 10 kWh 0,1500€ 1,50€ 23%",
+  "TAXAS E IMPOSTOS",
+  "Imposto Especial Consumo 200 kWh 0,0010€ 0,20€ 23%",
+  "IBERDROLA CLIENTES PORTUGAL, UNIPESSOAL, LDA",
+];
+
+/** A supplier the reader does not know. */
+export const UNKNOWN_SUPPLIER = [
+  "Comercializadora Exemplo, S.A.",
+  "Potência contratada 3,45 kVA",
+  "Energia simples 200 kWh 0,1500 €",
+];

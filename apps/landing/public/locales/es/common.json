@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} ofertas cuestan menos. La más barata te ahorra {{saving}} al año.",
         "noneCheaper": "Ninguna oferta de la lista cuesta menos que tu tarifa."
       },
+      "invoice": {
+        "title": "Leer mi factura (PDF)",
+        "intro": "Elige la factura en PDF de tu comercializadora y el comparador lee la potencia contratada, la opción tarifaria, los kWh, los días y los precios.",
+        "label": "Factura en PDF",
+        "privacy": "El archivo se queda en tu dispositivo: se lee en este navegador y nunca se sube.",
+        "supported": "Lee facturas en PDF de estas comercializadoras: {{suppliers}}. Usa el PDF que envía la comercializadora, no un escaneo ni una foto.",
+        "reading": "Leyendo la factura…",
+        "found": "Leído de la factura ({{supplier}}):",
+        "fields": {
+          "power": "Potencia contratada",
+          "option": "Opción tarifaria",
+          "cycle": "Ciclo horario",
+          "days": "Días facturados",
+          "kwhSimple": "Consumo",
+          "kwh": "Consumo, {{period}}",
+          "powerPrice": "Precio de la potencia",
+          "energyPriceSimple": "Precio de la energía",
+          "energyPrice": "Precio de la energía, {{period}}"
+        },
+        "check": "revisar",
+        "checkHelp": "Las cifras marcadas con «revisar» se han deducido o proceden de un formato de factura del que no tenemos muestra: compáralas con la factura.",
+        "notes": "Precios sin IVA y antes de descuentos. Lo que no aparece en la lista se queda como está en el formulario.",
+        "apply": "Rellenar el formulario",
+        "discard": "Descartar",
+        "applied": "El formulario tiene ahora las cifras de tu factura. Revísalas abajo y cambia las que no coincidan.",
+        "errors": {
+          "unsupported": "Todavía no sabemos leer este formato de factura. El formulario se ha quedado como estaba: introduce abajo las cifras de la factura. Leemos facturas de estas comercializadoras: {{suppliers}}.",
+          "noElectricity": "No hemos encontrado cifras de electricidad del hogar en esta factura (puede ser solo de gas o de movilidad eléctrica). El formulario se ha quedado como estaba.",
+          "unreadable": "Este archivo no se puede leer como PDF. El formulario se ha quedado como estaba.",
+          "encrypted": "Este PDF está protegido con contraseña. Ábrelo, guarda una copia sin contraseña y elige esa copia, o introduce las cifras abajo.",
+          "noText": "Este PDF no tiene texto que leer (puede ser un escaneo o una foto). Usa el PDF que envió la comercializadora, o introduce las cifras abajo.",
+          "tooLarge": "Este archivo pesa más de {{max}} MB, más que una factura. El formulario se ha quedado como estaba."
+        }
+      },
       "solar": {
         "title": "Paneles solares",
         "intro": "Estima lo que producen unos paneles en tu zona y compara las ofertas por lo que aún compras a la red.",

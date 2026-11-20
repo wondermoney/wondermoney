@@ -5,6 +5,7 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
+import ElectricityInvoiceUpload from "./ElectricityInvoiceUpload";
 import ElectricityTariffResults, { k, PERIOD_KEYS } from "./ElectricityTariffResults";
 import { ElectricitySolarPanel, ElectricitySolarSummary, INITIAL_SOLAR, useSolar, type SolarLoader, type SolarSettings } from "./ElectricitySolarPanel";
 import type { ContractedPowerKva, ElectricityOffer } from "@/lib/calculators/electricityOfferTypes";
@@ -40,6 +41,7 @@ import {
   type PricingFilter,
 } from "@/lib/calculators/electricityTariffComparator";
 import { solarBillSaving } from "@/lib/calculators/electricitySolar";
+import { applyInvoiceReading } from "@/lib/calculators/electricityInvoice";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
@@ -377,6 +379,12 @@ function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: Of
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
       <form className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
+        <ElectricityInvoiceUpload
+          onApply={(reading) => {
+            setEdited(true);
+            setForm((current) => applyInvoiceReading(current, reading));
+          }}
+        />
         <div className="space-y-5 rounded-card border border-border bg-background p-6">
           <fieldset>
             <legend className="text-sm font-medium text-foreground">{t(k("mode.legend"))}</legend>

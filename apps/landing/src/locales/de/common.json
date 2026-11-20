@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} Angebote kosten weniger. Mit dem günstigsten sparst du {{saving}} im Jahr.",
         "noneCheaper": "Kein Angebot in der Liste kostet weniger als dein Tarif."
       },
+      "invoice": {
+        "title": "Meine Rechnung lesen (PDF)",
+        "intro": "Wähle die PDF-Rechnung deines Anbieters, und der Vergleich liest daraus die vertragliche Leistung, die Tarifoption, die kWh, die Tage und die Preise.",
+        "label": "Rechnung als PDF",
+        "privacy": "Die Datei bleibt auf deinem Gerät: Sie wird in diesem Browser gelesen und nie hochgeladen.",
+        "supported": "Liest PDF-Rechnungen dieser Anbieter: {{suppliers}}. Verwende das PDF, das der Anbieter schickt, keinen Scan und kein Foto.",
+        "reading": "Rechnung wird gelesen…",
+        "found": "Aus der Rechnung gelesen ({{supplier}}):",
+        "fields": {
+          "power": "Vertragliche Leistung",
+          "option": "Tarifoption",
+          "cycle": "Zeitzyklus",
+          "days": "Abgerechnete Tage",
+          "kwhSimple": "Verbrauch",
+          "kwh": "Verbrauch, {{period}}",
+          "powerPrice": "Leistungspreis",
+          "energyPriceSimple": "Energiepreis",
+          "energyPrice": "Energiepreis, {{period}}"
+        },
+        "check": "prüfen",
+        "checkHelp": "Mit „prüfen“ markierte Werte wurden abgeleitet oder stammen aus einem Rechnungsformat, von dem wir kein Muster haben: Vergleiche sie mit der Rechnung.",
+        "notes": "Preise ohne MwSt. und vor Rabatten. Was nicht in der Liste steht, bleibt im Formular, wie es ist.",
+        "apply": "Formular ausfüllen",
+        "discard": "Verwerfen",
+        "applied": "Das Formular enthält jetzt die Werte deiner Rechnung. Prüfe sie unten und ändere die, die abweichen.",
+        "errors": {
+          "unsupported": "Dieses Rechnungsformat können wir noch nicht lesen. Das Formular ist unverändert: Gib die Werte der Rechnung unten ein. Wir lesen Rechnungen dieser Anbieter: {{suppliers}}.",
+          "noElectricity": "In dieser Rechnung wurden keine Stromwerte des Haushalts gefunden (sie betrifft vielleicht nur Gas oder E-Mobilität). Das Formular ist unverändert.",
+          "unreadable": "Diese Datei konnte nicht als PDF gelesen werden. Das Formular ist unverändert.",
+          "encrypted": "Dieses PDF ist passwortgeschützt. Öffne es, speichere eine Kopie ohne Passwort und wähle diese Kopie, oder gib die Werte unten ein.",
+          "noText": "Dieses PDF enthält keinen lesbaren Text (vielleicht ein Scan oder ein Foto). Verwende das PDF, das der Anbieter geschickt hat, oder gib die Werte unten ein.",
+          "tooLarge": "Diese Datei ist größer als {{max}} MB, mehr als eine Rechnung. Das Formular ist unverändert."
+        }
+      },
       "solar": {
         "title": "Solaranlage",
         "intro": "Schätze, was eine Solaranlage in deiner Gegend erzeugt, und vergleiche die Angebote nach dem, was du noch aus dem Netz beziehst.",

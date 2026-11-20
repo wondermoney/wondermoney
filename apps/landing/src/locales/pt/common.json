@@ -4346,6 +4346,40 @@
         "cheaper": "{{count}} ofertas custam menos. A mais barata poupa-te {{saving}} por ano.",
         "noneCheaper": "Nenhuma oferta da lista custa menos do que o teu tarifário."
       },
+      "invoice": {
+        "title": "Ler a minha fatura (PDF)",
+        "intro": "Escolhe a fatura em PDF do teu comercializador e o comparador lê a potência contratada, a opção tarifária, os kWh, os dias e os preços.",
+        "label": "Fatura em PDF",
+        "privacy": "O ficheiro fica no teu dispositivo: é lido neste navegador e nunca é enviado.",
+        "supported": "Lê faturas em PDF destes comercializadores: {{suppliers}}. Usa o PDF que o comercializador envia, não uma digitalização nem uma fotografia.",
+        "reading": "A ler a fatura…",
+        "found": "O que lemos da fatura ({{supplier}}):",
+        "fields": {
+          "power": "Potência contratada",
+          "option": "Opção tarifária",
+          "cycle": "Ciclo horário",
+          "days": "Dias faturados",
+          "kwhSimple": "Consumo",
+          "kwh": "Consumo, {{period}}",
+          "powerPrice": "Preço da potência",
+          "energyPriceSimple": "Preço da energia",
+          "energyPrice": "Preço da energia, {{period}}"
+        },
+        "check": "confirmar",
+        "checkHelp": "Os valores marcados com «confirmar» foram deduzidos ou vêm de um formato de fatura de que não temos exemplo: compara-os com a fatura.",
+        "notes": "Preços sem IVA e antes de descontos. O que não está na lista fica como está no formulário.",
+        "apply": "Preencher o formulário",
+        "discard": "Descartar",
+        "applied": "O formulário tem agora os valores da tua fatura. Confirma-os abaixo e altera os que forem diferentes.",
+        "errors": {
+          "unsupported": "Ainda não sabemos ler este formato de fatura. O formulário ficou como estava: introduz abaixo os valores da fatura. Lemos faturas destes comercializadores: {{suppliers}}.",
+          "noElectricity": "Não encontrámos valores de eletricidade da casa nesta fatura (pode ser só de gás ou de mobilidade elétrica). O formulário ficou como estava.",
+          "unreadable": "Não foi possível ler este ficheiro como PDF. O formulário ficou como estava.",
+          "encrypted": "Este PDF está protegido por palavra-passe. Abre-o, guarda uma cópia sem palavra-passe e escolhe essa cópia, ou introduz os valores abaixo.",
+          "noText": "Este PDF não tem texto para ler (pode ser uma digitalização ou uma fotografia). Usa o PDF que o comercializador enviou, ou introduz os valores abaixo.",
+          "tooLarge": "Este ficheiro tem mais de {{max}} MB, mais do que uma fatura. O formulário ficou como estava."
+        }
+      },
       "solar": {
         "title": "Painéis solares",
         "intro": "Estima o que produzem painéis na tua zona e compara as ofertas pelo que ainda compras à rede.",
