@@ -3,7 +3,6 @@ import { fileURLToPath } from "url";
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
-import sanity from "@sanity/astro";
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import { getLegacyRedirects } from "./src/lib/legacySlugs.ts";
@@ -35,11 +34,6 @@ export default defineConfig({
   },
   integrations: [
     react(),
-    sanity({
-      projectId: "94owjs69",
-      dataset: "production",
-      useCdn: true,
-    }),
     sitemap({
       i18n: {
         locales: {

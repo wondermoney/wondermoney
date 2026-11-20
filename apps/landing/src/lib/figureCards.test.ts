@@ -1,11 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { figureIndexLayout, glossaryTermCards, guideKeepReading, toolsHubGroupCards } from "./figureCards";
 import { figureForTool } from "./hairline/articleFigures";
 import { toLocalizedPath, toToolsHubPath } from "./routes";
 import { buildToolsHub, TOOLS_IN_DISPLAY_ORDER, toolAnalyticsName } from "./toolsCatalog";
 import { getTranslations } from "./translations";
-
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
 
 const siblings = [
   { title: "Old budgeting", slug: "build-monthly-budget", category: "budgeting", publishedAt: "2026-01-01" },

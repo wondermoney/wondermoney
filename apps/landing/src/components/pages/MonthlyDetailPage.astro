@@ -1,17 +1,16 @@
 ---
 import { toIntlLocale } from "@/lib/numberFormat";
 import "@/styles/globals.css";
-import { PortableText } from "astro-portabletext";
+import { getEntry, render } from "astro:content";
 import ContentLayout from "@/layouts/ContentLayout.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import ArticleSection from "@/components/learning/ArticleSection.astro";
 import ReferenceList from "@/components/learning/ReferenceList.astro";
 import DataTable from "@/components/learning/DataTable.astro";
-import { buildOutline, portableTextToPlain, readingMinutes } from "@/lib/articleOutline";
+import { buildOutline, readingMinutes } from "@/lib/articleOutline";
 import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/i18nLocale";
-import type { PortableTextBlock } from "@/lib/learningContent";
-import type { MonthlyContent } from "@/lib/pageStaticPaths";
+import type { MonthlyContent } from "@/lib/contentCollections";
 import { getTranslations } from "@/lib/translations";
 
 interface Props {
@@ -51,7 +50,9 @@ const seriesTitle = t("resources.links.monthly.title");
 const title = monthlyItem.title || seriesTitle;
 const whatChanged = monthlyItem.whatChanged ?? [];
 const whoShouldCare = monthlyItem.whoShouldCare ?? [];
-const bodyBlocks = Array.isArray(monthlyItem.body) ? (monthlyItem.body as PortableTextBlock[]) : [];
+const entry = await getEntry("monthly", monthlyItem.id);
+if (!entry) throw new Error(`No monthly item at src/content/monthly/${monthlyItem.id}.md`);
+const { Content } = await render(entry);
 
 // The indicator sections, in reading order; numbered when there are two or more.
 type SectionKey = "methodology" | "snapshot" | "change" | "whatChanged" | "whoShouldCare" | "trend";
@@ -81,7 +82,7 @@ const readMinutes = readingMinutes([
   ...deltaRows.map((entry) => `${entry.metric} ${entry.note ?? ""}`),
   ...whatChanged.map((change) => `${change.title ?? ""} ${change.detail ?? ""}`),
   ...whoShouldCare,
-  portableTextToPlain(bodyBlocks),
+  monthlyItem.bodyText,
 ]);
 
 const articleSchema = {
@@ -204,9 +205,9 @@ const articleSchema = {
           </ArticleSection>
         )}
 
-        {bodyBlocks.length > 0 && (
+        {monthlyItem.bodyText && (
           <section class="prose prose-lg article-prose">
-            <PortableText value={[...bodyBlocks]} />
+            <Content />
           </section>
         )}
 

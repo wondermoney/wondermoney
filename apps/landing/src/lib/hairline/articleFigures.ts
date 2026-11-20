@@ -58,7 +58,7 @@ export function resolveFigure(requested: FigureName): ResolvedFigure {
   return { name, labelKey: `hairline.labels.${name}` };
 }
 
-/** Learn guides (Sanity) by slug, English and Portuguese. Guides exist in those two locales only. */
+/** Learn guides (`src/content/guides`) by slug, English and Portuguese. Guides exist in those two locales only. */
 const GUIDE_FIGURES: Readonly<Record<string, FigureName>> = {
   "emergency-fund-guide": "jar",
   "fundo-de-emergencia": "jar",

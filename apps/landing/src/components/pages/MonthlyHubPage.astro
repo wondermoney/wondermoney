@@ -5,20 +5,10 @@ import ContentLayout from "@/layouts/ContentLayout.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import FigureCards from "@/components/shared/FigureCards.astro";
 import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
-import { sanityClient } from "sanity:client";
+import { getMonthlyItems } from "@/lib/contentCollections";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
-
-type MonthlyListItem = {
-  title?: string;
-  slug?: string;
-  excerpt?: string;
-  year?: number;
-  month?: number;
-  publishedAt?: string;
-  contentStatus?: string;
-};
 
 interface Props {
   locale: Lang;
@@ -30,20 +20,8 @@ const learnPrefix = `/${locale}/learn`;
 const monthlyPrefix = `${learnPrefix}/monthly`;
 const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}/learn/monthly`);
 
-const monthlyItems = (await sanityClient.fetch(
-  `*[_type == "monthlyContent" && locale == $locale] | order(year desc, month desc) {
-    title,
-    "slug": slug.current,
-    excerpt,
-    year,
-    month,
-    publishedAt,
-    contentStatus
-  }`,
-  { locale },
-)) as MonthlyListItem[];
-
-const validMonthlyItems = monthlyItems.filter((item) => Boolean(item.slug?.trim() && item.title?.trim()));
+// Latest month first.
+const monthlyItems = (await getMonthlyItems()).filter((item) => item.locale === locale);
 
 const monthYearLabel = (year?: number, month?: number) => {
   if (!year || !month) {
@@ -60,9 +38,9 @@ const monthYearLabel = (year?: number, month?: number) => {
 const title = t("resources.links.monthly.title");
 const dek = t("resources.links.monthly.description");
 
-const cards = validMonthlyItems.map((item) => ({
+const cards = monthlyItems.map((item) => ({
   href: `${monthlyPrefix}/${item.slug}`,
-  title: item.title as string,
+  title: item.title,
   description: item.excerpt,
   figure: PAGE_FIGURES.monthlyHub,
   kind: monthYearLabel(item.year, item.month) ?? undefined,
@@ -74,8 +52,8 @@ const itemListSchema = {
   name: title,
   description: dek,
   url: `https://wonder.money${monthlyPrefix}`,
-  numberOfItems: validMonthlyItems.length,
-  itemListElement: validMonthlyItems.map((item, index) => ({
+  numberOfItems: monthlyItems.length,
+  itemListElement: monthlyItems.map((item, index) => ({
     "@type": "ListItem",
     position: index + 1,
     name: item.title,

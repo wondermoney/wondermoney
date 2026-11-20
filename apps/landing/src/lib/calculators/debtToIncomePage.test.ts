@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { getToolStaticPaths } from "../pageStaticPaths"
 import {
 	SUPPORTED_LANGS,
@@ -10,9 +10,6 @@ import {
 	toLocalizedPathname,
 } from "../routes"
 import { buildToolsHub } from "../toolsCatalog"
-
-// pageStaticPaths imports the Sanity client for the content routes; tool paths never call it.
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
 function readLocale(base: "src/locales" | "public/locales", lang: string) {
 	const path = fileURLToPath(new URL(`../../../${base}/${lang}/common.json`, import.meta.url))

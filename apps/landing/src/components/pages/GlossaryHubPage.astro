@@ -3,20 +3,11 @@ import "@/styles/globals.css";
 import ContentLayout from "@/layouts/ContentLayout.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import ContentSearch from "@/components/shared/ContentSearch";
-import { sanityClient } from "sanity:client";
 import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
+import { getGlossaryTerms } from "@/lib/contentCollections";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
-
-type GlossaryTermEntry = {
-  term: string;
-  slug: string;
-  definition: string;
-  category?: string;
-  market?: string;
-  topicKey?: string;
-};
 
 interface Props {
   locale: Lang;
@@ -26,27 +17,8 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}/glossary`);
 
-const terms = await sanityClient.fetch<GlossaryTermEntry[]>(
-  `*[_type == "glossaryTerm" && locale == $locale] | order(term asc) { term, "slug": slug.current, definition, category, market, topicKey }`,
-  { locale },
-);
-
-const rankTermForRouteSelection = (term: GlossaryTermEntry): number => (term.market ? 0 : 1);
-
-const dedupedTerms = Array.from(
-  terms
-    .reduce((acc, term, index) => {
-      const key = term.topicKey || term.slug || `term-${index}`;
-      const current = acc.get(key);
-
-      if (!current || rankTermForRouteSelection(term) > rankTermForRouteSelection(current)) {
-        acc.set(key, term);
-      }
-
-      return acc;
-    }, new Map<string, GlossaryTermEntry>())
-    .values(),
-);
+// Alphabetical by term.
+const terms = (await getGlossaryTerms()).filter((term) => term.locale === locale);
 
 function normalizeLetter(value: string): string {
   const firstChar = value.charAt(0).toUpperCase();
@@ -59,11 +31,11 @@ function normalizeLetter(value: string): string {
   return "#";
 }
 
-const grouped: Record<string, typeof dedupedTerms> = {};
+const grouped: Record<string, typeof terms> = {};
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const glossarySections = [...alphabet, "#"];
 
-for (const term of dedupedTerms) {
+for (const term of terms) {
   const letter = normalizeLetter(term.term);
   if (!grouped[letter]) {
     grouped[letter] = [];
@@ -75,7 +47,7 @@ const glossaryPrefix = `/${locale}/glossary`;
 const categoryLabel = (category?: string) =>
   category ? t(`category.${category}`, { defaultValue: category }) : undefined;
 
-const searchItems = dedupedTerms.map((term) => ({
+const searchItems = terms.map((term) => ({
   title: term.term,
   description: term.definition,
   href: `${glossaryPrefix}/${term.slug}`,
@@ -88,7 +60,7 @@ const definedTermSetSchema = {
   name: t("glossary.hub.title"),
   description: t("glossary.hub.schemaDescription"),
   url: `https://wonder.money${glossaryPrefix}`,
-  hasDefinedTerm: dedupedTerms.map((term) => ({
+  hasDefinedTerm: terms.map((term) => ({
     "@type": "DefinedTerm",
     name: term.term,
     description: term.definition,
@@ -143,7 +115,7 @@ const definedTermSetSchema = {
     </nav>
 
     {
-      dedupedTerms.length === 0 ? (
+      terms.length === 0 ? (
         <p class="mt-12 max-w-[40rem] rounded-card border border-border bg-paper-2 p-8 text-lg text-muted-foreground">
           {t("glossary.hub.comingSoon")}
         </p>

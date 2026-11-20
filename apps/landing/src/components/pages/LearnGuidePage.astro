@@ -6,19 +6,14 @@ import CTABanner from "@/components/shared/CTABanner";
 import EmailCaptureForm from "@/components/shared/EmailCaptureForm";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import FigureCards from "@/components/shared/FigureCards.astro";
-import GuideSections from "@/components/learning/GuideSections.astro";
-import { sanityClient } from "sanity:client";
-import { buildOutline, portableTextToPlain, readingMinutes } from "@/lib/articleOutline";
-import { guideKeepReading, type SiblingGuide } from "@/lib/figureCards";
+import GuideBody from "@/components/learning/GuideBody.astro";
+import { getEntry, render } from "astro:content";
+import { readingMinutes } from "@/lib/articleOutline";
+import { getGuides, type GuideEntry } from "@/lib/contentCollections";
+import { guideKeepReading } from "@/lib/figureCards";
 import { figureForGuide } from "@/lib/hairline/articleFigures";
-import {
-  normalizeGuideSections,
-  type GuideSection,
-  type PortableTextBlock,
-} from "@/lib/learningContent";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
-import type { GuideEntry } from "@/lib/pageStaticPaths";
 
 interface Props {
   locale: Lang;
@@ -39,39 +34,15 @@ const formatDate = (dateValue?: string) => (dateValue ? formatMonthYear(locale, 
 const publishedDate = formatDate(guide.publishedAt);
 const reviewedDate = formatDate(guide.lastReviewedAt);
 
-const guideSections = (guide.sections ?? []) as GuideSection[];
-const guideBodyBlocks = (guide.body ?? []) as PortableTextBlock[];
+const entry = await getEntry("guides", guide.id);
+if (!entry) throw new Error(`No guide at src/content/guides/${guide.id}.md`);
+const { Content } = await render(entry);
 
-// A guide written as one body (no sections) reads as one untitled section: the
-// "Overview" heading normalizeGuideSections gives it is English on every locale.
-const sections = normalizeGuideSections({
-  sections: guideSections,
-  body: guideBodyBlocks,
-}).map((section) => (guideSections.length > 0 ? section : { ...section, title: undefined }));
+const readMinutes = readingMinutes([guide.excerpt, guide.bodyText]);
 
-const outline = buildOutline(
-  sections
-    .filter((section) => section._type === "concept" && (section.body?.length ?? 0) > 0)
-    .map((section) => section.title),
-);
+const glossaryTerms = guide.relatedTerms;
 
-const readMinutes = readingMinutes([
-  guide.excerpt ?? "",
-  ...sections.flatMap((section) => {
-    if (section._type === "concept") return [portableTextToPlain(section.body ?? [])];
-    if (section._type === "workedExample") return [...(section.steps ?? []), section.result ?? ""];
-    if (section._type === "warning") return [section.body ?? ""];
-    if (section._type === "faq") return (section.items ?? []).flatMap((item) => [item.question, item.answer]);
-    return [];
-  }),
-]);
-
-const glossaryTerms = (guide.relatedTerms ?? []).filter((term) => term.slug && term.locale === locale);
-
-const siblings = await sanityClient.fetch<SiblingGuide[]>(
-  `*[_type == "guide" && locale == $locale && slug.current != $slug] { title, "slug": slug.current, category, publishedAt }`,
-  { locale, slug: guide.slug },
-);
+const siblings = (await getGuides()).filter((sibling) => sibling.locale === locale && sibling.slug !== guide.slug);
 const keepReading = guideKeepReading({
   locale,
   t,
@@ -117,7 +88,6 @@ const articleSchema = {
         ...(guide.category ? [{ label: t(`category.${guide.category}`, { defaultValue: guide.category }) }] : []),
       ]}
       readMinutes={readMinutes}
-      outline={outline}
       figure={figureForGuide(guide.slug)}
     >
       {(publishedDate || reviewedDate) && (
@@ -134,8 +104,10 @@ const articleSchema = {
     </ArticleHero>
 
     <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
-      {sections.length > 0 && (
-        <GuideSections locale={locale} sections={sections} references={guide.references ?? []} outline={outline} />
+      {guide.bodyText && (
+        <GuideBody references={guide.references}>
+          <Content />
+        </GuideBody>
       )}
 
       {glossaryTerms.length > 0 && (

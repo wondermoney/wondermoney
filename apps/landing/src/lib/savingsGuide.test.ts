@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   SAVINGS_COLUMN_IDS,
   SAVINGS_GUIDE_RELATED_ROUTE_IDS,
@@ -14,8 +14,6 @@ import { buildResourcesHub } from "./resourcesHub";
 import { buildAlternateLinks, SUPPORTED_LANGS, toLocalizedPath, toLocalizedPathname } from "./routes";
 import { isSitemapPage } from "./sitemap";
 import { getTranslations } from "./translations";
-
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
 
 describe("savings guide table", () => {
   it("gives every product exactly one cell per column, in row order", () => {
