@@ -15,7 +15,7 @@ prerendered.
 src/pages/             # Root redirect and mirrored locale route files
 src/components/pages/  # Shared page archetypes/composition
 src/components/shared/ # Layout, SEO, structured data
-src/lib/               # Locale, routes, static paths, Sanity clients
+src/lib/               # Locale, routes, static paths, Sanity queries
 src/content/           # Local content/config
 src/locales/           # Translation catalogues (mirrored in public/locales/)
 scripts/               # Offer and claims alignment checks, and the data-snapshot refresh scripts
@@ -44,9 +44,9 @@ public/                # Static assets
 - Public claims and the offer are guarded: `src/lib/claimsAlignment.test.ts` and
   `scripts/check-offer-alignment.mjs` (both run by `pnpm test`) fail on unsupported product
   claims or a stale offer in any locale.
-- Follow nearby formatting: `prettier` and `prettier-plugin-astro` are installed, but there is no
-  Prettier config or format script, and existing Astro/TS style is mixed. Do not reformat files
-  you are not otherwise changing.
+- Follow nearby formatting: the site has no formatter (no Prettier config or format script, as in
+  `apps/docs` and `apps/mobile`), and existing Astro/TS style is mixed. Do not reformat files you
+  are not otherwise changing.
 - `pt` copy is European Portuguese and addresses the reader as **tu** ("Começa grátis", "as tuas
   contas"), never "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples).
 - Analytics IDs in `src/lib/gtm.ts` and `src/lib/posthog.ts` are public client keys, and

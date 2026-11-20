@@ -65,7 +65,7 @@
       "id": "sanity",
       "heading": { "en": "Sanity", "pt": "Sanity", "es": "Sanity" },
       "purpose": "Content management for marketing and editorial content.",
-      "evidence": "lp depends on @sanity/astro, @sanity/client, @sanity/image-url.",
+      "evidence": "lp depends on @sanity/astro, @sanity/client.",
       "personalData": "None — public editorial content only.",
       "location": "European Union"
     },
