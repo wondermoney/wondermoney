@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  computeVehicleTax, instalmentMonths, IUC_TABLES, transitionalMonths2027, VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS,
-  type VehicleTaxInput,
+  computeVehicleTax, computeVehicleTaxes, instalmentMonths, IUC_TABLES, transitionalMonths2027, VEHICLE_DETAILS_EXAMPLE,
+  VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS, type VehicleDetails, type VehicleTaxInput,
 } from "./vehicleTax";
 
 function resultFor(overrides: Partial<VehicleTaxInput> = {}) {
@@ -186,5 +186,127 @@ describe("diesel surcharge (adicional de IUC)", () => {
   it("cites art. 94 of the 2026 State Budget, which keeps the surcharge in force", () => {
     expect(IUC_TABLES.taxYear).toBe(2026);
     expect(IUC_TABLES.budgetSource).toBe("https://diariodarepublica.pt/dr/detalhe/lei/73-a-2025-993270096");
+  });
+});
+
+describe("IUC across several vehicles of one taxpayer", () => {
+  const details = (overrides: Partial<VehicleDetails> = {}): VehicleDetails => ({ ...VEHICLE_DETAILS_EXAMPLE, ...overrides });
+  // 158.29 (diesel, March), 39.95 (category A petrol, March) and 426.83 (petrol with the additional rate, October).
+  const family = [
+    details(),
+    details({ fuel: "petrol", cc: 1200, co2: NaN, year: 2000, month: 3 }),
+    details({ fuel: "petrol", cc: 1999, co2: 230, year: 2021, month: 10 }),
+  ];
+  const sum = (amounts: number[]) => amounts.reduce((total, amount) => total + Math.round(amount * 100), 0) / 100;
+
+  it.each<[string, Partial<VehicleDetails>, number]>([
+    ["the worked example", {}, 0],
+    ["the worked example with other IUC", {}, 400],
+    ["a category A diesel", { fuel: "diesel", cc: 1999, year: 1995, month: 5 }, 0],
+    ["a cheap category A petrol at the 100 euro threshold", { fuel: "petrol", cc: 998, year: 1992, month: 1 }, 87.45],
+    ["a cheap category A petrol over the threshold", { fuel: "petrol", cc: 998, year: 1992, month: 1 }, 87.46],
+    ["a large category B car", { cc: 3000, co2: 270 }, 0],
+    ["a 2007 NEDC car", { fuel: "petrol", cc: 1250, co2: 120, standard: "nedc", year: 2007, month: 7 }, 12.5],
+    ["an electric car", { fuel: "electric", cc: NaN, co2: NaN, year: 2022 }, 900],
+  ])("gives one vehicle exactly the single-car result: %s", (_, overrides, otherIucEuros) => {
+    const vehicle = details(overrides);
+    const { vehicles, summary } = computeVehicleTaxes([vehicle], otherIucEuros);
+    const single = computeVehicleTax({ ...vehicle, otherIucEuros });
+    expect(vehicles).toEqual([single]);
+    if (!single.ok) throw new Error("expected a valid example");
+    expect(summary).toMatchObject({
+      annualTax: single.result.annualTax,
+      totalAnnualTax: single.result.totalAnnualTax,
+      monthlyProvision: single.result.monthlyProvision,
+    });
+    expect(summary?.schedule2028.map(({ month, amount }) => ({ month, amount }))).toEqual(single.result.schedule2028);
+    expect(summary?.schedule2027.map(({ month, amount }) => ({ month, amount }))).toEqual(single.result.schedule2027);
+  });
+
+  it("starts from the worked example's car", () => {
+    expect({ ...VEHICLE_DETAILS_EXAMPLE, otherIucEuros: 0 }).toEqual(VEHICLE_TAX_EXAMPLE);
+  });
+
+  it("keeps each car's own tax and makes the total the sum of the cars", () => {
+    const { vehicles, summary } = computeVehicleTaxes(family, 0);
+    const annual = vehicles.map((calculation) => (calculation.ok ? calculation.result.annualTax : NaN));
+    expect(annual).toEqual([158.29, 39.95, 426.83]);
+    family.forEach((vehicle, index) => {
+      const alone = computeVehicleTax({ ...vehicle, otherIucEuros: 0 });
+      expect(alone.ok && alone.result.annualTax).toBe(annual[index]);
+    });
+    expect(summary?.annualTax).toBe(625.07);
+    expect(summary?.annualTax).toBe(sum(annual));
+    expect(summary?.totalAnnualTax).toBe(625.07);
+    expect(summary?.monthlyProvision).toBe(52.09);
+  });
+
+  it("applies the instalment thresholds to the taxpayer's total, not to each car", () => {
+    const { vehicles } = computeVehicleTaxes(family, 0);
+    // 39.95 euros alone is one April payment; with the family's 625.07 it is split into three.
+    const alone = computeVehicleTax({ ...family[1], otherIucEuros: 0 });
+    expect(alone.ok && alone.result.schedule2028.map((row) => row.month)).toEqual([4]);
+    for (const calculation of vehicles) {
+      if (!calculation.ok) throw new Error("expected valid vehicles");
+      expect(calculation.result.totalAnnualTax).toBe(625.07);
+      expect(calculation.result.schedule2028.map((row) => row.month)).toEqual([4, 7, 10]);
+      expect(calculation.result.schedule2027.map((row) => row.month)).toEqual([7, 10]);
+    }
+  });
+
+  it("groups the payment months and adds up each month's amounts", () => {
+    const { summary } = computeVehicleTaxes(family, 0);
+    expect(summary?.due2026).toEqual([
+      { month: 3, amount: 198.24, vehicles: [0, 1] },
+      { month: 10, amount: 426.83, vehicles: [2] },
+    ]);
+    expect(summary?.schedule2027).toEqual([
+      { month: 7, amount: 312.52, vehicles: [0, 1, 2] },
+      { month: 10, amount: 312.55, vehicles: [0, 1, 2] },
+    ]);
+    expect(summary?.schedule2028).toEqual([
+      { month: 4, amount: 208.34, vehicles: [0, 1, 2] },
+      { month: 7, amount: 208.34, vehicles: [0, 1, 2] },
+      { month: 10, amount: 208.39, vehicles: [0, 1, 2] },
+    ]);
+    for (const months of [summary!.due2026, summary!.schedule2027, summary!.schedule2028]) {
+      expect(sum(months.map((row) => row.amount))).toBe(625.07);
+    }
+  });
+
+  it("sorts the 2026 months through the year whatever the order of the cars", () => {
+    const { summary } = computeVehicleTaxes([family[2], details({ month: 1 }), family[1]], 0);
+    expect(summary?.due2026.map((row) => [row.month, row.vehicles])).toEqual([[1, [1]], [3, [2]], [10, [0]]]);
+  });
+
+  it("leaves exempt cars out of the payment months but keeps them in the list", () => {
+    const electric = details({ fuel: "electric", cc: NaN, co2: NaN, year: 2022, month: 6 });
+    const { vehicles, summary } = computeVehicleTaxes([family[1], electric], 0);
+    expect(vehicles[1]).toMatchObject({ ok: true, result: { exempt: true, annualTax: 0, totalAnnualTax: 39.95 } });
+    expect(summary?.due2026).toEqual([{ month: 3, amount: 39.95, vehicles: [0] }]);
+    expect(summary?.schedule2028).toEqual([{ month: 4, amount: 39.95, vehicles: [0] }]);
+  });
+
+  it("adds the other IUC to the thresholds but schedules only the cars listed", () => {
+    const { summary } = computeVehicleTaxes(family.slice(0, 2), 400); // 198.24 listed, 598.24 in all
+    expect(summary).toMatchObject({ annualTax: 198.24, totalAnnualTax: 598.24 });
+    expect(summary?.schedule2027.map((row) => row.month)).toEqual([7, 10]);
+    expect(sum(summary!.schedule2028.map((row) => row.amount))).toBe(198.24);
+    expect(summary?.schedule2028.map((row) => row.month)).toEqual([4, 7, 10]);
+  });
+
+  it("returns no summary while a car or the other IUC is invalid, and still prices the valid cars", () => {
+    const withInvalid = computeVehicleTaxes([family[0], details({ cc: 0 })], 0);
+    expect(withInvalid.summary).toBeNull();
+    expect(withInvalid.vehicles[0]).toMatchObject({ ok: true, result: { annualTax: 158.29 } });
+    expect(withInvalid.vehicles[1]).toEqual({ ok: false, errors: { cc: "zero" } });
+
+    const badOther = computeVehicleTaxes(family, -1);
+    expect(badOther.summary).toBeNull();
+    expect(badOther.otherIucError).toBe("negative");
+    // The per-car errors never carry the shared field.
+    expect(badOther.vehicles.every((calculation) => calculation.ok)).toBe(true);
+    expect(computeVehicleTaxes(family, Number.NaN).otherIucError).toBe("required");
+    expect(computeVehicleTaxes([], 0).summary).toBeNull();
   });
 });

@@ -3408,7 +3408,14 @@
         "dieselSurcharge": "Adicional de gasóleo (não multiplicado pelo coeficiente)",
         "scheduleTitle2028": "A partir de 2028: calendário de pagamento",
         "totalAnnualTax": "IUC total para os limites das prestações",
-        "scheduleShareNote": "Os meses seguem o teu total de {{total}} em todos os veículos; os valores são a parte deste automóvel em cada prestação."
+        "scheduleShareNote": "Os meses seguem o teu total de {{total}} em todos os veículos; os valores são a parte deste automóvel em cada prestação.",
+        "annualTaxAll": "IUC anual estimado, todos os veículos",
+        "perVehicleTitle": "IUC por veículo",
+        "vehicleRow": "{{name}} (categoria {{category}})",
+        "vehicleRowExempt": "{{name}} (isento)",
+        "scheduleTitle2026": "2026: a pagar no mês do aniversário da matrícula de cada carro",
+        "scheduleTotalNote": "A partir de 2027 os meses seguem o teu total de {{total}} nestes veículos; cada valor soma a parte de todos os carros.",
+        "scheduleTotalOtherNote": "A partir de 2027 os meses seguem o teu total de {{total}}, incluindo o outro IUC que indicaste; os valores cobrem só os veículos desta lista."
       },
       "guide": {
         "exampleTitle": "Exemplo prático",
@@ -3427,7 +3434,7 @@
         "scopeUnsupported": "Não suportado: veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
         "assumptionsTitle": "Pressupostos",
         "assumptionYear": "As taxas são as tabelas de {{taxYear}} do Código do IUC (artigos 9.º e 10.º), na redação da {{law}}. O Portal das Finanças não indica alterações posteriores a estas taxas.",
-        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula, que o preâmbulo do Decreto-Lei n.º 161/2026 confirma ser a regra atualmente em vigor. Os calendários de 2027 e 2028 mostram a parte deste automóvel em cada prestação; os meses seguem o total de todos os teus veículos, que podes indicar como outro IUC (a lei aplica os limites a esse total). Sem isso, o simulador assume que este é o teu único veículo. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
+        "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula, que o preâmbulo do Decreto-Lei n.º 161/2026 confirma ser a regra atualmente em vigor. A partir de 2027 o imposto é liquidado por contribuinte, sobre todos os seus veículos: adiciona cada um dos teus carros e indica o IUC dos outros veículos como outro IUC, para que os meses das prestações sigam o teu total (a lei aplica os limites a esse total). Os calendários de 2027 e 2028 mostram o valor de cada mês para os carros que adicionaste; com um só carro, a parte dele em cada prestação. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
         "assumptionEducational": "Esta é uma estimativa educativa, não aconselhamento fiscal. Conta o valor da nota de cobrança da Autoridade Tributária.",
         "sourcesTitle": "Fontes",
         "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
@@ -3441,7 +3448,16 @@
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
       "nextStepCta": "Reserva um doze avos do teu imposto automóvel anual",
-      "otherIucHelp": "O IUC anual de todos os teus outros veículos, em euros. A partir de 2027 os meses de pagamento dependem do total de todos os veículos. Indica 0 se este é o teu único veículo."
+      "otherIucHelp": "O IUC anual dos veículos que não adicionaste acima, como motociclos ou veículos de mercadorias, em euros. A partir de 2027 os meses de pagamento dependem do total de todos os veículos. Indica 0 se adicionaste todos os teus veículos.",
+      "vehicles": {
+        "label": "Carro {{n}}",
+        "name": "Nome (opcional)",
+        "add": "Adicionar outro veículo",
+        "removeShort": "Remover",
+        "remove": "Remover {{name}}",
+        "removed": "Veículo removido: {{name}}.",
+        "max": "Podes adicionar até {{max}} veículos."
+      }
     },
     "propertyCapitalGains": {
       "title": "Simulador de mais-valias na venda de casa",

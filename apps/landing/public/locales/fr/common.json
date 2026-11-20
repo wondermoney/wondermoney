@@ -3408,7 +3408,14 @@
         "dieselSurcharge": "Supplément diesel (non multiplié par le coefficient)",
         "scheduleTitle2028": "À partir de 2028 : calendrier de paiement",
         "totalAnnualTax": "IUC total pour les seuils des échéances",
-        "scheduleShareNote": "Les mois suivent votre total de {{total}} sur tous les véhicules ; les montants sont la part de cette voiture dans chaque échéance."
+        "scheduleShareNote": "Les mois suivent votre total de {{total}} sur tous les véhicules ; les montants sont la part de cette voiture dans chaque échéance.",
+        "annualTaxAll": "IUC annuel estimé, tous les véhicules",
+        "perVehicleTitle": "IUC par véhicule",
+        "vehicleRow": "{{name}} (catégorie {{category}})",
+        "vehicleRowExempt": "{{name}} (exonéré)",
+        "scheduleTitle2026": "2026 : à payer le mois de l'anniversaire de l'immatriculation de chaque voiture",
+        "scheduleTotalNote": "À partir de 2027, les mois suivent votre total de {{total}} sur ces véhicules ; chaque montant additionne la part de toutes les voitures.",
+        "scheduleTotalOtherNote": "À partir de 2027, les mois suivent votre total de {{total}}, y compris l'autre IUC saisi ; les montants ne couvrent que les véhicules de cette liste."
       },
       "guide": {
         "exampleTitle": "Exemple chiffré",
@@ -3427,7 +3434,7 @@
         "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
         "assumptionsTitle": "Hypothèses",
         "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
-        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation, que le préambule du décret-loi n.º 161/2026 confirme comme la règle en vigueur. Les calendriers de 2027 et 2028 montrent la part de cette voiture dans chaque échéance ; les mois suivent le total de tous vos véhicules, que vous pouvez saisir comme autre IUC (la loi applique ses seuils à ce total). Sans cela, le calculateur suppose que c'est votre seul véhicule. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
+        "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation, que le préambule du décret-loi n.º 161/2026 confirme comme la règle en vigueur. À partir de 2027, l'impôt est établi par contribuable, sur l'ensemble de ses véhicules : ajoutez chacune de vos voitures et saisissez l'IUC de vos autres véhicules comme autre IUC, pour que les mois des échéances suivent votre total (la loi applique ses seuils à ce total). Les calendriers de 2027 et 2028 montrent le montant de chaque mois pour les voitures ajoutées ; avec une seule voiture, sa part dans chaque échéance. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
         "assumptionEducational": "Il s'agit d'une estimation pédagogique, pas d'un conseil fiscal. Seul le montant de l'avis de l'administration fiscale fait foi.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
@@ -3441,7 +3448,16 @@
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
       "nextStepCta": "Mettez de côté un douzième de votre taxe auto annuelle",
-      "otherIucHelp": "L'IUC annuel de tous vos autres véhicules, en euros. À partir de 2027, les mois de paiement dépendent du total de tous vos véhicules. Indiquez 0 si c'est votre seul véhicule."
+      "otherIucHelp": "L'IUC annuel des véhicules que vous n'avez pas ajoutés ci-dessus, comme les motos ou les véhicules utilitaires, en euros. À partir de 2027, les mois de paiement dépendent du total de tous vos véhicules. Indiquez 0 si vous avez ajouté tous vos véhicules.",
+      "vehicles": {
+        "label": "Voiture {{n}}",
+        "name": "Nom (facultatif)",
+        "add": "Ajouter un autre véhicule",
+        "removeShort": "Supprimer",
+        "remove": "Supprimer {{name}}",
+        "removed": "Véhicule supprimé : {{name}}.",
+        "max": "Vous pouvez ajouter jusqu'à {{max}} véhicules."
+      }
     },
     "propertyCapitalGains": {
       "title": "Calculateur de plus-values sur la vente d'un logement",

@@ -155,6 +155,12 @@ const checkNumber = (value: number, max: number): FieldError | undefined => {
   return value > max ? "tooLarge" : undefined;
 };
 
+function otherIucError(value: number): FieldError | undefined {
+  if (Number.isNaN(value)) return "required";
+  if (value < 0) return "negative";
+  return value > VEHICLE_TAX_LIMITS.otherIuc ? "tooLarge" : undefined;
+}
+
 export function computeVehicleTax(input: VehicleTaxInput) {
   const errors: Partial<Record<VehicleTaxField, FieldError>> = {};
   const electric = input.fuel === "electric";
@@ -177,9 +183,8 @@ export function computeVehicleTax(input: VehicleTaxInput) {
   } else if (isCategoryA) {
     errors.fuel = "electricCategoryA";
   }
-  if (Number.isNaN(input.otherIucEuros)) errors.otherIucEuros = "required";
-  else if (input.otherIucEuros < 0) errors.otherIucEuros = "negative";
-  else if (input.otherIucEuros > VEHICLE_TAX_LIMITS.otherIuc) errors.otherIucEuros = "tooLarge";
+  const otherError = otherIucError(input.otherIucEuros);
+  if (otherError) errors.otherIucEuros = otherError;
   if (Object.keys(errors).length > 0) return { ok: false as const, errors };
 
   const category: VehicleTaxCategory = isCategoryA ? "A" : "B";
@@ -243,6 +248,88 @@ export function computeVehicleTax(input: VehicleTaxInput) {
       schedule2027: split(transitionalMonths2027),
       /** From 2028: settled by April and paid in April, July and October by instalment thresholds. */
       schedule2028: split(instalmentMonths),
+    },
+  };
+}
+
+/** One vehicle's own details: everything the per-car calculation reads except the taxpayer's other IUC. */
+export type VehicleDetails = Omit<VehicleTaxInput, "otherIucEuros">;
+export type VehicleTaxCalculation = ReturnType<typeof computeVehicleTax>;
+/** The worked example's car, which is also what a newly added vehicle starts from. */
+export const VEHICLE_DETAILS_EXAMPLE: VehicleDetails = {
+  fuel: VEHICLE_TAX_EXAMPLE.fuel,
+  cc: VEHICLE_TAX_EXAMPLE.cc,
+  co2: VEHICLE_TAX_EXAMPLE.co2,
+  standard: VEHICLE_TAX_EXAMPLE.standard,
+  year: VEHICLE_TAX_EXAMPLE.year,
+  month: VEHICLE_TAX_EXAMPLE.month,
+};
+/** How many vehicles the multi-vehicle mode accepts. */
+export const MAX_VEHICLES = 10;
+
+export interface PaymentMonth {
+  month: number;
+  /** Euros due that month for the vehicles listed. */
+  amount: number;
+  /** Indexes into the vehicles passed in, in input order. */
+  vehicles: number[];
+}
+
+function groupByMonth(entries: { month: number; cents: number; vehicle: number }[]): PaymentMonth[] {
+  const byMonth = new Map<number, { cents: number; vehicles: number[] }>();
+  for (const entry of entries) {
+    const group = byMonth.get(entry.month) ?? { cents: 0, vehicles: [] };
+    group.cents += entry.cents;
+    if (!group.vehicles.includes(entry.vehicle)) group.vehicles.push(entry.vehicle);
+    byMonth.set(entry.month, group);
+  }
+  return [...byMonth.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([month, group]) => ({ month, amount: group.cents / 100, vehicles: group.vehicles }));
+}
+
+const toCents = (euros: number) => Math.round(euros * 100);
+
+/**
+ * IUC for every vehicle of one taxpayer. Each vehicle goes through computeVehicleTax unchanged; its other IUC is the
+ * tax of the other vehicles listed plus `otherIucEuros` (vehicles the calculator cannot price), so the 2027 and 2028
+ * instalment months follow the taxpayer's total (Decreto-Lei n.º 161/2026, arts. 6(1) and 17(3)). With one vehicle the
+ * result is exactly computeVehicleTax({ ...vehicle, otherIucEuros }).
+ */
+export function computeVehicleTaxes(vehicles: readonly VehicleDetails[], otherIucEuros: number) {
+  const otherError = otherIucError(otherIucEuros);
+  const own = vehicles.map((vehicle) => computeVehicleTax({ ...vehicle, otherIucEuros: 0 }));
+  const ownCents = own.map((calculation) => (calculation.ok ? toCents(calculation.result.annualTax) : 0));
+  const listedCents = ownCents.reduce((sum, cents) => sum + cents, 0);
+  const extraCents = otherError ? 0 : toCents(otherIucEuros);
+  const results: VehicleTaxCalculation[] = vehicles.map((vehicle, index) =>
+    own[index].ok
+      ? computeVehicleTax({ ...vehicle, otherIucEuros: (listedCents - ownCents[index] + extraCents) / 100 })
+      : own[index],
+  );
+
+  const valid = results.every((calculation) => calculation.ok);
+  if (otherError || !valid || results.length === 0) {
+    return { vehicles: results, otherIucError: otherError, summary: null };
+  }
+  const ok = results.flatMap((calculation, vehicle) => (calculation.ok ? [{ result: calculation.result, vehicle }] : []));
+  const scheduled = (pick: (result: (typeof ok)[number]["result"]) => { month: number; amount: number }[]) =>
+    groupByMonth(ok.flatMap(({ result, vehicle }) =>
+      pick(result).map((row) => ({ month: row.month, cents: toCents(row.amount), vehicle })),
+    ));
+  return {
+    vehicles: results,
+    otherIucError: undefined,
+    summary: {
+      /** The vehicles listed. */
+      annualTax: listedCents / 100,
+      /** The vehicles listed plus the other IUC entered: what the instalment thresholds apply to. */
+      totalAnnualTax: (listedCents + extraCents) / 100,
+      monthlyProvision: Math.round(listedCents / 12) / 100,
+      /** 2026: each vehicle in the month of its registration anniversary. Exempt vehicles pay nothing. */
+      due2026: scheduled((result) => (result.annualTax > 0 ? [{ month: result.dueMonth, amount: result.annualTax }] : [])),
+      schedule2027: scheduled((result) => result.schedule2027),
+      schedule2028: scheduled((result) => result.schedule2028),
     },
   };
 }
