@@ -4554,6 +4554,230 @@
           "budgetBody": "Calcula quanto podes deixar na poupança."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Comparador de corretoras em Portugal: custódia, transação, câmbio e proteção",
+      "shortName": "Comparador de corretoras",
+      "subtitle": "Uma tabela datada do que as corretoras online e os bancos portugueses cobram para investir, lida no preçário de cada um, com o custo anual de três perfis de investidor.",
+      "description": "Compara comissões de custódia, transação e câmbio, juros sobre o saldo e proteção do investidor nas corretoras disponíveis em Portugal, com cenários de custo anual.",
+      "pageTitle": "Comparador de Corretoras em Portugal: Custódia, Comissões e Câmbio",
+      "pageDescription": "Comissões de custódia, de compra de ETF e de ações americanas, câmbio, juros sobre o saldo, proteção do investidor e reporte fiscal em Portugal, em corretoras e bancos para residentes, com o custo anual de três perfis de investidor.",
+      "review": {
+        "checked": "Comissões verificadas a {{date}}",
+        "confirm": "As comissões mudam. Confirma o preçário em vigor da corretora antes de abrires conta ou dares uma ordem.",
+        "source": "Cada linha foi lida no preçário publicado pela própria corretora, com o link na tabela. Nenhum site de comparação foi usado como fonte.",
+        "staleTitle": "Esta revisão pode estar desatualizada",
+        "stale": "Estas comissões foram verificadas pela última vez a {{date}}, há mais de quatro meses. Algumas podem ter mudado: confirma o preçário de cada corretora."
+      },
+      "calculator": {
+        "title": "Custo anual estimado",
+        "intro": "Escolhe um perfil ou altera os valores. A lista mostra lado a lado o custo estimado de um ano em cada corretora, do mais baixo para o mais alto, com o cálculo por baixo de cada uma.",
+        "profile": "Perfil de investidor",
+        "assumptions": "Pressupostos: as ordens repartem-se ao longo do ano; as ordens nos EUA são convertidas de euros a {{rate}} dólares por euro (taxa de referência do BCE de {{rateDate}}); uma ação americana custa {{price}}, para as comissões cobradas por ação; a custódia é cobrada sobre o valor indicado durante todo o ano; o IVA é o do continente, 23%. Não incluem spreads, taxas de bolsa e regulatórias fora do preçário, nem os impostos sobre os teus ganhos."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Investidor mensal em ETF",
+          "description": "12 compras de 200 € de um ETF cotado na UE, 2400 € investidos."
+        },
+        "occasionalStocks": {
+          "label": "Comprador ocasional de ações",
+          "description": "6 compras de 1000 € de ações americanas, 6000 € investidos."
+        },
+        "largePortfolio": {
+          "label": "Carteira maior",
+          "description": "50 000 € investidos, com 4 compras de ETF de 2500 € por ano."
+        },
+        "custom": "Valores teus: nenhum perfil selecionado."
+      },
+      "fields": {
+        "market": "O que compras",
+        "trades": "Ordens de compra por ano",
+        "tradeAmount": "Valor por ordem",
+        "portfolio": "Valor investido",
+        "savingsPlan": "Usar o plano de investimento em ETF da corretora, quando o publica"
+      },
+      "markets": {
+        "etfEu": "ETF cotado na UE",
+        "usStock": "Ação americana"
+      },
+      "help": {
+        "trades": "Ordens inteiras, repartidas por 12 meses.",
+        "portfolio": "Valor médio na conta ao longo do ano, para a comissão de custódia."
+      },
+      "errors": {
+        "trades": "Indica um número inteiro de ordens entre 0 e {{max}}.",
+        "amount": "Indica um valor entre 0 e {{max}}."
+      },
+      "result": {
+        "title": "Custo por corretora, do mais baixo para o mais alto",
+        "perYear": "por ano",
+        "invalid": "Corrige os campos acima para veres a estimativa.",
+        "trading": "Ordens ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Plano de investimento ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Ordens: nenhuma",
+        "fx": "Câmbio ({{pct}} de {{amount}}): {{total}}",
+        "custody": "Custódia e manutenção: {{total}}",
+        "missing": "Não contado, por não estar publicado: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Inclui {{amount}} de Imposto do Selo ({{pct}})",
+          "vat": "Inclui {{amount}} de IVA ({{pct}})"
+        },
+        "fees": {
+          "trading": "comissão da ordem",
+          "fx": "câmbio",
+          "custody": "custódia"
+        },
+        "custodyMarket": "Custódia e manutenção: {{total}}, incluindo {{market}} de comissão por bolsa",
+        "feePerOrder": "Comissão por ordem: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} por ação",
+        "min": "mín. {{amount}}",
+        "max": "máx. {{amount}}",
+        "maxPct": "máx. {{pct}} da ordem",
+        "freeUpTo": "sem comissão até {{amount}} em ordens por mês; acima disso, {{fee}}",
+        "noFee": "sem comissão",
+        "noCustody": "sem comissão",
+        "period": {
+          "month": "{{fee}} por mês",
+          "quarter": "{{fee}} por trimestre",
+          "semester": "{{fee}} por semestre",
+          "year": "{{fee}} por ano"
+        },
+        "above": "sobre o valor acima de {{amount}}",
+        "tierUpTo": "{{fee}} até {{amount}}",
+        "tierAbove": "{{fee}} acima de {{amount}}",
+        "freeOrders": "{{count}} ordem por mês sem comissão; depois, {{fee}}"
+      },
+      "table": {
+        "title": "Comissões por corretora",
+        "intro": "Corretoras por ordem alfabética. Uma comissão que a corretora não indica no próprio preçário aparece como não publicada.",
+        "caption": "Comissões de corretoras para investidores em Portugal, com a fonte e a data de verificação",
+        "columns": {
+          "broker": "Corretora",
+          "custody": "Custódia",
+          "etfEu": "Ordem de ETF na UE",
+          "usStock": "Ordem de ação americana",
+          "fx": "Câmbio",
+          "cash": "Juros sobre o saldo",
+          "protection": "Proteção do investidor",
+          "tax": "Impostos em Portugal",
+          "source": "Fonte"
+        },
+        "notPublished": "Não publicado",
+        "regulator": "Supervisor: {{name}}",
+        "venue": "Em {{venue}}",
+        "plan": "Plano de investimento: {{fee}}",
+        "noFx": "Sem comissão",
+        "noInterest": "Nenhum",
+        "interest": "{{pct}} por ano",
+        "interestUpTo": "até {{amount}}",
+        "protection": "{{scheme}}: até {{amount}}",
+        "deposit": "Saldo: {{scheme}}, até {{amount}}",
+        "checked": "Verificado a {{date}}",
+        "interestAbove": "sobre o saldo acima de {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} da perda, até {{amount}}",
+        "marketFee": "Acresce {{fee}} por ano por cada bolsa usada (máx. {{pct}} do valor da conta)",
+        "tax": {
+          "stampDuty": "Acresce Imposto do Selo de {{pct}} sobre: {{fees}}",
+          "vat": "Acresce IVA de {{pct}} sobre: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Retém ou reporta impostos em Portugal",
+          "no": "Sem reporte fiscal em Portugal: declaras tu",
+          "unknown": "Não indicado"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Alemanha",
+        "IE": "Irlanda",
+        "PL": "Polónia",
+        "EE": "Estónia"
+      },
+      "notices": {
+        "title": "Antes de te basares nesta tabela",
+        "educationalTitle": "Apenas educativo",
+        "educational": "Esta página é educativa. Não é uma recomendação nem uma oferta, a ordem não é um ranking e o WonderMoney não recomenda nenhuma corretora.",
+        "neutralTitle": "Sem links de afiliados",
+        "neutral": "O WonderMoney não recebe nada de nenhuma corretora desta página. Os links levam ao preçário de cada corretora.",
+        "taxTitle": "Impostos sobre os teus investimentos",
+        "tax": "As mais-valias e os dividendos são tributados em Portugal, em regra a 28%. Um banco português retém e reporta; com uma corretora estrangeira, declaras tu no IRS."
+      },
+      "nextStepHeadline": "Junta numa só vista os investimentos de várias corretoras",
+      "nextStepDescription": "As comissões são só uma parte. Importa o ficheiro de exportação de cada corretora no WonderMoney e vê todos os teus investimentos, com preços diários, ao lado das tuas contas bancárias.",
+      "nextStepCta": "Ver a tua carteira num só sítio",
+      "guide": {
+        "read": {
+          "title": "Como ler esta tabela",
+          "what": "Cada corretora cobra de forma diferente: um valor fixo ou uma percentagem por ordem, muitas vezes com um mínimo; uma comissão de custódia sobre o que tens investido, por mês, trimestre ou semestre; e uma comissão para converter euros em dólares quando compras ações americanas. A tabela escreve cada comissão como o preçário a indica, para uma ordem online, e a calculadora aplica as mesmas fórmulas a um ano inteiro.",
+          "protection": "A proteção do investidor cobre os teus títulos se a corretora falir e não os conseguir devolver, até ao montante indicado; nunca cobre uma descida das cotações. O saldo em dinheiro num banco fica coberto pela garantia de depósitos. O sistema depende do país da entidade onde tens a conta, por isso a tabela indica-o.",
+          "notRec": "A tabela é educativa. Não é uma recomendação, a ordem não é um ranking e a corretora mais barata para um perfil pode ser a mais cara para outro. O serviço, os produtos disponíveis e a forma como cada corretora trata os impostos em Portugal também contam."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Pensa no comprador ocasional de ações: {{count}} compras de {{amount}} em ações americanas num ano, com {{portfolio}} investidos.",
+          "bank": "No {{bank}}, cada ordem custa {{bankFormula}}, por isso as {{count}} ordens custam {{bankTrading}} com Imposto do Selo. Converter {{converted}} em dólares a {{bankFx}} soma {{bankFxTotal}}, e a custódia ({{bankCustodyFormula}}) soma {{bankCustody}} com IVA. O ano custa {{bankTotal}}, dos quais {{bankStampDuty}} são Imposto do Selo e {{bankVat}} são IVA.",
+          "online": "Na {{online}}, cada ordem custa {{onlineFormula}}: {{onlineTrading}} no ano. O câmbio a {{onlineFx}} soma {{onlineFxTotal}} e a custódia {{onlineCustody}}, num total de {{onlineTotal}}.",
+          "takeaway": "Com ordens pequenas e pouco frequentes, pesam mais as comissões mínimas e as custódias de valor fixo; com ordens grandes ou uma carteira grande, pesam mais as comissões em percentagem. Muda o perfil acima para veres como a ordem muda."
+        },
+        "method": {
+          "title": "Método",
+          "intro": "Cada comissão foi lida no preçário publicado pela própria corretora, na data indicada na respetiva linha; a tabela inteira foi revista a {{date}} e é verificada de novo a cada trimestre. As comissões que um preçário não indica aparecem como não publicadas e ficam fora dos totais, que surgem então como incompletos.",
+          "steps": {
+            "a": "Ordens: a comissão de cada ordem é a parte fixa mais a percentagem da ordem, com o mínimo e o máximo por ordem. As comissões por ação contam ações inteiras ao preço assumido. Um valor mensal sem comissão aplica-se mês a mês.",
+            "b": "Plano de investimento: nas compras de ETF, com a opção ativa e quando a corretora publica um plano periódico, a comissão do plano substitui a da ordem.",
+            "c": "Câmbio: as ordens nos EUA pagam a comissão de câmbio da corretora sobre o valor convertido; as comissões em dólares são convertidas a {{rate}} dólares por euro.",
+            "d": "Custódia: a fórmula publicada, por período e com o respetivo mínimo e máximo, é cobrada sobre o valor investido tantas vezes quantos os períodos de um ano.",
+            "e": "Impostos sobre as comissões: quando o preçário diz que as comissões não incluem o Imposto do Selo (4% sobre a corretagem) ou o IVA (23% sobre a custódia), estes somam-se às comissões a que se aplicam.",
+            "f": "O total soma as ordens do ano, o câmbio e a custódia, e as corretoras aparecem da mais barata para a mais cara. As que não publicam uma comissão de que o perfil precisa ficam no fim."
+          }
+        },
+        "limits": {
+          "title": "O que a estimativa deixa de fora",
+          "items": {
+            "a": "Taxas de bolsa, de liquidação e regulatórias que a corretora cobra à parte, o spread no preço a que negoceias e os encargos correntes do próprio ETF.",
+            "b": "Promoções, escalões para quem negoceia muito e condições ligadas a outros produtos do banco.",
+            "c": "Vendas, transferências para outra corretora, dividendos e os impostos sobre dividendos e mais-valias.",
+            "d": "Alterações depois da data de verificação: as comissões mudam e prevalece sempre o preçário em vigor da corretora."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "compoundLink": "Calculadora de juros compostos",
+          "compoundBody": "Vê quanto custa uma comissão anual ao longo de décadas de juros compostos.",
+          "returnLink": "Calculadora de rentabilidade",
+          "returnBody": "A rentabilidade passada de um índice, antes de comissões e impostos.",
+          "profileLink": "Questionário de perfil de investidor",
+          "profileBody": "Quanto risco podes correr, antes de escolheres o que comprar.",
+          "netWorthLink": "Calculadora de património líquido",
+          "netWorthBody": "Junta os teus investimentos a tudo o que tens e deves."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD)",
+        "deInvestor": "Sistema alemão de indemnização aos investidores",
+        "deEdw": "EdW, indemnização aos investidores (Alemanha)",
+        "deDeposit": "Garantia de depósitos alemã",
+        "ieIcs": "Investor Compensation Scheme (Irlanda)",
+        "plKdpw": "Sistema de indemnização KDPW (Polónia)",
+        "eeFund": "Fundo de Proteção dos Investidores (Estónia)"
+      },
+      "brokerNotes": {
+        "degiro": "A comissão de ETF na UE é a da Seleção de ETFs da DEGIRO na Tradegate. Noutras bolsas, como a Euronext Amesterdão ou a Xetra, uma ordem custa 2 € + 1 € de manuseamento, mais 2,50 € por ano por cada bolsa usada (exceto a Euronext Lisbon). Não há plano de investimento automático.",
+        "ibkr": "Preço fixo IBKR Pro. Os ETF na Euronext somam 0,75 € por execução. Câmbio: 0,03% na conversão automática. Os juros são proporcionais ao valor da conta abaixo de 100 000 USD. Acresce IVA às comissões, quando aplicável.",
+        "trading212": "Os juros sobre o saldo aplicam-se a novos clientes da Trading 212 EU que adiram ao programa, até 100 000 €; o dinheiro pode ficar aplicado em fundos do mercado monetário.",
+        "xtb": "Sem comissão até 100 000 € em ordens por mês, somando as tuas contas. A comissão mensal de 10 € só se aplica após um ano sem negociar e 90 dias sem depósitos. Proteção: 100% dos primeiros 3000 € e 90% acima disso. Os juros indicados são a taxa padrão; as contas novas têm taxas de boas-vindas. As comissões já incluem Imposto do Selo ou IVA.",
+        "lightyear": "Ações, ETC e ETN em euros custam 1 € por ordem. Em Portugal, acresce Imposto do Selo de 4% sobre a comissão de câmbio. Os juros sobre o saldo dependem do país de residência; não há taxa publicada para Portugal.",
+        "trade-republic": "O 1 € por ordem é uma taxa de liquidação; os planos de poupança são gratuitos. O câmbio está incluído no preço, sem comissão própria publicada. Juros: 4% para novos clientes até 20 000 €, até 1 de março de 2027, com IBAN português; a taxa padrão não está publicada. A retenção e o reporte fiscal em Portugal aplicam-se aos clientes da sucursal portuguesa.",
+        "activobank": "A primeira ordem de cada mês no site ou na app é gratuita, em qualquer mercado. O preçário indica também uma comissão mensal de guarda para títulos não integrados e estrangeiros (de 4 € a 33 € consoante o valor), e não é claro qual se aplica a ETF estrangeiros e ações americanas. Câmbio às taxas internas do banco, sem spread publicado.",
+        "banco-best": "A partir da 21.ª ordem do mês: 0,10% (mín. 12 €). O serviço Best Trading Pro, na plataforma do Saxo Bank, tem outros preços: ETF a 0,08% (mín. 10 €), sem custódia e indemnização aos investidores até 20 000 €.",
+        "big": "A custódia fica isenta com três negócios por trimestre e ordenado domiciliado ou posição média acima de 100 000 €. O spread cambial é indicativo. Uma Superconta à parte paga juros sobre o saldo.",
+        "millennium-bcp": "A custódia é de 6 € por trimestre só se houve uma transação no site ou na app nos três meses anteriores; caso contrário, 9 €. Câmbio às taxas internas do banco, sem spread publicado. Às vendas nos EUA acresce a SEC fee."
+      }
     }
   },
   "resources": {

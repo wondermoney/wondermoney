@@ -116,6 +116,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolFreeBankAccounts",
   },
   {
+    sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "toolSp500History"],
+    destination: "toolBrokerFees",
+  },
+  {
     sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
     destination: "toolElectricityIndex",
   },

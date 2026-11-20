@@ -234,7 +234,7 @@ export const TOOLS_CATALOG = [
 		key: "investmentReturn",
 		routeId: "toolInvestmentReturn",
 		group: "investAndGrow",
-		related: ["toolSp500History", "toolCompoundInterest", "toolNetWorth"],
+		related: ["toolSp500History", "toolCompoundInterest", "toolNetWorth", "toolBrokerFees"],
 	},
 	{
 		key: "sp500History",
@@ -246,7 +246,7 @@ export const TOOLS_CATALOG = [
 		key: "investorProfile",
 		routeId: "toolInvestorProfile",
 		group: "investAndGrow",
-		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund"],
+		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund", "toolBrokerFees"],
 	},
 	{
 		key: "fire",
@@ -289,6 +289,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolRemuneratedAccounts",
 		group: "investAndGrow",
 		related: ["toolDepositRateIndex", "toolSavingsCertificates", "toolTermDeposit", "toolHouseholdBudget"],
+	},
+	{
+		key: "brokerFees",
+		routeId: "toolBrokerFees",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "toolNetWorth"],
 	},
 	// Track your wealth
 	{

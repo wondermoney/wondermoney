@@ -4554,6 +4554,230 @@
           "budgetBody": "Calcola quanto puoi lasciare nel risparmio."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Commissioni dei broker in Portogallo: custodia, ordini, cambio e tutela a confronto",
+      "shortName": "Commissioni dei broker",
+      "subtitle": "Una tabella datata di quanto chiedono broker online e banche portoghesi per investire, letta nel foglio commissioni di ciascuno, con il costo annuo di tre profili di investitore.",
+      "description": "Confronta commissioni di custodia, di negoziazione e di cambio, interessi sulla liquidità e tutela dell'investitore nei broker disponibili in Portogallo, con scenari di costo annuo.",
+      "pageTitle": "Confronto Broker in Portogallo: Custodia, Commissioni e Cambio",
+      "pageDescription": "Commissioni di custodia, di acquisto di ETF e azioni USA, cambio valuta, interessi sulla liquidità, tutela dell'investitore e dichiarazione fiscale in Portogallo, in broker e banche per residenti, con il costo annuo di tre profili di investitore.",
+      "review": {
+        "checked": "Commissioni verificate il {{date}}",
+        "confirm": "Le commissioni cambiano. Controlla il foglio commissioni in vigore del broker prima di aprire un conto o inviare un ordine.",
+        "source": "Ogni riga è letta nel foglio commissioni pubblicato dal broker stesso, collegato nella tabella. Nessun sito di confronto è usato come fonte.",
+        "staleTitle": "Questa verifica potrebbe non essere aggiornata",
+        "stale": "Queste commissioni sono state verificate l'ultima volta il {{date}}, più di quattro mesi fa. Alcune potrebbero essere cambiate: controlla il foglio commissioni di ogni broker."
+      },
+      "calculator": {
+        "title": "Costo annuo stimato",
+        "intro": "Scegli un profilo o modifica i valori. L'elenco mette a confronto il costo stimato di un anno presso ogni broker, dal più basso al più alto, con il calcolo sotto ciascuno.",
+        "profile": "Profilo di investitore",
+        "assumptions": "Ipotesi: gli ordini sono distribuiti nell'anno; gli ordini USA sono convertiti dall'euro a {{rate}} dollari per euro (tasso di riferimento BCE del {{rateDate}}); un'azione USA costa {{price}}, per le commissioni per azione; la custodia si applica al valore indicato per tutto l'anno; l'IVA è quella del Portogallo continentale, 23%. Non sono inclusi spread, diritti di borsa e regolamentari fuori dal foglio commissioni né le imposte sui tuoi guadagni."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Investitore mensile in ETF",
+          "description": "12 acquisti da 200 € di un ETF quotato nell'UE, 2.400 € investiti."
+        },
+        "occasionalStocks": {
+          "label": "Acquirente occasionale di azioni",
+          "description": "6 acquisti da 1.000 € di azioni USA, 6.000 € investiti."
+        },
+        "largePortfolio": {
+          "label": "Portafoglio più grande",
+          "description": "50.000 € investiti, con 4 acquisti di ETF da 2.500 € l'anno."
+        },
+        "custom": "Valori tuoi: nessun profilo selezionato."
+      },
+      "fields": {
+        "market": "Cosa compri",
+        "trades": "Ordini di acquisto all'anno",
+        "tradeAmount": "Importo per ordine",
+        "portfolio": "Valore investito",
+        "savingsPlan": "Usa il piano di accumulo in ETF del broker quando ne pubblica uno"
+      },
+      "markets": {
+        "etfEu": "ETF quotato nell'UE",
+        "usStock": "Azione USA"
+      },
+      "help": {
+        "trades": "Ordini interi, distribuiti su 12 mesi.",
+        "portfolio": "Valore medio sul conto nell'anno, per la commissione di custodia."
+      },
+      "errors": {
+        "trades": "Inserisci un numero intero di ordini tra 0 e {{max}}.",
+        "amount": "Inserisci un importo tra 0 e {{max}}."
+      },
+      "result": {
+        "title": "Costo per broker, dal più basso al più alto",
+        "perYear": "all'anno",
+        "invalid": "Correggi i campi qui sopra per vedere la stima.",
+        "trading": "Ordini ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Piano di accumulo ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Ordini: nessuno",
+        "fx": "Cambio valuta ({{pct}} di {{amount}}): {{total}}",
+        "custody": "Custodia e tenuta conto: {{total}}",
+        "missing": "Non conteggiato, perché non pubblicato: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Include {{amount}} di imposta di bollo ({{pct}})",
+          "vat": "Include {{amount}} di IVA ({{pct}})"
+        },
+        "fees": {
+          "trading": "commissione dell'ordine",
+          "fx": "cambio valuta",
+          "custody": "custodia"
+        },
+        "custodyMarket": "Custodia e tenuta conto: {{total}}, di cui {{market}} di commissione per borsa",
+        "feePerOrder": "Commissione per ordine: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} per azione",
+        "min": "min. {{amount}}",
+        "max": "max. {{amount}}",
+        "maxPct": "max. {{pct}} dell'ordine",
+        "freeUpTo": "senza commissioni fino a {{amount}} di ordini al mese, poi {{fee}}",
+        "noFee": "nessuna commissione",
+        "noCustody": "nessuna commissione",
+        "period": {
+          "month": "{{fee}} al mese",
+          "quarter": "{{fee}} al trimestre",
+          "semester": "{{fee}} al semestre",
+          "year": "{{fee}} all'anno"
+        },
+        "above": "sul valore oltre {{amount}}",
+        "tierUpTo": "{{fee}} fino a {{amount}}",
+        "tierAbove": "{{fee}} oltre {{amount}}",
+        "freeOrders": "{{count}} ordine al mese senza commissioni, poi {{fee}}"
+      },
+      "table": {
+        "title": "Commissioni per broker",
+        "intro": "Broker in ordine alfabetico. Una commissione che il broker non indica nel proprio foglio commissioni è segnata come non pubblicata.",
+        "caption": "Commissioni dei broker per investitori in Portogallo, con la fonte e la data di verifica",
+        "columns": {
+          "broker": "Broker",
+          "custody": "Custodia",
+          "etfEu": "Ordine su ETF dell'UE",
+          "usStock": "Ordine su azione USA",
+          "fx": "Cambio valuta",
+          "cash": "Interessi sulla liquidità",
+          "protection": "Tutela dell'investitore",
+          "tax": "Imposte in Portogallo",
+          "source": "Fonte"
+        },
+        "notPublished": "Non pubblicato",
+        "regulator": "Vigilanza: {{name}}",
+        "venue": "Su {{venue}}",
+        "plan": "Piano di accumulo: {{fee}}",
+        "noFx": "Nessuna commissione",
+        "noInterest": "Nessuno",
+        "interest": "{{pct}} all'anno",
+        "interestUpTo": "fino a {{amount}}",
+        "protection": "{{scheme}}: fino a {{amount}}",
+        "deposit": "Liquidità: {{scheme}}, fino a {{amount}}",
+        "checked": "Verificato il {{date}}",
+        "interestAbove": "sul saldo oltre {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} della perdita, fino a {{amount}}",
+        "marketFee": "Più {{fee}} all'anno per ogni borsa usata (max. {{pct}} del valore del conto)",
+        "tax": {
+          "stampDuty": "Più {{pct}} di imposta di bollo su: {{fees}}",
+          "vat": "Più {{pct}} di IVA su: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Trattiene o comunica le imposte in Portogallo",
+          "no": "Nessuna comunicazione fiscale in Portogallo: dichiari tu",
+          "unknown": "Non indicato"
+        }
+      },
+      "countries": {
+        "PT": "Portogallo",
+        "DE": "Germania",
+        "IE": "Irlanda",
+        "PL": "Polonia",
+        "EE": "Estonia"
+      },
+      "notices": {
+        "title": "Prima di basarti su questa tabella",
+        "educationalTitle": "Solo a scopo informativo",
+        "educational": "Questa pagina è informativa. Non è una raccomandazione né un'offerta, l'ordine non è una classifica e WonderMoney non raccomanda alcun broker.",
+        "neutralTitle": "Nessun link di affiliazione",
+        "neutral": "WonderMoney non riceve nulla da nessun broker di questa pagina. I link portano al foglio commissioni di ogni broker.",
+        "taxTitle": "Imposte sui tuoi investimenti",
+        "tax": "Plusvalenze e dividendi sono tassati in Portogallo, di norma al 28%. Una banca portoghese trattiene e comunica; con un broker estero li dichiari tu nella dichiarazione IRS."
+      },
+      "nextStepHeadline": "Tieni in un'unica vista gli investimenti di broker diversi",
+      "nextStepDescription": "Le commissioni sono solo una parte. Importa il file di esportazione di ogni broker in WonderMoney e vedi tutti i tuoi investimenti, con prezzi giornalieri, accanto ai tuoi conti bancari.",
+      "nextStepCta": "Vedi il tuo portafoglio in un unico posto",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa tabella",
+          "what": "Ogni broker addebita a modo suo: un importo fisso o una percentuale per ordine, spesso con un minimo; una commissione di custodia su quanto detieni, al mese, al trimestre o al semestre; e una commissione per convertire euro in dollari quando compri azioni USA. La tabella riporta ogni commissione come la indica il foglio commissioni, per un ordine online, e il calcolatore applica le stesse formule a un anno intero.",
+          "protection": "La tutela dell'investitore copre i tuoi titoli se il broker fallisce e non riesce a restituirli, fino all'importo indicato; non copre mai un calo dei prezzi. La liquidità presso una banca è coperta dalla sua garanzia dei depositi. Il sistema dipende dal paese della società che tiene il tuo conto, per questo la tabella lo indica.",
+          "notRec": "La tabella è informativa. Non è una raccomandazione, l'ordine non è una classifica e il broker più economico per un profilo può essere il più caro per un altro. Contano anche il servizio, i prodotti offerti e come ogni broker gestisce le imposte in Portogallo."
+        },
+        "example": {
+          "title": "Esempio pratico",
+          "setup": "Prendi l'acquirente occasionale di azioni: {{count}} acquisti da {{amount}} di azioni USA in un anno, {{portfolio}} investiti.",
+          "bank": "Presso {{bank}} ogni ordine costa {{bankFormula}}, quindi i {{count}} ordini costano {{bankTrading}} con l'imposta di bollo. Convertire {{converted}} in dollari al {{bankFx}} aggiunge {{bankFxTotal}}, e la custodia ({{bankCustodyFormula}}) aggiunge {{bankCustody}} con l'IVA. L'anno costa {{bankTotal}}, di cui {{bankStampDuty}} di imposta di bollo e {{bankVat}} di IVA.",
+          "online": "Presso {{online}} ogni ordine costa {{onlineFormula}}: {{onlineTrading}} nell'anno. Il cambio al {{onlineFx}} aggiunge {{onlineFxTotal}} e la custodia {{onlineCustody}}, per {{onlineTotal}} in totale.",
+          "takeaway": "Con ordini piccoli e poco frequenti pesano di più le commissioni minime e le custodie a importo fisso; con ordini grandi o un portafoglio grande pesano di più le commissioni in percentuale. Cambia il profilo qui sopra per vedere come cambia l'ordine."
+        },
+        "method": {
+          "title": "Metodo",
+          "intro": "Ogni commissione è stata letta nel foglio commissioni pubblicato dal broker stesso, alla data indicata nella sua riga; l'intera tabella è stata rivista il {{date}} e viene ricontrollata ogni trimestre. Le commissioni che un foglio non indica sono segnate come non pubblicate e restano fuori dai totali, che appaiono allora come incompleti.",
+          "steps": {
+            "a": "Ordini: la commissione di ogni ordine è la parte fissa più la percentuale dell'ordine, con il minimo e il massimo per ordine. Le commissioni per azione contano azioni intere al prezzo ipotizzato. Una franchigia mensile senza commissioni si applica mese per mese.",
+            "b": "Piano di accumulo: per gli acquisti di ETF, con l'opzione attiva e se il broker pubblica un piano periodico, la sua commissione sostituisce quella dell'ordine.",
+            "c": "Valuta: gli ordini USA pagano la commissione di cambio del broker sull'importo convertito; le commissioni in dollari sono convertite a {{rate}} dollari per euro.",
+            "d": "Custodia: la formula pubblicata, per periodo con il suo minimo e massimo, si applica al valore detenuto tante volte quanti sono i periodi dell'anno.",
+            "e": "Imposte sulle commissioni: quando il foglio commissioni dice che le commissioni non includono l'imposta di bollo portoghese (4% sull'intermediazione) o l'IVA (23% sulla custodia), si aggiungono alle commissioni a cui si applicano.",
+            "f": "Il totale somma gli ordini dell'anno, il cambio e la custodia, e i broker sono elencati dal più economico al più caro. Quelli che non pubblicano una commissione necessaria al profilo vanno in fondo."
+          }
+        },
+        "limits": {
+          "title": "Cosa lascia fuori la stima",
+          "items": {
+            "a": "Diritti di borsa, di regolamento e regolamentari che il broker addebita a parte, lo spread sul prezzo di esecuzione e i costi correnti dell'ETF stesso.",
+            "b": "Promozioni, scaglioni per chi opera molto e condizioni legate ad altri prodotti della banca.",
+            "c": "Vendite, trasferimenti ad altro broker, dividendi e le imposte su dividendi e plusvalenze.",
+            "d": "Modifiche dopo la data di verifica: le commissioni cambiano e prevale sempre il foglio commissioni in vigore del broker."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "compoundLink": "Calcolatore dell'interesse composto",
+          "compoundBody": "Guarda quanto costa una commissione annua in decenni di interesse composto.",
+          "returnLink": "Calcolatore del rendimento",
+          "returnBody": "Il rendimento passato di un indice, prima di commissioni e imposte.",
+          "profileLink": "Questionario sul profilo di investitore",
+          "profileBody": "Quanto rischio potresti sostenere, prima di scegliere cosa comprare.",
+          "netWorthLink": "Calcolatore del patrimonio netto",
+          "netWorthBody": "Aggiungi i tuoi investimenti a tutto ciò che possiedi e devi."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII, Portogallo)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD, Portogallo)",
+        "deInvestor": "Sistema tedesco di indennizzo degli investitori",
+        "deEdw": "EdW, indennizzo degli investitori (Germania)",
+        "deDeposit": "Garanzia dei depositi tedesca",
+        "ieIcs": "Investor Compensation Scheme (Irlanda)",
+        "plKdpw": "Sistema di indennizzo KDPW (Polonia)",
+        "eeFund": "Fondo di tutela degli investitori (Estonia)"
+      },
+      "brokerNotes": {
+        "degiro": "La commissione sugli ETF dell'UE è quella della selezione di ETF di DEGIRO su Tradegate. Su altre borse, come Euronext Amsterdam o Xetra, un ordine costa 2 € + 1 € di gestione, più 2,50 € all'anno per ogni borsa usata (esclusa Euronext Lisbona). Nessun piano di accumulo automatico.",
+        "ibkr": "Tariffa fissa IBKR Pro. Gli ETF su Euronext aggiungono 0,75 € per esecuzione. Valuta: 0,03% sulla conversione automatica. Gli interessi sono proporzionali al valore del conto sotto i 100.000 USD. Alle commissioni si aggiunge l'IVA dove applicabile.",
+        "trading212": "Gli interessi sulla liquidità valgono per i nuovi clienti di Trading 212 EU che aderiscono, fino a 100.000 €; la liquidità può essere investita in fondi monetari.",
+        "xtb": "Senza commissioni fino a 100.000 € di ordini al mese, sommando i tuoi conti. La commissione mensile di 10 € si applica solo dopo un anno senza operazioni e 90 giorni senza depositi. Tutela: 100% dei primi 3.000 € e 90% oltre. Il tasso indicato è quello standard; i nuovi conti hanno tassi di benvenuto. Le commissioni includono imposta di bollo o IVA.",
+        "lightyear": "Azioni, ETC ed ETN in euro costano 1 € per ordine. In Portogallo si aggiunge il 4% di imposta di bollo sulla commissione di cambio. Gli interessi sulla liquidità dipendono dal paese di residenza; per il Portogallo non è pubblicato alcun tasso.",
+        "trade-republic": "L'1 € per ordine è una commissione di regolamento; i piani di accumulo sono gratuiti. Il cambio è incluso nel prezzo, senza una commissione propria pubblicata. Interessi: 4% per i nuovi clienti fino a 20.000 €, fino al 1° marzo 2027, con IBAN portoghese; il tasso standard non è pubblicato. Ritenuta e comunicazione fiscale in Portogallo valgono per i clienti della succursale portoghese.",
+        "activobank": "Il primo ordine di ogni mese dal sito o dall'app è gratuito, su qualsiasi mercato. Il foglio commissioni indica anche una commissione mensile di custodia per titoli non integrati ed esteri (da 4 € a 33 € secondo il valore), e non è chiaro quale si applichi a ETF esteri e azioni USA. Cambio ai tassi interni della banca, spread non pubblicato.",
+        "banco-best": "Dal 21° ordine del mese: 0,10% (min. 12 €). Il servizio Best Trading Pro, sulla piattaforma di Saxo Bank, ha altri prezzi: ETF allo 0,08% (min. 10 €), nessuna custodia e indennizzo degli investitori fino a 20.000 €.",
+        "big": "La custodia è esente con tre operazioni al trimestre e stipendio accreditato o una giacenza media oltre 100.000 €. Lo spread di cambio è indicativo. Una Superconta separata remunera la liquidità.",
+        "millennium-bcp": "La custodia costa 6 € al trimestre solo dopo un'operazione dal sito o dall'app nei tre mesi precedenti, altrimenti 9 €. Cambio ai tassi interni della banca, spread non pubblicato. Alle vendite negli USA si aggiunge la SEC fee."
+      }
     }
   },
   "resources": {

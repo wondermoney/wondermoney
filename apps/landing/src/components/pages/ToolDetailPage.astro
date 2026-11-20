@@ -81,6 +81,8 @@ import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp"
 import FreeBankAccountsGuide from "@/components/calculators/FreeBankAccountsGuide.astro";
 import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccountsComp";
 import RemuneratedAccountsGuide from "@/components/calculators/RemuneratedAccountsGuide.astro";
+import BrokerFeesComp from "@/components/calculators/BrokerFeesComp";
+import BrokerFeesGuide from "@/components/calculators/BrokerFeesGuide.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FigureCards from "@/components/shared/FigureCards.astro";
@@ -300,6 +302,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.remuneratedAccounts.nextStepCta"),
     ctaHref: toLocalizedPath("featureGoals", locale),
   },
+  toolBrokerFees: {
+    headline: t("tools.brokerFees.nextStepHeadline"),
+    description: t("tools.brokerFees.nextStepDescription"),
+    ctaText: t("tools.brokerFees.nextStepCta"),
+    ctaHref: toLocalizedPath("featurePortfolio", locale),
+  },
   toolPersonalLoan: {
     headline: t("tools.personalLoan.nextStepHeadline"),
     description: t("tools.personalLoan.nextStepDescription"),
@@ -441,6 +449,7 @@ const schema = {
         {routeId === "toolTermDepositOffers" && <TermDepositOffersComp locale={locale} client:load />}
         {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
         {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
+        {routeId === "toolBrokerFees" && <BrokerFeesComp locale={locale} client:load />}
         {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
         {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
       </div>
@@ -484,6 +493,7 @@ const schema = {
           {routeId === "toolTermDepositOffers" && <TermDepositOffersGuide locale={locale} />}
           {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
           {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
+          {routeId === "toolBrokerFees" && <BrokerFeesGuide locale={locale} />}
           {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
           {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
         </div>

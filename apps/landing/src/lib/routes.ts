@@ -536,6 +536,14 @@ const ROUTE_SLUGS = {
 		de: "verzinste-konten-portugal",
 		it: "conti-remunerati-portogallo",
 	},
+	toolBrokerFees: {
+		pt: "comparador-de-corretoras",
+		en: "broker-fees-comparison-portugal",
+		es: "comparador-brokers-portugal",
+		fr: "comparateur-courtiers-portugal",
+		de: "broker-vergleich-portugal",
+		it: "confronto-broker-portogallo",
+	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
 		en: "portugal-state-pension-calculator",
@@ -686,6 +694,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolFuelPrices",
 	"toolFreeBankAccounts",
 	"toolRemuneratedAccounts",
+	"toolBrokerFees",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -1029,6 +1038,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolremuneratedaccounts: "toolRemuneratedAccounts",
 	"savings-accounts": "toolRemuneratedAccounts",
 	"contas-poupanca": "toolRemuneratedAccounts",
+	toolbrokerfees: "toolBrokerFees",
+	"broker-fees": "toolBrokerFees",
+	"comparador-corretoras": "toolBrokerFees",
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",

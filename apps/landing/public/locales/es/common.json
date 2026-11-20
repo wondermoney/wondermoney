@@ -4554,6 +4554,230 @@
           "budgetBody": "Calcula cuánto puedes dejar en ahorro."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Comisiones de brókers en Portugal: custodia, compraventa, cambio y protección",
+      "shortName": "Comisiones de brókers",
+      "subtitle": "Una tabla fechada de lo que cobran los brókers online y los bancos portugueses por invertir, leída en la tarifa de cada uno, con el coste anual de tres perfiles de inversor.",
+      "description": "Compara comisiones de custodia, compraventa y cambio, intereses sobre el saldo y protección del inversor en brókers disponibles en Portugal, con escenarios de coste anual.",
+      "pageTitle": "Comparador de Brókers en Portugal: Custodia, Comisiones y Cambio",
+      "pageDescription": "Comisiones de custodia, de compra de ETF y de acciones de EE. UU., cambio de divisa, intereses sobre el saldo, protección del inversor y declaración fiscal en Portugal, en brókers y bancos para residentes, con el coste anual de tres perfiles de inversor.",
+      "review": {
+        "checked": "Comisiones comprobadas el {{date}}",
+        "confirm": "Las comisiones cambian. Consulta la tarifa vigente del bróker antes de abrir una cuenta o dar una orden.",
+        "source": "Cada fila se ha leído en la tarifa publicada por el propio bróker, enlazada en la tabla. No se usa ningún comparador como fuente.",
+        "staleTitle": "Esta revisión puede estar desactualizada",
+        "stale": "Estas comisiones se comprobaron por última vez el {{date}}, hace más de cuatro meses. Algunas pueden haber cambiado: consulta la tarifa de cada bróker."
+      },
+      "calculator": {
+        "title": "Coste anual estimado",
+        "intro": "Elige un perfil o cambia los valores. La lista muestra el coste estimado de un año en cada bróker, del más bajo al más alto, con el cálculo debajo de cada uno.",
+        "profile": "Perfil de inversor",
+        "assumptions": "Supuestos: las órdenes se reparten a lo largo del año; las órdenes en EE. UU. se convierten de euros a {{rate}} dólares por euro (tipo de referencia del BCE del {{rateDate}}); una acción de EE. UU. cuesta {{price}}, para las comisiones por acción; la custodia se cobra sobre el valor indicado durante todo el año; el IVA es el del continente portugués, 23%. No se incluyen diferenciales, cánones de bolsa y regulatorios fuera de la tarifa ni los impuestos sobre tus ganancias."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Inversor mensual en ETF",
+          "description": "12 compras de 200 € de un ETF cotizado en la UE, 2400 € invertidos."
+        },
+        "occasionalStocks": {
+          "label": "Comprador ocasional de acciones",
+          "description": "6 compras de 1000 € de acciones de EE. UU., 6000 € invertidos."
+        },
+        "largePortfolio": {
+          "label": "Cartera mayor",
+          "description": "50 000 € invertidos, con 4 compras de ETF de 2500 € al año."
+        },
+        "custom": "Tus propios valores: ningún perfil seleccionado."
+      },
+      "fields": {
+        "market": "Qué compras",
+        "trades": "Órdenes de compra al año",
+        "tradeAmount": "Importe por orden",
+        "portfolio": "Valor invertido",
+        "savingsPlan": "Usar el plan de inversión periódica en ETF del bróker cuando lo publica"
+      },
+      "markets": {
+        "etfEu": "ETF cotizado en la UE",
+        "usStock": "Acción de EE. UU."
+      },
+      "help": {
+        "trades": "Órdenes enteras, repartidas en 12 meses.",
+        "portfolio": "Valor medio en la cuenta durante el año, para la comisión de custodia."
+      },
+      "errors": {
+        "trades": "Introduce un número entero de órdenes entre 0 y {{max}}.",
+        "amount": "Introduce un importe entre 0 y {{max}}."
+      },
+      "result": {
+        "title": "Coste por bróker, del más bajo al más alto",
+        "perYear": "al año",
+        "invalid": "Corrige los campos de arriba para ver la estimación.",
+        "trading": "Órdenes ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Plan de inversión ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Órdenes: ninguna",
+        "fx": "Cambio de divisa ({{pct}} de {{amount}}): {{total}}",
+        "custody": "Custodia y mantenimiento: {{total}}",
+        "missing": "No contado, por no estar publicado: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Incluye {{amount}} de impuesto de sello ({{pct}})",
+          "vat": "Incluye {{amount}} de IVA ({{pct}})"
+        },
+        "fees": {
+          "trading": "comisión de la orden",
+          "fx": "cambio de divisa",
+          "custody": "custodia"
+        },
+        "custodyMarket": "Custodia y mantenimiento: {{total}}, con {{market}} de comisión por bolsa",
+        "feePerOrder": "Comisión por orden: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} por acción",
+        "min": "mín. {{amount}}",
+        "max": "máx. {{amount}}",
+        "maxPct": "máx. {{pct}} de la orden",
+        "freeUpTo": "sin comisión hasta {{amount}} en órdenes al mes; por encima, {{fee}}",
+        "noFee": "sin comisión",
+        "noCustody": "sin comisión",
+        "period": {
+          "month": "{{fee}} al mes",
+          "quarter": "{{fee}} al trimestre",
+          "semester": "{{fee}} al semestre",
+          "year": "{{fee}} al año"
+        },
+        "above": "sobre el valor por encima de {{amount}}",
+        "tierUpTo": "{{fee}} hasta {{amount}}",
+        "tierAbove": "{{fee}} por encima de {{amount}}",
+        "freeOrders": "{{count}} orden al mes sin comisión; después, {{fee}}"
+      },
+      "table": {
+        "title": "Comisiones por bróker",
+        "intro": "Brókers por orden alfabético. Una comisión que el bróker no indica en su propia tarifa aparece como no publicada.",
+        "caption": "Comisiones de brókers para inversores en Portugal, con la fuente y la fecha de comprobación",
+        "columns": {
+          "broker": "Bróker",
+          "custody": "Custodia",
+          "etfEu": "Orden de ETF en la UE",
+          "usStock": "Orden de acción de EE. UU.",
+          "fx": "Cambio de divisa",
+          "cash": "Intereses sobre el saldo",
+          "protection": "Protección del inversor",
+          "tax": "Impuestos en Portugal",
+          "source": "Fuente"
+        },
+        "notPublished": "No publicado",
+        "regulator": "Supervisor: {{name}}",
+        "venue": "En {{venue}}",
+        "plan": "Plan de inversión: {{fee}}",
+        "noFx": "Sin comisión",
+        "noInterest": "Ninguno",
+        "interest": "{{pct}} al año",
+        "interestUpTo": "hasta {{amount}}",
+        "protection": "{{scheme}}: hasta {{amount}}",
+        "deposit": "Saldo: {{scheme}}, hasta {{amount}}",
+        "checked": "Comprobado el {{date}}",
+        "interestAbove": "sobre el saldo por encima de {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} de la pérdida, hasta {{amount}}",
+        "marketFee": "Más {{fee}} al año por cada bolsa usada (máx. {{pct}} del valor de la cuenta)",
+        "tax": {
+          "stampDuty": "Más {{pct}} de impuesto de sello sobre: {{fees}}",
+          "vat": "Más {{pct}} de IVA sobre: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Retiene o informa impuestos en Portugal",
+          "no": "Sin información fiscal para Portugal: lo declaras tú",
+          "unknown": "No indicado"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Alemania",
+        "IE": "Irlanda",
+        "PL": "Polonia",
+        "EE": "Estonia"
+      },
+      "notices": {
+        "title": "Antes de basarte en esta tabla",
+        "educationalTitle": "Solo educativo",
+        "educational": "Esta página es educativa. No es una recomendación ni una oferta, el orden no es un ranking y WonderMoney no recomienda ningún bróker.",
+        "neutralTitle": "Sin enlaces de afiliados",
+        "neutral": "WonderMoney no recibe nada de ningún bróker de esta página. Los enlaces llevan a la tarifa de cada bróker.",
+        "taxTitle": "Impuestos sobre tus inversiones",
+        "tax": "Las plusvalías y los dividendos tributan en Portugal, por lo general al 28%. Un banco portugués retiene e informa; con un bróker extranjero, lo declaras tú en el IRS."
+      },
+      "nextStepHeadline": "Reúne en una sola vista las inversiones de distintos brókers",
+      "nextStepDescription": "Las comisiones son solo una parte. Importa el archivo de exportación de cada bróker en WonderMoney y ve todas tus inversiones, con precios diarios, junto a tus cuentas bancarias.",
+      "nextStepCta": "Ver tu cartera en un solo lugar",
+      "guide": {
+        "read": {
+          "title": "Cómo leer esta tabla",
+          "what": "Cada bróker cobra a su manera: un importe fijo o un porcentaje por orden, a menudo con un mínimo; una comisión de custodia sobre lo que tienes invertido, por mes, trimestre o semestre; y una comisión por convertir euros en dólares cuando compras acciones de EE. UU. La tabla escribe cada comisión como la indica la tarifa, para una orden online, y la calculadora aplica las mismas fórmulas a un año entero.",
+          "protection": "La protección del inversor cubre tus valores si el bróker quiebra y no puede devolverlos, hasta el importe indicado; nunca cubre una caída de las cotizaciones. El efectivo en un banco lo cubre su garantía de depósitos. El sistema depende del país de la entidad que lleva tu cuenta, por eso la tabla lo indica.",
+          "notRec": "La tabla es educativa. No es una recomendación, el orden no es un ranking y el bróker más barato para un perfil puede ser el más caro para otro. El servicio, los productos disponibles y cómo trata cada bróker los impuestos en Portugal también cuentan."
+        },
+        "example": {
+          "title": "Ejemplo práctico",
+          "setup": "Piensa en el comprador ocasional de acciones: {{count}} compras de {{amount}} en acciones de EE. UU. en un año, con {{portfolio}} invertidos.",
+          "bank": "En {{bank}}, cada orden cuesta {{bankFormula}}, así que las {{count}} órdenes cuestan {{bankTrading}} con el impuesto de sello. Convertir {{converted}} en dólares al {{bankFx}} suma {{bankFxTotal}}, y la custodia ({{bankCustodyFormula}}) suma {{bankCustody}} con IVA. El año cuesta {{bankTotal}}, de los que {{bankStampDuty}} son impuesto de sello y {{bankVat}} son IVA.",
+          "online": "En {{online}}, cada orden cuesta {{onlineFormula}}: {{onlineTrading}} en el año. El cambio de divisa al {{onlineFx}} suma {{onlineFxTotal}} y la custodia {{onlineCustody}}, en total {{onlineTotal}}.",
+          "takeaway": "Con órdenes pequeñas y poco frecuentes pesan más las comisiones mínimas y las custodias de importe fijo; con órdenes grandes o una cartera grande, pesan más las comisiones porcentuales. Cambia el perfil de arriba para ver cómo cambia el orden."
+        },
+        "method": {
+          "title": "Método",
+          "intro": "Cada comisión se ha leído en la tarifa publicada por el propio bróker, en la fecha indicada en su fila; toda la tabla se revisó el {{date}} y se comprueba de nuevo cada trimestre. Las comisiones que una tarifa no indica aparecen como no publicadas y quedan fuera de los totales, que se muestran entonces como incompletos.",
+          "steps": {
+            "a": "Órdenes: la comisión de cada orden es la parte fija más el porcentaje de la orden, con el mínimo y el máximo por orden. Las comisiones por acción cuentan acciones enteras al precio supuesto. Un importe mensual sin comisión se aplica mes a mes.",
+            "b": "Plan de inversión: en las compras de ETF, con la opción activada y cuando el bróker publica un plan periódico, su comisión sustituye a la de la orden.",
+            "c": "Divisa: las órdenes en EE. UU. pagan la comisión de cambio del bróker sobre el importe convertido; las comisiones en dólares se convierten a {{rate}} dólares por euro.",
+            "d": "Custodia: la fórmula publicada, por periodo y con su mínimo y máximo, se cobra sobre el valor invertido tantas veces como periodos tiene un año.",
+            "e": "Impuestos sobre las comisiones: cuando la tarifa dice que sus comisiones no incluyen el impuesto de sello portugués (4% sobre el corretaje) o el IVA (23% sobre la custodia), se suman a las comisiones a las que se aplican.",
+            "f": "El total suma las órdenes del año, el cambio de divisa y la custodia, y los brókers aparecen del más barato al más caro. Los que no publican una comisión que el perfil necesita van al final."
+          }
+        },
+        "limits": {
+          "title": "Lo que la estimación deja fuera",
+          "items": {
+            "a": "Cánones de bolsa, de liquidación y regulatorios que el bróker cobra aparte, el diferencial en el precio al que operas y los gastos corrientes del propio ETF.",
+            "b": "Promociones, tramos para quien opera mucho y condiciones ligadas a otros productos del banco.",
+            "c": "Ventas, traspasos a otro bróker, dividendos y los impuestos sobre dividendos y plusvalías.",
+            "d": "Cambios después de la fecha de comprobación: las comisiones cambian y siempre prevalece la tarifa vigente del bróker."
+          }
+        },
+        "related": {
+          "title": "Sigue",
+          "compoundLink": "Calculadora de interés compuesto",
+          "compoundBody": "Mira cuánto cuesta una comisión anual a lo largo de décadas de interés compuesto.",
+          "returnLink": "Calculadora de rentabilidad",
+          "returnBody": "La rentabilidad pasada de un índice, antes de comisiones e impuestos.",
+          "profileLink": "Test de perfil de inversor",
+          "profileBody": "Cuánto riesgo podrías asumir, antes de elegir qué comprar.",
+          "netWorthLink": "Calculadora de patrimonio neto",
+          "netWorthBody": "Suma tus inversiones a todo lo que tienes y debes."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII, Portugal)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD, Portugal)",
+        "deInvestor": "Sistema alemán de indemnización a los inversores",
+        "deEdw": "EdW, indemnización a los inversores (Alemania)",
+        "deDeposit": "Garantía de depósitos alemana",
+        "ieIcs": "Investor Compensation Scheme (Irlanda)",
+        "plKdpw": "Sistema de indemnización KDPW (Polonia)",
+        "eeFund": "Fondo de Protección de los Inversores (Estonia)"
+      },
+      "brokerNotes": {
+        "degiro": "La comisión de ETF en la UE es la de la selección de ETF de DEGIRO en Tradegate. En otras bolsas, como Euronext Ámsterdam o Xetra, una orden cuesta 2 € + 1 € de gestión, más 2,50 € al año por cada bolsa usada (salvo Euronext Lisboa). No hay plan de inversión automático.",
+        "ibkr": "Tarifa fija IBKR Pro. Los ETF en Euronext suman 0,75 € por ejecución. Divisa: 0,03% en la conversión automática. Los intereses son proporcionales al valor de la cuenta por debajo de 100 000 USD. Se añade IVA a las comisiones cuando corresponde.",
+        "trading212": "Los intereses sobre el saldo se aplican a nuevos clientes de Trading 212 EU que se adhieran, hasta 100 000 €; el efectivo puede estar en fondos del mercado monetario.",
+        "xtb": "Sin comisión hasta 100 000 € en órdenes al mes, sumando tus cuentas. La comisión mensual de 10 € solo se aplica tras un año sin operar y 90 días sin depósitos. Protección: 100% de los primeros 3000 € y 90% por encima. El interés indicado es el tipo estándar; las cuentas nuevas tienen tipos de bienvenida. Las comisiones ya incluyen impuesto de sello o IVA.",
+        "lightyear": "Las acciones, ETC y ETN en euros cuestan 1 € por orden. En Portugal se añade un 4% de impuesto de sello a la comisión de cambio. Los intereses sobre el saldo dependen del país de residencia; no hay tipo publicado para Portugal.",
+        "trade-republic": "El 1 € por orden es una tasa de liquidación; los planes de ahorro son gratuitos. El cambio de divisa va incluido en el precio, sin comisión propia publicada. Intereses: 4% para nuevos clientes hasta 20 000 €, hasta el 1 de marzo de 2027, con IBAN portugués; el tipo estándar no está publicado. La retención y la información fiscal en Portugal se aplican a los clientes de la sucursal portuguesa.",
+        "activobank": "La primera orden de cada mes en la web o la app es gratuita, en cualquier mercado. La tarifa también incluye una comisión mensual de custodia para valores no integrados y extranjeros (de 4 € a 33 € según el valor), y no queda claro cuál se aplica a ETF extranjeros y acciones de EE. UU. Cambio a los tipos internos del banco, sin diferencial publicado.",
+        "banco-best": "A partir de la 21.ª orden del mes: 0,10% (mín. 12 €). El servicio Best Trading Pro, en la plataforma de Saxo Bank, tiene otros precios: ETF al 0,08% (mín. 10 €), sin custodia e indemnización a los inversores hasta 20 000 €.",
+        "big": "La custodia queda exenta con tres operaciones al trimestre y nómina domiciliada o posición media superior a 100 000 €. El diferencial de cambio es indicativo. Una Superconta aparte paga intereses sobre el saldo.",
+        "millennium-bcp": "La custodia es de 6 € al trimestre solo si hubo una operación en la web o la app en los tres meses anteriores; si no, 9 €. Cambio a los tipos internos del banco, sin diferencial publicado. A las ventas en EE. UU. se añade la SEC fee."
+      }
     }
   },
   "resources": {
