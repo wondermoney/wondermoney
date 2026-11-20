@@ -140,13 +140,33 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
 | `data/erseTariffs.ts` | ERSE tariff documents (diretivas, price simulator) | quarterly: check in the first week of January, April, July and October | Edit by hand, bump `version`, update the "downloaded on" date |
 | `data/electricityProfiles.ts` | E-REDES BTN consumption profiles A, B and C (`Perfil_Consumo_Injeção_E-REDES_<year>.xlsx`, published each December) | each January, for the new year | `node scripts/build-electricity-profiles.mjs --url <new year's xlsx>` (or `--from-file`) |
-| `data/solarProduction/` (`index.ts` and a JSON file per district) | PVGIS 5.3 API (EU JRC): for each district capital, the optimal tilt (`PVcalc`), the TMY's selected months (`tmy`) and those years' hourly PV output (`seriescalc`), PVGIS-SARAH3. The API has no CORS, so the page cannot call it | when PVGIS publishes a new version or extends its database (the version is in the API path) | `node scripts/build-solar-production.mjs --cache-dir <dir>` (about 200 calls; `--offline` rebuilds from the cache) |
+| `data/solarProduction/` (`index.ts` and a JSON file per district) | PVGIS 5.3 API (EU JRC): for each district capital, the optimal tilt (`PVcalc`), the TMY's selected months (`tmy`) and those years' hourly PV output (`seriescalc`), PVGIS-SARAH3. The API has no CORS, so the page cannot call it; any other tilt, orientation or point goes through `/api/solar-production` ("Server routes") | when PVGIS publishes a new version or extends its database (the version is in the API path) | `node scripts/build-solar-production.mjs --cache-dir <dir>` (about 200 calls; `--offline` rebuilds from the cache) |
 | `calculators/electricityCycles.ts` | ERSE period hours (Despacho n.º 26 126-A/2004, ciclo diário 2009, Diretiva n.º 3/2026) | when ERSE changes the periods; BTN meters move to the Diretiva n.º 3/2026 hours in the second half of 2027 | Edit by hand against the official table and rerun the profiles script |
 | `data/brokerFees.ts` | Each broker's own price list (preçário, fee page or PDF), linked per row in `sources` | quarterly: check in the first week of January, April, July and October; the page warns after about four months | Edit by hand, update each row's `checked` and `BROKER_FEES_REVIEWED`, run `brokerFees.test.ts` |
 | IMT and stamp duty (`purchaseTaxes.ts`), IMI (`propertyTax.ts`), IUC (`vehicleTax.ts`), IRS withholding and Social Security (`payroll.ts`), IAS and benefits (`unemploymentBenefit.ts`, `statePension.ts`, `sickPay.ts`) | Portal das Finanças, Diário da República, Segurança Social | each January, and again when the State Budget or a Portaria changes them | Edit by hand against the official table, update the module's year and review date, run the calculator's tests |
 
 When the data changes a number a page quotes in prose, update the pages in all six locales in the
 same pull request.
+
+## SERVER ROUTES
+
+Localized pages are prerendered; `src/pages/api/` holds the server endpoints
+(`export const prerender = false`), which run in the site's Vercel function.
+
+- `GET /api/solar-production` (`src/pages/api/solar-production.ts`): a typical year of PV
+  production from PVGIS (EU JRC) for any tilt, orientation and point in mainland Portugal,
+  Madeira or the Azores, for the solar section of the electricity comparator. The contract
+  (query, limits, rounding, coverage boxes, response) is in
+  `src/lib/calculators/solarProductionQuery.ts`, the handler in `solarProductionApi.ts`, and the
+  typical-year method in `solarPvgis.ts`, shared with `scripts/build-solar-production.mjs`.
+  Inputs are rounded (coordinates to 0.05°, tilt and azimuth to 1°, losses to 1 %) and any other
+  spelling of a query is redirected to the canonical one, so the CDN keeps one cached copy per
+  rounded query (`s-maxage` 30 days); errors are `no-store`. It keeps no store and never logs
+  coordinates. When it fails, the page falls back to the nearest district's committed table.
+- **Rate limiting** is not in the code. The rounding and the CDN cache bound how often PVGIS is
+  called. If the route needs a limit, add a Vercel Firewall rate-limit rule on the path
+  `/api/solar-production` in the Vercel dashboard (the landing project: Firewall > Rules); it is
+  configured there, not in this repository.
 
 ## DAILY DATA
 
