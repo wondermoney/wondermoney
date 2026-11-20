@@ -5493,6 +5493,64 @@
       }
     }
   },
+  "curatedLists": {
+    "common": {
+      "reviewed": "Verificata da WonderMoney il {{date}}",
+      "howTitle": "Come li abbiamo scelti",
+      "howIntro": "WonderMoney ha preparato questa lista e controllato ogni voce con queste regole alla data di revisione:",
+      "criteria": {
+        "active": "Ha pubblicato negli ultimi sei mesi, verificato sul suo sito o feed.",
+        "independent": "È educazione indipendente. Autorità di vigilanza e banche centrali sono incluse; i canali di vendita di banche, broker e società di gestione no.",
+        "noHype": "Nessuna promessa di arricchimento rapido, promozione di monete digitali speculative o segnali di trading a pagamento.",
+        "free": "Puoi seguirla gratis.",
+        "market": "È stata scelta per chi vive in Italia, non tradotta dalla lista di un altro Paese."
+      },
+      "order": "Le voci sono in ordine alfabetico, senza classifica. Non abbiamo rapporti commerciali con nessuna e i link non contengono codici di affiliazione o di tracciamento.",
+      "owner": "Il team di WonderMoney cura questa lista e ricontrolla ogni voce ogni sei mesi. Una voce può uscire dalla lista a ogni revisione.",
+      "audience": "Per chi è",
+      "value": "Cosa ti dà",
+      "applyIt": "Provalo con:",
+      "checked": "verificato il {{date}}",
+      "formats": {
+        "podcast": "Podcast",
+        "newsletter": "Newsletter",
+        "youtube": "Canale YouTube"
+      },
+      "staleTitle": "Questa lista va rivista",
+      "stale": "Abbiamo controllato queste voci l'ultima volta il {{date}}, più di sei mesi fa. Alcune potrebbero aver smesso di pubblicare o essere cambiate; controlla ciascuna prima di fidarti.",
+      "practiceTitle": "Metti in pratica un'idea",
+      "practiceIntro": "Prendi una cosa che hai ascoltato o letto e provala con i tuoi numeri."
+    },
+    "lists": {
+      "podcasts": {
+        "title": "Podcast di finanza personale",
+        "metaTitle": "Podcast di finanza personale in italiano | WonderMoney",
+        "metaDescription": "Una lista verificata di podcast italiani attivi, indipendenti e gratuiti su risparmio, investimenti e soldi di tutti i giorni, con il pubblico di ognuno.",
+        "dek": "Programmi su risparmio, investimenti e soldi di tutti i giorni che pubblicano ancora, con il pubblico di ognuno e uno strumento per mettere in pratica ciò che ascolti.",
+        "hubDescription": "Programmi attivi e indipendenti su risparmio, investimenti e soldi di tutti i giorni.",
+        "listTitle": "I podcast",
+        "latest": "Ultimo episodio il {{date}}"
+      },
+      "newsletters": {
+        "title": "Newsletter di finanza personale",
+        "metaTitle": "Newsletter di finanza personale in italiano | WonderMoney",
+        "metaDescription": "Una lista verificata di newsletter italiane attive, indipendenti e gratuite su risparmio, investimenti e consumi, con ciò che tratta ognuna.",
+        "dek": "Email su risparmio, investimenti e diritti dei consumatori che escono ancora, con il pubblico di ognuna e uno strumento per mettere in pratica ciò che leggi.",
+        "hubDescription": "Email attive e indipendenti su risparmio, investimenti e consumi.",
+        "listTitle": "Le newsletter",
+        "latest": "Ultimo numero il {{date}}"
+      },
+      "youtube": {
+        "title": "Canali YouTube di finanza personale",
+        "metaTitle": "Canali YouTube di finanza personale in italiano | WonderMoney",
+        "metaDescription": "Una lista verificata di canali YouTube italiani attivi e indipendenti che spiegano risparmio, investimenti e soldi di tutti i giorni, con il pubblico di ognuno.",
+        "dek": "Canali che spiegano risparmio, investimenti e soldi di tutti i giorni e pubblicano ancora, con il pubblico di ognuno e uno strumento per mettere in pratica ciò che guardi.",
+        "hubDescription": "Canali attivi e indipendenti che spiegano risparmio, investimenti e soldi di tutti i giorni.",
+        "listTitle": "I canali",
+        "latest": "Ultimo video il {{date}}"
+      }
+    }
+  },
   "savingsGuide": {
     "metaTitle": "Dove tenere i risparmi in Portogallo: i prodotti a confronto | WonderMoney",
     "metaDescription": "Confronta certificati di risparmio, certificati del tesoro, conti correnti remunerati, conti di risparmio, depositi vincolati e assicurazioni di capitalizzazione o PPR in Portogallo: garanzia, versamenti, prelievi, interessi e IRS.",

@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { getToolStaticPaths, getTopLevelPageStaticPaths } from "./pageStaticPaths";
+import { getCuratedListStaticPaths, getToolStaticPaths, getTopLevelPageStaticPaths } from "./pageStaticPaths";
 import { buildResourcesHub } from "./resourcesHub";
 import { buildAlternateLinks, SUPPORTED_LANGS, toLocalizedPath, toLocalizedPathname } from "./routes";
 import { isSitemapPage } from "./sitemap";
@@ -21,6 +21,7 @@ describe("resources hub routes", () => {
     const generatedPaths = [
       ...getToolStaticPaths(locale).map(({ params }) => `/${locale}/tools/${params.tool}`),
       ...getTopLevelPageStaticPaths(locale).map(({ params }) => `/${locale}/${params.page}`),
+      ...getCuratedListStaticPaths(locale).map(({ params }) => `${toLocalizedPath(routeId, locale)}/${params.list}`),
     ];
     for (const link of buildResourcesHub(locale)) {
       expect(link.href.startsWith(`/${locale}/`)).toBe(true);

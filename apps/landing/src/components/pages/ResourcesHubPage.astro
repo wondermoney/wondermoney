@@ -17,11 +17,11 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const links = buildResourcesHub(locale);
 const routeId = "pageResources";
-const cards = links.map(({ destination, href, title, description }) => ({
+const cards = links.map(({ destination, href, title, description, figure }) => ({
   href,
   title,
   description,
-  figure: figureForResource(destination),
+  figure: figure ?? figureForResource(destination),
   data: { "data-resource-destination": destination },
 }));
 ---

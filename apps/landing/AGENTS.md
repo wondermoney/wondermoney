@@ -30,6 +30,7 @@ public/                # Static assets
 | Localized URLs | `src/lib/routes.ts` | Typed localized slug map |
 | Static content expansion | `src/lib/pageStaticPaths.ts` | Top-level, feature, tool and ad pages |
 | Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
+| Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
@@ -109,6 +110,64 @@ monthly item's commentary.
   yet.
 - `src/content/content.test.ts` validates every file, its path, its references and the en/pt
   parity; run it after editing content.
+
+## CURATED RESOURCE LISTS
+
+Lists of outside resources (podcasts, newsletters and YouTube channels so far) live in
+`src/lib/resources/curatedLists/`, one module per list (`podcasts.ts`, `newsletters.ts`,
+`youtube.ts`), typed by `types.ts` and registered in `index.ts`. Each page is
+`/{locale}/{resources slug}/{list slug}` (`/pt/recursos/podcasts-financas-pessoais`), served for
+every list by one route file per locale tree, `src/pages/{locale}/{resources slug}/[list].astro`,
+and drawn by `CuratedListPage.astro` from `buildCuratedListPage` (`page.ts`). The page copy is
+under `curatedLists` in the catalogues; the entries' own lines are in the data modules.
+WonderMoney researches and writes the entries, and the owner may strike any of them.
+
+**Choosing entries.** Each locale has its own 5 to 8 entries per list, chosen for its market and
+never translated from another locale: pt Portuguese-language and Portugal-relevant, en the UK,
+Ireland and international English, es Spain, fr France and Belgium, de Germany, Austria and
+Switzerland, it Italy. An entry goes in only when all of these hold on the day it is checked:
+
+- it published in the last six months, read on its own site or feed (a podcast's RSS feed, a
+  YouTube channel's `feeds/videos.xml?channel_id=…`, a newsletter's archive or feed), never a
+  third party's claim;
+- it is independent education, not the sales channel of a bank, broker, insurer, fund house or
+  credit intermediary; regulators and central banks are welcome;
+- no get-rich-quick, crypto promotion, day trading or paid signals;
+- it is free to follow (a free tier with paid extras is fine when the free issues stand alone).
+
+**Each entry** records `name` (as published), `url` (its own site or channel page: https, no
+query string, no affiliate or tracking code), `language`, `format`, `audience` ("who it's for")
+and `value` ("what you'll get"), one line each that we write ourselves in the locale's form of
+address (pt-PT "tu", de "Sie", fr "vous" with a no-break space before `: ; ? ! %` and `€`, es "tú" and it
+"tu"), `related` (a calculator, the savings guide or a learn guide in that locale, only where one
+genuinely fits; Portugal-specific calculators in the pt list only), `checked`, `lastPublished` and
+`evidence` (the feed or archive where `lastPublished` was read). The lines name no host, author or
+other person beyond the show's own published name, and use no "best", rankings or audience sizes;
+the page sorts entries alphabetically.
+
+**Exceptions to the minimum.** A list may hold fewer than five entries only when no other
+candidate meets the criteria, and only with a named entry in `MIN_ENTRIES_EXCEPTIONS` in
+`curatedLists.test.ts`. One is open: the Portuguese newsletters have 4 (no other Portuguese
+newsletter qualified on 2026-11-20). Remove that exception, and this note, when Portefólio Perfeito
+launches its newsletter (it had only a waitlist then) or another qualifying newsletter turns up;
+the test fails once the list is back to five, as a reminder. The repository's leak check fails on some personal names:
+when an entry trips it, drop the entry rather than allowlisting the name.
+
+**Review cadence.** Re-check every entry of every list every six months from its `reviewed` date
+(the current lists: by May 2027), against the rules above. Drop entries that no longer pass, add
+replacements to keep 5 to 8, update each kept entry's `checked` and `lastPublished`, then bump
+the list's `reviewed`. The page shows the review date, and 183 days after it
+(`CURATED_LIST_STALE_AFTER_DAYS`) a note that the list is due for review, both at build time and
+in the browser. `curatedLists.test.ts` checks the counts, the fields, the URLs, the six-month
+window, the related links, the wording and the copy in every locale; run it after every edit.
+
+**Adding a list** (forums, events, courses, books): add its route id and six slugs to
+`ROUTE_SLUGS` and `CURATED_LIST_ROUTE_IDS` in `src/lib/routes.ts`, its format to `CuratedFormat`
+(`types.ts`), a module beside the others (copy `podcasts.ts`) with an existing Hairline figure, an
+entry in `CURATED_LISTS`, and its copy under `curatedLists.lists.<id>` plus
+`curatedLists.common.formats.<format>` in all six catalogues (`src/locales` and `public/locales`
+alike). The route files, the sitemap, hreflang, the language switcher and the resources hub card
+follow from those; no new page file is needed.
 
 ## CALCULATOR DATA REFRESH
 
