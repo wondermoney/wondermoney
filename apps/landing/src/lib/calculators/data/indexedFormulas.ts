@@ -172,6 +172,10 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     basis: "quarterHour",
     losses: { kind: "profile" },
     multiplier: 1,
+    // Ci from the live offer page. Galp's loss value behind ERSE's figure is not published, so this
+    // cannot be checked exactly against ERSE: at ERSE's own OMIE figure (0,15201 EUR/kWh), with the
+    // E-REDES/REN loss profile, it prices about 0,002 to 0,0045 EUR/kWh above ERSE's implied energy
+    // price, which points to a Ci of about 0,017. The ficha's 0,0159 would price about 0,002 below.
     beforeLosses: 0.0191,
     adder: 0,
     levies: 0,
