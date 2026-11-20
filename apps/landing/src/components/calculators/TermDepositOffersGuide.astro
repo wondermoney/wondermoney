@@ -42,8 +42,9 @@ const values = {
   count: String(TERM_DEPOSIT_OFFERS.length),
 };
 
+// Each item goes through t() so its {{placeholders}} are filled like any other string.
 const list = (key: string) =>
-  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+  Object.keys(t<Record<string, string>>(k(key), { returnObjects: true })).map((item) => t(`${k(key)}.${item}`, values));
 const steps = list("method.steps");
 const limits = list("limits.items");
 
