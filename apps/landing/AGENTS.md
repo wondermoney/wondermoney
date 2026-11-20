@@ -85,13 +85,14 @@ src/pages/index.astro         # Root redirect only
 ## CALCULATOR DATA REFRESH
 
 Dated data modules live in `src/lib/calculators/data/` (plus a few tables inside the calculator
-modules). Each carries its own "as of" date, which the page shows. The three open-API snapshots
-refresh themselves: `.github/workflows/landing-data-refresh.yml` runs on the 6th of every month
-(and by hand: Actions > Landing data refresh), runs their scripts and opens or updates one pull
-request from `bot/landing-data-refresh` into `develop` when the figures changed. That pull request
-gets no CI run (it is opened with `GITHUB_TOKEN`): close and reopen it before merging. A script
-that fails fails the job and leaves the data as it was. Everything else is refreshed by hand, on
-the calendar below. Run the commands from `apps/landing`.
+modules). Each carries its own "as of" date, which the page shows. The open-API snapshots refresh
+themselves: `.github/workflows/landing-data-refresh.yml` runs the market-data scripts on the 6th of
+every month and the ERSE offers script every Monday (and either set by hand: Actions > Landing
+data refresh), and opens or updates one pull request per set into `develop` when the figures
+changed, from `bot/landing-data-refresh` (market data) or `bot/landing-offers-refresh` (offers).
+Those pull requests get no CI run (they are opened with `GITHUB_TOKEN`): close and reopen them
+before merging. A script that fails fails the job and leaves the data as it was. Everything else
+is refreshed by hand, on the calendar below. Run the commands from `apps/landing`.
 
 | Module | Source | Cadence | Refresh |
 |---|---|---|---|
@@ -99,6 +100,7 @@ the calendar below. Run the commands from `apps/landing`.
 | `data/depositRates.ts` | ECB MIR deposit rates | monthly, automated | `node scripts/build-deposit-rates.mjs` |
 | `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
 | `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
+| `data/electricityOffers.ts` | ERSE price simulator export (`csvPath` in its `Settings.json`): every supplier's household electricity offer. Types in `calculators/electricityOfferTypes.ts`; loaded only with a dynamic `import()` | weekly, automated (Mondays) | `node scripts/build-electricity-offers.mjs` (`--from-file <zip>` for a saved export) |
 | `data/sp500History.ts` | Damodaran `histretSP.xls` and Shiller `ie_data.xls`, downloaded by hand | each January, after the year-end data is out | `node scripts/build-sp500-history.mjs <histretSP.xls> <date> <ie_data.xls> <date>` |
 | `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
 | `data/erseTariffs.ts` | ERSE tariff documents (diretivas, price simulator) | quarterly: check in the first week of January, April, July and October | Edit by hand, bump `version`, update the "downloaded on" date |
