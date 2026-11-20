@@ -43,6 +43,7 @@ const index = "mb-2 block font-mono text-sm font-medium tracking-normal text-pri
   canonicalUrl={page.canonicalUrl}
   alternateLinks={buildAlternateLinks(page.list.routeId)}
   layout="article"
+  landingSource={page.list.routeId}
   structuredData={page.structuredData}
   locale={locale}
 >
@@ -105,7 +106,7 @@ const index = "mb-2 block font-mono text-sm font-medium tracking-normal text-pri
               {section.entries.map((entry) => (
                 <li class="flex min-w-0 flex-col rounded-card border border-border bg-card p-6" data-curated-entry data-ends={entry.ends}>
                   <h3 class="break-words text-lg font-semibold leading-7 tracking-[-0.01em]">
-                    <a href={entry.url} rel="noopener noreferrer" class="group underline decoration-border underline-offset-4 hover:decoration-current">
+                    <a href={entry.url} rel="noopener noreferrer" data-curated-entry-link={entry.format} class="group underline decoration-border underline-offset-4 hover:decoration-current">
                       {entry.name}
                       <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="ml-1 inline size-3.5 align-baseline text-muted-foreground group-hover:text-primary">
                         <path d="M6 3h7v7M13 3L4 12" />
@@ -176,6 +177,12 @@ const index = "mb-2 block font-mono text-sm font-medium tracking-normal text-pri
 </ContentLayout>
 
 <script>
+  import { trackCuratedListPage } from "@/lib/curatedListTracking";
+
+  // One view event, and one per entry followed, both only with analytics consent.
+  const article = document.querySelector<HTMLElement>("[data-curated-list]");
+  if (article) trackCuratedListPage(article);
+
   // The page is prerendered: show the review note once the list has gone unreviewed too long,
   // counted from today, not only from the build.
   const note = document.querySelector<HTMLElement>("[data-curated-stale]");

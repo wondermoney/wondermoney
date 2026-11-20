@@ -15,6 +15,8 @@ export type AuthCallbackResponse = {
 export type AuthCallbackBody = {
   /** Household invite token from `/join`; the API links the new user into the owner's tenant. */
   readonly inviteToken?: string;
+  /** The website page the signup came from (`lib/analytics/landing-source.ts`), only with consent. */
+  readonly landingSource?: string;
   readonly locale?: string;
 };
 

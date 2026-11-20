@@ -5,6 +5,7 @@ import Footer from "@/components/shared/Footer";
 import StructuredData from "@/components/shared/StructuredData.astro";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
+import type { LandingSource } from "@/lib/landingSource";
 
 interface BreadcrumbItem {
 	label: string;
@@ -26,6 +27,8 @@ interface Props {
 	 * and its own containers, so the bar, the freshness pill and the padded main are left out.
 	 */
 	layout?: "default" | "article";
+	/** A tool or curated list page's route id, for landing attribution (`lib/landingSource.ts`). */
+	landingSource?: LandingSource;
 	locale: Lang;
 }
 
@@ -40,6 +43,7 @@ const {
 	breadcrumbs,
 	freshnessLabel,
 	layout = "default",
+	landingSource,
 	locale,
 } =
 	Astro.props;
@@ -56,6 +60,7 @@ const homeLabel = translate("nav.home");
 	ogType={ogType}
 	canonicalUrl={canonicalUrl}
 	alternateLinks={alternateLinks}
+	landingSource={landingSource}
 	locale={locale}
 >
 	<Header locale={locale} client:load />

@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
+import { LANDING_SOURCE_PARAM } from "@/lib/analytics/landing-source";
 import { SIGNUP_COMPLETION_QUERY_PARAMS } from "@/lib/analytics/signup";
 import api from "@/lib/api/api";
 import { getServerApiUrl } from "@/lib/api/server-api-url";
@@ -97,6 +98,10 @@ async function completeAuth(request: NextRequest) {
   // A household invite carried through single sign-on (OidcSignInButton); the API checks it
   // against the signed-in address and ignores it for an existing account.
   const inviteToken = request.nextUrl.searchParams.get("invite") || undefined;
+  // The website page a Google signup came from. SignupForm adds it to the callback URL only
+  // with the app's analytics consent; the API drops any value that is not a route id.
+  const landingSource =
+    request.nextUrl.searchParams.get(LANDING_SOURCE_PARAM) || undefined;
 
   let session: BetterAuthSession | null;
   try {
@@ -120,7 +125,7 @@ async function completeAuth(request: NextRequest) {
   try {
     const { data: callbackResult } = await api.post<AuthCallbackResponse>(
       "/v1/auth/callback",
-      { inviteToken, locale },
+      { inviteToken, landingSource, locale },
       {
         baseURL: getServerApiUrl(),
         // The API refuses a cookie-authenticated POST without an allowed

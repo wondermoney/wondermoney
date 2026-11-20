@@ -1,12 +1,14 @@
 import { readConsentDecision } from "./consent";
+import { getLandingSource } from "./landingSource";
 
 /**
- * Same project as the app (PostHog project 3621, EU region). That is the point
- * of putting PostHog here at all: `cross_subdomain_cookie` defaults to true for
- * `wonder.money`, so a visitor's distinct id survives the hop from this site to
- * `app.wonder.money`, and a landing-page visit can be joined to the signup and
- * activation events the product already emits. A separate project would have
- * given us LP pageview counts and no funnel.
+ * Same project as the app (PostHog project 3621, EU region), so the site's
+ * events and the app's signup and activation events can be read side by side.
+ * The app keeps no PostHog identity across visits (in-memory persistence, no
+ * person profiles), so a visitor is not joined across the hop to
+ * `app.wonder.money`: a tool or list page is linked to its signups only by its
+ * route id, which every event from that page carries as `landing_source` and
+ * its signup links carry with consent (`landingSource.ts`).
  *
  * The key is publishable — it ships in the page bundle either way, exactly like
  * the GTM container id next door in `gtm.ts`. It is inlined rather than read
@@ -88,6 +90,14 @@ export function applyPostHogConsent(consent: { analytics: boolean }): void {
         // makes the integration impossible to verify locally, because captures
         // are silently discarded while init still looks perfectly healthy.
         opt_out_useragent_filter: import.meta.env.DEV,
+        // The tool or list page's route id on every event it sends, the automatic
+        // page view included: a page's visits, uses and next-step clicks group by it,
+        // whatever the locale's slug.
+        before_send: (event) => {
+          const source = getLandingSource();
+          if (event && source) event.properties.landing_source = source;
+          return event;
+        },
         debug: import.meta.env.DEV,
       });
       client = posthog as unknown as PostHogClient;

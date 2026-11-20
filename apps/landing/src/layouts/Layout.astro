@@ -8,6 +8,7 @@ import StickyMobileCta from "@/components/shared/StickyMobileCta";
 import SEO from "@/components/shared/SEO.astro";
 import StructuredData from "@/components/shared/StructuredData.astro";
 import type { Lang } from "@/lib/i18nLocale";
+import type { LandingSource } from "@/lib/landingSource";
 
 const organizationSchema = {
   "@context": "https://schema.org",
@@ -28,6 +29,8 @@ interface Props {
   noindex?: boolean;
   noindexFollow?: boolean;
   alternateLinks?: Array<{ hrefLang: string; href: string }>;
+  /** A tool or curated list page's route id, for landing attribution (`lib/landingSource.ts`). */
+  landingSource?: LandingSource;
   locale: Lang;
 }
 
@@ -40,6 +43,7 @@ const {
   noindex = false,
   noindexFollow = false,
   alternateLinks,
+  landingSource,
   locale,
 } = Astro.props;
 const enableReactDevTools =
@@ -87,7 +91,7 @@ const enableReactDevTools =
       locale={locale}
     />
   </head>
-  <body>
+  <body data-landing-source={landingSource}>
     <PivotAnnouncementBanner locale={locale} client:load />
     <div class="pb-16 md:pb-0">
       <slot />
@@ -95,5 +99,10 @@ const enableReactDevTools =
     <ConsentBanner locale={locale} client:load />
     <StickyMobileCta locale={locale} client:idle />
     <StructuredData data={organizationSchema} />
+    <script>
+      // Does nothing on a page without `data-landing-source`.
+      import { installLandingSourceLinks } from "@/lib/landingSource";
+      installLandingSourceLinks();
+    </script>
   </body>
 </html>

@@ -36,6 +36,7 @@ public/                # Static assets
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
 | Visual rules | `DESIGN.md` | Tokens shared with `apps/web/DESIGN.md` |
 | Redirects | `vercel.json` | Host-scoped 301s for retired pages |
+| Analytics and attribution | `src/lib/gtm.ts`, `posthog.ts`, `landingSource.ts`, `curatedListTracking.ts` | Every event is consent-gated; how tool and list pages are tied to signups and activations is in `docs/landing-attribution.md` at the repository root |
 
 ## CONVENTIONS
 
