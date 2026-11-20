@@ -1,13 +1,20 @@
 name: Landing data refresh
 
-# Regenerates the dated market-data snapshots behind the landing tools (Euribor from BPstat,
-# deposit rates from the ECB, household electricity prices from Eurostat, fuel prices from DGEG)
-# and, when the figures
-# changed, opens or updates ONE pull request into develop from the fixed branch
-# bot/landing-data-refresh. A run with no new figures opens nothing.
+# Regenerates the dated data snapshots behind the landing tools and, when the figures changed,
+# opens or updates one pull request into develop per set of snapshots. A run with no new figures
+# opens nothing. Two sets, each with its own fixed branch:
 #
-# The sources publish monthly, so it runs on the 6th. The data modules and their other refresh
-# paths (S&P 500, Portugal CPI, ERSE, the tax tables) are listed in apps/landing/AGENTS.md.
+#   market  Euribor from BPstat, deposit rates from the ECB, household electricity prices from
+#           Eurostat, fuel prices from DGEG. The sources publish monthly, so it runs on the 6th.
+#           Branch bot/landing-data-refresh.
+#   offers  Every supplier's electricity offer, from ERSE's price simulator export. Offers start
+#           and end every week, so it runs every Monday. Branch bot/landing-offers-refresh.
+#
+# A separate branch per set keeps a weekly offers run from rebuilding (and dropping) a market
+# refresh that is still waiting for review, and a failure in one set from blocking the other.
+# Run either by hand from Actions > Landing data refresh. The data modules and their other
+# refresh paths (S&P 500, Portugal CPI, ERSE tariffs, the tax tables) are listed in
+# apps/landing/AGENTS.md.
 #
 # A fetch or parse failure fails the job before anything is committed: the data stays as it is.
 #
@@ -18,17 +25,26 @@ name: Landing data refresh
 # Creating the pull request needs the repository setting "Allow GitHub Actions to create and
 # approve pull requests" (Settings > Actions > General). Without it the push still happens and the
 # job fails at the pull request step; open it by hand (gh pr create --base develop --head
-# bot/landing-data-refresh) and later runs keep it current.
+# <the set's branch>) and later runs keep it current.
 on:
   schedule:
+    # The set each schedule refreshes is chosen from github.event.schedule in the job below: keep
+    # these strings and those in "Pick the snapshots" identical.
     - cron: '17 6 6 * *'
+    - cron: '41 6 * * 1'
   workflow_dispatch:
+    inputs:
+      set:
+        description: Which snapshots to refresh
+        type: choice
+        options: [market, offers]
+        default: market
 
 permissions:
   contents: write
   pull-requests: write
 
-# One run at a time; the branch is rebuilt from develop on every run.
+# One run at a time; a set's branch is rebuilt from develop on every run of that set.
 concurrency:
   group: landing-data-refresh
   cancel-in-progress: false
@@ -41,9 +57,37 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      BRANCH: bot/landing-data-refresh
       DATA_DIR: apps/landing/src/lib/calculators/data
     steps:
+      - name: Pick the snapshots
+        id: set
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          INPUT_SET: ${{ inputs.set }}
+        run: |
+          set -euo pipefail
+          case "${SCHEDULE:-}" in
+            '41 6 * * 1') set=offers ;;
+            '17 6 6 * *') set=market ;;
+            *) set="${INPUT_SET:-market}" ;;
+          esac
+          if [ "$set" = offers ]; then
+            {
+              echo "scripts=build-electricity-offers"
+              echo "branch=bot/landing-offers-refresh"
+              echo "title=chore(landing): refresh the electricity offers"
+              echo "tests=electricityOffers"
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices"
+              echo "branch=bot/landing-data-refresh"
+              echo "title=chore(landing): refresh the market-data snapshots"
+              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision"
+            } >> "$GITHUB_OUTPUT"
+          fi
+          echo "set=$set" >> "$GITHUB_OUTPUT"
+          echo "Refreshing the $set snapshots." | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v7
         with:
           ref: develop
@@ -53,11 +97,13 @@ jobs:
         uses: ./.github/actions/setup-workspace
       - name: Fetch the snapshots
         working-directory: apps/landing
+        env:
+          SCRIPTS: ${{ steps.set.outputs.scripts }}
         run: |
           set -euo pipefail
           # Each script writes its module only after the fetch and the parse succeed, and a
           # failure stops the job here, so a failed run leaves the data as it was.
-          for script in build-euribor build-deposit-rates build-electricity-prices build-fuel-prices; do
+          for script in $SCRIPTS; do
             echo "::group::$script"
             node "scripts/$script.mjs" || { echo "::error::scripts/$script.mjs failed: the source did not answer or its format changed. The data was left as it was."; exit 1; }
             echo "::endgroup::"
@@ -80,13 +126,19 @@ jobs:
       - name: Run the related landing tests
         if: steps.changes.outputs.changed == 'true'
         working-directory: apps/landing
+        env:
+          TESTS: ${{ steps.set.outputs.tests }}
         run: |
           set -euo pipefail
-          VITEST_MAX_WORKERS=$(nproc) pnpm exec vitest run euribor depositRate electricity fuel termDeposit rateRevision
+          # shellcheck disable=SC2086 # TESTS is a list of test name filters.
+          VITEST_MAX_WORKERS=$(nproc) pnpm exec vitest run $TESTS
       - name: Open or update the pull request
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.set.outputs.branch }}
+          TITLE: ${{ steps.set.outputs.title }}
+          SET: ${{ steps.set.outputs.set }}
         run: |
           set -euo pipefail
           repo="$GITHUB_REPOSITORY"
@@ -106,15 +158,16 @@ jobs:
           row "Deposit rates (ECB MIR)" depositRates.ts lastMonth retrievedOn
           row "Electricity prices (Eurostat)" electricityPrices.ts lastPeriod updatedOn
           row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
+          row "Electricity offers (ERSE export date)" electricityOffers.ts exportedOn fetchedOn
 
           body_file=$(mktemp)
           {
-            echo "Scheduled refresh of the landing market-data snapshots, generated by"
+            echo "Scheduled refresh of the landing $SET snapshots, generated by"
             echo "\`.github/workflows/landing-data-refresh.yml\` (run $GITHUB_SERVER_URL/$repo/actions/runs/$GITHUB_RUN_ID)."
             echo
             printf '%s' "$summary"
             echo
-            echo "The related landing tests (Euribor, deposit rates, electricity, fuel, term deposit, rate revision) passed in the workflow."
+            echo "The related landing tests passed in the workflow."
             echo
             echo "This pull request was opened with the workflow token, so CI did not start. Close and reopen it to run CI before merging."
             echo "Review the diff for plausible figures: the scripts only check the shape of the response."
@@ -124,7 +177,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C "$BRANCH"
           git add -- "$DATA_DIR"
-          git commit -m "chore(landing): refresh the market-data snapshots"
+          git commit -m "$TITLE"
           # The branch belongs to this workflow and is rebuilt from develop on every run.
           git push --force origin "$BRANCH"
 
@@ -134,7 +187,7 @@ jobs:
             echo "Updated pull request #$existing" | tee -a "$GITHUB_STEP_SUMMARY"
           else
             url=$(gh pr create --repo "$repo" --base develop --head "$BRANCH" \
-              --title "chore(landing): refresh the market-data snapshots" \
+              --title "$TITLE" \
               --body-file "$body_file" --label skip-release-notes)
             echo "Opened $url" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
