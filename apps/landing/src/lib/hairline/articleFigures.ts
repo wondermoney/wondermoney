@@ -150,6 +150,7 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolElectricityIndex: "meter",
   toolElectricityTariffComparison: "meter",
   toolFuelPrices: "pump",
+  toolGoldPrice: "safe",
   toolFreeBankAccounts: "wallet",
   toolRemuneratedAccounts: "wallet",
   toolPersonalLoan: "wallet",

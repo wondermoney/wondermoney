@@ -4526,10 +4526,10 @@
     "fuelPrices": {
       "title": "Fuel prices in Portugal and monthly fuel cost",
       "shortName": "Fuel prices",
-      "subtitle": "See the official average price of diesel, petrol and LPG in Portugal, its history, and what your driving costs a month.",
-      "description": "Official DGEG average fuel prices in mainland Portugal with weekly change and history, plus a monthly fuel cost calculator.",
-      "pageTitle": "Fuel Prices in Portugal: Official Average and Monthly Cost",
-      "pageDescription": "The latest DGEG average price of diesel, petrol 95 and LPG in Portugal with week-on-week change and five-year history, and a calculator for your monthly fuel cost. Official data, no forecast.",
+      "subtitle": "See the official average price of diesel, petrol and LPG in Portugal, the cheapest stations in your district and municipality, and what your driving costs a month.",
+      "description": "Official DGEG average fuel prices in mainland Portugal, the cheapest stations by district and municipality, and a monthly fuel cost calculator.",
+      "pageTitle": "Fuel Prices in Portugal: Cheapest Stations and Official Average",
+      "pageDescription": "The cheapest stations for diesel, petrol 95 and LPG by district and municipality, refreshed daily from DGEG, the official average price with five years of history, and a monthly fuel cost calculator. No forecast.",
       "fuels": {
         "diesel": "Diesel (gasóleo simples)",
         "gasoline95": "Petrol 95 (gasolina simples 95)",
@@ -4597,7 +4597,8 @@
           "title": "How to read this page",
           "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
           "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
-          "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week."
+          "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week.",
+          "stations": "Below them are the cheapest stations: the {{stationsDistrict}} cheapest of mainland Portugal or of a district, or the {{stationsMunicipality}} cheapest of a municipality, for the fuel you choose. Each shows the price, the station and its brand, the address, a map link and when the station last updated the price."
         },
         "example": {
           "title": "Worked example",
@@ -4613,21 +4614,25 @@
             "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
             "d": "Year: twelve such months."
           },
-          "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price."
+          "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price.",
+          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres."
         },
         "data": {
           "title": "Data and sources",
           "dgeg": "Prices: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário of road fuels in mainland Portugal, for gasóleo simples, gasolina simples 95 and GPL auto. The latest day is {{asOf}}; this page's copy was built on {{fetched}}. The history is one DGEG value every seven days back to {{first}}, copied as DGEG publishes it.",
           "terms": "DGEG states that this information is free and may be used freely, provided DGEG is named as the source, the date of the latest update is shown and the information is reproduced faithfully. The prices are reported by the stations, which are responsible for them.",
           "dgegLink": "DGEG, daily average price (Preço Médio Diário)",
-          "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}})."
+          "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}}).",
+          "stations": "Stations: DGEG's prices per station, as the stations report them, for the same three fuels. The snapshot was taken on {{stationsDate}} at {{stationsTime}} UTC, and each price keeps the date and time the station last updated it.",
+          "stationsLink": "DGEG, fuel prices by station",
+          "stationsRefresh": "The station list is a snapshot taken once a day, when the site is rebuilt, not a live feed. If DGEG does not answer or its data fails the checks, the page keeps the previous snapshot and shows its date ({{stationsDate}})."
         },
         "limits": {
           "title": "What these figures leave out",
           "items": {
             "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
             "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
-            "stations": "No stations: this page names no station and ranks none. DGEG's own site lists prices by station if you want to look.",
+            "stations": "Stations: the list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump.",
             "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
             "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
             "education": "Educational use only, not advice."
@@ -4641,6 +4646,172 @@
           "carLoanBody": "Add the instalment to fuel to see what the car costs in total.",
           "vehicleTaxLink": "Vehicle tax calculator",
           "vehicleTaxBody": "Estimate the yearly vehicle tax, another cost of owning a car."
+        }
+      },
+      "stations": {
+        "title": "Cheapest stations",
+        "intro": "The cheapest stations for each fuel in mainland Portugal, in a district or in a municipality, from the prices the stations report to DGEG.",
+        "asOf": "Snapshot of DGEG's station prices taken on {{date}} at {{time}} UTC. Each price shows when the station last updated it.",
+        "stale": "This list is {{days}} days old: the daily refresh has not run since {{date}}. Prices may have changed, so check at the station before you go.",
+        "fuel": "Fuel type",
+        "district": "District",
+        "municipality": "Municipality",
+        "mainland": "All of mainland Portugal",
+        "allMunicipalities": "All municipalities of {{district}}",
+        "pickDistrict": "Pick a district first",
+        "loading": "Loading the stations of {{district}}…",
+        "loadError": "The list for this district could not be loaded. Reload the page to try again.",
+        "none": "No station in {{area}} reports a price for {{fuel}}. Pick the whole district to see the cheapest nearby.",
+        "summary": "Stations with a price for {{fuel}} in {{area}}: {{count}}. Median price: {{median}}. The cheapest:",
+        "map": "See on the map",
+        "updated": "Updated {{date}}",
+        "saving": "The cheapest here is {{perLitre}} below the median: {{perTank}} less on a {{litres}} L tank.",
+        "noSaving": "Here the cheapest station charges the median price.",
+        "nextStepCta": "Save the monthly difference toward a goal",
+        "note": "Prices as the stations report them to DGEG, which publishes them; each station is responsible for its price. Prices can change during the day, and discounts from fuel cards and apps are not included."
+      }
+    },
+    "goldPrice": {
+      "title": "Gold price per gram in euro and gold value calculator",
+      "shortName": "Gold price",
+      "subtitle": "See the latest price of a gram of gold in euro and what your gold is worth by weight and karat, from 24k to 19.2k Portuguese gold.",
+      "description": "The price of a gram of gold in euro from a central bank, dated, and a calculator for the metal value of gold by weight and karat.",
+      "pageTitle": "Gold Price per Gram in Euro and Gold Value Calculator",
+      "pageDescription": "The price of a gram of pure gold in euro, dated, from Narodowy Bank Polski at the ECB rate, and a calculator for the metal value of 24k, 22k, 19.2k, 18k, 14k and 9k gold. Buyers pay less than this.",
+      "purities": {
+        "k24": "{{karat}} karat ({{fineness}}‰), pure gold",
+        "k22": "{{karat}} karat ({{fineness}}‰)",
+        "k19_2": "{{karat}} karat ({{fineness}}‰), Portuguese gold",
+        "k18": "{{karat}} karat ({{fineness}}‰)",
+        "k14": "{{karat}} karat ({{fineness}}‰)",
+        "k9": "{{karat}} karat ({{fineness}}‰)"
+      },
+      "fields": {
+        "grams": "Weight",
+        "purity": "Purity",
+        "price": "Price of pure gold per gram",
+        "resetPrice": "Use the latest price ({{price}}/g)",
+        "offer": "Offer from a buyer (optional)"
+      },
+      "help": {
+        "grams": "The weight of the piece in grams, from a scale that weighs to 0.1 g or from the receipt. Stones and other metals add weight but no gold.",
+        "purity": "The fineness stamped in the hallmark: 800 is Portuguese gold (19.2k), 750 is 18k. Without a mark, ask an assay office or a jeweller.",
+        "price": "Starts at the latest price of pure gold, {{price}}/g on {{date}}. Change it to see the value at another price.",
+        "offer": "What a shop or buyer offered you, to see it as a share of the metal value. Leave it empty to skip."
+      },
+      "errors": {
+        "required": "Enter a valid number.",
+        "negative": "This cannot be negative.",
+        "tooLarge": "Enter {{max}} or less.",
+        "zero": "Enter a value above zero.",
+        "summary": "Check the highlighted fields to see the value."
+      },
+      "result": {
+        "value": "Metal value of the gold",
+        "pureGrams": "Pure gold in the piece",
+        "perGram": "Metal value per gram of the piece",
+        "nothing": "With no weight there is no gold to value.",
+        "offerBelow": "The offer is {{share}} of the metal value, {{gap}} below it.",
+        "offerAbove": "The offer is {{share}} of the metal value, {{gap}} above it. Check the weight and the purity.",
+        "offerNoValue": "With no metal value, the offer cannot be compared.",
+        "buyers": "Gold buyers pay less than this. The metal value is what the gold itself is worth at the reference price, before the buyer's margin and the cost of assaying and refining.",
+        "netWorth": "Gold you own is part of your wealth. Count it at {{amount}}, or at what a buyer would really pay, and update it when the price moves."
+      },
+      "notes": {
+        "assumptions": "Estimate: weight times fineness times the price of pure gold. It values the metal only, not the work, the stones or the brand. Not an offer or advice."
+      },
+      "latest": {
+        "title": "Latest gold price",
+        "asOf": "Price of {{date}}: Narodowy Bank Polski's price of pure gold, in euro at the ECB rate of the same day.",
+        "stale": "This price is {{days}} days old: the daily refresh has not brought a newer one since {{date}}. The price of gold may have moved since.",
+        "perGram": "Pure gold (24k), per gram",
+        "perOunce": "Pure gold, per troy ounce (31.1 g)",
+        "portuguese": "Portuguese gold (19.2k), per gram",
+        "portugueseNote": "800 thousandths of the price of pure gold",
+        "dayChange": "{{percent}} since {{date}}",
+        "periodChange": "{{percent}} since {{date}}",
+        "note": "A reference price of the metal, not what a shop pays or charges. It is a price of the past, not a forecast: this page does not predict where gold goes next."
+      },
+      "recent": {
+        "title": "Recent prices",
+        "intro": "The price of a gram of pure gold on the latest days NBP published, with the zloty price and the ECB rate it was converted with.",
+        "caption": "Price of a gram of pure gold on recent days, in euro and in zloty, and the euro rate",
+        "date": "Date",
+        "eurPerGram": "Euro per gram",
+        "plnPerGram": "Zloty per gram (NBP)",
+        "rate": "Zloty per euro (ECB)",
+        "asOf": "Data as of {{date}}. This page's copy was built on {{fetched}}. Sources: Narodowy Bank Polski (gold price) and the European Central Bank (euro reference rate)."
+      },
+      "nextStepHeadline": "Count your gold in your net worth",
+      "nextStepDescription": "Gold, jewellery and other things you own are part of your wealth. Add them to WonderMoney next to your accounts and investments and see the whole picture.",
+      "nextStepCta": "Include physical assets in your net worth",
+      "guide": {
+        "read": {
+          "title": "How to read this page",
+          "price": "The top of the page shows the price of a gram of pure gold in euro on {{asOf}}, about {{ounce}} per troy ounce, and what a gram of 19.2k Portuguese gold is worth at that price.",
+          "calculator": "The calculator turns a piece of gold into its metal value. You give the weight and the purity; the price starts at the latest one and you can change it. Enter a buyer's offer to see what share of the metal value it is.",
+          "noForecast": "This page does not forecast. It shows a published price and what your gold is worth at it; it does not say where the price goes next or whether to buy or sell."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "A {{grams}} chain in Portuguese gold (19.2k, 800 thousandths) holds {{grams}} times 0.8, which is {{pureGrams}} of pure gold. At {{price}} its metal is worth {{value}}.",
+          "ring": "A 4 g ring in 18k gold (750 thousandths) holds {{ringPure}} of pure gold, worth {{ringValue}} at the same price."
+        },
+        "purity": {
+          "title": "Karats and fineness",
+          "intro": "The purity of gold is given in karats, out of 24, or in thousandths, the number stamped in the hallmark. These are the six legal finenesses of gold in Portugal:",
+          "items": {
+            "k24": "24k, 999 thousandths: pure gold, as in investment bars and coins.",
+            "k22": "22k, 916: gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
+            "k19_2": "19.2k, 800: Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
+            "k18": "18k, 750: the most common fineness of jewellery in Europe.",
+            "k14": "14k, 585: harder, cheaper jewellery.",
+            "k9": "9k, 375: the lowest legal fineness."
+          }
+        },
+        "method": {
+          "title": "How it is calculated",
+          "intro": "The page does four things:",
+          "steps": {
+            "a": "Price: NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
+            "b": "Pure gold: the weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
+            "c": "Value: the grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
+            "d": "Offer: when you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+          }
+        },
+        "buyers": {
+          "title": "Why buyers pay less than the metal value",
+          "below": "A shop that buys gold pays less than the metal value: it melts the piece, pays for assaying and refining, and keeps a margin. How much less varies from shop to shop, so ask more than one and compare each offer with the value here.",
+          "jewellery": "New jewellery costs more than its metal value: the price includes the work, the design, the brand and VAT. Selling it later returns the metal at most, not what you paid.",
+          "tips": "Before you sell, weigh the piece, check the hallmark, ask for the offer per gram and the fineness the buyer assumed, and keep a written receipt."
+        },
+        "data": {
+          "title": "Data and sources",
+          "nbp": "Gold price: Narodowy Bank Polski (NBP), the central bank of Poland, publishes each business day the price of 1 g of gold of 1000 fineness that it calculates, in zloty, through its public API. The latest day is {{asOf}}; this page's copy was built on {{fetched}}.",
+          "why": "Why not the LBMA Gold Price: that benchmark, set twice a day in London in US dollars, is administered by ICE Benchmark Administration, which requires a licence to pass it on to others, even delayed. NBP's price is a central bank publication offered to the public through an open API, with no licence or key, so this page uses it and names NBP as the source.",
+          "ecb": "Euro: the ECB euro reference rate for the zloty on the same day, which the European Central Bank publishes for information. A day with only one of the two figures is skipped.",
+          "nbpLink": "NBP, current gold price",
+          "ecbLink": "ECB, euro reference rate for the Polish zloty",
+          "refresh": "The page reads a saved snapshot and never calls NBP or the ECB while you use it. The site is rebuilt every day with a new snapshot. A refresh that fails or returns implausible figures is refused, and the page keeps the last good price with its date ({{asOf}})."
+        },
+        "limits": {
+          "title": "What this value leaves out",
+          "items": {
+            "metal": "Metal only: the value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
+            "buyers": "Not a selling price: buyers pay less, and a shop selling gold charges more.",
+            "purity": "Purity: the calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
+            "reference": "Reference price: NBP's daily price, not a live quote. The market moves during the day.",
+            "education": "Educational use only, not advice."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "netWorthLink": "Net worth calculator",
+          "netWorthBody": "Add your gold to what you own and owe and see your net worth.",
+          "inflationLink": "Inflation calculator",
+          "inflationBody": "See how prices have changed and what money was worth in other years.",
+          "investmentReturnLink": "Investment return calculator",
+          "investmentReturnBody": "See what an investment returned over the years."
         }
       }
     },

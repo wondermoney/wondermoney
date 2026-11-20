@@ -141,11 +141,39 @@ describe("fuel prices tool page", () => {
 		expect(en.latest.note).toContain("not a forecast")
 	})
 
-	it("names no station or brand", () => {
+	it("names no station or brand in its own copy: station names come from DGEG's data", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = JSON.stringify(readLocale("src/locales", lang).tools.fuelPrices)
 			expect(copy).not.toMatch(/\b(Galp|Repsol|BP|Cepsa|Moeve|Prio|Shell|Intermarch[eé]|Continente|Auchan)\b/)
 		}
+	})
+
+	it("dates the station snapshot, names DGEG and offers the goal next step, in every locale", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const copy = readLocale("src/locales", lang).tools.fuelPrices as unknown as {
+				stations: Record<string, string>
+				guide: { data: { stations: string; stationsRefresh: string } }
+			}
+			expect(copy.stations.asOf).toContain("{{date}}")
+			expect(copy.stations.asOf).toContain("{{time}}")
+			expect(copy.stations.asOf).toContain("DGEG")
+			expect(copy.stations.stale).toContain("{{days}}")
+			expect(copy.stations.updated).toContain("{{date}}")
+			expect(copy.stations.note).toContain("DGEG")
+			expect(copy.guide.data.stations).toContain("{{stationsDate}}")
+			expect(copy.guide.data.stationsRefresh).toContain("{{stationsDate}}")
+		}
+		expect(readLocale("src/locales", "en").tools.fuelPrices.stations).toMatchObject({
+			nextStepCta: "Save the monthly difference toward a goal",
+		})
+	})
+
+	it("lists stations without asking where the visitor is or sending anything about them", () => {
+		const source = readSource("../../components/calculators/CheapestStations.tsx")
+		expect(source).toContain('pushGtmEvent({ event: "tool_used", tool: "fuel_stations", page_type: getPageType() })')
+		expect(source).toContain('toLocalizedPath("featureGoals", locale)')
+		expect(source).not.toMatch(/geolocation|localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest/)
+		expect(readSource("../../components/calculators/FuelPricesComp.tsx")).toContain("<CheapestStations />")
 	})
 
 	it("asks for a review of the transport allowance as the next step, in every locale", () => {

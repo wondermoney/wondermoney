@@ -4526,10 +4526,10 @@
     "fuelPrices": {
       "title": "Precio de los combustibles en Portugal y coste mensual",
       "shortName": "Precio de los combustibles",
-      "subtitle": "Consulta el precio medio oficial del gasóleo, la gasolina y el GLP en Portugal, su histórico y lo que te cuesta conducir al mes.",
-      "description": "Precios medios oficiales de la DGEG de los combustibles en Portugal continental, con variación semanal e histórico, y una calculadora del coste mensual de combustible.",
-      "pageTitle": "Precio de los Combustibles en Portugal: Media Oficial y Coste Mensual",
-      "pageDescription": "El último precio medio de la DGEG del gasóleo, la gasolina 95 y el GLP en Portugal, con la variación semanal y cinco años de histórico, y una calculadora de tu coste mensual de combustible. Datos oficiales, sin predicciones.",
+      "subtitle": "Consulta el precio medio oficial del gasóleo, la gasolina y el GLP en Portugal, las gasolineras más baratas de tu distrito y municipio, y cuánto te cuesta conducir al mes.",
+      "description": "Precios medios oficiales de la DGEG en Portugal continental, las gasolineras más baratas por distrito y municipio, y una calculadora del coste mensual de combustible.",
+      "pageTitle": "Precio del Combustible en Portugal: Gasolineras Más Baratas y Media Oficial",
+      "pageDescription": "Las gasolineras más baratas de gasóleo, gasolina 95 y GLP por distrito y municipio, actualizadas cada día con datos de la DGEG, el precio medio oficial con cinco años de historial y una calculadora del coste mensual. Sin previsiones.",
       "fuels": {
         "diesel": "Gasóleo (gasóleo simples)",
         "gasoline95": "Gasolina 95 (gasolina simples 95)",
@@ -4597,7 +4597,8 @@
           "title": "Cómo leer esta página",
           "prices": "En la parte superior está el último precio medio nacional por litro del gasóleo, la gasolina 95 y el GLP, tal como lo publicó la DGEG para el {{asOf}}, y cuánto se movió cada uno en una semana: gasóleo {{dieselChange}} y gasolina {{gasolineChange}} respecto a la semana anterior.",
           "calculator": "La calculadora convierte tu conducción en un coste mensual de combustible. Indicas la distancia, el consumo en litros por 100 km y el combustible; el precio empieza en la última media y puedes cambiarlo por el que pagas de verdad.",
-          "noForecast": "Esta página no hace previsiones. Muestra lo que midió la DGEG y lo que cuesta tu conducción a ese precio; no dice cuál será el precio la semana que viene."
+          "noForecast": "Esta página no hace previsiones. Muestra lo que midió la DGEG y lo que cuesta tu conducción a ese precio; no dice cuál será el precio la semana que viene.",
+          "stations": "Debajo están las gasolineras más baratas: las {{stationsDistrict}} más baratas de Portugal continental o de un distrito, o las {{stationsMunicipality}} más baratas de un municipio, para el combustible que elijas. Cada una muestra el precio, la estación y su marca, la dirección, un enlace al mapa y cuándo actualizó la estación el precio por última vez."
         },
         "example": {
           "title": "Ejemplo práctico",
@@ -4613,21 +4614,25 @@
             "c": "Coste: litros por el precio por litro que indicas, redondeado al céntimo.",
             "d": "Año: doce meses así."
           },
-          "change": "La variación semanal es la última media de la DGEG menos la de siete días antes, en euros por litro y como porcentaje del precio anterior."
+          "change": "La variación semanal es la última media de la DGEG menos la de siete días antes, en euros por litro y como porcentaje del precio anterior.",
+          "stations": "Las gasolineras más baratas son los precios por estación de la DGEG ordenados de menor a mayor; en caso de empate va primero el precio actualizado más recientemente. Se dejan fuera los precios sin actualizar desde hace 30 días y los que están muy fuera del rango habitual (lo más probable, un error al teclear). La mediana es el precio central de todas las estaciones de la zona, y el ahorro en un depósito es la mediana menos el precio más barato, por 50 litros."
         },
         "data": {
           "title": "Datos y fuentes",
           "dgeg": "Precios: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário de los combustibles de carretera en Portugal continental, para gasóleo simples, gasolina simples 95 y GPL auto. El último día es el {{asOf}}; la copia de esta página se generó el {{fetched}}. El histórico es un valor de la DGEG cada siete días hasta el {{first}}, copiado tal como lo publica la DGEG.",
           "terms": "La DGEG indica que esta información es gratuita y puede usarse libremente, siempre que se cite a la DGEG como fuente, se muestre la fecha de la última actualización y la información se reproduzca fielmente. Los precios los comunican las estaciones, que son responsables de ellos.",
           "dgegLink": "DGEG, Preço Médio Diário",
-          "refresh": "La página lee un archivo de datos guardado y nunca llama a la DGEG mientras la usas. El archivo lo actualiza un script que rechaza datos obsoletos o inverosímiles, de modo que una actualización fallida conserva los últimos números buenos y su fecha ({{asOf}})."
+          "refresh": "La página lee un archivo de datos guardado y nunca llama a la DGEG mientras la usas. El archivo lo actualiza un script que rechaza datos obsoletos o inverosímiles, de modo que una actualización fallida conserva los últimos números buenos y su fecha ({{asOf}}).",
+          "stations": "Estaciones: los precios por estación de la DGEG, tal como las estaciones los comunican, para los mismos tres combustibles. La instantánea se tomó el {{stationsDate}} a las {{stationsTime}} UTC, y cada precio conserva la fecha y la hora en que la estación lo actualizó por última vez.",
+          "stationsLink": "DGEG, precios del combustible por estación",
+          "stationsRefresh": "La lista de estaciones es una instantánea tomada una vez al día, cuando se reconstruye el sitio, y no sigue los cambios a lo largo del día. Si la DGEG no responde o sus datos no superan las comprobaciones, la página mantiene la instantánea anterior y muestra su fecha ({{stationsDate}})."
         },
         "limits": {
           "title": "Qué no incluyen estas cifras",
           "items": {
             "noForecast": "Sin previsión: nada aquí predice precios futuros, y los movimientos pasados no dicen hacia dónde irá el precio.",
             "average": "Media nacional: reúne todas las estaciones de Portugal continental y está ponderada por las ventas. El precio en tu estación puede ser más alto o más bajo, y Azores y Madeira no están incluidas.",
-            "stations": "Sin estaciones: esta página no nombra ni clasifica ninguna estación. El sitio de la DGEG lista los precios por estación si quieres mirarlos.",
+            "stations": "Estaciones: la lista muestra solo las pocas estaciones más baratas de cada zona, tal como las publica la DGEG, y no valora el servicio ni la calidad. Un precio puede cambiar después de la instantánea, así que confírmalo en el surtidor.",
             "consumption": "Consumo: la misma cifra en todos los viajes. El consumo real cambia con la velocidad, la carga, el tráfico y la estación del año, y suele ser superior al oficial.",
             "scope": "Solo combustible: peajes, seguro, impuesto, mantenimiento y aparcamiento no están incluidos. La carga eléctrica no se cubre y no se muestran otros combustibles.",
             "education": "Solo con fines educativos, no es asesoramiento."
@@ -4641,6 +4646,172 @@
           "carLoanBody": "Suma la cuota al combustible para ver cuánto cuesta el coche en total.",
           "vehicleTaxLink": "Calculadora del IUC",
           "vehicleTaxBody": "Estima el impuesto anual del vehículo, otro coste de tener coche."
+        }
+      },
+      "stations": {
+        "title": "Gasolineras más baratas",
+        "intro": "Las gasolineras más baratas de cada combustible en Portugal continental, en un distrito o en un municipio, a partir de los precios que las estaciones comunican a la DGEG.",
+        "asOf": "Instantánea de los precios por estación de la DGEG tomada el {{date}} a las {{time}} UTC. Cada precio indica cuándo lo actualizó la estación por última vez.",
+        "stale": "Esta lista tiene {{days}} días: la actualización diaria no se ejecuta desde el {{date}}. Los precios pueden haber cambiado, así que compruébalos en la estación antes de ir.",
+        "fuel": "Tipo de combustible",
+        "district": "Distrito",
+        "municipality": "Municipio",
+        "mainland": "Todo Portugal continental",
+        "allMunicipalities": "Todos los municipios de {{district}}",
+        "pickDistrict": "Elige primero un distrito",
+        "loading": "Cargando las estaciones de {{district}}…",
+        "loadError": "No se ha podido cargar la lista de este distrito. Recarga la página para intentarlo de nuevo.",
+        "none": "Ninguna estación de {{area}} indica precio de {{fuel}}. Elige el distrito entero para ver las más baratas cerca.",
+        "summary": "Estaciones con precio de {{fuel}} en {{area}}: {{count}}. Precio mediano: {{median}}. Las más baratas:",
+        "map": "Ver en el mapa",
+        "updated": "Actualizado el {{date}}",
+        "saving": "La más barata de aquí está {{perLitre}} por debajo de la mediana: {{perTank}} menos en un depósito de {{litres}} L.",
+        "noSaving": "Aquí la estación más barata cobra el precio mediano.",
+        "nextStepCta": "Ahorra la diferencia mensual para un objetivo",
+        "note": "Precios tal como las estaciones los comunican a la DGEG, que los publica; cada estación es responsable de su precio. Los precios pueden cambiar a lo largo del día y no incluyen descuentos de tarjetas ni aplicaciones."
+      }
+    },
+    "goldPrice": {
+      "title": "Precio del oro por gramo en euros y calculadora del valor del oro",
+      "shortName": "Precio del oro",
+      "subtitle": "Consulta el último precio de un gramo de oro en euros y cuánto vale tu oro según su peso y sus quilates, del oro de 24 quilates al oro portugués de 19,2.",
+      "description": "El precio de un gramo de oro en euros, con fecha, de un banco central, y una calculadora del valor del metal según el peso y los quilates.",
+      "pageTitle": "Precio del Oro por Gramo en Euros y Calculadora del Valor del Oro",
+      "pageDescription": "El precio de un gramo de oro puro en euros, con fecha, del Narodowy Bank Polski al tipo del BCE, y una calculadora del valor del metal en oro de 24, 22, 19,2, 18, 14 y 9 quilates. Los compradores pagan menos.",
+      "purities": {
+        "k24": "{{karat}} quilates ({{fineness}}‰), oro puro",
+        "k22": "{{karat}} quilates ({{fineness}}‰)",
+        "k19_2": "{{karat}} quilates ({{fineness}}‰), oro portugués",
+        "k18": "{{karat}} quilates ({{fineness}}‰)",
+        "k14": "{{karat}} quilates ({{fineness}}‰)",
+        "k9": "{{karat}} quilates ({{fineness}}‰)"
+      },
+      "fields": {
+        "grams": "Peso",
+        "purity": "Ley",
+        "price": "Precio del oro puro por gramo",
+        "resetPrice": "Usar el último precio ({{price}}/g)",
+        "offer": "Oferta de un comprador (opcional)"
+      },
+      "help": {
+        "grams": "El peso de la pieza en gramos, con una báscula que pese a 0,1 g o según el tique de compra. Las piedras y otros metales cuentan en el peso, pero no tienen oro.",
+        "purity": "La ley grabada en el contraste: 800 es oro portugués (19,2 quilates), 750 es oro de 18 quilates. Sin marca, pregunta en un laboratorio de contraste o a un joyero.",
+        "price": "Empieza en el último precio del oro puro, {{price}}/g el {{date}}. Cámbialo para ver el valor a otro precio.",
+        "offer": "Lo que te ha ofrecido una tienda o un comprador, para verlo como parte del valor del metal. Déjalo vacío si no quieres comparar."
+      },
+      "errors": {
+        "required": "Introduce un número válido.",
+        "negative": "Este valor no puede ser negativo.",
+        "tooLarge": "Introduce {{max}} o menos.",
+        "zero": "Introduce un valor mayor que cero.",
+        "summary": "Revisa los campos marcados para ver el valor."
+      },
+      "result": {
+        "value": "Valor del metal",
+        "pureGrams": "Oro puro en la pieza",
+        "perGram": "Valor del metal por gramo de la pieza",
+        "nothing": "Sin peso no hay oro que valorar.",
+        "offerBelow": "La oferta es el {{share}} del valor del metal, {{gap}} por debajo.",
+        "offerAbove": "La oferta es el {{share}} del valor del metal, {{gap}} por encima. Comprueba el peso y la ley.",
+        "offerNoValue": "Sin valor del metal no se puede comparar la oferta.",
+        "buyers": "Quien compra oro paga menos que esto. El valor del metal es lo que vale el propio oro al precio de referencia, antes del margen del comprador y del coste de ensayarlo y refinarlo.",
+        "netWorth": "El oro que tienes forma parte de tu patrimonio. Cuéntalo por {{amount}}, o por lo que pagaría de verdad un comprador, y actualízalo cuando cambie el precio."
+      },
+      "notes": {
+        "assumptions": "Estimación: peso por ley por el precio del oro puro. Valora solo el metal, no la hechura, las piedras ni la marca. No es una oferta ni un consejo."
+      },
+      "latest": {
+        "title": "Último precio del oro",
+        "asOf": "Precio del {{date}}: el precio del oro puro del Narodowy Bank Polski, en euros al tipo del BCE del mismo día.",
+        "stale": "Este precio tiene {{days}} días: la actualización diaria no ha traído uno más reciente desde el {{date}}. El precio del oro puede haber cambiado desde entonces.",
+        "perGram": "Oro puro (24 quilates), por gramo",
+        "perOunce": "Oro puro, por onza troy (31,1 g)",
+        "portuguese": "Oro portugués (19,2 quilates), por gramo",
+        "portugueseNote": "800 milésimas del precio del oro puro",
+        "dayChange": "{{percent}} desde el {{date}}",
+        "periodChange": "{{percent}} desde el {{date}}",
+        "note": "Un precio de referencia del metal, no lo que paga o cobra una tienda. Es un precio del pasado, no una previsión: esta página no predice hacia dónde irá el oro."
+      },
+      "recent": {
+        "title": "Precios recientes",
+        "intro": "El precio de un gramo de oro puro en los últimos días publicados por el NBP, con el precio en esloti y el tipo del BCE usado para convertirlo.",
+        "caption": "Precio de un gramo de oro puro en los últimos días, en euros y en eslotis, y el tipo del euro",
+        "date": "Fecha",
+        "eurPerGram": "Euros por gramo",
+        "plnPerGram": "Eslotis por gramo (NBP)",
+        "rate": "Eslotis por euro (BCE)",
+        "asOf": "Datos a {{date}}. La copia de esta página se creó el {{fetched}}. Fuentes: Narodowy Bank Polski (precio del oro) y Banco Central Europeo (tipo de cambio de referencia del euro)."
+      },
+      "nextStepHeadline": "Cuenta tu oro en tu patrimonio",
+      "nextStepDescription": "El oro, las joyas y otras cosas que tienes forman parte de tu patrimonio. Añádelas en WonderMoney junto a tus cuentas e inversiones y ve el cuadro completo.",
+      "nextStepCta": "Incluye los bienes físicos en tu patrimonio",
+      "guide": {
+        "read": {
+          "title": "Cómo leer esta página",
+          "price": "La parte superior muestra el precio de un gramo de oro puro en euros el {{asOf}}, unos {{ounce}} por onza troy, y lo que vale a ese precio un gramo de oro portugués de 19,2 quilates.",
+          "calculator": "La calculadora convierte una pieza de oro en el valor de su metal. Indicas el peso y la ley; el precio empieza en el más reciente y puedes cambiarlo. Introduce la oferta de un comprador para ver qué parte del valor del metal representa.",
+          "noForecast": "Esta página no hace previsiones. Muestra un precio publicado y cuánto vale tu oro a ese precio; no dice hacia dónde irá el precio ni si debes comprar o vender."
+        },
+        "example": {
+          "title": "Ejemplo",
+          "setup": "Una cadena de {{grams}} de oro portugués (19,2 quilates, 800 milésimas) tiene {{grams}} por 0,8, es decir, {{pureGrams}} de oro puro. A {{price}}, su metal vale {{value}}.",
+          "ring": "Un anillo de 4 g de oro de 18 quilates (750 milésimas) tiene {{ringPure}} de oro puro, que valen {{ringValue}} al mismo precio."
+        },
+        "purity": {
+          "title": "Quilates y ley",
+          "intro": "La pureza del oro se indica en quilates, sobre 24, o en milésimas, el número grabado en el contraste. Estas son las seis leyes legales del oro en Portugal:",
+          "items": {
+            "k24": "24 quilates, 999 milésimas: oro puro, como en los lingotes y monedas de inversión.",
+            "k22": "22 quilates, 916: monedas de oro como el soberano y el Krugerrand, y muchas joyas de la India.",
+            "k19_2": "19,2 quilates, 800: el oro portugués, la ley tradicional de la orfebrería portuguesa.",
+            "k18": "18 quilates, 750: la ley más habitual en la joyería europea.",
+            "k14": "14 quilates, 585: joyas más duras y más baratas.",
+            "k9": "9 quilates, 375: la ley legal más baja."
+          }
+        },
+        "method": {
+          "title": "Cómo se calcula",
+          "intro": "La página hace cuatro cosas:",
+          "steps": {
+            "a": "Precio: el precio de un gramo de oro puro del NBP en eslotis, dividido por los eslotis por euro del BCE del mismo día.",
+            "b": "Oro puro: el peso por la ley dividido entre 1000. Una pieza de 24 quilates cuenta con 999 milésimas.",
+            "c": "Valor: los gramos de oro puro por el precio de un gramo de oro puro, redondeado al céntimo.",
+            "d": "Oferta: si la introduces, la oferta dividida por el valor, en porcentaje, y la diferencia en euros."
+          }
+        },
+        "buyers": {
+          "title": "Por qué quien compra oro paga menos de lo que vale el metal",
+          "below": "Una tienda que compra oro paga menos que el valor del metal: funde la pieza, paga el ensayo y el refinado, y se queda con un margen. La diferencia varía de una tienda a otra, así que pide más de una oferta y compara cada una con el valor de esta página.",
+          "jewellery": "Una joya nueva cuesta más que el valor de su metal: el precio incluye la hechura, el diseño, la marca y el IVA. Al venderla más adelante recibes, como mucho, el metal, no lo que pagaste.",
+          "tips": "Antes de vender, pesa la pieza, comprueba el contraste, pide la oferta por gramo y la ley que ha supuesto el comprador, y guarda un recibo por escrito."
+        },
+        "data": {
+          "title": "Datos y fuentes",
+          "nbp": "Precio del oro: el Narodowy Bank Polski (NBP), el banco central de Polonia, publica cada día hábil el precio de 1 g de oro de ley 1000 que calcula, en eslotis, a través de su API pública. El último día es el {{asOf}}; la copia de esta página se creó el {{fetched}}.",
+          "why": "Por qué no el LBMA Gold Price: esa referencia, que se fija dos veces al día en Londres en dólares, la administra ICE Benchmark Administration, que exige una licencia para transmitirla a terceros, incluso con retraso. El precio del NBP es una publicación de un banco central ofrecida al público en una API abierta, sin licencia ni clave, así que esta página lo usa e indica al NBP como fuente.",
+          "ecb": "Euro: el tipo de cambio de referencia del euro para el esloti del mismo día, que el Banco Central Europeo publica a título informativo. Un día con solo una de las dos cifras se omite.",
+          "nbpLink": "NBP, precio actual del oro",
+          "ecbLink": "BCE, tipo de referencia del euro para el esloti polaco",
+          "refresh": "La página lee una instantánea guardada y nunca llama al NBP ni al BCE mientras la usas. El sitio se reconstruye cada día con una instantánea nueva. Una actualización que falle o traiga cifras inverosímiles se rechaza, y la página mantiene el último precio bueno con su fecha ({{asOf}})."
+        },
+        "limits": {
+          "title": "Lo que este valor deja fuera",
+          "items": {
+            "metal": "Solo el metal: el valor es el oro que contiene la pieza a un precio de referencia. Las piedras, otros metales, la hechura y la marca no cuentan.",
+            "buyers": "No es un precio de venta: quien compra paga menos, y una tienda que vende oro cobra más.",
+            "purity": "Ley: la calculadora se fía de la ley que eliges. Una pieza sin contraste o chapada en oro puede tener mucho menos oro, o ninguno.",
+            "reference": "Precio de referencia: el precio diario del NBP, no una cotización al minuto. El mercado se mueve a lo largo del día.",
+            "education": "Solo con fines educativos, no es asesoramiento."
+          }
+        },
+        "related": {
+          "title": "Sigue",
+          "netWorthLink": "Calculadora de patrimonio neto",
+          "netWorthBody": "Suma tu oro a lo que tienes y lo que debes y ve tu patrimonio neto.",
+          "inflationLink": "Calculadora de inflación",
+          "inflationBody": "Mira cómo han cambiado los precios y cuánto valía el dinero en otros años.",
+          "investmentReturnLink": "Calculadora de rentabilidad de inversiones",
+          "investmentReturnBody": "Mira cuánto rindió una inversión a lo largo de los años."
         }
       }
     },

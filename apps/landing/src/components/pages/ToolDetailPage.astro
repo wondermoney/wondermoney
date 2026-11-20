@@ -79,6 +79,8 @@ import ElectricityTariffComparisonComp from "@/components/calculators/Electricit
 import ElectricityTariffComparisonGuide from "@/components/calculators/ElectricityTariffComparisonGuide.astro";
 import FuelPricesComp from "@/components/calculators/FuelPricesComp";
 import FuelPricesGuide from "@/components/calculators/FuelPricesGuide.astro";
+import GoldPriceComp from "@/components/calculators/GoldPriceComp";
+import GoldPriceGuide from "@/components/calculators/GoldPriceGuide.astro";
 import FreeBankAccountsComp from "@/components/calculators/FreeBankAccountsComp";
 import FreeBankAccountsGuide from "@/components/calculators/FreeBankAccountsGuide.astro";
 import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccountsComp";
@@ -298,6 +300,12 @@ const nextStepCtaByRouteId: Partial<
     ctaText: t("tools.fuelPrices.nextStepCta"),
     ctaHref: toLocalizedPath("featureBudgeting", locale),
   },
+  toolGoldPrice: {
+    headline: t("tools.goldPrice.nextStepHeadline"),
+    description: t("tools.goldPrice.nextStepDescription"),
+    ctaText: t("tools.goldPrice.nextStepCta"),
+    ctaHref: toLocalizedPath("featureNetWorth", locale),
+  },
   toolFreeBankAccounts: {
     headline: t("tools.freeBankAccounts.nextStepHeadline"),
     description: t("tools.freeBankAccounts.nextStepDescription"),
@@ -461,6 +469,7 @@ const schema = {
         {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
         {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonComp locale={locale} client:load />}
         {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
+        {routeId === "toolGoldPrice" && <GoldPriceComp locale={locale} client:load />}
       </div>
 
       {hasGuide && (
@@ -506,6 +515,7 @@ const schema = {
           {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
           {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonGuide locale={locale} />}
           {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}
+          {routeId === "toolGoldPrice" && <GoldPriceGuide locale={locale} />}
         </div>
       )}
 

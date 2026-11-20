@@ -4526,10 +4526,10 @@
     "fuelPrices": {
       "title": "Prix des carburants au Portugal et coût mensuel",
       "shortName": "Prix des carburants",
-      "subtitle": "Consultez le prix moyen officiel du gazole, de l'essence et du GPL au Portugal, son historique et ce que vous coûte la route chaque mois.",
-      "description": "Prix moyens officiels de la DGEG des carburants au Portugal continental, avec variation hebdomadaire et historique, et un calculateur du coût mensuel de carburant.",
-      "pageTitle": "Prix des carburants au Portugal : moyenne officielle et coût mensuel",
-      "pageDescription": "Le dernier prix moyen de la DGEG du gazole, du SP95 et du GPL au Portugal, avec la variation sur une semaine et cinq ans d'historique, et un calculateur de votre coût mensuel de carburant. Données officielles, sans prévision.",
+      "subtitle": "Consultez le prix moyen officiel du gazole, de l'essence et du GPL au Portugal, les stations les moins chères de votre district et de votre commune, et ce que vous coûte la conduite chaque mois.",
+      "description": "Prix moyens officiels de la DGEG au Portugal continental, les stations les moins chères par district et par commune, et un calculateur du coût mensuel en carburant.",
+      "pageTitle": "Prix des Carburants au Portugal : Stations les Moins Chères et Moyenne Officielle",
+      "pageDescription": "Les stations les moins chères pour le gazole, l'essence 95 et le GPL par district et par commune, mises à jour chaque jour à partir de la DGEG, le prix moyen officiel sur cinq ans et un calculateur du coût mensuel. Sans prévision.",
       "fuels": {
         "diesel": "Gazole (gasóleo simples)",
         "gasoline95": "Essence 95 (gasolina simples 95)",
@@ -4597,7 +4597,8 @@
           "title": "Comment lire cette page",
           "prices": "Le haut de la page affiche le dernier prix moyen national au litre du gazole, de l'essence 95 et du GPL, tel que la DGEG l'a publié pour le {{asOf}}, et de combien chacun a bougé en une semaine : gazole {{dieselChange}} et essence {{gasolineChange}} par rapport à la semaine précédente.",
           "calculator": "Le calculateur transforme votre conduite en coût mensuel de carburant. Vous indiquez la distance, la consommation en litres aux 100 km et le carburant ; le prix part de la dernière moyenne et vous pouvez le remplacer par celui que vous payez vraiment.",
-          "noForecast": "Cette page ne fait aucune prévision. Elle montre ce que la DGEG a mesuré et ce que coûte votre conduite à ce prix ; elle ne dit pas quel sera le prix la semaine prochaine."
+          "noForecast": "Cette page ne fait aucune prévision. Elle montre ce que la DGEG a mesuré et ce que coûte votre conduite à ce prix ; elle ne dit pas quel sera le prix la semaine prochaine.",
+          "stations": "En dessous figurent les stations les moins chères : les {{stationsDistrict}} moins chères du Portugal continental ou d'un district, ou les {{stationsMunicipality}} moins chères d'une commune, pour le carburant choisi. Chacune indique le prix, la station et sa marque, l'adresse, un lien vers la carte et la date de la dernière mise à jour du prix par la station."
         },
         "example": {
           "title": "Exemple chiffré",
@@ -4613,21 +4614,25 @@
             "c": "Coût : litres fois le prix au litre saisi, arrondi au centime.",
             "d": "Année : douze mois comme celui-ci."
           },
-          "change": "La variation hebdomadaire est la dernière moyenne de la DGEG moins celle d'il y a sept jours, en euros par litre et en pourcentage du prix précédent."
+          "change": "La variation hebdomadaire est la dernière moyenne de la DGEG moins celle d'il y a sept jours, en euros par litre et en pourcentage du prix précédent.",
+          "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres."
         },
         "data": {
           "title": "Données et sources",
           "dgeg": "Prix : DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário des carburants routiers au Portugal continental, pour le gasóleo simples, la gasolina simples 95 et le GPL auto. Le dernier jour est le {{asOf}} ; la copie de cette page a été générée le {{fetched}}. L'historique est une valeur de la DGEG tous les sept jours, en remontant jusqu'au {{first}}, copiée telle que la DGEG la publie.",
           "terms": "La DGEG indique que ces informations sont gratuites et peuvent être utilisées librement, à condition de citer la DGEG comme source, d'indiquer la date de la dernière mise à jour et de reproduire fidèlement l'information. Les prix sont communiqués par les stations, qui en sont responsables.",
           "dgegLink": "DGEG, prix moyen quotidien (Preço Médio Diário)",
-          "refresh": "La page lit un fichier de données enregistré et n'appelle jamais la DGEG pendant que vous l'utilisez. Le fichier est mis à jour par un script qui refuse les données périmées ou invraisemblables ; une mise à jour qui échoue conserve donc les derniers bons chiffres et leur date ({{asOf}})."
+          "refresh": "La page lit un fichier de données enregistré et n'appelle jamais la DGEG pendant que vous l'utilisez. Le fichier est mis à jour par un script qui refuse les données périmées ou invraisemblables ; une mise à jour qui échoue conserve donc les derniers bons chiffres et leur date ({{asOf}}).",
+          "stations": "Stations : les prix par station de la DGEG, tels que les stations les déclarent, pour les trois mêmes carburants. Le relevé a été pris le {{stationsDate}} à {{stationsTime}} UTC, et chaque prix garde la date et l'heure de sa dernière mise à jour par la station.",
+          "stationsLink": "DGEG, prix des carburants par station",
+          "stationsRefresh": "La liste des stations est un relevé pris une fois par jour, lors de la reconstruction du site, et non un flux en direct. Si la DGEG ne répond pas ou si ses données échouent aux contrôles, la page garde le relevé précédent et affiche sa date ({{stationsDate}})."
         },
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
             "noForecast": "Aucune prévision : rien ici ne prédit les prix futurs, et les variations passées n'indiquent pas où ira le prix.",
             "average": "Moyenne nationale : elle regroupe toutes les stations du Portugal continental et est pondérée par les ventes. Le prix de votre station peut être plus haut ou plus bas, et les Açores et Madère ne sont pas inclus.",
-            "stations": "Aucune station : cette page ne cite ni ne classe aucune station. Le site de la DGEG liste les prix par station si vous voulez les consulter.",
+            "stations": "Stations : la liste ne montre que les quelques stations les moins chères de chaque zone, telles que la DGEG les publie, et ne juge ni le service ni la qualité. Un prix peut changer après le relevé : vérifiez-le à la pompe.",
             "consumption": "Consommation : la même valeur à chaque trajet. La consommation réelle varie avec la vitesse, la charge, la circulation et la saison, et dépasse souvent la valeur officielle.",
             "scope": "Carburant seulement : péages, assurance, taxe de circulation, entretien et stationnement ne sont pas inclus. La recharge électrique n'est pas couverte et les autres carburants ne sont pas affichés.",
             "education": "À usage éducatif uniquement, ce n'est pas un conseil."
@@ -4642,6 +4647,28 @@
           "vehicleTaxLink": "Calculateur de l'IUC",
           "vehicleTaxBody": "Estimez la taxe annuelle du véhicule, un autre coût de la voiture."
         }
+      },
+      "stations": {
+        "title": "Stations les moins chères",
+        "intro": "Les stations les moins chères pour chaque carburant au Portugal continental, dans un district ou dans une commune, d'après les prix que les stations déclarent à la DGEG.",
+        "asOf": "Relevé des prix par station de la DGEG pris le {{date}} à {{time}} UTC. Chaque prix indique quand la station l'a mis à jour pour la dernière fois.",
+        "stale": "Cette liste date de {{days}} jours : la mise à jour quotidienne ne s'est pas faite depuis le {{date}}. Les prix ont pu changer, vérifiez donc à la station avant de vous déplacer.",
+        "fuel": "Type de carburant",
+        "district": "District",
+        "municipality": "Commune",
+        "mainland": "Tout le Portugal continental",
+        "allMunicipalities": "Toutes les communes de {{district}}",
+        "pickDistrict": "Choisissez d'abord un district",
+        "loading": "Chargement des stations de {{district}}…",
+        "loadError": "La liste de ce district n'a pas pu être chargée. Rechargez la page pour réessayer.",
+        "none": "Aucune station de {{area}} n'indique de prix pour {{fuel}}. Choisissez tout le district pour voir les moins chères à proximité.",
+        "summary": "Stations avec un prix pour {{fuel}} à {{area}} : {{count}}. Prix médian : {{median}}. Les moins chères :",
+        "map": "Voir sur la carte",
+        "updated": "Mis à jour le {{date}}",
+        "saving": "La moins chère ici est {{perLitre}} sous la médiane : {{perTank}} de moins pour un plein de {{litres}} L.",
+        "noSaving": "Ici, la station la moins chère pratique le prix médian.",
+        "nextStepCta": "Épargnez la différence mensuelle pour un objectif",
+        "note": "Prix tels que les stations les déclarent à la DGEG, qui les publie ; chaque station est responsable de son prix. Les prix peuvent changer dans la journée et n'incluent pas les remises des cartes carburant ou des applications."
       }
     },
     "bankAccountsShared": {
@@ -5089,6 +5116,150 @@
         "banco-best": "À partir du 21e ordre du mois : 0,10 % (min. 12 €). Le service Best Trading Pro, sur la plateforme de Saxo Bank, a d'autres prix : ETF à 0,08 % (min. 10 €), sans frais de garde et indemnisation des investisseurs jusqu'à 20 000 €.",
         "big": "La garde est offerte avec trois transactions par trimestre et un salaire domicilié ou un encours moyen supérieur à 100 000 €. Le spread de change est indicatif. Une Superconta distincte rémunère les liquidités.",
         "millennium-bcp": "La garde coûte 6 € par trimestre seulement après une transaction sur le site ou l'appli dans les trois mois précédents, sinon 9 €. Change aux taux internes de la banque, spread non publié. La SEC fee s'ajoute aux ventes américaines."
+      }
+    },
+    "goldPrice": {
+      "title": "Prix de l'or au gramme en euros et calculateur de la valeur de l'or",
+      "shortName": "Prix de l'or",
+      "subtitle": "Consultez le dernier prix d'un gramme d'or en euros et ce que vaut votre or selon son poids et ses carats, de l'or 24 carats à l'or portugais 19,2 carats.",
+      "description": "Le prix d'un gramme d'or en euros, daté, issu d'une banque centrale, et un calculateur de la valeur du métal selon le poids et les carats.",
+      "pageTitle": "Prix de l'Or au Gramme en Euros et Calculateur de la Valeur de l'Or",
+      "pageDescription": "Le prix d'un gramme d'or pur en euros, daté, de la Narodowy Bank Polski au taux de la BCE, et un calculateur de la valeur du métal pour l'or 24, 22, 19,2, 18, 14 et 9 carats. Les acheteurs paient moins.",
+      "purities": {
+        "k24": "{{karat}} carats ({{fineness}} ‰), or pur",
+        "k22": "{{karat}} carats ({{fineness}} ‰)",
+        "k19_2": "{{karat}} carats ({{fineness}} ‰), or portugais",
+        "k18": "{{karat}} carats ({{fineness}} ‰)",
+        "k14": "{{karat}} carats ({{fineness}} ‰)",
+        "k9": "{{karat}} carats ({{fineness}} ‰)"
+      },
+      "fields": {
+        "grams": "Poids",
+        "purity": "Titre",
+        "price": "Prix de l'or pur au gramme",
+        "resetPrice": "Utiliser le dernier prix ({{price}}/g)",
+        "offer": "Offre d'un acheteur (facultatif)"
+      },
+      "help": {
+        "grams": "Le poids de la pièce en grammes, sur une balance précise à 0,1 g ou d'après le ticket d'achat. Les pierres et les autres métaux comptent dans le poids, mais ne contiennent pas d'or.",
+        "purity": "Le titre gravé dans le poinçon : 800 est l'or portugais (19,2 carats), 750 l'or 18 carats. Sans poinçon, demandez à un bureau de garantie ou à un bijoutier.",
+        "price": "Commence au dernier prix de l'or pur, {{price}}/g le {{date}}. Modifiez-le pour voir la valeur à un autre prix.",
+        "offer": "Ce qu'une boutique ou un acheteur vous a proposé, pour le voir en part de la valeur du métal. Laissez vide pour ne pas comparer."
+      },
+      "errors": {
+        "required": "Saisissez un nombre valide.",
+        "negative": "Cette valeur ne peut pas être négative.",
+        "tooLarge": "Saisissez {{max}} ou moins.",
+        "zero": "Saisissez une valeur supérieure à zéro.",
+        "summary": "Vérifiez les champs signalés pour voir la valeur."
+      },
+      "result": {
+        "value": "Valeur du métal",
+        "pureGrams": "Or pur dans la pièce",
+        "perGram": "Valeur du métal par gramme de la pièce",
+        "nothing": "Sans poids, il n'y a pas d'or à évaluer.",
+        "offerBelow": "L'offre représente {{share}} de la valeur du métal, {{gap}} en dessous.",
+        "offerAbove": "L'offre représente {{share}} de la valeur du métal, {{gap}} au-dessus. Vérifiez le poids et le titre.",
+        "offerNoValue": "Sans valeur du métal, l'offre ne peut pas être comparée.",
+        "buyers": "Les acheteurs d'or paient moins que cela. La valeur du métal est ce que vaut l'or lui-même au prix de référence, avant la marge de l'acheteur et le coût de l'essai et de l'affinage.",
+        "netWorth": "L'or que vous possédez fait partie de votre patrimoine. Comptez-le pour {{amount}}, ou pour ce qu'un acheteur paierait vraiment, et mettez-le à jour quand le prix bouge."
+      },
+      "notes": {
+        "assumptions": "Estimation : poids fois titre fois prix de l'or pur. Elle évalue le métal seul, pas la façon, les pierres ni la marque. Ce n'est ni une offre ni un conseil."
+      },
+      "latest": {
+        "title": "Dernier prix de l'or",
+        "asOf": "Prix du {{date}} : le prix de l'or pur de la Narodowy Bank Polski, en euros au taux de la BCE du même jour.",
+        "stale": "Ce prix date de {{days}} jours : la mise à jour quotidienne n'en a pas apporté de plus récent depuis le {{date}}. Le prix de l'or a pu évoluer depuis.",
+        "perGram": "Or pur (24 carats), au gramme",
+        "perOunce": "Or pur, à l'once troy (31,1 g)",
+        "portuguese": "Or portugais (19,2 carats), au gramme",
+        "portugueseNote": "800 millièmes du prix de l'or pur",
+        "dayChange": "{{percent}} depuis le {{date}}",
+        "periodChange": "{{percent}} depuis le {{date}}",
+        "note": "Un prix de référence du métal, pas ce qu'une boutique paie ou facture. C'est un prix passé, pas une prévision : cette page ne prédit pas l'évolution de l'or."
+      },
+      "recent": {
+        "title": "Prix récents",
+        "intro": "Le prix d'un gramme d'or pur les derniers jours publiés par la NBP, avec le prix en zlotys et le taux de la BCE utilisé pour la conversion.",
+        "caption": "Prix d'un gramme d'or pur les derniers jours, en euros et en zlotys, et le taux de l'euro",
+        "date": "Date",
+        "eurPerGram": "Euros par gramme",
+        "plnPerGram": "Zlotys par gramme (NBP)",
+        "rate": "Zlotys par euro (BCE)",
+        "asOf": "Données au {{date}}. La copie de cette page a été créée le {{fetched}}. Sources : Narodowy Bank Polski (prix de l'or) et Banque centrale européenne (taux de change de référence de l'euro)."
+      },
+      "nextStepHeadline": "Comptez votre or dans votre patrimoine",
+      "nextStepDescription": "L'or, les bijoux et les autres biens que vous possédez font partie de votre patrimoine. Ajoutez-les dans WonderMoney à côté de vos comptes et placements et voyez l'ensemble.",
+      "nextStepCta": "Incluez vos biens physiques dans votre patrimoine",
+      "guide": {
+        "read": {
+          "title": "Comment lire cette page",
+          "price": "Le haut de la page indique le prix d'un gramme d'or pur en euros le {{asOf}}, environ {{ounce}} l'once troy, et ce que vaut à ce prix un gramme d'or portugais 19,2 carats.",
+          "calculator": "Le calculateur transforme une pièce d'or en valeur de son métal. Vous indiquez le poids et le titre ; le prix part du plus récent et vous pouvez le modifier. Saisissez l'offre d'un acheteur pour voir quelle part de la valeur du métal elle représente.",
+          "noForecast": "Cette page ne fait pas de prévision. Elle montre un prix publié et ce que vaut votre or à ce prix ; elle ne dit pas où va le prix ni s'il faut acheter ou vendre."
+        },
+        "example": {
+          "title": "Exemple",
+          "setup": "Une chaîne de {{grams}} en or portugais (19,2 carats, 800 millièmes) contient {{grams}} fois 0,8, soit {{pureGrams}} d'or pur. À {{price}}, son métal vaut {{value}}.",
+          "ring": "Une bague de 4 g en or 18 carats (750 millièmes) contient {{ringPure}} d'or pur, soit {{ringValue}} au même prix."
+        },
+        "purity": {
+          "title": "Carats et titre",
+          "intro": "La pureté de l'or s'exprime en carats, sur 24, ou en millièmes, le nombre gravé dans le poinçon. Voici les six titres légaux de l'or au Portugal :",
+          "items": {
+            "k24": "24 carats, 999 millièmes : or pur, comme dans les lingots et pièces d'investissement.",
+            "k22": "22 carats, 916 : pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
+            "k19_2": "19,2 carats, 800 : l'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
+            "k18": "18 carats, 750 : le titre le plus courant de la bijouterie européenne.",
+            "k14": "14 carats, 585 : des bijoux plus durs et moins chers.",
+            "k9": "9 carats, 375 : le titre légal le plus bas."
+          }
+        },
+        "method": {
+          "title": "Mode de calcul",
+          "intro": "La page fait quatre choses :",
+          "steps": {
+            "a": "Prix : le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
+            "b": "Or pur : le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
+            "c": "Valeur : les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
+            "d": "Offre : si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+          }
+        },
+        "buyers": {
+          "title": "Pourquoi les acheteurs paient moins que la valeur du métal",
+          "below": "Une boutique qui rachète de l'or paie moins que la valeur du métal : elle fond la pièce, paie l'essai et l'affinage et garde une marge. L'écart varie d'une boutique à l'autre : demandez plusieurs offres et comparez chacune à la valeur de cette page.",
+          "jewellery": "Un bijou neuf coûte plus que la valeur de son métal : le prix comprend la façon, le dessin, la marque et la TVA. En le revendant plus tard, vous récupérez au mieux le métal, pas ce que vous avez payé.",
+          "tips": "Avant de vendre, pesez la pièce, vérifiez le poinçon, demandez l'offre au gramme et le titre retenu par l'acheteur, et gardez un reçu écrit."
+        },
+        "data": {
+          "title": "Données et sources",
+          "nbp": "Prix de l'or : la Narodowy Bank Polski (NBP), la banque centrale de Pologne, publie chaque jour ouvré le prix d'un gramme d'or au titre de 1000 qu'elle calcule, en zlotys, via son API publique. Le dernier jour est le {{asOf}} ; la copie de cette page a été créée le {{fetched}}.",
+          "why": "Pourquoi pas le LBMA Gold Price : cette référence, fixée deux fois par jour à Londres en dollars, est administrée par ICE Benchmark Administration, qui exige une licence pour la transmettre à des tiers, même en différé. Le prix de la NBP est une publication de banque centrale offerte au public par une API ouverte, sans licence ni clé : cette page l'utilise donc et cite la NBP comme source.",
+          "ecb": "Euro : le taux de change de référence de l'euro pour le zloty du même jour, que la Banque centrale européenne publie à titre d'information. Un jour où l'un des deux chiffres manque est écarté.",
+          "nbpLink": "NBP, prix actuel de l'or",
+          "ecbLink": "BCE, taux de référence de l'euro pour le zloty polonais",
+          "refresh": "La page lit un relevé enregistré et n'appelle jamais la NBP ni la BCE pendant que vous l'utilisez. Le site est reconstruit chaque jour avec un nouveau relevé. Une mise à jour qui échoue ou renvoie des chiffres invraisemblables est refusée, et la page garde le dernier bon prix avec sa date ({{asOf}})."
+        },
+        "limits": {
+          "title": "Ce que cette valeur laisse de côté",
+          "items": {
+            "metal": "Le métal seul : la valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
+            "buyers": "Pas un prix de vente : les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
+            "purity": "Titre : le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
+            "reference": "Prix de référence : le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
+            "education": "À usage éducatif uniquement, ce n'est pas un conseil."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "netWorthLink": "Calculateur de patrimoine net",
+          "netWorthBody": "Ajoutez votre or à ce que vous possédez et devez, et voyez votre patrimoine net.",
+          "inflationLink": "Calculateur d'inflation",
+          "inflationBody": "Voyez comment les prix ont évolué et ce que valait l'argent d'autres années.",
+          "investmentReturnLink": "Calculateur de rendement d'investissement",
+          "investmentReturnBody": "Voyez ce qu'un placement a rapporté au fil des ans."
+        }
       }
     }
   },
