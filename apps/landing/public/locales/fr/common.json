@@ -4307,6 +4307,7 @@
         "loadError": "Les prix OMIE n'ont pas pu être chargés. Les offres indexées restent sur l'estimation de l'ERSE.",
         "diagramLoadError": "Les prix OMIE au quart d'heure n'ont pas pu être chargés. Les 12 derniers mois sont utilisés.",
         "diagramOutOfRange": "Aucun jour de votre fichier de consommation n'a de prix OMIE chargés (seulement les 12 derniers mois). Les 12 derniers mois sont utilisés.",
+        "diagramShort": "Votre fichier de consommation couvre {{months}} des 12 mois avec des prix OMIE ; il en faut au moins {{minimum}}. Les 12 derniers mois sont utilisés.",
         "coverage": "{{percent}} % de la consommation de votre fichier tombe sur des jours avec des prix OMIE ({{period}}). Le reste est calculé au prix moyen de ces jours."
       },
       "filters": {
@@ -4492,6 +4493,8 @@
         "same": "Coûte autant que votre tarif",
         "details": "Détail et liens",
         "estimatedNote": "Prix indexé : estimation de l'ERSE pour les prochains mois. Ce que vous payez suit le marché.",
+        "estimatedLeft": "{{count}} offres indexées sans formule publiée restent sur l'estimation de l'ERSE (contrats à terme à 3 mois).",
+        "estimatedLeftOne": "1 offre indexée sans formule publiée reste sur l'estimation de l'ERSE (contrats à terme à 3 mois).",
         "marketNote": "Énergie calculée avec la formule publiée par le fournisseur et les prix OMIE de {{period}}, pondérés par le profil de consommation d'E-REDES, aux tarifs d'accès au réseau d'aujourd'hui.",
         "marketDiagramNote": "Énergie calculée avec la formule publiée par le fournisseur et le prix OMIE de chaque quart d'heure de votre fichier de consommation ({{period}}), aux tarifs d'accès au réseau d'aujourd'hui.",
         "marketPrices": "Énergie, hors TVA : {{prices}}.",
@@ -4545,11 +4548,17 @@
           "laterYears": "Années suivantes (EUR)",
           "period": "Votre période (EUR)",
           "estimated": "Prix estimé",
+          "priceBasis": "Base du prix",
           "saving": "Économie par an (EUR)",
           "link": "Lien"
         },
         "yes": "oui",
-        "no": "non"
+        "no": "non",
+        "basis": {
+          "fixed": "Prix fixe",
+          "erseEstimate": "Estimation de l'ERSE (contrats à terme à 3 mois)",
+          "market": "Coût réel OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offres : ERSE, export du {{date}} ({{offers}} offres de {{suppliers}} fournisseurs et le tarif réglementé).",

@@ -4307,6 +4307,7 @@
         "loadError": "Die OMIE-Preise konnten nicht geladen werden. Indexierte Angebote bleiben bei der Schätzung der ERSE.",
         "diagramLoadError": "Die OMIE-Viertelstundenpreise konnten nicht geladen werden. Stattdessen werden die letzten 12 Monate verwendet.",
         "diagramOutOfRange": "Für keinen Tag deiner Verbrauchsdatei sind OMIE-Preise geladen (nur für die letzten 12 Monate). Stattdessen werden die letzten 12 Monate verwendet.",
+        "diagramShort": "Deine Verbrauchsdatei deckt {{months}} der 12 Monate mit OMIE-Preisen ab; nötig sind mindestens {{minimum}}. Stattdessen werden die letzten 12 Monate verwendet.",
         "coverage": "{{percent}} % des Verbrauchs in deiner Datei fällt auf Tage mit OMIE-Preisen ({{period}}). Der Rest wird zum Durchschnittspreis dieser Tage berechnet."
       },
       "filters": {
@@ -4492,6 +4493,8 @@
         "same": "Kostet so viel wie dein Tarif",
         "details": "Aufschlüsselung und Links",
         "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was du zahlst, folgt dem Markt.",
+        "estimatedLeft": "{{count}} indexierte Angebote ohne veröffentlichte Formel bleiben bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
+        "estimatedLeftOne": "1 indexiertes Angebot ohne veröffentlichte Formel bleibt bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
         "marketNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und den OMIE-Preisen von {{period}}, gewichtet mit dem Verbrauchsprofil von E-REDES, zu den heutigen Netzentgelten.",
         "marketDiagramNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und dem OMIE-Preis jeder Viertelstunde deiner Verbrauchsdatei ({{period}}), zu den heutigen Netzentgelten.",
         "marketPrices": "Energie, ohne MwSt.: {{prices}}.",
@@ -4545,11 +4548,17 @@
           "laterYears": "Folgejahre (EUR)",
           "period": "Dein Zeitraum (EUR)",
           "estimated": "Geschätzter Preis",
+          "priceBasis": "Preisgrundlage",
           "saving": "Ersparnis pro Jahr (EUR)",
           "link": "Link"
         },
         "yes": "ja",
-        "no": "nein"
+        "no": "nein",
+        "basis": {
+          "fixed": "Festpreis",
+          "erseEstimate": "Schätzung der ERSE (Terminpreise für 3 Monate)",
+          "market": "Tatsächliche Kosten OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Angebote: ERSE, Export vom {{date}} ({{offers}} Angebote von {{suppliers}} Versorgern und der regulierte Tarif).",

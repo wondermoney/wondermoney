@@ -4307,6 +4307,7 @@
         "loadError": "Não foi possível carregar os preços OMIE. As ofertas indexadas ficam na estimativa da ERSE.",
         "diagramLoadError": "Não foi possível carregar os preços OMIE por quarto de hora. Usamos os últimos 12 meses.",
         "diagramOutOfRange": "Nenhum dia do teu ficheiro de consumos tem preços OMIE carregados (só os últimos 12 meses). Usamos os últimos 12 meses.",
+        "diagramShort": "O teu ficheiro de consumos cobre {{months}} dos 12 meses com preços OMIE; são precisos pelo menos {{minimum}}. Usamos os últimos 12 meses.",
         "coverage": "{{percent}}% do consumo do teu ficheiro cai em dias com preços OMIE ({{period}}). O resto é calculado ao preço médio desses dias."
       },
       "filters": {
@@ -4492,6 +4493,8 @@
         "same": "Custa o mesmo que o teu tarifário",
         "details": "Detalhe e ligações",
         "estimatedNote": "Preço indexado: estimativa da ERSE para os próximos meses. O que pagas acompanha o mercado.",
+        "estimatedLeft": "{{count}} ofertas indexadas sem fórmula publicada continuam com a estimativa ERSE (futuros a 3 meses).",
+        "estimatedLeftOne": "1 oferta indexada sem fórmula publicada continua com a estimativa ERSE (futuros a 3 meses).",
         "marketNote": "Preço da energia com a fórmula publicada pelo comercializador e os preços OMIE de {{period}}, ponderados pelo perfil de consumo da E-REDES, às tarifas de acesso de hoje.",
         "marketDiagramNote": "Preço da energia com a fórmula publicada pelo comercializador e os preços OMIE de cada quarto de hora do teu ficheiro de consumos ({{period}}), às tarifas de acesso de hoje.",
         "marketPrices": "Energia, sem IVA: {{prices}}.",
@@ -4545,11 +4548,17 @@
           "laterYears": "Anos seguintes (EUR)",
           "period": "O teu período (EUR)",
           "estimated": "Preço estimado",
+          "priceBasis": "Base do preço",
           "saving": "Poupança por ano (EUR)",
           "link": "Ligação"
         },
         "yes": "sim",
-        "no": "não"
+        "no": "não",
+        "basis": {
+          "fixed": "Preço fixo",
+          "erseEstimate": "Estimativa ERSE (futuros a 3 meses)",
+          "market": "Custo real OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Ofertas: ERSE, exportação de {{date}} ({{offers}} ofertas de {{suppliers}} comercializadores e a tarifa regulada).",

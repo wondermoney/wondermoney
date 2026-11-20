@@ -4307,6 +4307,7 @@
         "loadError": "OMIE prices could not be loaded. Indexed offers stay on ERSE's estimate.",
         "diagramLoadError": "OMIE's quarter-hour prices could not be loaded. The last 12 months are used instead.",
         "diagramOutOfRange": "None of the days in your consumption file has OMIE prices loaded (only the last 12 months are). The last 12 months are used instead.",
+        "diagramShort": "Your consumption file covers {{months}} of the 12 months with OMIE prices; at least {{minimum}} are needed. The last 12 months are used instead.",
         "coverage": "{{percent}}% of the consumption in your file falls on days with OMIE prices ({{period}}). The rest is priced at those days' average."
       },
       "filters": {
@@ -4492,6 +4493,8 @@
         "same": "Costs the same as your tariff",
         "details": "Breakdown and links",
         "estimatedNote": "Indexed price: ERSE's estimate for the coming months. What you pay follows the market.",
+        "estimatedLeft": "{{count}} indexed offers without a published formula stay on ERSE's estimate (3-month futures).",
+        "estimatedLeftOne": "1 indexed offer without a published formula stays on ERSE's estimate (3-month futures).",
         "marketNote": "Energy priced with the supplier's published formula and OMIE prices from {{period}}, weighted by the E-REDES consumption profile, at today's network access tariffs.",
         "marketDiagramNote": "Energy priced with the supplier's published formula and the OMIE price of each quarter-hour in your consumption file ({{period}}), at today's network access tariffs.",
         "marketPrices": "Energy, before VAT: {{prices}}.",
@@ -4545,11 +4548,17 @@
           "laterYears": "Later years (EUR)",
           "period": "Your period (EUR)",
           "estimated": "Estimated price",
+          "priceBasis": "Price basis",
           "saving": "Saving a year (EUR)",
           "link": "Link"
         },
         "yes": "yes",
-        "no": "no"
+        "no": "no",
+        "basis": {
+          "fixed": "Fixed price",
+          "erseEstimate": "ERSE estimate (3-month futures)",
+          "market": "OMIE real cost, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offers: ERSE, export of {{date}} ({{offers}} offers from {{suppliers}} suppliers and the regulated tariff).",
