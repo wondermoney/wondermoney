@@ -15,7 +15,8 @@ const locales = ["en", "pt", "es", "fr", "de", "it"];
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: vercel(),
+  // The function also serves /api/solar-production, which can wait up to 45 s for PVGIS.
+  adapter: vercel({ maxDuration: 60 }),
   site: "https://wonder.money",
   trailingSlash: "never",
   redirects: Object.fromEntries(

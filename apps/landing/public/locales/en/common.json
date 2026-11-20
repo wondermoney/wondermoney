@@ -4442,7 +4442,7 @@
         "alreadyHave": "If you already have panels, your bills and your E-REDES file already show only what you buy from the grid: leave this off.",
         "legend": "Your solar panels",
         "district": "District",
-        "districtHelp": "The production of the district capital, with the panels facing south at PVGIS's optimal tilt there ({{slope}}°).",
+        "districtHelp": "The production at the district capital. PVGIS's optimal tilt there is {{slope}}°.",
         "locate": "Use my location",
         "locating": "Finding your location…",
         "located": "Nearest district capital: {{district}}.",
@@ -4460,7 +4460,10 @@
         "errors": {
           "kwp": "Enter a power above 0 and up to 50 kWp.",
           "lossPercent": "Enter losses from 0 to 50 %.",
-          "surplusPrice": "Enter a price from 0 to 1 euro per kWh."
+          "surplusPrice": "Enter a price from 0 to 1 euro per kWh.",
+          "coordinates": "Enter a point in mainland Portugal, Madeira or the Azores.",
+          "tilt": "Enter a tilt from 0 to 90°.",
+          "azimuth": "Enter an azimuth from -180 to 180°."
         },
         "summary": {
           "title": "With your solar panels",
@@ -4476,7 +4479,47 @@
           "fromProfile": "Without an E-REDES file, your hours are rebuilt from the E-REDES BTN profile, so the share used at home is an estimate. Upload your file to use your real hours.",
           "ranking": "The offers below are ranked on what you still buy from the grid.",
           "source": "Production: PVGIS {{version}} (European Commission, Joint Research Centre), {{database}} radiation data for {{from}}–{{to}}, a typical year of 1 kWp of crystalline silicon on a free-standing mount, scaled to your system. Downloaded on {{date}}.",
-          "sourceLink": "About PVGIS"
+          "sourceLink": "About PVGIS",
+          "systemFacing": "{{kwp}} kWp {{place}}, tilted {{angle}}° and facing {{direction}}. Figures for a year.",
+          "systemAzimuth": "{{kwp}} kWp {{place}}, tilted {{angle}}° at an azimuth of {{aspect}}° (0° is south). Figures for a year.",
+          "placeDistrict": "in {{district}}",
+          "placeCoordinates": "at {{lat}}° N, {{lon}}° W",
+          "sourceLive": "Production: PVGIS {{version}} (European Commission, Joint Research Centre), {{database}} radiation data for {{from}}–{{to}}, a typical year of 1 kWp of crystalline silicon on a free-standing mount, calculated by PVGIS for this tilt, orientation and place and scaled to your system."
+        },
+        "location": "Location",
+        "locationDistrict": "District capital",
+        "locationCoordinates": "Exact coordinates",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "coordinatesHelp": "In decimal degrees, as a map app shows them: 38.7223 and -9.1393 for Lisbon. Mainland Portugal, Madeira or the Azores.",
+        "locateExact": "Use my exact location",
+        "locatedExact": "Coordinates filled in from your location.",
+        "locateExactFailed": "Your location is not available. Enter the coordinates by hand.",
+        "coordinatesPrivacy": "To calculate the production, these coordinates, rounded to about 5 km in your browser, are sent to the WonderMoney server and from there to PVGIS, run by the European Commission's Joint Research Centre. With a district capital instead, your location stays in your browser.",
+        "tilt": "Tilt",
+        "tiltHelp": "0° is flat, 90° upright. Leave it empty for PVGIS's optimal tilt at {{district}} ({{slope}}°).",
+        "orientation": "Orientation",
+        "orientations": {
+          "S": "South",
+          "SE": "South-east",
+          "SW": "South-west",
+          "E": "East",
+          "W": "West",
+          "custom": "Other (azimuth in degrees)"
+        },
+        "azimuth": "Azimuth",
+        "azimuthHelp": "Degrees from south: 0° south, -90° east, 90° west, 180° north.",
+        "liveHelp": "Facing south at the optimal tilt of a district capital, the page uses its own table. Any other tilt, orientation or exact coordinates are calculated by PVGIS, which can take up to half a minute.",
+        "loadingLive": "Asking PVGIS for your tilt, orientation and location…",
+        "fallbackFailed": "PVGIS could not be reached, so the estimate uses the table for {{district}}: panels facing south at {{slope}}°.",
+        "fallbackUnavailable": "PVGIS has no data for that point (it may be over the sea), so the estimate uses the table for {{district}}: panels facing south at {{slope}}°.",
+        "retry": "Try again",
+        "directions": {
+          "S": "south",
+          "SE": "south-east",
+          "SW": "south-west",
+          "E": "east",
+          "W": "west"
         }
       },
       "diagram": {
@@ -4621,7 +4664,7 @@
           "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
           "mine": "Under \"Compare with my tariff\" you enter the prices on your invoice. Your tariff then goes through the same calculation as every offer, so the saving shown on each one is like for like.",
-          "solar": "Under \"Solar panels\" you add a system by district, peak power and losses. Its production is subtracted from your consumption hour by hour, and the offers are ranked on what you still buy from the grid. The summary shows the share used at home, the surplus and what the panels save on the cheapest offer. A surplus sale price, if you enter one, is shown apart from the ranking.",
+          "solar": "Under \"Solar panels\" you add a system by district capital or by coordinates, with its tilt, orientation, peak power and losses. Its production is subtracted from your consumption hour by hour, and the offers are ranked on what you still buy from the grid. The summary shows the share used at home, the surplus and what the panels save on the cheapest offer. A surplus sale price, if you enter one, is shown apart from the ranking.",
           "options": "At the top of the results, the cheapest simple, bi-hourly and tri-hourly offers on the same consumption show whether another option would pay off. The filters narrow the list, and the CSV button downloads it."
         },
         "example": {
@@ -4651,7 +4694,7 @@
           "erse": "Offers: ERSE's price simulator, the export of {{date}}, with {{offers}} offers from {{suppliers}} suppliers and the regulated tariff. Suppliers must report their household offers to ERSE. Prices are before VAT and taxes; the page adds them.",
           "refresh": "The page takes a new export from ERSE every week. Offers that have ended by then are left out.",
           "names": "ERSE gives each supplier as a code; the page shows the brand name each supplier uses on its own website.",
-          "solar": "Solar production: PVGIS {{pvgisVersion}}, from the European Commission's Joint Research Centre, with the {{pvgisDatabase}} radiation database ({{pvgisFrom}}–{{pvgisTo}}). For each district capital the page holds PVGIS's typical year, hour by hour, for 1 kWp facing south at the optimal tilt with 14 % losses, downloaded on {{pvgisDate}}. Without an E-REDES file, your consumption's hours are rebuilt from the standard profile's split across the periods in each month.",
+          "solar": "Solar production: PVGIS {{pvgisVersion}}, from the European Commission's Joint Research Centre, with the {{pvgisDatabase}} radiation database ({{pvgisFrom}}–{{pvgisTo}}). For each district capital the page holds PVGIS's typical year, hour by hour, for 1 kWp facing south at the optimal tilt with 14 % losses, downloaded on {{pvgisDate}}. Another tilt, orientation or exact coordinates are sent, through the WonderMoney server, to PVGIS, which calculates the same typical year for them; if it does not answer, the nearest district capital's table is used and the page says so. Without an E-REDES file, your consumption's hours are rebuilt from the standard profile's split across the periods in each month.",
           "simulatorLink": "ERSE price simulator",
           "manualLink": "ERSE, Manual do Simulador de Preços de Energia (June 2026)",
           "pvgisLink": "PVGIS, European Commission"
@@ -4664,7 +4707,7 @@
             "c": "Indexed offers are priced at ERSE's estimate for the coming months. If you choose OMIE prices, those whose supplier publishes its formula show what they would have cost over the last 12 months (or on your file's dates), not what they will cost: what you pay follows the market.",
             "d": "Dual offers can include gas in their fixed amounts; they are left out unless you include them.",
             "e": "With a bill or a total, the split across periods is the standard profile, not your own. The E-REDES file gives your real split.",
-            "solar": "Solar production is a typical year for the district capital, facing south at the optimal tilt: shade, another orientation and a given year's weather change it.",
+            "solar": "Solar production is a typical year, at the district capital or at your coordinates rounded to about 5 km: shade and a given year's weather change it.",
             "f": "This is an educational estimate, not advice. Check the offer's standard sheet and terms before you sign."
           },
           "simulatorLink": "Check a result in ERSE's official simulator"

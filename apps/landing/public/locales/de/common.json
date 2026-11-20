@@ -4442,7 +4442,7 @@
         "alreadyHave": "Wenn Sie schon eine Anlage haben, zeigen Ihre Rechnungen und Ihre E-REDES-Datei bereits nur den Netzbezug: Lassen Sie diese Option dann aus.",
         "legend": "Ihre Solaranlage",
         "district": "Distrikt",
-        "districtHelp": "Die Erzeugung in der Distrikthauptstadt, mit Modulen nach Süden und dem dortigen optimalen Neigungswinkel laut PVGIS ({{slope}}°).",
+        "districtHelp": "Die Erzeugung in der Distrikthauptstadt. Der optimale Neigungswinkel laut PVGIS beträgt dort {{slope}}°.",
         "locate": "Meinen Standort verwenden",
         "locating": "Standort wird ermittelt …",
         "located": "Nächste Distrikthauptstadt: {{district}}.",
@@ -4460,7 +4460,10 @@
         "errors": {
           "kwp": "Geben Sie eine Leistung über 0 und bis 50 kWp ein.",
           "lossPercent": "Geben Sie Verluste zwischen 0 und 50 % ein.",
-          "surplusPrice": "Geben Sie einen Preis zwischen 0 und 1 Euro pro kWh ein."
+          "surplusPrice": "Geben Sie einen Preis zwischen 0 und 1 Euro pro kWh ein.",
+          "coordinates": "Geben Sie einen Punkt in Festland-Portugal, auf Madeira oder auf den Azoren ein.",
+          "tilt": "Geben Sie eine Neigung von 0 bis 90° ein.",
+          "azimuth": "Geben Sie einen Azimut von -180 bis 180° ein."
         },
         "summary": {
           "title": "Mit Ihrer Solaranlage",
@@ -4476,7 +4479,47 @@
           "fromProfile": "Ohne E-REDES-Datei werden Ihre Stunden aus dem BTN-Profil der E-REDES nachgebildet, der selbst verbrauchte Anteil ist daher eine Schätzung. Laden Sie Ihre Datei hoch, um Ihre echten Stunden zu verwenden.",
           "ranking": "Die Angebote unten sind nach dem gereiht, was Sie noch aus dem Netz beziehen.",
           "source": "Erzeugung: PVGIS {{version}} (Europäische Kommission, Gemeinsame Forschungsstelle), Strahlungsdaten {{database}} von {{from}} bis {{to}}, ein typisches Jahr von 1 kWp kristallinem Silizium in freier Aufstellung, auf Ihre Anlage skaliert. Heruntergeladen am {{date}}.",
-          "sourceLink": "Über PVGIS"
+          "sourceLink": "Über PVGIS",
+          "systemFacing": "{{kwp}} kWp {{place}}, mit {{angle}}° geneigt und nach {{direction}} ausgerichtet. Werte für ein Jahr.",
+          "systemAzimuth": "{{kwp}} kWp {{place}}, mit {{angle}}° geneigt, Azimut {{aspect}}° (0° ist Süden). Werte für ein Jahr.",
+          "placeDistrict": "in {{district}}",
+          "placeCoordinates": "bei {{lat}}° N, {{lon}}° W",
+          "sourceLive": "Erzeugung: PVGIS {{version}} (Europäische Kommission, Gemeinsame Forschungsstelle), Strahlungsdaten {{database}} von {{from}} bis {{to}}, ein typisches Jahr von 1 kWp kristallinem Silizium in freier Aufstellung, von PVGIS für diese Neigung, Ausrichtung und diesen Ort berechnet und auf Ihre Anlage skaliert."
+        },
+        "location": "Standort",
+        "locationDistrict": "Distrikthauptstadt",
+        "locationCoordinates": "Genaue Koordinaten",
+        "latitude": "Breitengrad",
+        "longitude": "Längengrad",
+        "coordinatesHelp": "In Dezimalgrad, wie in einer Karten-App: 38,7223 und -9,1393 für Lissabon. Festland-Portugal, Madeira oder die Azoren.",
+        "locateExact": "Meinen genauen Standort verwenden",
+        "locatedExact": "Koordinaten aus Ihrem Standort übernommen.",
+        "locateExactFailed": "Ihr Standort ist nicht verfügbar. Geben Sie die Koordinaten von Hand ein.",
+        "coordinatesPrivacy": "Um die Erzeugung zu berechnen, werden diese Koordinaten, in Ihrem Browser auf etwa 5 km gerundet, an den Server von WonderMoney und von dort an PVGIS gesendet, einen Dienst der Gemeinsamen Forschungsstelle der Europäischen Kommission. Wenn Sie eine Distrikthauptstadt wählen, bleibt Ihr Standort in Ihrem Browser.",
+        "tilt": "Neigung",
+        "tiltHelp": "0° ist waagerecht, 90° senkrecht. Lassen Sie das Feld leer, um den optimalen Neigungswinkel laut PVGIS in {{district}} zu verwenden ({{slope}}°).",
+        "orientation": "Ausrichtung",
+        "orientations": {
+          "S": "Süden",
+          "SE": "Südosten",
+          "SW": "Südwesten",
+          "E": "Osten",
+          "W": "Westen",
+          "custom": "Andere (Azimut in Grad)"
+        },
+        "azimuth": "Azimut",
+        "azimuthHelp": "Grad ab Süden: 0° Süden, -90° Osten, 90° Westen, 180° Norden.",
+        "liveHelp": "Nach Süden mit dem optimalen Neigungswinkel einer Distrikthauptstadt verwendet die Seite ihre eigene Tabelle. Eine andere Neigung, eine andere Ausrichtung oder genaue Koordinaten berechnet PVGIS, was bis zu einer halben Minute dauern kann.",
+        "loadingLive": "PVGIS berechnet die Erzeugung für Ihre Neigung, Ausrichtung und Ihren Standort …",
+        "fallbackFailed": "PVGIS war nicht erreichbar, daher verwendet die Schätzung die Tabelle für {{district}}: Module nach Süden mit {{slope}}° Neigung.",
+        "fallbackUnavailable": "PVGIS hat für diesen Punkt keine Daten (er liegt vielleicht auf dem Meer), daher verwendet die Schätzung die Tabelle für {{district}}: Module nach Süden mit {{slope}}° Neigung.",
+        "retry": "Erneut versuchen",
+        "directions": {
+          "S": "Süden",
+          "SE": "Südosten",
+          "SW": "Südwesten",
+          "E": "Osten",
+          "W": "Westen"
         }
       },
       "diagram": {
@@ -4621,7 +4664,7 @@
           "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von Ihrer Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für Ihre Leistung und Ihren Verbrauch auf die Zeiträume verteilt wird.",
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
           "mine": "Unter „Mit meinem Tarif vergleichen“ geben Sie die Preise von Ihrer Rechnung ein. Ihr Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
-          "solar": "Unter „Solaranlage“ fügen Sie eine Anlage nach Distrikt, Spitzenleistung und Verlusten hinzu. Die Erzeugung der Anlage wird Stunde für Stunde von Ihrem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was Sie noch aus dem Netz beziehen. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn Sie einen eingeben, wird getrennt von der Rangfolge gezeigt.",
+          "solar": "Unter „Solaranlage“ fügen Sie eine Anlage nach Distrikthauptstadt oder nach Koordinaten hinzu, mit Neigung, Ausrichtung, Spitzenleistung und Verlusten. Die Erzeugung der Anlage wird Stunde für Stunde von Ihrem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was Sie noch aus dem Netz beziehen. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn Sie einen eingeben, wird getrennt von der Rangfolge gezeigt.",
           "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für Eintarif, Zweitarif und Dreitarif bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
         },
         "example": {
@@ -4651,7 +4694,7 @@
           "erse": "Angebote: Preissimulator der ERSE, Export vom {{date}}, mit {{offers}} Angeboten von {{suppliers}} Versorgern und dem regulierten Tarif. Versorger müssen ihre Haushaltsangebote der ERSE melden. Die Preise verstehen sich ohne Mehrwertsteuer und Steuern; die Seite rechnet sie hinzu.",
           "refresh": "Die Seite übernimmt jede Woche einen neuen Export der ERSE. Angebote, die bis dahin ausgelaufen sind, werden ausgeblendet.",
           "names": "Die ERSE führt jeden Versorger unter einem Code; die Seite zeigt den Markennamen, den jeder Versorger auf seiner eigenen Website verwendet.",
-          "solar": "Solarerzeugung: PVGIS {{pvgisVersion}}, von der Gemeinsamen Forschungsstelle der Europäischen Kommission, mit der Strahlungsdatenbank {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Für jede Distrikthauptstadt enthält die Seite das typische Jahr von PVGIS, Stunde für Stunde, für 1 kWp nach Süden mit optimaler Neigung und 14 % Verlusten, heruntergeladen am {{pvgisDate}}. Ohne E-REDES-Datei werden die Stunden Ihres Verbrauchs aus der Aufteilung des Standardprofils auf die Zeiträume jedes Monats nachgebildet.",
+          "solar": "Solarerzeugung: PVGIS {{pvgisVersion}}, von der Gemeinsamen Forschungsstelle der Europäischen Kommission, mit der Strahlungsdatenbank {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Für jede Distrikthauptstadt enthält die Seite das typische Jahr von PVGIS, Stunde für Stunde, für 1 kWp nach Süden mit optimaler Neigung und 14 % Verlusten, heruntergeladen am {{pvgisDate}}. Eine andere Neigung, eine andere Ausrichtung oder genaue Koordinaten werden über den Server von WonderMoney an PVGIS gesendet, das dasselbe typische Jahr dafür berechnet; antwortet PVGIS nicht, verwendet die Seite die Tabelle der nächsten Distrikthauptstadt und weist Sie darauf hin. Ohne E-REDES-Datei werden die Stunden Ihres Verbrauchs aus der Aufteilung des Standardprofils auf die Zeiträume jedes Monats nachgebildet.",
           "simulatorLink": "Preissimulator der ERSE",
           "manualLink": "ERSE, Manual do Simulador de Preços de Energia (Juni 2026)",
           "pvgisLink": "PVGIS, Europäische Kommission"
@@ -4664,7 +4707,7 @@
             "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet. Wenn Sie OMIE-Preise wählen, zeigen die Angebote, deren Versorger die Formel veröffentlicht, was sie in den letzten 12 Monaten (oder an den Tagen Ihrer Datei) gekostet hätten, nicht was sie kosten werden: Was Sie zahlen, folgt dem Markt.",
             "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, es sei denn, Sie beziehen sie ein.",
             "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht Ihrem eigenen. Die E-REDES-Datei liefert Ihre tatsächliche Aufteilung.",
-            "solar": "Die Solarerzeugung ist ein typisches Jahr der Distrikthauptstadt, nach Süden mit optimaler Neigung: Verschattung, eine andere Ausrichtung und das Wetter eines bestimmten Jahres ändern sie.",
+            "solar": "Die Solarerzeugung ist ein typisches Jahr, in der Distrikthauptstadt oder an Ihren auf etwa 5 km gerundeten Koordinaten: Verschattung und das Wetter eines bestimmten Jahres ändern sie.",
             "f": "Dies ist eine Schätzung zu Informationszwecken, keine Beratung. Lesen Sie das standardisierte Datenblatt und die Bedingungen des Angebots, bevor Sie unterschreiben."
           },
           "simulatorLink": "Ein Ergebnis im offiziellen Simulator der ERSE prüfen"

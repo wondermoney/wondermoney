@@ -4442,7 +4442,7 @@
         "alreadyHave": "Si vous avez déjà des panneaux, vos factures et votre fichier E-REDES ne montrent déjà que ce que vous achetez au réseau : laissez cette option désactivée.",
         "legend": "Vos panneaux solaires",
         "district": "District",
-        "districtHelp": "La production au chef-lieu du district, panneaux orientés plein sud à l'inclinaison optimale de PVGIS à cet endroit ({{slope}}°).",
+        "districtHelp": "La production au chef-lieu du district. L'inclinaison optimale de PVGIS à cet endroit est de {{slope}}°.",
         "locate": "Utiliser ma position",
         "locating": "Recherche de votre position…",
         "located": "Chef-lieu de district le plus proche : {{district}}.",
@@ -4460,7 +4460,10 @@
         "errors": {
           "kwp": "Saisissez une puissance supérieure à 0 et jusqu'à 50 kWc.",
           "lossPercent": "Saisissez des pertes entre 0 et 50 %.",
-          "surplusPrice": "Saisissez un prix entre 0 et 1 euro par kWh."
+          "surplusPrice": "Saisissez un prix entre 0 et 1 euro par kWh.",
+          "coordinates": "Saisissez un point au Portugal continental, à Madère ou aux Açores.",
+          "tilt": "Saisissez une inclinaison de 0 à 90°.",
+          "azimuth": "Saisissez un azimut de -180 à 180°."
         },
         "summary": {
           "title": "Avec vos panneaux solaires",
@@ -4476,7 +4479,47 @@
           "fromProfile": "Sans fichier E-REDES, vos heures sont reconstituées à partir du profil BTN d'E-REDES, la part consommée sur place est donc une estimation. Importez votre fichier pour utiliser vos heures réelles.",
           "ranking": "Les offres ci-dessous sont classées sur ce que vous achetez encore au réseau.",
           "source": "Production : PVGIS {{version}} (Commission européenne, Centre commun de recherche), données de rayonnement {{database}} de {{from}} à {{to}}, une année type de 1 kWc de silicium cristallin sur structure libre, à l'échelle de votre système. Téléchargé le {{date}}.",
-          "sourceLink": "À propos de PVGIS"
+          "sourceLink": "À propos de PVGIS",
+          "systemFacing": "{{kwp}} kWc {{place}}, inclinés à {{angle}}° et orientés {{direction}}. Chiffres pour un an.",
+          "systemAzimuth": "{{kwp}} kWc {{place}}, inclinés à {{angle}}° avec un azimut de {{aspect}}° (0° est le sud). Chiffres pour un an.",
+          "placeDistrict": "à {{district}}",
+          "placeCoordinates": "à {{lat}}° N, {{lon}}° O",
+          "sourceLive": "Production : PVGIS {{version}} (Commission européenne, Centre commun de recherche), données de rayonnement {{database}} de {{from}} à {{to}}, une année type de 1 kWc de silicium cristallin sur structure libre, calculée par PVGIS pour cette inclinaison, cette orientation et cet endroit, à l'échelle de votre système."
+        },
+        "location": "Emplacement",
+        "locationDistrict": "Chef-lieu de district",
+        "locationCoordinates": "Coordonnées exactes",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "coordinatesHelp": "En degrés décimaux, comme dans une application de cartes : 38,7223 et -9,1393 pour Lisbonne. Portugal continental, Madère ou Açores.",
+        "locateExact": "Utiliser ma position exacte",
+        "locatedExact": "Coordonnées remplies à partir de votre position.",
+        "locateExactFailed": "Votre position n'est pas disponible. Saisissez les coordonnées à la main.",
+        "coordinatesPrivacy": "Pour calculer la production, ces coordonnées, arrondies à environ 5 km dans votre navigateur, sont envoyées au serveur de WonderMoney puis à PVGIS, du Centre commun de recherche de la Commission européenne. Avec un chef-lieu de district, votre position reste dans votre navigateur.",
+        "tilt": "Inclinaison",
+        "tiltHelp": "0° est à plat, 90° à la verticale. Laissez vide pour l'inclinaison optimale de PVGIS à {{district}} ({{slope}}°).",
+        "orientation": "Orientation",
+        "orientations": {
+          "S": "Sud",
+          "SE": "Sud-est",
+          "SW": "Sud-ouest",
+          "E": "Est",
+          "W": "Ouest",
+          "custom": "Autre (azimut en degrés)"
+        },
+        "azimuth": "Azimut",
+        "azimuthHelp": "Degrés depuis le sud : 0° sud, -90° est, 90° ouest, 180° nord.",
+        "liveHelp": "Plein sud à l'inclinaison optimale d'un chef-lieu de district, la page utilise sa propre table. Une autre inclinaison, une autre orientation ou des coordonnées exactes sont calculées par PVGIS, ce qui peut prendre jusqu'à une demi-minute.",
+        "loadingLive": "Demande à PVGIS de la production pour votre inclinaison, votre orientation et votre position…",
+        "fallbackFailed": "PVGIS n'a pas pu être joint, l'estimation utilise donc la table de {{district}} : panneaux plein sud à {{slope}}°.",
+        "fallbackUnavailable": "PVGIS n'a pas de données pour ce point (il est peut-être en mer), l'estimation utilise donc la table de {{district}} : panneaux plein sud à {{slope}}°.",
+        "retry": "Réessayer",
+        "directions": {
+          "S": "plein sud",
+          "SE": "sud-est",
+          "SW": "sud-ouest",
+          "E": "est",
+          "W": "ouest"
         }
       },
       "diagram": {
@@ -4621,7 +4664,7 @@
           "full": "Le mode complet utilise les kWh de chaque période indiqués sur votre facture, ou un total sur un nombre de jours quelconque, réparti entre les périodes selon le profil type E-REDES correspondant à votre puissance et à votre consommation.",
           "diagram": "Vous pouvez aussi lui fournir votre fichier de consommation E-REDES, téléchargé depuis le Balcão Digital. Ses relevés au quart d'heure donnent vos kWh réels dans chaque période et chaque cycle. Le fichier est lu dans votre navigateur et n'est jamais envoyé nulle part.",
           "mine": "Dans « Comparer avec mon tarif », vous saisissez les prix de votre facture. Votre tarif passe alors par le même calcul que chaque offre, de sorte que l'économie affichée pour chacune compare ce qui est comparable.",
-          "solar": "Sous « Panneaux solaires », vous ajoutez une installation par district, puissance crête et pertes. Sa production est déduite de votre consommation heure par heure, et les offres sont classées sur ce que vous achetez encore au réseau. Le résumé montre la part consommée sur place, le surplus et ce que les panneaux vous font économiser sur l'offre la moins chère. Un prix de vente du surplus, si vous en saisissez un, est affiché à part du classement.",
+          "solar": "Sous « Panneaux solaires », vous ajoutez une installation par chef-lieu de district ou par coordonnées, avec son inclinaison, son orientation, sa puissance crête et ses pertes. Sa production est déduite de votre consommation heure par heure, et les offres sont classées sur ce que vous achetez encore au réseau. Le résumé montre la part consommée sur place, le surplus et ce que les panneaux vous font économiser sur l'offre la moins chère. Un prix de vente du surplus, si vous en saisissez un, est affiché à part du classement.",
           "options": "En haut des résultats, les offres simple, bi-horaire et tri-horaire les moins chères sur la même consommation montrent si une autre option serait plus avantageuse. Les filtres affinent la liste, et le bouton CSV la télécharge."
         },
         "example": {
@@ -4651,7 +4694,7 @@
           "erse": "Offres : simulateur de prix de l'ERSE, export du {{date}}, avec {{offers}} offres de {{suppliers}} fournisseurs et le tarif réglementé. Les fournisseurs sont tenus de déclarer leurs offres résidentielles à l'ERSE. Les prix sont hors TVA et taxes ; la page les ajoute.",
           "refresh": "La page récupère un nouvel export de l'ERSE chaque semaine. Les offres terminées entre-temps sont exclues.",
           "names": "L'ERSE désigne chaque fournisseur par un code ; la page affiche le nom commercial que chaque fournisseur utilise sur son propre site.",
-          "solar": "Production solaire : PVGIS {{pvgisVersion}}, du Centre commun de recherche de la Commission européenne, avec la base de données de rayonnement {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Pour chaque chef-lieu de district, la page contient l'année type de PVGIS, heure par heure, pour 1 kWc orienté plein sud à l'inclinaison optimale avec 14 % de pertes, téléchargée le {{pvgisDate}}. Sans fichier E-REDES, les heures de votre consommation sont reconstituées à partir de la répartition du profil standard entre les périodes de chaque mois.",
+          "solar": "Production solaire : PVGIS {{pvgisVersion}}, du Centre commun de recherche de la Commission européenne, avec la base de données de rayonnement {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Pour chaque chef-lieu de district, la page contient l'année type de PVGIS, heure par heure, pour 1 kWc orienté plein sud à l'inclinaison optimale avec 14 % de pertes, téléchargée le {{pvgisDate}}. Une autre inclinaison, une autre orientation ou des coordonnées exactes sont envoyées, via le serveur de WonderMoney, à PVGIS, qui calcule la même année type pour elles ; s'il ne répond pas, la page utilise la table du chef-lieu de district le plus proche et vous le signale. Sans fichier E-REDES, les heures de votre consommation sont reconstituées à partir de la répartition du profil standard entre les périodes de chaque mois.",
           "simulatorLink": "Simulateur de prix de l'ERSE",
           "manualLink": "ERSE, Manual do Simulador de Preços de Energia (juin 2026)",
           "pvgisLink": "PVGIS, Commission européenne"
@@ -4664,7 +4707,7 @@
             "c": "Les offres indexées sont calculées selon l'estimation de l'ERSE pour les prochains mois. Si vous choisissez les prix OMIE, celles dont le fournisseur publie la formule montrent ce qu'elles auraient coûté sur les 12 derniers mois (ou aux dates de votre fichier), pas ce qu'elles coûteront : ce que vous payez suit le marché.",
             "d": "Les offres duales peuvent inclure le gaz dans leurs montants fixes ; elles sont exclues, sauf si vous les incluez.",
             "e": "Avec une facture ou un total, la répartition entre les périodes suit le profil type, pas le vôtre. Le fichier E-REDES donne votre répartition réelle.",
-            "solar": "La production solaire est une année type du chef-lieu de district, orientée plein sud à l'inclinaison optimale : l'ombre, une autre orientation et la météo d'une année donnée la modifient.",
+            "solar": "La production solaire est une année type, au chef-lieu de district ou à vos coordonnées arrondies à environ 5 km : l'ombre et la météo d'une année donnée la modifient.",
             "f": "Il s'agit d'une estimation éducative, pas d'un conseil. Consultez la fiche standardisée et les conditions de l'offre avant de signer."
           },
           "simulatorLink": "Vérifiez un résultat dans le simulateur officiel de l'ERSE"
