@@ -3638,7 +3638,8 @@
         "seniorityPay": "Primes d'ancienneté mensuelles (diuturnidades)",
         "startDate": "Date de début du contrat",
         "endDate": "Date de fin du contrat",
-        "contractType": "Type de rupture"
+        "contractType": "Type de rupture",
+        "fixedTermKind": "Type de terme"
       },
       "help": {
         "baseMonthly": "Le salaire de base (retribuição base) en euros par mois, avant la Sécurité sociale et l'IRS. N'incluez pas les primes de vacances ou de Noël, les bonus ni les heures supplémentaires.",
@@ -3646,7 +3647,8 @@
         "startDate": "Le jour où le CDI a commencé. En cas de groupe d'entreprises ou de contrat antérieur avec le même employeur, vérifiez comment votre ancienneté est comptée.",
         "endDate": "Le dernier jour du contrat. Il compte comme un jour travaillé. Cette estimation couvre les fins de contrat en {{year}}.",
         "contractType": "Le licenciement couvre le licenciement collectif, la suppression de poste et l'inadaptation. L'arrivée à terme est la fin d'un CDD à terme certain ou incertain (art. 344 et 345 du Código do Trabalho). Elle n'est pas due quand le contrat prend fin parce que vous avez déclaré ne pas vouloir le renouveler.",
-        "startDateFixedTerm": "Le jour où le CDD a commencé. S'il a été renouvelé, comptez depuis le premier jour : toute la durée, renouvellements compris, est payée à 24 jours par an."
+        "startDateFixedTerm": "Le jour où le CDD a commencé. S'il a été renouvelé, comptez depuis le premier jour : toute la durée, renouvellements compris, est payée à 24 jours par an.",
+        "fixedTermKind": "Il fixe la durée maximale : 2 ans à terme certain, 4 à terme incertain (art. 148). L'indemnité est la même, 24 jours par an."
       },
       "scope": "Couvre le licenciement collectif, la suppression de poste et l'inadaptation sur un contrat à durée indéterminée. Ne couvre pas le licenciement pour faute grave, le licenciement illicite, la rupture d'un commun accord ni le secteur public. Pour la fin d'un CDD, choisissez l'arrivée à terme d'un CDD.",
       "errors": {
@@ -3714,12 +3716,15 @@
         "unsupportedPublic": "Les agents du secteur public, qui suivent d'autres règles.",
         "sourcesTitle": "Sources",
         "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régimes transitoires des art. 5 et 6",
-        "sourceCode": "Código do Trabalho, texte consolidé (Diário da República) : art. 148, 344, 345 et 366",
+        "sourceCode": "Código do Trabalho, texte consolidé (Diário da República) : art. 147, 148, 149, 344, 345 et 366",
         "sourceDgert": "DGERT : indemnité de licenciement collectif (art. 366)",
-        "reviewed": "Règles vérifiées le 20 novembre 2026 sur le Diário da República : le Código do Trabalho consolidé (art. 148, 344, 345 et 366), la Lei n.º 13/2023 (art. 35) et la Lei n.º 69/2013 (art. 5 et 6), avec le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours ne comptent que pour l'ancienneté depuis le 1er mai 2023, comme le prévoit l'art. 35, n° 2, de la Lei n.º 13/2023. Les 24 jours de l'arrivée à terme d'un CDD comptent pour tout le contrat : c'est la lecture de l'art. 35, n° 1, retenue par la note de l'IGeFE, et un tribunal pourrait la lire autrement pour les contrats conclus avant le 1er mai 2023. Information pédagogique, pas un conseil juridique.",
-        "methodFixedTerm": "Arrivée à terme d'un CDD (art. 344, n° 2, et 345, n° 4, du Código do Trabalho, tels que modifiés par la Lei n.º 13/2023) : 24 jours de salaire de base et de diuturnidades par année complète d'ancienneté, calculés comme à l'art. 366. Le montant journalier, le plafond de 20 fois le salaire minimum pour le montant mensuel, le plafond de 12 montants mensuels et la fraction proportionnelle d'une année s'appliquent. L'art. 35, n° 1, de la Lei n.º 13/2023 soumet au nouveau texte les contrats conclus avant le 1er mai 2023, et son n° 2 ne limite à la période postérieure à cette date que les 14 jours de l'art. 366, n° 1. La note de l'IGeFE du 5 juillet 2023 la lit comme 24 jours pour tous les contrats qui arrivent à terme à partir du 1er mai 2023 : son exemple d'un contrat du 1er septembre 2021 au 31 août 2023 compte les 730 jours à 24 jours. Toute la durée compte donc à 24 jours, et les taux des CDI (12, 14, 18 et 20 jours) ne s'appliquent pas. Un CDD dure au plus deux ans, ou quatre à terme incertain (art. 148) : un contrat qui arrive à terme en 2026 n'a donc pas été conclu avant le 1er octobre 2013 et le régime transitoire de l'art. 6 de la Lei n.º 69/2013 ne s'applique pas.",
+        "reviewed": "Règles vérifiées le 20 novembre 2026 sur le Diário da República : le Código do Trabalho consolidé (art. 147, 148, 149, 344, 345 et 366), la Lei n.º 93/2019 (art. 11 et 13), la Lei n.º 13/2023 (art. 35) et la Lei n.º 69/2013 (art. 5 et 6), avec le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours ne comptent que pour l'ancienneté depuis le 1er mai 2023, comme le prévoit l'art. 35, n° 2, de la Lei n.º 13/2023. Les 24 jours de l'arrivée à terme d'un CDD comptent pour tout le contrat : c'est la lecture de l'art. 35, n° 1, retenue par la note de l'IGeFE, et un tribunal pourrait la lire autrement pour les contrats conclus avant le 1er mai 2023. Information pédagogique, pas un conseil juridique.",
+        "methodFixedTerm": "Arrivée à terme d'un CDD (art. 344, n° 2, et 345, n° 4, du Código do Trabalho, tels que modifiés par la Lei n.º 13/2023) : 24 jours de salaire de base et de diuturnidades par année complète d'ancienneté, calculés comme à l'art. 366. Le montant journalier, le plafond de 20 fois le salaire minimum pour le montant mensuel, le plafond de 12 montants mensuels et la fraction proportionnelle d'une année s'appliquent. L'art. 35, n° 1, de la Lei n.º 13/2023 soumet au nouveau texte les contrats conclus avant le 1er mai 2023, et son n° 2 ne limite à la période postérieure à cette date que les 14 jours de l'art. 366, n° 1. La note de l'IGeFE du 5 juillet 2023 la lit comme 24 jours pour tous les contrats qui arrivent à terme à partir du 1er mai 2023 : son exemple d'un contrat du 1er septembre 2021 au 31 août 2023 compte les 730 jours à 24 jours. Toute la durée compte donc à 24 jours, et les taux des CDI (12, 14, 18 et 20 jours) ne s'appliquent pas. Un CDD dure au plus deux ans, ou quatre à terme incertain (art. 148) : un contrat qui respecte cette limite et arrive à terme en 2026 n'a donc pas été conclu avant le 1er octobre 2013 et le régime transitoire de l'art. 6 de la Lei n.º 69/2013 ne s'applique pas.",
         "sourceLaw13Text": "Lei n.º 13/2023, du 3 avril (Diário da República) : nouvelle rédaction des art. 344, n° 2, 345, n° 4, et 366, n° 1, du Código do Trabalho et art. 35 sur son application dans le temps",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 juillet 2023) : 24 jours pour tous les CDD qui arrivent à terme à partir du 1er mai 2023, quelle que soit leur date de conclusion"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 juillet 2023) : 24 jours pour tous les CDD qui arrivent à terme à partir du 1er mai 2023, quelle que soit leur date de conclusion",
+        "methodDurationLimit": "Durée maximale (art. 148 du Código do Trabalho, dans la rédaction de la Lei n.º 93/2019) : 2 ans à terme certain, renouvellements compris, et 4 ans à terme incertain. Un CDD à terme certain peut être renouvelé jusqu'à trois fois, et les renouvellements réunis ne peuvent pas durer plus longtemps que la période initiale (art. 149, n° 4). Les CDD et l'intérim sur le même poste, ainsi que les prestations de services pour le même objet, avec le même employeur, comptent aussi dans les 2 ans (art. 148, n° 6). Les contrats conclus avant le 1er octobre 2019 gardent les limites antérieures (art. 11, n° 4, de la Lei n.º 93/2019) : 3 ans à terme certain (18 mois pour une personne en quête d'un premier emploi et 2 ans dans les autres cas de l'art. 140, n° 4) et 6 ans à terme incertain ; le calculateur prend la date de début comme date de conclusion. Quand les dates dépassent la limite, le calculateur signale que le contrat serait probablement un CDI (art. 147, n° 2, b)) et qu'y mettre fin serait un licenciement, mais affiche toujours le montant de l'arrivée à terme. Il ne voit ni les renouvellements ni les contrats antérieurs : vérifiez-les vous-même.",
+        "sourceLaw93": "Lei n.º 93/2019, du 4 septembre (Diário da República) : nouvelle rédaction des art. 148 et 149 du Código do Trabalho, application dans le temps (art. 11, n° 4) et entrée en vigueur le 1er octobre 2019 (art. 13)",
+        "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), avec sa rédaction initiale de 2009 : les limites des contrats conclus avant le 1er octobre 2019"
       },
       "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",
       "nextStepDescription": "WonderMoney réunit vos comptes et vos dépenses mensuelles, pour répartir une indemnité sur les mois à venir.",
@@ -3728,7 +3733,24 @@
         "permanent": "Licenciement sur un CDI",
         "fixedTerm": "Arrivée à terme d'un CDD"
       },
-      "scopeFixedTerm": "Couvre l'arrivée à terme d'un CDD, à terme certain ou incertain, avec une fin de contrat en {{year}} : 24 jours de salaire de base et de diuturnidades par an sur toute la durée du contrat, avec le montant journalier et les plafonds de l'art. 366. Ne couvre pas les contrats arrivés à terme avant le 1er mai 2023, la rupture anticipée, le licenciement pour faute grave, le licenciement illicite, la rupture d'un commun accord ni le secteur public."
+      "scopeFixedTerm": "Couvre l'arrivée à terme d'un CDD, à terme certain ou incertain, avec une fin de contrat en {{year}} : 24 jours de salaire de base et de diuturnidades par an sur toute la durée du contrat, avec le montant journalier et les plafonds de l'art. 366. Ne couvre pas les contrats arrivés à terme avant le 1er mai 2023, la rupture anticipée, le licenciement pour faute grave, le licenciement illicite, la rupture d'un commun accord ni le secteur public.",
+      "fixedTermKinds": {
+        "certain": "Terme certain (date de fin convenue)",
+        "uncertain": "Terme incertain (prend fin avec son motif)"
+      },
+      "durationWarning": {
+        "title": "Ce contrat pourrait être requalifié en CDI",
+        "from2019": {
+          "certain": "Un CDD à terme certain dure au plus 2 ans, renouvellements compris (art. 148, n° 1, du Código do Trabalho, dans la rédaction de la Lei n.º 93/2019). Avec ces dates, cette limite a été atteinte le {{date}}.",
+          "uncertain": "Un CDD à terme incertain dure au plus 4 ans (art. 148, n° 5, du Código do Trabalho, dans la rédaction de la Lei n.º 93/2019). Avec ces dates, cette limite a été atteinte le {{date}}."
+        },
+        "before2019": {
+          "certain": "Un CDD conclu avant le 1er octobre 2019 garde les limites antérieures (art. 11, n° 4, de la Lei n.º 93/2019) : au plus 3 ans à terme certain, renouvellements compris, et moins dans certains cas (rédaction initiale de l'art. 148, n° 1). Avec ces dates, cette limite a été atteinte le {{date}}.",
+          "uncertain": "Un CDD conclu avant le 1er octobre 2019 garde les limites antérieures (art. 11, n° 4, de la Lei n.º 93/2019) : au plus 6 ans à terme incertain (rédaction initiale de l'art. 148, n° 4). Avec ces dates, cette limite a été atteinte le {{date}}."
+        },
+        "consequence": "Un contrat qui dépasse sa durée maximale devient un CDI (art. 147, n° 2, b)), et l'ancienneté compte depuis le premier jour (art. 147, n° 3). Y mettre fin est alors un licenciement, pas une arrivée à terme, avec d'autres règles d'indemnité ; un employeur qui y met fin en invoquant seulement le terme peut commettre un licenciement illicite. Le montant affiché reste l'indemnité d'arrivée à terme.",
+        "action": "Calculer comme un licenciement sur un CDI"
+      }
     },
     "statePension": {
       "title": "Simulateur de pension de retraite au Portugal 2026",

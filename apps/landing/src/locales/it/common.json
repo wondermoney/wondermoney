@@ -3638,7 +3638,8 @@
         "seniorityPay": "Integrazioni mensili di anzianità (diuturnidades)",
         "startDate": "Data di inizio del contratto",
         "endDate": "Data di cessazione",
-        "contractType": "Tipo di cessazione"
+        "contractType": "Tipo di cessazione",
+        "fixedTermKind": "Tipo di termine"
       },
       "help": {
         "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima di previdenza e IRS. Non includere tredicesima, premi né straordinari.",
@@ -3646,7 +3647,8 @@
         "startDate": "Il giorno in cui è iniziato il contratto a tempo indeterminato. In caso di gruppo di imprese o di un contratto precedente con lo stesso datore di lavoro, verifica come viene conteggiata la tua anzianità.",
         "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}.",
         "contractType": "Il licenziamento copre il licenziamento collettivo, la soppressione del posto e l'inidoneità. La scadenza è la fine di un contratto a termine, certo o incerto (artt. 344 e 345 del Código do Trabalho). Non è dovuta quando il contratto finisce perché hai dichiarato di non volerlo rinnovare.",
-        "startDateFixedTerm": "Il giorno in cui è iniziato il contratto a termine. Se è stato rinnovato, conta dal primo giorno: tutta la durata, rinnovi compresi, è pagata a 24 giorni per anno."
+        "startDateFixedTerm": "Il giorno in cui è iniziato il contratto a termine. Se è stato rinnovato, conta dal primo giorno: tutta la durata, rinnovi compresi, è pagata a 24 giorni per anno.",
+        "fixedTermKind": "Stabilisce la durata massima: 2 anni a termine certo, 4 a termine incerto (art. 148). L'indennità è la stessa, 24 giorni per anno."
       },
       "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico. Per la fine di un contratto a termine, scegli scadenza di un contratto a termine.",
       "errors": {
@@ -3714,12 +3716,15 @@
         "unsupportedPublic": "I dipendenti del settore pubblico, che seguono altre regole.",
         "sourcesTitle": "Fonti",
         "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regimi transitori degli artt. 5 e 6",
-        "sourceCode": "Código do Trabalho, testo consolidato (Diário da República): artt. 148, 344, 345 e 366",
+        "sourceCode": "Código do Trabalho, testo consolidato (Diário da República): artt. 147, 148, 149, 344, 345 e 366",
         "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
-        "reviewed": "Regole verificate il 20 novembre 2026 sul Diário da República: il Código do Trabalho consolidato (artt. 148, 344, 345 e 366), la Lei n.º 13/2023 (art. 35) e la Lei n.º 69/2013 (artt. 5 e 6), con il salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni contano solo per l'anzianità dal 1° maggio 2023, come stabilisce l'art. 35, n. 2, della Lei n.º 13/2023. I 24 giorni della scadenza di un contratto a termine contano per tutto il contratto: è la lettura dell'art. 35, n. 1, data dalla nota dell'IGeFE, e un tribunale potrebbe leggerlo diversamente per i contratti conclusi prima del 1° maggio 2023. Informazione didattica, non consulenza legale.",
-        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e il suo n. 2 limita al periodo da quella data solo i 14 giorni dell'art. 366, n. 1. La nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023: il suo esempio di un contratto dal 1° settembre 2021 al 31 agosto 2023 conta tutti i 730 giorni a 24 giorni. Quindi tutta la durata conta a 24 giorni, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano. Un contratto a termine dura al massimo due anni, o quattro se a termine incerto (art. 148): uno che scade nel 2026 non è stato concluso prima del 1° ottobre 2013 e il regime transitorio dell'art. 6 della Lei n.º 69/2013 non si applica.",
+        "reviewed": "Regole verificate il 20 novembre 2026 sul Diário da República: il Código do Trabalho consolidato (artt. 147, 148, 149, 344, 345 e 366), la Lei n.º 93/2019 (artt. 11 e 13), la Lei n.º 13/2023 (art. 35) e la Lei n.º 69/2013 (artt. 5 e 6), con il salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni contano solo per l'anzianità dal 1° maggio 2023, come stabilisce l'art. 35, n. 2, della Lei n.º 13/2023. I 24 giorni della scadenza di un contratto a termine contano per tutto il contratto: è la lettura dell'art. 35, n. 1, data dalla nota dell'IGeFE, e un tribunale potrebbe leggerlo diversamente per i contratti conclusi prima del 1° maggio 2023. Informazione didattica, non consulenza legale.",
+        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e il suo n. 2 limita al periodo da quella data solo i 14 giorni dell'art. 366, n. 1. La nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023: il suo esempio di un contratto dal 1° settembre 2021 al 31 agosto 2023 conta tutti i 730 giorni a 24 giorni. Quindi tutta la durata conta a 24 giorni, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano. Un contratto a termine dura al massimo due anni, o quattro se a termine incerto (art. 148): uno che rispetta questo limite e scade nel 2026 non è stato concluso prima del 1° ottobre 2013 e il regime transitorio dell'art. 6 della Lei n.º 69/2013 non si applica.",
         "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile (Diário da República): nuovo testo degli artt. 344, n. 2, 345, n. 4, e 366, n. 1, del Código do Trabalho e art. 35 sull'applicazione nel tempo",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula",
+        "methodDurationLimit": "Durata massima (art. 148 del Código do Trabalho, nella versione della Lei n.º 93/2019): 2 anni a termine certo, rinnovi compresi, e 4 anni a termine incerto. Un contratto a termine certo può essere rinnovato fino a tre volte, e i rinnovi insieme non possono durare più del periodo iniziale (art. 149, n. 4). Nei 2 anni contano anche i contratti a termine e il lavoro somministrato sullo stesso posto, e le prestazioni di servizi per lo stesso oggetto, con lo stesso datore di lavoro (art. 148, n. 6). I contratti conclusi prima del 1° ottobre 2019 mantengono i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): 3 anni a termine certo (18 mesi per chi cerca il primo impiego e 2 anni negli altri casi dell'art. 140, n. 4) e 6 anni a termine incerto; il calcolatore usa la data di inizio come data di conclusione. Quando le date superano il limite, il calcolatore avvisa che il contratto sarebbe probabilmente a tempo indeterminato (art. 147, n. 2, lett. b) e che porvi fine sarebbe un licenziamento, ma mostra sempre l'importo della scadenza. Non vede rinnovi né contratti precedenti, quindi verificali tu.",
+        "sourceLaw93": "Lei n.º 93/2019, del 4 settembre (Diário da República): nuova versione degli artt. 148 e 149 del Código do Trabalho, applicazione nel tempo (art. 11, n. 4) ed entrata in vigore il 1° ottobre 2019 (art. 13)",
+        "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), con la versione iniziale del 2009: i limiti dei contratti conclusi prima del 1° ottobre 2019"
       },
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
       "nextStepDescription": "WonderMoney mostra i tuoi conti e le spese mensili insieme, così puoi ripartire un'indennità sui mesi successivi.",
@@ -3728,7 +3733,24 @@
         "permanent": "Licenziamento in un contratto a tempo indeterminato",
         "fixedTerm": "Scadenza di un contratto a termine"
       },
-      "scopeFixedTerm": "Copre la scadenza di un contratto a termine, certo o incerto, con cessazione nel {{year}}: 24 giorni di retribuzione base e diuturnidades per anno di tutta la durata del contratto, con l'importo giornaliero e i limiti dell'art. 366. Non copre contratti scaduti prima del 1° maggio 2023, cessazione anticipata, licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico."
+      "scopeFixedTerm": "Copre la scadenza di un contratto a termine, certo o incerto, con cessazione nel {{year}}: 24 giorni di retribuzione base e diuturnidades per anno di tutta la durata del contratto, con l'importo giornaliero e i limiti dell'art. 366. Non copre contratti scaduti prima del 1° maggio 2023, cessazione anticipata, licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico.",
+      "fixedTermKinds": {
+        "certain": "Termine certo (data di fine concordata)",
+        "uncertain": "Termine incerto (finisce con il suo motivo)"
+      },
+      "durationWarning": {
+        "title": "Questo contratto potrebbe valere come a tempo indeterminato",
+        "from2019": {
+          "certain": "Un contratto a termine certo dura al massimo 2 anni, rinnovi compresi (art. 148, n. 1, del Código do Trabalho, nella versione della Lei n.º 93/2019). Con queste date, il limite è stato raggiunto il {{date}}.",
+          "uncertain": "Un contratto a termine incerto dura al massimo 4 anni (art. 148, n. 5, del Código do Trabalho, nella versione della Lei n.º 93/2019). Con queste date, il limite è stato raggiunto il {{date}}."
+        },
+        "before2019": {
+          "certain": "Un contratto a termine concluso prima del 1° ottobre 2019 mantiene i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): al massimo 3 anni a termine certo, rinnovi compresi, e meno in alcuni casi (versione iniziale dell'art. 148, n. 1). Con queste date, il limite è stato raggiunto il {{date}}.",
+          "uncertain": "Un contratto a termine concluso prima del 1° ottobre 2019 mantiene i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): al massimo 6 anni a termine incerto (versione iniziale dell'art. 148, n. 4). Con queste date, il limite è stato raggiunto il {{date}}."
+        },
+        "consequence": "Un contratto che supera la durata massima si converte in contratto a tempo indeterminato (art. 147, n. 2, lett. b), e l'anzianità conta dal primo giorno (art. 147, n. 3). Porvi fine è allora un licenziamento, non una scadenza, con altre regole di indennità; se il datore di lavoro lo chiude solo invocando la fine del termine, può trattarsi di un licenziamento illegittimo. L'importo mostrato resta l'indennità per la scadenza.",
+        "action": "Calcola come licenziamento in un contratto a tempo indeterminato"
+      }
     },
     "statePension": {
       "title": "Calcolatore pensione di vecchiaia Portogallo 2026",

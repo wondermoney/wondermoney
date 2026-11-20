@@ -3638,7 +3638,8 @@
         "seniorityPay": "Monthly seniority supplements (diuturnidades)",
         "startDate": "Contract start date",
         "endDate": "Termination date",
-        "contractType": "Type of termination"
+        "contractType": "Type of termination",
+        "fixedTermKind": "Kind of term"
       },
       "help": {
         "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
@@ -3646,7 +3647,8 @@
         "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
         "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}.",
         "contractType": "Dismissal covers a collective dismissal, extinction of the post or unsuitability. Expiry is the end of a fixed-term contract, of certain or uncertain term (arts. 344 and 345 of the Código do Trabalho). It is not due when the contract ends because you declared you would not renew it.",
-        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year."
+        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year.",
+        "fixedTermKind": "It sets the maximum duration: 2 years with a certain term, 4 with an uncertain term (art. 148). The compensation is the same, 24 days a year."
       },
       "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: dismissal with just cause, unlawful dismissal, mutual agreement and the public sector. For the end of a fixed-term contract, choose expiry of a fixed-term contract.",
       "errors": {
@@ -3714,12 +3716,15 @@
         "unsupportedPublic": "Public-sector workers, who follow different rules.",
         "sourcesTitle": "Sources",
         "sourceLaw69": "Lei n.º 69/2013, of 30 August (Diário da República): new wording of art. 366 and the transitional regimes of arts. 5 and 6",
-        "sourceCode": "Código do Trabalho, consolidated text (Diário da República): arts. 148, 344, 345 and 366",
+        "sourceCode": "Código do Trabalho, consolidated text (Diário da República): arts. 147, 148, 149, 344, 345 and 366",
         "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
-        "reviewed": "Rules reviewed on 20 November 2026 against the Diário da República: the consolidated Código do Trabalho (arts. 148, 344, 345 and 366), Lei n.º 13/2023 (art. 35) and Lei n.º 69/2013 (arts. 5 and 6), with the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days count only for seniority from 1 May 2023, as art. 35(2) of Lei n.º 13/2023 sets. The 24 days of a fixed-term expiry count for the whole contract: that reading of art. 35(1) is the one in the IGeFE note, and a court could read it differently for contracts signed before 1 May 2023. Educational, not legal advice.",
-        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and its art. 35(2) limits only the 14 days of art. 366(1) to the time from that date. The IGeFE note of 5 July 2023 reads this as 24 days for every contract that expires from 1 May 2023: its example of a contract from 1 September 2021 to 31 August 2023 counts all 730 days at 24 days. So the whole duration counts at 24 days, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply. A fixed-term contract lasts at most two years, or four with an uncertain term (art. 148), so one that expires in 2026 was not signed before 1 October 2013 and the transitional rules of art. 6 of Lei n.º 69/2013 do not apply.",
+        "reviewed": "Rules reviewed on 20 November 2026 against the Diário da República: the consolidated Código do Trabalho (arts. 147, 148, 149, 344, 345 and 366), Lei n.º 93/2019 (arts. 11 and 13), Lei n.º 13/2023 (art. 35) and Lei n.º 69/2013 (arts. 5 and 6), with the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days count only for seniority from 1 May 2023, as art. 35(2) of Lei n.º 13/2023 sets. The 24 days of a fixed-term expiry count for the whole contract: that reading of art. 35(1) is the one in the IGeFE note, and a court could read it differently for contracts signed before 1 May 2023. Educational, not legal advice.",
+        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and its art. 35(2) limits only the 14 days of art. 366(1) to the time from that date. The IGeFE note of 5 July 2023 reads this as 24 days for every contract that expires from 1 May 2023: its example of a contract from 1 September 2021 to 31 August 2023 counts all 730 days at 24 days. So the whole duration counts at 24 days, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply. A fixed-term contract lasts at most two years, or four with an uncertain term (art. 148), so one that keeps to those limits and expires in 2026 was not signed before 1 October 2013 and the transitional rules of art. 6 of Lei n.º 69/2013 do not apply.",
         "sourceLaw13Text": "Lei n.º 13/2023, of 3 April (Diário da República): new wording of arts. 344(2), 345(4) and 366(1) of the Código do Trabalho and art. 35 on its application in time",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date",
+        "methodDurationLimit": "Maximum duration (art. 148 of the Código do Trabalho, as amended by Lei n.º 93/2019): 2 years with a certain term, renewals included, and 4 years with an uncertain term. A certain-term contract can be renewed up to three times, and the renewals together cannot last longer than the first period (art. 149(4)). Earlier fixed-term contracts and temporary agency work in the same job, and service contracts for the same work, with the same employer also count towards the 2 years (art. 148(6)). Contracts signed before 1 October 2019 keep the earlier limits (art. 11(4) of Lei n.º 93/2019): 3 years with a certain term (18 months for a first job seeker and 2 years in the other cases of art. 140(4)) and 6 years with an uncertain term; the calculator takes the start date as the signing date. When the dates pass the limit, the calculator warns that the contract would likely be open-ended (art. 147(2)(b)) and that ending it would be a dismissal, but still shows the expiry figure. It cannot see renewals or earlier contracts, so check those yourself.",
+        "sourceLaw93": "Lei n.º 93/2019, of 4 September (Diário da República): new wording of arts. 148 and 149 of the Código do Trabalho, its application in time (art. 11(4)) and entry into force on 1 October 2019 (art. 13)",
+        "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), with its initial 2009 wording: the limits for contracts signed before 1 October 2019"
       },
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
@@ -3728,7 +3733,24 @@
         "permanent": "Dismissal on a permanent contract",
         "fixedTerm": "Expiry of a fixed-term contract"
       },
-      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector."
+      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "fixedTermKinds": {
+        "certain": "Certain term (an agreed end date)",
+        "uncertain": "Uncertain term (ends when its reason ends)"
+      },
+      "durationWarning": {
+        "title": "This contract may count as open-ended",
+        "from2019": {
+          "certain": "A fixed-term contract with a certain term lasts at most 2 years, renewals included (art. 148(1) of the Código do Trabalho, as amended by Lei n.º 93/2019). With these dates, the limit was reached on {{date}}.",
+          "uncertain": "A fixed-term contract with an uncertain term lasts at most 4 years (art. 148(5) of the Código do Trabalho, as amended by Lei n.º 93/2019). With these dates, the limit was reached on {{date}}."
+        },
+        "before2019": {
+          "certain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 3 years with a certain term, renewals included, and less in some cases (initial wording of art. 148(1)). With these dates, the limit was reached on {{date}}.",
+          "uncertain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 6 years with an uncertain term (initial wording of art. 148(4)). With these dates, the limit was reached on {{date}}."
+        },
+        "consequence": "A contract that passes its maximum duration converts into an open-ended contract (art. 147(2)(b)), with seniority counted from the first day (art. 147(3)). Ending it is then a dismissal, not an expiry, with different compensation rules; an employer that ends it only by letting the term run out may be dismissing unlawfully. The figure here is still the expiry compensation.",
+        "action": "Calculate as a dismissal on a permanent contract"
+      }
     },
     "statePension": {
       "title": "Portugal state pension estimate 2026",

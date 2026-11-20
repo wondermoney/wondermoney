@@ -12,6 +12,7 @@ import {
   type ContractType,
   type DismissalCompensationInput,
   type DismissalField,
+  type FixedTermKind,
 } from "@/lib/calculators/dismissalCompensation";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
@@ -25,6 +26,7 @@ const dateClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive";
 const PAYOUT_MONTHS = [6, 12] as const;
 const CONTRACT_TYPES: readonly ContractType[] = ["permanent", "fixedTerm"];
+const FIXED_TERM_KINDS: readonly FixedTermKind[] = ["certain", "uncertain"];
 
 export default function DismissalCompensationCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -97,6 +99,9 @@ function DismissalCompensationCalculator() {
         })
       : undefined;
   const years = (value: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
+  const longDate = (iso: string) =>
+    new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+  const overLimit = result?.durationLimit?.exceeded ? result.durationLimit : null;
 
   const fixedTerm = input.contractType === "fixedTerm";
 
@@ -120,6 +125,25 @@ function DismissalCompensationCalculator() {
           </select>
           <p id="dismissal-contract-type-help" className="text-sm text-muted-foreground">{t(k("help.contractType"))}</p>
         </div>
+        {fixedTerm && (
+          <div className="space-y-1.5">
+            <label htmlFor="dismissal-term-kind" className="block text-sm font-medium text-foreground">
+              {t(k("fields.fixedTermKind"))}
+            </label>
+            <select
+              id="dismissal-term-kind"
+              value={input.fixedTermKind}
+              onChange={(event) => update("fixedTermKind", event.currentTarget.value as FixedTermKind)}
+              className={selectClass}
+              aria-describedby="dismissal-term-kind-help"
+            >
+              {FIXED_TERM_KINDS.map((kind) => (
+                <option key={kind} value={kind}>{t(k(`fixedTermKinds.${kind}`))}</option>
+              ))}
+            </select>
+            <p id="dismissal-term-kind-help" className="text-sm text-muted-foreground">{t(k("help.fixedTermKind"))}</p>
+          </div>
+        )}
         <CalculatorInput
           id="dismissal-base"
           label={t(k("fields.baseMonthly"))}
@@ -175,6 +199,21 @@ function DismissalCompensationCalculator() {
             <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
           )}
         </div>
+        {overLimit && (
+          // Non-blocking: the expiry figure above stays, and the button moves the same dates to the dismissal option.
+          <div role="note" aria-labelledby="dismissal-duration-warning" className="space-y-2 rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
+            <p id="dismissal-duration-warning" className="font-semibold">{t(k("durationWarning.title"))}</p>
+            <p>{t(k(`durationWarning.${overLimit.rules}.${overLimit.kind}`), { date: longDate(overLimit.lastDay) })}</p>
+            <p>{t(k("durationWarning.consequence"))}</p>
+            <button
+              type="button"
+              onClick={() => update("contractType", "permanent")}
+              className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {t(k("durationWarning.action"))}
+            </button>
+          </div>
+        )}
         {result && (
           <>
             <CalculatorResult
