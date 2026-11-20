@@ -154,6 +154,11 @@ describe("electricity tariff comparison page", () => {
 		expect(pt).not.toMatch(/(?<!\p{L})(?:você|seu|sua|seus|suas)(?!\p{L})/iu)
 	})
 
+	it("addresses the de reader as Sie", () => {
+		const de = JSON.stringify(readLocale("src/locales", "de").tools.electricityTariffComparison)
+		expect(de).not.toMatch(/(?<!\p{L})(?:du|dein|deine|deinen|deinem|deiner|dir|dich)(?!\p{L})/iu)
+	})
+
 	it("reports use without inputs or results, stores nothing and fetches only its own data files", () => {
 		const files = ["ElectricityTariffComparisonComp.tsx", "ElectricityTariffResults.tsx", "ElectricitySolarPanel.tsx"].map((name) =>
 			readSource(`../../components/calculators/${name}`),
