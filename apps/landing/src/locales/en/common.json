@@ -522,7 +522,7 @@
         "methodPayment": "The bill is paid in one instalment in May up to €100, in two in May and November from €100 up to €500, and in three in May, August and November above €500. Instalments are equal; any cent of rounding goes to the last one.",
         "methodBudget": "The monthly provision divides the annual bill by 12, so the money is ready when each instalment is due.",
         "exemptionTitle": "Exemption for your own permanent home",
-        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives three years of exemption after buying or building a home with a VPT up to €125,000, if the household's gross income in the previous year was at most €153,300; you must use the home as your permanent residence within six months and claim the exemption within the deadline. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
+        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives {{ebfYears}} years of exemption after buying or building a home with a VPT up to {{ebfVpt}}, if the household's gross income in the previous year was at most {{ebfIncome}}. The municipal assembly can extend it by another {{ebfExtraYears}} years. You must make the home your permanent residence within six months. On a purchase the exemption is automatic; after building or improving a home you must claim it within the deadline. A household can get it only twice. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
         "assumptionsTitle": "Assumptions",
         "assumptionRate": "The municipal rate is yours to enter. This page does not hold a table of municipal rates, and municipalities can also raise or lower the rate in specific cases, for example for vacant or dilapidated buildings, which the calculator ignores.",
         "assumptionScope": "The estimate covers a single property taxed under the ordinary rules. It excludes additional IMI (AIMI), the temporary exemptions and any other municipal deduction.",
@@ -530,11 +530,11 @@
         "sourcesTitle": "Sources",
         "sourceRates": "Código do IMI, article 112: rates (consulted 19 November 2026)",
         "sourcePayment": "Código do IMI, article 120: payment in instalments (consulted 19 November 2026)",
-        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 19 November 2026)",
-        "reviewed": "Rules reviewed on 19 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 20 November 2026)",
+        "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: three-year exemption (consulted 19 November 2026, wording of Lei 12/2022; check for later amendments)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",

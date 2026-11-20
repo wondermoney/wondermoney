@@ -52,6 +52,14 @@ describe("localized car loan tool page", () => {
     expect(localeCopy(lang, "public")).toEqual(copy);
   });
 
+  it.each(SUPPORTED_LANGS)("fills the EBF art. 46 limits, including the municipal extension, from the module in %s", (lang) => {
+    const { exemption } = localeCopy(lang, "src").guide;
+    for (const placeholder of ["{{ebfYears}}", "{{ebfExtraYears}}", "{{ebfVpt}}", "{{ebfIncome}}"]) {
+      expect(exemption).toContain(placeholder);
+    }
+    expect(exemption).not.toMatch(/125[ .,\u00a0]?000|153[ .,\u00a0]?300/);
+  });
+
   it("has distinct titles and descriptions", () => {
     const copies = SUPPORTED_LANGS.map((lang) => localeCopy(lang, "src"));
     expect(new Set(copies.map((copy) => copy.pageTitle)).size).toBe(SUPPORTED_LANGS.length);
