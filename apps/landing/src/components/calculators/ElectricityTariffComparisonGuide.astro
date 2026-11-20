@@ -1,10 +1,12 @@
 ---
 // Prerendered guide for the electricity tariff comparator: how to use the three ways in, a worked
 // example computed at build time from the same ERSE snapshot and engine the page runs, the method,
-// the sources with the export date, what the totals leave out, and the tools to go on with. The
-// offers module is imported dynamically, as everywhere else, so no client bundle carries it.
+// the sources with the export date (and PVGIS for the solar production), what the totals leave
+// out, and the tools to go on with. The offers module is imported dynamically, as everywhere else,
+// so no client bundle carries it.
 import ToolGuide from "./ToolGuide.astro";
 import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
+import { SOLAR_PRODUCTION_SOURCE } from "@/lib/calculators/data/solarProduction/index";
 import {
   DEFAULT_OFFER_FILTERS,
   MONTH_DAYS,
@@ -78,6 +80,11 @@ const values = {
   allowanceLarge: String(ERSE_TARIFFS.vat.reducedKwhPer30DaysLargeFamily),
   reduced: formatPercent(locale, ERSE_TARIFFS.vat.reduced * 100, { decimals: 0 }),
   standard: formatPercent(locale, ERSE_TARIFFS.vat.standard * 100, { decimals: 0 }),
+  pvgisVersion: SOLAR_PRODUCTION_SOURCE.version,
+  pvgisDatabase: SOLAR_PRODUCTION_SOURCE.radiationDb,
+  pvgisFrom: String(SOLAR_PRODUCTION_SOURCE.yearMin),
+  pvgisTo: String(SOLAR_PRODUCTION_SOURCE.yearMax),
+  pvgisDate: formatIsoDate(locale, SOLAR_PRODUCTION_SOURCE.downloadedOn),
 };
 
 const list = (key: string) => Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
@@ -101,6 +108,7 @@ const linkClass = "font-medium text-primary underline decoration-primary/40 unde
       <p>{t(k("use.full"))}</p>
       <p>{t(k("use.diagram"))}</p>
       <p>{t(k("use.mine"))}</p>
+      <p>{t(k("use.solar"))}</p>
       <p>{t(k("use.options"))}</p>
     </div>
   </section>
@@ -133,9 +141,11 @@ const linkClass = "font-medium text-primary underline decoration-primary/40 unde
       <p>{t(k("data.erse"), values)}</p>
       <p>{t(k("data.refresh"))}</p>
       <p>{t(k("data.names"))}</p>
+      <p>{t(k("data.solar"), values)}</p>
       <ul class="space-y-1">
         <li><a href={ELECTRICITY_OFFERS_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.simulatorLink"))}</a></li>
         <li><a href={charges.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.manualLink"))}</a></li>
+        <li><a href={SOLAR_PRODUCTION_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.pvgisLink"))}</a></li>
       </ul>
     </div>
   </section>

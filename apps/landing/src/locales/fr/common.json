@@ -4346,6 +4346,50 @@
         "cheaper": "{{count}} offres coûtent moins cher. La moins chère vous fait économiser {{saving}} par an.",
         "noneCheaper": "Aucune offre de la liste ne coûte moins cher que votre tarif."
       },
+      "solar": {
+        "title": "Panneaux solaires",
+        "intro": "Estimez ce que des panneaux produisent dans votre région et comparez les offres sur ce que vous achetez encore au réseau.",
+        "toggle": "Ajouter des panneaux solaires",
+        "alreadyHave": "Si vous avez déjà des panneaux, vos factures et votre fichier E-REDES ne montrent déjà que ce que vous achetez au réseau : laissez cette option désactivée.",
+        "legend": "Vos panneaux solaires",
+        "district": "District",
+        "districtHelp": "La production au chef-lieu du district, panneaux orientés plein sud à l'inclinaison optimale de PVGIS à cet endroit ({{slope}}°).",
+        "locate": "Utiliser ma position",
+        "locating": "Recherche de votre position…",
+        "located": "Chef-lieu de district le plus proche : {{district}}.",
+        "locateFailed": "Votre position n'est pas disponible. Choisissez le district dans la liste.",
+        "locatePrivacy": "Votre position sert seulement à choisir le chef-lieu de district le plus proche, dans votre navigateur. Elle n'est envoyée nulle part.",
+        "kwp": "Puissance crête",
+        "kwpUnit": "kWc",
+        "kwpHelp": "La puissance crête totale des panneaux, comme sur le devis de l'installateur.",
+        "losses": "Pertes du système",
+        "lossesHelp": "Câbles, onduleur, salissures et chaleur. 14 % est la valeur par défaut de PVGIS.",
+        "surplusPrice": "Prix de vente du surplus (facultatif)",
+        "surplusPriceHelp": "Ce qu'un acheteur vous paie pour chaque kWh injecté dans le réseau. Affiché à part, en dehors du classement.",
+        "loading": "Chargement de l'estimation de production…",
+        "loadError": "L'estimation de production n'a pas pu être chargée, les offres sont donc classées sans panneaux. Rechargez la page pour réessayer.",
+        "errors": {
+          "kwp": "Saisissez une puissance supérieure à 0 et jusqu'à 50 kWc.",
+          "lossPercent": "Saisissez des pertes entre 0 et 50 %.",
+          "surplusPrice": "Saisissez un prix entre 0 et 1 euro par kWh."
+        },
+        "summary": {
+          "title": "Avec vos panneaux solaires",
+          "system": "{{kwp}} kWc à {{district}}, orientés plein sud à {{slope}}°. Chiffres pour un an.",
+          "production": "Production",
+          "selfConsumed": "Consommée sur place",
+          "coverage": "De votre consommation",
+          "surplus": "Surplus injecté",
+          "savingFirstYear": "Sur l'offre la moins chère, {{supplier}} ({{offer}}), les panneaux vous font économiser {{amount}} la première année : {{without}} sans eux, {{with}} avec eux.",
+          "savingLaterYears": "Sur l'offre la moins chère, {{supplier}} ({{offer}}), les panneaux vous font économiser {{amount}} par an à partir de la deuxième année : {{without}} sans eux, {{with}} avec eux.",
+          "surplusIncome": "Vendre le surplus à {{price}} €/kWh rapporterait environ {{amount}} par an. Ce montant n'entre ni dans les totaux ni dans le classement.",
+          "fromDiagram": "Heure par heure face à votre fichier E-REDES, avec la production d'une année type aux mêmes dates.",
+          "fromProfile": "Sans fichier E-REDES, vos heures sont reconstituées à partir du profil BTN d'E-REDES, la part consommée sur place est donc une estimation. Importez votre fichier pour utiliser vos heures réelles.",
+          "ranking": "Les offres ci-dessous sont classées sur ce que vous achetez encore au réseau.",
+          "source": "Production : PVGIS {{version}} (Commission européenne, Centre commun de recherche), données de rayonnement {{database}} de {{from}} à {{to}}, une année type de 1 kWc de silicium cristallin sur structure libre, à l'échelle de votre système. Téléchargé le {{date}}.",
+          "sourceLink": "À propos de PVGIS"
+        }
+      },
       "diagram": {
         "label": "Fichier de consommation E-REDES",
         "help": "Dans le Balcão Digital d'E-REDES, ouvrez la consommation de votre installation, choisissez la période et téléchargez-la sous forme de tableur (xlsx). Les relevés au quart d'heure donnent vos kWh réels dans chaque période.",
@@ -4471,6 +4515,7 @@
           "full": "Le mode complet utilise les kWh de chaque période indiqués sur votre facture, ou un total sur un nombre de jours quelconque, réparti entre les périodes selon le profil type E-REDES correspondant à votre puissance et à votre consommation.",
           "diagram": "Vous pouvez aussi lui fournir votre fichier de consommation E-REDES, téléchargé depuis le Balcão Digital. Ses relevés au quart d'heure donnent vos kWh réels dans chaque période et chaque cycle. Le fichier est lu dans votre navigateur et n'est jamais envoyé nulle part.",
           "mine": "Dans « Comparer avec mon tarif », vous saisissez les prix de votre facture. Votre tarif passe alors par le même calcul que chaque offre, de sorte que l'économie affichée pour chacune compare ce qui est comparable.",
+          "solar": "Sous « Panneaux solaires », vous ajoutez une installation par district, puissance crête et pertes. Sa production est déduite de votre consommation heure par heure, et les offres sont classées sur ce que vous achetez encore au réseau. Le résumé montre la part consommée sur place, le surplus et ce que les panneaux vous font économiser sur l'offre la moins chère. Un prix de vente du surplus, si vous en saisissez un, est affiché à part du classement.",
           "options": "En haut des résultats, les offres simple, bi-horaire et tri-horaire les moins chères sur la même consommation montrent si une autre option serait plus avantageuse. Les filtres affinent la liste, et le bouton CSV la télécharge."
         },
         "example": {
@@ -4500,8 +4545,10 @@
           "erse": "Offres : simulateur de prix de l'ERSE, export du {{date}}, avec {{offers}} offres de {{suppliers}} fournisseurs et le tarif réglementé. Les fournisseurs sont tenus de déclarer leurs offres résidentielles à l'ERSE. Les prix sont hors TVA et taxes ; la page les ajoute.",
           "refresh": "La page récupère un nouvel export de l'ERSE chaque semaine. Les offres terminées entre-temps sont exclues.",
           "names": "L'ERSE désigne chaque fournisseur par un code ; la page affiche le nom commercial que chaque fournisseur utilise sur son propre site.",
+          "solar": "Production solaire : PVGIS {{pvgisVersion}}, du Centre commun de recherche de la Commission européenne, avec la base de données de rayonnement {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Pour chaque chef-lieu de district, la page contient l'année type de PVGIS, heure par heure, pour 1 kWc orienté plein sud à l'inclinaison optimale avec 14 % de pertes, téléchargée le {{pvgisDate}}. Sans fichier E-REDES, les heures de votre consommation sont reconstituées à partir de la répartition du profil standard entre les périodes de chaque mois.",
           "simulatorLink": "Simulateur de prix de l'ERSE",
-          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (juin 2026)"
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (juin 2026)",
+          "pvgisLink": "PVGIS, Commission européenne"
         },
         "limits": {
           "title": "Ce que les totaux ne comprennent pas",
@@ -4511,6 +4558,7 @@
             "c": "Les offres indexées sont calculées selon l'estimation de l'ERSE pour les prochains mois ; ce que vous payez suit le marché.",
             "d": "Les offres duales peuvent inclure le gaz dans leurs montants fixes ; elles sont exclues, sauf si vous les incluez.",
             "e": "Avec une facture ou un total, la répartition entre les périodes suit le profil type, pas le vôtre. Le fichier E-REDES donne votre répartition réelle.",
+            "solar": "La production solaire est une année type du chef-lieu de district, orientée plein sud à l'inclinaison optimale : l'ombre, une autre orientation et la météo d'une année donnée la modifient.",
             "f": "Il s'agit d'une estimation éducative, pas d'un conseil. Consultez la fiche standardisée et les conditions de l'offre avant de signer."
           },
           "simulatorLink": "Vérifiez un résultat dans le simulateur officiel de l'ERSE"

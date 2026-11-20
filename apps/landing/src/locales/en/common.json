@@ -4346,6 +4346,50 @@
         "cheaper": "{{count}} offers cost less. The cheapest saves you {{saving}} a year.",
         "noneCheaper": "No offer in the list costs less than your tariff."
       },
+      "solar": {
+        "title": "Solar panels",
+        "intro": "Estimate what panels in your area produce and compare the offers on what you still buy from the grid.",
+        "toggle": "Add solar panels",
+        "alreadyHave": "If you already have panels, your bills and your E-REDES file already show only what you buy from the grid: leave this off.",
+        "legend": "Your solar panels",
+        "district": "District",
+        "districtHelp": "The production of the district capital, with the panels facing south at PVGIS's optimal tilt there ({{slope}}°).",
+        "locate": "Use my location",
+        "locating": "Finding your location…",
+        "located": "Nearest district capital: {{district}}.",
+        "locateFailed": "Your location is not available. Choose the district from the list.",
+        "locatePrivacy": "Your location only picks the nearest district capital, in your browser. It is not sent anywhere.",
+        "kwp": "Peak power",
+        "kwpUnit": "kWp",
+        "kwpHelp": "The panels' total peak power, as on the installer's quote.",
+        "losses": "System losses",
+        "lossesHelp": "Cables, inverter, dirt and heat. 14 % is PVGIS's default.",
+        "surplusPrice": "Surplus sale price (optional)",
+        "surplusPriceHelp": "What a buyer pays you for each kWh you feed into the grid. Shown on its own, outside the ranking.",
+        "loading": "Loading the production estimate…",
+        "loadError": "The production estimate could not be loaded, so the offers are ranked without solar. Reload the page to try again.",
+        "errors": {
+          "kwp": "Enter a power above 0 and up to 50 kWp.",
+          "lossPercent": "Enter losses from 0 to 50 %.",
+          "surplusPrice": "Enter a price from 0 to 1 euro per kWh."
+        },
+        "summary": {
+          "title": "With your solar panels",
+          "system": "{{kwp}} kWp in {{district}}, facing south at {{slope}}°. Figures for a year.",
+          "production": "Production",
+          "selfConsumed": "Used at home",
+          "coverage": "Of your consumption",
+          "surplus": "Surplus to the grid",
+          "savingFirstYear": "On the cheapest offer, {{supplier}} ({{offer}}), the panels save you {{amount}} in the first year: {{without}} without them, {{with}} with them.",
+          "savingLaterYears": "On the cheapest offer, {{supplier}} ({{offer}}), the panels save you {{amount}} a year from the second year: {{without}} without them, {{with}} with them.",
+          "surplusIncome": "Selling the surplus at {{price}} €/kWh would bring in about {{amount}} a year. It is not in the totals or the ranking.",
+          "fromDiagram": "Hour by hour against your E-REDES file, with a typical year's production on the same dates.",
+          "fromProfile": "Without an E-REDES file, your hours are rebuilt from the E-REDES BTN profile, so the share used at home is an estimate. Upload your file to use your real hours.",
+          "ranking": "The offers below are ranked on what you still buy from the grid.",
+          "source": "Production: PVGIS {{version}} (European Commission, Joint Research Centre), {{database}} radiation data for {{from}}–{{to}}, a typical year of 1 kWp of crystalline silicon on a free-standing mount, scaled to your system. Downloaded on {{date}}.",
+          "sourceLink": "About PVGIS"
+        }
+      },
       "diagram": {
         "label": "E-REDES consumption file",
         "help": "In E-REDES's Balcão Digital, open your installation's consumption, choose the period and download it as a spreadsheet (xlsx). The 15-minute readings give your real kWh in each period.",
@@ -4471,6 +4515,7 @@
           "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
           "mine": "Under \"Compare with my tariff\" you enter the prices on your invoice. Your tariff then goes through the same calculation as every offer, so the saving shown on each one is like for like.",
+          "solar": "Under \"Solar panels\" you add a system by district, peak power and losses. Its production is subtracted from your consumption hour by hour, and the offers are ranked on what you still buy from the grid. The summary shows the share used at home, the surplus and what the panels save on the cheapest offer. A surplus sale price, if you enter one, is shown apart from the ranking.",
           "options": "At the top of the results, the cheapest simple, bi-hourly and tri-hourly offers on the same consumption show whether another option would pay off. The filters narrow the list, and the CSV button downloads it."
         },
         "example": {
@@ -4500,8 +4545,10 @@
           "erse": "Offers: ERSE's price simulator, the export of {{date}}, with {{offers}} offers from {{suppliers}} suppliers and the regulated tariff. Suppliers must report their household offers to ERSE. Prices are before VAT and taxes; the page adds them.",
           "refresh": "The page takes a new export from ERSE every week. Offers that have ended by then are left out.",
           "names": "ERSE gives each supplier as a code; the page shows the brand name each supplier uses on its own website.",
+          "solar": "Solar production: PVGIS {{pvgisVersion}}, from the European Commission's Joint Research Centre, with the {{pvgisDatabase}} radiation database ({{pvgisFrom}}–{{pvgisTo}}). For each district capital the page holds PVGIS's typical year, hour by hour, for 1 kWp facing south at the optimal tilt with 14 % losses, downloaded on {{pvgisDate}}. Without an E-REDES file, your consumption's hours are rebuilt from the standard profile's split across the periods in each month.",
           "simulatorLink": "ERSE price simulator",
-          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (June 2026)"
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (June 2026)",
+          "pvgisLink": "PVGIS, European Commission"
         },
         "limits": {
           "title": "What the totals leave out",
@@ -4511,6 +4558,7 @@
             "c": "Indexed offers are priced at ERSE's estimate for the coming months; what you pay follows the market.",
             "d": "Dual offers can include gas in their fixed amounts; they are left out unless you include them.",
             "e": "With a bill or a total, the split across periods is the standard profile, not your own. The E-REDES file gives your real split.",
+            "solar": "Solar production is a typical year for the district capital, facing south at the optimal tilt: shade, another orientation and a given year's weather change it.",
             "f": "This is an educational estimate, not advice. Check the offer's standard sheet and terms before you sign."
           },
           "simulatorLink": "Check a result in ERSE's official simulator"

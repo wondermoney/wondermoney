@@ -136,13 +136,25 @@ describe("electricity tariff comparison page", () => {
 		}
 	})
 
+	it("says where the solar production estimate comes from, in every locale", () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const copy = readLocale("src/locales", lang).tools.electricityTariffComparison as unknown as {
+				solar: { summary: Record<string, string> }
+			}
+			for (const placeholder of ["{{version}}", "{{database}}", "{{from}}", "{{to}}", "{{date}}"]) {
+				expect(copy.solar.summary.source, lang).toContain(placeholder)
+			}
+			expect(copy.solar.summary.source, lang).toContain("PVGIS")
+		}
+	})
+
 	it("addresses the pt reader as tu", () => {
 		const pt = JSON.stringify(readLocale("src/locales", "pt").tools.electricityTariffComparison)
 		expect(pt).not.toMatch(/(?<!\p{L})(?:você|seu|sua|seus|suas)(?!\p{L})/iu)
 	})
 
 	it("reports use without inputs or results, stores nothing and fetches nothing but its own offers chunk", () => {
-		const files = ["ElectricityTariffComparisonComp.tsx", "ElectricityTariffResults.tsx"].map((name) =>
+		const files = ["ElectricityTariffComparisonComp.tsx", "ElectricityTariffResults.tsx", "ElectricitySolarPanel.tsx"].map((name) =>
 			readSource(`../../components/calculators/${name}`),
 		)
 		expect(files[0]).toContain(
