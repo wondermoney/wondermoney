@@ -1,3 +1,4 @@
+import { PPR_TAX_SOURCES } from "@/lib/calculators/data/pprTaxRules";
 import type { RouteId } from "@/lib/routes";
 
 /**
@@ -123,7 +124,9 @@ export const SAVINGS_SOURCES: Readonly<Record<SavingsSourceId, { readonly url: s
 	cirs71: { url: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs71.aspx" },
 	cirs72: { url: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs72.aspx" },
 	cirs5: { url: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/irs5.aspx" },
-	ebf21: { url: "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/bf/Pages/bf-artigo-21-ordm-.aspx" },
+	// The consolidated EBF, as the PPR comparison cites it: the Portal's per-article page for art. 21.º
+	// still shows the wording before Lei n.º 64-B/2011 (20% instead of 21.5%).
+	ebf21: { url: PPR_TAX_SOURCES.ebf },
 }
 
 /**

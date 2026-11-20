@@ -149,6 +149,28 @@ export function pprDeduction(input: DeductionInput): DeductionResult {
 	}
 }
 
+export interface PprRedemptionRates {
+	/** Effective tax on the gain of a lump sum in a legal case (EBF art. 21.º, n.º 3, b). */
+	legal: number
+	/** Effective tax on the gain outside the legal cases, from the plan's first year and after each reduction (n.º 5). */
+	outside: readonly { afterYears: number; rate: number }[]
+}
+
+/** The tax rates on the gain of a PPR redemption, as shares of the whole gain, in percent. */
+export function pprRedemptionRates(): PprRedemptionRates {
+	const { legalRedemption, otherRedemptionRate, longHeldExclusions } = PPR_TAX_RULES
+	return {
+		legal: round2(legalRedemption.rate * legalRedemption.taxedShare),
+		outside: [
+			{ afterYears: 0, rate: otherRedemptionRate },
+			...longHeldExclusions.map(({ afterYears, excludedShare }) => ({
+				afterYears,
+				rate: round2(otherRedemptionRate * (1 - excludedShare)),
+			})),
+		],
+	}
+}
+
 // Staleness: the page checks it in the browser, so an old build still warns.
 
 const DAY = 86_400_000

@@ -2,11 +2,14 @@ import { describe, expect, it } from "vitest"
 import {
 	PPR_DEDUCTION_LIMITS,
 	PPR_PRODUCTS,
+	PPR_TAX_RULES,
+	PPR_TAX_SOURCES,
 	deductionLimitForAge,
 	filterProducts,
 	isFundsDataStale,
 	isInsuranceDataStale,
 	pprDeduction,
+	pprRedemptionRates,
 	riskClassSummary,
 	sortProducts,
 	validateDeduction,
@@ -146,6 +149,40 @@ describe("IRS deduction (EBF art. 21.º, n.º 2)", () => {
 		expect(validateDeduction({ age: Number.NaN, contribution: Number.NaN, retired: false })).toEqual(["age", "contribution"])
 		expect(validateDeduction({ age: 40.5, contribution: -1, retired: false })).toEqual(["age", "contribution"])
 		expect(validateDeduction({ age: 121, contribution: 1e12, retired: false })).toEqual(["age", "contribution"])
+	})
+})
+
+describe("tax on a redemption (EBF art. 21.º, n.os 3 to 5)", () => {
+	it("taxes a lump sum in a legal case at 20% on two fifths of the gain, 8% in effect (n.º 3, b)", () => {
+		expect(PPR_TAX_RULES.legalRedemption).toEqual({ rate: 20, taxedShare: 2 / 5 })
+		expect(pprRedemptionRates().legal).toBe(8)
+	})
+
+	it("taxes the gain outside the legal cases at 21.5% (n.º 5, as worded by Lei n.º 64-B/2011)", () => {
+		expect(PPR_TAX_RULES.otherRedemptionRate).toBe(21.5)
+		expect(PPR_TAX_RULES.clawbackPerYear).toBe(10)
+	})
+
+	it("leaves out a fifth of the gain after 5 years and three fifths after 8 (CIRS art. 5.º, n.º 3)", () => {
+		expect(PPR_TAX_RULES.firstHalfShare).toBe(35)
+		expect(PPR_TAX_RULES.longHeldExclusions).toEqual([
+			{ afterYears: 5, excludedShare: 1 / 5 },
+			{ afterYears: 8, excludedShare: 3 / 5 },
+		])
+		expect(pprRedemptionRates().outside).toEqual([
+			{ afterYears: 0, rate: 21.5 },
+			{ afterYears: 5, rate: 17.2 },
+			{ afterYears: 8, rate: 8.6 },
+		])
+	})
+
+	it("reads the rules from the consolidated texts", () => {
+		expect(PPR_TAX_SOURCES.ebf).toBe(
+			"https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/Cod_download/Documents/EBF.pdf",
+		)
+		expect(PPR_TAX_SOURCES.cirs).toBe(
+			"https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/Cod_download/Documents/CIRS.pdf",
+		)
 	})
 })
 

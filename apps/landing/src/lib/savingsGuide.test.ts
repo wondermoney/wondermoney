@@ -10,6 +10,7 @@ import {
   getProductCells,
   getTableRowCells,
 } from "../content/savingsGuide";
+import { PPR_TAX_RULES, PPR_TAX_SOURCES, pprRedemptionRates } from "./calculators/pprComparison";
 import { buildResourcesHub } from "./resourcesHub";
 import { buildAlternateLinks, SUPPORTED_LANGS, toLocalizedPath, toLocalizedPathname } from "./routes";
 import { isSitemapPage } from "./sitemap";
@@ -107,5 +108,43 @@ describe("savings guide page", () => {
       expect(t("savingsGuide.cells.fgdLimit")).toMatch(/100\p{Z}?000|100[.,]000/u);
       expect(t("savingsGuide.cells.rate28")).toContain("28");
     }
+  });
+});
+
+describe("savings guide PPR tax (EBF art. 21.º)", () => {
+  /** "21.5%", "21,5 %" or "21,5\u00a0%", not part of a longer number. */
+  const rate = (value: number) => new RegExp(`(?<![\\d.,])${String(value).replace(".", "[.,]")}\\p{Z}?%`, "u");
+  const { legal, outside } = pprRedemptionRates();
+  const pprKeys = ["savingsGuide.tax.ppr.text", "savingsGuide.cells.pprRates", "savingsGuide.cells.pprLegalRate", "savingsGuide.sources.items.ebf21"];
+
+  it("cites the consolidated EBF the PPR comparison reads, not the Portal's earlier wording", () => {
+    expect(SAVINGS_SOURCES.ebf21.url).toBe(PPR_TAX_SOURCES.ebf);
+    expect(SAVINGS_SOURCES.ebf21.url).toBe(
+      "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/Cod_download/Documents/EBF.pdf",
+    );
+  });
+
+  it("pins the rates it quotes", () => {
+    expect(legal).toBe(8);
+    expect(outside.map(({ rate }) => rate)).toEqual([21.5, 17.2, 8.6]);
+  });
+
+  it.each(SUPPORTED_LANGS)("quotes the current rates in %s", (locale) => {
+    const t = getTranslations(locale);
+    const text = t("savingsGuide.tax.ppr.text");
+    for (const value of [legal, PPR_TAX_RULES.legalRedemption.rate, ...outside.map(({ rate }) => rate)]) expect(text).toMatch(rate(value));
+    for (const value of [PPR_TAX_RULES.firstHalfShare, PPR_TAX_RULES.clawbackPerYear]) expect(text).toMatch(rate(value));
+    // 16% was the 20% rate before Lei n.º 64-B/2011 with a fifth of the gain left out.
+    expect(text).not.toMatch(rate(16));
+    const range = t("savingsGuide.cells.pprRates");
+    expect(range).toMatch(rate(Math.min(...outside.map(({ rate }) => rate))));
+    expect(range).toMatch(rate(PPR_TAX_RULES.otherRedemptionRate));
+    expect(t("savingsGuide.cells.pprLegalRate")).toMatch(rate(legal));
+  });
+
+  it("puts a no-break space before French punctuation and percent signs", () => {
+    const t = getTranslations("fr");
+    // \s would match the no-break space itself, so plain spaces are spelled out.
+    for (const key of pprKeys) expect(t(key)).not.toMatch(/[^\u00a0][:;?!»]|[ \t\n][:;?!%€»]|\d%/u);
   });
 });

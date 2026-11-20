@@ -5483,7 +5483,7 @@
             "death": "morte del risparmiatore, con il valore agli eredi."
           },
           "fiveYears": "Per pensione, 60 anni e rate del mutuo, ogni versamento deve essere nel piano da almeno {{years}} anni; lo stesso vale per disoccupazione, inabilità o malattia già presenti al momento del versamento. Dopo {{years}} anni dal primo versamento, in questi casi si può riscattare l'intero valore se i versamenti della prima metà della durata del piano sono almeno il {{firstHalf}} del totale.",
-          "outside": "Puoi riscattare in qualsiasi altro momento, secondo il contratto, ma allora le deduzioni ottenute tornano come imposta, maggiorate del {{clawback}} per ogni anno o frazione da quando sono state fatte (EBF, articolo 21, n.º 4), e il guadagno è tassato al {{otherRate}} invece che all'aliquota ridotta, con qualche agevolazione per i piani tenuti più a lungo (n.º 5). Possono applicarsi anche le commissioni di riscatto del contratto.",
+          "outside": "Puoi riscattare in qualsiasi altro momento, secondo il contratto, ma allora le deduzioni ottenute tornano come imposta, maggiorate del {{clawback}} per ogni anno o frazione da quando sono state fatte (EBF, articolo 21, n.º 4), e il guadagno è tassato al {{otherRate}} invece che all'aliquota ridotta (n.º 5). Se i versamenti della prima metà della durata del piano sono almeno il {{firstHalf}} del totale, questa aliquota si applica a quattro quinti del guadagno quando il piano ha più di {{reducedAfter}} anni e a due quinti dopo più di {{lowestAfter}} anni, con un'aliquota effettiva pari rispettivamente a {{reducedRate}} e {{lowestRate}} (articolo 5, n.º 3, del Codice IRS). Possono applicarsi anche le commissioni di riscatto del contratto.",
           "transfer": "Puoi trasferire il valore su un altro PPR (articolo 6); il trasferimento non dà diritto a una nuova deduzione. Senza garanzia del capitale o del rendimento non si può applicare alcuna commissione di trasferimento; con garanzia, al massimo pari a {{transferFee}} del valore."
         },
         "method": {
@@ -5513,7 +5513,7 @@
             "asf": "ASF: piattaforma di confronto dei PPR (assicurazioni e fondi pensione)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: come sono calcolati i dati ASF",
             "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, articolo 21 (testo consolidato)",
-            "cirs": "Portal das Finanças: Código do IRS, articolo 78 (testo consolidato)",
+            "cirs": "Portal das Finanças: Código do IRS, articoli 5 e 78 (testo consolidato)",
             "dl158": "Diário da República: Decreto-Lei n.º 158/2002, regime giuridico dei PPR (consolidato)"
           }
         },
@@ -5849,7 +5849,7 @@
       "irsInReturn": "Nella dichiarazione IRS (dichiarazione obbligatoria)",
       "irsOnWithdrawal": "Al prelievo",
       "capitalisationRates": "11,2 % a 28 %, in base all'anzianità",
-      "pprRates": "8 % a 20 %, in base all'anzianità",
+      "pprRates": "8,6 % a 21,5 %, in base all'anzianità",
       "pprLegalRate": "8 % se il prelievo è per un motivo previsto dalla legge"
     },
     "fgd": {
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Se prelevi per un motivo previsto dalla legge, il guadagno è tassato all'8 % (20 % su due quinti). Fuori da questi casi è tassato al 20 %, ridotto al 16 % dopo 5 anni e all'8 % dopo 8 anni se almeno il 35 % dei versamenti è stato fatto nella prima metà. Restituisci inoltre quanto hai dedotto nell'IRS, più il 10 % per ogni anno o frazione, salvo dopo 5 anni nei casi previsti dalla legge (EBF, art. 21)."
+        "text": "Se prelevi per un motivo previsto dalla legge, il guadagno è tassato all'8 % (20 % su due quinti). Fuori da questi casi è tassato al 21,5 %, ridotto al 17,2 % quando il piano ha più di 5 anni e all'8,6 % oltre gli 8 anni (21,5 % su quattro quinti e poi su due quinti del guadagno), se almeno il 35 % dei versamenti è stato fatto nella prima metà della durata del piano. Restituisci inoltre quanto hai dedotto nell'IRS, più il 10 % per ogni anno o frazione, salvo in caso di morte del titolare o quando il versamento è nel piano da almeno 5 anni e il prelievo è per un motivo previsto dalla legge (EBF, art. 21, e CIRS, art. 5, comma 3)."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS art. 71: ritenuta del 28 % e opzione di englobamento",
         "cirs72": "Portal das Finanças, CIRS art. 72: 28 % sui redditi senza ritenuta",
         "cirs5": "Portal das Finanças, CIRS art. 5, comma 3: riscatti di assicurazioni sulla vita",
-        "ebf21": "Portal das Finanças, EBF art. 21: piani di risparmio pensionistico"
+        "ebf21": "Portal das Finanças, EBF art. 21 (testo consolidato): piani di risparmio pensionistico"
       }
     },
     "related": {

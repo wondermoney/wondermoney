@@ -5483,7 +5483,7 @@
             "death": "le décès de l'épargnant, la valeur revenant aux héritiers."
           },
           "fiveYears": "Pour la retraite, les 60 ans et le prêt immobilier, chaque versement doit être dans le plan depuis au moins {{years}} ans ; il en va de même pour le chômage, l'incapacité ou la maladie qui existaient déjà à la date du versement. Après {{years}} ans depuis le premier versement, toute la valeur peut être rachetée dans ces cas si les versements de la première moitié de la vie du plan représentent au moins {{firstHalf}} du total.",
-          "outside": "Vous pouvez racheter à tout autre moment, selon le contrat, mais les déductions obtenues reviennent alors sous forme d'impôt, majorées de {{clawback}} par année ou fraction d'année écoulée depuis (EBF, article 21, n.º 4), et le gain est imposé à {{otherRate}} au lieu du taux réduit, avec un allègement pour les plans détenus plus longtemps (n.º 5). Les commissions de rachat du contrat peuvent aussi s'appliquer.",
+          "outside": "Vous pouvez racheter à tout autre moment, selon le contrat, mais les déductions obtenues reviennent alors sous forme d'impôt, majorées de {{clawback}} par année ou fraction d'année écoulée depuis (EBF, article 21, n.º 4), et le gain est imposé à {{otherRate}} au lieu du taux réduit (n.º 5). Si les versements de la première moitié de la vie du plan représentent au moins {{firstHalf}} du total, ce taux ne s'applique qu'aux quatre cinquièmes du gain lorsque le plan a plus de {{reducedAfter}} ans, puis aux deux cinquièmes au-delà de {{lowestAfter}} ans, soit un taux effectif de {{reducedRate}} puis de {{lowestRate}} (article 5, n.º 3, du Code de l'IRS). Les commissions de rachat du contrat peuvent aussi s'appliquer.",
           "transfer": "Vous pouvez transférer la valeur vers un autre PPR (article 6) ; le transfert ne donne pas droit à une nouvelle déduction. Sans garantie du capital ou du rendement, aucune commission de transfert ne peut être prélevée ; avec une garantie, elle est au plus de {{transferFee}} de la valeur."
         },
         "method": {
@@ -5513,7 +5513,7 @@
             "asf": "ASF : plateforme de comparaison des PPR (assurances et fonds de pension)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R : comment les chiffres de l'ASF sont calculés",
             "ebf": "Portal das Finanças : Estatuto dos Benefícios Fiscais, article 21 (texte consolidé)",
-            "cirs": "Portal das Finanças : Código do IRS, article 78 (texte consolidé)",
+            "cirs": "Portal das Finanças : Código do IRS, articles 5 et 78 (texte consolidé)",
             "dl158": "Diário da República : Decreto-Lei n.º 158/2002, régime juridique des PPR (consolidé)"
           }
         },
@@ -5849,8 +5849,8 @@
       "irsInReturn": "Dans la déclaration d'IRS (déclaration obligatoire)",
       "irsOnWithdrawal": "Au retrait",
       "capitalisationRates": "11,2 % à 28 %, selon l'ancienneté",
-      "pprRates": "8 % à 20 %, selon l'ancienneté",
-      "pprLegalRate": "8 % si le retrait a lieu pour un motif prévu par la loi"
+      "pprRates": "8,6 % à 21,5 %, selon l'ancienneté",
+      "pprLegalRate": "8 % si le retrait a lieu pour un motif prévu par la loi"
     },
     "fgd": {
       "title": "Le Fonds de garantie des dépôts",
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Si vous retirez pour un motif prévu par la loi, le gain est imposé à 8 % (20 % sur deux cinquièmes). Hors de ces cas, il est imposé à 20 %, réduit à 16 % après 5 ans et à 8 % après 8 ans si au moins 35 % des versements ont été faits pendant la première moitié. Vous restituez aussi ce que vous avez déduit de l'IRS, majoré de 10 % par année ou fraction d'année, sauf après 5 ans dans les cas prévus par la loi (EBF, art. 21)."
+        "text": "Si vous retirez pour un motif prévu par la loi, le gain est imposé à 8 % (20 % sur deux cinquièmes). Hors de ces cas, il est imposé à 21,5 %, réduit à 17,2 % lorsque le plan a plus de 5 ans et à 8,6 % au-delà de 8 ans (21,5 % sur les quatre cinquièmes puis sur les deux cinquièmes du gain), si au moins 35 % des versements ont été faits pendant la première moitié de la vie du plan. Vous restituez aussi ce que vous avez déduit de l'IRS, majoré de 10 % par année ou fraction d'année, sauf en cas de décès du titulaire ou lorsque le versement a au moins 5 ans et que le retrait a lieu pour un motif prévu par la loi (EBF, art. 21, et CIRS, art. 5, n° 3)."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS art. 71 : retenue de 28 % et option d'englobamento",
         "cirs72": "Portal das Finanças, CIRS art. 72 : 28 % sur les revenus sans retenue",
         "cirs5": "Portal das Finanças, CIRS art. 5, n° 3 : rachats d'assurance vie",
-        "ebf21": "Portal das Finanças, EBF art. 21 : plans d'épargne retraite"
+        "ebf21": "Portal das Finanças, EBF art. 21 (texte consolidé) : plans d'épargne retraite"
       }
     },
     "related": {

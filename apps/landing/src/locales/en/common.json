@@ -5627,7 +5627,7 @@
             "death": "the death of the saver, with the value going to the heirs."
           },
           "fiveYears": "For retirement, age 60 and mortgage payments, each contribution must have been in the plan for at least {{years}} years; the same applies to unemployment, incapacity or illness that already existed when the contribution was made. After {{years}} years from the first contribution, the whole value can be redeemed in those cases if the contributions in the first half of the plan's life were at least {{firstHalf}} of all contributions.",
-          "outside": "You can redeem at any other time, under the contract's terms, but then the deductions you had come back as tax, increased by {{clawback}} for each year or part of a year since they were made (EBF article 21, n.º 4), and the gain is taxed at {{otherRate}} rather than the lower rate, with some relief for long-held plans (n.º 5). Redemption fees in the contract may apply as well.",
+          "outside": "You can redeem at any other time, under the contract's terms, but then the deductions you had come back as tax, increased by {{clawback}} for each year or part of a year since they were made (EBF article 21, n.º 4), and the gain is taxed at {{otherRate}} rather than the lower rate (n.º 5). If the contributions in the first half of the plan's life were at least {{firstHalf}} of all contributions, that rate applies to four fifths of the gain once the plan has run more than {{reducedAfter}} years and to two fifths after more than {{lowestAfter}}, an effective {{reducedRate}} and {{lowestRate}} (article 5, n.º 3 of the IRS code). Redemption fees in the contract may apply as well.",
           "transfer": "You can move the value to another PPR (article 6); the transfer gives no new deduction. Without a capital or return guarantee no transfer fee can be charged; with one, the fee is at most {{transferFee}} of the value."
         },
         "method": {
@@ -5657,7 +5657,7 @@
             "asf": "ASF: PPR comparison platform (insurance and pension funds)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: how the ASF figures are calculated",
             "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, article 21 (consolidated text)",
-            "cirs": "Portal das Finanças: Código do IRS, article 78 (consolidated text)",
+            "cirs": "Portal das Finanças: Código do IRS, articles 5 and 78 (consolidated text)",
             "dl158": "Diário da República: Decreto-Lei n.º 158/2002, the legal regime of PPR (consolidated)"
           }
         },
@@ -5849,7 +5849,7 @@
       "irsInReturn": "In your IRS return (declaration mandatory)",
       "irsOnWithdrawal": "When you withdraw",
       "capitalisationRates": "11.2% to 28%, depending on how long you held it",
-      "pprRates": "8% to 20%, depending on how long you held it",
+      "pprRates": "8.6% to 21.5%, depending on how long you held it",
       "pprLegalRate": "8% if the withdrawal is for a reason set out in law"
     },
     "fgd": {
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "If you withdraw for a reason set out in law, the gain is taxed at 8% (20% on two fifths of it). Outside those cases the gain is taxed at 20%, reduced to 16% after 5 years and to 8% after 8 years if at least 35% of contributions were paid in the first half. You also give back what you deducted in your IRS return, plus 10% for each year or part of a year, except after 5 years in the cases set out in law (EBF art. 21)."
+        "text": "If you withdraw for a reason set out in law, the gain is taxed at 8% (20% on two fifths of it). Outside those cases the gain is taxed at 21.5%, reduced to 17.2% once the plan has run more than 5 years and to 8.6% after more than 8 (21.5% on four fifths and then on two fifths of the gain), if at least 35% of contributions were paid in the first half of the plan's life. You also give back what you deducted in your IRS return, plus 10% for each year or part of a year, except on the holder's death or when the contribution has been in the plan for at least 5 years and the withdrawal is for a reason set out in law (EBF art. 21 and CIRS art. 5(3))."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS art. 71: 28% withholding and the aggregation option",
         "cirs72": "Portal das Finanças, CIRS art. 72: 28% on income without withholding",
         "cirs5": "Portal das Finanças, CIRS art. 5(3): life insurance withdrawals",
-        "ebf21": "Portal das Finanças, EBF art. 21: retirement savings plans"
+        "ebf21": "Portal das Finanças, EBF art. 21 (consolidated text): retirement savings plans"
       }
     },
     "related": {
