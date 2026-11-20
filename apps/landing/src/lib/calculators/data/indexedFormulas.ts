@@ -48,6 +48,10 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
       "EDPC_160", "EDPC_161", "EDPC_162", "EDPC_163", "EDPC_179", "EDPC_180", "EDPC_181", "EDPC_182",
     ],
     basis: "periodMean",
+    // "POMIE i: ... preço médio do mercado ibérico ... apurado de acordo com a opção tarifária
+    // contratada e para o período de consumo" (ficha, p. 15): a mean of the period's hours, which no
+    // consumption weighs.
+    weighting: "none",
     losses: { kind: "fixed", factor: 1.164 },
     multiplier: 1.1,
     beforeLosses: 0,
@@ -82,6 +86,8 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     product: "Tarifa Index 04/25",
     offerIds: ["GOLD_41", "GOLD_42", "GOLD_77", "GOLD_78", "GOLD_85", "GOLD_86"],
     basis: "monthMean",
+    // "Pomie = Valor médio do período de faturação" (ficha, p. 5): the month's mean.
+    weighting: "none",
     losses: { kind: "monthly", factors: [1.29, 1.18, 1.18, 1.15, 1.11, 1.1, 1.15, 1.13, 1.1, 1.1, 1.16, 1.25] },
     multiplier: 1,
     beforeLosses: 0,
@@ -110,6 +116,7 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     product: "Tarifa Index 100% Online",
     offerIds: ["GOLD_79", "GOLD_80", "GOLD_83", "GOLD_84", "GOLD_87", "GOLD_88"],
     basis: "monthMean",
+    weighting: "none",
     losses: { kind: "monthly", factors: [1.29, 1.18, 1.18, 1.15, 1.11, 1.1, 1.15, 1.13, 1.1, 1.1, 1.16, 1.25] },
     multiplier: 1,
     beforeLosses: 0,
@@ -136,6 +143,8 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     product: "Tarifa Indexada",
     offerIds: ["END_86", "END_87", "END_90"],
     basis: "monthMean",
+    // "B – ... Preço médio diário do OMIE em Portugal para o período de faturação" (p. 4).
+    weighting: "none",
     losses: { kind: "fixed", factor: 1 },
     multiplier: 1,
     beforeLosses: 0,
@@ -170,6 +179,10 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     product: "Plano Flexível",
     offerIds: ["GALP_170", "GALP_171"],
     basis: "quarterHour",
+    // Billed on the profile, whatever the meter reads: "Q consumida perfilada i – Consumo perfilado
+    // resulta da distribuição do consumo total em períodos ... de acordo com (i) perfil de consumo
+    // publicado pela ERSE" (offer page, Plano Flexível). Only Plano Dinâmico uses the real diagram.
+    weighting: "profile",
     losses: { kind: "profile" },
     multiplier: 1,
     // Ci from the live offer page. Galp's loss value behind ERSE's figure is not published, so this
@@ -192,22 +205,18 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
           "Ci – Componente de Comercializador ... é de 0,0191€/kWh ...; Li – aplicação dos valores fixos em percentagem para perdas ..., publicados pela ERSE ...; " +
           "Q consumida perfilada i – Consumo perfilado resulta da distribuição do consumo total ... de acordo com (i) perfil de consumo publicado pela ERSE",
       },
-      {
-        document: "Galp, Ficha normalizada, Plano dinâmico - Residencial (with the Plano Flexível clause)",
-        url: "https://www.galp.com/pt/casa/system/files/2026-09/plano-indexado-residencial-fno.pdf",
-        location: "pp. 3 and 4",
-        readOn: READ_ON,
-        quote: "Preço Final (PF)i = [∑ (PMi+Ci) * (1+Li)]*Q consumida real i)/(Q total consumida*1000). Ci ... à data da celebração do contrato, é de 0,0159€/kWh",
-      },
     ],
     caveat:
-      "The ficha (September 2026) gives Ci = 0,0159 EUR/kWh, the live offer page 0,0191; Ci may be revised each quarter, and the page's value is used. Li is read as the low-voltage loss profile (data/omiePrices.ts).",
+      "The Plano dinâmico ficha (https://www.galp.com/pt/casa/system/files/2026-09/plano-indexado-residencial-fno.pdf, pp. 3 and 4, a different product with a Plano Flexível clause) gives Ci = 0,0159 EUR/kWh, the live Plano Flexível page 0,0191; Ci may be revised each quarter, and the page's value is used. Li is read as the low-voltage loss profile (data/omiePrices.ts).",
   },
   {
     supplier: "LOGICA",
     product: "Base Index S",
     offerIds: ["LOGICA_02"],
     basis: "quarterHour",
+    // The ficha says "Custo da Energia horária" and "Valor unitário a aplicar sobre o consumo total"
+    // without saying whose consumption weighs the hours (metered or profiled): left "actual".
+    weighting: "actual",
     losses: { kind: "profile" },
     multiplier: 1,
     beforeLosses: 0,

@@ -24,12 +24,12 @@
 //   16 % the supplier formulas quote. All profiles are in Lisbon legal time.
 //
 // Outputs:
-// - The committed module: for each of the last 13 full months, OMIE's arithmetic mean and, for each
+// - The committed module: for each of the last 12 full months, OMIE's arithmetic mean and, for each
 //   hourly cycle and tri-hourly period, the profile-weighted average of OMIE, of OMIE x loss factor
 //   and of the loss factor, with the profile's weight, and the period's arithmetic mean. Every linear
 //   formula of the kind suppliers publish for indexed offers can be priced from those averages
 //   (indexedPricing.ts).
-// - The static JSON: every quarter-hour price and loss factor of the last 12 full months, fetched
+// - The static JSON: the same months' quarter-hour prices, loss factors and BTN C profile, fetched
 //   by the page only when a visitor prices indexed offers against an uploaded load diagram.
 //
 // Usage, from apps/landing (xlsx is a devDependency, loaded only here):
@@ -69,9 +69,12 @@ export const SOURCE = {
   },
 };
 
-/** Full months kept in the committed module, and in the JSON for the diagram. */
-export const MODULE_MONTHS = 13;
-export const JSON_MONTHS = 12;
+/** Full months kept, in the committed module and in the JSON for the diagram. */
+export const MONTHS = 12;
+/** Plausible OMIE prices, EUR/MWh: each quarter-hour (the market's limits are wider, but a value
+ * outside these means the file or its parsing is wrong), and each month's mean. */
+export const PRICE_RANGE = { min: -50, max: 1000 };
+export const MONTH_MEAN_RANGE = { min: 0, max: 400 };
 const TRI_PERIODS = ["peak", "shoulder", "valley"];
 const HOUR_MS = 3_600_000;
 
@@ -106,6 +109,9 @@ export function parseOmieDay(text, year, month, day) {
     }
     const price = Number(pt);
     if (pt === "" || !Number.isFinite(price)) fail(`${year}-${pad(month)}-${pad(day)}: bad price in ${fields.join(";")}`);
+    if (price < PRICE_RANGE.min || price > PRICE_RANGE.max) {
+      fail(`${year}-${pad(month)}-${pad(day)}: implausible price ${price} EUR/MWh in period ${index + 1}`);
+    }
     for (let i = 0; i < perPeriod; i++) prices.push(price);
   });
   return { start: omieDayStart(year, month, day), prices };
@@ -221,10 +227,12 @@ export function aggregateMonths(months, { prices, profile, losses }) {
       }
     }
     const finish = ([w, p, pl, l, sum, n]) => (w > 0 ? [w, p / w, pl / w, l / w, sum / n, n] : [0, 0, 0, 1, 0, n]);
+    const mean = sum / instants.length;
+    if (mean < MONTH_MEAN_RANGE.min || mean > MONTH_MEAN_RANGE.max) fail(`${month}: implausible mean ${mean} EUR/MWh`);
     return {
       month,
       quarters: instants.length,
-      mean: sum / instants.length,
+      mean,
       daily: buckets.daily.map(finish),
       weekly: buckets.weekly.map(finish),
     };
@@ -265,7 +273,7 @@ export const OMIE_PRICES_SOURCE = {
   /** The first and last month covered. */
   firstMonth: ${JSON.stringify(months[0].month)},
   lastMonth: ${JSON.stringify(months.at(-1).month)},
-  /** The quarter-hour prices of the last ${JSON_MONTHS} months, for the load-diagram mode. */
+  /** The same months' quarter-hour prices, for the load-diagram mode. */
   quarterHoursPath: ${JSON.stringify(meta.jsonPath)},
   fetchedOn: ${JSON.stringify(meta.fetchedOn)},
   /** Bump when the derivation changes, not when the prices change. */
@@ -285,7 +293,7 @@ ${rows}
 }
 
 /** The JSON for the diagram mode: integers keep it small. */
-export function renderQuarterHours(months, { prices, losses }) {
+export function renderQuarterHours(months, { prices, losses, profile }) {
   const instants = months.flatMap(quartersOfMonth);
   return JSON.stringify({
     source: SOURCE.omie.name,
@@ -298,6 +306,8 @@ export function renderQuarterHours(months, { prices, losses }) {
     omie: instants.map((t) => Math.round(prices.get(t) * 100)),
     /** Loss factor minus 1, hundred-thousandths. */
     loss: instants.map((t) => Math.round((losses.get(t) - 1) * 1e5)),
+    /** E-REDES BTN C profile, millionths of a thousandth of its year (for profile-billed formulas). */
+    profile: instants.map((t) => Math.round(profile.get(t) * 1e6)),
   });
 }
 
@@ -311,7 +321,8 @@ async function download(url, cacheDir, name) {
       if (cacheDir) writeFileSync(join(cacheDir, name), buffer);
       return buffer;
     } catch (error) {
-      if (attempt >= 3) fail(`download of ${url} failed: ${error.message}`);
+      // The first try and three retries.
+      if (attempt >= 4) fail(`download of ${url} failed: ${error.message}`);
       await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
     }
   }
@@ -347,7 +358,7 @@ async function main() {
   const cacheDir = option("--cache");
   if (cacheDir) mkdirSync(cacheDir, { recursive: true });
 
-  const months = monthsEndingWith(to, MODULE_MONTHS);
+  const months = monthsEndingWith(to, MONTHS);
   const years = [...new Set(months.map((m) => m.slice(0, 4)))];
 
   // E-REDES profiles and losses for every year covered.
@@ -412,7 +423,7 @@ async function main() {
   const moduleOut = fileURLToPath(new URL("../src/lib/calculators/data/omiePrices.ts", import.meta.url));
   const jsonOut = fileURLToPath(new URL(`../public${jsonPath}`, import.meta.url));
   mkdirSync(fileURLToPath(new URL("../public/data/", import.meta.url)), { recursive: true });
-  const json = renderQuarterHours(months.slice(-JSON_MONTHS), { prices, losses });
+  const json = renderQuarterHours(months, { prices, losses, profile });
   writeFileSync(moduleOut, renderModule(aggregated, { files, fetchedOn, jsonPath }));
   writeFileSync(jsonOut, `${json}\n`);
   console.log(`Wrote ${months[0]} to ${to} to ${moduleOut} and ${jsonOut} (${json.length} bytes)`);

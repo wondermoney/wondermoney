@@ -50,6 +50,12 @@ describe("build-omie-prices: OMIE files", () => {
     expect(() => parseOmieDay(omieFile([2026, 10, 25], 96, () => [1, 1]), 2026, 10, 25)).toThrow(/100/);
   });
 
+  it("rejects an implausible price", () => {
+    expect(() => parseOmieDay(omieFile([2026, 1, 1], 96, (p) => [p === 7 ? 1500 : 50, 50]), 2026, 1, 1)).toThrow(/implausible price 1500/);
+    expect(() => parseOmieDay(omieFile([2026, 1, 1], 96, (p) => [p === 7 ? -60 : 50, 50]), 2026, 1, 1)).toThrow(/implausible/);
+    expect(parseOmieDay(omieFile([2026, 1, 1], 96, () => [-5, 50]), 2026, 1, 1).prices[0]).toBe(-5);
+  });
+
   it("rejects another file, another day or a missing price", () => {
     expect(() => parseOmieDay("<html></html>", 2026, 1, 1)).toThrow(/not an OMIE/);
     expect(() => parseOmieDay(omieFile([2026, 1, 2], 96, () => [1, 1]), 2026, 1, 1)).toThrow(/unexpected row/);
@@ -120,12 +126,15 @@ describe("build-omie-prices: aggregation", () => {
     expect(shoulder[1]).toBe(50);
     expect(month.mean).toBeCloseTo((100 * peakQuarters + 50 * (28 * 96 - peakQuarters)) / (28 * 96), 9);
     expect(() => aggregateMonths(["2026-03"], { prices, profile, losses })).toThrow(/no OMIE price/);
+    const dear = new Map(instants.map((t) => [t, 450]));
+    expect(() => aggregateMonths(["2026-02"], { prices: dear, profile, losses })).toThrow(/implausible mean 450/);
 
     const module = renderModule([month], { files: {}, fetchedOn: "2026-11-20", jsonPath: "/data/x.json" });
     expect(module).toContain('month: "2026-02", quarters: 2688');
     expect(module).toContain('fetchedOn: "2026-11-20"');
 
-    const json = JSON.parse(renderQuarterHours(["2026-02"], { prices, losses }));
+    const json = JSON.parse(renderQuarterHours(["2026-02"], { prices, losses, profile }));
+    expect(json.profile[0]).toBe(1e6);
     expect(json.start).toBe(new Date(legalMidnight(2026, 2, 1)).toISOString());
     expect(json.omie).toHaveLength(28 * 96);
     expect(json.loss[0]).toBe(10000);

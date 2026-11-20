@@ -3,8 +3,9 @@ export const SOURCE: {
   profiles: { name: string; page: string };
   ren: { page: string; file: (year: string | number) => string };
 };
-export const MODULE_MONTHS: number;
-export const JSON_MONTHS: number;
+export const MONTHS: number;
+export const PRICE_RANGE: { min: number; max: number };
+export const MONTH_MEAN_RANGE: { min: number; max: number };
 
 type Bucket = [weight: number, omie: number, omieLoss: number, loss: number, mean: number, quarters: number];
 
@@ -32,6 +33,6 @@ export function renderModule(
 ): string;
 export function renderQuarterHours(
   months: readonly string[],
-  maps: { prices: Map<number, number>; losses: Map<number, number> },
+  maps: { prices: Map<number, number>; losses: Map<number, number>; profile: Map<number, number> },
 ): string;
 export function eredesLinks(html: string): { consumption: Record<string, string>; losses: Record<string, string> };

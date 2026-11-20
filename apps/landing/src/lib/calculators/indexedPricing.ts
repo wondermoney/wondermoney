@@ -54,6 +54,15 @@ export interface OmieMonth {
   mean: number;
   daily: readonly [OmieBucket, OmieBucket, OmieBucket];
   weekly: readonly [OmieBucket, OmieBucket, OmieBucket];
+  /**
+   * Diagram only: the same days' buckets weighted by the E-REDES BTN C profile instead of the
+   * diagram, for formulas billed on the profile (`weighting: "profile"`). The committed months are
+   * profile-weighted already and leave it out.
+   */
+  profile?: {
+    daily: readonly [OmieBucket, OmieBucket, OmieBucket];
+    weekly: readonly [OmieBucket, OmieBucket, OmieBucket];
+  };
 }
 
 export type MarketBasisKind = "last12Months" | "diagram";
@@ -84,6 +93,8 @@ export interface OmieQuarterHours {
   omie: readonly number[];
   /** Loss factor minus 1, hundred-thousandths. */
   loss: readonly number[];
+  /** E-REDES BTN C profile, millionths of a thousandth of its year. */
+  profile?: readonly number[];
 }
 
 const TRI_INDEX: Record<TriHourlyPeriod, 0 | 1 | 2> = { peak: 0, shoulder: 1, valley: 2 };
@@ -91,8 +102,10 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 /**
  * The market basis of a load diagram: each reading's kWh weighs its own quarter-hour's price. The
- * arithmetic means cover the calendar days of the diagram. Readings outside the price file are left
- * out of the averages (`coverage` says how much was priced); null when none could be priced.
+ * arithmetic means, and the profile-weighted buckets for profile-billed formulas, cover every
+ * quarter-hour of the diagram's calendar days. Readings outside the price file are left out of the
+ * averages (`coverage` says how much was priced); null when none could be priced. With solar, pass
+ * the readings netted against the production: what the household draws from the grid.
  */
 export function diagramBasis(readings: readonly LoadReading[], data: OmieQuarterHours): MarketBasis | null {
   const first = Date.parse(data.start);
@@ -104,15 +117,18 @@ export function diagramBasis(readings: readonly LoadReading[], data: OmieQuarter
 
   type Acc = { w: number; p: number; pl: number; l: number; sum: number; n: number };
   const fresh = (): Acc => ({ w: 0, p: 0, pl: 0, l: 0, sum: 0, n: 0 });
-  const months = new Map<string, { sum: number; n: number; daily: Acc[]; weekly: Acc[] }>();
+  type Entry = { sum: number; n: number; daily: Acc[]; weekly: Acc[]; profileDaily: Acc[]; profileWeekly: Acc[] };
+  const months = new Map<string, Entry>();
+  const three = () => [fresh(), fresh(), fresh()];
   const monthOf = (key: string) => {
     let entry = months.get(key);
     if (!entry) {
-      entry = { sum: 0, n: 0, daily: [fresh(), fresh(), fresh()], weekly: [fresh(), fresh(), fresh()] };
+      entry = { sum: 0, n: 0, daily: three(), weekly: three(), profileDaily: three(), profileWeekly: three() };
       months.set(key, entry);
     }
     return entry;
   };
+  const hasProfile = data.profile !== undefined && data.profile.length >= count;
 
   let total = 0;
   let priced = 0;
@@ -138,20 +154,31 @@ export function diagramBasis(readings: readonly LoadReading[], data: OmieQuarter
   }
   if (months.size === 0) return null;
 
-  // Arithmetic means over every quarter-hour of the diagram's days, consumed or not.
+  // Arithmetic means and the profile's weights over every quarter-hour of the diagram's days,
+  // consumed or not.
   for (let index = 0; index < count; index++) {
     const instant = first + index * QUARTER_HOUR_MS;
     const time = legalTimeOf(instant);
     const month = `${time.year}-${pad(time.month)}`;
     if (!days.has(`${month}-${pad(time.day)}`)) continue;
     const price = data.omie[index] / 100;
+    const loss = 1 + data.loss[index] / 1e5;
+    const weight = hasProfile ? data.profile![index] / 1e6 : 0;
     const entry = monthOf(month);
     entry.sum += price;
     entry.n += 1;
     for (const cycle of ["daily", "weekly"] as const) {
-      const acc = entry[cycle][TRI_INDEX[triHourlyPeriodAt(instant, cycle)]];
+      const period = TRI_INDEX[triHourlyPeriodAt(instant, cycle)];
+      const acc = entry[cycle][period];
       acc.sum += price;
       acc.n += 1;
+      const byProfile = entry[cycle === "daily" ? "profileDaily" : "profileWeekly"][period];
+      byProfile.w += weight;
+      byProfile.p += weight * price;
+      byProfile.pl += weight * price * loss;
+      byProfile.l += weight * loss;
+      byProfile.sum += price;
+      byProfile.n += 1;
     }
   }
 
@@ -162,7 +189,14 @@ export function diagramBasis(readings: readonly LoadReading[], data: OmieQuarter
   const triple = (accs: Acc[]) => [bucket(accs[0]), bucket(accs[1]), bucket(accs[2])] as const;
   const list: OmieMonth[] = [...months.keys()].sort().map((month) => {
     const entry = months.get(month)!;
-    return { month, quarters: entry.n, mean: entry.n > 0 ? entry.sum / entry.n : 0, daily: triple(entry.daily), weekly: triple(entry.weekly) };
+    return {
+      month,
+      quarters: entry.n,
+      mean: entry.n > 0 ? entry.sum / entry.n : 0,
+      daily: triple(entry.daily),
+      weekly: triple(entry.weekly),
+      ...(hasProfile ? { profile: { daily: triple(entry.profileDaily), weekly: triple(entry.profileWeekly) } } : {}),
+    };
   });
   return {
     kind: "diagram",
@@ -197,6 +231,8 @@ export type LossFactor =
   | { kind: "profile" }
   | { kind: "fixed"; factor: number }
   | { kind: "monthly"; factors: readonly number[] };
+
+export type FormulaWeighting = "profile" | "actual" | "none";
 
 /** EUR/kWh per period of each option, for terms a supplier publishes per period. */
 export interface PeriodTerms {
@@ -238,6 +274,14 @@ export interface IndexedFormula {
   /** The ERSE offers (COD_Proposta) that carry this formula. */
   offerIds: readonly string[];
   basis: OmieBasis;
+  /**
+   * Whose consumption weighs the quarter-hour prices within a billing month, for the
+   * "quarterHour" basis: "profile", the ERSE/E-REDES profile whatever the meter reads (a supplier
+   * that bills a household on the profile); "actual", the metered quarter-hours (with a diagram,
+   * the visitor's own). "none" for the mean bases, which no consumption weighs within a month. In
+   * every case the kWh of each month and period weigh the months against each other.
+   */
+  weighting: FormulaWeighting;
   losses: LossFactor;
   multiplier: number;
   /** EUR/kWh added to OMIE before the losses and the multiplier. */
@@ -298,25 +342,33 @@ function lossFactorOf(losses: LossFactor, month: string): number {
 
 /**
  * The market part of one group of periods in one month, EUR/kWh: multiplier x (OMIE / 1000 +
- * beforeLosses) x losses + adder, averaged with the consumption weights, within the limits.
- * Returns [value, weight].
+ * beforeLosses) x losses + adder, within the limits. `buckets` carry the household's kWh, the
+ * month's weight against the others; `prices` the buckets the formula's averages come from (the
+ * profile's, for a profile-billed formula with a diagram; otherwise the same). Returns [value, weight].
  */
-function monthTerm(formula: IndexedFormula, month: OmieMonth, buckets: readonly OmieBucket[]): [number, number] {
+function monthTerm(
+  formula: IndexedFormula,
+  month: OmieMonth,
+  buckets: readonly OmieBucket[],
+  prices: readonly OmieBucket[] = buckets,
+): [number, number] {
   const weight = buckets.reduce((sum, b) => sum + b[0], 0);
   if (weight <= 0) return [0, 0];
-  const weighted = (index: 1 | 2 | 3) => buckets.reduce((sum, b) => sum + b[0] * b[index], 0) / weight;
+  const priceWeight = prices.reduce((sum, b) => sum + b[0], 0);
+  if (priceWeight <= 0) return [0, 0];
+  const weighted = (index: 1 | 2 | 3) => prices.reduce((sum, b) => sum + b[0] * b[index], 0) / priceWeight;
   const { multiplier, beforeLosses, losses, basis } = formula;
   let value: number;
   if (basis === "quarterHour" && losses.kind === "profile") {
     value = (weighted(2) / 1000 + beforeLosses * weighted(3)) * multiplier;
   } else {
-    const quarters = buckets.reduce((sum, b) => sum + b[5], 0);
+    const quarters = prices.reduce((sum, b) => sum + b[5], 0);
     const omie =
       basis === "quarterHour"
         ? weighted(1)
         : basis === "periodMean"
           ? quarters > 0
-            ? buckets.reduce((sum, b) => sum + b[4] * b[5], 0) / quarters
+            ? prices.reduce((sum, b) => sum + b[4] * b[5], 0) / quarters
             : month.mean
           : month.mean;
     value = (omie / 1000 + beforeLosses) * lossFactorOf(losses, month.month) * multiplier;
@@ -333,10 +385,14 @@ function unweightedTerm(
   group: readonly (0 | 1 | 2)[],
   cycle: HourlyCycle,
 ): [number, number] {
-  const all = basis.months.flatMap((month) => [...month.daily]).filter((b) => b[0] > 0);
+  const all = basis.months.flatMap((month) => [...month[cycle]]).filter((b) => b[0] > 0);
   const loss = all.length > 0 ? all.reduce((sum, b) => sum + b[0] * b[3], 0) / all.reduce((sum, b) => sum + b[0], 0) : 1;
+  // A month-mean formula stays a month mean; the others take the period's plain mean.
+  const meanBasis: OmieBasis = formula.basis === "monthMean" ? "monthMean" : "periodMean";
   const flat: IndexedFormula =
-    formula.losses.kind === "profile" ? { ...formula, basis: "periodMean", losses: { kind: "fixed", factor: loss } } : { ...formula, basis: "periodMean" };
+    formula.losses.kind === "profile"
+      ? { ...formula, basis: meanBasis, losses: { kind: "fixed", factor: loss } }
+      : { ...formula, basis: meanBasis };
   let sum = 0;
   let weight = 0;
   for (const month of basis.months) {
@@ -370,9 +426,11 @@ export function formulaEnergyPrices(
   for (const [index, group] of GROUPS[option].entries()) {
     let sum = 0;
     let weight = 0;
+    const key = option === "simple" ? "daily" : cycle;
     for (const month of basis.months) {
-      const buckets = group.map((period) => month[option === "simple" ? "daily" : cycle][period]);
-      const [value, w] = monthTerm(formula, month, buckets);
+      const buckets = group.map((period) => month[key][period]);
+      const byProfile = formula.weighting === "profile" && month.profile ? group.map((period) => month.profile![key][period]) : buckets;
+      const [value, w] = monthTerm(formula, month, buckets, byProfile);
       sum += value * w;
       weight += w;
     }
