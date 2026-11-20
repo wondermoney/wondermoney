@@ -237,22 +237,22 @@ importers:
         specifier: ^2.0.1
         version: 2.0.3(express@5.3.0(supports-color@8.1.1))(pg-boss@12.18.2)(pg@8.23.1)
       '@mikro-orm/core':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(dataloader@2.2.3)
       '@mikro-orm/decorators':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(@mikro-orm/core@7.2.9(dataloader@2.2.3))(reflect-metadata@0.2.2)
       '@mikro-orm/migrations':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(@mikro-orm/core@7.2.9(dataloader@2.2.3))
       '@mikro-orm/postgresql':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(@mikro-orm/core@7.2.9(dataloader@2.2.3))
       '@mikro-orm/reflection':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(@mikro-orm/core@7.2.9(dataloader@2.2.3))
       '@mikro-orm/seeder':
-        specifier: ^7.2.8
+        specifier: ^7.2.9
         version: 7.2.9(@mikro-orm/core@7.2.9(dataloader@2.2.3))
       '@mikro-orm/sql-highlighter':
         specifier: ^1.0.1
@@ -415,8 +415,8 @@ importers:
         specifier: 10.0.1
         version: 10.0.1(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))
       '@mikro-orm/cli':
-        specifier: ^7.2.8
-        version: 7.2.8(dataloader@2.2.3)
+        specifier: ^7.2.9
+        version: 7.2.9(dataloader@2.2.3)
       '@sentry/cli':
         specifier: ^3.3.0
         version: 3.8.2
@@ -3980,19 +3980,10 @@ packages:
   '@mdx-js/mdx@3.1.1':
     resolution: {integrity: sha512-f6ZO2ifpwAQIpzGWaBQT2TXxPv6z3RBzQKpVftEWN78Vl/YweF1uwussDx8ECAXVtr3Rs89fKyG9YlzUs9DyGQ==}
 
-  '@mikro-orm/cli@7.2.8':
-    resolution: {integrity: sha512-JTgHO79ijaMUlwAnOvsCvWr6BmttDUtwVeui8fiOD31pL/P2BVnG0NPg/qGBWxaqJa76vebdQ5RWQN+deUllvA==}
+  '@mikro-orm/cli@7.2.9':
+    resolution: {integrity: sha512-ELYJsajqZKWaG4FpHhHavPT7AAuXHmqIhpVcni7rDmH6fhFRpAnAsdh+xBfubnL+hSfJkAWBYnL/Wwlo7LSpPQ==}
     engines: {node: '>= 22.17.0'}
     hasBin: true
-
-  '@mikro-orm/core@7.2.8':
-    resolution: {integrity: sha512-9E7wApevmNrqswey8pVT65nyBz1ejOafcdyHV2aKU9FmxnWr/MbfOVNlnpMe6D3+r+wsrVyx3dBJ0mHqTYQTCw==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      dataloader: 2.2.3
-    peerDependenciesMeta:
-      dataloader:
-        optional: true
 
   '@mikro-orm/core@7.2.9':
     resolution: {integrity: sha512-4l0rACONPIxtdJAHQjsjQ1kNXEKafrM2fXYZ+mnwkGUzpD2RjLKcEcpiUQ80qkCdhArDSIgbpxSKFVfVOvirhA==}
@@ -12453,8 +12444,8 @@ packages:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
 
-  mikro-orm@7.2.8:
-    resolution: {integrity: sha512-gipORQuQA91QG9BbrATOHg8/JAYdk7wG5lyfW8M8zfq5FHNn3HzHCz6OzcUAEfEXyXT3TSKchZwiyqRPxkYXTA==}
+  mikro-orm@7.2.9:
+    resolution: {integrity: sha512-+gIfyLhlP0gMQbTMJ29h6qzNbfWQ9N0xVAG/WUB7pWW/4FCBtpN70aUcxrdodKueWkBbb8EEaccynf8KTkLKmw==}
     engines: {node: '>= 22.17.0'}
 
   mime-db@1.52.0:
@@ -19014,17 +19005,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@mikro-orm/cli@7.2.8(dataloader@2.2.3)':
+  '@mikro-orm/cli@7.2.9(dataloader@2.2.3)':
     dependencies:
-      '@mikro-orm/core': 7.2.8(dataloader@2.2.3)
-      mikro-orm: 7.2.8
+      '@mikro-orm/core': 7.2.9(dataloader@2.2.3)
+      mikro-orm: 7.2.9
       yargs: 18.2.0
     transitivePeerDependencies:
       - dataloader
-
-  '@mikro-orm/core@7.2.8(dataloader@2.2.3)':
-    optionalDependencies:
-      dataloader: 2.2.3
 
   '@mikro-orm/core@7.2.9(dataloader@2.2.3)':
     optionalDependencies:
@@ -28683,7 +28670,7 @@ snapshots:
       braces: 3.0.3
       picomatch: 2.3.2
 
-  mikro-orm@7.2.8: {}
+  mikro-orm@7.2.9: {}
 
   mime-db@1.52.0: {}
 
