@@ -5627,7 +5627,7 @@
             "death": "morte do participante, com o valor a passar para os herdeiros."
           },
           "fiveYears": "Na reforma, aos 60 anos e no pagamento do crédito à habitação, cada entrega tem de estar no plano há pelo menos {{years}} anos; o mesmo vale para o desemprego, a incapacidade ou a doença que já existiam na data da entrega. Passados {{years}} anos da primeira entrega, podes reaver todo o valor nesses casos se as entregas da primeira metade da vigência do plano forem pelo menos {{firstHalf}} do total.",
-          "outside": "Podes pedir o reembolso em qualquer outra altura, nos termos do contrato, mas aí as deduções que tiveste voltam como imposto, majoradas em {{clawback}} por cada ano ou fração desde que foram feitas (EBF, artigo 21.º, n.º 4), e o rendimento é tributado a {{otherRate}} em vez da taxa mais baixa, com algum alívio para planos mantidos mais tempo (n.º 5). Podem aplicar-se também as comissões de reembolso do contrato.",
+          "outside": "Podes pedir o reembolso em qualquer outra altura, nos termos do contrato, mas aí as deduções que tiveste voltam como imposto, majoradas em {{clawback}} por cada ano ou fração desde que foram feitas (EBF, artigo 21.º, n.º 4), e o rendimento é tributado a {{otherRate}} em vez da taxa mais baixa (n.º 5). Se as entregas da primeira metade da vigência do plano forem pelo menos {{firstHalf}} do total, essa taxa incide sobre quatro quintos do rendimento com mais de {{reducedAfter}} anos de vigência e sobre dois quintos com mais de {{lowestAfter}}, ou seja, {{reducedRate}} e {{lowestRate}} efetivos (artigo 5.º, n.º 3, do Código do IRS). Podem aplicar-se também as comissões de reembolso do contrato.",
           "transfer": "Podes transferir o valor para outro PPR (artigo 6.º); a transferência não dá direito a nova dedução. Sem garantia de capital ou de rendibilidade não pode ser cobrada comissão de transferência; com garantia, a comissão é no máximo {{transferFee}} do valor."
         },
         "method": {
@@ -5657,7 +5657,7 @@
             "asf": "ASF: plataforma de comparação de PPR (seguros e fundos de pensões)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: como são calculados os valores da ASF",
             "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, artigo 21.º (texto consolidado)",
-            "cirs": "Portal das Finanças: Código do IRS, artigo 78.º (texto consolidado)",
+            "cirs": "Portal das Finanças: Código do IRS, artigos 5.º e 78.º (texto consolidado)",
             "dl158": "Diário da República: Decreto-Lei n.º 158/2002, regime jurídico dos PPR (consolidado)"
           }
         },
@@ -5849,7 +5849,7 @@
       "irsInReturn": "Na declaração de IRS (declaração obrigatória)",
       "irsOnWithdrawal": "No levantamento",
       "capitalisationRates": "11,2 % a 28 %, em função da antiguidade",
-      "pprRates": "8 % a 20 %, em função da antiguidade",
+      "pprRates": "8,6 % a 21,5 %, em função da antiguidade",
       "pprLegalRate": "8 % se o levantamento for por motivo previsto na lei"
     },
     "fgd": {
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Se levantares por motivo previsto na lei, o ganho é tributado a 8 % (20 % sobre dois quintos). Fora desses casos o ganho é tributado a 20 %, reduzido para 16 % ao fim de 5 anos e para 8 % ao fim de 8 anos se pelo menos 35 % das entregas tiverem sido feitas na primeira metade. Devolves ainda o que deduziste no IRS, mais 10 % por cada ano ou fração, exceto passados 5 anos nos casos previstos na lei (EBF, art. 21.º)."
+        "text": "Se levantares por motivo previsto na lei, o ganho é tributado a 8 % (20 % sobre dois quintos). Fora desses casos o ganho é tributado a 21,5 %, reduzido para 17,2 % com mais de 5 anos de vigência do plano e para 8,6 % com mais de 8 (21,5 % sobre quatro quintos e depois sobre dois quintos do ganho), se pelo menos 35 % das entregas tiverem sido feitas na primeira metade da vigência. Devolves ainda o que deduziste no IRS, mais 10 % por cada ano ou fração, exceto em caso de morte do subscritor ou quando a entrega tiver pelo menos 5 anos e o levantamento for por motivo previsto na lei (EBF, art. 21.º, e CIRS, art. 5.º, n.º 3)."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS art. 71.º: retenção de 28 % e opção pelo englobamento",
         "cirs72": "Portal das Finanças, CIRS art. 72.º: 28 % sobre rendimentos sem retenção",
         "cirs5": "Portal das Finanças, CIRS art. 5.º, n.º 3: resgates de seguros de vida",
-        "ebf21": "Portal das Finanças, EBF art. 21.º: planos de poupança-reforma"
+        "ebf21": "Portal das Finanças, EBF art. 21.º (texto consolidado): planos de poupança-reforma"
       }
     },
     "related": {

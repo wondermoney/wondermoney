@@ -5627,7 +5627,7 @@
             "death": "fallecimiento del partícipe, con el valor para sus herederos."
           },
           "fiveYears": "En la jubilación, a los 60 años y en el pago de la hipoteca, cada aportación debe llevar al menos {{years}} años en el plan; lo mismo vale para el desempleo, la incapacidad o la enfermedad que ya existían en la fecha de la aportación. Pasados {{years}} años desde la primera aportación, puedes rescatar todo el valor en esos casos si las aportaciones de la primera mitad de vida del plan suponen al menos el {{firstHalf}} del total.",
-          "outside": "Puedes rescatar en cualquier otro momento, según el contrato, pero entonces las deducciones que tuviste vuelven como impuesto, aumentadas un {{clawback}} por cada año o fracción desde que se hicieron (EBF, artículo 21, n.º 4), y la ganancia tributa al {{otherRate}} en lugar del tipo más bajo, con algo de alivio para planes mantenidos más tiempo (n.º 5). También pueden aplicarse las comisiones de reembolso del contrato.",
+          "outside": "Puedes rescatar en cualquier otro momento, según el contrato, pero entonces las deducciones que tuviste vuelven como impuesto, aumentadas un {{clawback}} por cada año o fracción desde que se hicieron (EBF, artículo 21, n.º 4), y la ganancia tributa al {{otherRate}} en lugar del tipo más bajo (n.º 5). Si las aportaciones de la primera mitad de vida del plan suponen al menos el {{firstHalf}} del total, ese tipo se aplica a cuatro quintas partes de la ganancia cuando el plan lleva más de {{reducedAfter}} años y a dos quintas partes cuando lleva más de {{lowestAfter}}, un {{reducedRate}} y un {{lowestRate}} efectivos (artículo 5, n.º 3, del Código del IRS). También pueden aplicarse las comisiones de reembolso del contrato.",
           "transfer": "Puedes traspasar el valor a otro PPR (artículo 6); el traspaso no da derecho a una nueva deducción. Sin garantía de capital o de rentabilidad no se puede cobrar comisión de traspaso; con garantía, la comisión es como máximo del {{transferFee}} del valor."
         },
         "method": {
@@ -5657,7 +5657,7 @@
             "asf": "ASF: plataforma de comparación de PPR (seguros y fondos de pensiones)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: cómo se calculan las cifras de la ASF",
             "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, artículo 21 (texto consolidado)",
-            "cirs": "Portal das Finanças: Código do IRS, artículo 78 (texto consolidado)",
+            "cirs": "Portal das Finanças: Código do IRS, artículos 5 y 78 (texto consolidado)",
             "dl158": "Diário da República: Decreto-Lei n.º 158/2002, régimen jurídico de los PPR (consolidado)"
           }
         },
@@ -5849,7 +5849,7 @@
       "irsInReturn": "En la declaración del IRS (declaración obligatoria)",
       "irsOnWithdrawal": "Al retirar",
       "capitalisationRates": "11,2 % a 28 %, según la antigüedad",
-      "pprRates": "8 % a 20 %, según la antigüedad",
+      "pprRates": "8,6 % a 21,5 %, según la antigüedad",
       "pprLegalRate": "8 % si la retirada es por un motivo previsto en la ley"
     },
     "fgd": {
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Si retiras por un motivo previsto en la ley, la ganancia tributa al 8 % (20 % sobre dos quintas partes). Fuera de esos casos tributa al 20 %, reducido al 16 % a los 5 años y al 8 % a los 8 años si al menos el 35 % de las aportaciones se hizo en la primera mitad. Además devuelves lo que dedujiste en el IRS, más un 10 % por cada año o fracción, salvo pasados 5 años en los casos previstos en la ley (EBF, art. 21)."
+        "text": "Si retiras por un motivo previsto en la ley, la ganancia tributa al 8 % (20 % sobre dos quintas partes). Fuera de esos casos tributa al 21,5 %, reducido al 17,2 % cuando el plan lleva más de 5 años y al 8,6 % cuando lleva más de 8 (21,5 % sobre cuatro quintas partes y luego sobre dos quintas partes de la ganancia), si al menos el 35 % de las aportaciones se hizo en la primera mitad de vida del plan. Además devuelves lo que dedujiste en el IRS, más un 10 % por cada año o fracción, salvo en caso de fallecimiento del titular o cuando la aportación lleve al menos 5 años en el plan y la retirada sea por un motivo previsto en la ley (EBF, art. 21, y CIRS, art. 5.3)."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS art. 71: retención del 28 % y opción de englobamento",
         "cirs72": "Portal das Finanças, CIRS art. 72: 28 % sobre rendimientos sin retención",
         "cirs5": "Portal das Finanças, CIRS art. 5.3: rescates de seguros de vida",
-        "ebf21": "Portal das Finanças, EBF art. 21: planes de ahorro para la jubilación"
+        "ebf21": "Portal das Finanças, EBF art. 21 (texto consolidado): planes de ahorro para la jubilación"
       }
     },
     "related": {

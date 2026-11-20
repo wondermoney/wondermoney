@@ -5483,7 +5483,7 @@
             "death": "Tod der sparenden Person, der Wert geht an die Erben."
           },
           "fiveYears": "Bei Rente, ab 60 Jahren und für die Kreditraten muss jede Einzahlung mindestens {{years}} Jahre im Plan sein; dasselbe gilt für Arbeitslosigkeit, Arbeitsunfähigkeit oder Krankheit, die bei der Einzahlung bereits bestanden. Nach {{years}} Jahren ab der ersten Einzahlung kann in diesen Fällen der gesamte Wert ausgezahlt werden, wenn die Einzahlungen in der ersten Hälfte der Laufzeit mindestens {{firstHalf}} aller Einzahlungen ausmachen.",
-          "outside": "Sie können jederzeit sonst nach den Vertragsbedingungen auszahlen lassen, dann kommen die erhaltenen Abzüge aber als Steuer zurück, erhöht um {{clawback}} für jedes Jahr oder jeden Teil eines Jahres seither (EBF, Artikel 21, n.º 4), und der Gewinn wird mit {{otherRate}} statt mit dem niedrigeren Satz besteuert, mit einer Erleichterung für länger gehaltene Pläne (n.º 5). Auch Rücknahmegebühren des Vertrags können anfallen.",
+          "outside": "Sie können jederzeit sonst nach den Vertragsbedingungen auszahlen lassen, dann kommen die erhaltenen Abzüge aber als Steuer zurück, erhöht um {{clawback}} für jedes Jahr oder jeden Teil eines Jahres seither (EBF, Artikel 21, n.º 4), und der Gewinn wird mit {{otherRate}} statt mit dem niedrigeren Satz besteuert (n.º 5). Machen die Einzahlungen der ersten Hälfte der Laufzeit mindestens {{firstHalf}} aller Einzahlungen aus, gilt dieser Satz bei mehr als {{reducedAfter}} Jahren Laufzeit nur für vier Fünftel des Gewinns und bei mehr als {{lowestAfter}} Jahren für zwei Fünftel, effektiv also {{reducedRate}} bzw. {{lowestRate}} (Artikel 5, n.º 3, des IRS-Gesetzbuchs). Auch Rücknahmegebühren des Vertrags können anfallen.",
           "transfer": "Sie können den Wert auf einen anderen PPR übertragen (Artikel 6); die Übertragung gibt keinen neuen Abzug. Ohne Kapital- oder Renditegarantie darf keine Übertragungsgebühr erhoben werden; mit Garantie höchstens {{transferFee}} des Werts."
         },
         "method": {
@@ -5513,7 +5513,7 @@
             "asf": "ASF: Vergleichsplattform für PPR (Versicherungen und Pensionsfonds)",
             "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: wie die ASF-Zahlen berechnet werden",
             "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, Artikel 21 (konsolidierte Fassung)",
-            "cirs": "Portal das Finanças: Código do IRS, Artikel 78 (konsolidierte Fassung)",
+            "cirs": "Portal das Finanças: Código do IRS, Artikel 5 und 78 (konsolidierte Fassung)",
             "dl158": "Diário da República: Decreto-Lei n.º 158/2002, Rechtsrahmen der PPR (konsolidiert)"
           }
         },
@@ -5849,7 +5849,7 @@
       "irsInReturn": "In der IRS-Erklärung (Erklärung verpflichtend)",
       "irsOnWithdrawal": "Bei der Abhebung",
       "capitalisationRates": "11,2 % bis 28 %, je nach Haltedauer",
-      "pprRates": "8 % bis 20 %, je nach Haltedauer",
+      "pprRates": "8,6 % bis 21,5 %, je nach Haltedauer",
       "pprLegalRate": "8 %, wenn die Abhebung aus gesetzlich vorgesehenem Grund erfolgt"
     },
     "fgd": {
@@ -5875,7 +5875,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Heben Sie aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 20 %, gesenkt auf 16 % nach 5 Jahren und auf 8 % nach 8 Jahren, wenn mindestens 35 % der Einzahlungen in der ersten Hälfte erfolgten. Außerdem geben Sie den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer nach 5 Jahren in den gesetzlich vorgesehenen Fällen (EBF, Art. 21)."
+        "text": "Heben Sie aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 21,5 %, gesenkt auf 17,2 % bei mehr als 5 Jahren Laufzeit und auf 8,6 % bei mehr als 8 Jahren (21,5 % auf vier Fünftel bzw. zwei Fünftel des Gewinns), wenn mindestens 35 % der Einzahlungen in der ersten Hälfte der Laufzeit erfolgten. Außerdem geben Sie den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer im Todesfall des Inhabers oder wenn die Einzahlung mindestens 5 Jahre im Plan war und die Abhebung aus gesetzlich vorgesehenem Grund erfolgt (EBF, Art. 21, und CIRS, Art. 5 Abs. 3)."
       }
     },
     "sources": {
@@ -5890,7 +5890,7 @@
         "cirs71": "Portal das Finanças, CIRS Art. 71: 28 % Quellensteuer und Option des englobamento",
         "cirs72": "Portal das Finanças, CIRS Art. 72: 28 % auf Einkünfte ohne Quellensteuer",
         "cirs5": "Portal das Finanças, CIRS Art. 5 Abs. 3: Rückkäufe von Lebensversicherungen",
-        "ebf21": "Portal das Finanças, EBF Art. 21: Altersvorsorgepläne"
+        "ebf21": "Portal das Finanças, EBF Art. 21 (konsolidierte Fassung): Altersvorsorgepläne"
       }
     },
     "related": {

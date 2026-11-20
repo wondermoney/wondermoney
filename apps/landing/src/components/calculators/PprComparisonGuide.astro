@@ -11,6 +11,7 @@ import {
   PPR_TAX_RULES_REVIEWED,
   PPR_TAX_SOURCES,
   pprDeduction,
+  pprRedemptionRates,
   riskClassSummary,
   type PprProduct,
 } from "@/lib/calculators/pprComparison";
@@ -47,6 +48,9 @@ const costGap = ((high.yearlyCost - low.yearlyCost) / 100) * invested;
 const deductionAge = 40;
 const deductionExample = pprDeduction({ age: deductionAge, contribution: 1750, retired: false });
 const [under35, from35, over50] = PPR_TAX_RULES.limits.map((band) => format.eur(band.limit));
+const redemptionRates = pprRedemptionRates();
+const [, reduced, lowest] = redemptionRates.outside;
+if (!reduced || !lowest) throw new Error("The redemption copy quotes two reductions for long-held plans");
 
 const values = {
   risk: String(exampleRisk),
@@ -80,8 +84,12 @@ const values = {
   firstHalf: format.rate(PPR_TAX_RULES.firstHalfShare),
   clawback: format.rate(PPR_TAX_RULES.clawbackPerYear),
   legalRate: format.rate(PPR_TAX_RULES.legalRedemption.rate),
-  legalEffective: format.rate(Math.round(PPR_TAX_RULES.legalRedemption.rate * PPR_TAX_RULES.legalRedemption.taxedShare * 100) / 100),
+  legalEffective: format.rate(redemptionRates.legal),
   otherRate: format.rate(PPR_TAX_RULES.otherRedemptionRate),
+  reducedAfter: String(reduced.afterYears),
+  reducedRate: format.rate(reduced.rate),
+  lowestAfter: String(lowest.afterYears),
+  lowestRate: format.rate(lowest.rate),
   transferFee: format.rate(PPR_TAX_RULES.maxGuaranteedTransferFee),
   fundsDate: format.date(PPR_FUNDS_SOURCE.fetchedOn),
   insuranceDate: format.date(PPR_INSURANCE_SOURCE.fetchedOn),
@@ -99,7 +107,7 @@ const sources = [
   { key: "asf", href: PPR_INSURANCE_SOURCE.url },
   { key: "asfRule", href: PPR_INSURANCE_SOURCE.regulationUrl },
   { key: "ebf", href: PPR_TAX_SOURCES.ebf },
-  { key: "cirs", href: PPR_TAX_SOURCES.cirs78 },
+  { key: "cirs", href: PPR_TAX_SOURCES.cirs },
   { key: "dl158", href: PPR_TAX_SOURCES.dl158 },
 ] as const;
 
