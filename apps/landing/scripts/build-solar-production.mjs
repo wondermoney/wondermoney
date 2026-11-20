@@ -7,7 +7,8 @@
 // mainland Portugal, a typical year of hourly production of a 1 kWp crystalline-silicon system,
 // free-standing, facing south at the optimal tilt, with PVGIS's default 14 % system losses.
 // The method is in src/lib/calculators/solarPvgis.ts, which this script imports (Node strips the
-// types). The radiation database (PVGIS-SARAH3 for Portugal), the years and the tilt are read from
+// types); its fetchPvgisTypicalYear is also what the site's /api/solar-production route runs for
+// any other tilt, orientation and location. The radiation database (PVGIS-SARAH3 for Portugal), the years and the tilt are read from
 // the responses and written to the module.
 //
 // Each district's JSON holds 365 rows, one per day: the first UTC hour with production, then the
@@ -30,11 +31,12 @@ import {
   PVGIS_API,
   PVGIS_DEFAULT_LOSS_PERCENT,
   PVGIS_VERSION,
+  PvgisResponseError,
   encodeTypicalYear,
+  fetchPvgisTypicalYear,
   parsePvgisPvcalc,
-  parsePvgisSeries,
-  parsePvgisTmyMonths,
-  typicalYear,
+  pvgisSeriesUrl,
+  pvgisTmyUrl,
 } from "../src/lib/calculators/solarPvgis.ts";
 
 export const USER_AGENT = "WonderMoney-landing-build/1.0 (+https://github.com/wondermoney/wondermoney)";
@@ -85,42 +87,31 @@ export function pvcalcUrl(district) {
   return `${PVGIS_API}/PVcalc?${query}`;
 }
 
+/** The district's system: south at `slope`, PVGIS's default losses. */
+const siteOf = (district, slope) => ({ lat: district.lat, lon: district.lon, angle: slope, aspect: 0, lossPercent: PVGIS_DEFAULT_LOSS_PERCENT });
+
 export function tmyUrl(district) {
-  return `${PVGIS_API}/tmy?${new URLSearchParams(common(district))}`;
+  return pvgisTmyUrl(district);
 }
 
 export function seriesUrl(district, slope, year) {
-  const query = new URLSearchParams({
-    ...common(district),
-    peakpower: "1",
-    loss: String(PVGIS_DEFAULT_LOSS_PERCENT),
-    angle: String(slope),
-    aspect: "0",
-    pvcalculation: "1",
-    startyear: String(year),
-    endyear: String(year),
-  });
-  return `${PVGIS_API}/seriescalc?${query}`;
+  return pvgisSeriesUrl(siteOf(district, slope), year);
 }
 
 /**
  * One district's typical year and its checks, from a `get(url)` that returns the parsed JSON of
- * each API call.
+ * each API call. The typical year itself is fetchPvgisTypicalYear's, as for the site's
+ * /api/solar-production route.
  */
 export async function buildDistrict(district, get) {
   const optimum = parsePvgisPvcalc(await get(pvcalcUrl(district)));
   if (optimum.azimuth !== 0) fail(`${district.slug}: PVcalc did not face south`);
-  const tmy = parsePvgisTmyMonths(await get(tmyUrl(district)));
-  const series = new Map();
-  for (const year of [...new Set(tmy.months.map((month) => month.year))].sort()) {
-    const parsed = parsePvgisSeries(await get(seriesUrl(district, optimum.slope, year)));
-    if (parsed.slope !== optimum.slope || parsed.azimuth !== 0 || parsed.peakPowerKw !== 1 || parsed.lossPercent !== PVGIS_DEFAULT_LOSS_PERCENT) {
-      fail(`${district.slug} ${year}: the series is for another system`);
-    }
-    if (parsed.radiationDb !== optimum.radiationDb) fail(`${district.slug} ${year}: radiation database ${parsed.radiationDb}`);
-    series.set(year, parsed);
-  }
-  const year = typicalYear(series, tmy.months);
+  const typical = await fetchPvgisTypicalYear(siteOf(district, optimum.slope), get).catch((error) => {
+    if (error instanceof PvgisResponseError) fail(`${district.slug}: ${error.message}`);
+    throw error;
+  });
+  if (typical.meteo.radiationDb !== optimum.radiationDb) fail(`${district.slug}: radiation database ${typical.meteo.radiationDb}`);
+  const year = typical.year;
   const yearlyKwh = year.reduce((sum, value) => sum + value, 0) / 1000;
   if (yearlyKwh < YEARLY_RANGE.min || yearlyKwh > YEARLY_RANGE.max) fail(`${district.slug}: implausible ${yearlyKwh.toFixed(0)} kWh/kWp`);
   const gap = Math.abs(yearlyKwh / optimum.yearlyKwh - 1);
@@ -134,7 +125,7 @@ export async function buildDistrict(district, get) {
       slope: optimum.slope,
       yearlyKwhPerKwp: Math.round(yearlyKwh),
       pvgisAverageKwhPerKwp: Math.round(optimum.yearlyKwh),
-      monthsSelected: tmy.months.map((month) => month.year),
+      monthsSelected: typical.months.map((month) => month.year),
     },
     meteo: { radiationDb: optimum.radiationDb, meteoDb: optimum.meteoDb, yearMin: optimum.yearMin, yearMax: optimum.yearMax },
     days: encodeTypicalYear(year),
