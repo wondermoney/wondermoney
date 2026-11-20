@@ -3,7 +3,7 @@ term: Debt-to-Income Ratio (DTI)
 definition: DTI is the percentage of gross monthly income used to pay debt obligations.
 category: banking
 example: If monthly debt payments are 900 and gross income is 3,000, DTI is 30%.
-relatedCalculator: loan-calculator
+relatedCalculator: debt-to-income-calculator
 relatedGuide: debt-payoff-plan
 relatedTerms:
   - apr-annual-percentage-rate

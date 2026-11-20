@@ -4,8 +4,8 @@ excerpt: Um método prático para gerir o orçamento mensal em menos de 20 minut
 category: budgeting
 publishedAt: 2026-03-01T09:00:00.000Z
 relatedCalculators:
-  - budget-planner
-  - expense-tracker
+  - household-budget-calculator
+  - savings-rate-calculator
 relatedTerms:
   - orcamento
   - fluxo-de-caixa

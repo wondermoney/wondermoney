@@ -271,12 +271,14 @@ describe("CSV export", () => {
     laterYears: "Later years (EUR)",
     period: "Period (EUR)",
     estimated: "Estimated price",
+    priceBasis: "Price basis",
     saving: "Saving (EUR)",
     link: "Link",
     options: { simple: "Simple", biHourly: "Bi-hourly", triHourly: "Tri-hourly" },
     yes: "yes",
     no: "no",
     supplierOf: (candidate) => (candidate.regulated ? "Regulated tariff" : supplierName(candidate.supplier)),
+    basisOf: (result) => (result.priceBasis === "market" ? `OMIE ${result.market!.from} to ${result.market!.to}` : result.priceBasis),
   };
 
   it("writes one row per result in the list's order, with a header and a byte-order mark", () => {
@@ -284,11 +286,12 @@ describe("CSV export", () => {
     const csv = comparisonCsv(result.results, "en", LABELS);
     const lines = csv.replace(/^\uFEFF/, "").trimEnd().split("\r\n");
     expect(csv.startsWith("\uFEFF")).toBe(true);
-    expect(lines[0]).toBe("Rank,Supplier,Offer,Option,First year (EUR),Later years (EUR),Period (EUR),Estimated price,Link");
+    expect(lines[0]).toBe("Rank,Supplier,Offer,Option,First year (EUR),Later years (EUR),Period (EUR),Estimated price,Price basis,Link");
     expect(lines).toHaveLength(result.results.length + 1);
     const first = result.results[0];
     expect(lines[1].startsWith(`1,${LABELS.supplierOf(first.offer)},`)).toBe(true);
     expect(lines[1]).toContain(`,Simple,${first.firstYear.total.toFixed(2)},`);
+    expect(lines[1]).toContain(`,${first.priceBasis},`);
   });
 
   it("uses a semicolon and a decimal comma outside English, quotes what needs it and adds the saving", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SAVINGS_CERTIFICATES_BASE_RATE } from "./data/savingsCertificatesRate";
 import {
   PERMANENCE_PREMIUM_STEPS,
   SAVINGS_CERTIFICATES_EXAMPLE,
@@ -90,7 +91,9 @@ describe("computeSavingsCertificates", () => {
 
   it("defaults the base rate to the reference month within the 0% to 2.5% band", () => {
     const { referenceBaseRate, maxBaseRate } = SAVINGS_CERTIFICATES_RULES;
-    expect(referenceBaseRate.month).toBe("2026-11");
+    // The monthly refresh moves the month on; it is never older than the November 2026 rate checked by hand.
+    expect(referenceBaseRate.month).toMatch(/^\d{4}-(0[1-9]|1[0-2])$/);
+    expect(referenceBaseRate.month >= "2026-11").toBe(true);
     expect(referenceBaseRate.rate).toBeGreaterThanOrEqual(0);
     expect(referenceBaseRate.rate).toBeLessThanOrEqual(maxBaseRate);
     expect(SAVINGS_CERTIFICATES_EXAMPLE.baseRate).toBe(referenceBaseRate.rate);
@@ -98,13 +101,15 @@ describe("computeSavingsCertificates", () => {
 
   it("takes the default base rate and the rules from IGCP's own pages", () => {
     const { referenceBaseRate, rulesSource } = SAVINGS_CERTIFICATES_RULES;
-    // IGCP, 30 October 2026: the gross rate for new Série F subscriptions in November 2026 is 2,500%. A new
-    // subscription has no permanence premium in year 1, so that is the base rate.
+    // IGCP's monthly notice gives the gross rate for new Série F subscriptions. A new subscription has no
+    // permanence premium in year 1, so that is the base rate. scripts/build-savings-certificates-rate.mjs
+    // writes it to data/savingsCertificatesRate.ts.
     expect(referenceBaseRate).toEqual({
-      rate: 2.5,
-      month: "2026-11",
-      source: "https://www.igcp.pt/pt/noticias/taxas-de-juro-dos-certificados-de-aforro-das-series-b-d-e-e-f-em-novembro-de-2026",
+      rate: SAVINGS_CERTIFICATES_BASE_RATE.rate,
+      month: SAVINGS_CERTIFICATES_BASE_RATE.month,
+      source: SAVINGS_CERTIFICATES_BASE_RATE.source,
     });
+    expect(referenceBaseRate.source).toMatch(/^https:\/\/www\.igcp\.pt\/pt\/noticias\/taxas-de-juro-dos-certificados-de-aforro-/);
     expect(rulesSource).toBe(
       "https://www.igcp.pt/pt/aforristas/produtos-de-aforro/certificados-de-aforro/ficha-tecnica-certificados-de-aforro-serie-f",
     );

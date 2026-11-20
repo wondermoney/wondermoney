@@ -18,6 +18,9 @@ export interface ElectricityOffer {
   socialTariff: boolean; // FiltroTarifaSocial
   durationMonths: number | null;
   validFrom: string; validTo: string | null;   // ISO dates
+  // ConsIni_ELE / ConsFim_ELE: the annual kWh the offer is open to, both ends included (null: no
+  // limit). ERSE's simulator leaves an offer out when the annualised consumption is outside them.
+  minAnnualKwh: number | null; maxAnnualKwh: number | null;
   mandatoryServicesPerYear: number;            // CustoServicos_c/IVA, EUR with VAT
   refunds: { fixedPerYear: number; powerPercent: number; energyPercent: number; energyPerKwh: number };
   newClient: { fixedPerYear: number; powerPercent: number; energyPercent: number; energyPerKwh: number };

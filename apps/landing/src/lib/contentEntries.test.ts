@@ -75,6 +75,20 @@ describe("buildGuides", () => {
       'guides/pt/plano refers to glossary "budget", which has no file at glossary/pt/budget.md',
     );
   });
+
+  it("accepts a calculator by its key, its slug in the guide's locale or its route id", () => {
+    const [entry] = buildGuides(
+      [guide("pt/plano", { relatedCalculators: ["debt-to-income-calculator", "credito-habitacao", "toolInvestorProfile"] })],
+      [],
+    );
+    expect(entry.relatedCalculators).toEqual(["debt-to-income-calculator", "credito-habitacao", "toolInvestorProfile"]);
+  });
+
+  it("fails on a related calculator that names no tool, instead of falling back to the tools hub", () => {
+    expect(() => buildGuides([guide("en/plan", { relatedCalculators: ["mortgage-calculator", "debt-payoff-calculator"] })], [])).toThrow(
+      'guides/en/plan names the calculator "debt-payoff-calculator", which is no tool',
+    );
+  });
 });
 
 describe("buildGlossaryTerms", () => {
@@ -103,6 +117,17 @@ describe("buildGlossaryTerms", () => {
       relatedTerms: [{ slug: "tanb", term: "TANB", locale: "pt" }],
       bodyText: "",
     });
+  });
+
+  it("fails on a related calculator that names no tool", () => {
+    expect(() => buildGlossaryTerms([term("pt/taxa-de-esforco", { relatedCalculator: "loan-payoff" })], [])).toThrow(
+      'glossary/pt/taxa-de-esforco names the calculator "loan-payoff", which is no tool',
+    );
+  });
+
+  it("accepts the FIRE calculator page as a related calculator", () => {
+    const [entry] = buildGlossaryTerms([term("en/fire", { relatedCalculator: "fire" })], []);
+    expect(entry.relatedCalculator).toBe("fire");
   });
 
   it("fails on a related guide in another locale", () => {

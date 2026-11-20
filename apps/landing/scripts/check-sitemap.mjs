@@ -18,10 +18,15 @@ const sitemapPaths = locs(readFileSync(join(outDir, "sitemap-index.xml"), "utf8"
 const sitemap = new Set(sitemapPaths);
 
 const pages = new Map();
+const unfilled = [];
 for (const file of readdirSync(outDir, { recursive: true, encoding: "utf8" })) {
   if (!file.endsWith(".html")) continue;
   const path = `/${file.split(sep).join("/")}`.replace(/(\/index)?\.html$/, "") || "/";
   const html = readFileSync(join(outDir, file), "utf8");
+  // A {{placeholder}} in page text means a translation was rendered without its values.
+  for (const [text] of html.matchAll(/>[^<]*\{\{\s*[\w.]+\s*\}\}[^<]*</g)) {
+    unfilled.push(`${file}: ${text.slice(1, -1).trim().slice(0, 120)}`);
+  }
   const refresh = html.match(/<meta http-equiv="refresh" content="\d+;\s*url=([^"]+)"/i);
   pages.set(path, refresh ? { redirectTo: refresh[1] } : {});
 }
@@ -60,5 +65,6 @@ for (const { source, destination } of legacyRedirects) {
 }
 for (const [path, { redirectTo }] of htmlRedirects) checkDestination(path, redirectTo);
 
+assert.deepEqual(unfilled, [], `Unfilled translation placeholders in built pages:\n${unfilled.join("\n")}`);
 assert.deepEqual(failures, [], `Sitemap check failed:\n${failures.join("\n")}`);
 console.log(`Sitemap check: ${sitemap.size} canonical URLs, ${legacyRedirects.length} legacy HTTP 301s and ${htmlRedirects.length} HTML redirects.`);

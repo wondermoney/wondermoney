@@ -3,6 +3,7 @@ term: Tolerância ao Risco
 definition: Tolerância ao risco é a capacidade e conforto para lidar com perdas temporárias.
 category: investing-concepts
 example: Se uma queda de 20% te impede de manter a estratégia, o risco da carteira pode estar elevado.
+relatedCalculator: investor-profile-quiz
 relatedGuide: diversificacao-da-carteira
 relatedTerms:
   - alocacao-de-ativos

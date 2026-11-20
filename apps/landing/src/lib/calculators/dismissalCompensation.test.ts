@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  DISMISSAL_EXAMPLE, FIXED_TERM_MAX_YEARS, LEI_93_2019_IN_FORCE, RMMG_2026_CENTS, checkFixedTermDuration,
-  computeDismissalCompensation, splitPayout, validateDismissal, type DismissalCompensationInput, type FixedTermKind,
+  DISMISSAL_EXAMPLE, FIXED_TERM_MAX_YEARS, LEI_93_2019_IN_FORCE, MAX_RENEWALS, RMMG_2026_CENTS, checkFixedTermDuration,
+  checkFixedTermRenewals, computeDismissalCompensation, fixedTermFields, splitPayout, validateDismissal,
+  type DismissalCompensationInput, type FixedTermKind,
 } from "./dismissalCompensation";
 
 const base = (overrides: Partial<DismissalCompensationInput>): DismissalCompensationInput => ({
@@ -224,7 +225,7 @@ describe("fixed-term duration limits (arts. 147(2)(b) and 148 CT; art. 11(4) of 
     { kind: "certain", start: "2019-10-01", end: "2022-09-29", rules: "from2019", maxYears: 2, lastDay: "2021-09-30", exceeded: true },
   ];
   it.each(cases)("$kind term from $start to $end: $rules, exceeded $exceeded", ({ kind, start, end, rules, maxYears, lastDay, exceeded }) => {
-    expect(checkFixedTermDuration(kind, start, end)).toEqual({ kind, rules, maxYears, lastDay, exceeded });
+    expect(checkFixedTermDuration(kind, start, end)).toEqual({ kind, rules, maxYears, earlierMonths: 0, lastDay, exceeded });
   });
 
   it("gives a start on 29 February the whole of 28 February in a year without one", () => {
@@ -243,7 +244,7 @@ describe("fixed-term duration limits (arts. 147(2)(b) and 148 CT; art. 11(4) of 
     it("flags a certain-term contract over 2 years and still pays 24 days a year on the whole duration", () => {
       // 2024-01-01 to 2026-12-31 is 3 years: over the limit, which was reached on 31 December 2025.
       const result = fixed({ startDate: "2024-01-01", endDate: "2026-12-31" });
-      expect(result.durationLimit).toEqual({ kind: "certain", rules: "from2019", maxYears: 2, lastDay: "2025-12-31", exceeded: true });
+      expect(result.durationLimit).toEqual({ kind: "certain", rules: "from2019", maxYears: 2, earlierMonths: 0, lastDay: "2025-12-31", exceeded: true });
       expect(result.regime).toBe("fixedTerm");
       expect(result.compensationCents).toBe(3 * 24 * 10_000);
     });
@@ -263,7 +264,7 @@ describe("fixed-term duration limits (arts. 147(2)(b) and 148 CT; art. 11(4) of 
 
     it("applies the pre-2019 limits to a contract that started before 1 October 2019; ending in 2026 it has passed them too", () => {
       expect(fixed({ fixedTermKind: "uncertain", startDate: "2019-09-30", endDate: "2026-01-31" }).durationLimit)
-        .toEqual({ kind: "uncertain", rules: "before2019", maxYears: 6, lastDay: "2025-09-29", exceeded: true });
+        .toEqual({ kind: "uncertain", rules: "before2019", maxYears: 6, earlierMonths: 0, lastDay: "2025-09-29", exceeded: true });
     });
 
     it("has no limit for a permanent contract", () => {
@@ -274,9 +275,138 @@ describe("fixed-term duration limits (arts. 147(2)(b) and 148 CT; art. 11(4) of 
       for (const [startDate, endDate] of [["2024-01-01", "2026-12-31"], ["2025-03-15", "2026-03-14"], ["2009-12-31", "2026-12-31"]]) {
         const certain = fixed({ startDate, endDate });
         const uncertain = fixed({ fixedTermKind: "uncertain", startDate, endDate });
-        expect({ ...uncertain, durationLimit: null }).toEqual({ ...certain, durationLimit: null });
+        expect({ ...uncertain, durationLimit: null, renewalLimit: null }).toEqual({ ...certain, durationLimit: null, renewalLimit: null });
       }
     });
+  });
+});
+
+describe("earlier contracts for the same job (art. 148(6) CT; initially art. 148(5))", () => {
+  // A certain-term contract from 1 July 2024 may run to 30 June 2026 on its own (art. 148(1)). Six months of earlier
+  // contracts for the same job bring the last day forward to 31 December 2025.
+  const cases: { earlier: number; end: string; lastDay: string; exceeded: boolean }[] = [
+    { earlier: 6, end: "2025-12-30", lastDay: "2025-12-31", exceeded: false },
+    { earlier: 6, end: "2025-12-31", lastDay: "2025-12-31", exceeded: false },
+    { earlier: 6, end: "2026-01-01", lastDay: "2025-12-31", exceeded: true },
+  ];
+  it.each(cases)("$earlier earlier months, ending $end: exceeded $exceeded", ({ earlier, end, lastDay, exceeded }) => {
+    expect(checkFixedTermDuration("certain", "2024-07-01", end, earlier))
+      .toEqual({ kind: "certain", rules: "from2019", maxYears: 2, earlierMonths: earlier, lastDay, exceeded });
+  });
+
+  it("counts them towards the 3 years of a contract signed before 1 October 2019 (initial art. 148(1)(c) and (5))", () => {
+    // 2018-06-01 plus 3 years less 12 months: the last day is 31 May 2020.
+    expect(checkFixedTermDuration("certain", "2018-06-01", "2020-05-31", 12)).toMatchObject({ rules: "before2019", lastDay: "2020-05-31", exceeded: false });
+    expect(checkFixedTermDuration("certain", "2018-06-01", "2020-06-01", 12)).toMatchObject({ exceeded: true });
+  });
+
+  it("does not count them towards the uncertain-term limit, which art. 148(6) does not name", () => {
+    expect(checkFixedTermDuration("uncertain", "2024-07-01", "2026-12-31", 30))
+      .toEqual({ kind: "uncertain", rules: "from2019", maxYears: 4, earlierMonths: 0, lastDay: "2028-06-30", exceeded: false });
+  });
+
+  it("ends a period that starts on the 31st with the last day of a shorter month", () => {
+    // 31 March 2024 plus 23 months (24 less one earlier month) falls in February 2026, which has no 31st: the period ends
+    // on 28 February.
+    expect(checkFixedTermDuration("certain", "2024-03-31", "2026-02-28", 1)).toMatchObject({ lastDay: "2026-02-28", exceeded: false });
+    expect(checkFixedTermDuration("certain", "2024-03-31", "2026-03-01", 1)).toMatchObject({ exceeded: true });
+  });
+
+  it("treats empty as none", () => {
+    expect(checkFixedTermDuration("certain", "2024-07-01", "2026-06-30", Number.NaN)).toMatchObject({ earlierMonths: 0, exceeded: false });
+  });
+
+  it("feeds the calculator's warning, without changing the amount", () => {
+    const without = run({ contractType: "fixedTerm", startDate: "2025-01-01", endDate: "2026-06-30" });
+    const withEarlier = run({ contractType: "fixedTerm", startDate: "2025-01-01", endDate: "2026-06-30", earlierMonths: 7 });
+    expect(without.durationLimit).toMatchObject({ exceeded: false, earlierMonths: 0 });
+    expect(withEarlier.durationLimit).toMatchObject({ exceeded: true, earlierMonths: 7, lastDay: "2026-05-31" });
+    expect(withEarlier.compensationCents).toBe(without.compensationCents);
+    expect(withEarlier.lines).toEqual(without.lines);
+    // An uncertain term ignores the field, and a permanent contract has no limit at all.
+    expect(run({ contractType: "fixedTerm", fixedTermKind: "uncertain", startDate: "2025-01-01", endDate: "2026-06-30", earlierMonths: 30 }).durationLimit)
+      .toMatchObject({ earlierMonths: 0, exceeded: false });
+    expect(run({ earlierMonths: 30 }).durationLimit).toBeNull();
+  });
+});
+
+describe("renewals of a certain-term contract (art. 149(4) CT; initially art. 148(1))", () => {
+  it("allows three renewals in both wordings", () => {
+    expect(MAX_RENEWALS).toBe(3);
+  });
+
+  it.each([
+    { start: "2024-07-01", renewals: 2, tooMany: false },
+    { start: "2024-07-01", renewals: 3, tooMany: false },
+    { start: "2024-07-01", renewals: 4, tooMany: true },
+    { start: "2018-06-01", renewals: 3, tooMany: false },
+    { start: "2018-06-01", renewals: 4, tooMany: true },
+  ])("$renewals renewals from $start: too many $tooMany", ({ start, renewals, tooMany }) => {
+    expect(checkFixedTermRenewals(start, "2026-06-30", renewals)).toMatchObject({ renewals, tooMany, tooLong: false });
+  });
+
+  // A 6-month first period from 1 January 2025 allows renewals up to 6 months in total: the contract may run to 31 December 2025.
+  it.each([
+    { end: "2025-12-30", tooLong: false },
+    { end: "2025-12-31", tooLong: false },
+    { end: "2026-01-01", tooLong: true },
+  ])("a 6-month first period renewed to $end: too long $tooLong", ({ end, tooLong }) => {
+    expect(checkFixedTermRenewals("2025-01-01", end, 2, 6)).toEqual({
+      rules: "from2019", renewals: 2, tooMany: false, initialMonths: 6, renewalsLastDay: "2025-12-31", tooLong,
+    });
+  });
+
+  it("has no length limit for contracts signed before 1 October 2019 (art. 11(4) of Lei 93/2019; the initial art. 149 had none)", () => {
+    expect(checkFixedTermRenewals("2019-09-30", "2021-09-29", 1, 6)).toEqual({
+      rules: "before2019", renewals: 1, tooMany: false, initialMonths: null, renewalsLastDay: null, tooLong: false,
+    });
+    expect(checkFixedTermRenewals("2019-10-01", "2021-09-29", 1, 6)).toMatchObject({ rules: "from2019", tooLong: true });
+  });
+
+  it("checks the length only when the contract was renewed and the first period is given", () => {
+    expect(checkFixedTermRenewals("2025-01-01", "2026-06-30", 0, 6)).toMatchObject({ initialMonths: null, tooLong: false });
+    expect(checkFixedTermRenewals("2025-01-01", "2026-06-30", 2)).toMatchObject({ initialMonths: null, tooLong: false });
+    expect(checkFixedTermRenewals("2025-01-01", "2026-06-30", Number.NaN, 6)).toMatchObject({ renewals: 0, tooLong: false });
+    expect(checkFixedTermRenewals("", "2026-06-30", 4)).toBeNull();
+  });
+
+  it("feeds the calculator's warning for a certain term only, without changing the amount", () => {
+    const plain = run({ contractType: "fixedTerm", startDate: "2025-01-01", endDate: "2026-06-30" });
+    const renewed = run({ contractType: "fixedTerm", startDate: "2025-01-01", endDate: "2026-06-30", renewals: 4, initialMonths: 6 });
+    expect(plain.renewalLimit).toMatchObject({ renewals: 0, tooMany: false, tooLong: false });
+    expect(renewed.renewalLimit).toEqual({
+      rules: "from2019", renewals: 4, tooMany: true, initialMonths: 6, renewalsLastDay: "2025-12-31", tooLong: true,
+    });
+    expect(renewed.durationLimit).toMatchObject({ exceeded: false });
+    expect(renewed.compensationCents).toBe(plain.compensationCents);
+    expect(run({ contractType: "fixedTerm", fixedTermKind: "uncertain", renewals: 4 }).renewalLimit).toBeNull();
+    expect(run({ renewals: 4 }).renewalLimit).toBeNull();
+  });
+});
+
+describe("the optional fixed-term fields", () => {
+  const fixed = (overrides: Partial<DismissalCompensationInput>) => base({ contractType: "fixedTerm", startDate: "2025-01-01", ...overrides });
+
+  it("are shown for a certain term only, and the first period only once renewed and from 1 October 2019", () => {
+    expect(fixedTermFields(fixed({}))).toEqual({ renewals: true, earlierMonths: true, initialMonths: false });
+    expect(fixedTermFields(fixed({ renewals: 1 }))).toEqual({ renewals: true, earlierMonths: true, initialMonths: true });
+    expect(fixedTermFields(fixed({ renewals: 1, startDate: "2019-09-30" }))).toMatchObject({ initialMonths: false });
+    expect(fixedTermFields(fixed({ renewals: 1, fixedTermKind: "uncertain" }))).toEqual({ renewals: false, earlierMonths: false, initialMonths: false });
+    expect(fixedTermFields(base({ renewals: 1 }))).toEqual({ renewals: false, earlierMonths: false, initialMonths: false });
+  });
+
+  it("accept empty values and whole numbers in range, and reject the rest", () => {
+    const check = (overrides: Partial<DismissalCompensationInput>) => validateDismissal(fixed(overrides), "2026-11-19");
+    expect(check({ renewals: Number.NaN, initialMonths: Number.NaN, earlierMonths: Number.NaN })).toEqual({});
+    expect(check({ renewals: 3, initialMonths: 12, earlierMonths: 0 })).toEqual({});
+    expect(check({ renewals: -1 }).renewals).toBe("wholeNumber");
+    expect(check({ renewals: 1.5 }).renewals).toBe("wholeNumber");
+    expect(check({ renewals: 21 }).renewals).toBe("wholeNumber");
+    expect(check({ renewals: 1, initialMonths: 0 }).initialMonths).toBe("wholeNumber");
+    expect(check({ earlierMonths: 601 }).earlierMonths).toBe("wholeNumber");
+    // Hidden fields are not read: an uncertain term or a dismissal keeps whatever they hold.
+    expect(check({ fixedTermKind: "uncertain", renewals: -1, earlierMonths: -1 })).toEqual({});
+    expect(check({ renewals: 0, initialMonths: -5 })).toEqual({});
   });
 });
 

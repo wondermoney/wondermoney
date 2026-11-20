@@ -3,7 +3,7 @@ term: Prazo do Empréstimo
 definition: Prazo do empréstimo é o período total acordado para liquidar a dívida.
 category: banking
 example: Um crédito a 30 anos tende a ter custo total superior a um crédito equivalente a 20 anos.
-relatedCalculator: loan-calculator
+relatedCalculator: mortgage-calculator
 relatedGuide: plano-para-pagar-dividas
 relatedTerms:
   - amortizacao-pt

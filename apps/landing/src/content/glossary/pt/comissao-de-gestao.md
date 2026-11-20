@@ -3,6 +3,7 @@ term: Comissão de Gestão (Expense Ratio)
 definition: Comissão de gestão é o custo anual de um fundo expresso em percentagem do património.
 category: investing-concepts
 example: Uma comissão de 0,20% equivale a 20 por ano por cada 10.000 investidos.
+relatedCalculator: investment-return-calculator
 relatedGuide: investir-em-etfs-iniciantes
 relatedTerms:
   - etf-pt

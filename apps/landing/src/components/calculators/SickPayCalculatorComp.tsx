@@ -133,6 +133,14 @@ function SickPayCalculator() {
           helpText={t(k("help.dependants"))}
           error={err("dependants", { min: "0", max: String(l.dependants) })}
         />
+        <SelectField<"no" | "yes">
+          id="sick-disability-bonus"
+          label={t(k("fields.disabilityBonus"))}
+          value={input.disabilityBonus ? "yes" : "no"}
+          options={(["no", "yes"] as const).map((value) => ({ value, label: t(k(`disabilityBonusOptions.${value}`)) }))}
+          onChange={(value) => update("disabilityBonus", value === "yes")}
+          help={t(k("help.disabilityBonus"))}
+        />
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
         <div aria-live="polite" aria-atomic="true">

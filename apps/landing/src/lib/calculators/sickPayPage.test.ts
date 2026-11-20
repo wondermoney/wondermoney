@@ -56,6 +56,14 @@ describe("localized sick pay tool page", () => {
     }
   });
 
+  it.each(SUPPORTED_LANGS)("asks about the disability bonus and cites art. 17(1)(c) in %s", (lang) => {
+    const copy = localeCopy(lang, "src");
+    expect(copy.fields.disabilityBonus).toBeTruthy();
+    expect(copy.help.disabilityBonus).toContain("bonificação por deficiência");
+    expect(Object.keys(copy.disabilityBonusOptions)).toEqual(["no", "yes"]);
+    expect(copy.guide.sourceLaw).toMatch(/17.*c\)/);
+  });
+
   it.each(SUPPORTED_LANGS)("has the same translation keys, placeholders and public mirror in %s", (lang) => {
     const copy = localeCopy(lang, "src");
     expect(copyShape(copy)).toEqual(copyShape(localeCopy("en", "src")));

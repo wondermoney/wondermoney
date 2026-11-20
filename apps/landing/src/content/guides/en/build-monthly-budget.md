@@ -4,8 +4,8 @@ excerpt: A practical monthly budgeting method you can maintain in under 20 minut
 category: budgeting
 publishedAt: 2026-03-01T09:00:00.000Z
 relatedCalculators:
-  - budget-planner
-  - expense-tracker
+  - household-budget-calculator
+  - savings-rate-calculator
 relatedTerms:
   - budget
   - cash-flow

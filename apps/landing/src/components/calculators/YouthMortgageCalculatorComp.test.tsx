@@ -39,3 +39,10 @@ it("keeps the checklist and the estimate apart and tracks metadata only", () => 
     event: "tool_used", tool: "youth_mortgage", page_type: "tools/youth-mortgage-calculator-portugal",
   });
 });
+
+it("shows the notice that the guarantee covers contracts signed by 31 December 2026", () => {
+  render(<YouthMortgageCalculatorComp locale="en" />);
+  const notice = screen.getByRole("note");
+  expect(notice.textContent).toContain("signed by 31 December 2026");
+  expect(notice.textContent).toContain("rules for 2027");
+});

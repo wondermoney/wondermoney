@@ -43,8 +43,11 @@ export const guideSchema = z
     category: text,
     publishedAt: z.coerce.date(),
     lastReviewedAt: z.coerce.date().optional(),
-    /** Calculator keys such as `net-worth-calculator` (`resolveCalculatorRouteIdFromLegacy` in routes.ts), shown as "Keep reading" cards. */
-    relatedCalculators: z.array(text).default([]),
+    /**
+     * At most three calculator keys such as `net-worth-calculator` (`resolveCalculatorRouteIdFromLegacy` in routes.ts),
+     * shown as "Keep reading" cards; the build fails on one that names no tool.
+     */
+    relatedCalculators: z.array(text).max(3).default([]),
     /** Slugs of glossary terms in the same locale. */
     relatedTerms: z.array(contentSlug).default([]),
     references: z.array(referenceSchema).default([]),
@@ -101,7 +104,7 @@ export const glossaryTermSchema = z
     formula: formulaSchema.optional(),
     miniTable: tableSchema.optional(),
     references: z.array(referenceSchema).default([]),
-    /** A calculator key such as `net-worth-calculator` (`resolveCalculatorRouteIdFromLegacy` in routes.ts). */
+    /** A calculator key such as `net-worth-calculator` (`resolveCalculatorRouteIdFromLegacy` in routes.ts); the build fails on one that names no tool. */
     relatedCalculator: text.optional(),
     /** The slug of a guide in the same locale. */
     relatedGuide: contentSlug.optional(),

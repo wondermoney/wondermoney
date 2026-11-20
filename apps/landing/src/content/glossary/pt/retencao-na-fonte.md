@@ -3,6 +3,7 @@ term: Retenção na Fonte
 definition: Retenção na fonte é imposto deduzido no momento do pagamento de rendimentos como dividendos ou juros.
 category: tax
 example: Um dividendo bruto de 100 com retenção de 15% resulta em 85 líquidos antes de acerto fiscal.
+relatedCalculator: term-deposit-calculator
 relatedGuide: planeamento-fiscal-investidores
 relatedTerms:
   - mais-valia

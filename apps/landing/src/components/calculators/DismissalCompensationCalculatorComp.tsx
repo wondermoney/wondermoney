@@ -3,11 +3,13 @@ import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
 import {
+  COUNT_BOUNDS,
   DISMISSAL_EXAMPLE,
   DISMISSAL_LIMITS,
   RMMG_2026_CENTS,
   SUPPORTED_END_YEAR,
   computeDismissalCompensation,
+  fixedTermFields,
   splitPayout,
   type ContractType,
   type DismissalCompensationInput,
@@ -90,20 +92,31 @@ function DismissalCompensationCalculator() {
   const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
   const update = <K extends keyof DismissalCompensationInput>(key: K, value: DismissalCompensationInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }));
-  const err = (field: DismissalField) =>
-    errors[field]
-      ? t(k(`errors.${errors[field]}`), {
-          min: formatMoney(locale, field === "baseMonthly" ? 0.01 : 0, { decimals: 2 }),
-          max: formatMoney(locale, DISMISSAL_LIMITS.monthly, { decimals: 0 }),
-          year: String(SUPPORTED_END_YEAR),
-        })
-      : undefined;
+  const count = (value: number) => new Intl.NumberFormat(locale).format(value);
+  const err = (field: DismissalField) => {
+    if (!errors[field]) return undefined;
+    if (field === "renewals" || field === "initialMonths" || field === "earlierMonths") {
+      return t(k(`errors.${errors[field]}`), { min: count(COUNT_BOUNDS[field].min), max: count(COUNT_BOUNDS[field].max) });
+    }
+    return t(k(`errors.${errors[field]}`), {
+      min: formatMoney(locale, field === "baseMonthly" ? 0.01 : 0, { decimals: 2 }),
+      max: formatMoney(locale, DISMISSAL_LIMITS.monthly, { decimals: 0 }),
+      year: String(SUPPORTED_END_YEAR),
+    });
+  };
+  const monthsLabel = (value: number) =>
+    new Intl.NumberFormat(locale, { style: "unit", unit: "month", unitDisplay: "long" }).format(value);
   const years = (value: number) => new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(value);
   const longDate = (iso: string) =>
     new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
   const overLimit = result?.durationLimit?.exceeded ? result.durationLimit : null;
+  const renewalLimit = result?.renewalLimit ?? null;
+  const tooManyRenewals = renewalLimit?.tooMany ? renewalLimit : null;
+  const renewalsTooLong = renewalLimit?.tooLong ? renewalLimit : null;
+  const warned = Boolean(overLimit || tooManyRenewals || renewalsTooLong);
 
   const fixedTerm = input.contractType === "fixedTerm";
+  const shown = fixedTermFields(input);
 
   return (
     <CalculatorLayout>
@@ -182,6 +195,43 @@ function DismissalCompensationCalculator() {
           help={t(k("help.endDate"), { year: String(SUPPORTED_END_YEAR) })}
           error={err("endDate")}
         />
+        {shown.renewals && (
+          // Optional, certain term only: they feed the duration warning, never the amount.
+          <CalculatorInput
+            id="dismissal-renewals"
+            label={t(k("fields.renewals"))}
+            value={input.renewals ?? Number.NaN}
+            onChange={(value) => update("renewals", value)}
+            min={0}
+            max={DISMISSAL_LIMITS.renewals}
+            helpText={t(k("help.renewals"))}
+            error={err("renewals")}
+          />
+        )}
+        {shown.initialMonths && (
+          <CalculatorInput
+            id="dismissal-initial-months"
+            label={t(k("fields.initialMonths"))}
+            value={input.initialMonths ?? Number.NaN}
+            onChange={(value) => update("initialMonths", value)}
+            min={1}
+            max={DISMISSAL_LIMITS.months}
+            helpText={t(k("help.initialMonths"))}
+            error={err("initialMonths")}
+          />
+        )}
+        {shown.earlierMonths && (
+          <CalculatorInput
+            id="dismissal-earlier-months"
+            label={t(k("fields.earlierMonths"))}
+            value={input.earlierMonths ?? Number.NaN}
+            onChange={(value) => update("earlierMonths", value)}
+            min={0}
+            max={DISMISSAL_LIMITS.months}
+            helpText={t(k("help.earlierMonths"))}
+            error={err("earlierMonths")}
+          />
+        )}
         <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
           {fixedTerm ? t(k("scopeFixedTerm"), { year: String(SUPPORTED_END_YEAR) }) : t(k("scope"))}
         </p>
@@ -199,11 +249,27 @@ function DismissalCompensationCalculator() {
             <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
           )}
         </div>
-        {overLimit && (
+        {warned && (
           // Non-blocking: the expiry figure above stays, and the button moves the same dates to the dismissal option.
           <div role="note" aria-labelledby="dismissal-duration-warning" className="space-y-2 rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
             <p id="dismissal-duration-warning" className="font-semibold">{t(k("durationWarning.title"))}</p>
-            <p>{t(k(`durationWarning.${overLimit.rules}.${overLimit.kind}`), { date: longDate(overLimit.lastDay) })}</p>
+            {overLimit && (
+              <p>
+                {t(k(`durationWarning.${overLimit.rules}.${overLimit.kind}`), { date: longDate(overLimit.lastDay) })}
+                {overLimit.earlierMonths > 0 &&
+                  ` ${t(k(`durationWarning.earlier.${overLimit.rules}`), { months: monthsLabel(overLimit.earlierMonths) })}`}
+              </p>
+            )}
+            {tooManyRenewals && (
+              <p>{t(k(`durationWarning.renewals.${tooManyRenewals.rules}`), { count: count(tooManyRenewals.renewals) })}</p>
+            )}
+            {renewalsTooLong?.initialMonths && renewalsTooLong.renewalsLastDay && (
+              <p>
+                {t(k("durationWarning.renewalLength"), {
+                  months: monthsLabel(renewalsTooLong.initialMonths), date: longDate(renewalsTooLong.renewalsLastDay),
+                })}
+              </p>
+            )}
             <p>{t(k("durationWarning.consequence"))}</p>
             <button
               type="button"

@@ -18,6 +18,8 @@
  * annual rate (no day count). Each quarter's gross interest and tax are rounded to the cent.
  */
 
+import { SAVINGS_CERTIFICATES_BASE_RATE } from "./data/savingsCertificatesRate";
+
 export const SAVINGS_CERTIFICATES_RULES = {
   seriesLabel: "F",
   termYears: 15,
@@ -27,15 +29,15 @@ export const SAVINGS_CERTIFICATES_RULES = {
   rulesSource:
     "https://www.igcp.pt/pt/aforristas/produtos-de-aforro/certificados-de-aforro/ficha-tecnica-certificados-de-aforro-serie-f",
   /**
-   * The base rate in force in the month below, used as the calculator default: IGCP's announcement of
-   * 30 October 2026 fixes the gross rate for new subscriptions in November 2026 at 2,500% (the ceiling).
-   * A new subscription has no premium in year 1, so that rate is the base rate. The December rate is set
-   * on 26 November 2026, the third-to-last business day of the month.
+   * The base rate in force in one month, used as the calculator default: the gross rate for new
+   * subscriptions in IGCP's monthly notice (a new subscription has no premium in year 1, so that rate is
+   * the base rate). `scripts/build-savings-certificates-rate.mjs` refreshes it every month with the
+   * landing data refresh.
    */
   referenceBaseRate: {
-    rate: 2.5,
-    month: "2026-11",
-    source: "https://www.igcp.pt/pt/noticias/taxas-de-juro-dos-certificados-de-aforro-das-series-b-d-e-e-f-em-novembro-de-2026",
+    rate: SAVINGS_CERTIFICATES_BASE_RATE.rate,
+    month: SAVINGS_CERTIFICATES_BASE_RATE.month,
+    source: SAVINGS_CERTIFICATES_BASE_RATE.source,
   },
   /** IRS withheld at source on the interest, in percent. */
   irsRate: 28,
@@ -67,7 +69,7 @@ export const PERMANENCE_PREMIUM_STEPS = [
 export const SAVINGS_CERTIFICATES_EXAMPLE = {
   amount: 10_000,
   years: 5,
-  /** The base rate of the reference month (currently the ceiling); the visitor can change it. */
+  /** The base rate of the reference month; the visitor can change it. */
   baseRate: SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate,
 } as const;
 

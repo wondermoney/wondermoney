@@ -3,6 +3,7 @@ term: Risk Tolerance
 definition: Risk tolerance is your ability and willingness to accept investment losses.
 category: investing-concepts
 example: If a 15% drawdown causes severe stress, a lower-risk allocation may be more suitable.
+relatedCalculator: investor-profile-quiz
 relatedGuide: diversification-portfolio
 relatedTerms:
   - asset-allocation

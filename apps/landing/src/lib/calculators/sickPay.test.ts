@@ -84,6 +84,52 @@ describe("limits and increase", () => {
     expect(run({ grossMonthly: 600, dependants: 2 }).increaseApplied).toBe(false);
   });
 
+  describe("disability bonus on child benefit (art. 17(1)(c) DL 28/2004)", () => {
+    it("adds 5 points above 500 euros, where neither other condition applies", () => {
+      const result = run({ grossMonthly: 1500, dependants: 0, disabilityBonus: true, sickDays: 100 });
+      expect(result.increaseApplied).toBe(true);
+      expect(result.bands.map((band) => [band.percent, band.dailyCents])).toEqual([
+        [60, 3000], [65, 3250], [70, 3500],
+      ]);
+      expect(result.limit).toBe("none");
+      expect(run({ grossMonthly: 1500, dependants: 0, disabilityBonus: false }).increaseApplied).toBe(false);
+    });
+
+    it("adds 5 points just above 500 euros, where the art. 17(2) floor would otherwise apply", () => {
+      // 520 a month, 17.33 a day: 60% is 10.40 and 65% is 11.26, both above the floors of 10.00 and 10.84.
+      const result = run({ grossMonthly: 520, dependants: 0, disabilityBonus: true, sickDays: 60 });
+      expect(result.increaseApplied).toBe(true);
+      expect(result.bands.map((band) => [band.percent, band.dailyCents])).toEqual([[60, 1040], [65, 1126]]);
+      expect(result.limit).toBe("none");
+    });
+
+    it("adds the 5 points once at 500 euros or less: the increases are not cumulative (art. 17(3))", () => {
+      const without = run({ grossMonthly: 480, dependants: 0, sickDays: 100 });
+      const withBonus = run({ grossMonthly: 480, dependants: 0, disabilityBonus: true, sickDays: 100 });
+      expect(withBonus.increaseApplied).toBe(true);
+      expect(withBonus.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
+      expect(withBonus).toEqual(without);
+    });
+
+    it("adds the 5 points once with 3 or more descendants too", () => {
+      const without = run({ grossMonthly: 1500, dependants: 3, sickDays: 100 });
+      const withBonus = run({ grossMonthly: 1500, dependants: 3, disabilityBonus: true, sickDays: 100 });
+      expect(withBonus.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
+      expect(withBonus).toEqual(without);
+      const allThree = run({ grossMonthly: 480, dependants: 3, disabilityBonus: true, sickDays: 100 });
+      expect(allThree.bands.map((band) => band.percent)).toEqual([60, 65, 70]);
+    });
+
+    it("leaves the 70% and 75% bands as they are", () => {
+      const result = run({ grossMonthly: 1500, disabilityBonus: true, sickDays: 400 });
+      expect(result.bands.map((band) => band.percent)).toEqual([60, 65, 70, 75]);
+    });
+
+    it("is off in the example, so the default results do not change", () => {
+      expect(SICK_PAY_EXAMPLE.disabilityBonus).toBe(false);
+    });
+  });
+
   it("keeps the 500 euro threshold: the Segurança Social guide v4.55 (23 October 2026) still says 500,00 euros", () => {
     expect(INCREASE_MAX_REFERENCE_MONTHLY_CENTS).toBe(50_000);
   });

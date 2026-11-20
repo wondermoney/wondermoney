@@ -3,7 +3,7 @@ term: Fluxo de Caixa
 definition: Fluxo de caixa é a diferença entre entradas e saídas de dinheiro num período.
 category: budgeting
 example: Se entram 2.000 e saem 1.700 num mês, o fluxo de caixa é +300.
-relatedCalculator: expense-tracker
+relatedCalculator: household-budget-calculator
 relatedGuide: como-criar-orcamento-mensal
 relatedTerms:
   - orcamento

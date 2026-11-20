@@ -2,19 +2,30 @@ name: Landing data refresh
 
 # Regenerates the dated data snapshots behind the landing tools and, when the figures changed,
 # opens or updates one pull request into develop per set of snapshots. A run with no new figures
-# opens nothing. Two sets, each with its own fixed branch:
+# opens nothing. Three sets, each with its own fixed branch:
 #
 #   market  Euribor from BPstat, deposit rates from the ECB, household electricity prices from
-#           Eurostat, fuel prices from DGEG. The sources publish monthly, so it runs on the 6th.
-#           Also the committed fallback of the two daily snapshots, the cheapest fuel stations
-#           (DGEG) and the gold price (NBP, ECB), which every production build refreshes anyway
+#           Eurostat, fuel prices from DGEG, and the Série F savings certificates base rate from
+#           IGCP. The sources publish monthly, so it runs on the 6th. IGCP sets the base rate on
+#           the third-to-last business day of a month for the next month and posts its notice in
+#           the last days of that month, so on the 6th the newest notice is the current month's.
+#           The calculator default then trails a new rate by the days from the 1st to the merge,
+#           and the page names the month of the rate it shows. A second run at the end of the month
+#           would gain those days for one figure at the cost of a second pull request each month;
+#           run the set by hand after IGCP's notice when the new rate matters sooner. Also the
+#           committed fallback of the two daily snapshots, the cheapest fuel stations (DGEG) and
+#           the gold price (NBP, ECB), which every production build refreshes anyway
 #           (landing-daily-deploy.yml). Branch bot/landing-data-refresh.
 #   offers  Every supplier's electricity offer, from ERSE's price simulator export. Offers start
 #           and end every week, so it runs every Monday. Branch bot/landing-offers-refresh.
+#   omie    OMIE's Portuguese day-ahead prices for the last 12 full months, with the E-REDES and
+#           REN profiles they are weighted by (the indexed offers' real cost). A new month is
+#           complete on the 1st, so it runs on the 8th, apart from the market set so that an OMIE
+#           failure never holds up Euribor or fuel. Branch bot/landing-omie-refresh.
 #
 # A separate branch per set keeps a weekly offers run from rebuilding (and dropping) a market
 # refresh that is still waiting for review, and a failure in one set from blocking the other.
-# Run either by hand from Actions > Landing data refresh. The data modules and their other
+# Run any of them by hand from Actions > Landing data refresh. The data modules and their other
 # refresh paths (S&P 500, Portugal CPI, ERSE tariffs, the tax tables) are listed in
 # apps/landing/AGENTS.md.
 #
@@ -34,12 +45,13 @@ on:
     # these strings and those in "Pick the snapshots" identical.
     - cron: '17 6 6 * *'
     - cron: '41 6 * * 1'
+    - cron: '29 6 8 * *'
   workflow_dispatch:
     inputs:
       set:
         description: Which snapshots to refresh
         type: choice
-        options: [market, offers]
+        options: [market, offers, omie]
         default: market
 
 permissions:
@@ -60,6 +72,8 @@ jobs:
     timeout-minutes: 20
     env:
       DATA_DIR: apps/landing/src/lib/calculators/data
+      # Static data the page fetches (the OMIE quarter-hour prices), refreshed with the omie set.
+      PUBLIC_DATA_DIR: apps/landing/public/data
     steps:
       - name: Pick the snapshots
         id: set
@@ -71,6 +85,7 @@ jobs:
           case "${SCHEDULE:-}" in
             '41 6 * * 1') set=offers ;;
             '17 6 6 * *') set=market ;;
+            '29 6 8 * *') set=omie ;;
             *) set="${INPUT_SET:-market}" ;;
           esac
           if [ "$set" = offers ]; then
@@ -78,14 +93,22 @@ jobs:
               echo "scripts=build-electricity-offers"
               echo "branch=bot/landing-offers-refresh"
               echo "title=chore(landing): refresh the electricity offers"
-              echo "tests=electricityOffers"
+              # The formulas of the indexed offers are checked against each new export's prices.
+              echo "tests=electricityOffers indexedPricing"
+            } >> "$GITHUB_OUTPUT"
+          elif [ "$set" = omie ]; then
+            {
+              echo "scripts=build-omie-prices"
+              echo "branch=bot/landing-omie-refresh"
+              echo "title=chore(landing): refresh the OMIE prices"
+              echo "tests=indexedPricing omiePrices"
             } >> "$GITHUB_OUTPUT"
           else
             {
-              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices build-fuel-stations build-gold-price"
+              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices build-fuel-stations build-gold-price build-savings-certificates-rate"
               echo "branch=bot/landing-data-refresh"
               echo "title=chore(landing): refresh the market-data snapshots"
-              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision gold CheapestStations"
+              echo "tests=euribor depositRate electricity fuel termDeposit TermDeposit rateRevision gold CheapestStations savingsCertificates SavingsCertificates"
             } >> "$GITHUB_OUTPUT"
           fi
           echo "set=$set" >> "$GITHUB_OUTPUT"
@@ -117,14 +140,14 @@ jobs:
           # The scripts stamp today's date as the fetch date on every run, so a date-only diff is
           # not a data change: put those modules back.
           ignore='^[[:space:]]*(fetchedOn|retrievedOn):'
-          if [ -z "$(git diff -I"$ignore" --numstat -- "$DATA_DIR")" ]; then
-            git checkout -- "$DATA_DIR"
+          if [ -z "$(git diff -I"$ignore" --numstat -- "$DATA_DIR" "$PUBLIC_DATA_DIR")" ]; then
+            git checkout -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No new figures; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          git diff --stat -- "$DATA_DIR"
+          git diff --stat -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
       - name: Run the related landing tests
         if: steps.changes.outputs.changed == 'true'
         working-directory: apps/landing
@@ -162,6 +185,8 @@ jobs:
           row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
           row "Fuel stations (DGEG)" fuelStations/index.ts asOf fetchedAt
           row "Gold price (NBP, ECB)" goldPrice.ts asOf fetchedOn
+          row "OMIE prices (Portugal)" omiePrices.ts lastMonth fetchedOn
+          row "Série F base rate (IGCP)" savingsCertificatesRate.ts month publishedOn
           row "Electricity offers (ERSE export date)" electricityOffers.ts exportedOn fetchedOn
 
           body_file=$(mktemp)
@@ -180,7 +205,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -C "$BRANCH"
-          git add -- "$DATA_DIR"
+          git add -- "$DATA_DIR" "$PUBLIC_DATA_DIR"
           git commit -m "$TITLE"
           # The branch belongs to this workflow and is rebuilt from develop on every run.
           git push --force origin "$BRANCH"

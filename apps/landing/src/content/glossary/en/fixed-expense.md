@@ -3,6 +3,7 @@ term: Fixed Expense
 definition: A fixed expense is a recurring cost that stays relatively stable each period.
 category: budgeting
 example: Rent of 900 each month is a fixed expense.
+relatedCalculator: household-budget-calculator
 relatedGuide: build-monthly-budget
 relatedTerms:
   - budget

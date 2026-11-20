@@ -2461,6 +2461,7 @@
       "checkIntro": "Solo informativo. Esta lista muestra qué condiciones cumplen las respuestas de abajo; no dice si tienes derecho a la garantía. Deciden el banco y el Estado.",
       "checkSummary": "{{met}} de {{total}} condiciones cumplidas según tus respuestas.",
       "checkNote": "Condiciones revisadas el {{date}}. La garantía cubre hasta el {{percent}}% del valor de la transacción, por lo que la financiación puede llegar al 100%. No cambia el tipo de interés.",
+      "deadlineNotice": "La garantía del Estado para compradores de hasta 35 años solo cubre los contratos de préstamo firmados hasta el 31 de diciembre de 2026. Actualizaremos esta página cuando se conozcan las reglas para 2027.",
       "estimateTitle": "2. Estima la hipoteca y el efectivo necesario",
       "years": "años",
       "fields": {
@@ -2528,9 +2529,10 @@
         "conditionProperty": "No ser propietario, total o parcial, de otro inmueble de vivienda.",
         "conditionPrice": "La vivienda cuesta hasta {{maxPrice}} (la tasación del banco puede reducir el valor de la transacción).",
         "conditionIncome": "Renta hasta el 8.º tramo del IRS: {{maxIncome}} al año en 2026 (eran 83 696 euros en 2025).",
-        "conditionDate": "Solo los contratos de préstamo firmados hasta el 31 de diciembre de 2026 pueden acogerse, y la garantía cubre hasta el {{percent}}% del valor de la transacción durante un máximo de 10 años.",
+        "conditionDate": "Solo los contratos de préstamo firmados hasta el 31 de diciembre de 2026 pueden acogerse (art. 5.4 de la Portaria n.º 236-A/2024/1), y la garantía cubre hasta el {{percent}}% del valor de la transacción durante un máximo de 10 años.",
         "sourceGovernment": "Gobierno de Portugal: Garantía Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "sourcePortaria": "Portaria n.º 236-A/2024/1, art. 5.4, versión consolidada en el Diário da República: contratos firmados hasta el 31 de diciembre de 2026",
         "review": "Condiciones revisadas por última vez el {{date}}. El límite de renta de 2026 es el límite superior del 8.º tramo del IRS del artículo 68 del Código del IRS, actualizado un 3,51% por la Ley 73-A/2025 (Presupuesto del Estado 2026). Los bancos deciden cada solicitud.",
         "assumptionsTitle": "Supuestos y límites",
         "assumptionBanks": "Los bancos evalúan tu riesgo de crédito y pueden rechazar el préstamo u ofrecer otras condiciones, diga lo que diga la lista. En un préstamo con dos titulares, ambos deben cumplir las condiciones.",
@@ -2707,9 +2709,10 @@
         "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
         "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
-        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRate}}, el máximo) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRateNote}}) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
-        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
+        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros.",
+        "referenceRateAtCeiling": "{{rate}}, el máximo"
       },
       "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
@@ -3266,17 +3269,23 @@
         "allowances": "Pagas extra",
         "sickDays": "Días de baja",
         "dependants": "Hijos hasta 16 años (o 24 con prestación familiar)",
+        "disabilityBonus": "¿Tu hogar recibe la bonificación por discapacidad de un hijo o dependiente?",
         "hospitalisation": "Ingreso hospitalario o cirugía ambulatoria"
       },
       "allowanceOptions": {
         "fourteen": "14 pagos (pagas de vacaciones y Navidad aparte)",
         "twelfths": "Prorrateadas (el salario ya las incluye)"
       },
+      "disabilityBonusOptions": {
+        "no": "No",
+        "yes": "Sí"
+      },
       "help": {
         "gross": "El salario base de los meses considerados, antes de Seguridad Social e IRS. Las pagas de vacaciones y Navidad no forman parte de la remuneración de referencia.",
         "allowances": "Prorrateadas, la calculadora quita las dos pagas para obtener el salario base que usa la remuneración de referencia.",
         "sickDays": "Total de días del parte de baja (CIT), contados desde el primer día. Los trabajadores por cuenta ajena pueden cobrar hasta 1095 días.",
-        "dependants": "Se usa para el aumento de 5 puntos, que se aplica con 3 o más hijos, o cuando la remuneración de referencia es de 500 euros al mes o menos.",
+        "dependants": "Se usa para el aumento de 5 puntos, que se aplica con 3 o más hijos, con la bonificación por discapacidad, o cuando la remuneración de referencia es de 500 euros al mes o menos.",
+        "disabilityBonus": "La bonificación por discapacidad (bonificação por deficiência) se paga con la prestación familiar (abono de família) a descendientes con discapacidad. También da el aumento de 5 puntos, sea cual sea la remuneración de referencia.",
         "hospitalisation": "Con ingreso hospitalario o cirugía ambulatoria la prestación se paga desde el primer día, sin período de espera."
       },
       "errors": {
@@ -3299,7 +3308,7 @@
         "bandsTitle": "Por tramo de duración",
         "bandLabel": "Días {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} días pagados × {{daily}} = {{amount}}",
-        "increaseApplied": "Incluye el aumento de 5 puntos (remuneración de referencia de 500 euros o menos, o 3 o más hijos).",
+        "increaseApplied": "Incluye el aumento de 5 puntos (remuneración de referencia de 500 euros o menos, 3 o más hijos, o bonificación por discapacidad).",
         "allWaiting": "Todos los días de esta baja son días de espera, así que la Seguridad Social no paga nada. Comprueba si tu contrato o convenio obliga a la empresa a pagarlos.",
         "waitingNote": "La Seguridad Social no paga los 3 primeros días. Que la empresa los pague depende de tu contrato o convenio colectivo.",
         "estimate": "Una estimación para planificar, no una decisión. La Seguridad Social calcula el importe real con tus remuneraciones registradas.",
@@ -3327,7 +3336,7 @@
         "methodBands": "La prestación diaria es un porcentaje de la RR que crece con la duración de la baja: 55% hasta 30 días, 60% del día 31 al 90, 70% del día 91 al 365 y 75% después, hasta 1095 días para trabajadores por cuenta ajena. Los días cuentan desde el primero de la baja, incluidos los de espera.",
         "methodWaiting": "Los trabajadores por cuenta ajena tienen un período de espera de 3 días que la Seguridad Social no paga. Con ingreso hospitalario o cirugía ambulatoria, tuberculosis, o una enfermedad que empieza durante la prestación parental y va más allá, el pago empieza el día 1.",
         "methodMinimum": "La prestación diaria no puede ser inferior a {{min}} (30% del salario mínimo de {{rmmg}}). Si la propia RR es menor, la prestación es igual a la RR.",
-        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando se da cualquiera de estas situaciones (art. 17 del Decreto-Ley 28/2004): la RR es de 500 euros al mes como máximo, el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o el hogar tiene hijos con bonificación por discapacidad. Las condiciones son alternativas, no acumulativas. La calculadora modela las dos primeras y no modela la bonificación por discapacidad.",
+        "methodIncrease": "En los tramos del 55% y el 60%, el porcentaje sube 5 puntos cuando se da cualquiera de estas situaciones (art. 17.1 del Decreto-Ley 28/2004): la RR es de 500 euros al mes como máximo, el hogar tiene 3 o más hijos hasta 16 años (o 24 con prestación familiar), o el hogar tiene hijos que reciben la bonificación por discapacidad de la prestación familiar. Las condiciones son alternativas y los 5 puntos se suman una sola vez aunque se cumpla más de una (art. 17.3). La calculadora pregunta por las tres.",
         "methodNetCap": "La prestación diaria tampoco puede superar el valor neto de la RR. La calculadora lo estima con un 11% de Seguridad Social y la tasa de retención de IRS de 2026 del continente para un titular soltero.",
         "methodGap": "La pérdida de ingresos compara tu sueldo neto normal (14 o 12 pagos, en promedio de 12 meses) con lo que paga la Seguridad Social. Las pagas de vacaciones y Navidad no se reponen por los días de baja.",
         "methodBudget": "La diferencia es el ingreso que tienes que cubrir con ahorros o recortando gastos mientras estás de baja. Úsala para dimensionar tu colchón.",
@@ -3338,7 +3347,7 @@
         "unsupportedOther": "Menos de 6 meses de remuneraciones registradas, remuneraciones muy variables, indemnizaciones por accidente de trabajo o enfermedad profesional y convenios que complementan la prestación.",
         "sourcesTitle": "Fuentes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de octubre de 2026), con el salario mínimo de 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, versión consolidada en el Diário da República: el régimen de protección en la enfermedad (art. 17 en la redacción del art. 9 del Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, versión consolidada en el Diário da República: el régimen de protección en la enfermedad (art. 17 en la redacción del art. 9 del Decreto-Lei n.º 133/2012, con la condición de la bonificación por discapacidad del art. 17.1.c)",
         "reviewed": "Reglas y valores de 2026 revisados el 20 de noviembre de 2026 con la guía de la Segurança Social y el texto consolidado del Decreto-Lei n.º 28/2004 en el Diário da República. Las tres condiciones alternativas del incremento de 5 puntos y el suelo por encima de 500 euros proceden del art. 17. El art. 17.4 dice que el valor de 500 euros se actualiza con el IAS, pero no hemos encontrado ninguna norma que publique un valor actualizado, y la guía vigente (ISS 5001 v4.55, 23 de octubre de 2026) sigue indicando 500,00 euros, por eso mantenemos 500. La estimación del salario neto detrás del límite neto es una simplificación nuestra.",
         "methodFloor": "Por encima de una remuneración de referencia de 500 euros al mes, el subsidio diario al 55% y al 60% no puede ser inferior al subsidio incrementado calculado sobre 500 euros: 60% y 65% de 500 dividido entre 30, es decir, {{floor55}} y {{floor60}} al día (art. 17.2 del Decreto-Ley 28/2004). Solo importa para una remuneración de referencia algo superior a 500 euros, hasta unos 545 euros, cuando no hay incremento. No se aplica a los tramos del 70% y 75%."
       },
@@ -3400,7 +3409,14 @@
         "dieselSurcharge": "Recargo diésel (no se multiplica por el coeficiente)",
         "scheduleTitle2028": "Desde 2028: calendario de pago",
         "totalAnnualTax": "IUC total para los umbrales de los plazos",
-        "scheduleShareNote": "Los meses siguen tu total de {{total}} en todos los vehículos; los importes son la parte de este coche en cada plazo."
+        "scheduleShareNote": "Los meses siguen tu total de {{total}} en todos los vehículos; los importes son la parte de este coche en cada plazo.",
+        "annualTaxAll": "IUC anual estimado, todos los vehículos",
+        "perVehicleTitle": "IUC por vehículo",
+        "vehicleRow": "{{name}} (categoría {{category}})",
+        "vehicleRowExempt": "{{name}} (exento)",
+        "scheduleTitle2026": "2026: a pagar en el mes del aniversario de la matriculación de cada coche",
+        "scheduleTotalNote": "Desde 2027 los meses siguen tu total de {{total}} en estos vehículos; cada importe suma la parte de todos los coches.",
+        "scheduleTotalOtherNote": "Desde 2027 los meses siguen tu total de {{total}}, incluido el otro IUC que has indicado; los importes cubren solo los vehículos de esta lista."
       },
       "guide": {
         "exampleTitle": "Ejemplo práctico",
@@ -3419,7 +3435,7 @@
         "scopeUnsupported": "No admitido: vehículos de mercancías y más pesados (categorías C y D), motocicletas (E), embarcaciones de recreo (F), aeronaves (G) y coches matriculados antes de 1981.",
         "assumptionsTitle": "Supuestos",
         "assumptionYear": "Las tasas son las tablas de {{taxYear}} del Código do IUC (artículos 9 y 10), en la redacción de la {{law}}. El Portal das Finanças no indica cambios posteriores en estas tasas.",
-        "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación, que el preámbulo del Decreto-Ley n.º 161/2026 confirma como la regla vigente. Los calendarios de 2027 y 2028 muestran la parte de este coche en cada plazo; los meses siguen el total de todos tus vehículos, que puedes indicar como otro IUC (la ley aplica los umbrales a ese total). Sin él, la calculadora supone que este es tu único vehículo. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
+        "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación, que el preámbulo del Decreto-Ley n.º 161/2026 confirma como la regla vigente. Desde 2027 el impuesto se liquida por contribuyente, sobre todos sus vehículos: añade cada uno de tus coches e indica el IUC de los demás vehículos como otro IUC, para que los meses de los plazos sigan tu total (la ley aplica los umbrales a ese total). Los calendarios de 2027 y 2028 muestran el importe de cada mes para los coches que has añadido; con un solo coche, su parte en cada plazo. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
         "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Cuenta el importe de la notificación de la Autoridad Tributaria.",
         "sourcesTitle": "Fuentes",
         "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
@@ -3433,7 +3449,16 @@
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",
       "nextStepCta": "Aparta una doceava parte de tu impuesto anual del coche",
-      "otherIucHelp": "El IUC anual de todos tus otros vehículos, en euros. Desde 2027 los meses de pago dependen del total de todos tus vehículos. Indica 0 si este es tu único vehículo."
+      "otherIucHelp": "El IUC anual de los vehículos que no has añadido arriba, como motos o vehículos de mercancías, en euros. Desde 2027 los meses de pago dependen del total de todos tus vehículos. Indica 0 si has añadido todos tus vehículos.",
+      "vehicles": {
+        "label": "Coche {{n}}",
+        "name": "Nombre (opcional)",
+        "add": "Añadir otro vehículo",
+        "removeShort": "Eliminar",
+        "remove": "Eliminar {{name}}",
+        "removed": "Vehículo eliminado: {{name}}.",
+        "max": "Puedes añadir hasta {{max}} vehículos."
+      }
     },
     "propertyCapitalGains": {
       "title": "Calculadora de plusvalías por la venta de una vivienda",
@@ -3640,7 +3665,10 @@
         "startDate": "Fecha de inicio del contrato",
         "endDate": "Fecha de cese",
         "contractType": "Tipo de extinción",
-        "fixedTermKind": "Tipo de plazo"
+        "fixedTermKind": "Tipo de plazo",
+        "renewals": "Número de renovaciones (opcional)",
+        "initialMonths": "Periodo inicial, en meses (opcional)",
+        "earlierMonths": "Contratos anteriores para el mismo puesto, en meses (opcional)"
       },
       "help": {
         "baseMonthly": "La retribución base (retribuição base) en euros al mes, antes de la Seguridad Social y del IRS. No incluyas pagas extra, bonus ni horas extra.",
@@ -3649,7 +3677,10 @@
         "endDate": "El último día del contrato. Cuenta como día trabajado. Esta estimación cubre ceses en {{year}}.",
         "contractType": "El despido cubre el despido colectivo, la extinción del puesto de trabajo y la inadaptación. La caducidad es el fin de un contrato temporal, de plazo cierto o incierto (arts. 344 y 345 del Código do Trabalho). No se debe cuando el contrato termina porque declaraste que no querías renovarlo.",
         "startDateFixedTerm": "El día en que empezó el contrato temporal. Si se renovó, cuenta desde el primer día: toda la duración, renovaciones incluidas, se paga a 24 días por año.",
-        "fixedTermKind": "Fija la duración máxima: 2 años de plazo cierto, 4 de plazo incierto (art. 148). La indemnización es la misma, 24 días por año."
+        "fixedTermKind": "Fija la duración máxima: 2 años de plazo cierto, 4 de plazo incierto (art. 148). La indemnización es la misma, 24 días por año.",
+        "renewals": "Cuántas veces se renovó el contrato. Un contrato de plazo cierto puede renovarse hasta tres veces (art. 149.4). Déjalo vacío si nunca se renovó.",
+        "initialMonths": "El periodo acordado al firmar el contrato, antes de cualquier renovación. Las renovaciones juntas no pueden durar más que este periodo (art. 149.4).",
+        "earlierMonths": "Contratos temporales o de trabajo temporal anteriores en el mismo puesto, y prestaciones de servicios con el mismo objeto, con el mismo empleador o una sociedad de su grupo. Cuentan para la duración máxima (art. 148.6). Déjalo vacío si no hubo ninguno."
       },
       "scope": "Cubre despido colectivo, extinción del puesto de trabajo e inadaptación en un contrato indefinido. No cubre despido con justa causa, despido ilícito, extinción por mutuo acuerdo ni el sector público. Para el fin de un contrato temporal, elige caducidad de un contrato temporal.",
       "errors": {
@@ -3660,7 +3691,8 @@
         "endBeforeStart": "La fecha de cese no puede ser anterior a la de inicio.",
         "startFuture": "El contrato no puede empezar en el futuro.",
         "endOutsideYear": "Esta estimación cubre ceses en {{year}}, el año del salario mínimo que usan los límites.",
-        "summary": "Revisa los campos marcados para ver tu estimación."
+        "summary": "Revisa los campos marcados para ver tu estimación.",
+        "wholeNumber": "Introduce un número entero de {{min}} a {{max}}, o déjalo vacío."
       },
       "result": {
         "compensation": "Indemnización estimada",
@@ -3723,7 +3755,7 @@
         "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y su art. 35.2 limita al tiempo desde esa fecha solo los 14 días del art. 366.1. La nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023: su ejemplo de un contrato del 1 de septiembre de 2021 al 31 de agosto de 2023 cuenta los 730 días a 24 días. Por tanto, toda la duración cuenta a 24 días, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican. Un contrato temporal dura como máximo dos años, o cuatro si es de término incierto (art. 148), así que uno que respeta ese límite y caduca en 2026 no se firmó antes del 1 de octubre de 2013 y el régimen transitorio del art. 6 de la Lei n.º 69/2013 no se aplica.",
         "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nueva redacción de los arts. 344.2, 345.4 y 366.1 del Código do Trabalho y art. 35 sobre su aplicación en el tiempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julio de 2023): 24 días para todos los contratos temporales que caduquen desde el 1 de mayo de 2023, sea cual sea la fecha de celebración",
-        "methodDurationLimit": "Duración máxima (art. 148 del Código do Trabalho, en la redacción de la Lei n.º 93/2019): 2 años de plazo cierto, renovaciones incluidas, y 4 años de plazo incierto. Un contrato de plazo cierto puede renovarse hasta tres veces, y las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). En los 2 años cuentan también los contratos temporales y el trabajo temporal en el mismo puesto, y las prestaciones de servicios con el mismo objeto, con el mismo empleador (art. 148.6). Los contratos firmados antes del 1 de octubre de 2019 mantienen los límites anteriores (art. 11.4 de la Lei n.º 93/2019): 3 años de plazo cierto (18 meses para quien busca su primer empleo y 2 años en los demás casos del art. 140.4) y 6 años de plazo incierto; la calculadora toma la fecha de inicio como fecha de firma. Cuando las fechas superan el límite, la calculadora avisa de que el contrato sería probablemente indefinido (art. 147.2.b) y de que ponerle fin sería un despido, pero sigue mostrando la cifra de la caducidad. No ve renovaciones ni contratos anteriores, así que compruébalos tú.",
+        "methodDurationLimit": "Duración máxima (art. 148 del Código do Trabalho, en la redacción de la Lei n.º 93/2019): 2 años de plazo cierto, renovaciones incluidas, y 4 años de plazo incierto. Un contrato de plazo cierto puede renovarse hasta tres veces, y las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). En los 2 años cuentan también los contratos temporales y el trabajo temporal en el mismo puesto, y las prestaciones de servicios con el mismo objeto, con el mismo empleador (art. 148.6). Los contratos firmados antes del 1 de octubre de 2019 mantienen los límites anteriores (art. 11.4 de la Lei n.º 93/2019): 3 años de plazo cierto (18 meses para quien busca su primer empleo y 2 años en los demás casos del art. 140.4) y 6 años de plazo incierto; la calculadora toma la fecha de inicio como fecha de firma. Cuando las fechas superan el límite, la calculadora avisa de que el contrato sería probablemente indefinido (art. 147.2.b) y de que ponerle fin sería un despido, pero sigue mostrando la cifra de la caducidad. En un contrato de plazo cierto puedes indicar también el número de renovaciones, la duración del periodo inicial y los meses de contratos anteriores para el mismo puesto, y el aviso cubre también esas reglas: más de tres renovaciones, renovaciones más largas en total que el periodo inicial (art. 147.2.a) o contratos anteriores que adelantan el límite de 2 años. Los contratos firmados antes del 1 de octubre de 2019 podían renovarse tres veces sin límite de duración de las renovaciones (redacción inicial del art. 148.1), y los contratos anteriores cuentan para sus 3 años (redacción inicial del art. 148.5). Los contratos anteriores no cuentan para el límite del plazo incierto.",
         "sourceLaw93": "Lei n.º 93/2019, de 4 de septiembre (Diário da República): nueva redacción de los arts. 148 y 149 del Código do Trabalho, aplicación en el tiempo (art. 11.4) y entrada en vigor el 1 de octubre de 2019 (art. 13)",
         "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), con su redacción inicial de 2009: los límites de los contratos firmados antes del 1 de octubre de 2019"
       },
@@ -3749,8 +3781,17 @@
           "certain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 3 años de plazo cierto, renovaciones incluidas, y menos en algunos casos (redacción inicial del art. 148.1). Con estas fechas, ese límite se alcanzó el {{date}}.",
           "uncertain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 6 años de plazo incierto (redacción inicial del art. 148.4). Con estas fechas, ese límite se alcanzó el {{date}}."
         },
-        "consequence": "Un contrato que supera su duración máxima se convierte en indefinido (art. 147.2.b), y la antigüedad cuenta desde el primer día (art. 147.3). Ponerle fin es entonces un despido, no una caducidad, con otras reglas de indemnización; si el empleador lo hace solo alegando el fin del plazo, puede ser un despido ilícito. La cifra mostrada sigue siendo la indemnización por caducidad.",
-        "action": "Calcular como despido en un contrato indefinido"
+        "consequence": "Un contrato que supera su duración máxima o los límites de renovación se convierte en indefinido (art. 147.2.a y b), y la antigüedad cuenta desde el primer día (art. 147.3). Ponerle fin es entonces un despido, no una caducidad, con otras reglas de indemnización; si el empleador lo hace solo alegando el fin del plazo, puede ser un despido ilícito. La cifra mostrada sigue siendo la indemnización por caducidad.",
+        "action": "Calcular como despido en un contrato indefinido",
+        "earlier": {
+          "from2019": "El límite cuenta {{months}} de contratos anteriores para el mismo puesto con el mismo empleador (art. 148.6).",
+          "before2019": "El límite cuenta {{months}} de contratos anteriores para el mismo puesto con el mismo empleador (redacción inicial del art. 148.5)."
+        },
+        "renewals": {
+          "from2019": "Un contrato de plazo cierto puede renovarse como máximo tres veces (art. 149.4 del Código do Trabalho, en la redacción de la Lei n.º 93/2019). Este se renovó {{count}} veces.",
+          "before2019": "Un contrato de plazo cierto firmado antes del 1 de octubre de 2019 puede renovarse como máximo tres veces (redacción inicial del art. 148.1, mantenida por el art. 11.4 de la Lei n.º 93/2019). Este se renovó {{count}} veces."
+        },
+        "renewalLength": "Las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). Con un periodo inicial de {{months}}, el contrato podía durar como máximo hasta el {{date}}."
       }
     },
     "statePension": {
@@ -4296,6 +4337,20 @@
         "newClient": "Sería cliente nuevo",
         "newClientHelp": "Cuenta los descuentos que las comercializadoras dan a los clientes nuevos el primer año."
       },
+      "indexed": {
+        "legend": "Ofertas indexadas",
+        "range": "{{from}} a {{to}}",
+        "erse": "Estimación de la ERSE",
+        "market": "Coste real de los últimos 12 meses con precios OMIE",
+        "marketDiagram": "Coste real en las fechas de tu archivo de consumos con precios OMIE",
+        "help": "La ERSE da un único precio a cada oferta indexada, la media de los futuros de los próximos tres meses. Con los precios OMIE, las ofertas cuya fórmula publica la comercializadora se calculan con lo que el mercado costó de verdad, en las condiciones de hoy. Las demás siguen con la estimación de la ERSE.",
+        "loading": "Cargando los precios OMIE…",
+        "loadError": "No se han podido cargar los precios OMIE. Las ofertas indexadas siguen con la estimación de la ERSE.",
+        "diagramLoadError": "No se han podido cargar los precios OMIE por cuarto de hora. Usamos los últimos 12 meses.",
+        "diagramOutOfRange": "Ningún día de tu archivo de consumos tiene precios OMIE cargados (solo los últimos 12 meses). Usamos los últimos 12 meses.",
+        "diagramShort": "Tu archivo de consumos cubre {{months}} de los 12 meses con precios OMIE; hacen falta al menos {{minimum}}. Usamos los últimos 12 meses.",
+        "coverage": "El {{percent}}% del consumo de tu archivo cae en días con precios OMIE ({{period}}). El resto se calcula al precio medio de esos días."
+      },
       "filters": {
         "title": "Filtros",
         "summary": "(tipo de precio, comercializadora, condiciones)",
@@ -4345,6 +4400,40 @@
         "yearlyLater": "En un año, impuestos incluidos.",
         "cheaper": "{{count}} ofertas cuestan menos. La más barata te ahorra {{saving}} al año.",
         "noneCheaper": "Ninguna oferta de la lista cuesta menos que tu tarifa."
+      },
+      "invoice": {
+        "title": "Leer mi factura (PDF)",
+        "intro": "Elige la factura en PDF de tu comercializadora y el comparador lee la potencia contratada, la opción tarifaria, los kWh, los días y los precios.",
+        "label": "Factura en PDF",
+        "privacy": "El archivo se queda en tu dispositivo: se lee en este navegador y nunca se sube.",
+        "supported": "Lee facturas en PDF de estas comercializadoras: {{suppliers}}. Usa el PDF que envía la comercializadora, no un escaneo ni una foto.",
+        "reading": "Leyendo la factura…",
+        "found": "Leído de la factura ({{supplier}}):",
+        "fields": {
+          "power": "Potencia contratada",
+          "option": "Opción tarifaria",
+          "cycle": "Ciclo horario",
+          "days": "Días facturados",
+          "kwhSimple": "Consumo",
+          "kwh": "Consumo, {{period}}",
+          "powerPrice": "Precio de la potencia",
+          "energyPriceSimple": "Precio de la energía",
+          "energyPrice": "Precio de la energía, {{period}}"
+        },
+        "check": "revisar",
+        "checkHelp": "Las cifras marcadas con «revisar» se han deducido o proceden de un formato de factura del que no tenemos muestra: compáralas con la factura.",
+        "notes": "Precios sin IVA y antes de descuentos. Lo que no aparece en la lista se queda como está en el formulario.",
+        "apply": "Rellenar el formulario",
+        "discard": "Descartar",
+        "applied": "El formulario tiene ahora las cifras de tu factura. Revísalas abajo y cambia las que no coincidan.",
+        "errors": {
+          "unsupported": "Todavía no sabemos leer este formato de factura. El formulario se ha quedado como estaba: introduce abajo las cifras de la factura. Leemos facturas de estas comercializadoras: {{suppliers}}.",
+          "noElectricity": "No hemos encontrado cifras de electricidad del hogar en esta factura (puede ser solo de gas o de movilidad eléctrica). El formulario se ha quedado como estaba.",
+          "unreadable": "Este archivo no se puede leer como PDF. El formulario se ha quedado como estaba.",
+          "encrypted": "Este PDF está protegido con contraseña. Ábrelo, guarda una copia sin contraseña y elige esa copia, o introduce las cifras abajo.",
+          "noText": "Este PDF no tiene texto que leer (puede ser un escaneo o una foto). Usa el PDF que envió la comercializadora, o introduce las cifras abajo.",
+          "tooLarge": "Este archivo pesa más de {{max}} MB, más que una factura. El formulario se ha quedado como estaba."
+        }
       },
       "solar": {
         "title": "Paneles solares",
@@ -4445,6 +4534,12 @@
         "same": "Cuesta lo mismo que tu tarifa",
         "details": "Desglose y enlaces",
         "estimatedNote": "Precio indexado: estimación de ERSE para los próximos meses. Lo que pagas sigue al mercado.",
+        "estimatedLeft": "{{count}} ofertas indexadas sin fórmula publicada siguen con la estimación de la ERSE (futuros a 3 meses).",
+        "estimatedLeftOne": "1 oferta indexada sin fórmula publicada sigue con la estimación de la ERSE (futuros a 3 meses).",
+        "marketNote": "Precio de la energía con la fórmula publicada por la comercializadora y los precios OMIE de {{period}}, ponderados por el perfil de consumo de E-REDES, con los peajes de acceso de hoy.",
+        "marketDiagramNote": "Precio de la energía con la fórmula publicada por la comercializadora y el precio OMIE de cada cuarto de hora de tu archivo de consumos ({{period}}), con los peajes de acceso de hoy.",
+        "marketPrices": "Energía, sin IVA: {{prices}}.",
+        "formulaLink": "Fórmula de la comercializadora (leída el {{date}})",
         "conditionsLabel": "Condiciones, en palabras de ERSE",
         "links": {
           "offer": "Página de la oferta",
@@ -4457,6 +4552,7 @@
       "badges": {
         "label": "Características de la oferta",
         "estimated": "Precio estimado",
+        "market": "Coste real (OMIE)",
         "regulated": "Regulada",
         "conditioned": "Condicionada",
         "dual": "Con gas",
@@ -4493,20 +4589,30 @@
           "laterYears": "Años siguientes (EUR)",
           "period": "Tu periodo (EUR)",
           "estimated": "Precio estimado",
+          "priceBasis": "Base del precio",
           "saving": "Ahorro al año (EUR)",
           "link": "Enlace"
         },
         "yes": "sí",
-        "no": "no"
+        "no": "no",
+        "basis": {
+          "fixed": "Precio fijo",
+          "erseEstimate": "Estimación de la ERSE (futuros a 3 meses)",
+          "market": "Coste real OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Ofertas: ERSE, exportación del {{date}} ({{offers}} ofertas de {{suppliers}} comercializadoras y la tarifa regulada).",
         "negotiation": "Los precios son los publicados, antes de cualquier negociación personal. Confirma la oferta con la comercializadora antes de firmar.",
         "indexed": "Los precios indexados son estimaciones de ERSE para los próximos meses, no un precio fijo.",
+        "indexedMarket": "Ofertas indexadas con fórmula publicada: coste real con los precios OMIE de Portugal de {{period}}, ponderados por el perfil de consumo BTN C de E-REDES, con las pérdidas de E-REDES y REN y los peajes de acceso de hoy. Es lo que habrían costado, no una previsión. Las demás siguen con la estimación de la ERSE.",
+        "indexedMarketDiagram": "Ofertas indexadas con fórmula publicada: coste real con el precio OMIE de Portugal de cada cuarto de hora de tu archivo de consumos ({{period}}), con las pérdidas de E-REDES y REN y los peajes de acceso de hoy. Es lo que habrían costado, no una previsión. Las demás siguen con la estimación de la ERSE.",
         "taxes": "Los totales incluyen la potencia, la energía, la contribución audiovisual, el impuesto sobre la electricidad y el IVA.",
         "dgeg": "No se incluye la tasa de la DGEG (unos céntimos al mes).",
         "educational": "Estimación educativa, no asesoramiento. WonderMoney no tiene relación comercial con ninguna comercializadora.",
-        "simulatorLink": "Simulador oficial de precios de ERSE"
+        "simulatorLink": "Simulador oficial de precios de ERSE",
+        "omieLink": "Precios del mercado diario (OMIE, Portugal)",
+        "profilesLink": "Perfiles de consumo y de pérdidas (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4555,7 +4661,7 @@
           "items": {
             "a": "La tasa de la DGEG, de unos céntimos al mes, y cualquier cargo por el contador u otros cargos.",
             "b": "La negociación personal: los precios son los publicados.",
-            "c": "Las ofertas indexadas se calculan con la estimación de ERSE para los próximos meses; lo que pagas sigue al mercado.",
+            "c": "Las ofertas indexadas se calculan con la estimación de ERSE para los próximos meses. Si eliges los precios OMIE, las que tienen la fórmula publicada por la comercializadora muestran lo que habrían costado en los últimos 12 meses (o en las fechas de tu archivo), no lo que costarán: lo que pagas sigue al mercado.",
             "d": "Las ofertas duales pueden incluir el gas en sus importes fijos; quedan fuera salvo que las incluyas.",
             "e": "Con una factura o un total, el reparto entre periodos es el del perfil estándar, no el tuyo. El archivo de E-REDES da tu reparto real.",
             "solar": "La producción solar es un año típico de la capital de distrito, orientada al sur con la inclinación óptima: las sombras, otra orientación y el tiempo de un año concreto la cambian.",

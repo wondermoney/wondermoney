@@ -2,10 +2,10 @@
   "guidedStart": {
     "title": "Wo soll ich anfangen?",
     "metaTitle": "Wo soll ich bei meinen Finanzen anfangen? | WonderMoney",
-    "metaDescription": "Beantworte zwei Fragen, um einen Rechner für Budget, Sparen oder Geldanlage zu finden. Probiere danach ein kurzes Finanzquiz aus.",
-    "intro": "Finde einen Rechner für deine nächste Entscheidung und teste dein Finanzwissen.",
-    "goalQuestion": "Woran möchtest du arbeiten?",
-    "taskQuestion": "Was würde dir jetzt helfen?",
+    "metaDescription": "Beantworten Sie zwei Fragen, um einen Rechner für Budget, Sparen oder Geldanlage zu finden. Probieren Sie danach ein kurzes Finanzquiz aus.",
+    "intro": "Finden Sie einen Rechner für Ihre nächste Entscheidung und testen Sie Ihr Finanzwissen.",
+    "goalQuestion": "Woran möchten Sie arbeiten?",
+    "taskQuestion": "Was würde Ihnen jetzt helfen?",
     "findTool": "Passenden Rechner finden",
     "resultTitle": "Ein Rechner für den Einstieg",
     "browse": "Alle sechs Rechner ansehen",
@@ -20,7 +20,7 @@
     },
     "quiz": {
       "title": "Quiz zum Finanzwissen",
-      "intro": "Teste dein Wissen zu Budget, Gebühren, Inflation und Diversifikation mit vier Fragen.",
+      "intro": "Testen Sie Ihr Wissen zu Budget, Gebühren, Inflation und Diversifikation mit vier Fragen.",
       "open": "Quiz öffnen",
       "submit": "Meine Antworten prüfen",
       "score": "{{score}} von {{total}} richtig",
@@ -28,25 +28,25 @@
       "incorrect": "Richtige Antwort",
       "retry": "Erneut versuchen",
       "budget": {
-        "question": "Was vergleichst du, um zu sehen, wie viel im Monatsbudget übrig bleibt?",
+        "question": "Was vergleichen Sie, um zu sehen, wie viel im Monatsbudget übrig bleibt?",
         "choice0": "Monatliche Einnahmen und Ausgaben",
         "choice1": "Nur wiederkehrende Rechnungen",
         "choice2": "Das Einkommen vom Vorjahr",
-        "explanation": "Wenn du die monatlichen Ausgaben von den Einnahmen abziehst, siehst du, ob Geld übrig bleibt oder ob du mehr ausgibst, als du einnimmst."
+        "explanation": "Wenn Sie die monatlichen Ausgaben von den Einnahmen abziehen, sehen Sie, ob Geld übrig bleibt oder ob Sie mehr ausgeben, als Sie einnehmen."
       },
       "fees": {
         "question": "Zwei Anlagen haben dieselbe Bruttorendite. Wie wirken sich höhere Gebühren auf die Nettorendite aus?",
-        "choice0": "Sie erhöhen sie",
-        "choice1": "Sie bleibt gleich",
-        "choice2": "Sie senken sie",
-        "explanation": "Gebühren werden von der Anlage abgezogen. Bei gleicher Bruttorendite bleibt dir durch höhere Gebühren weniger übrig."
+        "choice0": "Die Nettorendite steigt",
+        "choice1": "Die Nettorendite bleibt gleich",
+        "choice2": "Die Nettorendite sinkt",
+        "explanation": "Gebühren werden von der Anlage abgezogen. Bei gleicher Bruttorendite bleibt Ihnen durch höhere Gebühren weniger übrig."
       },
       "inflation": {
-        "question": "Was passiert mit deiner Kaufkraft, wenn die Preise allgemein steigen und dein Einkommen gleich bleibt?",
+        "question": "Was passiert mit Ihrer Kaufkraft, wenn die Preise allgemein steigen und Ihr Einkommen gleich bleibt?",
         "choice0": "Sie steigt",
         "choice1": "Sie sinkt",
         "choice2": "Sie bleibt gleich",
-        "explanation": "Wenn Preise steigen, kannst du mit demselben Geld weniger Waren und Dienstleistungen kaufen."
+        "explanation": "Wenn Preise steigen, können Sie mit demselben Geld weniger Waren und Dienstleistungen kaufen."
       },
       "diversification": {
         "question": "Warum kann es sinnvoll sein, Geld auf verschiedene Anlagen zu verteilen?",
@@ -59,7 +59,7 @@
   },
   "global": {
     "mainCta": "Kostenlos starten",
-    "mainCtaMicrocopy": "Kostenlos und Open Source. Nutze es hier oder betreibe es selbst.",
+    "mainCtaMicrocopy": "Kostenlos und Open Source. Nutzen Sie es hier oder betreiben Sie es selbst.",
     "demoCta": "Demo ausprobieren",
     "secondaryCta": "So funktioniert es",
     "financialDisclaimer": "Dieser Rechner dient ausschließlich zur Veranschaulichung und stellt keine Finanz-, Anlage- oder Steuerberatung dar. Die angezeigten Werte sind Schätzungen — wenden Sie sich vor finanziellen Entscheidungen an einen qualifizierten Finanzberater.",
@@ -119,23 +119,23 @@
       "headline": "Schluss mit 5 Apps. Bankkonten, Budget und Investitionen an einem Ort.",
       "subheadline": "WonderMoney verbindet sich über Open Banking mit Ihrer Bank, organisiert alles automatisch und zeigt Ihnen das vollständige Bild. Endlich.",
       "newHeadline": "Banken, Budgets und Investments. An einem Ort.",
-      "newSubheadline": "Verbinde deine Bank per Open Banking mit reinem Lesezugriff. WonderMoney sortiert den Rest.",
+      "newSubheadline": "Verbinden Sie Ihre Bank per Open Banking mit reinem Lesezugriff. WonderMoney sortiert den Rest.",
       "newCta": "Kostenlos starten"
     },
     "howItWorksSteps": {
       "title": "So funktioniert es",
       "subtitle": "Vom ersten Kontakt bis zur vollständigen Finanzübersicht.",
       "step1": {
-        "title": "Verbinde deine Bank",
-        "description": "Eine einzige Open-Banking-Verbindung nur zum Lesen. Deine Zugangsdaten bleiben bei deiner Bank."
+        "title": "Verbinden Sie Ihre Bank",
+        "description": "Eine einzige Open-Banking-Verbindung nur zum Lesen. Ihre Zugangsdaten bleiben bei Ihrer Bank."
       },
       "step2": {
-        "title": "Sieh dein Geld klar",
-        "description": "Transaktionen werden automatisch kategorisiert. Budget und Nettovermögen aktualisieren sich täglich mit deinen Daten."
+        "title": "Behalten Sie Ihr Geld im Blick",
+        "description": "Transaktionen werden automatisch kategorisiert. Budget und Nettovermögen aktualisieren sich täglich mit Ihren Daten."
       },
       "step3": {
-        "title": "Bau auf einer vollständigen Übersicht auf",
-        "description": "Verfolge Investitionen, erkenne Muster und entscheide mit allem an einem Ort."
+        "title": "Bauen Sie auf einer vollständigen Übersicht auf",
+        "description": "Verfolgen Sie Investitionen, erkennen Sie Muster und entscheiden Sie mit allem an einem Ort."
       }
     },
     "features": {
@@ -160,7 +160,7 @@
       },
       "item5": {
         "title": "Vermögensverfolgung",
-        "description": "Sieh dein vollständiges finanzielles Bild in einer einzigen Zahl. WonderMoney vereint Konten, Investitionen und Schulden.",
+        "description": "Sehen Sie Ihr vollständiges finanzielles Bild in einer einzigen Zahl. WonderMoney vereint Konten, Investitionen und Schulden.",
         "status": ""
       }
     },
@@ -172,61 +172,61 @@
       },
       "categorization": {
         "title": "Transaktionen, automatisch sortiert",
-        "description": "WonderMoney kategorisiert deine Banktransaktionen automatisch mit KI.",
+        "description": "WonderMoney kategorisiert Ihre Banktransaktionen automatisch mit KI.",
         "link": "Mehr über die Kategorisierung"
       },
       "budgets": {
-        "title": "Wisse genau, wohin dein Geld geht",
+        "title": "Genau wissen, wohin Ihr Geld geht",
         "description": "Automatische Kategorisierung und individuelle Budgets zeigen Ihnen, wohin jeder Euro geht — damit Sie bewusst ausgeben.",
         "link": "Mehr über Budgets"
       },
       "goals": {
-        "title": "Spare für das, was zählt",
-        "description": "Setze Sparziele, verfolge Fortschritte und reserviere Geld für das, was zählt.",
+        "title": "Sparen Sie für das, was zählt",
+        "description": "Setzen Sie Sparziele, verfolgen Sie Fortschritte und reservieren Sie Geld für das, was zählt.",
         "link": "Mehr über Ziele"
       },
       "portfolio": {
-        "title": "Dein Portfolio, ohne Tabellenkalkulation",
+        "title": "Ihr Portfolio, ohne Tabellenkalkulation",
         "description": "Verfolgen Sie Aktien, ETFs und andere Anlagen mit Marktwerten, die regelmäßig nach Datenverfügbarkeit aktualisiert werden.",
         "link": "Mehr über das Portfolio"
       },
       "netWorth": {
-        "title": "Dein Nettovermögen in einer Zahl",
-        "description": "Sieh dein vollständiges finanzielles Bild in einer einzigen Zahl. WonderMoney vereint Konten, Investitionen und Schulden.",
+        "title": "Ihr Nettovermögen in einer Zahl",
+        "description": "Sehen Sie Ihr vollständiges finanzielles Bild in einer einzigen Zahl. WonderMoney vereint Konten, Investitionen und Schulden.",
         "link": "Mehr über das Nettovermögen"
       }
     },
     "worksWith": {
       "title": "Für europäische Banken gemacht",
-      "body": "Verbinde die meisten Banken in Portugal und viele in ganz Europa und füge dann die Exportdateien deines Brokers hinzu."
+      "body": "Verbinden Sie die meisten Banken in Portugal und viele in ganz Europa und fügen Sie dann die Exportdateien Ihres Brokers hinzu."
     },
     "privacy": {
-      "title": "Nur Lesezugriff. WonderMoney sieht nie deine Bank-Zugangsdaten.",
+      "title": "Nur Lesezugriff. WonderMoney sieht nie Ihre Bank-Zugangsdaten.",
       "noTransfers": {
         "title": "Keine Überweisungen",
-        "body": "WonderMoney kann deine Konten lesen. Es kann kein Geld bewegen."
+        "body": "WonderMoney kann Ihre Konten lesen. Es kann kein Geld bewegen."
       },
       "revoke": {
         "title": "Jederzeit widerrufbar",
-        "body": "Trenne eine Bank in WonderMoney oder in der App deiner Bank."
+        "body": "Trennen Sie eine Bank in WonderMoney oder in der App Ihrer Bank."
       },
       "credentials": {
-        "title": "Deine Zugangsdaten bleiben bei deiner Bank",
-        "body": "Du meldest dich über Enable Banking auf der Seite deiner eigenen Bank an."
+        "title": "Ihre Zugangsdaten bleiben bei Ihrer Bank",
+        "body": "Sie melden sich über Enable Banking auf der Seite Ihrer eigenen Bank an."
       },
-      "link": "Wie WonderMoney deine Daten schützt"
+      "link": "Wie WonderMoney Ihre Daten schützt"
     },
     "openSource": {
       "title": "Kostenlos und Open Source",
       "body": "Kein Abo. Der Code ist öffentlich, also kann jeder prüfen, was er tut.",
       "hosted": {
         "title": "Hier nutzen",
-        "body": "Erstelle ein Konto auf wonder.money. Wir betreiben es und halten es aktuell.",
+        "body": "Erstellen Sie ein Konto auf wonder.money. Wir betreiben es und halten es aktuell.",
         "link": "Kostenloses Konto erstellen"
       },
       "selfHosted": {
         "title": "Selbst betreiben",
-        "body": "Eine Docker-Compose-Datei auf deinem eigenen Server, mit deinen eigenen Schlüsseln für die optionalen Extras.",
+        "body": "Eine Docker-Compose-Datei auf Ihrem eigenen Server, mit Ihren eigenen Schlüsseln für die optionalen Extras.",
         "guide": "Anleitung zum Selbsthosten",
         "code": "Code auf GitHub"
       }
@@ -250,7 +250,7 @@
       },
       "faq3": {
         "question": "Ist WonderMoney kostenlos?",
-        "answer": "Ja. WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es auf deinem eigenen Server."
+        "answer": "Ja. WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es auf Ihrem eigenen Server."
       },
       "faq5": {
         "question": "Kann ich auch Investitionen verfolgen?",
@@ -422,8 +422,8 @@
   },
   "bottomCta": {
     "pretitle": "Bereit, die Kontrolle zu übernehmen?",
-    "headline": "Dein Geld, an einem Ort.",
-    "subheadline": "Sieh alle Konten, Budgets und Investments zusammen, kostenlos.",
+    "headline": "Ihr Geld, an einem Ort.",
+    "subheadline": "Sehen Sie alle Konten, Budgets und Investments zusammen, kostenlos.",
     "microcopy": "Kostenlos und Open Source"
   },
   "tools": {
@@ -2461,6 +2461,7 @@
       "checkIntro": "Nur zur Information. Diese Liste zeigt, welche Bedingungen Ihre Angaben erfüllen; sie sagt nicht, ob Sie Anspruch haben. Bank und Staat entscheiden.",
       "checkSummary": "{{met}} von {{total}} Bedingungen durch Ihre Angaben erfüllt.",
       "checkNote": "Bedingungen geprüft am {{date}}. Die Garantie deckt bis zu {{percent}} % des Transaktionswerts, sodass die Finanzierung 100 % erreichen kann. Sie ändert den Zinssatz nicht.",
+      "deadlineNotice": "Die Staatsgarantie für Käufer bis 35 Jahre gilt nur für Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden. Wir aktualisieren diese Seite, sobald die Regeln für 2027 bekannt sind.",
       "estimateTitle": "2. Kredit und nötige Eigenmittel schätzen",
       "years": "Jahre",
       "fields": {
@@ -2528,9 +2529,10 @@
         "conditionProperty": "Kein ganzer oder teilweiser Besitz einer anderen Wohnimmobilie.",
         "conditionPrice": "Die Immobilie kostet höchstens {{maxPrice}} (die Bankbewertung kann den Transaktionswert senken).",
         "conditionIncome": "Einkommen bis zur 8. IRS-Stufe: {{maxIncome}} pro Jahr im Jahr 2026 (2025 waren es 83.696 Euro).",
-        "conditionDate": "Nur Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden, kommen infrage, und die Garantie deckt bis zu {{percent}} % des Transaktionswerts für höchstens 10 Jahre.",
+        "conditionDate": "Nur Kreditverträge, die bis zum 31. Dezember 2026 unterzeichnet werden, kommen infrage (Art. 5 Abs. 4 der Portaria n.º 236-A/2024/1), und die Garantie deckt bis zu {{percent}} % des Transaktionswerts für höchstens 10 Jahre.",
         "sourceGovernment": "Portugiesische Regierung: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "sourcePortaria": "Portaria n.º 236-A/2024/1, Art. 5 Abs. 4, konsolidierte Fassung im Diário da República: Verträge, die bis zum 31. Dezember 2026 unterzeichnet werden",
         "review": "Bedingungen zuletzt geprüft am {{date}}. Die Einkommensgrenze 2026 ist die Obergrenze der 8. IRS-Stufe nach Artikel 68 des IRS-Gesetzbuchs, um 3,51 % angehoben durch das Gesetz 73-A/2025 (Staatshaushalt 2026). Die Banken entscheiden über jeden Antrag.",
         "assumptionsTitle": "Annahmen und Grenzen",
         "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
@@ -2707,9 +2709,10 @@
         "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
         "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
-        "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
+        "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRateNote}}), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Kapitalerträgen. Ihre persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
-        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
+        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen.",
+        "referenceRateAtCeiling": "{{rate}}, die Obergrenze"
       },
       "nextStepHeadline": "Sehen Sie Ihre Zertifikate neben Ihren übrigen Ersparnissen",
       "nextStepDescription": "Fügen Sie sie in WonderMoney hinzu, um alles, was Sie gespart haben, an einem Ort zu verfolgen.",
@@ -3266,17 +3269,23 @@
         "allowances": "Urlaubs- und Weihnachtsgeld",
         "sickDays": "Tage der Krankschreibung",
         "dependants": "Kinder bis 16 Jahre (oder 24 mit Kindergeld)",
+        "disabilityBonus": "Erhält Ihr Haushalt den Behinderungszuschlag für ein Kind oder eine unterhaltsberechtigte Person?",
         "hospitalisation": "Krankenhausaufenthalt oder ambulante Operation"
       },
       "allowanceOptions": {
         "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
         "twelfths": "In Zwölfteln (das Gehalt enthält sie bereits)"
       },
+      "disabilityBonusOptions": {
+        "no": "Nein",
+        "yes": "Ja"
+      },
       "help": {
         "gross": "Das Grundgehalt der berücksichtigten Monate, vor Sozialversicherung und IRS. Urlaubs- und Weihnachtsgeld zählen nicht zum Referenzentgelt.",
         "allowances": "Bei Zahlung in Zwölfteln zieht der Rechner die beiden Sonderzahlungen ab, um das Grundgehalt für das Referenzentgelt zu erhalten.",
         "sickDays": "Gesamtzahl der Tage laut Krankschreibung (CIT), ab dem ersten Tag gezählt. Arbeitnehmer erhalten bis zu 1095 Tage.",
-        "dependants": "Wird für die Erhöhung um 5 Punkte verwendet, die bei 3 oder mehr Kindern gilt oder wenn das Referenzentgelt höchstens 500 Euro im Monat beträgt.",
+        "dependants": "Wird für die Erhöhung um 5 Punkte verwendet, die bei 3 oder mehr Kindern, beim Behinderungszuschlag oder bei einem Referenzentgelt von höchstens 500 Euro im Monat gilt.",
+        "disabilityBonus": "Der Behinderungszuschlag (bonificação por deficiência) wird mit dem Kindergeld (abono de família) für Nachkommen mit Behinderung gezahlt. Er führt ebenfalls zur Erhöhung um 5 Punkte, unabhängig vom Referenzentgelt.",
         "hospitalisation": "Bei Krankenhausaufenthalt oder ambulanter Operation wird das Krankengeld ab dem ersten Tag gezahlt, ohne Karenzzeit."
       },
       "errors": {
@@ -3299,7 +3308,7 @@
         "bandsTitle": "Nach Dauerstufe",
         "bandLabel": "Tage {{from}} bis {{to}} ({{percent}} %)",
         "bandValue": "{{paid}} bezahlte Tage × {{daily}} = {{amount}}",
-        "increaseApplied": "Die Erhöhung um 5 Punkte (Referenzentgelt bis 500 Euro oder 3 oder mehr Kinder) ist enthalten.",
+        "increaseApplied": "Die Erhöhung um 5 Punkte (Referenzentgelt bis 500 Euro, 3 oder mehr Kinder oder Behinderungszuschlag) ist enthalten.",
         "allWaiting": "Jeder Tag dieser Krankschreibung ist ein Karenztag, die Segurança Social zahlt daher nichts. Prüfen Sie, ob Ihr Vertrag oder Tarifvertrag den Arbeitgeber zur Zahlung verpflichtet.",
         "waitingNote": "Die Segurança Social zahlt die ersten 3 Tage nicht. Ob der Arbeitgeber sie zahlt, hängt von Ihrem Vertrag oder Tarifvertrag ab.",
         "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Segurança Social berechnet den tatsächlichen Betrag aus Ihren gemeldeten Entgelten.",
@@ -3327,7 +3336,7 @@
         "methodBands": "Der Tagessatz ist ein Prozentsatz der RR, der mit der Dauer steigt: 55 % bis 30 Tage, 60 % von Tag 31 bis 90, 70 % von Tag 91 bis 365 und danach 75 %, für Arbeitnehmer bis 1095 Tage. Die Tage zählen ab dem ersten Tag, Karenztage eingeschlossen.",
         "methodWaiting": "Arbeitnehmer haben 3 Karenztage, die die Segurança Social nicht zahlt. Bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht, beginnt die Zahlung am ersten Tag.",
         "methodMinimum": "Der Tagessatz darf nicht unter {{min}} liegen (30 % des Mindestlohns von {{rmmg}}). Liegt die RR selbst darunter, entspricht das Krankengeld der RR.",
-        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn eine dieser Bedingungen erfüllt ist (Art. 17 des Decreto-Lei 28/2004): Die RR beträgt höchstens 500 Euro im Monat, der Haushalt hat 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder der Haushalt hat Kinder mit Behinderungszuschlag. Die Bedingungen gelten alternativ, nicht kumulativ. Der Rechner berücksichtigt die ersten beiden, nicht den Behinderungszuschlag.",
+        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn eine dieser Bedingungen erfüllt ist (Art. 17 Abs. 1 des Decreto-Lei 28/2004): Die RR beträgt höchstens 500 Euro im Monat, der Haushalt hat 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder der Haushalt hat Kinder, die den Behinderungszuschlag zum Kindergeld erhalten. Die Bedingungen gelten alternativ, und die 5 Punkte kommen nur einmal hinzu, auch wenn mehrere erfüllt sind (Art. 17 Abs. 3). Der Rechner fragt alle drei ab.",
         "methodNetCap": "Der Tagessatz darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Quellensteuersatz 2026 des Festlands für einen Alleinstehenden.",
         "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
         "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
@@ -3338,7 +3347,7 @@
         "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
         "sourcesTitle": "Quellen",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: Regelung des Schutzes bei Krankheit (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: Regelung des Schutzes bei Krankheit (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012, mit der Bedingung des Behinderungszuschlags in Art. 17 Abs. 1 Buchst. c)",
         "reviewed": "Regeln und Werte 2026 am 20. November 2026 geprüft anhand des Leitfadens der Segurança Social und des konsolidierten Textes des Decreto-Lei n.º 28/2004 im Diário da República. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus Art. 17. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird, doch wir haben keinen Rechtsakt gefunden, der einen angepassten Betrag veröffentlicht, und der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
         "methodFloor": "Über einem Referenzentgelt von 500 Euro im Monat darf der Tagessatz bei 55 % und 60 % nicht unter dem erhöhten Krankengeld liegen, das auf 500 Euro berechnet wird: 60 % und 65 % von 500 geteilt durch 30, also {{floor55}} und {{floor60}} pro Tag (Art. 17 Abs. 2 des Decreto-Lei 28/2004). Das spielt nur bei einem Referenzentgelt knapp über 500 Euro eine Rolle, bis etwa 545 Euro, wenn keine Erhöhung gilt. Für die Stufen 70 % und 75 % gilt es nicht."
       },
@@ -3400,7 +3409,14 @@
         "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)",
         "scheduleTitle2028": "Ab 2028: Zahlungsplan",
         "totalAnnualTax": "Gesamt-IUC für die Ratengrenzen",
-        "scheduleShareNote": "Die Monate folgen Ihrer Summe von {{total}} über alle Fahrzeuge; die Beträge sind der Anteil dieses Autos an jeder Rate."
+        "scheduleShareNote": "Die Monate folgen Ihrer Summe von {{total}} über alle Fahrzeuge; die Beträge sind der Anteil dieses Autos an jeder Rate.",
+        "annualTaxAll": "Geschätzte jährliche IUC, alle Fahrzeuge",
+        "perVehicleTitle": "IUC je Fahrzeug",
+        "vehicleRow": "{{name}} (Kategorie {{category}})",
+        "vehicleRowExempt": "{{name}} (befreit)",
+        "scheduleTitle2026": "2026: fällig im Monat des Zulassungsjahrestags jedes Autos",
+        "scheduleTotalNote": "Ab 2027 folgen die Monate Ihrer Summe von {{total}} über diese Fahrzeuge; jeder Betrag addiert die Anteile aller Autos.",
+        "scheduleTotalOtherNote": "Ab 2027 folgen die Monate Ihrer Summe von {{total}} einschließlich der eingegebenen weiteren IUC; die Beträge umfassen nur die Fahrzeuge in dieser Liste."
       },
       "guide": {
         "exampleTitle": "Rechenbeispiel",
@@ -3419,7 +3435,7 @@
         "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
-        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Die Zahlungspläne für 2027 und 2028 zeigen den Anteil dieses Autos an jeder Rate; die Monate folgen der Summe aller Ihrer Fahrzeuge, die Sie als weitere IUC eingeben können (das Gesetz wendet die Grenzen auf diese Summe an). Ohne sie nimmt der Rechner an, dass dies Ihr einziges Fahrzeug ist. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Ab 2027 wird die Steuer je Steuerpflichtigem über alle seine Fahrzeuge festgesetzt: Fügen Sie jedes Ihrer Autos hinzu und geben Sie die IUC Ihrer übrigen Fahrzeuge als weitere IUC ein, damit die Ratenmonate Ihrer Summe folgen (das Gesetz wendet die Grenzen auf diese Summe an). Die Zahlungspläne für 2027 und 2028 zeigen den Betrag jedes Monats für die hinzugefügten Autos, bei einem Auto dessen Anteil an jeder Rate. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
         "assumptionEducational": "Das ist eine Schätzung zu Informationszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
         "sourcesTitle": "Quellen",
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
@@ -3433,7 +3449,16 @@
       "nextStepHeadline": "Lassen Sie sich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel Ihrer Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
       "nextStepCta": "Legen Sie ein Zwölftel Ihrer jährlichen Kfz-Steuer zurück",
-      "otherIucHelp": "Die jährliche IUC aller Ihrer anderen Fahrzeuge in Euro. Ab 2027 hängen die Zahlungsmonate von Ihrer Summe über alle Fahrzeuge ab. Geben Sie 0 ein, wenn dies Ihr einziges Fahrzeug ist."
+      "otherIucHelp": "Die jährliche IUC der Fahrzeuge, die Sie oben nicht hinzugefügt haben, etwa Motorräder oder Nutzfahrzeuge, in Euro. Ab 2027 hängen die Zahlungsmonate von Ihrer Summe über alle Fahrzeuge ab. Geben Sie 0 ein, wenn Sie alle Ihre Fahrzeuge hinzugefügt haben.",
+      "vehicles": {
+        "label": "Auto {{n}}",
+        "name": "Name (optional)",
+        "add": "Weiteres Fahrzeug hinzufügen",
+        "removeShort": "Entfernen",
+        "remove": "{{name}} entfernen",
+        "removed": "Fahrzeug entfernt: {{name}}.",
+        "max": "Sie können bis zu {{max}} Fahrzeuge hinzufügen."
+      }
     },
     "propertyCapitalGains": {
       "title": "Rechner für den Veräußerungsgewinn beim Hausverkauf",
@@ -3640,7 +3665,10 @@
         "startDate": "Vertragsbeginn",
         "endDate": "Datum der Beendigung",
         "contractType": "Art der Beendigung",
-        "fixedTermKind": "Art der Befristung"
+        "fixedTermKind": "Art der Befristung",
+        "renewals": "Anzahl der Verlängerungen (optional)",
+        "initialMonths": "Erste Laufzeit in Monaten (optional)",
+        "earlierMonths": "Frühere Verträge auf demselben Arbeitsplatz in Monaten (optional)"
       },
       "help": {
         "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
@@ -3649,7 +3677,10 @@
         "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}.",
         "contractType": "Kündigung umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung. Das Auslaufen ist das Ende eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer (Art. 344 und 345 des Código do Trabalho). Die Abfindung steht Ihnen nicht zu, wenn der Vertrag endet, weil Sie erklärt haben, ihn nicht verlängern zu wollen.",
         "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zählen Sie ab dem ersten Tag: Die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet.",
-        "fixedTermKind": "Sie bestimmt die Höchstdauer: 2 Jahre bei bestimmter Dauer, 4 bei unbestimmter (Art. 148). Die Abfindung ist dieselbe, 24 Tage pro Jahr."
+        "fixedTermKind": "Sie bestimmt die Höchstdauer: 2 Jahre bei bestimmter Dauer, 4 bei unbestimmter (Art. 148). Die Abfindung ist dieselbe, 24 Tage pro Jahr.",
+        "renewals": "Wie oft der Vertrag verlängert wurde. Ein Vertrag mit bestimmter Dauer kann höchstens dreimal verlängert werden (Art. 149 Abs. 4). Lassen Sie das Feld leer, wenn er nie verlängert wurde.",
+        "initialMonths": "Die beim Vertragsschluss vereinbarte Laufzeit vor jeder Verlängerung. Die Verlängerungen zusammen dürfen nicht länger dauern als sie (Art. 149 Abs. 4).",
+        "earlierMonths": "Frühere befristete Verträge oder Leiharbeit auf demselben Arbeitsplatz sowie Dienstverträge für dieselbe Aufgabe beim selben Arbeitgeber oder einer Gesellschaft seiner Gruppe. Sie werden auf die Höchstdauer angerechnet (Art. 148 Abs. 6). Lassen Sie das Feld leer, wenn es keine gab."
       },
       "scope": "Umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung in einem unbefristeten Vertrag. Nicht umfasst: Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst. Für das Ende eines befristeten Vertrags wählen Sie „Auslaufen eines befristeten Vertrags“.",
       "errors": {
@@ -3660,7 +3691,8 @@
         "endBeforeStart": "Das Beendigungsdatum darf nicht vor dem Vertragsbeginn liegen.",
         "startFuture": "Der Vertrag kann nicht in der Zukunft beginnen.",
         "endOutsideYear": "Diese Schätzung gilt für Beendigungen im Jahr {{year}}, dessen Mindestlohn für die Grenzen gilt.",
-        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen."
+        "summary": "Prüfen Sie die markierten Felder, um Ihre Schätzung zu sehen.",
+        "wholeNumber": "Geben Sie eine ganze Zahl von {{min}} bis {{max}} ein oder lassen Sie das Feld leer."
       },
       "result": {
         "compensation": "Geschätzte Abfindung",
@@ -3723,7 +3755,7 @@
         "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und Diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagesbetrag, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die Informationsnote des IGeFE vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der diese Grenze einhält und 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
         "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April (Diário da República): neue Fassung von Art. 344 Abs. 2, 345 Abs. 4 und 366 Abs. 1 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum",
-        "methodDurationLimit": "Höchstdauer (Art. 148 des Código do Trabalho in der Fassung der Lei n.º 93/2019): 2 Jahre bei bestimmter Dauer, Verlängerungen eingeschlossen, und 4 Jahre bei unbestimmter Dauer. Ein Vertrag mit bestimmter Dauer kann bis zu dreimal verlängert werden, und die Verlängerungen zusammen dürfen nicht länger dauern als die erste Laufzeit (Art. 149 Abs. 4). Auf die 2 Jahre werden auch frühere befristete Verträge und Leiharbeit auf demselben Arbeitsplatz sowie Dienstverträge für dieselbe Aufgabe beim selben Arbeitgeber angerechnet (Art. 148 Abs. 6). Für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): 3 Jahre bei bestimmter Dauer (18 Monate für Personen, die ihre erste Stelle suchen, und 2 Jahre in den übrigen Fällen von Art. 140 Abs. 4) und 6 Jahre bei unbestimmter Dauer; der Rechner nimmt das Anfangsdatum als Datum des Vertragsschlusses. Überschreiten die Daten die Grenze, weist der Rechner darauf hin, dass der Vertrag wahrscheinlich unbefristet wäre (Art. 147 Abs. 2 Buchst. b) und seine Beendigung eine Kündigung wäre, zeigt aber weiter den Betrag für das Auslaufen. Verlängerungen und frühere Verträge sieht er nicht, prüfen Sie sie also selbst.",
+        "methodDurationLimit": "Höchstdauer (Art. 148 des Código do Trabalho in der Fassung der Lei n.º 93/2019): 2 Jahre bei bestimmter Dauer, Verlängerungen eingeschlossen, und 4 Jahre bei unbestimmter Dauer. Ein Vertrag mit bestimmter Dauer kann bis zu dreimal verlängert werden, und die Verlängerungen zusammen dürfen nicht länger dauern als die erste Laufzeit (Art. 149 Abs. 4). Auf die 2 Jahre werden auch frühere befristete Verträge und Leiharbeit auf demselben Arbeitsplatz sowie Dienstverträge für dieselbe Aufgabe beim selben Arbeitgeber angerechnet (Art. 148 Abs. 6). Für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): 3 Jahre bei bestimmter Dauer (18 Monate für Personen, die ihre erste Stelle suchen, und 2 Jahre in den übrigen Fällen von Art. 140 Abs. 4) und 6 Jahre bei unbestimmter Dauer; der Rechner nimmt das Anfangsdatum als Datum des Vertragsschlusses. Überschreiten die Daten die Grenze, weist der Rechner darauf hin, dass der Vertrag wahrscheinlich unbefristet wäre (Art. 147 Abs. 2 Buchst. b) und seine Beendigung eine Kündigung wäre, zeigt aber weiter den Betrag für das Auslaufen. Bei einem Vertrag mit bestimmter Dauer können Sie auch die Anzahl der Verlängerungen, die erste Laufzeit und die Monate früherer Verträge auf demselben Arbeitsplatz angeben; dann prüft der Hinweis auch diese Regeln: mehr als drei Verlängerungen, Verlängerungen, die zusammen länger dauern als die erste Laufzeit (Art. 147 Abs. 2 Buchst. a), oder frühere Verträge, die die 2-Jahres-Grenze vorziehen. Verträge, die vor dem 1. Oktober 2019 geschlossen wurden, konnten dreimal verlängert werden, ohne Grenze für die Dauer der Verlängerungen (ursprüngliche Fassung von Art. 148 Abs. 1), und frühere Verträge werden auf ihre 3 Jahre angerechnet (ursprüngliche Fassung von Art. 148 Abs. 5). Auf die Grenze bei unbestimmter Dauer werden frühere Verträge nicht angerechnet.",
         "sourceLaw93": "Lei n.º 93/2019 vom 4. September (Diário da República): Neufassung von Art. 148 und 149 des Código do Trabalho, zeitliche Anwendung (Art. 11 Abs. 4) und Inkrafttreten am 1. Oktober 2019 (Art. 13)",
         "sourceArt148": "Código do Trabalho, Art. 148 (Diário da República), mit der ursprünglichen Fassung von 2009: die Grenzen für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden"
       },
@@ -3749,8 +3781,17 @@
           "certain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 3 Jahre mit bestimmter Dauer, Verlängerungen eingeschlossen, in manchen Fällen weniger (ursprüngliche Fassung von Art. 148 Abs. 1). Mit diesen Daten war die Grenze am {{date}} erreicht.",
           "uncertain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 6 Jahre mit unbestimmter Dauer (ursprüngliche Fassung von Art. 148 Abs. 4). Mit diesen Daten war die Grenze am {{date}} erreicht."
         },
-        "consequence": "Ein Vertrag, der seine Höchstdauer überschreitet, wird zu einem unbefristeten Vertrag (Art. 147 Abs. 2 Buchst. b), und die Betriebszugehörigkeit zählt ab dem ersten Tag (Art. 147 Abs. 3). Ihn zu beenden ist dann eine Kündigung, kein Auslaufen, mit anderen Abfindungsregeln; beendet der Arbeitgeber ihn nur unter Berufung auf das Fristende, kann das eine rechtswidrige Kündigung sein. Der angezeigte Betrag bleibt die Abfindung für das Auslaufen.",
-        "action": "Als Kündigung in einem unbefristeten Vertrag berechnen"
+        "consequence": "Ein Vertrag, der seine Höchstdauer oder die Grenzen für Verlängerungen überschreitet, wird zu einem unbefristeten Vertrag (Art. 147 Abs. 2 Buchst. a und b), und die Betriebszugehörigkeit zählt ab dem ersten Tag (Art. 147 Abs. 3). Ihn zu beenden ist dann eine Kündigung, kein Auslaufen, mit anderen Abfindungsregeln; beendet der Arbeitgeber ihn nur unter Berufung auf das Fristende, kann das eine rechtswidrige Kündigung sein. Der angezeigte Betrag bleibt die Abfindung für das Auslaufen.",
+        "action": "Als Kündigung in einem unbefristeten Vertrag berechnen",
+        "earlier": {
+          "from2019": "Angerechnet: {{months}} früherer Verträge auf demselben Arbeitsplatz beim selben Arbeitgeber (Art. 148 Abs. 6).",
+          "before2019": "Angerechnet: {{months}} früherer Verträge auf demselben Arbeitsplatz beim selben Arbeitgeber (ursprüngliche Fassung von Art. 148 Abs. 5)."
+        },
+        "renewals": {
+          "from2019": "Ein Vertrag mit bestimmter Dauer kann höchstens dreimal verlängert werden (Art. 149 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 93/2019). Dieser wurde {{count}}-mal verlängert.",
+          "before2019": "Ein Vertrag mit bestimmter Dauer, der vor dem 1. Oktober 2019 geschlossen wurde, kann höchstens dreimal verlängert werden (ursprüngliche Fassung von Art. 148 Abs. 1, beibehalten durch Art. 11 Abs. 4 der Lei n.º 93/2019). Dieser wurde {{count}}-mal verlängert."
+        },
+        "renewalLength": "Die Verlängerungen zusammen dürfen nicht länger dauern als die erste Laufzeit (Art. 149 Abs. 4). Bei dieser ersten Laufzeit ({{months}}) durfte der Vertrag höchstens bis zum {{date}} laufen."
       }
     },
     "statePension": {
@@ -4217,23 +4258,23 @@
     "electricityTariffComparison": {
       "title": "Stromtarifvergleich für Portugal",
       "shortName": "Stromtarife",
-      "subtitle": "Vergleiche das Haushaltsstromangebot jedes Versorgers mit deinem eigenen Verbrauch, mit allen Entgelten und Steuern, auf Basis der offiziellen Daten der ERSE.",
-      "description": "Ordne alle Haushaltsstromangebote auf dem portugiesischen Festland danach, was sie dich in einem Jahr kosten würden, auf Basis der offiziellen Angebotsdaten der ERSE.",
+      "subtitle": "Vergleichen Sie das Haushaltsstromangebot jedes Versorgers mit Ihrem eigenen Verbrauch, mit allen Entgelten und Steuern, auf Basis der offiziellen Daten der ERSE.",
+      "description": "Ordnen Sie alle Haushaltsstromangebote auf dem portugiesischen Festland nach den Kosten, die Ihnen damit in einem Jahr entstehen würden, auf Basis der offiziellen Angebotsdaten der ERSE.",
       "pageTitle": "Stromtarifvergleich Portugal: alle Angebote, ERSE-Daten",
-      "pageDescription": "Vergleiche alle Haushaltsstromangebote auf dem portugiesischen Festland nach Rechnung, kWh oder E-REDES-Verbrauchsdatei. Mit Steuern, ERSE-Daten, ohne Upload.",
-      "nextStepHeadline": "Nimm die neue Stromrechnung in dein Budget auf",
-      "nextStepDescription": "Sobald du weißt, was dein Strom kosten sollte, verfolge ihn neben deinen anderen Haushaltsrechnungen und sieh die Ersparnis Monat für Monat.",
+      "pageDescription": "Vergleichen Sie alle Haushaltsstromangebote auf dem portugiesischen Festland nach Rechnung, kWh oder E-REDES-Verbrauchsdatei. Mit Steuern, ERSE-Daten, ohne Upload.",
+      "nextStepHeadline": "Nehmen Sie die neue Stromrechnung in Ihr Budget auf",
+      "nextStepDescription": "Sobald Sie wissen, was Ihr Strom kosten sollte, verfolgen Sie ihn neben Ihren anderen Haushaltsrechnungen und sehen Sie die Ersparnis Monat für Monat.",
       "nextStepCta": "Haushaltsbudget planen",
-      "formLabel": "Dein Verbrauch und Vertrag",
+      "formLabel": "Ihr Verbrauch und Vertrag",
       "loading": "Angebote der ERSE werden geladen…",
-      "loadError": "Die Angebote konnten nicht geladen werden. Prüfe deine Verbindung und lade die Seite neu.",
+      "loadError": "Die Angebote konnten nicht geladen werden. Prüfen Sie Ihre Verbindung und laden Sie die Seite neu.",
       "regulatedSupplier": "Regulierter Tarif",
       "mode": {
-        "legend": "Wie möchtest du vergleichen?",
+        "legend": "Wie möchten Sie vergleichen?",
         "quick": "Schnell",
         "full": "Vollständig",
-        "quickHelp": "Anhand deiner Monatsrechnung oder deiner kWh. Die Aufteilung auf die Zeiträume folgt dem Standardprofil für Haushalte.",
-        "fullHelp": "Anhand deiner kWh je Zeitraum, einer Summe für beliebig viele Tage oder deiner E-REDES-Verbrauchsdatei."
+        "quickHelp": "Anhand Ihrer Monatsrechnung oder Ihrer kWh. Die Aufteilung auf die Zeiträume folgt dem Standardprofil für Haushalte.",
+        "fullHelp": "Anhand Ihrer kWh je Zeitraum, einer Summe für beliebig viele Tage oder Ihrer E-REDES-Verbrauchsdatei."
       },
       "fields": {
         "power": "Vertraglich vereinbarte Leistung",
@@ -4251,9 +4292,9 @@
         "periodsLegend": "Verbrauch je Zeitraum"
       },
       "options": {
-        "simple": "Einfach",
-        "biHourly": "Zweizeitig",
-        "triHourly": "Dreizeitig"
+        "simple": "Eintarif",
+        "biHourly": "Zweitarif",
+        "triHourly": "Dreitarif"
       },
       "cycles": {
         "daily": "Täglicher Zyklus",
@@ -4277,24 +4318,38 @@
         "shoulder": "Normallastzeit (cheias)"
       },
       "help": {
-        "power": "Auf deiner Rechnung, in kVA. Die meisten Haushalte haben 3,45, 4,6 oder 6,9 kVA.",
-        "option": "Einfach hat einen einzigen Energiepreis; zweizeitig und dreizeitig berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
-        "cycle": "Der Zyklus deines Zählers, auf der Rechnung. Der wöchentliche Zyklus verschiebt die Schwachlastzeiten am Wochenende.",
-        "bill": "Was du im Monat zahlst, inklusive Mehrwertsteuer. Der Betrag wird in kWh umgerechnet, als hättest du den regulierten Tarif, wie bei der Schnellsimulation der ERSE.",
+        "power": "Auf Ihrer Rechnung, in kVA. Die meisten Haushalte haben 3,45, 4,6 oder 6,9 kVA.",
+        "option": "Der Eintarif hat einen einzigen Energiepreis; Zweitarif und Dreitarif berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
+        "cycle": "Der Zyklus Ihres Zählers, auf der Rechnung. Der wöchentliche Zyklus verschiebt die Schwachlastzeiten am Wochenende.",
+        "bill": "Was Sie im Monat zahlen, inklusive Mehrwertsteuer. Der Betrag wird in kWh umgerechnet, als hätten Sie den regulierten Tarif, wie bei der Schnellsimulation der ERSE.",
         "billKwh": "Im regulierten Tarif entspricht diese Rechnung etwa {{kwh}} im Monat.",
         "monthlyKwh": "Auf der Rechnung, oder der Jahresverbrauch geteilt durch 12.",
-        "days": "Die Tage, die deine kWh abdecken, von 1 bis 731, wie auf einer Rechnung oder in einem Zählerdownload.",
-        "total": "Alle kWh im obigen Zeitraum. Die Aufteilung auf die Zeiträume folgt dem E-REDES-Profil für deine Leistung und deinen Verbrauch.",
-        "periods": "Wie auf deiner Rechnung oder Zählerablesung. Andere Optionen werden mit denselben kWh berechnet, bei Bedarf nach dem Standardprofil aufgeteilt."
+        "days": "Die Tage, die Ihre kWh abdecken, von 1 bis 731, wie auf einer Rechnung oder in einem Zählerdownload.",
+        "total": "Alle kWh im obigen Zeitraum. Die Aufteilung auf die Zeiträume folgt dem E-REDES-Profil für Ihre Leistung und Ihren Verbrauch.",
+        "periods": "Wie auf Ihrer Rechnung oder Zählerablesung. Andere Optionen werden mit denselben kWh berechnet, bei Bedarf nach dem Standardprofil aufgeteilt."
       },
       "household": {
-        "legend": "Dein Haushalt",
+        "legend": "Ihr Haushalt",
         "socialTariff": "Ich habe den Sozialtarif",
         "socialTariffHelp": "Ein Nachlass auf Leistung und Energie, bis 6,9 kVA. Angebote, die keine Kunden mit Sozialtarif annehmen, werden ausgeblendet.",
         "largeFamily": "Haushalt mit fünf oder mehr Personen",
         "largeFamilyHelp": "Ermäßigte Mehrwertsteuer auf bis zu 300 kWh alle 30 Tage statt 200.",
         "newClient": "Ich wäre Neukunde",
         "newClientHelp": "Berücksichtigt die Rabatte, die Versorger Neukunden im ersten Jahr geben."
+      },
+      "indexed": {
+        "legend": "Indexierte Angebote",
+        "range": "{{from}} bis {{to}}",
+        "erse": "Schätzung der ERSE",
+        "market": "Tatsächliche Kosten der letzten 12 Monate mit OMIE-Preisen",
+        "marketDiagram": "Tatsächliche Kosten an den Tagen Ihrer Verbrauchsdatei mit OMIE-Preisen",
+        "help": "Die ERSE gibt jedem indexierten Angebot einen einzigen Preis, den Durchschnitt der Terminpreise der nächsten drei Monate. Mit OMIE-Preisen werden die Angebote, deren Versorger die Formel veröffentlicht, mit dem berechnet, was der Markt tatsächlich gekostet hat, zu den heutigen Bedingungen. Die übrigen bleiben bei der Schätzung der ERSE.",
+        "loading": "OMIE-Preise werden geladen…",
+        "loadError": "Die OMIE-Preise konnten nicht geladen werden. Indexierte Angebote bleiben bei der Schätzung der ERSE.",
+        "diagramLoadError": "Die OMIE-Viertelstundenpreise konnten nicht geladen werden. Stattdessen werden die letzten 12 Monate verwendet.",
+        "diagramOutOfRange": "Für keinen Tag Ihrer Verbrauchsdatei sind OMIE-Preise geladen (nur für die letzten 12 Monate). Stattdessen werden die letzten 12 Monate verwendet.",
+        "diagramShort": "Ihre Verbrauchsdatei deckt {{months}} der 12 Monate mit OMIE-Preisen ab; nötig sind mindestens {{minimum}}. Stattdessen werden die letzten 12 Monate verwendet.",
+        "coverage": "{{percent}} % des Verbrauchs in Ihrer Datei fällt auf Tage mit OMIE-Preisen ({{period}}). Der Rest wird zum Durchschnittspreis dieser Tage berechnet."
       },
       "filters": {
         "title": "Filter",
@@ -4317,112 +4372,146 @@
         "includeRefunds": "Erstattungen und Rabatte für alle Kunden einrechnen",
         "includeRefundsHelp": "Beträge, die der Versorger auf jeder Rechnung gutschreibt, so wie die ERSE sie zählt.",
         "mandatoryServices": "Angebote mit kostenpflichtigen Pflichtleistungen einbeziehen",
-        "mandatoryServicesHelp": "Manche Angebote setzen eine kostenpflichtige Leistung voraus, etwa eine Assistenzleistung. Ihre Kosten sind in der Summe enthalten.",
+        "mandatoryServicesHelp": "Manche Angebote setzen eine kostenpflichtige Leistung voraus, etwa eine Assistenzleistung. Deren Kosten sind in der Summe enthalten.",
         "directDebit": "Angebote mit Lastschriftpflicht einbeziehen",
         "eInvoice": "Angebote mit Pflicht zur elektronischen Rechnung einbeziehen",
         "renewableOnly": "Nur 100 % erneuerbare Energie",
         "noLoyalty": "Nur Angebote ohne Mindestvertragslaufzeit",
         "includeDual": "Kombiangebote (Strom und Gas) einbeziehen",
-        "includeDualHelp": "Sie setzen einen Gasvertrag beim selben Versorger voraus, und ihre Fixbeträge können auch Gas abdecken.",
+        "includeDualHelp": "Diese Angebote setzen einen Gasvertrag beim selben Versorger voraus, und ihre Fixbeträge können auch Gas abdecken.",
         "cheapestPerSupplier": "Nur das günstigste Angebot je Versorger"
       },
       "myTariff": {
         "title": "Mit meinem Tarif vergleichen",
-        "intro": "Gib deine aktuellen Preise ein, und jedes Angebot zeigt, was du damit gegenüber diesen Preisen sparst, bei gleichem Verbrauch und gleichen Steuern.",
+        "intro": "Geben Sie Ihre aktuellen Preise ein, und jedes Angebot zeigt, was Sie damit gegenüber diesen Preisen sparen, bei gleichem Verbrauch und gleichen Steuern.",
         "toggle": "Meine Preise verwenden",
         "legend": "Meine Preise für die Option {{option}}",
         "power": "Leistungspreis",
         "powerUnit": "€/Tag",
         "energy": "Energiepreis, {{period}}",
         "energySimple": "Energiepreis",
-        "help": "Ohne MwSt., wie auf deiner Rechnung, für die oben gewählte Option {{option}}.",
+        "help": "Ohne MwSt., wie auf Ihrer Rechnung, für die oben gewählte Option {{option}}.",
         "errors": {
-          "outOfRange": "Gib einen Preis von 0 bis 5 Euro ein."
+          "outOfRange": "Geben Sie einen Preis von 0 bis 5 Euro ein."
         },
-        "incomplete": "Gib alle deine Preise ein, um die Ersparnis jedes Angebots zu sehen.",
-        "resultTitle": "Dein Tarif bei diesem Verbrauch",
+        "incomplete": "Geben Sie alle Ihre Preise ein, um die Ersparnis jedes Angebots zu sehen.",
+        "resultTitle": "Ihr Tarif bei diesem Verbrauch",
         "yearly": "Im ersten Jahr, inklusive Steuern.",
         "yearlyLater": "In einem Jahr, inklusive Steuern.",
-        "cheaper": "{{count}} Angebote kosten weniger. Mit dem günstigsten sparst du {{saving}} im Jahr.",
-        "noneCheaper": "Kein Angebot in der Liste kostet weniger als dein Tarif."
+        "cheaper": "{{count}} Angebote kosten weniger. Mit dem günstigsten sparen Sie {{saving}} im Jahr.",
+        "noneCheaper": "Kein Angebot in der Liste kostet weniger als Ihr Tarif."
+      },
+      "invoice": {
+        "title": "Meine Rechnung lesen (PDF)",
+        "intro": "Wählen Sie die PDF-Rechnung Ihres Anbieters, und der Vergleich liest daraus die vertragliche Leistung, die Tarifoption, die kWh, die Tage und die Preise.",
+        "label": "Rechnung als PDF",
+        "privacy": "Die Datei bleibt auf Ihrem Gerät: Dieser Browser liest sie, und sie wird nie hochgeladen.",
+        "supported": "Liest PDF-Rechnungen dieser Anbieter: {{suppliers}}. Verwenden Sie das PDF, das der Anbieter schickt, keinen Scan und kein Foto.",
+        "reading": "Rechnung wird gelesen…",
+        "found": "Aus der Rechnung gelesen ({{supplier}}):",
+        "fields": {
+          "power": "Vertragliche Leistung",
+          "option": "Tarifoption",
+          "cycle": "Zeitzyklus",
+          "days": "Abgerechnete Tage",
+          "kwhSimple": "Verbrauch",
+          "kwh": "Verbrauch, {{period}}",
+          "powerPrice": "Leistungspreis",
+          "energyPriceSimple": "Energiepreis",
+          "energyPrice": "Energiepreis, {{period}}"
+        },
+        "check": "prüfen",
+        "checkHelp": "Mit „prüfen“ markierte Werte wurden abgeleitet oder stammen aus einem Rechnungsformat, von dem wir kein Muster haben: Vergleichen Sie sie mit der Rechnung.",
+        "notes": "Preise ohne MwSt. und vor Rabatten. Was nicht in der Liste steht, bleibt im Formular, wie es ist.",
+        "apply": "Formular ausfüllen",
+        "discard": "Verwerfen",
+        "applied": "Das Formular enthält jetzt die Werte Ihrer Rechnung. Prüfen Sie sie unten und ändern Sie die, die abweichen.",
+        "errors": {
+          "unsupported": "Dieses Rechnungsformat können wir noch nicht lesen. Das Formular ist unverändert: Geben Sie die Werte der Rechnung unten ein. Wir lesen Rechnungen dieser Anbieter: {{suppliers}}.",
+          "noElectricity": "In dieser Rechnung wurden keine Stromwerte des Haushalts gefunden (sie betrifft vielleicht nur Gas oder E-Mobilität). Das Formular ist unverändert.",
+          "unreadable": "Diese Datei konnte nicht als PDF gelesen werden. Das Formular ist unverändert.",
+          "encrypted": "Dieses PDF ist passwortgeschützt. Öffnen Sie es, speichern Sie eine Kopie ohne Passwort und wählen Sie diese Kopie, oder geben Sie die Werte unten ein.",
+          "noText": "Dieses PDF enthält keinen lesbaren Text (vielleicht ein Scan oder ein Foto). Verwenden Sie das PDF, das der Anbieter geschickt hat, oder geben Sie die Werte unten ein.",
+          "tooLarge": "Diese Datei ist größer als {{max}} MB, mehr als eine Rechnung. Das Formular ist unverändert."
+        }
       },
       "solar": {
         "title": "Solaranlage",
-        "intro": "Schätze, was eine Solaranlage in deiner Gegend erzeugt, und vergleiche die Angebote nach dem, was du noch aus dem Netz beziehst.",
+        "intro": "Schätzen Sie, was eine Solaranlage in Ihrer Gegend erzeugt, und vergleichen Sie die Angebote nach dem, was Sie noch aus dem Netz beziehen.",
         "toggle": "Solaranlage einbeziehen",
-        "alreadyHave": "Wenn du schon eine Anlage hast, zeigen deine Rechnungen und deine E-REDES-Datei bereits nur den Netzbezug: Lass diese Option dann aus.",
-        "legend": "Deine Solaranlage",
+        "alreadyHave": "Wenn Sie schon eine Anlage haben, zeigen Ihre Rechnungen und Ihre E-REDES-Datei bereits nur den Netzbezug: Lassen Sie diese Option dann aus.",
+        "legend": "Ihre Solaranlage",
         "district": "Distrikt",
         "districtHelp": "Die Erzeugung in der Distrikthauptstadt, mit Modulen nach Süden und dem dortigen optimalen Neigungswinkel laut PVGIS ({{slope}}°).",
         "locate": "Meinen Standort verwenden",
         "locating": "Standort wird ermittelt …",
         "located": "Nächste Distrikthauptstadt: {{district}}.",
-        "locateFailed": "Dein Standort ist nicht verfügbar. Wähle den Distrikt aus der Liste.",
-        "locatePrivacy": "Dein Standort dient nur dazu, in deinem Browser die nächste Distrikthauptstadt zu wählen. Er wird nirgendwohin gesendet.",
+        "locateFailed": "Ihr Standort ist nicht verfügbar. Wählen Sie den Distrikt aus der Liste.",
+        "locatePrivacy": "Ihr Standort dient nur dazu, in Ihrem Browser die nächste Distrikthauptstadt zu wählen. Er wird nirgendwohin gesendet.",
         "kwp": "Spitzenleistung",
         "kwpUnit": "kWp",
         "kwpHelp": "Die gesamte Spitzenleistung der Module, wie im Angebot des Installateurs.",
         "losses": "Systemverluste",
         "lossesHelp": "Kabel, Wechselrichter, Verschmutzung und Wärme. 14 % ist der Standardwert von PVGIS.",
         "surplusPrice": "Verkaufspreis für den Überschuss (optional)",
-        "surplusPriceHelp": "Was dir ein Abnehmer für jede ins Netz eingespeiste kWh zahlt. Wird getrennt gezeigt, außerhalb der Rangfolge.",
+        "surplusPriceHelp": "Was Ihnen ein Abnehmer für jede ins Netz eingespeiste kWh zahlt. Wird getrennt gezeigt, außerhalb der Rangfolge.",
         "loading": "Erzeugungsschätzung wird geladen …",
-        "loadError": "Die Erzeugungsschätzung konnte nicht geladen werden, daher sind die Angebote ohne Solaranlage gereiht. Lade die Seite neu, um es noch einmal zu versuchen.",
+        "loadError": "Die Erzeugungsschätzung konnte nicht geladen werden, daher sind die Angebote ohne Solaranlage gereiht. Laden Sie die Seite neu, um es noch einmal zu versuchen.",
         "errors": {
-          "kwp": "Gib eine Leistung über 0 und bis 50 kWp ein.",
-          "lossPercent": "Gib Verluste zwischen 0 und 50 % ein.",
-          "surplusPrice": "Gib einen Preis zwischen 0 und 1 Euro pro kWh ein."
+          "kwp": "Geben Sie eine Leistung über 0 und bis 50 kWp ein.",
+          "lossPercent": "Geben Sie Verluste zwischen 0 und 50 % ein.",
+          "surplusPrice": "Geben Sie einen Preis zwischen 0 und 1 Euro pro kWh ein."
         },
         "summary": {
-          "title": "Mit deiner Solaranlage",
+          "title": "Mit Ihrer Solaranlage",
           "system": "{{kwp}} kWp in {{district}}, nach Süden mit {{slope}}° geneigt. Werte für ein Jahr.",
           "production": "Erzeugung",
           "selfConsumed": "Selbst verbraucht",
-          "coverage": "Deines Verbrauchs",
+          "coverage": "Ihres Verbrauchs",
           "surplus": "Überschuss ins Netz",
-          "savingFirstYear": "Beim günstigsten Angebot, {{supplier}} ({{offer}}), spart dir die Anlage im ersten Jahr {{amount}}: {{without}} ohne, {{with}} mit Anlage.",
-          "savingLaterYears": "Beim günstigsten Angebot, {{supplier}} ({{offer}}), spart dir die Anlage ab dem zweiten Jahr {{amount}} pro Jahr: {{without}} ohne, {{with}} mit Anlage.",
+          "savingFirstYear": "Beim günstigsten Angebot, {{supplier}} ({{offer}}), spart Ihnen die Anlage im ersten Jahr {{amount}}: {{without}} ohne, {{with}} mit Anlage.",
+          "savingLaterYears": "Beim günstigsten Angebot, {{supplier}} ({{offer}}), spart Ihnen die Anlage ab dem zweiten Jahr {{amount}} pro Jahr: {{without}} ohne, {{with}} mit Anlage.",
           "surplusIncome": "Der Verkauf des Überschusses zu {{price}} €/kWh brächte etwa {{amount}} im Jahr. Das ist weder in den Summen noch in der Rangfolge enthalten.",
-          "fromDiagram": "Stunde für Stunde gegen deine E-REDES-Datei, mit der Erzeugung eines typischen Jahres an denselben Tagen.",
-          "fromProfile": "Ohne E-REDES-Datei werden deine Stunden aus dem BTN-Profil der E-REDES nachgebildet, der selbst verbrauchte Anteil ist daher eine Schätzung. Lade deine Datei hoch, um deine echten Stunden zu verwenden.",
-          "ranking": "Die Angebote unten sind nach dem gereiht, was du noch aus dem Netz beziehst.",
-          "source": "Erzeugung: PVGIS {{version}} (Europäische Kommission, Gemeinsame Forschungsstelle), Strahlungsdaten {{database}} von {{from}} bis {{to}}, ein typisches Jahr von 1 kWp kristallinem Silizium in freier Aufstellung, auf deine Anlage skaliert. Heruntergeladen am {{date}}.",
+          "fromDiagram": "Stunde für Stunde gegen Ihre E-REDES-Datei, mit der Erzeugung eines typischen Jahres an denselben Tagen.",
+          "fromProfile": "Ohne E-REDES-Datei werden Ihre Stunden aus dem BTN-Profil der E-REDES nachgebildet, der selbst verbrauchte Anteil ist daher eine Schätzung. Laden Sie Ihre Datei hoch, um Ihre echten Stunden zu verwenden.",
+          "ranking": "Die Angebote unten sind nach dem gereiht, was Sie noch aus dem Netz beziehen.",
+          "source": "Erzeugung: PVGIS {{version}} (Europäische Kommission, Gemeinsame Forschungsstelle), Strahlungsdaten {{database}} von {{from}} bis {{to}}, ein typisches Jahr von 1 kWp kristallinem Silizium in freier Aufstellung, auf Ihre Anlage skaliert. Heruntergeladen am {{date}}.",
           "sourceLink": "Über PVGIS"
         }
       },
       "diagram": {
         "label": "E-REDES-Verbrauchsdatei",
-        "help": "Öffne im Balcão Digital der E-REDES den Verbrauch deiner Anlage, wähle den Zeitraum und lade ihn als Tabelle (xlsx) herunter. Die 15-Minuten-Werte ergeben deine tatsächlichen kWh in jedem Zeitraum.",
-        "privacy": "Die Datei wird in deinem Browser gelesen und verlässt ihn nie: Es wird nichts hochgeladen.",
+        "help": "Öffnen Sie im Balcão Digital der E-REDES den Verbrauch Ihrer Anlage, wählen Sie den Zeitraum und laden Sie ihn als Tabelle (xlsx) herunter. Die 15-Minuten-Werte ergeben Ihre tatsächlichen kWh in jedem Zeitraum.",
+        "privacy": "Die Datei wird in Ihrem Browser gelesen und verlässt ihn nie: Es wird nichts hochgeladen.",
         "reading": "Datei wird gelesen…",
         "loaded": "{{first}} bis {{last}}: {{days}} Tage, {{kwh}}.",
         "missing": "{{count}} Viertelstunden haben keinen Messwert und zählen als null.",
         "clear": "Datei entfernen",
         "errors": {
-          "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden. Lade sie erneut als xlsx bei E-REDES herunter.",
+          "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden. Laden Sie sie erneut als xlsx bei E-REDES herunter.",
           "notERedesExport": "Das sieht nicht nach einer E-REDES-Verbrauchsdatei aus: Es gibt keine Datumsspalte neben einer Verbrauchsspalte in kW.",
-          "noReadings": "Die Datei enthält keine Verbrauchswerte. Wähle einen Zeitraum mit Messwerten und lade sie erneut herunter.",
+          "noReadings": "Die Datei enthält keine Verbrauchswerte. Wählen Sie einen Zeitraum mit Messwerten und laden Sie sie erneut herunter.",
           "invalidRow": "Zeile {{row}} hat kein gültiges Datum, keine gültige Viertelstunde oder keinen gültigen Verbrauch.",
           "duplicateReading": "Zeile {{row}} wiederholt eine Viertelstunde, die bereits in der Datei steht."
         }
       },
       "errors": {
-        "required": "Gib eine gültige Zahl ein.",
+        "required": "Geben Sie eine gültige Zahl ein.",
         "negative": "Der Wert darf nicht negativ sein.",
-        "tooLarge": "Gib {{max}} oder weniger ein.",
-        "outOfRange": "Gib eine Anzahl von Tagen von 1 bis {{max}} ein.",
-        "notAllowed": "Wähle eine vertraglich vereinbarte Leistung aus der Liste.",
-        "days": "Gib eine ganze Zahl von Tagen von 1 bis {{max}} ein.",
-        "belowFixed": "Ein Monat im regulierten Tarif kostet bei dieser Leistung mindestens {{minimum}}, noch vor jedem Verbrauch. Prüfe die Rechnung oder die Leistung.",
-        "billTooLarge": "Gib eine Rechnung von höchstens {{maximum}} ein.",
-        "noRegulatedPrice": "Der regulierte Tarif hat für diese Leistung und Option keinen Preis, daher lässt sich eine Rechnung nicht in kWh umrechnen. Gib stattdessen die kWh ein.",
-        "noDiagram": "Wähle deine E-REDES-Verbrauchsdatei.",
-        "summary": "Prüfe die markierten Felder, um die Angebote zu sehen."
+        "tooLarge": "Geben Sie {{max}} oder weniger ein.",
+        "outOfRange": "Geben Sie eine Anzahl von Tagen von 1 bis {{max}} ein.",
+        "notAllowed": "Wählen Sie eine vertraglich vereinbarte Leistung aus der Liste.",
+        "days": "Geben Sie eine ganze Zahl von Tagen von 1 bis {{max}} ein.",
+        "belowFixed": "Ein Monat im regulierten Tarif kostet bei dieser Leistung mindestens {{minimum}}, noch vor jedem Verbrauch. Prüfen Sie die Rechnung oder die Leistung.",
+        "billTooLarge": "Geben Sie eine Rechnung von höchstens {{maximum}} ein.",
+        "noRegulatedPrice": "Der regulierte Tarif hat für diese Leistung und Option keinen Preis, daher lässt sich eine Rechnung nicht in kWh umrechnen. Geben Sie stattdessen die kWh ein.",
+        "noDiagram": "Wählen Sie Ihre E-REDES-Verbrauchsdatei.",
+        "summary": "Prüfen Sie die markierten Felder, um die Angebote zu sehen."
       },
       "compare": {
-        "title": "Einfach, zweizeitig oder dreizeitig?",
-        "intro": "Das günstigste Angebot jeder Option bei gleichem Verbrauch, aufgeteilt nach deinem Zeitzyklus.",
-        "yours": "(deine Option)",
+        "title": "Eintarif, Zweitarif oder Dreitarif?",
+        "intro": "Das günstigste Angebot jeder Option bei gleichem Verbrauch, aufgeteilt nach Ihrem Zeitzyklus.",
+        "yours": "(Ihre Option)",
         "perFirstYear": "im ersten Jahr",
         "perLaterYear": "pro Jahr ab dem zweiten Jahr",
         "cheapest": "Günstigste Option",
@@ -4432,19 +4521,25 @@
       "results": {
         "title": "Angebote mit der Option {{option}}",
         "count": "{{count}} Angebote, berechnet für {{kwh}} im Jahr.",
-        "none": "Kein Angebot passt. Lockere die Filter oder ändere die Option.",
+        "none": "Kein Angebot passt. Lockern Sie die Filter oder ändern Sie die Option.",
         "listLabel": "Angebote, günstigstes zuerst",
         "showMore": "{{count}} weitere anzeigen",
         "firstYear": "Erstes Jahr",
         "laterYears": "Folgejahre",
-        "period": "Deine {{days}} Tage",
+        "period": "Ihre {{days}} Tage",
         "periodMonth": "Ein Monat",
         "periodYear": "Ein Jahr",
-        "saving": "Du sparst {{amount}} im Jahr",
+        "saving": "Sie sparen {{amount}} im Jahr",
         "dearer": "Kostet {{amount}} mehr im Jahr",
-        "same": "Kostet so viel wie dein Tarif",
+        "same": "Kostet so viel wie Ihr Tarif",
         "details": "Aufschlüsselung und Links",
-        "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was du zahlst, folgt dem Markt.",
+        "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was Sie zahlen, folgt dem Markt.",
+        "estimatedLeft": "{{count}} indexierte Angebote ohne veröffentlichte Formel bleiben bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
+        "estimatedLeftOne": "1 indexiertes Angebot ohne veröffentlichte Formel bleibt bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
+        "marketNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und den OMIE-Preisen von {{period}}, gewichtet mit dem Verbrauchsprofil von E-REDES, zu den heutigen Netzentgelten.",
+        "marketDiagramNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und dem OMIE-Preis jeder Viertelstunde Ihrer Verbrauchsdatei ({{period}}), zu den heutigen Netzentgelten.",
+        "marketPrices": "Energie, ohne MwSt.: {{prices}}.",
+        "formulaLink": "Formel des Versorgers (gelesen am {{date}})",
         "conditionsLabel": "Bedingungen, in den Worten der ERSE",
         "links": {
           "offer": "Angebotsseite",
@@ -4457,6 +4552,7 @@
       "badges": {
         "label": "Merkmale des Angebots",
         "estimated": "Geschätzter Preis",
+        "market": "Tatsächliche Kosten (OMIE)",
         "regulated": "Reguliert",
         "conditioned": "Mit Bedingungen",
         "dual": "Mit Gas",
@@ -4491,36 +4587,46 @@
           "option": "Option",
           "firstYear": "Erstes Jahr (EUR)",
           "laterYears": "Folgejahre (EUR)",
-          "period": "Dein Zeitraum (EUR)",
+          "period": "Ihr Zeitraum (EUR)",
           "estimated": "Geschätzter Preis",
+          "priceBasis": "Preisgrundlage",
           "saving": "Ersparnis pro Jahr (EUR)",
           "link": "Link"
         },
         "yes": "ja",
-        "no": "nein"
+        "no": "nein",
+        "basis": {
+          "fixed": "Festpreis",
+          "erseEstimate": "Schätzung der ERSE (Terminpreise für 3 Monate)",
+          "market": "Tatsächliche Kosten OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Angebote: ERSE, Export vom {{date}} ({{offers}} Angebote von {{suppliers}} Versorgern und der regulierte Tarif).",
-        "negotiation": "Die Preise sind die veröffentlichten, vor jeder persönlichen Verhandlung. Bestätige das Angebot beim Versorger, bevor du unterschreibst.",
+        "negotiation": "Die Preise sind die veröffentlichten, vor jeder persönlichen Verhandlung. Bestätigen Sie das Angebot beim Versorger, bevor Sie unterschreiben.",
         "indexed": "Indexierte Preise sind Schätzungen der ERSE für die kommenden Monate, kein Festpreis.",
+        "indexedMarket": "Indexierte Angebote mit veröffentlichter Formel: tatsächliche Kosten mit den portugiesischen OMIE-Preisen von {{period}}, gewichtet mit dem Verbrauchsprofil BTN C von E-REDES, mit den Netzverlusten von E-REDES und REN und den heutigen Netzentgelten. So viel hätten sie gekostet, keine Prognose. Die übrigen bleiben bei der Schätzung der ERSE.",
+        "indexedMarketDiagram": "Indexierte Angebote mit veröffentlichter Formel: tatsächliche Kosten mit dem portugiesischen OMIE-Preis jeder Viertelstunde Ihrer Verbrauchsdatei ({{period}}), mit den Netzverlusten von E-REDES und REN und den heutigen Netzentgelten. So viel hätten sie gekostet, keine Prognose. Die übrigen bleiben bei der Schätzung der ERSE.",
         "taxes": "Die Summen enthalten Leistung, Energie, den Rundfunkbeitrag, die Stromverbrauchsteuer und die Mehrwertsteuer.",
         "dgeg": "Die DGEG-Gebühr (einige Cent im Monat) ist nicht enthalten.",
-        "educational": "Schätzung zu Bildungszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
-        "simulatorLink": "Offizieller Preissimulator der ERSE"
+        "educational": "Schätzung zu Informationszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
+        "simulatorLink": "Offizieller Preissimulator der ERSE",
+        "omieLink": "Day-Ahead-Marktpreise (OMIE, Portugal)",
+        "profilesLink": "Verbrauchs- und Verlustprofile (E-REDES)"
       },
       "guide": {
         "use": {
-          "title": "So nutzt du den Vergleich",
-          "quick": "Der Schnellmodus braucht nur deine vertraglich vereinbarte Leistung und deine Monatsrechnung oder deine kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
-          "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von deiner Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für deine Leistung und deinen Verbrauch auf die Zeiträume verteilt wird.",
-          "diagram": "Du kannst auch deine E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Ihre 15-Minuten-Werte ergeben deine tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in deinem Browser gelesen und nirgendwohin gesendet.",
-          "mine": "Unter „Mit meinem Tarif vergleichen“ gibst du die Preise von deiner Rechnung ein. Dein Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
-          "solar": "Unter „Solaranlage“ fügst du eine Anlage nach Distrikt, Spitzenleistung und Verlusten hinzu. Ihre Erzeugung wird Stunde für Stunde von deinem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was du noch aus dem Netz beziehst. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn du einen eingibst, wird getrennt von der Rangfolge gezeigt.",
-          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für einfach, zweizeitig und dreizeitig bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
+          "title": "So nutzen Sie den Vergleich",
+          "quick": "Der Schnellmodus braucht nur Ihre vertraglich vereinbarte Leistung und Ihre Monatsrechnung oder Ihre kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
+          "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von Ihrer Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für Ihre Leistung und Ihren Verbrauch auf die Zeiträume verteilt wird.",
+          "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
+          "mine": "Unter „Mit meinem Tarif vergleichen“ geben Sie die Preise von Ihrer Rechnung ein. Ihr Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
+          "solar": "Unter „Solaranlage“ fügen Sie eine Anlage nach Distrikt, Spitzenleistung und Verlusten hinzu. Die Erzeugung der Anlage wird Stunde für Stunde von Ihrem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was Sie noch aus dem Netz beziehen. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn Sie einen eingeben, wird getrennt von der Rangfolge gezeigt.",
+          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für Eintarif, Zweitarif und Dreitarif bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
         },
         "example": {
           "title": "Rechenbeispiel",
-          "setup": "Ein Haushalt mit 3,45 kVA in der einfachen Option verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
+          "setup": "Ein Haushalt mit 3,45 kVA im Eintarif verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
           "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
           "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
         },
@@ -4545,7 +4651,7 @@
           "erse": "Angebote: Preissimulator der ERSE, Export vom {{date}}, mit {{offers}} Angeboten von {{suppliers}} Versorgern und dem regulierten Tarif. Versorger müssen ihre Haushaltsangebote der ERSE melden. Die Preise verstehen sich ohne Mehrwertsteuer und Steuern; die Seite rechnet sie hinzu.",
           "refresh": "Die Seite übernimmt jede Woche einen neuen Export der ERSE. Angebote, die bis dahin ausgelaufen sind, werden ausgeblendet.",
           "names": "Die ERSE führt jeden Versorger unter einem Code; die Seite zeigt den Markennamen, den jeder Versorger auf seiner eigenen Website verwendet.",
-          "solar": "Solarerzeugung: PVGIS {{pvgisVersion}}, von der Gemeinsamen Forschungsstelle der Europäischen Kommission, mit der Strahlungsdatenbank {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Für jede Distrikthauptstadt enthält die Seite das typische Jahr von PVGIS, Stunde für Stunde, für 1 kWp nach Süden mit optimaler Neigung und 14 % Verlusten, heruntergeladen am {{pvgisDate}}. Ohne E-REDES-Datei werden die Stunden deines Verbrauchs aus der Aufteilung des Standardprofils auf die Zeiträume jedes Monats nachgebildet.",
+          "solar": "Solarerzeugung: PVGIS {{pvgisVersion}}, von der Gemeinsamen Forschungsstelle der Europäischen Kommission, mit der Strahlungsdatenbank {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Für jede Distrikthauptstadt enthält die Seite das typische Jahr von PVGIS, Stunde für Stunde, für 1 kWp nach Süden mit optimaler Neigung und 14 % Verlusten, heruntergeladen am {{pvgisDate}}. Ohne E-REDES-Datei werden die Stunden Ihres Verbrauchs aus der Aufteilung des Standardprofils auf die Zeiträume jedes Monats nachgebildet.",
           "simulatorLink": "Preissimulator der ERSE",
           "manualLink": "ERSE, Manual do Simulador de Preços de Energia (Juni 2026)",
           "pvgisLink": "PVGIS, Europäische Kommission"
@@ -4555,20 +4661,20 @@
           "items": {
             "a": "Die DGEG-Gebühr von einigen Cent im Monat sowie etwaige Zähler- oder sonstige Entgelte.",
             "b": "Persönliche Verhandlungen: Die Preise sind die veröffentlichten.",
-            "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet; was du zahlst, folgt dem Markt.",
-            "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, außer du beziehst sie ein.",
-            "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht deinem eigenen. Die E-REDES-Datei liefert deine tatsächliche Aufteilung.",
+            "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet. Wenn Sie OMIE-Preise wählen, zeigen die Angebote, deren Versorger die Formel veröffentlicht, was sie in den letzten 12 Monaten (oder an den Tagen Ihrer Datei) gekostet hätten, nicht was sie kosten werden: Was Sie zahlen, folgt dem Markt.",
+            "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, es sei denn, Sie beziehen sie ein.",
+            "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht Ihrem eigenen. Die E-REDES-Datei liefert Ihre tatsächliche Aufteilung.",
             "solar": "Die Solarerzeugung ist ein typisches Jahr der Distrikthauptstadt, nach Süden mit optimaler Neigung: Verschattung, eine andere Ausrichtung und das Wetter eines bestimmten Jahres ändern sie.",
-            "f": "Dies ist eine Schätzung zu Bildungszwecken, keine Beratung. Lies das standardisierte Datenblatt und die Bedingungen des Angebots, bevor du unterschreibst."
+            "f": "Dies ist eine Schätzung zu Informationszwecken, keine Beratung. Lesen Sie das standardisierte Datenblatt und die Bedingungen des Angebots, bevor Sie unterschreiben."
           },
-          "simulatorLink": "Prüfe ein Ergebnis im offiziellen Simulator der ERSE"
+          "simulatorLink": "Ein Ergebnis im offiziellen Simulator der ERSE prüfen"
         },
         "related": {
           "title": "Weiter geht's",
           "electricityIndexLink": "Strompreisindex",
           "electricityIndexBody": "Wie der Haushaltsstrompreis in Portugal im Vergleich zur EU liegt und woraus sich die Rechnung im regulierten Tarif zusammensetzt.",
           "householdBudgetLink": "Haushaltsbudget",
-          "householdBudgetBody": "Stell die Stromrechnung neben deine übrigen monatlichen Kosten."
+          "householdBudgetBody": "Stellen Sie die Stromrechnung neben Ihre übrigen monatlichen Kosten."
         }
       }
     },
@@ -5313,47 +5419,47 @@
     }
   },
   "resources": {
-    "metaTitle": "Ressourcen für deine Finanzen | WonderMoney",
-    "metaDescription": "Entdecke Finanzratgeber, ein Glossar, monatliche Berichte und Rechner für dein Haushaltsbudget und deinen Notgroschen.",
-    "title": "Ressourcen für deine Finanzen",
-    "intro": "Finde deinen nächsten Schritt, von der Begriffserklärung bis zum eigenen Haushaltsbudget.",
+    "metaTitle": "Ressourcen für Ihre Finanzen | WonderMoney",
+    "metaDescription": "Entdecken Sie Finanzratgeber, ein Glossar, monatliche Berichte und Rechner für Ihr Haushaltsbudget und Ihren Notgroschen.",
+    "title": "Ressourcen für Ihre Finanzen",
+    "intro": "Finden Sie Ihren nächsten Schritt, von der Begriffserklärung bis zum eigenen Haushaltsbudget.",
     "links": {
       "guides": {
-        "title": "Ratgeber für deine Finanzen",
-        "description": "Lerne Schritt für Schritt, wie du ein Budget erstellst, sparst und investierst."
+        "title": "Ratgeber für Ihre Finanzen",
+        "description": "Lernen Sie Schritt für Schritt, wie Sie ein Budget erstellen, sparen und investieren."
       },
       "glossary": {
         "title": "Finanzglossar",
-        "description": "Schlage unbekannte Begriffe nach, die dir beim Lesen über Finanzen begegnen."
+        "description": "Schlagen Sie unbekannte Begriffe nach, die Ihnen beim Lesen über Finanzen begegnen."
       },
       "monthly": {
         "title": "Monatliche Berichte",
-        "description": "Erfahre, wie sich wichtige Kennzahlen verändert haben und wie sie berechnet werden."
+        "description": "Erfahren Sie, wie sich wichtige Kennzahlen verändert haben und wie sie berechnet werden."
       },
       "household_budget": {
         "title": "Haushaltsbudget-Rechner",
-        "description": "Vergleiche Einnahmen und Ausgaben deines Haushalts und sieh, wie viel im Monat übrig bleibt."
+        "description": "Vergleichen Sie Einnahmen und Ausgaben Ihres Haushalts und sehen Sie, wie viel im Monat übrig bleibt."
       },
       "emergency_fund": {
         "title": "Notgroschen-Rechner",
-        "description": "Schätze, wie viel du für mehrere Monate notwendiger Ausgaben zurücklegen solltest."
+        "description": "Schätzen Sie, wie viel Sie für mehrere Monate notwendiger Ausgaben zurücklegen sollten."
       },
       "tools": {
         "title": "Alle Rechner",
-        "description": "Entdecke Rechner für Budgetplanung, Kredite und Geldanlage."
+        "description": "Entdecken Sie Rechner für Budgetplanung, Kredite und Geldanlage."
       }
     }
   },
   "savingsGuide": {
     "metaTitle": "Wo Ersparnisse in Portugal anlegen: Produkte im Vergleich | WonderMoney",
-    "metaDescription": "Vergleiche Sparzertifikate, Schatzzertifikate, verzinste Girokonten, Sparkonten, Festgeld sowie Kapitalisierungs- und PPR-Versicherungen in Portugal: Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS.",
+    "metaDescription": "Vergleichen Sie Sparzertifikate, Schatzzertifikate, verzinste Girokonten, Sparkonten, Festgeld sowie Kapitalisierungs- und PPR-Versicherungen in Portugal: Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS.",
     "breadcrumbLabel": "Wo Ersparnisse anlegen",
-    "title": "Wo du deine Ersparnisse in Portugal anlegen kannst",
-    "intro": "Sieben Wege, Geld in Portugal zu halten, nebeneinander: wer das Geld absichert, ob du nachzahlen kannst, wann du es abheben kannst, wie die Zinsen gezahlt werden und wie die IRS gilt. Nur zur Information: Diese Seite empfiehlt kein Produkt und keinen Anbieter.",
+    "title": "Wo Sie Ihre Ersparnisse in Portugal anlegen können",
+    "intro": "Sieben Wege, Geld in Portugal zu halten, nebeneinander: wer das Geld absichert, ob Sie nachzahlen können, wann Sie es abheben können, wie die Zinsen gezahlt werden und wie die IRS gilt. Nur zur Information: Diese Seite empfiehlt kein Produkt und keinen Anbieter.",
     "checked": "Angaben mit offiziellen Quellen abgeglichen im {{date}}",
     "tableTitle": "Die Vergleichstabelle",
     "tableCaption": "Sparprodukte in Portugal im Vergleich nach Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS",
-    "tableHint": "Zinsen, Gebühren und Bedingungen jedes Produkts ändern sich und unterscheiden sich je nach Anbieter: Lies immer die Bedingungen des Produkts, das du in Betracht ziehst.",
+    "tableHint": "Zinsen, Gebühren und Bedingungen jedes Produkts ändern sich und unterscheiden sich je nach Anbieter: Lesen Sie immer die Bedingungen des Produkts, das Sie in Betracht ziehen.",
     "productColumn": "Produkt",
     "columns": {
       "guarantee": "Sicherung",
@@ -5366,11 +5472,11 @@
     "products": {
       "aforro": {
         "name": "Sparzertifikate (Certificados de Aforro)",
-        "text": "Staatsschuld des portugiesischen Staates, verwaltet vom IGCP, der Agentur für Staatskasse und Staatsschuld, für Personen mit portugiesischer Steuernummer. Die Serie F läuft bis zu 15 Jahre. Ihr Zins folgt dem 3-Monats-Euribor und erhält einen Treuebonus, der mit der Haltedauer steigt. Die Zinsen laufen vierteljährlich auf und werden nach IRS dem Guthaben gutgeschrieben. Die erste Zeichnung beträgt mindestens 100 Einheiten zu 1 €, spätere mindestens 10. Du kannst ab dem ersten vierteljährlichen Zinstermin zurückgeben und verlierst die Zinsen des laufenden Quartals."
+        "text": "Staatsschuld des portugiesischen Staates, verwaltet vom IGCP, der Agentur für Staatskasse und Staatsschuld, für Personen mit portugiesischer Steuernummer. Die Serie F läuft bis zu 15 Jahre. Der Zins folgt dem 3-Monats-Euribor und erhält einen Treuebonus, der mit der Haltedauer steigt. Die Zinsen laufen vierteljährlich auf und werden nach IRS dem Guthaben gutgeschrieben. Die erste Zeichnung beträgt mindestens 100 Einheiten zu 1 €, spätere mindestens 10. Sie können ab dem ersten vierteljährlichen Zinstermin zurückgeben und verlieren die Zinsen des laufenden Quartals."
       },
       "tesouro": {
         "name": "Schatzzertifikate (Certificados do Tesouro)",
-        "text": "Ebenfalls Staatsschuld, vom IGCP verwaltet, und 2026 weiterhin im Verkauf: Die neue Serie 5, seit Juli 2026 offen, hat die Serie Poupança Valor ersetzt, die keine Zeichnungen mehr annimmt. Zum Start zahlte sie einen festen, jährlich steigenden Zins, von 2,35 % im ersten Jahr bis 3,35 % im zehnten, mit jährlicher Zinszahlung. Das Minimum beträgt 1000 €, das Maximum 1 Million Euro je Inhaber. Du kannst ab Ende des ersten Jahres zurückgeben und verlierst die Zinsen des laufenden Jahres. Die Zinsen neuer Zeichnungen können sich ändern."
+        "text": "Ebenfalls Staatsschuld, vom IGCP verwaltet, und 2026 weiterhin im Verkauf: Die neue Serie 5, seit Juli 2026 offen, hat die Serie Poupança Valor ersetzt, die keine Zeichnungen mehr annimmt. Zum Start zahlte sie einen festen, jährlich steigenden Zins, von 2,35 % im ersten Jahr bis 3,35 % im zehnten, mit jährlicher Zinszahlung. Das Minimum beträgt 1000 €, das Maximum 1 Million Euro je Inhaber. Sie können ab Ende des ersten Jahres zurückgeben und verlieren die Zinsen des laufenden Jahres. Die Zinsen neuer Zeichnungen können sich ändern."
       },
       "demand": {
         "name": "Verzinstes Girokonto",
@@ -5382,11 +5488,11 @@
       },
       "term": {
         "name": "Festgeld",
-        "text": "Du bindest einen Betrag für eine feste Laufzeit zu einem vorab vereinbarten Zins. Nachzahlen ist nicht möglich, und die meisten zahlen die Zinsen am Laufzeitende. Nur manche erlauben die vorzeitige Abhebung, die meist die Hälfte oder mehr der aufgelaufenen Zinsen kostet. Es ist bis zur Grenze durch den Einlagensicherungsfonds abgedeckt."
+        "text": "Sie binden einen Betrag für eine feste Laufzeit zu einem vorab vereinbarten Zins. Nachzahlen ist nicht möglich, und die meisten zahlen die Zinsen am Laufzeitende. Nur manche erlauben die vorzeitige Abhebung, die meist die Hälfte oder mehr der aufgelaufenen Zinsen kostet. Es ist bis zur Grenze durch den Einlagensicherungsfonds abgedeckt."
       },
       "capitalisation": {
         "name": "Kapitalisierungsversicherung",
-        "text": "Ein Lebensversicherungsvertrag, der Ersparnisse ansammelt. Die Sicherung liegt beim Versicherer, nicht beim Einlagensicherungsfonds, und ob das Kapital garantiert ist, hängt vom Vertrag ab, prüfe es also. Die meisten erheben in den ersten Jahren eine Gebühr bei vorzeitiger Abhebung. Der Gewinn wird bei der Abhebung besteuert, und der Satz sinkt mit der Haltedauer."
+        "text": "Ein Lebensversicherungsvertrag, der Ersparnisse ansammelt. Die Sicherung liegt beim Versicherer, nicht beim Einlagensicherungsfonds, und ob das Kapital garantiert ist, hängt vom Vertrag ab, prüfen Sie es also. Die meisten erheben in den ersten Jahren eine Gebühr bei vorzeitiger Abhebung. Der Gewinn wird bei der Abhebung besteuert, und der Satz sinkt mit der Haltedauer."
       },
       "ppr": {
         "name": "PPR-Versicherung (Altersvorsorgeplan)",
@@ -5442,24 +5548,24 @@
       "intro": "Zinsen und Gewinne aus Ersparnissen sind Kapitaleinkünfte (Kategorie E der IRS). Die Regeln unterscheiden sich je nach Produkt.",
       "domestic": {
         "title": "Zertifikate und portugiesische Banken",
-        "text": "Zinsen werden per Quellensteuer von 28 % besteuert, einem abgeltenden Satz (CIRS, Art. 71). Du kannst wählen, sie stattdessen deinem übrigen Einkommen hinzuzurechnen (englobamento); die einbehaltene Steuer gilt dann als Vorauszahlung."
+        "text": "Zinsen werden per Quellensteuer von 28 % besteuert, einem abgeltenden Satz (CIRS, Art. 71). Sie können die Zinsen stattdessen Ihrem übrigen Einkommen hinzurechnen (englobamento); die einbehaltene Steuer gilt dann als Vorauszahlung."
       },
       "foreign": {
         "title": "Ausländische Banken",
-        "text": "Eine Bank im Ausland behält keine portugiesische Steuer ein. Bist du in Portugal ansässig, musst du die Zinsen in der IRS-Erklärung angeben, wo sie mit 28 % besteuert werden, außer du wählst das englobamento (CIRS, Art. 72)."
+        "text": "Eine Bank im Ausland behält keine portugiesische Steuer ein. Sind Sie in Portugal ansässig, müssen Sie die Zinsen in der IRS-Erklärung angeben, wo sie mit 28 % besteuert werden, außer Sie wählen das englobamento (CIRS, Art. 72)."
       },
       "insurance": {
         "title": "Kapitalisierungsversicherung",
-        "text": "Der Gewinn wird bei der Abhebung mit 28 % besteuert. Hast du den Vertrag mehr als 5 und bis zu 8 Jahre gehalten, ist ein Fünftel des Gewinns ausgenommen (22,4 %), nach 8 Jahren drei Fünftel (11,2 %). Diese Minderungen gelten nur, wenn mindestens 35 % der Prämien in der ersten Vertragshälfte gezahlt wurden (CIRS, Art. 5 Abs. 3)."
+        "text": "Der Gewinn wird bei der Abhebung mit 28 % besteuert. Haben Sie den Vertrag mehr als 5 und bis zu 8 Jahre gehalten, ist ein Fünftel des Gewinns ausgenommen (22,4 %), nach 8 Jahren drei Fünftel (11,2 %). Diese Minderungen gelten nur, wenn mindestens 35 % der Prämien in der ersten Vertragshälfte gezahlt wurden (CIRS, Art. 5 Abs. 3)."
       },
       "ppr": {
         "title": "PPR",
-        "text": "Hebst du aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 20 %, gesenkt auf 16 % nach 5 Jahren und auf 8 % nach 8 Jahren, wenn mindestens 35 % der Einzahlungen in der ersten Hälfte erfolgten. Außerdem gibst du den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer nach 5 Jahren in den gesetzlich vorgesehenen Fällen (EBF, Art. 21)."
+        "text": "Heben Sie aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 20 %, gesenkt auf 16 % nach 5 Jahren und auf 8 % nach 8 Jahren, wenn mindestens 35 % der Einzahlungen in der ersten Hälfte erfolgten. Außerdem geben Sie den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer nach 5 Jahren in den gesetzlich vorgesehenen Fällen (EBF, Art. 21)."
       }
     },
     "sources": {
       "title": "Quellen",
-      "intro": "Jede Aussage zu Sicherung und Steuern wurde mit diesen offiziellen Seiten abgeglichen. Regeln ändern sich: Prüfe den aktuellen Text, bevor du entscheidest.",
+      "intro": "Jede Aussage zu Sicherung und Steuern wurde mit diesen offiziellen Seiten abgeglichen. Regeln ändern sich: Prüfen Sie den aktuellen Text, bevor Sie entscheiden.",
       "checkedOn": "Abgerufen im {{date}}",
       "items": {
         "fgd": "Fundo de Garantia de Depósitos: Einlagensicherung",
@@ -5473,11 +5579,11 @@
       }
     },
     "related": {
-      "title": "Rechne nach",
-      "intro": "Hinterlege die obigen Produkte mit Zahlen, mit diesen kostenlosen Werkzeugen."
+      "title": "Rechnen Sie nach",
+      "intro": "Rechnen Sie die obigen Produkte mit diesen kostenlosen Werkzeugen durch."
     },
     "disclaimer": "Dieser Leitfaden dient der Information und ist keine Finanz- oder Steuerberatung. Er nennt keine Anbieter und empfiehlt kein Produkt.",
-    "hubDescription": "Vergleiche Zertifikate, Einlagen, Sparkonten und Versicherungen bei Sicherung, Abhebung und Steuern."
+    "hubDescription": "Vergleichen Sie Zertifikate, Einlagen, Sparkonten und Versicherungen bei Sicherung, Abhebung und Steuern."
   },
   "learn": {
     "hub": {
@@ -5727,7 +5833,7 @@
         "cta": "Mehr erfahren"
       },
       "ctaCampaignPrimary": "Kostenlos starten",
-      "ctaCampaignNote": "Nutze es auf wonder.money oder auf deinem eigenen Server.",
+      "ctaCampaignNote": "Nutzen Sie es auf wonder.money oder auf Ihrem eigenen Server.",
       "openBankingScaleNote": "16,5 Millionen aktive Open-Banking-Verbindungen im Vereinigten Königreich im Dezember 2025, 36 % mehr als im Vorjahr. Eine Bank auf diesem Weg zu verbinden, ist inzwischen ganz normal.",
       "openBankingScaleSource": "Quelle: Open Banking Limited, Dezember 2025"
     },
@@ -5777,7 +5883,7 @@
       "why3Title": "Kostenlos, Open Source. Alle Funktionen inklusive.",
       "why3Body": "Kein Abo, keine Stufen, keine Zusatzverkäufe. Voller Zugang zu allen Funktionen ab dem ersten Tag.",
       "ctaHeadline": "Bereit, von YNAB zu wechseln?",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst.",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst.",
       "eyebrow": "YNAB-Alternative"
     },
     "netWorthTracker": {
@@ -6068,7 +6174,7 @@
     },
     "pricing": {
       "metaTitle": "Preise — WonderMoney",
-      "metaDescription": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder auf deinem eigenen Server."
+      "metaDescription": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder auf Ihrem eigenen Server."
     },
     "about": {
       "metaTitle": "Über WonderMoney — WonderMoney",
@@ -6095,21 +6201,21 @@
       "metaDescription": "Verfolgen Sie Ihr Investmentportfolio mit CSV-Importen großer Broker, täglichen Bewertungen, Allokations-Insights und Integration ins Nettovermögen.",
       "eyebrow": "Portfolio-Tracking",
       "heroTitle": "Portfolio-Tracker für Interactive Brokers, DEGIRO, Trading 212 und mehr",
-      "heroSubtitle": "Importiere Positionen per CSV und verfolge Performance, Allokation, Dividendenerträge und Nettovermögen an einem Ort.",
+      "heroSubtitle": "Importieren Sie Positionen per CSV und verfolgen Sie Performance, Allokation, Dividendenerträge und Nettovermögen an einem Ort.",
       "howTitle": "So funktioniert es",
       "step1Title": "Portfolio als CSV exportieren",
-      "step1Body": "Lade einen Positionsexport aus deinem Broker-Konto herunter. Der CSV-Import funktioniert bei unterstützten und nicht unterstützten Brokern.",
+      "step1Body": "Laden Sie einen Positionsexport aus Ihrem Broker-Konto herunter. Der CSV-Import funktioniert bei unterstützten und nicht unterstützten Brokern.",
       "step2Title": "Datei hochladen und Positionen zuordnen",
-      "step2Body": "Lade die Datei in WonderMoney hoch. Deine Vermögenswerte und Mengen werden erkannt und für das Tracking vorbereitet.",
+      "step2Body": "Laden Sie die Datei in WonderMoney hoch. Ihre Vermögenswerte und Mengen werden erkannt und für das Tracking vorbereitet.",
       "step3Title": "Performance täglich überwachen",
-      "step3Body": "Verfolge Bewertung, Gewinne, Allokation, größte Bewegungen und Dividendenerträge mit täglichen Kursaktualisierungen.",
-      "brokersTitle": "Funktioniert mit deinen bestehenden Brokern",
-      "brokersBody": "WonderMoney unterstützt den Import von Positionen per CSV von gängigen Brokern und Plattformen, sodass du dein Portfolio-Tracking zentralisieren kannst, ohne auf Broker-APIs warten zu müssen.",
+      "step3Body": "Verfolgen Sie Bewertung, Gewinne, Allokation, größte Bewegungen und Dividendenerträge mit täglichen Kursaktualisierungen.",
+      "brokersTitle": "Funktioniert mit Ihren bestehenden Brokern",
+      "brokersBody": "WonderMoney unterstützt den Import von Positionen per CSV von gängigen Brokern und Plattformen, sodass Sie Ihr Portfolio-Tracking zentralisieren können, ohne auf Broker-APIs warten zu müssen.",
       "broker1": "Interactive Brokers",
       "broker2": "DEGIRO",
       "broker3": "Trading 212",
       "broker4": "Und viele weitere per CSV-Import",
-      "featuresTitle": "Was du bekommst",
+      "featuresTitle": "Was Sie bekommen",
       "feature1": "Tägliche Portfolio-Bewertung auf Basis von Marktpreisen",
       "feature2": "Performance-Tracking mit Rendite- und Gewinn-/Verlustübersicht",
       "feature3": "Allokationsanalysen nach Positionen und Exposure",
@@ -6120,38 +6226,38 @@
       "feature8": "Portfolio-Wert integriert ins Nettovermögen",
       "faqTitle": "Häufige Fragen zum Portfolio-Tracker",
       "faq1Q": "Von welchen Brokern kann ich importieren?",
-      "faq1A": "Du kannst CSV-Dateien von Interactive Brokers, DEGIRO, Trading 212 und vielen weiteren Brokern importieren.",
+      "faq1A": "Sie können CSV-Dateien von Interactive Brokers, DEGIRO, Trading 212 und vielen weiteren Brokern importieren.",
       "faq2Q": "Benötige ich Zugang zur Broker-API?",
-      "faq2A": "Nein. Der CSV-Import reicht aus, um deine Positionen zu verfolgen — kein API-Zugang erforderlich.",
+      "faq2A": "Nein. Der CSV-Import reicht aus, um Ihre Positionen zu verfolgen — kein API-Zugang erforderlich.",
       "faq3Q": "Kann ich mehr als ein Portfolio verfolgen?",
       "faq3A": "Ja. WonderMoney unterstützt mehrere Portfolios unter demselben Konto.",
       "schemaName": "WonderMoney Portfolio-Tracker",
-      "schemaDescription": "Verfolge per CSV importierte Anlageportfolios von Interactive Brokers, DEGIRO, Trading 212 und mehr mit Performance-Analysen und Nettovermögensintegration.",
-      "ctaHeadline": "Portfolio gemeinsam mit deinen übrigen Finanzen verfolgen",
-      "ctaBody": "Bringe Investments, Konten und Nettovermögen in einem übersichtlichen Dashboard zusammen."
+      "schemaDescription": "Verfolgen Sie per CSV importierte Anlageportfolios von Interactive Brokers, DEGIRO, Trading 212 und mehr mit Performance-Analysen und Nettovermögensintegration.",
+      "ctaHeadline": "Portfolio gemeinsam mit Ihren übrigen Finanzen verfolgen",
+      "ctaBody": "Bringen Sie Investments, Konten und Nettovermögen in einem übersichtlichen Dashboard zusammen."
     },
     "featureReports": {
       "metaTitle": "Persönliche Finanzberichte zu Ausgaben, Cashflow und finanzieller Gesundheit — WonderMoney",
       "metaDescription": "Verstehen Sie Ausgabenmuster, Cashflow-Trends und Signale zur finanziellen Gesundheit mit praxisnahen Berichten für bessere wöchentliche Geldentscheidungen.",
       "eyebrow": "Finanzberichte",
       "heroTitle": "Finanzberichte für Ausgaben, Cashflow und finanzielle Gesundheit",
-      "heroSubtitle": "Verwandle tägliche Finanzdaten in klare wöchentliche Erkenntnisse, damit du bewusster ausgibst, schneller reagierst und auf Kurs bleibst.",
+      "heroSubtitle": "Verwandeln Sie tägliche Finanzdaten in klare wöchentliche Erkenntnisse, damit Sie bewusster ausgeben, schneller reagieren und auf Kurs bleiben.",
       "devStatus": "In aktiver Entwicklung — wird derzeit schrittweise eingeführt.",
       "pillarsTitle": "Berichte, die zum Handeln anregen",
       "pillar1Title": "Ausgaben nach Kategorie",
-      "pillar1Body": "Sieh, wohin dein Geld nach Kategorien fließt, damit Mehrausgaben frühzeitig sichtbar werden.",
+      "pillar1Body": "Sehen Sie, wohin Ihr Geld nach Kategorien fließt, damit Mehrausgaben frühzeitig sichtbar werden.",
       "pillar2Title": "Cashflow-Trends",
-      "pillar2Body": "Verfolge Ein- und Ausgaben über die Zeit, um das Momentum zu verstehen und Überraschungen zu vermeiden.",
+      "pillar2Body": "Verfolgen Sie Ein- und Ausgaben über die Zeit, um das Momentum zu verstehen und Überraschungen zu vermeiden.",
       "pillar3Title": "Signale zur finanziellen Gesundheit",
-      "pillar3Body": "Überprüfe das Sparverhalten und wichtige Risikoindikatoren für bessere kurz- und langfristige Entscheidungen.",
-      "workflowTitle": "So nutzt du Berichte jede Woche",
-      "step1Title": "Überprüfe, was sich verändert hat",
-      "step1Body": "Beginne mit den Kategorieausgaben und der Cashflow-Entwicklung seit der letzten Woche.",
-      "step2Title": "Identifiziere eine wichtige Entscheidung",
-      "step2Body": "Wähle die wichtigste Anpassung: eine Kategorie kürzen, Ersparnisse umschichten oder Portfolio-Exposure überprüfen.",
+      "pillar3Body": "Überprüfen Sie das Sparverhalten und wichtige Risikoindikatoren für bessere kurz- und langfristige Entscheidungen.",
+      "workflowTitle": "So nutzen Sie Berichte jede Woche",
+      "step1Title": "Überprüfen Sie, was sich verändert hat",
+      "step1Body": "Beginnen Sie mit den Kategorieausgaben und der Cashflow-Entwicklung seit der letzten Woche.",
+      "step2Title": "Identifizieren Sie eine wichtige Entscheidung",
+      "step2Body": "Wählen Sie die wichtigste Anpassung: eine Kategorie kürzen, Ersparnisse umschichten oder Portfolio-Exposure überprüfen.",
       "step3Title": "Umsetzen und beobachten",
-      "step3Body": "Setze deine Änderung um und nutze den Bericht der nächsten Woche, um den Fortschritt zu bestätigen.",
-      "featuresTitle": "Was du bekommst",
+      "step3Body": "Setzen Sie Ihre Änderung um und nutzen Sie den Bericht der nächsten Woche, um den Fortschritt zu bestätigen.",
+      "featuresTitle": "Was Sie bekommen",
       "feature1": "Ausgabentransparenz auf Kategorieebene",
       "feature2": "Cashflow-Trendkontext",
       "feature3": "Periodenbezogene Kontokennzahlen",
@@ -6162,13 +6268,13 @@
       "faq1Q": "Welche Berichte sind enthalten?",
       "faq1A": "WonderMoney enthält Kategorieausgaben, Cashflow-Trends und Berichte zu Signalen der finanziellen Gesundheit.",
       "faq2Q": "Kann ich Berichte für die Wochenplanung nutzen?",
-      "faq2A": "Ja. Berichte sind für regelmäßige Reviews konzipiert, damit du Entscheidungen Woche für Woche anpassen kannst.",
+      "faq2A": "Ja. Berichte sind für regelmäßige Reviews konzipiert, damit Sie Entscheidungen Woche für Woche anpassen können.",
       "faq3Q": "Enthalten Berichte Portfolio-Kontext?",
-      "faq3A": "Ja. Portfolio-Performance und verwandte Kennzahlen ergänzen deine Ausgaben- und Cashflow-Analyse.",
+      "faq3A": "Ja. Portfolio-Performance und verwandte Kennzahlen ergänzen Ihre Ausgaben- und Cashflow-Analyse.",
       "schemaName": "WonderMoney Finanzberichte",
-      "schemaDescription": "Analysiere Ausgabenkategorien, Cashflow-Trends und Signale zur finanziellen Gesundheit mit praxisnahen Berichten für persönliche Finanzen.",
-      "ctaHeadline": "Triff jede Woche bessere Finanzentscheidungen",
-      "ctaBody": "Nutze klare Berichte, um zu verstehen, was sich verändert hat und was als Nächstes zu tun ist."
+      "schemaDescription": "Analysieren Sie Ausgabenkategorien, Cashflow-Trends und Signale zur finanziellen Gesundheit mit praxisnahen Berichten für persönliche Finanzen.",
+      "ctaHeadline": "Treffen Sie jede Woche bessere Finanzentscheidungen",
+      "ctaBody": "Nutzen Sie klare Berichte, um zu verstehen, was sich verändert hat und was als Nächstes zu tun ist."
     },
     "trustBar": {
       "openBanking": "Open Banking (PSD2)",
@@ -6212,95 +6318,95 @@
     },
     "gestaoFinanceira": {
       "metaTitle": "App für persönliches Finanzmanagement — WonderMoney",
-      "metaDescription": "Behalte die Kontrolle über deine persönlichen Finanzen mit WonderMoney. Automatische Banksynchronisierung, intelligente Budgets, Nettovermögens-Tracking und Anlageportfolio — alles in einer App.",
+      "metaDescription": "Behalten Sie die Kontrolle über Ihre persönlichen Finanzen mit WonderMoney. Automatische Banksynchronisierung, intelligente Budgets, Nettovermögens-Tracking und Anlageportfolio — alles in einer App.",
       "heroBadge": "Persönliches Finanzmanagement",
-      "heroTitle": "Deine vollständige persönliche Finanz-App",
+      "heroTitle": "Ihre vollständige persönliche Finanz-App",
       "heroSubtitle": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
-      "featuresTitle": "Alles, was du zur Verwaltung deines Geldes brauchst",
+      "featuresTitle": "Alles, was Sie zur Verwaltung Ihres Geldes brauchen",
       "feat1Title": "Automatische Banksynchronisierung",
-      "feat1Body": "Verbinde deine Bankkonten über Open Banking. Transaktionen erscheinen automatisch — keine manuelle Eingabe, keine CSV-Importe, keine vergessenen Belege.",
+      "feat1Body": "Verbinden Sie Ihre Bankkonten über Open Banking. Transaktionen erscheinen automatisch — keine manuelle Eingabe, keine CSV-Importe, keine vergessenen Belege.",
       "feat2Title": "Intelligente Kategorisierung",
-      "feat2Body": "WonderMoney kategorisiert deine Transaktionen mit benutzerdefinierten Regeln, die du einmal einstellst. Passe Kategorien an, um die Art, wie du wirklich über deine Ausgaben denkst, widerzuspiegeln.",
+      "feat2Body": "WonderMoney kategorisiert Ihre Transaktionen mit benutzerdefinierten Regeln, die Sie einmal einstellen. Passen Sie die Kategorien so an, dass sie widerspiegeln, wie Sie wirklich über Ihre Ausgaben denken.",
       "feat3Title": "Nettovermögens-Tracking",
       "feat3Body": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
       "howTitle": "Mit geführter Einrichtung loslegen",
       "how1Title": "Bankkonten verbinden",
-      "how1Body": "Verknüpfe deine Konten sicher über Open Banking. WonderMoney unterstützt die wichtigsten europäischen Banken über Enable Banking.",
+      "how1Body": "Verknüpfen Sie Ihre Konten sicher über Open Banking. WonderMoney unterstützt die wichtigsten europäischen Banken über Enable Banking.",
       "how2Title": "Budgets festlegen",
-      "how2Body": "Erstelle Monatsbudgets nach der Umschlagmethode. Weise jedem Euro eine Aufgabe zu und verfolge die Ausgaben gegenüber deinem Plan.",
+      "how2Body": "Erstellen Sie Monatsbudgets nach der Umschlagmethode. Weisen Sie jedem Euro eine Aufgabe zu und verfolgen Sie die Ausgaben gegenüber Ihrem Plan.",
       "how3Title": "Fortschritt beobachten",
       "how3Body": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
-      "ctaHeadline": "Starte noch heute mit deinem Finanzmanagement",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst."
+      "ctaHeadline": "Starten Sie noch heute mit Ihrem Finanzmanagement",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst."
     },
     "appFinancasPortugal": {
       "metaTitle": "Finanz-App für Portugal | WonderMoney",
       "metaDescription": "Die Finanz-App für portugiesische Banken. WonderMoney verbindet sich über Open Banking mit Caixa, Millennium, Novo Banco und mehr. Budgetieren, Nettovermögen verfolgen und Investments verwalten.",
       "heroBadge": "Finanz-App Portugal",
       "heroTitle": "Die Finanz-App für portugiesische Banken",
-      "heroSubtitle": "Verbinde dich über Open Banking mit CGD, Millennium, Novo Banco, Santander und mehr. Budgetieren, Nettovermögen verfolgen und Investments verwalten. Auf Portugiesisch oder Englisch.",
-      "featuresTitle": "Für Portugal entwickelt, für dich gemacht",
+      "heroSubtitle": "Verbinden Sie sich über Open Banking mit CGD, Millennium, Novo Banco, Santander und mehr. Budgetieren, Nettovermögen verfolgen und Investments verwalten. Auf Portugiesisch oder Englisch.",
+      "featuresTitle": "Für Portugal entwickelt, für Sie gemacht",
       "feat1Title": "Abdeckung portugiesischer Banken",
-      "feat1Body": "Verbinde dich über sicheres Open Banking (PSD2) mit CGD, Millennium BCP, Novo Banco, Santander Totta, BPI und ActivoBank. Deine Bank ist wahrscheinlich bereits unterstützt.",
+      "feat1Body": "Verbinden Sie sich über sicheres Open Banking (PSD2) mit CGD, Millennium BCP, Novo Banco, Santander Totta, BPI und ActivoBank. Ihre Bank wird wahrscheinlich bereits unterstützt.",
       "feat2Title": "Open Banking, vollständig sicher",
       "feat2Body": "Bankverbindungen nutzen Nur-Lese-Open-Banking über Enable Banking. WonderMoney kann keine Überweisungen veranlassen. Sie geben Ihre Zugangsdaten bei Ihrer Bank oder Ihrem Anbieter ein; WonderMoney sieht sie nicht.",
       "feat3Title": "Euro-zentriert, mehrwährungsfähig",
-      "feat3Body": "Rund um den Euro konzipiert. Verfolge Ausgaben, Budgets und Nettovermögen in EUR. Mehrwährungsunterstützung für Konten in anderen Währungen verfügbar.",
+      "feat3Body": "Rund um den Euro konzipiert. Verfolgen Sie Ausgaben, Budgets und Nettovermögen in EUR. Mehrwährungsunterstützung für Konten in anderen Währungen verfügbar.",
       "painTitle": "Warum die meisten Finanz-Apps in Portugal nicht funktionieren",
       "pain1Title": "Keine Unterstützung für portugiesische Banken",
-      "pain1Body": "Die meisten internationalen Finanz-Apps (Mint, YNAB, Copilot) verbinden sich nicht mit portugiesischen Banken. Du bist auf CSV-Importe oder manuelle Transaktionseingabe angewiesen.",
+      "pain1Body": "Die meisten internationalen Finanz-Apps (Mint, YNAB, Copilot) verbinden sich nicht mit portugiesischen Banken. Sie sind auf CSV-Importe oder manuelle Transaktionseingabe angewiesen.",
       "pain2Title": "Manuelle CSV-Importe sind mühsam",
       "pain2Body": "Kontoauszüge herunterladen, Spalten formatieren, Dateien importieren. Das ist eine wöchentliche Routinearbeit, die die meisten innerhalb eines Monats aufgeben.",
       "pain3Title": "Keine portugiesische Sprachoption",
       "pain3Body": "Viele Finanz-Apps sind nur auf Englisch und bieten keine Lokalisierung für Portugal. WonderMoney funktioniert auf Portugiesisch (PT-PT) und Englisch.",
-      "ctaHeadline": "Teste die Finanz-App für Portugal",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst."
+      "ctaHeadline": "Testen Sie die Finanz-App für Portugal",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst."
     },
     "controloGastos": {
       "metaTitle": "Automatische Ausgaben-Tracking-App | WonderMoney",
-      "metaDescription": "Verfolge deine Ausgaben automatisch mit WonderMoney. Banksynchronisierung über Open Banking, intelligente Kategorisierung und Budgetwarnungen. Keine manuelle Eingabe erforderlich.",
+      "metaDescription": "Verfolgen Sie Ihre Ausgaben automatisch mit WonderMoney. Banksynchronisierung über Open Banking, intelligente Kategorisierung und Budgetwarnungen. Keine manuelle Eingabe erforderlich.",
       "heroBadge": "Ausgaben-Tracking",
       "heroTitle": "Automatisches Ausgaben-Tracking, null Aufwand",
-      "heroSubtitle": "Deine Banktransaktionen werden täglich synchronisiert. Jede Ausgabe ist kategorisiert. Budgetwarnungen lösen aus, bevor du das Limit überschreitest. Keine Tabellen, keine Belege, nichts Manuelles.",
+      "heroSubtitle": "Ihre Banktransaktionen werden täglich synchronisiert. Jede Ausgabe ist kategorisiert. Budgetwarnungen lösen aus, bevor Sie das Limit überschreiten. Keine Tabellen, keine Belege, nichts Manuelles.",
       "painTitle": "Warum manuelles Ausgaben-Tracking scheitert",
       "pain1Title": "Tabellen werden in der zweiten Woche aufgegeben",
       "pain1Body": "Ausgaben in Excel oder Google Sheets zu verfolgen erfordert tägliche Disziplin. Die meisten starten motiviert und hören innerhalb von Wochen auf zu aktualisieren. Die Daten werden wertlos.",
       "pain2Title": "Beleg-Apps brauchen ständige Eingaben",
       "pain2Body": "Apps, die auf das Scannen von Belegen oder manuelle Eingaben angewiesen sind, erzeugen Reibung. Was nicht automatisch ist, ist nicht nachhaltig.",
       "pain3Title": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
-      "pain3Body": "Wenn du Ausgaben manuell verfolgst, siehst du das Bild erst im Nachhinein. Wenn du merkst, dass du zu viel ausgegeben hast, ist das Geld bereits weg.",
+      "pain3Body": "Wenn Sie Ausgaben manuell verfolgen, sehen Sie das Bild erst im Nachhinein. Wenn Sie merken, dass Sie zu viel ausgegeben haben, ist das Geld bereits weg.",
       "featuresTitle": "Ausgaben-Tracking auf Autopilot",
       "feat1Title": "Automatische Synchronisierung von allen Konten",
-      "feat1Body": "Verbinde deine Bankkonten über Open Banking. Jede Transaktion wird automatisch täglich importiert, ohne dass du einen Finger rühren musst.",
+      "feat1Body": "Verbinden Sie Ihre Bankkonten über Open Banking. Jede Transaktion wird automatisch täglich importiert, ohne dass Sie einen Finger rühren müssen.",
       "feat2Title": "Intelligente Kategorisierung mit benutzerdefinierten Regeln",
-      "feat2Body": "WonderMoney kategorisiert Transaktionen anhand von Regeln, die du selbst definierst. Stelle sie einmal ein, und jede zukünftige Transaktion dieses Händlers wird korrekt kategorisiert.",
+      "feat2Body": "WonderMoney kategorisiert Transaktionen anhand von Regeln, die Sie selbst definieren. Stellen Sie sie einmal ein, und jede zukünftige Transaktion dieses Händlers wird korrekt kategorisiert.",
       "feat3Title": "Budgetwarnungen vor dem Überschreiten",
-      "feat3Body": "Lege monatliche Budgets nach Kategorie fest. WonderMoney warnt dich, wenn du dich deinem Limit näherst, damit du rechtzeitig gegensteuern kannst.",
+      "feat3Body": "Legen Sie monatliche Budgets nach Kategorie fest. WonderMoney warnt Sie, wenn Sie sich Ihrem Limit nähern, damit Sie rechtzeitig gegensteuern können.",
       "howTitle": "So funktioniert es",
       "how1Title": "Verbinden",
       "how1Body": "Verbinden Sie Ihre Bank über den Nur-Lese-Open-Banking-Dienst von Enable Banking.",
       "how2Title": "Kategorisieren",
-      "how2Body": "WonderMoney kategorisiert deine Transaktionen automatisch. Passe Regeln an deine Kategorien an.",
+      "how2Body": "WonderMoney kategorisiert Ihre Transaktionen automatisch. Passen Sie die Regeln an Ihre Kategorien an.",
       "how3Title": "Kontrollieren",
       "how3Body": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
       "ctaHeadline": "Ausgaben automatisch tracken — jetzt starten",
-      "ctaBody": "Verbinde deine Bank und lass die Automatisierung die Arbeit erledigen. Kostenlos und Open Source."
+      "ctaBody": "Verbinden Sie Ihre Bank und lassen Sie die Automatisierung die Arbeit erledigen. Kostenlos und Open Source."
     },
     "alternativaExcel": {
       "metaTitle": "Excel-Alternative für persönliche Finanzen | WonderMoney",
       "metaDescription": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
       "heroBadge": "Excel-Alternative",
-      "heroTitle": "Hör auf, deine Finanzen in Tabellen zu verwalten",
-      "heroSubtitle": "Du verwaltest dein Geld in Excel, und es funktioniert irgendwie. WonderMoney macht alles, was deine Tabelle macht — aber automatisch. Banksynchronisierung, Kategorisierung, Berichte, Dashboards. Keine Formeln nötig.",
+      "heroTitle": "Hören Sie auf, Ihre Finanzen in Tabellen zu verwalten",
+      "heroSubtitle": "Sie verwalten Ihr Geld in Excel, und es funktioniert irgendwie. WonderMoney macht alles, was Ihre Tabelle macht — aber automatisch. Banksynchronisierung, Kategorisierung, Berichte, Dashboards. Keine Formeln nötig.",
       "painTitle": "Das Problem mit Excel für persönliche Finanzen",
       "pain1Title": "Manuelle Dateneingabe ist fehleranfällig",
-      "pain1Body": "Jede von Hand eingegebene Transaktion bietet eine Fehlerquelle. Eine falsche Zahl, eine vergessene Zeile, und deine Monatssummen stimmen nicht mehr. Das merkst du erst, wenn es zu spät ist.",
+      "pain1Body": "Jede von Hand eingegebene Transaktion bietet eine Fehlerquelle. Eine falsche Zahl, eine vergessene Zeile, und Ihre Monatssummen stimmen nicht mehr. Das merken Sie erst, wenn es zu spät ist.",
       "pain2Title": "Formeln brechen und Dateien werden beschädigt",
       "pain2Body": "Komplexe Tabellen sind fragil. Eine gelöschte Zeile kann Fehler durch alle Formeln kaskadieren. Eine beschädigte Datei kann monatelange Finanzhistorie auslöschen.",
       "pain3Title": "Keine Banksynchronisierung, nur Kopieren und Einfügen",
-      "pain3Body": "Jeden Monat lädst du einen Kontoauszug herunter, formatierst die Spalten und fügst ihn in deine Tabelle ein. Das ist mühsam, repetitiv und das Erste, womit du aufhören wirst.",
+      "pain3Body": "Jeden Monat laden Sie einen Kontoauszug herunter, formatieren die Spalten und fügen ihn in Ihre Tabelle ein. Das ist mühsam, repetitiv und das Erste, womit Sie aufhören werden.",
       "comparisonTitle": "Excel vs. WonderMoney",
-      "comparisonSubtitle": "Was sich ändert, wenn du von Tabellen auf WonderMoney umsteigst.",
+      "comparisonSubtitle": "Was sich ändert, wenn Sie von Tabellen auf WonderMoney umsteigen.",
       "featureLabel": "Funktion",
       "excelLabel": "Excel / Sheets",
       "row1Feature": "Banktransaktionsimport",
@@ -6324,99 +6430,99 @@
       "row7Feature": "Datensicherheit",
       "row7Excel": "Lokale Datei, Verlustrisiko",
       "row7Wm": "Nur-Lese-Open-Banking",
-      "featuresTitle": "Alles, was deine Tabelle macht — automatisiert",
+      "featuresTitle": "Alles, was Ihre Tabelle macht — automatisiert",
       "feat1Title": "Vorhandene Daten importieren",
-      "feat1Body": "Hast du bereits Finanzhistorie in Excel? WonderMoney verbindet sich mit deiner Bank und beginnt automatisch, Transaktionen zu importieren. Keine Migration alter Dateien nötig.",
+      "feat1Body": "Haben Sie bereits Finanzhistorie in Excel? WonderMoney verbindet sich mit Ihrer Bank und beginnt automatisch, Transaktionen zu importieren. Keine Migration alter Dateien nötig.",
       "feat2Title": "Automatische Kategorisierung ersetzt Formeln",
-      "feat2Body": "Kein SVERWEIS oder WENN-Formeln mehr zum Kennzeichnen von Ausgabenkategorien. WonderMoney kategorisiert Transaktionen mit Regeln, die du einmal einstellst.",
+      "feat2Body": "Kein SVERWEIS oder WENN-Formeln mehr zum Kennzeichnen von Ausgabenkategorien. WonderMoney kategorisiert Transaktionen mit Regeln, die Sie einmal einstellen.",
       "feat3Title": "Sehen Sie Ihre verbundenen Finanzdaten an einem Ort. Bankdaten werden aktualisiert, wenn Anbieter sie bereitstellen; Marktwerte regelmäßig nach Verfügbarkeit.",
-      "feat3Body": "Deine Ausgabenaufschlüsselung, der Budget-Fortschritt und das Nettovermögen sind immer aktuell. Kein Aktualisieren von Pivottabellen oder Neuerstellen von Diagrammen.",
+      "feat3Body": "Ihre Ausgabenaufschlüsselung, der Budget-Fortschritt und das Nettovermögen sind immer aktuell. Kein Aktualisieren von Pivottabellen oder Neuerstellen von Diagrammen.",
       "ctaHeadline": "Bereit, die Tabelle hinter sich zu lassen?",
-      "ctaBody": "Alles, was dein Excel macht — aber automatisch. Kostenlos und Open Source.",
-      "ctaBody2": "WonderMoney verdient dein Vertrauen, indem es deine Daten privat, sicher und in deinen Händen hält. Kostenlos und Open Source.",
-      "principle6Title": "Dein Login bleibt bei deiner Bank",
-      "principle6Body": "Du authentifizierst dich direkt auf dem Portal deiner Bank. Dein Passwort gelangt niemals zu WonderMoney."
+      "ctaBody": "Alles, was Ihr Excel macht — aber automatisch. Kostenlos und Open Source.",
+      "ctaBody2": "WonderMoney verdient Ihr Vertrauen, indem es Ihre Daten privat, sicher und in Ihren Händen hält. Kostenlos und Open Source.",
+      "principle6Title": "Ihr Login bleibt bei Ihrer Bank",
+      "principle6Body": "Sie authentifizieren sich direkt auf dem Portal Ihrer Bank. Ihr Passwort gelangt niemals zu WonderMoney."
     },
     "featureGoals": {
       "eyebrow": "Ziele",
       "metaTitle": "Sparziel-Tracking für Europa — WonderMoney",
-      "metaDescription": "Setze Sparziele, verfolge Fortschritte und reserviere Geld für das, was zählt. Kostenlos und Open Source.",
-      "heroTitle": "Erreiche deine Ziele, einen Schritt nach dem anderen",
-      "heroSubtitle": "Setze Ziele, verfolge Fortschritte und reserviere Geld für das, was zählt. WonderMoney macht Zielplanung ruhig und konkret.",
+      "metaDescription": "Setzen Sie Sparziele, verfolgen Sie Fortschritte und reservieren Sie Geld für das, was zählt. Kostenlos und Open Source.",
+      "heroTitle": "Erreichen Sie Ihre Ziele, einen Schritt nach dem anderen",
+      "heroSubtitle": "Setzen Sie Ziele, verfolgen Sie Fortschritte und reservieren Sie Geld für das, was zählt. WonderMoney macht Zielplanung ruhig und konkret.",
       "howTitle": "Wie WonderMoney-Ziele funktionieren",
-      "step1Title": "Beschreibe, wofür du sparst",
-      "step1Body": "Urlaub, Eigenkapital, Notfallfonds oder Schuldenabbau — WonderMoney reserviert den richtigen Betrag in deinem Plan.",
-      "step2Title": "Verbinde deine Bank",
-      "step2Body": "Nur-Lese-Open-Banking verbindet deine Ziele mit deinen echten Konten. Was du siehst, ist, was wirklich da ist.",
-      "step3Title": "Beobachte den Fortschritt",
+      "step1Title": "Beschreiben Sie, wofür Sie sparen",
+      "step1Body": "Urlaub, Eigenkapital, Notfallfonds oder Schuldenabbau — WonderMoney reserviert den richtigen Betrag in Ihrem Plan.",
+      "step2Title": "Verbinden Sie Ihre Bank",
+      "step2Body": "Nur-Lese-Open-Banking verbindet Ihre Ziele mit Ihren echten Konten. Was Sie sehen, ist, was wirklich da ist.",
+      "step3Title": "Beobachten Sie den Fortschritt",
       "step3Body": "Jedes Ziel zeigt Verfügbar, Ziel und einen klaren Prozentsatz. Keine Tabellen, keine manuelle Mathematik.",
-      "benefitsTitle": "Was du mit WonderMoney-Zielen tun kannst",
-      "benefit1": "Setze jedes Ziel — Sparen oder Tilgen",
-      "benefit2": "Sieh echten Fortschritt, keine Schätzungen",
-      "benefit3": "Pausiere ein Ziel, wenn sich Prioritäten ändern",
-      "benefit4": "Bleib mit deinem Geld verbunden",
+      "benefitsTitle": "Was Sie mit WonderMoney-Zielen tun können",
+      "benefit1": "Setzen Sie jedes Ziel — Sparen oder Tilgen",
+      "benefit2": "Sehen Sie echten Fortschritt, keine Schätzungen",
+      "benefit3": "Pausieren Sie ein Ziel, wenn sich Prioritäten ändern",
+      "benefit4": "Bleiben Sie mit Ihrem Geld verbunden",
       "faqTitle": "Häufig gestellte Fragen",
       "faq1Q": "Wie verfolgt WonderMoney meine Ziele?",
-      "faq1A": "Jedes Ziel hat ein Ziel, ein verfügbares Guthaben und einen Status. WonderMoney liest deine verbundenen Konten und zeigt echten Fortschritt, keine Schätzungen.",
+      "faq1A": "Jedes Ziel hat ein Ziel, ein verfügbares Guthaben und einen Status. WonderMoney liest Ihre verbundenen Konten und zeigt echten Fortschritt, keine Schätzungen.",
       "faq2Q": "Kann ich ein Ziel pausieren?",
-      "faq2A": "Ja. Pausieren ist ein erstklassiger Zustand in WonderMoney. Du kannst jedes pausierte Ziel fortsetzen, ohne deinen Verlauf zu verlieren.",
+      "faq2A": "Ja. Pausieren ist ein erstklassiger Zustand in WonderMoney. Sie können jedes pausierte Ziel fortsetzen, ohne Ihren Verlauf zu verlieren.",
       "faq3Q": "Was ist der Unterschied zwischen einem Sparziel und einem Schuldentilgungsziel?",
-      "faq3A": "Sparziele reservieren Geld für einen zukünftigen Kauf (Urlaub, Eigenkapital). Schuldentilgungsziele verfolgen Geld, das zur Tilgung einer Schuld eingesetzt wird, und zeigen einen Tilgungszeitplan basierend auf deinen Zahlungen und deinem Zinssatz.",
-      "ctaHeadline": "Plane deine Ziele noch heute",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst.",
+      "faq3A": "Sparziele reservieren Geld für einen zukünftigen Kauf (Urlaub, Eigenkapital). Schuldentilgungsziele verfolgen Geld, das zur Tilgung einer Schuld eingesetzt wird, und zeigen einen Tilgungszeitplan basierend auf Ihren Zahlungen und Ihrem Zinssatz.",
+      "ctaHeadline": "Planen Sie Ihre Ziele noch heute",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst.",
       "schemaName": "WonderMoney Sparziel-Tracking",
-      "schemaDescription": "Setze Sparziele, verfolge Fortschritte und reserviere Geld für das, was zählt. Kostenlos und Open Source.",
+      "schemaDescription": "Setzen Sie Sparziele, verfolgen Sie Fortschritte und reservieren Sie Geld für das, was zählt. Kostenlos und Open Source.",
       "researchNote": "Eine Studie unter britischen Haushalten zeigt: Wer sich Sparziele setzt, spart mehr. Haushalte mit vier oder mehr Zielen hielten mehr als doppelt so viel investiertes Vermögen wie Haushalte ohne Ziele und erreichten ihre langfristigen Ziele eher.",
       "researchSource": "Quelle: University of Stirling, Journal of Banking and Finance (2021)"
     },
     "featureNetWorth": {
       "eyebrow": "Vermögen",
       "metaTitle": "Vermögensverfolgung für Europa — WonderMoney",
-      "metaDescription": "Sieh dein vollständiges finanzielles Bild an einem Ort. WonderMoney vereint Konten, Investitionen und Schulden in einer einzigen Zahl — dein Vermögen. Kostenlos und Open Source.",
-      "heroTitle": "Dein Finanzleben, in einer Zahl",
-      "heroSubtitle": "WonderMoney vereint deine Konten, Investitionen und Schulden in einer einzigen Vermögenszahl. Sieh das vollständige Bild, beobachte das Wachstum und plane mit Zuversicht.",
+      "metaDescription": "Sehen Sie Ihr vollständiges finanzielles Bild an einem Ort. WonderMoney vereint Konten, Investitionen und Schulden in einer einzigen Zahl — Ihr Vermögen. Kostenlos und Open Source.",
+      "heroTitle": "Ihr Finanzleben, in einer Zahl",
+      "heroSubtitle": "WonderMoney vereint Ihre Konten, Investitionen und Schulden in einer einzigen Vermögenszahl. Sehen Sie das vollständige Bild, beobachten Sie das Wachstum und planen Sie mit Zuversicht.",
       "howTitle": "Wie die Vermögensverfolgung funktioniert",
-      "step1Title": "Verbinde alles",
-      "step1Body": "Verknüpfe deine Bankkonten, Investitionsportfolios und Kredite über Nur-Lese-Open-Banking. WonderMoney liest deine Salden, ohne Anmeldedaten zu speichern.",
-      "step2Title": "Sieh das vollständige Bild",
-      "step2Body": "Vermögenswerte minus Verbindlichkeiten, aktuell. WonderMoney zeigt dein Vermögen in einer einzigen ruhigen Zahl — keine Tabellen, keine Mathematik.",
-      "step3Title": "Beobachte das Wachstum",
-      "step3Body": "Ein 6-Monats-Verlaufsdiagramm verfolgt die Entwicklung deines Vermögens. Geht rauf, geht runter, keine Überraschungen.",
-      "benefitsTitle": "Was du mit WonderMoney Vermögen machen kannst",
-      "benefit1": "Eine Zahl für dein gesamtes Finanzleben",
+      "step1Title": "Verbinden Sie alles",
+      "step1Body": "Verknüpfen Sie Ihre Bankkonten, Investitionsportfolios und Kredite über Nur-Lese-Open-Banking. WonderMoney liest Ihre Salden, ohne Anmeldedaten zu speichern.",
+      "step2Title": "Sehen Sie das vollständige Bild",
+      "step2Body": "Vermögenswerte minus Verbindlichkeiten, aktuell. WonderMoney zeigt Ihr Vermögen in einer einzigen ruhigen Zahl — keine Tabellen, keine Mathematik.",
+      "step3Title": "Beobachten Sie das Wachstum",
+      "step3Body": "Ein 6-Monats-Verlaufsdiagramm verfolgt die Entwicklung Ihres Vermögens. Geht rauf, geht runter, keine Überraschungen.",
+      "benefitsTitle": "Was Sie mit WonderMoney Vermögen machen können",
+      "benefit1": "Eine Zahl für Ihr gesamtes Finanzleben",
       "benefit2": "Vermögenswerte und Verbindlichkeiten in einer Ansicht",
       "benefit3": "6-Monats-Verlaufsdiagramm zur Fortschrittsverfolgung",
       "benefit4": "Ruhig nach Design — nie Geld bewegt, nie etwas verkauft",
       "faqTitle": "Häufig gestellte Fragen",
       "faq1Q": "Was bedeutet \"Vermögen\" in WonderMoney?",
-      "faq1A": "Dein Vermögen ist die Summe aller deiner Vermögenswerte (Bankkonten, Investitionen) minus deiner Verbindlichkeiten (Kredite, Kreditkarten). WonderMoney berechnet es automatisch aus deinen verbundenen Konten.",
+      "faq1A": "Ihr Vermögen ist die Summe aller Ihrer Vermögenswerte (Bankkonten, Investitionen) minus Ihrer Verbindlichkeiten (Kredite, Kreditkarten). WonderMoney berechnet es automatisch aus Ihren verbundenen Konten.",
       "faq2Q": "Wie oft wird mein Vermögen aktualisiert?",
-      "faq2A": "WonderMoney aktualisiert das Vermögen, wenn deine verbundenen Konten aktualisiert werden — normalerweise einmal täglich für Banksalden und häufiger für Investitionsportfolios. Das Verlaufsdiagramm verwendet monatliche Schnappschüsse.",
+      "faq2A": "WonderMoney aktualisiert das Vermögen, wenn Ihre verbundenen Konten aktualisiert werden — normalerweise einmal täglich für Banksalden und häufiger für Investitionsportfolios. Das Verlaufsdiagramm verwendet monatliche Schnappschüsse.",
       "faq3Q": "Kann ich Konten von meinem Vermögen ausschließen?",
       "faq3A": "Ja. Jedes Konto, Portfolio und jeder Kredit kann einzeln ein- oder ausgeschlossen werden. Das Dashboard zeigt die Gesamtsumme mit angewendetem Ausschluss.",
-      "ctaHeadline": "Sieh heute dein Vermögen",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst.",
+      "ctaHeadline": "Sehen Sie heute Ihr Vermögen",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst.",
       "schemaName": "WonderMoney Vermögensverfolgung",
-      "schemaDescription": "Sieh dein vollständiges finanzielles Bild an einem Ort. WonderMoney vereint Konten, Investitionen und Schulden in einer einzigen Vermögenszahl. Kostenlos und Open Source."
+      "schemaDescription": "Sehen Sie Ihr vollständiges finanzielles Bild an einem Ort. WonderMoney vereint Konten, Investitionen und Schulden in einer einzigen Vermögenszahl. Kostenlos und Open Source."
     },
     "featureFinancialMarkets": {
       "eyebrow": "Finanzmärkte",
       "metaTitle": "Finanzmarkt-Tracking für Europa — WonderMoney",
-      "metaDescription": "Erkunde Aktien, ETFs und Watchlists. WonderMoney bringt aktuelle Marktdaten, Fundamentaldaten und Quartalszahlen in dein Finanz-Dashboard. Kostenlos und Open Source.",
-      "heroTitle": "Der Markt, in deinem Dashboard",
-      "heroSubtitle": "WonderMoney bringt aktuelle Marktdaten, Fundamentaldaten und Quartalszahlen an denselben Ort wie deine Konten und dein Vermögen. Erkunden, beobachten, entscheiden — alles an einem Ort.",
+      "metaDescription": "Erkunden Sie Aktien, ETFs und Watchlists. WonderMoney bringt aktuelle Marktdaten, Fundamentaldaten und Quartalszahlen in Ihr Finanz-Dashboard. Kostenlos und Open Source.",
+      "heroTitle": "Der Markt, in Ihrem Dashboard",
+      "heroSubtitle": "WonderMoney bringt aktuelle Marktdaten, Fundamentaldaten und Quartalszahlen an denselben Ort wie Ihre Konten und Ihr Vermögen. Erkunden, beobachten, entscheiden — alles an einem Ort.",
       "howTitle": "Wie Finanzmärkte in WonderMoney funktionieren",
-      "step1Title": "Suche nach jedem Ticker",
-      "step1Body": "Suche Aktien und ETFs nach Ticker. WonderMoney liefert Echtzeitpreise, Fundamentaldaten und eine 52-Wochen-Spanne — alles in einer sauberen, schnellen Ansicht.",
-      "step2Title": "Durchsuche den Markt",
-      "step2Body": "Filtere nach Marktkapitalisierung, Branche, Land und mehr. Finde die Aktien, die zu deiner Strategie passen, schnell, nicht in einer Tabelle.",
-      "step3Title": "Baue eine Watchlist auf",
-      "step3Body": "Füge Ticker zu deiner Watchlist hinzu und WonderMoney behält sie im Blick. Bei jedem Besuch ist deine Watchlist das Erste, was du siehst.",
-      "benefitsTitle": "Was du mit WonderMoney Finanzmärkten machen kannst",
-      "benefit1": "Suche nach jedem Ticker für Echtzeitdaten",
-      "benefit2": "Durchsuche den Markt mit reichhaltigen Filtern",
-      "benefit3": "Baue eine Watchlist auf, die dir folgt",
-      "benefit4": "Sieh Fundamentaldaten: KGV, Beta, Dividendenrendite",
+      "step1Title": "Suchen Sie nach jedem Ticker",
+      "step1Body": "Suchen Sie Aktien und ETFs nach Ticker. WonderMoney liefert Echtzeitpreise, Fundamentaldaten und eine 52-Wochen-Spanne — alles in einer sauberen, schnellen Ansicht.",
+      "step2Title": "Durchsuchen Sie den Markt",
+      "step2Body": "Filtern Sie nach Marktkapitalisierung, Branche, Land und mehr. Finden Sie die Aktien, die zu Ihrer Strategie passen, schnell, nicht in einer Tabelle.",
+      "step3Title": "Bauen Sie eine Watchlist auf",
+      "step3Body": "Fügen Sie Ticker zu Ihrer Watchlist hinzu und WonderMoney behält sie im Blick. Bei jedem Besuch ist Ihre Watchlist das Erste, was Sie sehen.",
+      "benefitsTitle": "Was Sie mit WonderMoney Finanzmärkten machen können",
+      "benefit1": "Suchen Sie nach jedem Ticker für Echtzeitdaten",
+      "benefit2": "Durchsuchen Sie den Markt mit reichhaltigen Filtern",
+      "benefit3": "Bauen Sie eine Watchlist auf, die Ihnen folgt",
+      "benefit4": "Sehen Sie Fundamentaldaten: KGV, Beta, Dividendenrendite",
       "faqTitle": "Häufig gestellte Fragen",
       "faq1Q": "Welche Märkte deckt WonderMoney ab?",
       "faq1A": "WonderMoney verfolgt Aktien und ETFs an den wichtigsten globalen Börsen, mit täglich aktualisierten Tagesschlusskursen — ohne manuelle Eingabe.",
@@ -6424,40 +6530,40 @@
       "faq2A": "Ja. WonderMoney zeigt historische Preisdaten pro Ticker, mit optionalen Dividendenüberlagerungen. Der Zeitraum kann bis zu 20 Jahre umfassen.",
       "faq3Q": "Sind die Daten live oder verzögert?",
       "faq3A": "WonderMoney zeigt während der US-Handelszeiten nahezu Echtzeitpreise und außerhalb der Handelszeiten Schlusskurs-Schnappschüsse. Watchlists werden aktualisiert, sobald neue Preise eintreffen.",
-      "ctaHeadline": "Erkunde den Markt noch heute",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst.",
+      "ctaHeadline": "Erkunden Sie den Markt noch heute",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst.",
       "schemaName": "WonderMoney Finanzmärkte",
-      "schemaDescription": "Erkunde Aktien, ETFs und Watchlists. WonderMoney bringt aktuelle Marktdaten und Fundamentaldaten in dein Finanz-Dashboard. Kostenlos und Open Source."
+      "schemaDescription": "Erkunden Sie Aktien, ETFs und Watchlists. WonderMoney bringt aktuelle Marktdaten und Fundamentaldaten in Ihr Finanz-Dashboard. Kostenlos und Open Source."
     },
     "featureCredits": {
       "eyebrow": "Kredite",
       "metaTitle": "Kredit- und Schulden-Tracking für Europa — WonderMoney",
-      "metaDescription": "Sieh alle deine Kredite an einem Ort — Hypotheken, Autokredite, Kreditkarten, Studienkredite. WonderMoney verfolgt jede Rate und jeden Zinssatz.",
+      "metaDescription": "Sehen Sie alle Ihre Kredite an einem Ort — Hypotheken, Autokredite, Kreditkarten, Studienkredite. WonderMoney verfolgt jede Rate und jeden Zinssatz.",
       "heroTitle": "Jeder Kredit an einem Ort",
-      "heroSubtitle": "Sieh deine Gesamtschuld, verfolge jede Rate und plane deine Tilgung. WonderMoney macht Schulden ohne Tabelle sichtbar.",
+      "heroSubtitle": "Sehen Sie Ihre Gesamtschuld, verfolgen Sie jede Rate und planen Sie Ihre Tilgung. WonderMoney macht Schulden ohne Tabelle sichtbar.",
       "howTitle": "Wie WonderMoney-Kredite funktionieren",
-      "step1Title": "Füge deine Kredite hinzu",
-      "step1Body": "Hypotheken, Autokredite, Kreditkarten, Studienkredite — füge jeden Kredit mit Guthaben, Zinssatz und Laufzeit hinzu.",
-      "step2Title": "Sieh deine Gesamtschuld",
+      "step1Title": "Fügen Sie Ihre Kredite hinzu",
+      "step1Body": "Hypotheken, Autokredite, Kreditkarten, Studienkredite — fügen Sie jeden Kredit mit Guthaben, Zinssatz und Laufzeit hinzu.",
+      "step2Title": "Sehen Sie Ihre Gesamtschuld",
       "step2Body": "WonderMoney aggregiert jeden Kredit in einer klaren Ansicht. Schluss mit der Jagd durch Bank-Apps.",
-      "step3Title": "Plane deine Tilgung",
-      "step3Body": "Sieh, wie Sondertilgungen deinen Zeitplan verändern. WonderMoney zeigt den Weg, nicht nur das Guthaben.",
-      "benefitsTitle": "Was du mit WonderMoney-Krediten tun kannst",
-      "benefit1": "Sieh Gesamtschulden in einer Ansicht",
-      "benefit2": "Verfolge jede Rate und jeden Zinssatz",
-      "benefit3": "Plane deinen Tilgungszeitplan",
+      "step3Title": "Planen Sie Ihre Tilgung",
+      "step3Body": "Sehen Sie, wie Sondertilgungen Ihren Zeitplan verändern. WonderMoney zeigt den Weg, nicht nur das Guthaben.",
+      "benefitsTitle": "Was Sie mit WonderMoney-Krediten tun können",
+      "benefit1": "Sehen Sie Ihre Gesamtschulden in einer Ansicht",
+      "benefit2": "Verfolgen Sie jede Rate und jeden Zinssatz",
+      "benefit3": "Planen Sie Ihren Tilgungszeitplan",
       "benefit4": "Nur-Lese nach Design",
       "faqTitle": "Häufig gestellte Fragen",
       "faq1Q": "Welche Kreditarten unterstützt WonderMoney?",
       "faq1A": "Hypotheken, Autokredite, Privatkredite, Studienkredite und andere Kredite.",
       "faq2Q": "Sind meine Daten sicher?",
-      "faq2A": "WonderMoney nutzt Nur-Lese-Open-Banking. Wir können keine Zahlungen auslösen, und deine Bankzugangsdaten werden bei deiner Bank eingegeben, nicht bei uns.",
+      "faq2A": "WonderMoney nutzt Nur-Lese-Open-Banking. Wir können keine Zahlungen auslösen, und Ihre Bankzugangsdaten werden bei Ihrer Bank eingegeben, nicht bei uns.",
       "faq3Q": "Führt WonderMoney Zahlungen für mich durch?",
-      "faq3A": "Nein. WonderMoney ist ein Tracker und Planer. Du führst Zahlungen immer über deine Bank durch, zu deinen Bedingungen.",
-      "ctaHeadline": "Übernimm heute die Kontrolle über deine Schulden",
-      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutze es auf wonder.money oder betreibe es selbst.",
+      "faq3A": "Nein. WonderMoney ist ein Tracker und Planer. Sie führen Zahlungen immer über Ihre Bank durch, zu Ihren Bedingungen.",
+      "ctaHeadline": "Übernehmen Sie heute die Kontrolle über Ihre Schulden",
+      "ctaBody": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money oder betreiben Sie es selbst.",
       "schemaName": "WonderMoney Kredit-Tracking",
-      "schemaDescription": "Sieh alle deine Kredite an einem Ort. Hypotheken, Autokredite, Kreditkarten, Studienkredite. Kostenlos und Open Source."
+      "schemaDescription": "Sehen Sie alle Ihre Kredite an einem Ort. Hypotheken, Autokredite, Kreditkarten, Studienkredite. Kostenlos und Open Source."
     },
     "trademarks": {
       "tmYnab": "YNAB ist eine Marke von You Need A Budget LLC. WonderMoney ist nicht mit YNAB verbunden und wird nicht von YNAB unterstützt.",
@@ -6496,7 +6602,7 @@
       "faq1Q": "Was unterscheidet WonderMoney von anderen Apps für persönliche Finanzen?",
       "faq1A": "Die meisten Apps für persönliche Finanzen können nur eine Sache — Budget, Vermögen oder Investment-Tracking. WonderMoney vereint Kontosynchronisation über Open Banking, Budgetierung nach Kategorien, Vermögens- und Portfolio-Tracking in einer App, zu einem Preis für den Alltag.",
       "faq2Q": "Kann ich WonderMoney kostenlos testen?",
-      "faq2A": "Ja. WonderMoney ist auf wonder.money kostenlos, und du kannst es auch auf deinem eigenen Server betreiben.",
+      "faq2A": "Ja. WonderMoney ist auf wonder.money kostenlos, und Sie können es auch auf Ihrem eigenen Server betreiben.",
       "faq3Q": "Welche Banken unterstützt WonderMoney?",
       "faq3A": "WonderMoney verbindet sich über Enable Banking mit den meisten Banken in Europa, mit kontinuierlich wachsender Abdeckung.",
       "faq4Q": "Können mein Partner oder meine Partnerin und ich uns ein Konto teilen?",
@@ -6539,7 +6645,7 @@
       "faq3A": "WonderMoney nutzt Enable Banking, ein registrierter Kontoinformationsdienstleister, reguliert von der finnischen Finanzaufsichtsbehörde (FIN-FSA), einen der etabliertesten Anbieter von Open-Banking-Infrastruktur in Europa.",
       "faq4Q": "Was passiert, wenn ich meine Bank trenne?",
       "faq4A": "Sie können den Zugriff jederzeit widerrufen — über WonderMoney oder direkt über die App Ihrer Bank. Bereits synchronisierte historische Daten bleiben in Ihrem Konto, sofern Sie sie nicht löschen.",
-      "ctaHeadline": "Verbinden Sie Ihre Bankkonten auf Sichere Weise",
+      "ctaHeadline": "Verbinden Sie Ihre Bankkonten auf sichere Weise",
       "ctaBody": "Verbinden Sie Ihre Konten über Open Banking und lassen Sie WonderMoney Ihr Finanzbild automatisch aktuell halten. Kostenlos und Open Source."
     },
     "budgetApp": {
@@ -6576,7 +6682,7 @@
       "faq3Q": "Kann ich mit meinem Partner oder meiner Partnerin gemeinsam budgetieren?",
       "faq3A": "Ja. Der Haushaltsmodus ermöglicht es zwei Personen, Budgets, Kategorien und Konten an einem Ort zu teilen, wobei die Abrechnung über einen einzigen Plan läuft.",
       "faq4Q": "Kann ich WonderMoney kostenlos testen?",
-      "faq4A": "Ja. WonderMoney ist auf wonder.money kostenlos, und du kannst es auch auf deinem eigenen Server betreiben.",
+      "faq4A": "Ja. WonderMoney ist auf wonder.money kostenlos, und Sie können es auch auf Ihrem eigenen Server betreiben.",
       "ctaHeadline": "Starten Sie mit Budgetierung Ohne Manuellen Aufwand",
       "ctaBody": "Verbinden Sie Ihre Bankkonten und lassen Sie WonderMoney Ihr Budget automatisch verfolgen. Kostenlos und Open Source."
     },
@@ -6665,7 +6771,7 @@
       "inflation": "Strichzeichnung einer Waage mit Münzen auf der einen und einem Einkaufskorb auf der anderen Seite, die sich mit steigenden Preisen neigt.",
       "doorchain": "Strichzeichnung einer Tür mit Sicherheitskette: Sie öffnet sich zum Nachsehen, nicht zum Hereinlassen.",
       "taxwedge": "Strichzeichnung eines Münzstapels, wie eine Torte angeschnitten, mit einem Stück, der Steuer, beiseitegelegt.",
-      "scale": "Strichzeichnung einer Waage, die dein Vermögen gegen deine Schulden abwägt.",
+      "scale": "Strichzeichnung einer Waage, die Ihr Vermögen gegen Ihre Schulden abwägt.",
       "timer": "Strichzeichnung einer Küchenuhr, auf zehn Minuten gestellt.",
       "containers": "Strichzeichnung eines Regals mit Behältern, von einer offenen Schale bis zu einem verschlossenen Tresor.",
       "booklets": "Strichzeichnung von Ratgeberheften, die in einem Ständer lehnen.",
@@ -6683,7 +6789,7 @@
       "pump": "Strichzeichnung einer Zapfsäule auf ihrer Insel, deren Zapfpistole am Schlauch aus der Halterung gehoben wird, während die Füllanzeige steigt.",
       "wallet": "Strichzeichnung einer aufgeklappten Geldbörse mit drei Karten in gestuften Fächern, von denen eine herausgleitet.",
       "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt.",
-      "deckchair": "Strichzeichnung eines Liegestuhls neben einem Münzstapel, der zu einer gestrichelten Münze aufsteigt, der Summe, die deine Ausgaben auf Dauer trägt; erreicht der Stapel sie, lehnt sich der Stuhl zurück."
+      "deckchair": "Strichzeichnung eines Liegestuhls neben einem Münzstapel, der zu einer gestrichelten Münze aufsteigt, der Summe, die Ihre Ausgaben auf Dauer trägt; erreicht der Stapel sie, lehnt sich der Stuhl zurück."
     }
   }
 }

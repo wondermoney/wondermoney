@@ -40,6 +40,9 @@ const link = "font-medium text-primary underline decoration-primary/40 underline
 ---
 
 <ToolGuide>
+  <p role="note" class="rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
+    {t("tools.youthMortgage.deadlineNotice")}
+  </p>
   <section aria-labelledby="youth-mortgage-example">
     <h2 id="youth-mortgage-example" class="text-2xl font-semibold tracking-tight text-foreground">
       {t(k("exampleTitle"))}
@@ -62,6 +65,8 @@ const link = "font-medium text-primary underline decoration-primary/40 underline
       <a href={YOUTH_GUARANTEE.sources.government} class={link}>{t(k("sourceGovernment"))}</a>
       {" · "}
       <a href={YOUTH_GUARANTEE.sources.literacia} class={link}>{t(k("sourceLiteracia"))}</a>
+      {" · "}
+      <a href={YOUTH_GUARANTEE.sources.portaria} rel="noopener" class={link}>{t(k("sourcePortaria"))}</a>
     </p>
     <p class="mt-4 text-sm">{t(k("review"), values)}</p>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>

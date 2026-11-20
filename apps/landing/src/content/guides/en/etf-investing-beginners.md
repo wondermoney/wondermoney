@@ -4,6 +4,8 @@ excerpt: Understand ETF basics, costs, and a beginner-friendly approach to long-
 category: investing
 publishedAt: 2026-03-01T09:30:00.000Z
 relatedCalculators:
+  - investment-return-calculator
+  - broker-fees
   - compound-interest-calculator
 relatedTerms:
   - etf

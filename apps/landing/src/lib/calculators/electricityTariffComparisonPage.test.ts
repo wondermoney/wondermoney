@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
+import { OMIE_PRICES_SOURCE } from "./data/omiePrices"
 import { getToolStaticPaths } from "../pageStaticPaths"
 import {
 	SUPPORTED_LANGS,
@@ -153,14 +154,43 @@ describe("electricity tariff comparison page", () => {
 		expect(pt).not.toMatch(/(?<!\p{L})(?:você|seu|sua|seus|suas)(?!\p{L})/iu)
 	})
 
-	it("reports use without inputs or results, stores nothing and fetches nothing but its own offers chunk", () => {
+	it("addresses the de reader as Sie", () => {
+		const de = JSON.stringify(readLocale("src/locales", "de").tools.electricityTariffComparison)
+		expect(de).not.toMatch(/(?<!\p{L})(?:du|dein|deine|deinen|deinem|deiner|dir|dich)(?!\p{L})/iu)
+	})
+
+	it("reports use without inputs or results, stores nothing and fetches only its own data files", () => {
 		const files = ["ElectricityTariffComparisonComp.tsx", "ElectricityTariffResults.tsx", "ElectricitySolarPanel.tsx"].map((name) =>
 			readSource(`../../components/calculators/${name}`),
 		)
 		expect(files[0]).toContain(
 			'pushGtmEvent({ event: "tool_used", tool: "electricity_tariff_comparison", page_type: getPageType() })',
 		)
-		for (const source of files) expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest/)
+		// The one fetch: the OMIE quarter-hour prices, a static file on the site's own origin, a plain
+		// GET that sends nothing of the visitor's.
+		expect(files[0].match(/fetch\(/g)).toHaveLength(1)
+		expect(files[0]).toContain("const response = await fetch(path);")
+		expect(OMIE_PRICES_SOURCE.quarterHoursPath).toMatch(/^\/data\/[\w-]+\.json$/)
+		const others = [files[0].replace("await fetch(path)", ""), ...files.slice(1)]
+		for (const source of others) expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest/)
+	})
+
+	it("reads the invoice PDF in the browser, with pdf.js loaded only when a file is chosen and nothing sent", () => {
+		const reader = readSource("./invoicePdf.ts")
+		expect(reader).toContain('import("pdfjs-dist/legacy/build/pdf.mjs")')
+		expect(reader).toContain('import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")')
+		expect(reader).not.toMatch(/cMapUrl|standardFontDataUrl|wasmUrl|iccUrl/)
+		const sources = [
+			reader,
+			readSource("./electricityInvoice.ts"),
+			readSource("../../components/calculators/ElectricityInvoiceUpload.tsx"),
+			// Its one fetch, the site's own OMIE price file, is checked in the test above.
+			readSource("../../components/calculators/ElectricityTariffComparisonComp.tsx").replace("await fetch(path)", ""),
+		]
+		for (const source of sources) {
+			expect(source).not.toMatch(/^import[^;]*pdfjs-dist/m)
+			expect(source).not.toMatch(/localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|sendBeacon/)
+		}
 	})
 
 	it("uses no data or text from tiagofelicia.pt", () => {

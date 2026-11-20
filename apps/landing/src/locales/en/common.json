@@ -2461,6 +2461,7 @@
       "checkIntro": "Informational only. This list shows which conditions the answers below meet; it does not say whether you are eligible. The bank and the State decide.",
       "checkSummary": "{{met}} of {{total}} conditions met by your answers.",
       "checkNote": "Conditions reviewed on {{date}}. The guarantee covers up to {{percent}}% of the transaction value, so financing can reach 100%. It does not change the interest rate.",
+      "deadlineNotice": "The State guarantee for buyers up to 35 only covers loan contracts signed by 31 December 2026. This page will be updated once the rules for 2027 are known.",
       "estimateTitle": "2. Estimate your mortgage and cash needed",
       "years": "years",
       "fields": {
@@ -2528,9 +2529,10 @@
         "conditionProperty": "You do not own, in whole or in part, another residential property.",
         "conditionPrice": "The home costs up to {{maxPrice}} (the bank valuation can lower the transaction value).",
         "conditionIncome": "Income up to the 8th IRS bracket: {{maxIncome}} a year in 2026 (it was 83,696 euros in 2025).",
-        "conditionDate": "Only loan contracts signed by 31 December 2026 qualify, and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
+        "conditionDate": "Only loan contracts signed by 31 December 2026 qualify (art. 5(4) of Portaria n.º 236-A/2024/1), and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
         "sourceGovernment": "Portuguese Government: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "sourcePortaria": "Portaria n.º 236-A/2024/1, art. 5(4), consolidated version in the Diário da República: contracts signed by 31 December 2026",
         "review": "Conditions last reviewed on {{date}}. The 2026 income limit is the upper limit of the 8th IRS bracket in article 68 of the IRS Code, updated by 3.51% by Lei 73-A/2025 (State Budget 2026). Banks decide on each application.",
         "assumptionsTitle": "Assumptions and limits",
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
@@ -2707,9 +2709,10 @@
         "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
         "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
-        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRate}}, the ceiling), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRateNote}}), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
-        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
+        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings.",
+        "referenceRateAtCeiling": "{{rate}}, the ceiling"
       },
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
@@ -3266,17 +3269,23 @@
         "allowances": "Allowances",
         "sickDays": "Days of sick leave",
         "dependants": "Children up to 16 (or 24 with child benefit)",
+        "disabilityBonus": "Does your household receive the disability bonus for a child or dependant?",
         "hospitalisation": "Hospital stay or outpatient surgery"
       },
       "allowanceOptions": {
         "fourteen": "14 payments (holiday and Christmas paid separately)",
         "twelfths": "In twelfths (the salary already includes them)"
       },
+      "disabilityBonusOptions": {
+        "no": "No",
+        "yes": "Yes"
+      },
       "help": {
         "gross": "The base salary in the months counted, before Social Security and IRS. Holiday and Christmas allowances are not part of the reference pay.",
         "allowances": "In twelfths, the calculator takes out the two allowances to get the base salary the reference pay uses.",
         "sickDays": "Total days on the sick note (CIT), counted from the first day. Employees can receive up to 1,095 days.",
-        "dependants": "Used for the 5-point increase, which applies with 3 or more children, or when the reference pay is 500 euros a month or less.",
+        "dependants": "Used for the 5-point increase, which applies with 3 or more children, with the disability bonus, or when the reference pay is 500 euros a month or less.",
+        "disabilityBonus": "The bonificação por deficiência, paid with child benefit (abono de família) for a descendant with a disability. It also gives the 5-point increase, whatever the reference pay.",
         "hospitalisation": "With a hospital stay or outpatient surgery the benefit is paid from day 1, with no waiting period."
       },
       "errors": {
@@ -3299,7 +3308,7 @@
         "bandsTitle": "By duration band",
         "bandLabel": "Days {{from}} to {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} paid days × {{daily}} = {{amount}}",
-        "increaseApplied": "The 5-point increase (reference pay of 500 euros or less, or 3 or more children) is included.",
+        "increaseApplied": "The 5-point increase (reference pay of 500 euros or less, 3 or more children, or the disability bonus) is included.",
         "allWaiting": "Every day of this leave is a waiting day, so Segurança Social pays nothing. Check whether your contract or collective agreement makes your employer pay these days.",
         "waitingNote": "Segurança Social does not pay the first 3 days. Whether your employer pays them depends on your contract or collective agreement.",
         "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
@@ -3327,7 +3336,7 @@
         "methodBands": "The daily benefit is a percentage of the RR that grows with the length of the leave: 55% up to 30 days, 60% from day 31 to 90, 70% from day 91 to 365 and 75% beyond that, up to 1,095 days for employees. The days count from the first day of the leave, waiting days included.",
         "methodWaiting": "Employees have a waiting period of 3 days that Segurança Social does not pay. With a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it, payment starts on day 1.",
         "methodMinimum": "The daily benefit cannot be below {{min}} (30% of the {{rmmg}} minimum wage). If the RR itself is lower, the benefit equals the RR.",
-        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when any one of these applies (art. 17 of Decree-Law 28/2004): the RR is at most 500 euros a month, the household has 3 or more children up to 16 (or 24 with child benefit), or the household has children with the disability bonus. The conditions are alternatives, not cumulative. The calculator models the first two and does not model the disability bonus.",
+        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when any one of these applies (art. 17(1) of Decree-Law 28/2004): the RR is at most 500 euros a month, the household has 3 or more children up to 16 (or 24 with child benefit), or the household has children who receive the disability bonus on child benefit. The conditions are alternatives, and the 5 points are added once even when more than one applies (art. 17(3)). The calculator asks about all three.",
         "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
         "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
         "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
@@ -3338,7 +3347,7 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, with the disability bonus condition in art. 17(1)(c))",
         "reviewed": "Rules and 2026 values reviewed on 20 November 2026 against the Segurança Social guide and the consolidated text of Decreto-Lei n.º 28/2004 in the Diário da República. The three alternative conditions for the 5-point increase and the floor above 500 euros come from art. 17. Art. 17(4) says the 500 euro figure is updated with the IAS, but we found no act that publishes an updated figure, and the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
         "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },
@@ -3400,7 +3409,14 @@
         "dieselSurcharge": "Diesel surcharge (not multiplied by the coefficient)",
         "scheduleTitle2028": "From 2028: payment schedule",
         "totalAnnualTax": "Total IUC for the instalment thresholds",
-        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment."
+        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment.",
+        "annualTaxAll": "Estimated annual IUC, all vehicles",
+        "perVehicleTitle": "IUC per vehicle",
+        "vehicleRow": "{{name}} (category {{category}})",
+        "vehicleRowExempt": "{{name}} (exempt)",
+        "scheduleTitle2026": "2026: due in each car's registration anniversary month",
+        "scheduleTotalNote": "From 2027 the months follow your total of {{total}} across these vehicles; each amount adds up every car's share.",
+        "scheduleTotalOtherNote": "From 2027 the months follow your total of {{total}}, including the other IUC you entered; the amounts cover only the vehicles listed here."
       },
       "guide": {
         "exampleTitle": "Worked example",
@@ -3419,7 +3435,7 @@
         "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
-        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 give this car's share of each instalment; the months follow the total of all your vehicles, which you can enter as other IUC (the law applies its thresholds to that total). Without it, the calculator assumes this is your only vehicle. In the year of registration the tax is paid within 30 days of the registration deadline.",
+        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. From 2027 the tax is assessed per taxpayer across all their vehicles: add each of your cars, and enter the IUC of any other vehicles as other IUC, so the instalment months follow your total (the law applies its thresholds to that total). The schedules for 2027 and 2028 give each month's amount for the cars you added; with one car, its share of each instalment. In the year of registration the tax is paid within 30 days of the registration deadline.",
         "assumptionEducational": "This is an educational estimate, not tax advice. The amount on the notice from the Tax Authority is the one that counts.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
@@ -3433,7 +3449,16 @@
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
       "nextStepCta": "Set aside one twelfth of your annual car tax",
-      "otherIucHelp": "The yearly IUC of all your other vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if this is your only vehicle."
+      "otherIucHelp": "The yearly IUC of any vehicles you have not added above, such as motorcycles or goods vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if you have added all your vehicles.",
+      "vehicles": {
+        "label": "Car {{n}}",
+        "name": "Name (optional)",
+        "add": "Add another vehicle",
+        "removeShort": "Remove",
+        "remove": "Remove {{name}}",
+        "removed": "{{name}} removed.",
+        "max": "You can add up to {{max}} vehicles."
+      }
     },
     "propertyCapitalGains": {
       "title": "Property capital gains calculator",
@@ -3640,7 +3665,10 @@
         "startDate": "Contract start date",
         "endDate": "Termination date",
         "contractType": "Type of termination",
-        "fixedTermKind": "Kind of term"
+        "fixedTermKind": "Kind of term",
+        "renewals": "Number of renewals (optional)",
+        "initialMonths": "First period, in months (optional)",
+        "earlierMonths": "Earlier contracts for the same job, in months (optional)"
       },
       "help": {
         "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
@@ -3649,7 +3677,10 @@
         "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}.",
         "contractType": "Dismissal covers a collective dismissal, extinction of the post or unsuitability. Expiry is the end of a fixed-term contract, of certain or uncertain term (arts. 344 and 345 of the Código do Trabalho). It is not due when the contract ends because you declared you would not renew it.",
         "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year.",
-        "fixedTermKind": "It sets the maximum duration: 2 years with a certain term, 4 with an uncertain term (art. 148). The compensation is the same, 24 days a year."
+        "fixedTermKind": "It sets the maximum duration: 2 years with a certain term, 4 with an uncertain term (art. 148). The compensation is the same, 24 days a year.",
+        "renewals": "How many times the contract was renewed. A certain-term contract can be renewed at most three times (art. 149(4)). Leave it empty if it never was.",
+        "initialMonths": "The period agreed when the contract was signed, before any renewal. The renewals together cannot last longer than it (art. 149(4)).",
+        "earlierMonths": "Earlier fixed-term contracts or temporary agency work in the same job, and service contracts for the same work, with the same employer or a company in its group. They count towards the maximum duration (art. 148(6)). Leave it empty if there were none."
       },
       "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: dismissal with just cause, unlawful dismissal, mutual agreement and the public sector. For the end of a fixed-term contract, choose expiry of a fixed-term contract.",
       "errors": {
@@ -3660,7 +3691,8 @@
         "endBeforeStart": "The termination date cannot be before the start date.",
         "startFuture": "The contract cannot start in the future.",
         "endOutsideYear": "This estimate covers terminations in {{year}}, the year whose minimum wage the caps use.",
-        "summary": "Check the highlighted fields to see your estimate."
+        "summary": "Check the highlighted fields to see your estimate.",
+        "wholeNumber": "Enter a whole number from {{min}} to {{max}}, or leave it empty."
       },
       "result": {
         "compensation": "Estimated compensation",
@@ -3723,7 +3755,7 @@
         "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and its art. 35(2) limits only the 14 days of art. 366(1) to the time from that date. The IGeFE note of 5 July 2023 reads this as 24 days for every contract that expires from 1 May 2023: its example of a contract from 1 September 2021 to 31 August 2023 counts all 730 days at 24 days. So the whole duration counts at 24 days, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply. A fixed-term contract lasts at most two years, or four with an uncertain term (art. 148), so one that keeps to those limits and expires in 2026 was not signed before 1 October 2013 and the transitional rules of art. 6 of Lei n.º 69/2013 do not apply.",
         "sourceLaw13Text": "Lei n.º 13/2023, of 3 April (Diário da República): new wording of arts. 344(2), 345(4) and 366(1) of the Código do Trabalho and art. 35 on its application in time",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date",
-        "methodDurationLimit": "Maximum duration (art. 148 of the Código do Trabalho, as amended by Lei n.º 93/2019): 2 years with a certain term, renewals included, and 4 years with an uncertain term. A certain-term contract can be renewed up to three times, and the renewals together cannot last longer than the first period (art. 149(4)). Earlier fixed-term contracts and temporary agency work in the same job, and service contracts for the same work, with the same employer also count towards the 2 years (art. 148(6)). Contracts signed before 1 October 2019 keep the earlier limits (art. 11(4) of Lei n.º 93/2019): 3 years with a certain term (18 months for a first job seeker and 2 years in the other cases of art. 140(4)) and 6 years with an uncertain term; the calculator takes the start date as the signing date. When the dates pass the limit, the calculator warns that the contract would likely be open-ended (art. 147(2)(b)) and that ending it would be a dismissal, but still shows the expiry figure. It cannot see renewals or earlier contracts, so check those yourself.",
+        "methodDurationLimit": "Maximum duration (art. 148 of the Código do Trabalho, as amended by Lei n.º 93/2019): 2 years with a certain term, renewals included, and 4 years with an uncertain term. A certain-term contract can be renewed up to three times, and the renewals together cannot last longer than the first period (art. 149(4)). Earlier fixed-term contracts and temporary agency work in the same job, and service contracts for the same work, with the same employer also count towards the 2 years (art. 148(6)). Contracts signed before 1 October 2019 keep the earlier limits (art. 11(4) of Lei n.º 93/2019): 3 years with a certain term (18 months for a first job seeker and 2 years in the other cases of art. 140(4)) and 6 years with an uncertain term; the calculator takes the start date as the signing date. When the dates pass the limit, the calculator warns that the contract would likely be open-ended (art. 147(2)(b)) and that ending it would be a dismissal, but still shows the expiry figure. For a certain-term contract you can also enter the number of renewals, the length of the first period and the months of earlier contracts for the same job, and the warning then covers those rules too: more than three renewals, renewals longer in total than the first period (art. 147(2)(a)), or earlier contracts that bring the 2-year limit forward. Contracts signed before 1 October 2019 could be renewed three times with no limit on how long the renewals last (initial wording of art. 148(1)), and earlier contracts count towards their 3 years (initial wording of art. 148(5)). Earlier contracts do not count towards the limit of an uncertain term.",
         "sourceLaw93": "Lei n.º 93/2019, of 4 September (Diário da República): new wording of arts. 148 and 149 of the Código do Trabalho, its application in time (art. 11(4)) and entry into force on 1 October 2019 (art. 13)",
         "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), with its initial 2009 wording: the limits for contracts signed before 1 October 2019"
       },
@@ -3749,8 +3781,17 @@
           "certain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 3 years with a certain term, renewals included, and less in some cases (initial wording of art. 148(1)). With these dates, the limit was reached on {{date}}.",
           "uncertain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 6 years with an uncertain term (initial wording of art. 148(4)). With these dates, the limit was reached on {{date}}."
         },
-        "consequence": "A contract that passes its maximum duration converts into an open-ended contract (art. 147(2)(b)), with seniority counted from the first day (art. 147(3)). Ending it is then a dismissal, not an expiry, with different compensation rules; an employer that ends it only by letting the term run out may be dismissing unlawfully. The figure here is still the expiry compensation.",
-        "action": "Calculate as a dismissal on a permanent contract"
+        "consequence": "A contract that passes its maximum duration or the renewal limits converts into an open-ended contract (art. 147(2)(a) and (b)), with seniority counted from the first day (art. 147(3)). Ending it is then a dismissal, not an expiry, with different compensation rules; an employer that ends it only by letting the term run out may be dismissing unlawfully. The figure here is still the expiry compensation.",
+        "action": "Calculate as a dismissal on a permanent contract",
+        "earlier": {
+          "from2019": "The limit counts {{months}} of earlier contracts for the same job with the same employer (art. 148(6)).",
+          "before2019": "The limit counts {{months}} of earlier contracts for the same job with the same employer (initial wording of art. 148(5))."
+        },
+        "renewals": {
+          "from2019": "A certain-term contract can be renewed at most three times (art. 149(4) of the Código do Trabalho, as amended by Lei n.º 93/2019). This one was renewed {{count}} times.",
+          "before2019": "A certain-term contract signed before 1 October 2019 can be renewed at most three times (initial wording of art. 148(1), kept by art. 11(4) of Lei n.º 93/2019). This one was renewed {{count}} times."
+        },
+        "renewalLength": "The renewals together cannot last longer than the first period (art. 149(4)). With a first period of {{months}}, the contract could run until {{date}} at most."
       }
     },
     "statePension": {
@@ -4296,6 +4337,20 @@
         "newClient": "I would be a new client",
         "newClientHelp": "Counts the discounts suppliers give new clients in the first year."
       },
+      "indexed": {
+        "legend": "Indexed offers",
+        "range": "{{from}} to {{to}}",
+        "erse": "ERSE's estimate",
+        "market": "Real cost over the last 12 months with OMIE prices",
+        "marketDiagram": "Real cost on the dates of your consumption file with OMIE prices",
+        "help": "ERSE gives each indexed offer one price, the average of the next three months' futures. With OMIE prices, the offers whose supplier publishes its formula are priced with what the market really cost, on today's terms. The others stay on ERSE's estimate.",
+        "loading": "Loading OMIE prices…",
+        "loadError": "OMIE prices could not be loaded. Indexed offers stay on ERSE's estimate.",
+        "diagramLoadError": "OMIE's quarter-hour prices could not be loaded. The last 12 months are used instead.",
+        "diagramOutOfRange": "None of the days in your consumption file has OMIE prices loaded (only the last 12 months are). The last 12 months are used instead.",
+        "diagramShort": "Your consumption file covers {{months}} of the 12 months with OMIE prices; at least {{minimum}} are needed. The last 12 months are used instead.",
+        "coverage": "{{percent}}% of the consumption in your file falls on days with OMIE prices ({{period}}). The rest is priced at those days' average."
+      },
       "filters": {
         "title": "Filters",
         "summary": "(price type, supplier, conditions)",
@@ -4345,6 +4400,40 @@
         "yearlyLater": "In a year, taxes included.",
         "cheaper": "{{count}} offers cost less. The cheapest saves you {{saving}} a year.",
         "noneCheaper": "No offer in the list costs less than your tariff."
+      },
+      "invoice": {
+        "title": "Read my invoice (PDF)",
+        "intro": "Choose your supplier's PDF invoice and the comparator reads your contracted power, tariff option, kWh, days and prices.",
+        "label": "Invoice PDF",
+        "privacy": "The file stays on your device: it is read in this browser and never uploaded.",
+        "supported": "Reads PDF invoices from these suppliers: {{suppliers}}. Use the PDF the supplier sends, not a scan or a photo.",
+        "reading": "Reading the invoice…",
+        "found": "Read from the invoice ({{supplier}}):",
+        "fields": {
+          "power": "Contracted power",
+          "option": "Tariff option",
+          "cycle": "Hourly cycle",
+          "days": "Days billed",
+          "kwhSimple": "Consumption",
+          "kwh": "Consumption, {{period}}",
+          "powerPrice": "Power price",
+          "energyPriceSimple": "Energy price",
+          "energyPrice": "Energy price, {{period}}"
+        },
+        "check": "check",
+        "checkHelp": "Figures marked “check” were worked out, or come from an invoice layout we have no sample of: compare them with the invoice.",
+        "notes": "Prices before VAT and before discounts. Anything not listed stays as it is in the form.",
+        "apply": "Fill in the form",
+        "discard": "Discard",
+        "applied": "The form now holds your invoice's figures. Check them below and change any that differ.",
+        "errors": {
+          "unsupported": "We can't read this invoice's layout yet. The form was left as it was: enter the figures from the invoice below. We read invoices from these suppliers: {{suppliers}}.",
+          "noElectricity": "No household electricity figures were found in this invoice (it may be for gas or electric mobility only). The form was left as it was.",
+          "unreadable": "This file could not be read as a PDF. The form was left as it was.",
+          "encrypted": "This PDF is password-protected. Open it, save a copy without the password and choose that copy, or enter the figures below.",
+          "noText": "This PDF has no text to read (it may be a scan or a photo). Use the PDF the supplier sent, or enter the figures below.",
+          "tooLarge": "This file is larger than {{max}} MB, more than an invoice. The form was left as it was."
+        }
       },
       "solar": {
         "title": "Solar panels",
@@ -4445,6 +4534,12 @@
         "same": "Costs the same as your tariff",
         "details": "Breakdown and links",
         "estimatedNote": "Indexed price: ERSE's estimate for the coming months. What you pay follows the market.",
+        "estimatedLeft": "{{count}} indexed offers without a published formula stay on ERSE's estimate (3-month futures).",
+        "estimatedLeftOne": "1 indexed offer without a published formula stays on ERSE's estimate (3-month futures).",
+        "marketNote": "Energy priced with the supplier's published formula and OMIE prices from {{period}}, weighted by the E-REDES consumption profile, at today's network access tariffs.",
+        "marketDiagramNote": "Energy priced with the supplier's published formula and the OMIE price of each quarter-hour in your consumption file ({{period}}), at today's network access tariffs.",
+        "marketPrices": "Energy, before VAT: {{prices}}.",
+        "formulaLink": "Supplier's formula (read on {{date}})",
         "conditionsLabel": "Conditions, in ERSE's words",
         "links": {
           "offer": "Offer page",
@@ -4457,6 +4552,7 @@
       "badges": {
         "label": "Offer features",
         "estimated": "Estimated price",
+        "market": "Real cost (OMIE)",
         "regulated": "Regulated",
         "conditioned": "Conditioned",
         "dual": "With gas",
@@ -4493,20 +4589,30 @@
           "laterYears": "Later years (EUR)",
           "period": "Your period (EUR)",
           "estimated": "Estimated price",
+          "priceBasis": "Price basis",
           "saving": "Saving a year (EUR)",
           "link": "Link"
         },
         "yes": "yes",
-        "no": "no"
+        "no": "no",
+        "basis": {
+          "fixed": "Fixed price",
+          "erseEstimate": "ERSE estimate (3-month futures)",
+          "market": "OMIE real cost, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offers: ERSE, export of {{date}} ({{offers}} offers from {{suppliers}} suppliers and the regulated tariff).",
         "negotiation": "Prices are the published ones, before any personal negotiation. Confirm the offer with the supplier before you sign.",
         "indexed": "Indexed prices are ERSE's estimates for the coming months, not a fixed price.",
+        "indexedMarket": "Indexed offers with a published formula: real cost with OMIE's Portuguese prices from {{period}}, weighted by the E-REDES BTN C consumption profile, with E-REDES and REN network losses and today's access tariffs. It is what they would have cost, not a forecast. The others stay on ERSE's estimate.",
+        "indexedMarketDiagram": "Indexed offers with a published formula: real cost with OMIE's Portuguese price of each quarter-hour in your consumption file ({{period}}), with E-REDES and REN network losses and today's access tariffs. It is what they would have cost, not a forecast. The others stay on ERSE's estimate.",
         "taxes": "Totals include power, energy, the audiovisual contribution, the electricity tax and VAT.",
         "dgeg": "The DGEG fee (a few cents a month) is not included.",
         "educational": "Educational estimate, not advice. WonderMoney has no commercial relationship with any supplier.",
-        "simulatorLink": "ERSE's official price simulator"
+        "simulatorLink": "ERSE's official price simulator",
+        "omieLink": "Day-ahead market prices (OMIE, Portugal)",
+        "profilesLink": "Consumption and loss profiles (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4555,7 +4661,7 @@
           "items": {
             "a": "The DGEG fee, a few cents a month, and any meter or other charges.",
             "b": "Personal negotiation: the prices are the published ones.",
-            "c": "Indexed offers are priced at ERSE's estimate for the coming months; what you pay follows the market.",
+            "c": "Indexed offers are priced at ERSE's estimate for the coming months. If you choose OMIE prices, those whose supplier publishes its formula show what they would have cost over the last 12 months (or on your file's dates), not what they will cost: what you pay follows the market.",
             "d": "Dual offers can include gas in their fixed amounts; they are left out unless you include them.",
             "e": "With a bill or a total, the split across periods is the standard profile, not your own. The E-REDES file gives your real split.",
             "solar": "Solar production is a typical year for the district capital, facing south at the optimal tilt: shade, another orientation and a given year's weather change it.",

@@ -44,6 +44,14 @@ describe("localized youth mortgage tool page", () => {
     expect(related).toContainEqual(expect.objectContaining({ href }));
   });
 
+  it.each(SUPPORTED_LANGS)("warns that the guarantee ends with 2026 contracts and cites the Portaria in %s", (lang) => {
+    const copy = localeCopy(lang, "src");
+    expect(copy.deadlineNotice).toMatch(/31\D+2026/);
+    expect(copy.deadlineNotice).toContain("2027");
+    expect(copy.guide.sourcePortaria).toContain("236-A/2024/1");
+    expect(copy.guide.conditionDate).toContain("236-A/2024/1");
+  });
+
   it.each(SUPPORTED_LANGS)("has the same translation keys, placeholders and public mirror in %s", (lang) => {
     const copy = localeCopy(lang, "src");
     expect(copyShape(copy)).toEqual(copyShape(localeCopy("en", "src")));

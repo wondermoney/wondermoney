@@ -3,6 +3,7 @@ term: Despesa Variável
 definition: Despesa variável é um custo que muda de valor de mês para mês.
 category: budgeting
 example: Gastos em supermercado e lazer variam frequentemente entre meses.
+relatedCalculator: household-budget-calculator
 relatedGuide: como-criar-orcamento-mensal
 relatedTerms:
   - despesa-fixa

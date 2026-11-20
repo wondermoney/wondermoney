@@ -3,7 +3,7 @@ term: Método Avalanche
 definition: Método avalanche direciona pagamentos extra para a dívida com taxa de juro mais alta.
 category: budgeting
 example: Pagas mínimos em todas as dívidas e reforças sempre a que tem TAEG mais elevada.
-relatedCalculator: debt-payoff-calculator
+relatedCalculator: early-repayment-calculator
 relatedGuide: plano-para-pagar-dividas
 relatedTerms:
   - metodo-snowball
