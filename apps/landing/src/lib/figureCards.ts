@@ -9,7 +9,7 @@ import {
   type RouteId,
   type ToolRouteId,
 } from "./routes";
-import { getToolCatalogEntry } from "./toolsCatalog";
+import { getToolCatalogEntry, toolAnalyticsName, type ToolsHubGroup } from "./toolsCatalog";
 import type { Translate } from "./translations";
 
 /** A link card that leads with its destination's figure (FigureCards.astro). */
@@ -121,4 +121,37 @@ export function glossaryTermCards(input: {
       ]
     : [];
   return [...direct, ...guide, ...paired];
+}
+
+/**
+ * The cards of one task group on the tools hub, in catalog order: every tool,
+ * with its subject figure and the hub's click tracking (`toolsHubTracking.ts`).
+ */
+export function toolsHubGroupCards(group: ToolsHubGroup, t: Translate): FigureCard[] {
+  const kind = t("tools.hub.badge");
+  return group.tools.map((tool) => ({
+    href: tool.href,
+    title: t(`tools.${tool.key}.title`),
+    description: t(`tools.${tool.key}.description`),
+    figure: figureForTool(tool.routeId),
+    kind,
+    data: {
+      "data-tools-hub-link": "tool",
+      "data-tool": toolAnalyticsName(tool.key),
+      "data-group": group.id,
+      "data-position": String(tool.position),
+    },
+  }));
+}
+
+/**
+ * How FigureCards' `index` variant lays out `count` cards: the first leads as
+ * a figure card spanning the grid rows the others fill beside it, as rows two
+ * (`spanTwo`) or three (`spanThree`) to a grid row. A lone card leads too, so
+ * every list carries its figure.
+ */
+export function figureIndexLayout(count: number): { lead: boolean; spanTwo: number; spanThree: number } {
+  if (count < 1) return { lead: false, spanTwo: 0, spanThree: 0 };
+  const rest = count - 1;
+  return { lead: true, spanTwo: Math.max(1, Math.ceil(rest / 2)), spanThree: Math.max(1, Math.ceil(rest / 3)) };
 }

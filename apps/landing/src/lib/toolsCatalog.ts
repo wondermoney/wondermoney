@@ -32,7 +32,9 @@ export interface ToolCatalogEntry {
 
 /**
  * Every calculator on the landing site, the one list the tools hub, its ItemList and the related
- * tools of each /tools page read. Entries are written group by group in display order.
+ * tools of each /tools page read. Entries are written group by group in display order. The first
+ * tool of a group leads it on the hub as the one card with a figure, so put the group's most
+ * sought-after tool first.
  *
  * Adding a tool: add its route to `TOOL_ROUTE_IDS`, one entry here, in its group, and its
  * `title`, `shortName` and `description` under `tools.<key>` in every locale. The hub, the header's
