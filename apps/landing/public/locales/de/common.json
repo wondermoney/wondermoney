@@ -3408,7 +3408,14 @@
         "dieselSurcharge": "Dieselzuschlag (nicht mit dem Koeffizienten multipliziert)",
         "scheduleTitle2028": "Ab 2028: Zahlungsplan",
         "totalAnnualTax": "Gesamt-IUC für die Ratengrenzen",
-        "scheduleShareNote": "Die Monate folgen Ihrer Summe von {{total}} über alle Fahrzeuge; die Beträge sind der Anteil dieses Autos an jeder Rate."
+        "scheduleShareNote": "Die Monate folgen Ihrer Summe von {{total}} über alle Fahrzeuge; die Beträge sind der Anteil dieses Autos an jeder Rate.",
+        "annualTaxAll": "Geschätzte jährliche IUC, alle Fahrzeuge",
+        "perVehicleTitle": "IUC je Fahrzeug",
+        "vehicleRow": "{{name}} (Kategorie {{category}})",
+        "vehicleRowExempt": "{{name}} (befreit)",
+        "scheduleTitle2026": "2026: fällig im Monat des Zulassungsjahrestags jedes Autos",
+        "scheduleTotalNote": "Ab 2027 folgen die Monate Ihrer Summe von {{total}} über diese Fahrzeuge; jeder Betrag addiert die Anteile aller Autos.",
+        "scheduleTotalOtherNote": "Ab 2027 folgen die Monate Ihrer Summe von {{total}} einschließlich der eingegebenen weiteren IUC; die Beträge umfassen nur die Fahrzeuge in dieser Liste."
       },
       "guide": {
         "exampleTitle": "Rechenbeispiel",
@@ -3427,7 +3434,7 @@
         "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
-        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Die Zahlungspläne für 2027 und 2028 zeigen den Anteil dieses Autos an jeder Rate; die Monate folgen der Summe aller Ihrer Fahrzeuge, die Sie als weitere IUC eingeben können (das Gesetz wendet die Grenzen auf diese Summe an). Ohne sie nimmt der Rechner an, dass dies Ihr einziges Fahrzeug ist. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
+        "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Ab 2027 wird die Steuer je Steuerpflichtigem über alle seine Fahrzeuge festgesetzt: Fügen Sie jedes Ihrer Autos hinzu und geben Sie die IUC Ihrer übrigen Fahrzeuge als weitere IUC ein, damit die Ratenmonate Ihrer Summe folgen (das Gesetz wendet die Grenzen auf diese Summe an). Die Zahlungspläne für 2027 und 2028 zeigen den Betrag jedes Monats für die hinzugefügten Autos, bei einem Auto dessen Anteil an jeder Rate. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
         "assumptionEducational": "Das ist eine Schätzung zu Informationszwecken, keine Steuerberatung. Maßgeblich ist der Betrag im Bescheid der Steuerbehörde.",
         "sourcesTitle": "Quellen",
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
@@ -3441,7 +3448,16 @@
       "nextStepHeadline": "Lassen Sie sich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel Ihrer Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
       "nextStepCta": "Legen Sie ein Zwölftel Ihrer jährlichen Kfz-Steuer zurück",
-      "otherIucHelp": "Die jährliche IUC aller Ihrer anderen Fahrzeuge in Euro. Ab 2027 hängen die Zahlungsmonate von Ihrer Summe über alle Fahrzeuge ab. Geben Sie 0 ein, wenn dies Ihr einziges Fahrzeug ist."
+      "otherIucHelp": "Die jährliche IUC der Fahrzeuge, die Sie oben nicht hinzugefügt haben, etwa Motorräder oder Nutzfahrzeuge, in Euro. Ab 2027 hängen die Zahlungsmonate von Ihrer Summe über alle Fahrzeuge ab. Geben Sie 0 ein, wenn Sie alle Ihre Fahrzeuge hinzugefügt haben.",
+      "vehicles": {
+        "label": "Auto {{n}}",
+        "name": "Name (optional)",
+        "add": "Weiteres Fahrzeug hinzufügen",
+        "removeShort": "Entfernen",
+        "remove": "{{name}} entfernen",
+        "removed": "Fahrzeug entfernt: {{name}}.",
+        "max": "Sie können bis zu {{max}} Fahrzeuge hinzufügen."
+      }
     },
     "propertyCapitalGains": {
       "title": "Rechner für den Veräußerungsgewinn beim Hausverkauf",

@@ -3408,7 +3408,14 @@
         "dieselSurcharge": "Diesel surcharge (not multiplied by the coefficient)",
         "scheduleTitle2028": "From 2028: payment schedule",
         "totalAnnualTax": "Total IUC for the instalment thresholds",
-        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment."
+        "scheduleShareNote": "The months follow your total of {{total}} across all vehicles; the amounts are this car's share of each instalment.",
+        "annualTaxAll": "Estimated annual IUC, all vehicles",
+        "perVehicleTitle": "IUC per vehicle",
+        "vehicleRow": "{{name}} (category {{category}})",
+        "vehicleRowExempt": "{{name}} (exempt)",
+        "scheduleTitle2026": "2026: due in each car's registration anniversary month",
+        "scheduleTotalNote": "From 2027 the months follow your total of {{total}} across these vehicles; each amount adds up every car's share.",
+        "scheduleTotalOtherNote": "From 2027 the months follow your total of {{total}}, including the other IUC you entered; the amounts cover only the vehicles listed here."
       },
       "guide": {
         "exampleTitle": "Worked example",
@@ -3427,7 +3434,7 @@
         "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
-        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. The schedules shown for 2027 and 2028 give this car's share of each instalment; the months follow the total of all your vehicles, which you can enter as other IUC (the law applies its thresholds to that total). Without it, the calculator assumes this is your only vehicle. In the year of registration the tax is paid within 30 days of the registration deadline.",
+        "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. From 2027 the tax is assessed per taxpayer across all their vehicles: add each of your cars, and enter the IUC of any other vehicles as other IUC, so the instalment months follow your total (the law applies its thresholds to that total). The schedules for 2027 and 2028 give each month's amount for the cars you added; with one car, its share of each instalment. In the year of registration the tax is paid within 30 days of the registration deadline.",
         "assumptionEducational": "This is an educational estimate, not tax advice. The amount on the notice from the Tax Authority is the one that counts.",
         "sourcesTitle": "Sources",
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
@@ -3441,7 +3448,16 @@
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
       "nextStepCta": "Set aside one twelfth of your annual car tax",
-      "otherIucHelp": "The yearly IUC of all your other vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if this is your only vehicle."
+      "otherIucHelp": "The yearly IUC of any vehicles you have not added above, such as motorcycles or goods vehicles, in euros. From 2027 the payment months depend on your total across all vehicles. Enter 0 if you have added all your vehicles.",
+      "vehicles": {
+        "label": "Car {{n}}",
+        "name": "Name (optional)",
+        "add": "Add another vehicle",
+        "removeShort": "Remove",
+        "remove": "Remove {{name}}",
+        "removed": "{{name}} removed.",
+        "max": "You can add up to {{max}} vehicles."
+      }
     },
     "propertyCapitalGains": {
       "title": "Property capital gains calculator",
