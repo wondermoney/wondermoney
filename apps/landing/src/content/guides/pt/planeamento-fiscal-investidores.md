@@ -3,8 +3,6 @@ title: Planeamento Fiscal para Investidores
 excerpt: Um guia prático para gerir mais-valias, retenção na fonte e retorno líquido.
 category: tax
 publishedAt: 2026-03-01T10:10:00.000Z
-relatedCalculators:
-  - capital-gains-calculator
 relatedTerms:
   - mais-valia
   - imposto-sobre-mais-valias
