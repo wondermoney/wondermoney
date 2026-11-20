@@ -1,0 +1,58 @@
+{
+ "inputs": {
+  "location": {
+   "latitude": 38.722,
+   "longitude": -9.139,
+   "elevation": 61
+  },
+  "meteo_data": {
+   "radiation_db": "PVGIS-SARAH3",
+   "meteo_db": "ERA5",
+   "year_min": 2005,
+   "year_max": 2023,
+   "use_horizon": true,
+   "horizon_db": "DEM-calculated"
+  },
+  "mounting_system": {
+   "fixed": {
+    "slope": {
+     "value": 33,
+     "optimal": true
+    },
+    "azimuth": {
+     "value": 0,
+     "optimal": false
+    },
+    "type": "free-standing"
+   }
+  },
+  "pv_module": {
+   "technology": "c-Si",
+   "peak_power": 1,
+   "system_loss": 14
+  },
+  "economic_data": {
+   "system_cost": null,
+   "interest": null,
+   "lifetime": null
+  }
+ },
+ "outputs": {
+  "totals": {
+   "fixed": {
+    "E_d": 4.32,
+    "E_m": 131.53,
+    "E_y": 1578.35,
+    "H(i)_d": 5.5,
+    "H(i)_m": 167.2,
+    "H(i)_y": 2006.44,
+    "SD_m": 4.29,
+    "SD_y": 51.5,
+    "l_aoi": -2.74,
+    "l_spec": "0.60",
+    "l_tg": -6.52,
+    "l_total": -21.34
+   }
+  }
+ }
+}

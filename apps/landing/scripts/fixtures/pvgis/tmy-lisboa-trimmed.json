@@ -1,0 +1,96 @@
+{
+ "inputs": {
+  "location": {
+   "latitude": 38.722,
+   "longitude": -9.139,
+   "elevation": 61,
+   "irradiance_time_offset": 0.1682
+  },
+  "meteo_data": {
+   "radiation_db": "PVGIS-SARAH3",
+   "meteo_db": "ERA5",
+   "year_min": 2005,
+   "year_max": 2023,
+   "use_horizon": true,
+   "horizon_db": "DEM-calculated"
+  }
+ },
+ "outputs": {
+  "months_selected": [
+   {
+    "month": 1,
+    "year": 2021
+   },
+   {
+    "month": 2,
+    "year": 2023
+   },
+   {
+    "month": 3,
+    "year": 2023
+   },
+   {
+    "month": 4,
+    "year": 2012
+   },
+   {
+    "month": 5,
+    "year": 2016
+   },
+   {
+    "month": 6,
+    "year": 2022
+   },
+   {
+    "month": 7,
+    "year": 2019
+   },
+   {
+    "month": 8,
+    "year": 2019
+   },
+   {
+    "month": 9,
+    "year": 2012
+   },
+   {
+    "month": 10,
+    "year": 2020
+   },
+   {
+    "month": 11,
+    "year": 2008
+   },
+   {
+    "month": 12,
+    "year": 2010
+   }
+  ],
+  "tmy_hourly": [
+   {
+    "time(UTC)": "20210101:0000",
+    "T2m": 11.68,
+    "RH": 80.55,
+    "G(h)": 0,
+    "Gb(n)": 0,
+    "Gd(h)": 0,
+    "IR(h)": 299.97,
+    "WS10m": 4.1,
+    "WD10m": 334,
+    "SP": 101870
+   },
+   {
+    "time(UTC)": "20210101:0100",
+    "T2m": 11.33,
+    "RH": 79.19,
+    "G(h)": 0,
+    "Gb(n)": 0,
+    "Gd(h)": 0,
+    "IR(h)": 296.48,
+    "WS10m": 4.25,
+    "WD10m": 336,
+    "SP": 101830
+   }
+  ]
+ }
+}
