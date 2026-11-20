@@ -1,0 +1,41 @@
+---
+title: WonderMoney 1.5.0
+description: Shared households with roles, bill and card calendars, many new import formats, deeper investment reporting, passkeys and single sign-on, and a Helm chart for self-hosting.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.5.0)
+
+## Upgrading
+
+Back up PostgreSQL before you upgrade from 1.4.0. The API applies this release's migrations when it starts: they add tables and constraints and remove the unused `lifecycle_delivery` table. See [Updates and backups](/en/docs/self-hosting/upgrade-and-backup).
+
+The new integrations are all optional and stay off until you configure them: single sign-on (OIDC), SimpleFIN, mobile push notifications, crypto explorers, extra market-data providers, instance-wide Enable Banking credentials and the public demo. [Configure](/en/docs/self-hosting/configure) lists their settings. Existing integrations keep working as they are.
+
+New ways to run WonderMoney: a [Helm chart](/en/docs/self-hosting/kubernetes), a Render Blueprint, a one-line installer, one-hostname deployments and scheduled backups with optional off-site copies.
+
+If you use the hosted service, there is nothing to do.
+
+## New
+
+- **Households:** invite members with owner, admin, member or viewer roles, choose who can see or edit each account, attribute spending to members, and keep personal budgets.
+- **Shared expenses:** group balances and settlements.
+- **Dashboard and reports:** savings rate, monthly comparisons, spending-versus-normal insights, budget pacing, a review inbox and a customizable dashboard. Pages are reorganized on desktop and phone so your records come first.
+- **Bills and cards:** an upcoming-bills calendar with a private calendar feed, balance forecasts, credit-card cycles and statements, payment reminders and installment plans.
+- **Transactions:** templates, attachments, bulk actions, rule import and export, and categorization that runs locally without an AI provider.
+- **Imports:** OFX/QFX, generic CSV, QIF, CAMT.053, YNAB and Actual Budget files, with duplicate warnings and a review step.
+- **Loans:** amortization schedules, extra-payment projections, variable rates and links to the asset a loan finances.
+- **Investments:** FIFO or average cost, per-lot holdings, realized gains, time- and money-weighted returns, benchmarks, target allocations and dividends.
+- **Integrations:** personal API tokens, a read-only MCP interface, crypto wallet balances from public addresses, and bank sync history and health.
+- **Sign-in:** passkeys on web and mobile, single sign-on and two-factor backup codes.
+- **Demo:** try a read-only demo household without an account, straight from wonder.money.
+
+## Fixes
+
+- Portfolio totals respect exclusions, and Top Movers and watchlists use each security's own currency.
+- Linking a repayment on the Loans page works again.
+- Scheduled bank refreshes keep running when a deleted user's old bank connection is still on record.
+- Household export and restore keep installment plans, card cycles and rate overrides.
+
+## Thanks to
+
+- @nip10

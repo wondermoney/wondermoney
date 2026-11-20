@@ -1,0 +1,15 @@
+---
+import CuratedListPage from "@/components/pages/CuratedListPage.astro";
+import { getCuratedListStaticPaths } from "@/lib/pageStaticPaths";
+import type { CuratedListId } from "@/lib/resources/curatedLists";
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return getCuratedListStaticPaths("es");
+}
+
+const { listId } = Astro.props as { listId: CuratedListId };
+---
+
+<CuratedListPage locale="es" listId={listId} />

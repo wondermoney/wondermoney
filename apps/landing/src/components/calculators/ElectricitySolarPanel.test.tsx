@@ -10,6 +10,11 @@ import { encodeTypicalYear } from "@/lib/calculators/solarPvgis";
 import type { OffersLoader } from "./ElectricityTariffComparisonComp";
 import type { SolarLoader, SolarProductionLoader } from "./ElectricitySolarPanel";
 
+// These tests render the whole comparator island, rebuild the profile year and, for the
+// "any tilt" cases, wait out the 0,7 s request debounce on real timers. They take 0,1–1,7 s
+// locally but went past vitest's 5 s default on loaded CI runners, so this file gets more room.
+vi.setConfig({ testTimeout: 15_000 });
+
 vi.mock("@/lib/gtm", () => ({ pushGtmEvent: () => undefined, getPageType: () => "tools/electricity-tariff-comparison" }));
 
 const { default: ElectricityTariffComparisonComp } = await import("./ElectricityTariffComparisonComp");

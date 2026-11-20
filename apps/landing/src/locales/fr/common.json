@@ -5493,6 +5493,64 @@
       }
     }
   },
+  "curatedLists": {
+    "common": {
+      "reviewed": "Vérifiée par WonderMoney le {{date}}",
+      "howTitle": "Comment nous les avons choisis",
+      "howIntro": "WonderMoney a constitué cette liste et vérifié chaque entrée selon ces règles à la date de révision :",
+      "criteria": {
+        "active": "Elle a publié au cours des six derniers mois, ce que nous avons vérifié sur son propre site ou flux.",
+        "independent": "C'est de l'éducation indépendante. Les régulateurs et les banques centrales en font partie ; les canaux de vente des banques, courtiers et sociétés de gestion, non.",
+        "noHype": "Pas de promesses d'enrichissement rapide, de promotion de monnaies numériques spéculatives ni de signaux de trading payants.",
+        "free": "Vous pouvez la suivre gratuitement.",
+        "market": "Elle a été choisie pour un public en France et en Belgique, et non traduite de la liste d'un autre pays."
+      },
+      "order": "Les entrées sont classées par ordre alphabétique, sans hiérarchie. Nous n'avons aucune relation commerciale avec elles, et les liens ne contiennent aucun code d'affiliation ni de suivi.",
+      "owner": "L'équipe WonderMoney tient cette liste et revérifie chaque entrée tous les six mois. Une entrée peut être retirée à chaque révision.",
+      "audience": "Pour qui",
+      "value": "Ce que vous y trouverez",
+      "applyIt": "À essayer avec :",
+      "checked": "vérifié le {{date}}",
+      "formats": {
+        "podcast": "Podcast",
+        "newsletter": "Newsletter",
+        "youtube": "Chaîne YouTube"
+      },
+      "staleTitle": "Cette liste doit être révisée",
+      "stale": "Nous avons vérifié ces entrées pour la dernière fois le {{date}}, il y a plus de six mois. Certaines ont pu cesser de publier ou changer ; vérifiez chacune avant de vous y fier.",
+      "practiceTitle": "Mettez une idée en pratique",
+      "practiceIntro": "Prenez une chose que vous avez entendue ou lue et essayez-la avec vos propres chiffres."
+    },
+    "lists": {
+      "podcasts": {
+        "title": "Podcasts sur les finances personnelles",
+        "metaTitle": "Podcasts sur les finances personnelles (France, Belgique) | WonderMoney",
+        "metaDescription": "Une liste vérifiée de podcasts actifs, indépendants et gratuits sur l'épargne, l'investissement et l'argent au quotidien, pour la France et la Belgique.",
+        "dek": "Des émissions sur l'épargne, l'investissement et l'argent au quotidien qui publient encore, avec le public de chacune et un outil pour appliquer ce que vous entendez.",
+        "hubDescription": "Des émissions actives et indépendantes sur l'épargne, l'investissement et l'argent au quotidien.",
+        "listTitle": "Les podcasts",
+        "latest": "Dernier épisode le {{date}}"
+      },
+      "newsletters": {
+        "title": "Newsletters sur les finances personnelles",
+        "metaTitle": "Newsletters sur les finances personnelles (France, Belgique) | WonderMoney",
+        "metaDescription": "Une liste vérifiée de newsletters actives, indépendantes et gratuites sur l'épargne, l'investissement et la consommation, pour la France et la Belgique.",
+        "dek": "Des lettres sur l'épargne, l'investissement et vos droits de consommateur qui paraissent encore, avec le public de chacune et un outil pour appliquer ce que vous lisez.",
+        "hubDescription": "Des lettres actives et indépendantes sur l'épargne, l'investissement et la consommation.",
+        "listTitle": "Les newsletters",
+        "latest": "Dernier numéro le {{date}}"
+      },
+      "youtube": {
+        "title": "Chaînes YouTube sur les finances personnelles",
+        "metaTitle": "Chaînes YouTube sur les finances personnelles (France, Belgique) | WonderMoney",
+        "metaDescription": "Une liste vérifiée de chaînes YouTube actives et indépendantes qui expliquent l'épargne, l'investissement et l'argent au quotidien, pour la France et la Belgique.",
+        "dek": "Des chaînes qui expliquent l'épargne, l'investissement et l'argent au quotidien et publient encore, avec le public de chacune et un outil pour appliquer ce que vous voyez.",
+        "hubDescription": "Des chaînes actives et indépendantes qui expliquent l'épargne, l'investissement et l'argent au quotidien.",
+        "listTitle": "Les chaînes",
+        "latest": "Dernière vidéo le {{date}}"
+      }
+    }
+  },
   "savingsGuide": {
     "metaTitle": "Où placer votre épargne au Portugal : les produits comparés | WonderMoney",
     "metaDescription": "Comparez certificats d'épargne, certificats du Trésor, comptes courants rémunérés, comptes d'épargne, dépôts à terme et assurances de capitalisation ou PPR au Portugal : garantie, versements, retraits, intérêts et IRS.",
