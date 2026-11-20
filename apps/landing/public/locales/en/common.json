@@ -2709,9 +2709,10 @@
         "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
         "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
-        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRate}}, the ceiling), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRateNote}}), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
-        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
+        "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings.",
+        "referenceRateAtCeiling": "{{rate}}, the ceiling"
       },
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",

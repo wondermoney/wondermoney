@@ -2709,9 +2709,10 @@
         "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
         "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
         "assumptionsTitle": "Pressupostos",
-        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRate}}, o máximo) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRateNote}}) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
         "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
-        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
+        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças.",
+        "referenceRateAtCeiling": "{{rate}}, o máximo"
       },
       "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",

@@ -2709,9 +2709,10 @@
         "methodTax": "Si trattiene il {{irsRate}} degli interessi di ogni trimestre e gli interessi netti si sommano al saldo, così i trimestri successivi maturano interessi anche su di essi.",
         "methodYield": "Il rendimento netto annuo è la crescita composta annua dall'importo sottoscritto al saldo finale. I valori lordi mostrano gli interessi prima dell'IRS.",
         "assumptionsTitle": "Ipotesi",
-        "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Parte dal tasso fissato dall'IGCP per {{referenceMonth}} ({{referenceRate}}, il massimo), che viene fissato di nuovo ogni mese, quindi gli interessi effettivi saranno diversi. Controlla il tasso attuale sul sito dell'IGCP.",
+        "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Parte dal tasso fissato dall'IGCP per {{referenceMonth}} ({{referenceRateNote}}), che viene fissato di nuovo ogni mese, quindi gli interessi effettivi saranno diversi. Controlla il tasso attuale sul sito dell'IGCP.",
         "assumptionRules": "L'aliquota IRS è quella generale per questo tipo di reddito. La tua situazione fiscale e le modifiche alle regole successive a {{rulesDate}} non sono considerate.",
-        "assumptionScope": "Si tratta di informazioni generali, non di una raccomandazione a sottoscrivere o evitare un prodotto, e non c'è alcun confronto tra i certificati e altre forme di risparmio."
+        "assumptionScope": "Si tratta di informazioni generali, non di una raccomandazione a sottoscrivere o evitare un prodotto, e non c'è alcun confronto tra i certificati e altre forme di risparmio.",
+        "referenceRateAtCeiling": "{{rate}}, il massimo"
       },
       "nextStepHeadline": "Vedi i tuoi certificati accanto al resto dei risparmi",
       "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",

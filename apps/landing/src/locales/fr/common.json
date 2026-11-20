@@ -2709,9 +2709,10 @@
         "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s'ajoutent au solde : ils produisent à leur tour des intérêts les trimestres suivants.",
         "methodYield": "Le rendement net annuel est le taux de croissance annuel composé entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
         "assumptionsTitle": "Hypothèses",
-        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Par défaut, il correspond au taux fixé par l'IGCP pour {{referenceMonth}} ({{referenceRate}}, le plafond) ; l'IGCP le révise chaque mois, donc les intérêts effectifs seront différents. Vérifiez le taux actuel sur le site de l'IGCP.",
+        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Par défaut, il correspond au taux fixé par l'IGCP pour {{referenceMonth}} ({{referenceRateNote}}) ; l'IGCP le révise chaque mois, donc les intérêts effectifs seront différents. Vérifiez le taux actuel sur le site de l'IGCP.",
         "assumptionRules": "Le taux d'IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
-        "assumptionScope": "Information générale, pas une recommandation de souscrire ou d'éviter un produit, et aucune comparaison avec d'autres produits d'épargne."
+        "assumptionScope": "Information générale, pas une recommandation de souscrire ou d'éviter un produit, et aucune comparaison avec d'autres produits d'épargne.",
+        "referenceRateAtCeiling": "{{rate}}, le plafond"
       },
       "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",

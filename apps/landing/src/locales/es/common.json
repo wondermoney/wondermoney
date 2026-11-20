@@ -2709,9 +2709,10 @@
         "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
         "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
-        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRate}}, el máximo) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRateNote}}) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
-        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
+        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros.",
+        "referenceRateAtCeiling": "{{rate}}, el máximo"
       },
       "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",

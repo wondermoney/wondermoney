@@ -2709,9 +2709,10 @@
         "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
         "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
-        "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
+        "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRateNote}}), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Kapitalerträgen. Ihre persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
-        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
+        "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen.",
+        "referenceRateAtCeiling": "{{rate}}, die Obergrenze"
       },
       "nextStepHeadline": "Sehen Sie Ihre Zertifikate neben Ihren übrigen Ersparnissen",
       "nextStepDescription": "Fügen Sie sie in WonderMoney hinzu, um alles, was Sie gespart haben, an einem Ort zu verfolgen.",
