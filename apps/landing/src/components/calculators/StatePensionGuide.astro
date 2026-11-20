@@ -8,6 +8,7 @@ import {
   NORMAL_AGE_2026_MONTHS,
   NORMAL_AGE_2027_MONTHS,
   STATE_PENSION_EXAMPLE,
+  STATE_PENSION_SOURCES,
   SUSTAINABILITY_FACTOR_2026_BP,
   computeStatePension,
 } from "@/lib/calculators/statePension";
@@ -56,11 +57,12 @@ const limitValues = {
   min31: money(MINIMUM_PENSIONS_2026[0].cents),
 };
 const sources = [
-  ["sourceGuide", "https://www.seg-social.pt/pensao-de-velhice"],
-  ["sourceLaw", "https://data.dre.pt/eli/dec-lei/187/2007/05/10/p/dre/pt/html"],
-  ["sourceAges", "https://data.dre.pt/eli/port/476/2025/12/29/p/dre/pt/html"],
-  ["sourceMinimum", "https://data.dre.pt/eli/port/480-B/2025/12/30/p/dre/pt/html"],
-  ["sourceSimulator", "https://www.seg-social.pt/reforma"],
+  ["sourceGuide", STATE_PENSION_SOURCES.guide],
+  ["sourceLaw", STATE_PENSION_SOURCES.law],
+  ["sourceAges", STATE_PENSION_SOURCES.ages],
+  ["sourceMinimum", STATE_PENSION_SOURCES.minimum],
+  ["sourceWithholding", STATE_PENSION_SOURCES.withholding],
+  ["sourceSimulator", STATE_PENSION_SOURCES.simulator],
 ] as const;
 const methods = [
   "methodReference", "methodRate", "methodAges", "methodEarly", "methodLate", "methodMinimum", "methodGap", "methodBudget",

@@ -3829,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: età normale per il 2027 e fattore di sostenibilità per il 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: adeguamento delle pensioni 2026 e pensioni minime",
         "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
-        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre. La tabella di ritenuta per pensioni VIII è stata verificata rispetto al Despacho n.º 233-A/2026 (regole e assegnazione della tabella) e a una trascrizione del suo allegato le cui righe coincidono con la colonna ufficiale dell'aliquota effettiva."
+        "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle portarie del 2026. I tassi annui, il bonus e le pensioni minime sono stati incrociati in fonti secondarie e sulle pagine della Segurança Social, senza lettura nella legge consolidata, e le semplificazioni qui sopra sono nostre. La tabella di ritenuta per pensioni VIII è stata verificata riga per riga il 20 novembre 2026 sull'allegato del Despacho n.º 233-A/2026 pubblicato nel Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelle di ritenuta IRS 2026, compresa la tabella VIII per le pensioni"
       }
     },
     "sp500History": {

@@ -3829,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: idade normal de 2027 e fator de sustentabilidade de 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: atualização das pensões de 2026 e pensões mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
-        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas. A tabela de retenção de pensões VIII foi verificada face ao Despacho n.º 233-A/2026 (regras e atribuição da tabela) e a uma transcrição do respetivo anexo cujas linhas coincidem com a coluna oficial da taxa efetiva."
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas. A tabela de retenção de pensões VIII foi verificada a 20 de novembro de 2026, linha a linha, face ao anexo do Despacho n.º 233-A/2026 publicado no Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelas de retenção na fonte de 2026, incluindo a tabela VIII de pensões"
       }
     },
     "sp500History": {

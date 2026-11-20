@@ -3829,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: edad normal de 2027 y factor de sostenibilidad de 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó con el Despacho n.º 233-A/2026 (reglas y asignación de la tabla) y con una transcripción de su anexo cuyas filas coinciden con la columna oficial de tasa efectiva."
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó fila por fila el 20 de noviembre de 2026 con el anexo del Despacho n.º 233-A/2026 publicado en el Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tablas de retención del IRS de 2026, incluida la tabla VIII de pensiones"
       }
     },
     "sp500History": {

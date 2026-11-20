@@ -3829,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1 : âge normal pour 2027 et facteur de durabilité pour 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
         "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
-        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée d'après le Despacho n.º 233-A/2026 (règles et attribution de la table) et une transcription de son annexe dont les lignes correspondent à la colonne officielle du taux effectif."
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée ligne par ligne le 20 novembre 2026 d'après l'annexe du Despacho n.º 233-A/2026 publiée au Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions"
       }
     },
     "sp500History": {

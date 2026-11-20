@@ -3829,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked against Despacho n.º 233-A/2026 (rules and table assignment) and a transcription of its annex whose rows match the official effective-rate column."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked row by row on 20 November 2026 against the annex of Despacho n.º 233-A/2026 as published in the Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII"
       }
     },
     "sp500History": {
