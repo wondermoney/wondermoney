@@ -26,7 +26,7 @@ export interface ToolCatalogEntry {
 	readonly key: string
 	readonly routeId: CatalogRouteId
 	readonly group: ToolGroupId
-	/** The tools a /tools page suggests next, in order. Only /tools pages have them. */
+	/** The tools a calculator page suggests next, in order: every /tools page, and the FIRE page. */
 	readonly related?: readonly ToolRouteId[]
 }
 
@@ -248,7 +248,12 @@ export const TOOLS_CATALOG = [
 		group: "investAndGrow",
 		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund"],
 	},
-	{ key: "fire", routeId: "pageFireCalculator", group: "investAndGrow" },
+	{
+		key: "fire",
+		routeId: "pageFireCalculator",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
+	},
 	{
 		key: "statePension",
 		routeId: "toolStatePension",

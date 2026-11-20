@@ -1,10 +1,22 @@
 ---
-// The FIRE calculator page: the calculator first, then what FIRE is, a worked
-// example and the method (all prerendered), and the next step into WonderMoney.
+// The FIRE calculator page, in the shape of every calculator page
+// (ToolDetailPage.astro): the hero with the deck chair, the calculator across
+// the page, its guide in the article column (what FIRE is, a worked example,
+// the method and how to track it), the card CTA and the related pages as
+// figure cards. TopLevelPage.astro supplies the document, header and JSON-LD.
 import FireCalculatorComp from "@/components/calculators/FireCalculatorComp";
 import FireGuide from "@/components/calculators/FireGuide.astro";
+import ArticleHero from "@/components/shared/ArticleHero.astro";
 import CTABanner from "@/components/shared/CTABanner";
+import FigureCards from "@/components/shared/FigureCards.astro";
+import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
+import type { OutlineEntry } from "@/lib/articleOutline";
+import type { FigureCard } from "@/lib/figureCards";
+import { figureForTool } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/i18nLocale";
+import { toLocalizedPath, toToolsHubPath } from "@/lib/routes";
+import { getToolCatalogEntry } from "@/lib/toolsCatalog";
+import { topLevelPageCard } from "@/lib/topLevelPageCards";
 import { getTranslations } from "@/lib/translations";
 
 interface Props {
@@ -15,86 +27,69 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `lp.fireCalculator.${key}`;
 
-const trackSteps = [1, 2, 3].map((number) => ({
-  number,
-  title: t(k(`track${number}Title`)),
-  body: t(k(`track${number}Body`)),
-}));
+const calculatorLabel = t("global.relatedContent.calculator");
+const outline: OutlineEntry[] = [
+  { id: "calculator", title: calculatorLabel },
+  { id: "guide", title: t("global.relatedContent.guide") },
+];
+
+const relatedCards: FigureCard[] = [
+  ...getToolCatalogEntry("pageFireCalculator").related.map((routeId) => {
+    const { key } = getToolCatalogEntry(routeId);
+    return {
+      href: toLocalizedPath(routeId, locale),
+      title: t(`tools.${key}.title`),
+      description: t(`tools.${key}.description`),
+      figure: figureForTool(routeId),
+      kind: calculatorLabel,
+    };
+  }),
+  topLevelPageCard("pageHowToCalculateNetWorth", locale, t),
+  topLevelPageCard("pageNetWorthTracker", locale, t),
+  topLevelPageCard("pagePortfolioTracker", locale, t),
+];
 ---
 
-{/* Hero */}
-<section class="bg-background pb-8 pt-16 md:pt-24">
-  <div class="mx-auto max-w-4xl px-6 text-center lg:px-8">
-    <h1 class="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl [text-wrap:balance]">
-      <span class="mb-3 block text-xl tracking-normal text-foreground">{t(k("eyebrow"))}</span>{" "}
-      {t(k("heroTitle"))}
-    </h1>
-    <p class="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-      {t(k("heroSubtitle"))}
-    </p>
-  </div>
-</section>
+<article>
+  <ArticleHero
+    locale={locale}
+    title={t(k("heroTitle"))}
+    dek={t(k("heroSubtitle"))}
+    breadcrumbs={[{ label: t("header.tools"), href: toToolsHubPath(locale) }, { label: t(k("eyebrow")) }]}
+    outline={outline}
+    figure={figureForTool("pageFireCalculator")}
+  />
 
-{/* Calculator */}
-<section class="pb-16 pt-8 md:pb-20" aria-labelledby="fire-calculator-heading">
-  <div class="mx-auto max-w-6xl px-6 lg:px-8">
-    <h2 id="fire-calculator-heading" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("calcTitle"))}
-    </h2>
-    <p class="mt-2 text-muted-foreground">{t(k("calcBody"))}</p>
-    <div class="mt-6">
+  <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+    <section id="calculator" class="scroll-mt-24 space-y-5" aria-labelledby="fire-calculator-heading">
+      <h2 id="fire-calculator-heading" class="text-2xl font-bold tracking-[-0.015em] text-foreground sm:text-3xl">
+        {t(k("calcTitle"))}
+      </h2>
+      <p class="max-w-[40rem] text-lg leading-[1.7] text-ink-2">{t(k("calcBody"))}</p>
       <FireCalculatorComp locale={locale} client:load />
+    </section>
+
+    <div id="guide" class="mt-16 scroll-mt-24 border-t border-border pt-12 lg:mt-20 lg:pt-16">
+      <FireGuide locale={locale} />
+    </div>
+
+    <div class="mt-12 max-w-[40rem]">
+      <FinancialDisclaimer locale={locale} client:idle />
     </div>
   </div>
-</section>
+</article>
 
-{/* What is FIRE */}
-<section class="bg-paper-2 py-16 md:py-20">
-  <div class="mx-auto max-w-3xl px-6 lg:px-8">
-    <h2 class="mb-6 text-3xl font-semibold tracking-tight text-foreground">{t(k("whatTitle"))}</h2>
-    <p class="mb-4 leading-7 text-muted-foreground">{t(k("whatBody1"))}</p>
-    <p class="mb-4 leading-7 text-muted-foreground">{t(k("whatBody2"))}</p>
-    <p class="max-w-[60ch] leading-7 text-muted-foreground">{t(k("whatBody3"))}</p>
-  </div>
-</section>
+<div class="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
+  <CTABanner
+    locale={locale}
+    variant="card"
+    client:idle
+    headline={t(k("ctaHeadline"))}
+    description={t(k("ctaBody"))}
+  />
 
-{/* Worked example and method */}
-<section class="px-6 py-16 md:py-20 lg:px-8">
-  <FireGuide locale={locale} />
-</section>
-
-{/* Track progress */}
-<section class="py-16 md:py-20">
-  <div class="mx-auto max-w-3xl px-6 lg:px-8">
-    <h2 class="mb-12 text-center text-3xl font-semibold tracking-tight text-foreground">
-      {t(k("trackTitle"))}
-    </h2>
-    <div class="flex flex-col gap-10">
-      {
-        trackSteps.map((step) => (
-          <div class="flex gap-5">
-            <div class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              {step.number}
-            </div>
-            <div>
-              <h3 class="text-base font-semibold text-foreground">{step.title}</h3>
-              <p class="mt-1 text-sm leading-6 text-muted-foreground">{step.body}</p>
-            </div>
-          </div>
-        ))
-      }
-    </div>
-  </div>
-</section>
-
-{/* Next step */}
-<section class="py-8 pb-16 md:pb-24">
-  <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <CTABanner
-      locale={locale}
-      client:idle
-      headline={t(k("ctaHeadline"))}
-      description={t(k("ctaBody"))}
-    />
-  </div>
-</section>
+  <section aria-labelledby="related-content" class="mt-16">
+    <h2 id="related-content" class="text-base font-semibold text-foreground">{t("global.relatedContent.title")}</h2>
+    <FigureCards locale={locale} cards={relatedCards} class="mt-4" />
+  </section>
+</div>

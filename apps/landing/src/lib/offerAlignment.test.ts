@@ -53,7 +53,7 @@ const flattenStrings = (value: Record<string, unknown>, prefix = ""): Array<[str
 			: flattenStrings(child as Record<string, unknown>, path)
 	})
 
-// Verified via: grep -rl "lp.shared.trialNote" src --include="*.tsx"
+// Verified via: grep -rl "lp.shared.trialNote" src --include="*.tsx" --include="*.astro"
 const trialNoteConsumers = [
 	"src/components/landing/BudgetApp.tsx",
 	"src/components/landing/EtfTracker.tsx",
@@ -67,7 +67,7 @@ const trialNoteConsumers = [
 	"src/components/landing/FeaturePortfolio.tsx",
 	"src/components/landing/FeaturePrivacy.tsx",
 	"src/components/landing/FeatureReports.tsx",
-	"src/components/landing/HowToCalculateNetWorth.tsx",
+	"src/components/landing/HowToCalculateNetWorth.astro",
 	"src/components/landing/NetWorthTracker.tsx",
 	"src/components/landing/OpenBankingApp.tsx",
 	"src/components/landing/PersonalFinanceApp.tsx",
