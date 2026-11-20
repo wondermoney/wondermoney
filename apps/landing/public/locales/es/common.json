@@ -2709,9 +2709,10 @@
         "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
         "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
-        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRate}}, el máximo) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRateNote}}) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
-        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
+        "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros.",
+        "referenceRateAtCeiling": "{{rate}}, el máximo"
       },
       "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
@@ -3664,7 +3665,10 @@
         "startDate": "Fecha de inicio del contrato",
         "endDate": "Fecha de cese",
         "contractType": "Tipo de extinción",
-        "fixedTermKind": "Tipo de plazo"
+        "fixedTermKind": "Tipo de plazo",
+        "renewals": "Número de renovaciones (opcional)",
+        "initialMonths": "Periodo inicial, en meses (opcional)",
+        "earlierMonths": "Contratos anteriores para el mismo puesto, en meses (opcional)"
       },
       "help": {
         "baseMonthly": "La retribución base (retribuição base) en euros al mes, antes de la Seguridad Social y del IRS. No incluyas pagas extra, bonus ni horas extra.",
@@ -3673,7 +3677,10 @@
         "endDate": "El último día del contrato. Cuenta como día trabajado. Esta estimación cubre ceses en {{year}}.",
         "contractType": "El despido cubre el despido colectivo, la extinción del puesto de trabajo y la inadaptación. La caducidad es el fin de un contrato temporal, de plazo cierto o incierto (arts. 344 y 345 del Código do Trabalho). No se debe cuando el contrato termina porque declaraste que no querías renovarlo.",
         "startDateFixedTerm": "El día en que empezó el contrato temporal. Si se renovó, cuenta desde el primer día: toda la duración, renovaciones incluidas, se paga a 24 días por año.",
-        "fixedTermKind": "Fija la duración máxima: 2 años de plazo cierto, 4 de plazo incierto (art. 148). La indemnización es la misma, 24 días por año."
+        "fixedTermKind": "Fija la duración máxima: 2 años de plazo cierto, 4 de plazo incierto (art. 148). La indemnización es la misma, 24 días por año.",
+        "renewals": "Cuántas veces se renovó el contrato. Un contrato de plazo cierto puede renovarse hasta tres veces (art. 149.4). Déjalo vacío si nunca se renovó.",
+        "initialMonths": "El periodo acordado al firmar el contrato, antes de cualquier renovación. Las renovaciones juntas no pueden durar más que este periodo (art. 149.4).",
+        "earlierMonths": "Contratos temporales o de trabajo temporal anteriores en el mismo puesto, y prestaciones de servicios con el mismo objeto, con el mismo empleador o una sociedad de su grupo. Cuentan para la duración máxima (art. 148.6). Déjalo vacío si no hubo ninguno."
       },
       "scope": "Cubre despido colectivo, extinción del puesto de trabajo e inadaptación en un contrato indefinido. No cubre despido con justa causa, despido ilícito, extinción por mutuo acuerdo ni el sector público. Para el fin de un contrato temporal, elige caducidad de un contrato temporal.",
       "errors": {
@@ -3684,7 +3691,8 @@
         "endBeforeStart": "La fecha de cese no puede ser anterior a la de inicio.",
         "startFuture": "El contrato no puede empezar en el futuro.",
         "endOutsideYear": "Esta estimación cubre ceses en {{year}}, el año del salario mínimo que usan los límites.",
-        "summary": "Revisa los campos marcados para ver tu estimación."
+        "summary": "Revisa los campos marcados para ver tu estimación.",
+        "wholeNumber": "Introduce un número entero de {{min}} a {{max}}, o déjalo vacío."
       },
       "result": {
         "compensation": "Indemnización estimada",
@@ -3747,7 +3755,7 @@
         "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y su art. 35.2 limita al tiempo desde esa fecha solo los 14 días del art. 366.1. La nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023: su ejemplo de un contrato del 1 de septiembre de 2021 al 31 de agosto de 2023 cuenta los 730 días a 24 días. Por tanto, toda la duración cuenta a 24 días, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican. Un contrato temporal dura como máximo dos años, o cuatro si es de término incierto (art. 148), así que uno que respeta ese límite y caduca en 2026 no se firmó antes del 1 de octubre de 2013 y el régimen transitorio del art. 6 de la Lei n.º 69/2013 no se aplica.",
         "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nueva redacción de los arts. 344.2, 345.4 y 366.1 del Código do Trabalho y art. 35 sobre su aplicación en el tiempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julio de 2023): 24 días para todos los contratos temporales que caduquen desde el 1 de mayo de 2023, sea cual sea la fecha de celebración",
-        "methodDurationLimit": "Duración máxima (art. 148 del Código do Trabalho, en la redacción de la Lei n.º 93/2019): 2 años de plazo cierto, renovaciones incluidas, y 4 años de plazo incierto. Un contrato de plazo cierto puede renovarse hasta tres veces, y las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). En los 2 años cuentan también los contratos temporales y el trabajo temporal en el mismo puesto, y las prestaciones de servicios con el mismo objeto, con el mismo empleador (art. 148.6). Los contratos firmados antes del 1 de octubre de 2019 mantienen los límites anteriores (art. 11.4 de la Lei n.º 93/2019): 3 años de plazo cierto (18 meses para quien busca su primer empleo y 2 años en los demás casos del art. 140.4) y 6 años de plazo incierto; la calculadora toma la fecha de inicio como fecha de firma. Cuando las fechas superan el límite, la calculadora avisa de que el contrato sería probablemente indefinido (art. 147.2.b) y de que ponerle fin sería un despido, pero sigue mostrando la cifra de la caducidad. No ve renovaciones ni contratos anteriores, así que compruébalos tú.",
+        "methodDurationLimit": "Duración máxima (art. 148 del Código do Trabalho, en la redacción de la Lei n.º 93/2019): 2 años de plazo cierto, renovaciones incluidas, y 4 años de plazo incierto. Un contrato de plazo cierto puede renovarse hasta tres veces, y las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). En los 2 años cuentan también los contratos temporales y el trabajo temporal en el mismo puesto, y las prestaciones de servicios con el mismo objeto, con el mismo empleador (art. 148.6). Los contratos firmados antes del 1 de octubre de 2019 mantienen los límites anteriores (art. 11.4 de la Lei n.º 93/2019): 3 años de plazo cierto (18 meses para quien busca su primer empleo y 2 años en los demás casos del art. 140.4) y 6 años de plazo incierto; la calculadora toma la fecha de inicio como fecha de firma. Cuando las fechas superan el límite, la calculadora avisa de que el contrato sería probablemente indefinido (art. 147.2.b) y de que ponerle fin sería un despido, pero sigue mostrando la cifra de la caducidad. En un contrato de plazo cierto puedes indicar también el número de renovaciones, la duración del periodo inicial y los meses de contratos anteriores para el mismo puesto, y el aviso cubre también esas reglas: más de tres renovaciones, renovaciones más largas en total que el periodo inicial (art. 147.2.a) o contratos anteriores que adelantan el límite de 2 años. Los contratos firmados antes del 1 de octubre de 2019 podían renovarse tres veces sin límite de duración de las renovaciones (redacción inicial del art. 148.1), y los contratos anteriores cuentan para sus 3 años (redacción inicial del art. 148.5). Los contratos anteriores no cuentan para el límite del plazo incierto.",
         "sourceLaw93": "Lei n.º 93/2019, de 4 de septiembre (Diário da República): nueva redacción de los arts. 148 y 149 del Código do Trabalho, aplicación en el tiempo (art. 11.4) y entrada en vigor el 1 de octubre de 2019 (art. 13)",
         "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), con su redacción inicial de 2009: los límites de los contratos firmados antes del 1 de octubre de 2019"
       },
@@ -3773,8 +3781,17 @@
           "certain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 3 años de plazo cierto, renovaciones incluidas, y menos en algunos casos (redacción inicial del art. 148.1). Con estas fechas, ese límite se alcanzó el {{date}}.",
           "uncertain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 6 años de plazo incierto (redacción inicial del art. 148.4). Con estas fechas, ese límite se alcanzó el {{date}}."
         },
-        "consequence": "Un contrato que supera su duración máxima se convierte en indefinido (art. 147.2.b), y la antigüedad cuenta desde el primer día (art. 147.3). Ponerle fin es entonces un despido, no una caducidad, con otras reglas de indemnización; si el empleador lo hace solo alegando el fin del plazo, puede ser un despido ilícito. La cifra mostrada sigue siendo la indemnización por caducidad.",
-        "action": "Calcular como despido en un contrato indefinido"
+        "consequence": "Un contrato que supera su duración máxima o los límites de renovación se convierte en indefinido (art. 147.2.a y b), y la antigüedad cuenta desde el primer día (art. 147.3). Ponerle fin es entonces un despido, no una caducidad, con otras reglas de indemnización; si el empleador lo hace solo alegando el fin del plazo, puede ser un despido ilícito. La cifra mostrada sigue siendo la indemnización por caducidad.",
+        "action": "Calcular como despido en un contrato indefinido",
+        "earlier": {
+          "from2019": "El límite cuenta {{months}} de contratos anteriores para el mismo puesto con el mismo empleador (art. 148.6).",
+          "before2019": "El límite cuenta {{months}} de contratos anteriores para el mismo puesto con el mismo empleador (redacción inicial del art. 148.5)."
+        },
+        "renewals": {
+          "from2019": "Un contrato de plazo cierto puede renovarse como máximo tres veces (art. 149.4 del Código do Trabalho, en la redacción de la Lei n.º 93/2019). Este se renovó {{count}} veces.",
+          "before2019": "Un contrato de plazo cierto firmado antes del 1 de octubre de 2019 puede renovarse como máximo tres veces (redacción inicial del art. 148.1, mantenida por el art. 11.4 de la Lei n.º 93/2019). Este se renovó {{count}} veces."
+        },
+        "renewalLength": "Las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). Con un periodo inicial de {{months}}, el contrato podía durar como máximo hasta el {{date}}."
       }
     },
     "statePension": {

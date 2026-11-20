@@ -81,7 +81,7 @@ it("warns, without blocking the figure, when a fixed-term contract passes the ar
   expect(screen.getByText("This contract may count as open-ended")).toBeTruthy();
   expect(screen.getByText(/at most 2 years, renewals included \(art\. 148\(1\)/)).toBeTruthy();
   expect(screen.getByText(/December 31, 2025/)).toBeTruthy();
-  expect(screen.getByText(/converts into an open-ended contract \(art\. 147\(2\)\(b\)/)).toBeTruthy();
+  expect(screen.getByText(/or the renewal limits converts into an open-ended contract \(art\. 147\(2\)\(a\) and \(b\)\)/)).toBeTruthy();
   expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros(7200));
 
   // An uncertain term may last 4 years.
@@ -98,4 +98,55 @@ it("warns, without blocking the figure, when a fixed-term contract passes the ar
   expect((screen.getByLabelText("Type of termination") as HTMLSelectElement).value).toBe("permanent");
   expect(screen.queryByText("This contract may count as open-ended")).toBeNull();
   expect(screen.queryByLabelText("Kind of term")).toBeNull();
+});
+
+it("asks a certain-term contract for its renewals and earlier contracts, and warns without changing the figure", () => {
+  render(<DismissalCompensationCalculatorComp locale="en" />);
+  expect(screen.queryByLabelText("Number of renewals (optional)")).toBeNull();
+  fireEvent.change(screen.getByLabelText("Type of termination"), { target: { value: "fixedTerm" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly base pay (gross)" }), { target: { value: "3000" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly seniority supplements (diuturnidades)" }), { target: { value: "0" } });
+  fireEvent.change(screen.getByLabelText("Contract start date"), { target: { value: "2025-01-01" } });
+  fireEvent.change(screen.getByLabelText("Termination date"), { target: { value: "2026-06-30" } });
+  const figure = () => document.getElementById("dismissal-compensation")?.textContent;
+  const euros = figure();
+  expect(euros).toMatch(/^€3,5\d\d\.\d\d$/);
+  const warning = "This contract may count as open-ended";
+
+  // The first period only matters once the contract was renewed.
+  expect(screen.queryByLabelText("First period, in months (optional)")).toBeNull();
+  const renewals = screen.getByRole("spinbutton", { name: "Number of renewals (optional)" });
+  fireEvent.change(renewals, { target: { value: "3" } });
+  expect(screen.queryByText(warning)).toBeNull();
+  fireEvent.change(renewals, { target: { value: "4" } });
+  expect(screen.getByText(warning)).toBeTruthy();
+  expect(screen.getByText(/renewed at most three times \(art\. 149\(4\).*This one was renewed 4 times\./)).toBeTruthy();
+  expect(figure()).toBe(euros);
+
+  // Three renewals of a 6-month first period, to 30 June 2026: 12 months of renewals is longer than 6.
+  fireEvent.change(renewals, { target: { value: "3" } });
+  const initial = screen.getByRole("spinbutton", { name: "First period, in months (optional)" });
+  fireEvent.change(initial, { target: { value: "9" } });
+  expect(screen.queryByText(warning)).toBeNull();
+  fireEvent.change(initial, { target: { value: "6" } });
+  expect(screen.getByText(/With a first period of 6 months, the contract could run until December 31, 2025 at most\./)).toBeTruthy();
+  expect(figure()).toBe(euros);
+  fireEvent.change(initial, { target: { value: "" } });
+  expect(screen.queryByText(warning)).toBeNull();
+
+  // Seven months of earlier contracts bring the 2-year limit forward to 31 May 2026.
+  const earlier = screen.getByRole("spinbutton", { name: "Earlier contracts for the same job, in months (optional)" });
+  fireEvent.change(earlier, { target: { value: "6" } });
+  expect(screen.queryByText(warning)).toBeNull();
+  fireEvent.change(earlier, { target: { value: "7" } });
+  expect(screen.getByText(/the limit was reached on May 31, 2026\. The limit counts 7 months of earlier contracts .*\(art\. 148\(6\)\)\./)).toBeTruthy();
+  expect(figure()).toBe(euros);
+
+  // A count that is not a whole number is an input error; an uncertain term asks for neither.
+  fireEvent.change(earlier, { target: { value: "1.5" } });
+  expect(screen.getByText("Enter a whole number from 0 to 600, or leave it empty.")).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("Kind of term"), { target: { value: "uncertain" } });
+  expect(screen.queryByLabelText("Number of renewals (optional)")).toBeNull();
+  expect(screen.queryByLabelText("Earlier contracts for the same job, in months (optional)")).toBeNull();
+  expect(figure()).toBe(euros);
 });

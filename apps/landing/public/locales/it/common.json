@@ -2709,9 +2709,10 @@
         "methodTax": "Si trattiene il {{irsRate}} degli interessi di ogni trimestre e gli interessi netti si sommano al saldo, così i trimestri successivi maturano interessi anche su di essi.",
         "methodYield": "Il rendimento netto annuo è la crescita composta annua dall'importo sottoscritto al saldo finale. I valori lordi mostrano gli interessi prima dell'IRS.",
         "assumptionsTitle": "Ipotesi",
-        "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Parte dal tasso fissato dall'IGCP per {{referenceMonth}} ({{referenceRate}}, il massimo), che viene fissato di nuovo ogni mese, quindi gli interessi effettivi saranno diversi. Controlla il tasso attuale sul sito dell'IGCP.",
+        "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Parte dal tasso fissato dall'IGCP per {{referenceMonth}} ({{referenceRateNote}}), che viene fissato di nuovo ogni mese, quindi gli interessi effettivi saranno diversi. Controlla il tasso attuale sul sito dell'IGCP.",
         "assumptionRules": "L'aliquota IRS è quella generale per questo tipo di reddito. La tua situazione fiscale e le modifiche alle regole successive a {{rulesDate}} non sono considerate.",
-        "assumptionScope": "Si tratta di informazioni generali, non di una raccomandazione a sottoscrivere o evitare un prodotto, e non c'è alcun confronto tra i certificati e altre forme di risparmio."
+        "assumptionScope": "Si tratta di informazioni generali, non di una raccomandazione a sottoscrivere o evitare un prodotto, e non c'è alcun confronto tra i certificati e altre forme di risparmio.",
+        "referenceRateAtCeiling": "{{rate}}, il massimo"
       },
       "nextStepHeadline": "Vedi i tuoi certificati accanto al resto dei risparmi",
       "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",
@@ -3664,7 +3665,10 @@
         "startDate": "Data di inizio del contratto",
         "endDate": "Data di cessazione",
         "contractType": "Tipo di cessazione",
-        "fixedTermKind": "Tipo di termine"
+        "fixedTermKind": "Tipo di termine",
+        "renewals": "Numero di rinnovi (facoltativo)",
+        "initialMonths": "Periodo iniziale, in mesi (facoltativo)",
+        "earlierMonths": "Contratti precedenti sullo stesso posto, in mesi (facoltativo)"
       },
       "help": {
         "baseMonthly": "La retribuzione base (retribuição base) in euro al mese, prima dei contributi previdenziali e dell'IRS. Non includere indennità, mensilità aggiuntive, premi né straordinari.",
@@ -3673,7 +3677,10 @@
         "endDate": "L'ultimo giorno del contratto. Conta come giorno lavorato. Questa stima copre le cessazioni nel {{year}}.",
         "contractType": "Il licenziamento copre il licenziamento collettivo, la soppressione del posto e l'inidoneità. La scadenza è la fine di un contratto a termine, certo o incerto (artt. 344 e 345 del Código do Trabalho). L'indennità non è dovuta quando il contratto finisce perché hai dichiarato di non volerlo rinnovare.",
         "startDateFixedTerm": "Il giorno in cui è iniziato il contratto a termine. Se è stato rinnovato, conta dal primo giorno: tutta la durata, rinnovi compresi, è pagata a 24 giorni per anno.",
-        "fixedTermKind": "Stabilisce la durata massima: 2 anni a termine certo, 4 a termine incerto (art. 148). L'indennità è la stessa, 24 giorni per anno."
+        "fixedTermKind": "Stabilisce la durata massima: 2 anni a termine certo, 4 a termine incerto (art. 148). L'indennità è la stessa, 24 giorni per anno.",
+        "renewals": "Quante volte il contratto è stato rinnovato. Un contratto a termine certo può essere rinnovato fino a tre volte (art. 149, n. 4). Lascia vuoto se non è mai stato rinnovato.",
+        "initialMonths": "Il periodo concordato alla conclusione del contratto, prima di qualsiasi rinnovo. I rinnovi insieme non possono durare più di questo periodo (art. 149, n. 4).",
+        "earlierMonths": "Contratti a termine o di lavoro somministrato precedenti sullo stesso posto, e prestazioni di servizi per lo stesso oggetto, con lo stesso datore di lavoro o una società del suo gruppo. Contano per la durata massima (art. 148, n. 6). Lascia vuoto se non ce ne sono stati."
       },
       "scope": "Copre licenziamento collettivo, soppressione del posto e inidoneità in un contratto a tempo indeterminato. Non copre licenziamento per giusta causa, licenziamento illegittimo, cessazione consensuale né settore pubblico. Per la fine di un contratto a termine, scegli «Scadenza di un contratto a termine».",
       "errors": {
@@ -3684,7 +3691,8 @@
         "endBeforeStart": "La data di cessazione non può precedere la data di inizio.",
         "startFuture": "Il contratto non può iniziare nel futuro.",
         "endOutsideYear": "Questa stima copre le cessazioni nel {{year}}, l'anno del salario minimo usato dai limiti.",
-        "summary": "Controlla i campi evidenziati per vedere la stima."
+        "summary": "Controlla i campi evidenziati per vedere la stima.",
+        "wholeNumber": "Inserisci un numero intero da {{min}} a {{max}}, oppure lascia vuoto."
       },
       "result": {
         "compensation": "Indennità stimata",
@@ -3747,7 +3755,7 @@
         "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e il suo n. 2 limita al periodo da quella data solo i 14 giorni dell'art. 366, n. 1. La nota dell'IGeFE del 5 luglio 2023 lo interpreta come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023: il suo esempio di un contratto dal 1° settembre 2021 al 31 agosto 2023 conta tutti i 730 giorni a 24 giorni. Quindi tutta la durata conta a 24 giorni, e le misure dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano. Un contratto a termine dura al massimo due anni, o quattro se a termine incerto (art. 148): uno che rispetta questo limite e scade nel 2026 non è stato concluso prima del 1° ottobre 2013 e il regime transitorio dell'art. 6 della Lei n.º 69/2013 non si applica.",
         "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile (Diário da República): nuovo testo degli artt. 344, n. 2, 345, n. 4, e 366, n. 1, del Código do Trabalho e art. 35 sull'applicazione nel tempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula",
-        "methodDurationLimit": "Durata massima (art. 148 del Código do Trabalho, nella versione della Lei n.º 93/2019): 2 anni a termine certo, rinnovi compresi, e 4 anni a termine incerto. Un contratto a termine certo può essere rinnovato fino a tre volte, e i rinnovi insieme non possono durare più del periodo iniziale (art. 149, n. 4). Nei 2 anni contano anche i contratti a termine e il lavoro somministrato sullo stesso posto, e le prestazioni di servizi per lo stesso oggetto, con lo stesso datore di lavoro (art. 148, n. 6). I contratti conclusi prima del 1° ottobre 2019 mantengono i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): 3 anni a termine certo (18 mesi per chi cerca il primo impiego e 2 anni negli altri casi dell'art. 140, n. 4) e 6 anni a termine incerto; il calcolatore usa la data di inizio come data di conclusione. Quando le date superano il limite, il calcolatore avvisa che il contratto sarebbe probabilmente a tempo indeterminato (art. 147, n. 2, lett. b) e che porvi fine sarebbe un licenziamento, ma mostra sempre l'importo della scadenza. Non vede rinnovi né contratti precedenti, quindi verificali tu.",
+        "methodDurationLimit": "Durata massima (art. 148 del Código do Trabalho, nella versione della Lei n.º 93/2019): 2 anni a termine certo, rinnovi compresi, e 4 anni a termine incerto. Un contratto a termine certo può essere rinnovato fino a tre volte, e i rinnovi insieme non possono durare più del periodo iniziale (art. 149, n. 4). Nei 2 anni contano anche i contratti a termine e il lavoro somministrato sullo stesso posto, e le prestazioni di servizi per lo stesso oggetto, con lo stesso datore di lavoro (art. 148, n. 6). I contratti conclusi prima del 1° ottobre 2019 mantengono i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): 3 anni a termine certo (18 mesi per chi cerca il primo impiego e 2 anni negli altri casi dell'art. 140, n. 4) e 6 anni a termine incerto; il calcolatore usa la data di inizio come data di conclusione. Quando le date superano il limite, il calcolatore avvisa che il contratto sarebbe probabilmente a tempo indeterminato (art. 147, n. 2, lett. b) e che porvi fine sarebbe un licenziamento, ma mostra sempre l'importo della scadenza. Per un contratto a termine certo puoi indicare anche il numero di rinnovi, la durata del periodo iniziale e i mesi di contratti precedenti sullo stesso posto, e l'avviso copre anche queste regole: più di tre rinnovi, rinnovi più lunghi in totale del periodo iniziale (art. 147, n. 2, lett. a) o contratti precedenti che anticipano il limite di 2 anni. I contratti conclusi prima del 1° ottobre 2019 potevano essere rinnovati tre volte senza limite alla durata dei rinnovi (versione iniziale dell'art. 148, n. 1), e i contratti precedenti contano per i loro 3 anni (versione iniziale dell'art. 148, n. 5). I contratti precedenti non contano per il limite del termine incerto.",
         "sourceLaw93": "Lei n.º 93/2019, del 4 settembre (Diário da República): nuova versione degli artt. 148 e 149 del Código do Trabalho, applicazione nel tempo (art. 11, n. 4) ed entrata in vigore il 1° ottobre 2019 (art. 13)",
         "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), con la versione iniziale del 2009: i limiti dei contratti conclusi prima del 1° ottobre 2019"
       },
@@ -3773,8 +3781,17 @@
           "certain": "Un contratto a termine concluso prima del 1° ottobre 2019 mantiene i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): al massimo 3 anni a termine certo, rinnovi compresi, e meno in alcuni casi (versione iniziale dell'art. 148, n. 1). Con queste date, il limite è stato raggiunto il {{date}}.",
           "uncertain": "Un contratto a termine concluso prima del 1° ottobre 2019 mantiene i limiti precedenti (art. 11, n. 4, della Lei n.º 93/2019): al massimo 6 anni a termine incerto (versione iniziale dell'art. 148, n. 4). Con queste date, il limite è stato raggiunto il {{date}}."
         },
-        "consequence": "Un contratto che supera la durata massima si converte in contratto a tempo indeterminato (art. 147, n. 2, lett. b), e l'anzianità conta dal primo giorno (art. 147, n. 3). Porvi fine è allora un licenziamento, non una scadenza, con altre regole di indennità; se il datore di lavoro lo chiude solo invocando la fine del termine, può trattarsi di un licenziamento illegittimo. L'importo mostrato resta l'indennità per la scadenza.",
-        "action": "Calcola come licenziamento in un contratto a tempo indeterminato"
+        "consequence": "Un contratto che supera la durata massima o i limiti di rinnovo si converte in contratto a tempo indeterminato (art. 147, n. 2, lett. a e b), e l'anzianità conta dal primo giorno (art. 147, n. 3). Porvi fine è allora un licenziamento, non una scadenza, con altre regole di indennità; se il datore di lavoro lo chiude solo invocando la fine del termine, può trattarsi di un licenziamento illegittimo. L'importo mostrato resta l'indennità per la scadenza.",
+        "action": "Calcola come licenziamento in un contratto a tempo indeterminato",
+        "earlier": {
+          "from2019": "Il limite tiene conto di {{months}} di contratti precedenti sullo stesso posto con lo stesso datore di lavoro (art. 148, n. 6).",
+          "before2019": "Il limite tiene conto di {{months}} di contratti precedenti sullo stesso posto con lo stesso datore di lavoro (versione iniziale dell'art. 148, n. 5)."
+        },
+        "renewals": {
+          "from2019": "Un contratto a termine certo può essere rinnovato al massimo tre volte (art. 149, n. 4, del Código do Trabalho, nella versione della Lei n.º 93/2019). Questo è stato rinnovato {{count}} volte.",
+          "before2019": "Un contratto a termine certo concluso prima del 1° ottobre 2019 può essere rinnovato al massimo tre volte (versione iniziale dell'art. 148, n. 1, mantenuta dall'art. 11, n. 4, della Lei n.º 93/2019). Questo è stato rinnovato {{count}} volte."
+        },
+        "renewalLength": "I rinnovi insieme non possono durare più del periodo iniziale (art. 149, n. 4). Con un periodo iniziale di {{months}}, il contratto poteva durare al massimo fino al {{date}}."
       }
     },
     "statePension": {

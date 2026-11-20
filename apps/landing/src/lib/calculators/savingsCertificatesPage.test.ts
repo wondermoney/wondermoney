@@ -56,6 +56,9 @@ describe("localized savings certificates tool page", () => {
     for (const lang of SUPPORTED_LANGS) {
       expect(localeCopy(lang, "src").guide.sourceIgcp).toContain("{{referenceMonth}}");
       expect(localeCopy(lang, "src").guide.assumptionBase).not.toMatch(/AforroNet\.?$/);
+      // The default rate is refreshed monthly: "the ceiling" comes only from the separate key, used when it is.
+      expect(localeCopy(lang, "src").guide.assumptionBase).toContain("({{referenceRateNote}})");
+      expect(localeCopy(lang, "src").guide.referenceRateAtCeiling).toMatch(/^\{\{rate\}\}, \S/);
     }
   });
 

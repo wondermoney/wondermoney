@@ -39,6 +39,11 @@ const values = {
   rulesDate: t(k("rulesDateValue")),
   referenceMonth: monthLabel(locale, SAVINGS_CERTIFICATES_RULES.referenceBaseRate.month),
   referenceRate: pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate),
+  // The monthly refresh can move the rate off the ceiling, so the page says "the ceiling" only when it is.
+  referenceRateNote:
+    SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate === SAVINGS_CERTIFICATES_RULES.maxBaseRate
+      ? t(k("referenceRateAtCeiling"), { rate: pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate) })
+      : pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate),
 };
 function monthLabel(lang: string, month: string) {
   return new Intl.DateTimeFormat(lang, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${month}-01`));

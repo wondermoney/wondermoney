@@ -2709,9 +2709,10 @@
         "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
         "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
         "assumptionsTitle": "Pressupostos",
-        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRate}}, o máximo) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRateNote}}) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
         "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
-        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
+        "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças.",
+        "referenceRateAtCeiling": "{{rate}}, o máximo"
       },
       "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
@@ -3664,7 +3665,10 @@
         "startDate": "Data de início do contrato",
         "endDate": "Data de cessação",
         "contractType": "Tipo de cessação",
-        "fixedTermKind": "Tipo de termo"
+        "fixedTermKind": "Tipo de termo",
+        "renewals": "Número de renovações (opcional)",
+        "initialMonths": "Período inicial, em meses (opcional)",
+        "earlierMonths": "Contratos anteriores para o mesmo posto, em meses (opcional)"
       },
       "help": {
         "baseMonthly": "A retribuição base em euros por mês, antes da Segurança Social e do IRS. Não incluas subsídios, prémios nem horas extra.",
@@ -3673,7 +3677,10 @@
         "endDate": "O último dia do contrato. Conta como dia trabalhado. Esta estimativa cobre cessações em {{year}}.",
         "contractType": "O despedimento cobre o despedimento coletivo, a extinção do posto de trabalho e a inadaptação. A caducidade é o fim de um contrato a termo, certo ou incerto (arts. 344.º e 345.º do Código do Trabalho). Não é devida quando o contrato termina porque declaraste que não o querias renovar.",
         "startDateFixedTerm": "O dia em que o contrato a termo começou. Se foi renovado, conta desde o primeiro dia: toda a duração, renovações incluídas, é paga a 24 dias por ano.",
-        "fixedTermKind": "Define a duração máxima: 2 anos a termo certo, 4 a termo incerto (art. 148.º). A compensação é a mesma, 24 dias por ano."
+        "fixedTermKind": "Define a duração máxima: 2 anos a termo certo, 4 a termo incerto (art. 148.º). A compensação é a mesma, 24 dias por ano.",
+        "renewals": "Quantas vezes o contrato foi renovado. Um contrato a termo certo pode ser renovado até três vezes (art. 149.º, n.º 4). Deixa em branco se nunca foi renovado.",
+        "initialMonths": "O período acordado quando o contrato foi celebrado, antes de qualquer renovação. A duração total das renovações não pode exceder a deste período (art. 149.º, n.º 4).",
+        "earlierMonths": "Contratos a termo ou de trabalho temporário anteriores no mesmo posto de trabalho, e prestações de serviço para o mesmo objeto, com o mesmo empregador ou uma sociedade do mesmo grupo. Contam para a duração máxima (art. 148.º, n.º 6). Deixa em branco se não houve nenhum."
       },
       "scope": "Cobre despedimento coletivo, extinção do posto de trabalho e inadaptação num contrato sem termo. Não cobre despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública. Para o fim de um contrato a termo, escolhe caducidade de contrato a termo.",
       "errors": {
@@ -3684,7 +3691,8 @@
         "endBeforeStart": "A data de cessação não pode ser anterior à data de início.",
         "startFuture": "O contrato não pode começar no futuro.",
         "endOutsideYear": "Esta estimativa cobre cessações em {{year}}, o ano do salário mínimo usado nos limites.",
-        "summary": "Verifica os campos assinalados para veres a estimativa."
+        "summary": "Verifica os campos assinalados para veres a estimativa.",
+        "wholeNumber": "Indica um número inteiro de {{min}} a {{max}}, ou deixa em branco."
       },
       "result": {
         "compensation": "Compensação estimada",
@@ -3747,7 +3755,7 @@
         "methodFixedTerm": "Caducidade de contrato a termo (arts. 344.º, n.º 2, e 345.º, n.º 4, do Código do Trabalho, na redação da Lei n.º 13/2023): 24 dias de retribuição base e diuturnidades por cada ano completo de antiguidade, calculados como no art. 366.º. Aplicam-se o valor diário, o limite de 20 vezes o salário mínimo para o valor mensal, o limite de 12 valores mensais e a fração proporcional de um ano. O art. 35.º, n.º 1, da Lei n.º 13/2023 sujeita ao novo texto os contratos celebrados antes de 1 de maio de 2023, e o n.º 2 do mesmo artigo limita ao tempo a partir dessa data apenas os 14 dias do art. 366.º, n.º 1. A nota do IGeFE de 5 de julho de 2023 lê-o como 24 dias para todos os contratos que caduquem a partir de 1 de maio de 2023: o seu exemplo de um contrato de 1 de setembro de 2021 a 31 de agosto de 2023 conta os 730 dias a 24 dias. Assim, toda a duração conta a 24 dias, e as taxas dos contratos sem termo (12, 14, 18 e 20 dias) não se aplicam. Um contrato a termo dura no máximo dois anos, ou quatro se for a termo incerto (art. 148.º), por isso um contrato que respeite esse limite e caduque em 2026 não foi celebrado antes de 1 de outubro de 2013 e o regime transitório do art. 6.º da Lei n.º 69/2013 não se aplica.",
         "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nova redação dos arts. 344.º, n.º 2, 345.º, n.º 4, e 366.º, n.º 1, do Código do Trabalho e art. 35.º sobre a aplicação no tempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julho de 2023): 24 dias para todos os contratos a termo que caduquem a partir de 1 de maio de 2023, seja qual for a data de celebração",
-        "methodDurationLimit": "Duração máxima (art. 148.º do Código do Trabalho, na redação da Lei n.º 93/2019): 2 anos a termo certo, renovações incluídas, e 4 anos a termo incerto. Um contrato a termo certo pode ser renovado até três vezes, e a duração total das renovações não pode exceder a do período inicial (art. 149.º, n.º 4). Para os 2 anos contam também os contratos a termo e o trabalho temporário no mesmo posto de trabalho, e as prestações de serviço para o mesmo objeto, com o mesmo empregador (art. 148.º, n.º 6). Os contratos celebrados antes de 1 de outubro de 2019 mantêm os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): 3 anos a termo certo (18 meses para quem procura o primeiro emprego e 2 anos nos outros casos do art. 140.º, n.º 4) e 6 anos a termo incerto; o simulador usa a data de início como data de celebração. Quando as datas ultrapassam o limite, o simulador avisa que o contrato seria provavelmente sem termo (art. 147.º, n.º 2, alínea b)) e que pôr-lhe fim seria um despedimento, mas continua a mostrar o valor da caducidade. Não vê renovações nem contratos anteriores, por isso confirma-os tu.",
+        "methodDurationLimit": "Duração máxima (art. 148.º do Código do Trabalho, na redação da Lei n.º 93/2019): 2 anos a termo certo, renovações incluídas, e 4 anos a termo incerto. Um contrato a termo certo pode ser renovado até três vezes, e a duração total das renovações não pode exceder a do período inicial (art. 149.º, n.º 4). Para os 2 anos contam também os contratos a termo e o trabalho temporário no mesmo posto de trabalho, e as prestações de serviço para o mesmo objeto, com o mesmo empregador (art. 148.º, n.º 6). Os contratos celebrados antes de 1 de outubro de 2019 mantêm os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): 3 anos a termo certo (18 meses para quem procura o primeiro emprego e 2 anos nos outros casos do art. 140.º, n.º 4) e 6 anos a termo incerto; o simulador usa a data de início como data de celebração. Quando as datas ultrapassam o limite, o simulador avisa que o contrato seria provavelmente sem termo (art. 147.º, n.º 2, alínea b)) e que pôr-lhe fim seria um despedimento, mas continua a mostrar o valor da caducidade. Num contrato a termo certo podes indicar também o número de renovações, a duração do período inicial e os meses de contratos anteriores para o mesmo posto, e o aviso cobre também essas regras: mais de três renovações, renovações mais longas no total do que o período inicial (art. 147.º, n.º 2, alínea a)) ou contratos anteriores que antecipam o limite de 2 anos. Os contratos celebrados antes de 1 de outubro de 2019 podiam ser renovados três vezes sem limite à duração das renovações (redação inicial do art. 148.º, n.º 1), e os contratos anteriores contam para os seus 3 anos (redação inicial do art. 148.º, n.º 5). Os contratos anteriores não contam para o limite do termo incerto.",
         "sourceLaw93": "Lei n.º 93/2019, de 4 de setembro (Diário da República): nova redação dos arts. 148.º e 149.º do Código do Trabalho, aplicação no tempo (art. 11.º, n.º 4) e entrada em vigor a 1 de outubro de 2019 (art. 13.º)",
         "sourceArt148": "Código do Trabalho, art. 148.º (Diário da República), com a redação inicial de 2009: os limites dos contratos celebrados antes de 1 de outubro de 2019"
       },
@@ -3773,8 +3781,17 @@
           "certain": "Um contrato a termo celebrado antes de 1 de outubro de 2019 mantém os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): no máximo 3 anos a termo certo, renovações incluídas, e menos em alguns casos (redação inicial do art. 148.º, n.º 1). Com estas datas, esse limite foi atingido a {{date}}.",
           "uncertain": "Um contrato a termo celebrado antes de 1 de outubro de 2019 mantém os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): no máximo 6 anos a termo incerto (redação inicial do art. 148.º, n.º 4). Com estas datas, esse limite foi atingido a {{date}}."
         },
-        "consequence": "Um contrato que ultrapassa a duração máxima converte-se em contrato sem termo (art. 147.º, n.º 2, alínea b)), e a antiguidade conta desde o primeiro dia (art. 147.º, n.º 3). Pôr-lhe fim é então um despedimento, não uma caducidade, com outras regras de compensação; se o empregador o fizer só por invocar o fim do prazo, pode tratar-se de um despedimento ilícito. O valor apresentado continua a ser a compensação por caducidade.",
-        "action": "Calcular como despedimento num contrato sem termo"
+        "consequence": "Um contrato que ultrapassa a duração máxima ou os limites de renovação converte-se em contrato sem termo (art. 147.º, n.º 2, alíneas a) e b)), e a antiguidade conta desde o primeiro dia (art. 147.º, n.º 3). Pôr-lhe fim é então um despedimento, não uma caducidade, com outras regras de compensação; se o empregador o fizer só por invocar o fim do prazo, pode tratar-se de um despedimento ilícito. O valor apresentado continua a ser a compensação por caducidade.",
+        "action": "Calcular como despedimento num contrato sem termo",
+        "earlier": {
+          "from2019": "O limite conta {{months}} de contratos anteriores para o mesmo posto de trabalho com o mesmo empregador (art. 148.º, n.º 6).",
+          "before2019": "O limite conta {{months}} de contratos anteriores para o mesmo posto de trabalho com o mesmo empregador (redação inicial do art. 148.º, n.º 5)."
+        },
+        "renewals": {
+          "from2019": "Um contrato a termo certo pode ser renovado até três vezes (art. 149.º, n.º 4, do Código do Trabalho, na redação da Lei n.º 93/2019). Este foi renovado {{count}} vezes.",
+          "before2019": "Um contrato a termo certo celebrado antes de 1 de outubro de 2019 pode ser renovado até três vezes (redação inicial do art. 148.º, n.º 1, mantida pelo art. 11.º, n.º 4, da Lei n.º 93/2019). Este foi renovado {{count}} vezes."
+        },
+        "renewalLength": "A duração total das renovações não pode exceder a do período inicial (art. 149.º, n.º 4). Com um período inicial de {{months}}, o contrato só podia durar até {{date}}."
       }
     },
     "statePension": {
