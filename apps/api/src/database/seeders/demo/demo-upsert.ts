@@ -4,7 +4,7 @@ import type { EntityData, EntityManager, EntityName, FilterQuery } from '@mikro-
 export async function upsertDemoRow<T extends object>(
   em: EntityManager,
   entity: EntityName<T>,
-  criteria: FilterQuery<NoInfer<T>>,
+  criteria: NoInfer<FilterQuery<T>>,
   data: EntityData<NoInfer<T>>,
 ): Promise<T> {
   const existing = await em.findOne<T>(entity, criteria);

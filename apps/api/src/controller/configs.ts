@@ -20,12 +20,6 @@ interface CategoryChildItem {
   textColor: string;
 }
 
-interface CategoryQueryItem {
-  $or: { appuserKey?: null | { appuserKey: number }; isSystemCategory: boolean }[];
-  deletedAt: undefined;
-  parentCategory: undefined;
-}
-
 interface CategoryResult {
   bgColor: string;
   categoryKey: number;
@@ -57,7 +51,7 @@ export async function getConfigs(req: Request, res: Response) {
       {
         deletedAt: undefined,
         parentCategory: undefined,
-      } as CategoryQueryItem,
+      },
       {
         populate: ['childCategory'],
       },
