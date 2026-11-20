@@ -11,6 +11,8 @@ describe("public claims alignment", () => {
     expect(classifyMatch("docs/historical-launch.md")).toBe("historical");
     expect(classifyMatch("src/lib/routes.test.ts")).toBe("not-claim");
     expect(classifyMatch("src/components/pages/HomePage.astro")).toBe("claim");
+    expect(classifyMatch("src/lib/resources/curatedLists/events.ts")).toBe("not-claim");
+    expect(classifyMatch("src/lib/resources/curatedLists/page.ts")).toBe("claim");
     expect(classifyMatch("src/locales/en/common.json", "Disconnect your bank immediately.")).toBe("not-claim");
     expect(classifyMatch("src/lib/envelope.ts", 'import { createHmac } from "node:crypto";')).toBe("technical");
     expect(classifyMatch("src/layouts/Layout.astro", 'crossorigin="anonymous"')).toBe("technical");

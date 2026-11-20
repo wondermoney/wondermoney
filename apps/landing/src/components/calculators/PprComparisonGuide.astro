@@ -1,0 +1,230 @@
+---
+// Prerendered explanation for the PPR comparison: what a PPR is, why products are compared within
+// one risk class, a worked comparison computed from the same data the island shows, the IRS
+// deduction, the redemption rules, the method and sources, and the tools to go on with.
+import ToolGuide from "./ToolGuide.astro";
+import {
+  PPR_FUNDS_SOURCE,
+  PPR_INSURANCE_SOURCE,
+  PPR_PRODUCTS,
+  PPR_TAX_RULES,
+  PPR_TAX_RULES_REVIEWED,
+  PPR_TAX_SOURCES,
+  pprDeduction,
+  pprRedemptionRates,
+  riskClassSummary,
+  type PprProduct,
+} from "@/lib/calculators/pprComparison";
+import { createPprFormat } from "@/lib/calculators/pprFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.pprComparison.guide.${key}`;
+const format = createPprFormat(t, locale);
+
+// The worked comparison: the risk class with the most products that publish both a yearly cost and
+// a 5-year return, and in it the lowest and the highest yearly cost.
+const comparable = PPR_PRODUCTS.filter(
+  (item): item is PprProduct & { riskClass: number; yearlyCost: number } =>
+    item.riskClass !== null && item.yearlyCost !== null && item.returns.y5 !== null,
+);
+const byRisk = new Map<number, typeof comparable>();
+for (const item of comparable) byRisk.set(item.riskClass, [...(byRisk.get(item.riskClass) ?? []), item]);
+const [exampleRisk, exampleItems] = [...byRisk.entries()].sort((a, b) => b[1].length - a[1].length || a[0] - b[0])[0] ?? [];
+if (!exampleRisk || !exampleItems || exampleItems.length < 2) throw new Error("The worked comparison needs two products in one risk class");
+const sortedByCost = [...exampleItems].sort((a, b) => a.yearlyCost - b.yearlyCost || a.name.localeCompare(b.name, "pt"));
+const low = sortedByCost[0];
+const high = sortedByCost[sortedByCost.length - 1];
+const summary = riskClassSummary(PPR_PRODUCTS, exampleRisk);
+const invested = 10_000;
+const costGap = ((high.yearlyCost - low.yearlyCost) / 100) * invested;
+
+const deductionAge = 40;
+const deductionExample = pprDeduction({ age: deductionAge, contribution: 1750, retired: false });
+const [under35, from35, over50] = PPR_TAX_RULES.limits.map((band) => format.eur(band.limit));
+const redemptionRates = pprRedemptionRates();
+const [, reduced, lowest] = redemptionRates.outside;
+if (!reduced || !lowest) throw new Error("The redemption copy quotes two reductions for long-held plans");
+
+const values = {
+  risk: String(exampleRisk),
+  count: String(exampleItems.length),
+  total: String(summary.count),
+  fundsYear: String(PPR_FUNDS_SOURCE.returnsYear),
+  insuranceYear: String(PPR_INSURANCE_SOURCE.returnsYear),
+  lowName: format.productName(low),
+  lowKind: t(k(`example.kinds.${low.kind}`)),
+  lowCost: format.percent(low.yearlyCost),
+  lowReturn: format.maybePercent(low.returns.y5),
+  highName: format.productName(high),
+  highKind: t(k(`example.kinds.${high.kind}`)),
+  highCost: format.percent(high.yearlyCost),
+  highReturn: format.maybePercent(high.returns.y5),
+  invested: format.eur(invested),
+  costGap: format.eur(Math.round(costGap)),
+  rate: format.rate(PPR_TAX_RULES.deductionRate),
+  under35,
+  from35,
+  over50,
+  full35: format.eur(PPR_TAX_RULES.limits[0].limit / (PPR_TAX_RULES.deductionRate / 100)),
+  full50: format.eur(PPR_TAX_RULES.limits[1].limit / (PPR_TAX_RULES.deductionRate / 100)),
+  fullOver: format.eur(PPR_TAX_RULES.limits[2].limit / (PPR_TAX_RULES.deductionRate / 100)),
+  age: String(deductionAge),
+  exampleContribution: format.eur(1750),
+  exampleDeduction: format.eur(deductionExample.deduction),
+  capMin: format.eur(PPR_TAX_RULES.overallCap.min),
+  capMax: format.eur(PPR_TAX_RULES.overallCap.max),
+  years: String(PPR_TAX_RULES.minYearsPerContribution),
+  firstHalf: format.rate(PPR_TAX_RULES.firstHalfShare),
+  clawback: format.rate(PPR_TAX_RULES.clawbackPerYear),
+  legalRate: format.rate(PPR_TAX_RULES.legalRedemption.rate),
+  legalEffective: format.rate(redemptionRates.legal),
+  otherRate: format.rate(PPR_TAX_RULES.otherRedemptionRate),
+  reducedAfter: String(reduced.afterYears),
+  reducedRate: format.rate(reduced.rate),
+  lowestAfter: String(lowest.afterYears),
+  lowestRate: format.rate(lowest.rate),
+  transferFee: format.rate(PPR_TAX_RULES.maxGuaranteedTransferFee),
+  fundsDate: format.date(PPR_FUNDS_SOURCE.fetchedOn),
+  insuranceDate: format.date(PPR_INSURANCE_SOURCE.fetchedOn),
+  rulesDate: format.date(PPR_TAX_RULES_REVIEWED),
+  funds: String(PPR_PRODUCTS.filter((item) => item.kind === "fund").length),
+  insurance: String(PPR_PRODUCTS.filter((item) => item.kind !== "fund").length),
+};
+
+// Each item is read through t() with the example's values, so an item can quote the figures.
+const list = (key: string) =>
+  Object.keys(t<Record<string, string>>(k(key), { returnObjects: true })).map((item) => t(k(`${key}.${item}`), values));
+
+const sources = [
+  { key: "cmvm", href: PPR_FUNDS_SOURCE.url },
+  { key: "asf", href: PPR_INSURANCE_SOURCE.url },
+  { key: "asfRule", href: PPR_INSURANCE_SOURCE.regulationUrl },
+  { key: "ebf", href: PPR_TAX_SOURCES.ebf },
+  { key: "cirs", href: PPR_TAX_SOURCES.cirs },
+  { key: "dl158", href: PPR_TAX_SOURCES.dl158 },
+] as const;
+
+const related = [
+  { key: "statePension", href: toLocalizedPath("toolStatePension", locale) },
+  { key: "compound", href: toLocalizedPath("toolCompoundInterest", locale) },
+  { key: "profile", href: toLocalizedPath("toolInvestorProfile", locale) },
+  { key: "brokers", href: toLocalizedPath("toolBrokerFees", locale) },
+] as const;
+
+const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+const headingClass = "text-2xl font-semibold tracking-tight text-foreground";
+---
+
+<ToolGuide>
+  <section aria-labelledby="ppr-what">
+    <h2 id="ppr-what" class={headingClass}>{t(k("what.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("what.body"))}</p>
+      <ul class="list-disc space-y-2 pl-5">
+        {list("what.forms").map((item) => <li>{item}</li>)}
+      </ul>
+      <p>{t(k("what.supervisors"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-fair">
+    <h2 id="ppr-fair" class={headingClass}>{t(k("fair.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("fair.risk"), values)}</p>
+      <p>{t(k("fair.returns"), values)}</p>
+      <p>{t(k("fair.costs"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-example">
+    <h2 id="ppr-example" class={headingClass}>{t(k("example.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+      <p>{t(k("example.pair"), values)}</p>
+      <p>{t(k("example.cost"), values)}</p>
+      <p>{t(k("example.takeaway"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-tax">
+    <h2 id="ppr-tax" class={headingClass}>{t(k("tax.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("tax.deduction"), values)}</p>
+      <ul class="list-disc space-y-2 pl-5">
+        {list("tax.limits").map((item) => <li>{item}</li>)}
+      </ul>
+      <p>{t(k("tax.example"), values)}</p>
+      <p>{t(k("tax.conditions"), values)}</p>
+      <p>{t(k("tax.payout"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-redemption">
+    <h2 id="ppr-redemption" class={headingClass}>{t(k("redemption.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("redemption.intro"), values)}</p>
+      <ul class="list-disc space-y-2 pl-5">
+        {list("redemption.cases").map((item) => <li>{item}</li>)}
+      </ul>
+      <p>{t(k("redemption.fiveYears"), values)}</p>
+      <p>{t(k("redemption.outside"), values)}</p>
+      <p>{t(k("redemption.transfer"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-method">
+    <h2 id="ppr-method" class={headingClass}>{t(k("method.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"), values)}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {list("method.steps").map((item) => <li>{item}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="ppr-limits">
+    <h2 id="ppr-limits" class={headingClass}>{t(k("limits.title"))}</h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {list("limits.items").map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  <section aria-labelledby="ppr-sources">
+    <h2 id="ppr-sources" class={headingClass}>{t(k("sources.title"))}</h2>
+    <p class="mt-3 leading-7">{t(k("sources.intro"), values)}</p>
+    <ul class="mt-3 space-y-2 leading-7">
+      {
+        sources.map((item) => (
+          <li>
+            <a href={item.href} rel="noopener" target="_blank" class={linkClass}>
+              {t(k(`sources.items.${item.key}`))}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section aria-labelledby="ppr-related">
+    <h2 id="ppr-related" class={headingClass}>{t(k("related.title"))}</h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</ToolGuide>

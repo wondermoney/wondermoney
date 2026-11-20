@@ -35,6 +35,10 @@ export function classifyMatch(file, context = "") {
   // The vendored Hairline kernel and the figure scripts: drawing code, none of it page copy
   // (a figure's accessible label comes from the locale files).
   if (/^src\/lib\/hairline\/(?:figures\/)?[\w-]+\.js$/.test(file)) return "technical";
+  // The curated lists' data modules describe outside podcasts, books, courses, forums and events
+  // (a webinar's length, a book's title, a forum's rule on crypto), never WonderMoney. Their page
+  // copy, in the locale files, and page.ts and index.ts are still checked.
+  if (/^src\/lib\/resources\/curatedLists\/(?!index\.ts$|page\.ts$)[\w-]+\.ts$/.test(file)) return "not-claim";
   if (/(?:disconnect|revoke|widerruf|trenn|desconect|revog|déconnect|révoqu|disconnett|revoc)[^\n]{0,80}(?:immediately|imediatamente|inmediatamente|immédiatement|immediatamente|sofort|umgehend|subito|de inmediato)/iu.test(context)) return "not-claim";
   return "claim";
 }

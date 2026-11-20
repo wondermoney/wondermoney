@@ -42,7 +42,7 @@ describe("localized state pension tool page", () => {
       [{ href: toLocalizedPath("toolCompoundInterest", lang) }], lang, getTranslations(lang),
     );
     expect(related).toContainEqual(expect.objectContaining({ href }));
-    expect(getToolCatalogEntry("toolStatePension").related).toEqual(["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"]);
+    expect(getToolCatalogEntry("toolStatePension").related).toEqual(["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary", "toolPprComparison"]);
   });
 
   it.each(SUPPORTED_LANGS)("names its sources, review date and unsupported situations in %s", (lang) => {

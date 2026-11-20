@@ -30,7 +30,7 @@ public/                # Static assets
 | Localized URLs | `src/lib/routes.ts` | Typed localized slug map |
 | Static content expansion | `src/lib/pageStaticPaths.ts` | Top-level, feature, tool and ad pages |
 | Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
-| Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels |
+| Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels, books, courses, forums, events |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
@@ -113,9 +113,9 @@ monthly item's commentary.
 
 ## CURATED RESOURCE LISTS
 
-Lists of outside resources (podcasts, newsletters and YouTube channels so far) live in
-`src/lib/resources/curatedLists/`, one module per list (`podcasts.ts`, `newsletters.ts`,
-`youtube.ts`), typed by `types.ts` and registered in `index.ts`. Each page is
+Lists of outside resources live in `src/lib/resources/curatedLists/`, one module per list
+(`podcasts.ts`, `newsletters.ts`, `youtube.ts`, `books.ts`, `courses.ts`, `forums.ts`,
+`events.ts`), typed by `types.ts` (one entry shape per format) and registered in `index.ts`. Each page is
 `/{locale}/{resources slug}/{list slug}` (`/pt/recursos/podcasts-financas-pessoais`), served for
 every list by one route file per locale tree, `src/pages/{locale}/{resources slug}/[list].astro`,
 and drawn by `CuratedListPage.astro` from `buildCuratedListPage` (`page.ts`). The page copy is
@@ -125,15 +125,27 @@ WonderMoney researches and writes the entries, and the owner may strike any of t
 **Choosing entries.** Each locale has its own 5 to 8 entries per list, chosen for its market and
 never translated from another locale: pt Portuguese-language and Portugal-relevant, en the UK,
 Ireland and international English, es Spain, fr France and Belgium, de Germany, Austria and
-Switzerland, it Italy. An entry goes in only when all of these hold on the day it is checked:
+Switzerland, it Italy. Every entry, in every list, is independent: never the sales channel of a
+bank, broker, insurer, fund house or credit intermediary (regulators and central banks are
+welcome), with no get-rich-quick, crypto promotion, day trading or paid signals, and nothing named
+after a private person. Each list's own rules are its `criteria` (shown on its page, copy under
+`curatedLists.common.criteria`), and they hold on the day the entry is checked, read on its own
+site or feed, never a third party's claim:
 
-- it published in the last six months, read on its own site or feed (a podcast's RSS feed, a
-  YouTube channel's `feeds/videos.xml?channel_id=…`, a newsletter's archive or feed), never a
-  third party's claim;
-- it is independent education, not the sales channel of a bank, broker, insurer, fund house or
-  credit intermediary; regulators and central banks are welcome;
-- no get-rich-quick, crypto promotion, day trading or paid signals;
-- it is free to follow (a free tier with paid extras is fine when the free issues stand alone).
+- **podcasts, newsletters, YouTube**: published in the last six months (a podcast's RSS feed, a
+  YouTube channel's `feeds/videos.xml?channel_id=…`, a newsletter's archive or feed), and free to
+  follow (a free tier with paid extras is fine when the free issues stand alone);
+- **forums**: a post in the last month, publicly joinable, written rules and active moderators
+  (`moderation` says what we saw); Discord or Telegram only when publicly joinable and moderated;
+  nothing centred on trading signals or crypto;
+- **books**: an edition in the locale's language, native or translated, linked to its
+  publisher's page for that edition, never a shop (`curatedLists.test.ts` rejects known
+  retailers); no get-rich-quick titles;
+- **courses**: open to follow or enrol in; free courses from public bodies (regulators, central
+  banks, national plans, consumer associations, public universities' open courses) first, paid
+  ones only from non-commercial providers with the `price` stated; no course funnels;
+- **events**: organised by a national financial education plan, a central bank or regulator, a
+  consumer association, a public library or a university, free to attend. See "Events" below.
 
 **Each entry** records `name` (as published), `url` (its own site or channel page: https, no
 query string, no affiliate or tracking code), `language`, `format`, `audience` ("who it's for")
@@ -141,32 +153,63 @@ and `value` ("what you'll get"), one line each that we write ourselves in the lo
 address (pt-PT "tu", de "Sie", fr "vous" with a no-break space before `: ; ? ! %` and `€`, es "tú" and it
 "tu"), `related` (a calculator, the savings guide or a learn guide in that locale, only where one
 genuinely fits; Portugal-specific calculators in the pt list only), `checked`, `lastPublished` and
-`evidence` (the feed or archive where `lastPublished` was read). The lines name no host, author or
+`evidence` (the feed or archive where `lastPublished` was read), plus each format's own fields:
+a forum's `platform` and `moderation`, a book's `author`, `publisher`, `year` and
+`originalTitle`, a course's `provider`, `level`, `delivery`, `price` and `duration`, an event's
+`organiser`, `starts`, `ends` and `where`, a programme's `organiser`, `when`, `lastHeld` and
+`next`. The lines name no host, author or
 other person beyond the show's own published name, and use no "best", rankings or audience sizes;
 the page sorts entries alphabetically.
 
+**Events.** The events list holds dated `event` entries and recurring `programme` entries (a
+yearly financial literacy day, week or month; Global Money Week; World Investor Week). It needs at
+least three programmes per locale (`CURATED_EVENTS_MIN_PROGRAMMES`), which never expire, and at
+most 8 of each kind; dated events may be none. A programme must have held an edition in the last
+13 months, or have its `next` dates announced. The page lists the dated events still to come by
+start date, leaving out at build time those that ended, and hides in the browser any that end
+after the build; when none is left it says so above the programmes. A dated event must still be
+to come on the list's `reviewed` date. On 2026-11-20 none of the main organisers published a
+machine-readable calendar of its public events: not Todos Contam, MaPS, the CNMV and the Plan de
+Educación Financiera, the Banque de France, the Verbraucherzentralen or the Comitato EDUFIN (a
+search form and a PDF export only). The feeds that exist are partial: DECO's agenda RSS (its next
+ten events, mostly help desks), the Bank of England's events RSS, one Irish county library's
+tag feed, an ICS per edition of the Banque de France's "Ensemble, dialoguons" on OpenAgenda, and
+one Austrian fund's ICS. None is worth a refresh script in `landing-data-refresh.yml`, so the
+list is reviewed by hand **every month** (`review: "monthly"`): drop the events that have
+passed, add the newly announced ones from each organiser's agenda, set `next` on a programme once
+its dates are out, then bump `reviewed`. The page warns 45 days after `reviewed`
+(`CURATED_REVIEW_DAYS.monthly`).
+
 **Exceptions to the minimum.** A list may hold fewer than five entries only when no other
 candidate meets the criteria, and only with a named entry in `MIN_ENTRIES_EXCEPTIONS` in
-`curatedLists.test.ts`. One is open: the Portuguese newsletters have 4 (no other Portuguese
-newsletter qualified on 2026-11-20). Remove that exception, and this note, when Portefólio Perfeito
-launches its newsletter (it had only a waitlist then) or another qualifying newsletter turns up;
-the test fails once the list is back to five, as a reminder. The repository's leak check fails on some personal names:
+`curatedLists.test.ts`; the test fails once a list is back to five, as a reminder to remove it.
+Open on 2026-11-20:
+
+- the Portuguese newsletters have 4: remove when Portefólio Perfeito launches its newsletter (it
+  had only a waitlist then) or another qualifying newsletter turns up;
+- the Portuguese forums have 4: the Literacia Financeira Discord could not be read without
+  joining, and the other Portuguese communities were Brazilian, closed or commercial;
+- the Italian forums have 4: the other Italian communities had no written rules, were off topic
+  or blocked automated checks (FinanzaOnline, PensioniOggi);
+- the Italian courses have 4: the Politecnico di Milano's free "Finanza per tutti" qualifies but
+  has no address without a query string. The repository's leak check fails on some personal names:
 when an entry trips it, drop the entry rather than allowlisting the name.
 
 **Review cadence.** Re-check every entry of every list every six months from its `reviewed` date
-(the current lists: by May 2027), against the rules above. Drop entries that no longer pass, add
+(the current lists: by May 2027; the events list every month), against the rules above. Drop entries that no longer pass, add
 replacements to keep 5 to 8, update each kept entry's `checked` and `lastPublished`, then bump
-the list's `reviewed`. The page shows the review date, and 183 days after it
-(`CURATED_LIST_STALE_AFTER_DAYS`) a note that the list is due for review, both at build time and
-in the browser. `curatedLists.test.ts` checks the counts, the fields, the URLs, the six-month
-window, the related links, the wording and the copy in every locale; run it after every edit.
+the list's `reviewed`. The page shows the review date, and 183 days after it (45 for events,
+`CURATED_REVIEW_DAYS`) a note that the list is due for review, both at build time and in the
+browser. `curatedLists.test.ts` checks the counts, the fields, the URLs, the activity windows,
+the related links, the wording and the copy in every locale; run it after every edit.
 
-**Adding a list** (forums, events, courses, books): add its route id and six slugs to
+**Adding a list**: add its route id and six slugs to
 `ROUTE_SLUGS` and `CURATED_LIST_ROUTE_IDS` in `src/lib/routes.ts`, its format to `CuratedFormat`
-(`types.ts`), a module beside the others (copy `podcasts.ts`) with an existing Hairline figure, an
-entry in `CURATED_LISTS`, and its copy under `curatedLists.lists.<id>` plus
-`curatedLists.common.formats.<format>` in all six catalogues (`src/locales` and `public/locales`
-alike). The route files, the sitemap, hreflang, the language switcher and the resources hub card
+and an entry shape (`types.ts`, with its lines in `buildCuratedListPage`, `page.ts`), a module
+beside the others (copy the closest one) with its `formats`, `criteria`, `review` and an existing
+Hairline figure, an entry in `CURATED_LISTS`, and its copy under `curatedLists.lists.<id>` plus
+`curatedLists.common.formats.<format>` and any new `criteria` in all six catalogues
+(`src/locales` and `public/locales` alike). The route files, the sitemap, hreflang, the language switcher and the resources hub card
 follow from those; no new page file is needed.
 
 ## CALCULATOR DATA REFRESH
@@ -174,10 +217,11 @@ follow from those; no new page file is needed.
 Dated data modules live in `src/lib/calculators/data/` (plus a few tables inside the calculator
 modules). Each carries its own "as of" date, which the page shows. The open-API snapshots refresh
 themselves: `.github/workflows/landing-data-refresh.yml` runs the market-data scripts on the 6th of
-every month, the ERSE offers script every Monday and the OMIE prices script on the 8th (and any
-set by hand: Actions > Landing data refresh), and opens or updates one pull request per set into
-`develop` when the figures changed, from `bot/landing-data-refresh` (market data),
-`bot/landing-offers-refresh` (offers) or `bot/landing-omie-refresh` (OMIE). The offers run also
+every month, the ERSE offers script every Monday, the OMIE prices script on the 8th and the PPR
+funds script on the 10th (and any set by hand: Actions > Landing data refresh), and opens or
+updates one pull request per set into `develop` when the figures changed, from
+`bot/landing-data-refresh` (market data), `bot/landing-offers-refresh` (offers),
+`bot/landing-omie-refresh` (OMIE) or `bot/landing-ppr-refresh` (PPR funds). The offers run also
 checks the indexed-offer formulas against the new export (`indexedPricing.test.ts`).
 Those pull requests get no CI run (they are opened with `GITHUB_TOKEN`): close and reopen them
 before merging. A script that fails fails the job and leaves the data as it was. Everything else
@@ -202,6 +246,9 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/solarProduction/` (`index.ts` and a JSON file per district) | PVGIS 5.3 API (EU JRC): for each district capital, the optimal tilt (`PVcalc`), the TMY's selected months (`tmy`) and those years' hourly PV output (`seriescalc`), PVGIS-SARAH3. The API has no CORS, so the page cannot call it; any other tilt, orientation or point goes through `/api/solar-production` ("Server routes") | when PVGIS publishes a new version or extends its database (the version is in the API path) | `node scripts/build-solar-production.mjs --cache-dir <dir>` (about 200 calls; `--offline` rebuilds from the cache) |
 | `calculators/electricityCycles.ts` | ERSE period hours (Despacho n.º 26 126-A/2004, ciclo diário 2009, Diretiva n.º 3/2026) | when ERSE changes the periods; BTN meters move to the Diretiva n.º 3/2026 hours in the second half of 2027 | Edit by hand against the official table and rerun the profiles script |
 | `data/brokerFees.ts` | Each broker's own price list (preçário, fee page or PDF), linked per row in `sources` | quarterly: check in the first week of January, April, July and October; the page warns after about four months | Edit by hand, update each row's `checked` and `BROKER_FEES_REVIEWED`, run `brokerFees.test.ts` |
+| `data/pprFunds.ts` | CMVM Portal do Investidor, "Lista de PPR sob a forma de Fundos de Investimento": the screen services its page calls (every share class's returns, TEC and risk class), its "Exportar em Excel" file (the managers) and its IFI links. Types in `calculators/pprTypes.ts` | monthly (the 10th), automated, its own set (ppr) | `node scripts/build-ppr-products.mjs` |
+| `data/pprInsurance.ts` | ASF "Plataforma de comparação de PPR" (Norma Regulamentar n.º 11/2024-R): its JSON lists of the products on sale, `https://www.asf.com.pt/o/servicosasf/get-list-ppr/1/0/<type>` (1 insurance not linked to funds, 2 linked to funds, 3 pension funds). The site's bot check answers browsers only, so the lists are saved by hand | yearly, in May (insurers report by 15 April for the year before), and when a product launch matters; the page warns from June of the second year after the figures' year | Open the three URLs in a browser, save them as `asf-1.json`, `asf-2.json` and `asf-3.json` in an empty folder, then `node scripts/build-ppr-products.mjs --asf-dir <folder>` and run the PPR tests |
+| `data/pprTaxRules.ts` | Portal das Finanças consolidated EBF (art. 21.º) and CIRS (art. 78.º, n.º 7), Diário da República consolidated Decreto-Lei n.º 158/2002 (arts. 4.º and 6.º) | each January, and when a State Budget or a change to those laws is published | Edit by hand, update `PPR_TAX_RULES_REVIEWED`, run `pprComparison.test.ts` |
 | IMT and stamp duty (`purchaseTaxes.ts`), IMI (`propertyTax.ts`), IUC (`vehicleTax.ts`), IRS withholding and Social Security (`payroll.ts`), IAS and benefits (`unemploymentBenefit.ts`, `statePension.ts`, `sickPay.ts`) | Portal das Finanças, Diário da República, Segurança Social | each January, and again when the State Budget or a Portaria changes them | Edit by hand against the official table, update the module's year and review date, run the calculator's tests |
 
 When the data changes a number a page quotes in prose, update the pages in all six locales in the

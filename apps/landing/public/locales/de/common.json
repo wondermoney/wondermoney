@@ -5316,6 +5316,220 @@
         "millennium-bcp": "Die Depotgebühr beträgt 6 € pro Quartal nur nach einem Geschäft über Website oder App in den drei Vormonaten, sonst 9 €. Währung zu den internen Kursen der Bank, Spread nicht veröffentlicht. Auf US-Verkäufe kommt die SEC Fee hinzu."
       }
     },
+    "pprComparison": {
+      "title": "PPR-Vergleich: Altersvorsorgepläne in Portugal",
+      "shortName": "PPR-Vergleich",
+      "subtitle": "Alle PPR im Vertrieb, die CMVM und ASF aufführen, mit Risikoklasse, laufenden Kosten, Gebühren und vergangenen Renditen so, wie die Aufsichtsbehörden sie veröffentlichen, dazu der IRS-Abzug und die Regeln für die Auszahlung.",
+      "description": "Vergleichen Sie PPR-Fonds, PPR-Versicherungen und PPR-Pensionsfonds nach Risikoklasse, Kosten und vergangenen Renditen, aus den Listen der Aufsichtsbehörden selbst.",
+      "pageTitle": "PPR-Vergleich Portugal: Kosten, Risiko und Rendite von Vorsorgeplänen",
+      "pageDescription": "PPR-Investmentfonds, -Versicherungen und -Pensionsfonds im Vertrieb in Portugal, aus den Listen von CMVM und ASF: Risikoklasse, jährliche Kosten, Gebühren, Renditen über 1 bis 10 Jahre, Garantien, IRS-Abzug und Auszahlungsregeln.",
+      "data": {
+        "title": "Woher die Zahlen kommen",
+        "funds": "PPR-Investmentfonds: die Liste der CMVM, gelesen am {{date}}, mit Renditen bis Ende {{year}}.",
+        "cmvmLink": "Liste der CMVM",
+        "insurance": "PPR-Versicherungen und -Pensionsfonds: die Vergleichsplattform der ASF, mit Zahlen für {{year}}, gelesen am {{date}}.",
+        "asfLink": "Plattform der ASF",
+        "source": "Beide Listen veröffentlichen die Aufsichtsbehörden, mit den Zahlen, die Verwaltungsgesellschaften und Versicherer ihnen melden. Keine Vergleichsseite und kein Anbieter ist eine Quelle. Eine Zahl, die eine Liste nicht veröffentlicht, erscheint als „nicht veröffentlicht“.",
+        "staleTitle": "Diese Zahlen sind möglicherweise veraltet",
+        "staleFunds": "Die Liste der CMVM wurde zuletzt am {{date}} gelesen, vor mehr als zwei Monaten. Prüfen Sie die aktuellen Zahlen in der Liste der CMVM.",
+        "staleInsurance": "Die angezeigten ASF-Zahlen gelten für {{year}}, und die ASF hat inzwischen ein neueres Jahr veröffentlicht. Prüfen Sie die aktuellen Zahlen auf der Plattform der ASF."
+      },
+      "compare": {
+        "title": "PPR im Vertrieb vergleichen",
+        "intro": "Wählen Sie eine Art und eine Risikoklasse und sortieren Sie nach jährlichen Kosten oder nach einer vergangenen Rendite. Vergleichen Sie innerhalb einer Risikoklasse: Produkte mit unterschiedlichem Risiko verhalten sich unterschiedlich, eine höhere vergangene Rendite in einer riskanteren Klasse sagt daher wenig über das Produkt.",
+        "kind": "Art",
+        "allKinds": "Alle Arten",
+        "risk": "Risikoklasse",
+        "allRisks": "Alle Risikoklassen",
+        "noRisk": "Risikoklasse nicht veröffentlicht",
+        "sort": "Sortieren nach",
+        "search": "Suchen",
+        "searchPlaceholder": "Produkt oder Verwaltungsgesellschaft",
+        "mixedRisk": "Sie sortieren über alle Risikoklassen nach Rendite. Riskantere Produkte schwanken stärker, nach oben wie nach unten, daher mischt diese Reihenfolge nicht vergleichbare Produkte: Wählen Sie eine Risikoklasse, um fair zu vergleichen.",
+        "riskSummary": "Risikoklasse {{risk}}: {{count}} PPR in dieser Ansicht, mit jährlichen Kosten von {{min}} bis {{max}} (Median {{median}}).",
+        "empty": "Kein PPR entspricht diesen Filtern.",
+        "count": "{{count}} PPR gefunden",
+        "showMore": "{{count}} weitere anzeigen (von {{total}})"
+      },
+      "kinds": {
+        "fund": "Investmentfonds (CMVM)",
+        "insuranceLinked": "Fondsgebundene Versicherung (ASF)",
+        "insuranceGuaranteed": "Nicht fondsgebundene Versicherung (ASF)",
+        "pensionFund": "Pensionsfonds (ASF)"
+      },
+      "sorts": {
+        "name": "Name",
+        "cost": "Jährliche Kosten, niedrigste zuerst",
+        "return1": "Rendite über 1 Jahr, höchste zuerst",
+        "return3": "Rendite über 3 Jahre, höchste zuerst",
+        "return5": "Rendite über 5 Jahre, höchste zuerst"
+      },
+      "categories": {
+        "ucits": "harmonisiert (OGAW)",
+        "ucitsEquity": "harmonisiert (OGAW), Aktien",
+        "ucitsBond": "harmonisiert (OGAW), Anleihen",
+        "ucitsFlexible": "harmonisiert (OGAW), flexibel",
+        "alternative": "alternativ (nicht harmonisiert)"
+      },
+      "guarantees": {
+        "always": "jederzeit",
+        "atMaturity": "bei Fälligkeit",
+        "other": "unter anderen Bedingungen",
+        "none": "keine"
+      },
+      "labels": {
+        "notPublished": "Nicht veröffentlicht",
+        "feeRange": "{{min}} bis {{max}}",
+        "withClass": "{{name}}, Klasse {{shareClass}}",
+        "riskValue": "Klasse {{risk}}",
+        "risk": "Risiko",
+        "costFund": "TEC",
+        "costAsf": "Jährliche Kosten",
+        "y1": "1 Jahr",
+        "y3": "3 Jahre",
+        "y5": "5 Jahre",
+        "y10": "10 Jahre",
+        "capitalGuarantee": "Kapitalgarantie: {{value}}",
+        "returnGuarantee": "Renditegarantie: {{value}}",
+        "minRate": "garantierter Mindestzins in diesem Jahr: {{pct}}",
+        "fundFees": "Ausgabe-, Rücknahme- und Übertragungsgebühren: nicht in der Liste der CMVM; sie stehen im IFI des Fonds.",
+        "fees": "Ausgabe {{subscription}} · Rücknahme {{redemption}} · Übertragung {{transfer}}",
+        "ifi": "IFI des Fonds auf der Website der CMVM",
+        "asfSource": "Plattform der ASF"
+      },
+      "deduction": {
+        "title": "Ihr IRS-Abzug für PPR-Einzahlungen",
+        "intro": "Sie können {{rate}} dessen, was Sie in einem Jahr in PPR einzahlen, von Ihrer IRS-Steuer abziehen, bis zu einer Grenze, die von Ihrem Alter am 1. Januar dieses Jahres abhängt (Estatuto dos Benefícios Fiscais, Artikel 21).",
+        "age": "Alter am 1. Januar",
+        "ageHelp": "In vollen Jahren, am 1. Januar des Einzahlungsjahres.",
+        "contribution": "Einzahlungen in diesem Jahr",
+        "retired": "Ich war bei der Einzahlung bereits in Rente",
+        "errors": {
+          "age": "Geben Sie ein Alter in vollen Jahren ein, von 0 bis {{max}}.",
+          "contribution": "Geben Sie einen Betrag von 0 € bis {{max}} ein."
+        },
+        "invalid": "Korrigieren Sie die Felder oben, um den Abzug zu sehen.",
+        "retiredResult": "Einzahlungen nach dem Renteneintritt sind nicht abziehbar (Artikel 21, n.º 10).",
+        "result": "Abzug von Ihrer IRS-Steuer: {{amount}}",
+        "limit": "Ihre Grenze mit {{age}} Jahren: {{limit}} pro Jahr, erreicht mit {{full}} an Einzahlungen.",
+        "capped": "Einzahlungen über {{full}} erhöhen den Abzug dieses Jahres nicht.",
+        "cap": "Der Abzug zählt auch zur Gesamtgrenze der Abzüge in Artikel 78 des IRS-Gesetzbuchs: keine Grenze für die niedrigsten steuerpflichtigen Einkommen, dann zwischen {{max}} und {{min}} je Haushalt, sinkend mit steigendem Einkommen. Er senkt nur Steuer, die Sie sonst zahlen würden."
+      },
+      "notices": {
+        "title": "Bevor Sie sich auf diesen Vergleich verlassen",
+        "educationalTitle": "Nur zur Information",
+        "educational": "Diese Seite dient der Information. Sie ist keine Empfehlung und kein Angebot, die Reihenfolge ist keine Rangliste, und WonderMoney empfiehlt keinen PPR. Vergangene Renditen sagen nichts über künftige aus.",
+        "neutralTitle": "Keine Affiliate-Links",
+        "neutral": "WonderMoney erhält nichts von einer Verwaltungsgesellschaft oder einem Versicherer auf dieser Seite. Die Links führen zu den Seiten der Aufsichtsbehörden selbst.",
+        "taxTitle": "Gebühren und Steuern nicht in den Renditen",
+        "tax": "Die Renditen verstehen sich nach den jährlichen Kosten des Produkts, aber vor Ausgabe- und Rücknahmegebühren und vor Steuern. Eine vorzeitige Auszahlung außerhalb der gesetzlichen Fälle kann Sie außerdem den erhaltenen Abzug kosten."
+      },
+      "nextStepHeadline": "Verfolgen Sie Ihre PPR-Guthaben in Ihrem langfristigen Portfolio",
+      "nextStepDescription": "Ein PPR ist ein Teil Ihrer Altersvorsorge. Tragen Sie sein Guthaben in WonderMoney ein und sehen Sie es neben Ihren anderen Anlagen und Konten.",
+      "nextStepCta": "Ihr Portfolio an einem Ort sehen",
+      "guide": {
+        "what": {
+          "title": "Was ein PPR ist",
+          "body": "Ein PPR (plano de poupança-reforma) ist ein portugiesisches Altersvorsorgeprodukt mit eigenen Steuerregeln: Ein Teil dessen, was Sie jedes Jahr einzahlen, ist von der IRS-Steuer abziehbar, und das Geld soll bis zur Rente oder einem der anderen gesetzlich vorgesehenen Fälle angelegt bleiben. Es gibt ihn in drei Rechtsformen:",
+          "forms": {
+            "fund": "Ein Investmentfonds (fundo de poupança-reforma) unter Aufsicht der CMVM. Sein Wert folgt den Anlagen des Fonds, in der Regel ohne Garantie.",
+            "linked": "Eine fondsgebundene Lebensversicherung unter Aufsicht der ASF. In der Regel ohne Kapital- oder Renditegarantie.",
+            "guaranteed": "Eine nicht fondsgebundene Lebensversicherung unter Aufsicht der ASF. Sie garantiert das Kapital und manchmal eine Mindestrendite, nach den Vertragsbedingungen.",
+            "pension": "Ein individueller Beitritt zu einem offenen Pensionsfonds unter Aufsicht der ASF. Er kann Kapital oder Rendite garantieren oder nicht."
+          },
+          "supervisors": "Jede Aufsichtsbehörde veröffentlicht ihre eigene Liste: die CMVM für die Fonds, die ASF für Versicherungen und Pensionsfonds. Diese Seite stellt beide nebeneinander, jede Zahl so, wie die Liste sie angibt."
+        },
+        "fair": {
+          "title": "Warum innerhalb einer Risikoklasse verglichen wird",
+          "risk": "Beide Aufsichtsbehörden ordnen ein Produkt nach der Volatilität seiner Renditen in die Klassen 1 bis 7 ein, mit denselben Spannen: Klasse 1 unter 0,5 % pro Jahr, Klasse 4 von 5 % bis 10 %, Klasse 7 über 25 %. Ein Produkt der Klasse 6 kann in einem guten Jahr mehr gewinnen und in einem schlechten viel mehr verlieren als eines der Klasse 3, eine höhere vergangene Rendite in einer riskanteren Klasse ist daher kein besseres Ergebnis. Vergleichen Sie Renditen innerhalb einer Klasse.",
+          "returns": "Die Renditen sind annualisierte Durchschnitte über volle Kalenderjahre, bis Ende {{fundsYear}} für die CMVM-Fonds und bis Ende {{insuranceYear}} für die ASF-Produkte. Sie verstehen sich nach den jährlichen Kosten des Produkts, aber vor Ausgabe- und Rücknahmegebühren und vor Steuern. Kurze Historien sind verrauscht: Eine Zahl über ein Jahr sagt wenig.",
+          "costs": "Jährliche Kosten sind sicher, Renditen nicht. Bei einem Fonds ist die Zahl seine TEC (laufende Kosten: Verwaltungs- und Verwahrgebühren, Prüfung und Aufsichtsgebühr). Für Versicherungen und Pensionsfonds veröffentlicht die ASF eine jährliche Kostenquote aus Verwaltungs- und Verwahrgebühren. Beide liegen nahe beieinander, sind aber nicht gleich: Behandeln Sie kleine Unterschiede zwischen den Arten mit Vorsicht."
+        },
+        "example": {
+          "title": "Ein Beispielvergleich",
+          "setup": "Die Risikoklasse {{risk}} hat die meisten Produkte, die sowohl jährliche Kosten als auch eine 5-Jahres-Rendite veröffentlichen: {{count}} (von {{total}} PPR in der Klasse).",
+          "pair": "Unter ihnen liegen die niedrigsten jährlichen Kosten bei {{lowCost}}, für {{lowName}} ({{lowKind}}), mit einer annualisierten 5-Jahres-Rendite von {{lowReturn}}. Die höchsten liegen bei {{highCost}}, für {{highName}} ({{highKind}}), mit {{highReturn}}.",
+          "cost": "Bei {{invested}} Anlage macht dieser Kostenunterschied rund {{costGap}} pro Jahr aus, jedes Jahr, ganz gleich, was die Märkte tun.",
+          "takeaway": "Das ist eine Veranschaulichung, keine Empfehlung. Vergangene Renditen hängen von der Strategie jedes Produkts ab und sagen künftige nicht voraus, und die beiden Aufsichtsbehörden definieren die jährlichen Kosten etwas unterschiedlich. Der Vergleich zeigt die Größe des Kostenunterschieds innerhalb einer Risikoklasse.",
+          "kinds": {
+            "fund": "Investmentfonds",
+            "insuranceLinked": "fondsgebundene Versicherung",
+            "insuranceGuaranteed": "nicht fondsgebundene Versicherung",
+            "pensionFund": "Pensionsfonds"
+          }
+        },
+        "tax": {
+          "title": "Der IRS-Abzug (EBF, Artikel 21)",
+          "deduction": "Artikel 21, n.º 2, des Estatuto dos Benefícios Fiscais erlaubt jeder steuerpflichtigen Person (jedem Ehepartner getrennt), {{rate}} der im Jahr in PPR eingezahlten Beträge von der IRS-Steuer abzuziehen, höchstens:",
+          "limits": {
+            "under35": "{{under35}} pro Jahr unter 35 Jahren (erreicht mit {{full35}} an Einzahlungen);",
+            "from35": "{{from35}} pro Jahr von 35 bis 50 Jahren ({{full50}});",
+            "over50": "{{over50}} pro Jahr über 50 Jahren ({{fullOver}})."
+          },
+          "example": "Maßgeblich ist das Alter am 1. Januar des Einzahlungsjahres (n.º 9). Mit {{age}} Jahren ergeben {{exampleContribution}} Einzahlung im Jahr {{exampleDeduction}}, den vollen Abzug.",
+          "conditions": "Der Abzug fällt unter die Gesamtgrenze der Abzüge in Artikel 78, n.º 7, des IRS-Gesetzbuchs: keine Grenze für die niedrigsten steuerpflichtigen Einkommen, dann von {{capMax}} bis {{capMin}} je Haushalt. Er senkt die geschuldete Steuer und wird nicht ausgezahlt, und Einzahlungen nach dem Renteneintritt sind nicht abziehbar (n.º 10).",
+          "payout": "Zahlt der Plan in einem gesetzlich vorgesehenen Fall aus, wird eine Einmalzahlung auf den Gewinn mit {{legalRate}} auf zwei Fünftel davon besteuert, effektiv {{legalEffective}} des Gewinns (n.º 3); regelmäßige Zahlungen werden wie Renten besteuert."
+        },
+        "redemption": {
+          "title": "Wann Sie auszahlen lassen können und was eine vorzeitige Auszahlung kostet",
+          "intro": "Das Decreto-Lei n.º 158/2002, Artikel 4, legt die Fälle fest, in denen Sie einen PPR ohne Nachteil auszahlen lassen können:",
+          "cases": {
+            "retirement": "Altersrente;",
+            "unemployment": "Langzeitarbeitslosigkeit der sparenden Person oder eines Haushaltsmitglieds;",
+            "incapacity": "dauerhafte Arbeitsunfähigkeit der sparenden Person oder eines Haushaltsmitglieds;",
+            "illness": "schwere Krankheit der sparenden Person oder eines Haushaltsmitglieds;",
+            "age": "ab dem Alter von 60 Jahren;",
+            "mortgage": "Zahlung von Raten eines hypothekarisch gesicherten Kredits für die eigene, ständig bewohnte Wohnung;",
+            "death": "Tod der sparenden Person, der Wert geht an die Erben."
+          },
+          "fiveYears": "Bei Rente, ab 60 Jahren und für die Kreditraten muss jede Einzahlung mindestens {{years}} Jahre im Plan sein; dasselbe gilt für Arbeitslosigkeit, Arbeitsunfähigkeit oder Krankheit, die bei der Einzahlung bereits bestanden. Nach {{years}} Jahren ab der ersten Einzahlung kann in diesen Fällen der gesamte Wert ausgezahlt werden, wenn die Einzahlungen in der ersten Hälfte der Laufzeit mindestens {{firstHalf}} aller Einzahlungen ausmachen.",
+          "outside": "Sie können jederzeit sonst nach den Vertragsbedingungen auszahlen lassen, dann kommen die erhaltenen Abzüge aber als Steuer zurück, erhöht um {{clawback}} für jedes Jahr oder jeden Teil eines Jahres seither (EBF, Artikel 21, n.º 4), und der Gewinn wird mit {{otherRate}} statt mit dem niedrigeren Satz besteuert (n.º 5). Machen die Einzahlungen der ersten Hälfte der Laufzeit mindestens {{firstHalf}} aller Einzahlungen aus, gilt dieser Satz bei mehr als {{reducedAfter}} Jahren Laufzeit nur für vier Fünftel des Gewinns und bei mehr als {{lowestAfter}} Jahren für zwei Fünftel, effektiv also {{reducedRate}} bzw. {{lowestRate}} (Artikel 5, n.º 3, des IRS-Gesetzbuchs). Auch Rücknahmegebühren des Vertrags können anfallen.",
+          "transfer": "Sie können den Wert auf einen anderen PPR übertragen (Artikel 6); die Übertragung gibt keinen neuen Abzug. Ohne Kapital- oder Renditegarantie darf keine Übertragungsgebühr erhoben werden; mit Garantie höchstens {{transferFee}} des Werts."
+        },
+        "method": {
+          "title": "Wie der Vergleich entsteht",
+          "intro": "Zwei amtliche Listen, so gelesen, wie sie veröffentlicht sind. Fonds: {{funds}} Anteilsklassen aus der CMVM-Liste vom {{fundsDate}}. Versicherungen und Pensionsfonds: {{insurance}} Produkte im Vertrieb von der ASF-Plattform, gelesen am {{insuranceDate}}.",
+          "steps": {
+            "cmvm": "Jede Anteilsklasse in der CMVM-Liste der PPR in Form von Investmentfonds, für die eine TEC oder eine Rendite veröffentlicht ist, wird aufgenommen, mit Verwaltungsgesellschaft, Fondsart, Risikoklasse, TEC und annualisierten Renditen. Die CMVM-Liste veröffentlicht keine Ausgabe- oder Rücknahmegebühren: Sie stehen im IFI jedes Fonds, verlinkt in seiner Zeile.",
+            "asf": "Jeder PPR, den die ASF-Plattform als im Vertrieb zeigt, wird aufgenommen: fondsgebundene und nicht fondsgebundene Versicherungen und Pensionsfonds, mit den Mindest- und Höchstgebühren für Ausgabe, Rücknahme und Übertragung, der jährlichen Kostenquote, den annualisierten Renditen, dem Risikoindikator und den Kapital- und Renditegarantien.",
+            "missing": "Eine Zahl, die eine Liste auslässt, bleibt „nicht veröffentlicht“; nichts wird geschätzt. Beide Listen zeigen 0,00 % für Zeiträume ohne Historie, daher gilt eine Folge von 0,00 % bei den längsten Zeiträumen als nicht veröffentlicht.",
+            "refresh": "Die CMVM-Zahlen werden jeden Monat aus ihrer Liste aktualisiert. Die ASF-Zahlen ändern sich einmal im Jahr (gemeldet bis 15. April, für das Vorjahr) und werden danach aktualisiert. Scheitert eine Aktualisierung, behält die Seite die letzten Zahlen mit ihren Daten und weist auf veraltete Zahlen hin."
+          }
+        },
+        "limits": {
+          "title": "Was nicht enthalten ist",
+          "items": {
+            "closed": "PPR, die nicht mehr vertrieben werden, aber noch Sparguthaben halten können, und das Paneuropäische Private Pensionsprodukt (PEPP).",
+            "fees": "Ausgabe- und Rücknahmegebühren der Fonds (im jeweiligen IFI) und Steuern, die die Renditen nicht enthalten.",
+            "future": "Jede Prognose. Vergangene Renditen, Risikoklassen und Kosten können sich ändern, und die Aufsichtsbehörden haften nicht für die Zahlen, die die Anbieter melden.",
+            "personal": "Ihre Lage: wie lange es bis zur Rente ist, Ihre übrigen Ersparnisse und wie viel Risiko Sie tragen können. Beim letzten Punkt hilft der Fragebogen zum Anlegerprofil."
+          }
+        },
+        "sources": {
+          "title": "Quellen",
+          "intro": "Die Produktzahlen stammen aus den Listen der beiden Aufsichtsbehörden; die Steuer- und Auszahlungsregeln aus den konsolidierten Gesetzestexten, geprüft am {{rulesDate}}.",
+          "items": {
+            "cmvm": "CMVM, Portal do Investidor: Liste der PPR in Form von Investmentfonds",
+            "asf": "ASF: Vergleichsplattform für PPR (Versicherungen und Pensionsfonds)",
+            "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: wie die ASF-Zahlen berechnet werden",
+            "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, Artikel 21 (konsolidierte Fassung)",
+            "cirs": "Portal das Finanças: Código do IRS, Artikel 5 und 78 (konsolidierte Fassung)",
+            "dl158": "Diário da República: Decreto-Lei n.º 158/2002, Rechtsrahmen der PPR (konsolidiert)"
+          }
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "statePensionLink": "Rechner für die staatliche Rente",
+          "statePensionBody": "Schätzen Sie die Rente der Sozialversicherung, zu der ein PPR hinzukäme.",
+          "compoundLink": "Zinseszinsrechner",
+          "compoundBody": "Sehen Sie, was jährliche Kosten über Jahrzehnte mit Zinseszins bewirken.",
+          "profileLink": "Fragebogen zum Anlegerprofil",
+          "profileBody": "Wie viel Risiko Sie tragen könnten, bevor Sie eine Risikoklasse wählen.",
+          "brokersLink": "Broker-Vergleich",
+          "brokersBody": "Die Kosten, außerhalb eines PPR mit ETFs für die Rente anzulegen."
+        }
+      }
+    },
     "goldPrice": {
       "title": "Goldpreis pro Gramm in Euro und Goldwert-Rechner",
       "shortName": "Goldpreis",
@@ -5503,7 +5717,19 @@
         "independent": "Er ist unabhängige Bildung. Aufsichtsbehörden und Zentralbanken zählen dazu, Verkaufskanäle von Banken, Brokern und Fondsgesellschaften nicht.",
         "noHype": "Keine Versprechen vom schnellen Reichtum, keine Werbung für spekulative Digitalwährungen und keine bezahlten Trading-Signale.",
         "free": "Sie können ihn kostenlos verfolgen.",
-        "market": "Er wurde für Menschen in Deutschland, Österreich und der Schweiz ausgewählt, nicht aus der Liste eines anderen Landes übersetzt."
+        "market": "Er wurde für Menschen in Deutschland, Österreich und der Schweiz ausgewählt, nicht aus der Liste eines anderen Landes übersetzt.",
+        "activeCommunity": "Dort gab es im letzten Monat neue Beiträge, geprüft in der Community selbst.",
+        "openModerated": "Alle können sie kostenlos lesen und beitreten, und es gibt schriftliche Regeln und eine aktive Moderation.",
+        "independentCommunity": "Keine Bank, kein Broker und keine Fondsgesellschaft betreibt sie, und sie dient nicht dem Verkauf eines Produkts.",
+        "noSignals": "Es geht nicht um Tradingsignale, Daytrading oder spekulative Digitalwährungen.",
+        "inPrint": "Der Verlag führt eine deutsche Ausgabe im Programm, und wir verlinken diese Seite, keinen Shop.",
+        "publicProvider": "Eine öffentliche Stelle, eine Verbraucherorganisation, eine öffentliche Hochschule oder eine andere nicht kommerzielle Einrichtung bietet ihn an.",
+        "freeOrPriced": "Er ist kostenlos, oder wir nennen den Preis.",
+        "noFunnel": "Er führt nicht zum Verkauf eines kostenpflichtigen Programms oder eines Finanzprodukts.",
+        "open": "Er war bei unserer Prüfung frei zugänglich oder offen für Anmeldungen.",
+        "officialOrganiser": "Veranstalter ist eine nationale Finanzbildungsstrategie, eine Zentralbank oder Aufsichtsbehörde, eine Verbraucherorganisation, eine öffentliche Bibliothek oder eine Hochschule.",
+        "freeToAttend": "Die Teilnahme ist kostenlos.",
+        "upcoming": "Termine erscheinen nur, bis sie vorbei sind. Wiederkehrende Programme fanden im letzten Jahr statt."
       },
       "order": "Die Einträge stehen in alphabetischer Reihenfolge, ohne Rangfolge. Wir haben mit keinem eine geschäftliche Beziehung, und die Links enthalten keine Affiliate- oder Tracking-Codes.",
       "owner": "Das WonderMoney-Team pflegt diese Liste und prüft jeden Eintrag alle sechs Monate erneut. Bei jeder Prüfung kann ein Eintrag wegfallen.",
@@ -5514,12 +5740,46 @@
       "formats": {
         "podcast": "Podcast",
         "newsletter": "Newsletter",
-        "youtube": "YouTube-Kanal"
+        "youtube": "YouTube-Kanal",
+        "forum": "Community",
+        "book": "Buch",
+        "course": "Kurs",
+        "event": "Veranstaltung",
+        "programme": "Programm"
       },
       "staleTitle": "Diese Liste ist fällig für eine Prüfung",
       "stale": "Wir haben diese Einträge zuletzt am {{date}} geprüft, vor mehr als sechs Monaten. Manche erscheinen vielleicht nicht mehr oder haben sich verändert; prüfen Sie jeden, bevor Sie sich darauf verlassen.",
       "practiceTitle": "Eine Idee in die Praxis umsetzen",
-      "practiceIntro": "Nehmen Sie eine Sache, die Sie gehört oder gelesen haben, und probieren Sie sie mit Ihren eigenen Zahlen aus."
+      "practiceIntro": "Nehmen Sie eine Sache, die Sie gehört oder gelesen haben, und probieren Sie sie mit Ihren eigenen Zahlen aus.",
+      "orderEvents": "Termine stehen nach Datum, Programme alphabetisch, ohne Rangfolge. Wir haben keine Geschäftsbeziehung zu den Veranstaltern, und die Links enthalten keine Affiliate- oder Tracking-Codes.",
+      "ownerMonthly": "Das WonderMoney-Team pflegt diese Liste und prüft die Kalender der Veranstalter jeden Monat. Vergangene Termine verschwinden von selbst von der Seite.",
+      "staleMonthly": "Wir haben diese Kalender zuletzt am {{date}} geprüft, vor mehr als sechs Wochen. Inzwischen können neue Termine angekündigt oder Daten geändert worden sein; prüfen Sie die Seite des Veranstalters, bevor Sie hingehen.",
+      "platforms": {
+        "subreddit": "Subreddit",
+        "forum": "Forum",
+        "discord": "Discord-Server",
+        "telegram": "Telegram-Gruppe"
+      },
+      "moderation": "Moderation und Regeln",
+      "edition": "Ausgabe",
+      "translatedFrom": "Übersetzung von „{{title}}“",
+      "courseFacts": "Niveau, Format und Kosten",
+      "levels": {
+        "beginner": "Für Einsteiger",
+        "intermediate": "Mit Vorkenntnissen",
+        "advanced": "Für Fortgeschrittene",
+        "all": "Für alle Niveaus"
+      },
+      "deliveries": {
+        "selfPaced": "Online, im eigenen Tempo",
+        "liveOnline": "Live online",
+        "inPerson": "Vor Ort",
+        "blended": "Online und vor Ort"
+      },
+      "free": "Kostenlos",
+      "when": "Wann",
+      "nextEdition": "nächster Termin: {{dates}}",
+      "lastHeld": "Zuletzt am {{date}}"
     },
     "lists": {
       "podcasts": {
@@ -5548,6 +5808,41 @@
         "hubDescription": "Aktive, unabhängige Kanäle, die Sparen, Geldanlage und Alltagsfinanzen erklären.",
         "listTitle": "Die Kanäle",
         "latest": "Neuestes Video am {{date}}"
+      },
+      "books": {
+        "title": "Bücher über persönliche Finanzen",
+        "metaTitle": "Bücher über Geld und Geldanlage auf Deutsch | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste von Büchern über Sparen, Schulden, Geldanlage und Altersvorsorge mit deutscher Ausgabe, mit der Leserschaft, für die jedes passt, und wie Sie es anwenden.",
+        "dek": "Bücher, die beim Sparen, Anlegen und besseren Entscheiden helfen, auf Deutsch erschienen, mit der Leserschaft, für die jedes passt, und einem Rechner, um das Gelesene umzusetzen.",
+        "hubDescription": "Bücher mit deutscher Ausgabe über Sparen, Schulden, Geldanlage und Altersvorsorge.",
+        "listTitle": "Die Bücher"
+      },
+      "courses": {
+        "title": "Kurse zur Finanzbildung",
+        "metaTitle": "Kurse zur Finanzbildung (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste von Finanzbildungskursen öffentlicher Stellen, Verbraucherorganisationen und Hochschulen, mit Niveau, Format, Kosten und Zielgruppe.",
+        "dek": "Kurse zu Haushaltsbudget, Kredit, Sparen und Geldanlage von öffentlichen und nicht kommerziellen Anbietern, mit Niveau, Format und Kosten und einem Rechner, um das Gelernte umzusetzen.",
+        "hubDescription": "Kurse öffentlicher Stellen und Hochschulen, mit Niveau, Format und Kosten.",
+        "listTitle": "Die Kurse"
+      },
+      "forums": {
+        "title": "Finanzforen und Communitys",
+        "metaTitle": "Finanzforen und Communitys (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste aktiver, moderierter Communitys zu Sparen, Steuern und Geldanlage im deutschsprachigen Raum, mit den Regeln und der Zielgruppe jeder einzelnen.",
+        "dek": "Aktive, moderierte Orte, um Fragen zu stellen und Erfahrungen mit Geld auszutauschen, mit den Regeln jeder Community und einem Rechner für Ihre eigenen Zahlen.",
+        "hubDescription": "Aktive, moderierte Communitys zu Sparen, Steuern und Geldanlage.",
+        "listTitle": "Die Communitys",
+        "latest": "Neuester Beitrag am {{date}}"
+      },
+      "events": {
+        "title": "Veranstaltungen zur Finanzbildung",
+        "metaTitle": "Veranstaltungen zur Finanzbildung (Deutschland, Österreich, Schweiz) | WonderMoney",
+        "metaDescription": "Ein geprüfter Kalender mit Veranstaltungen und Programmen zur Finanzbildung von öffentlichen Stellen und Verbraucherorganisationen, nur mit kommenden Terminen.",
+        "dek": "Vorträge, Aktionswochen und Thementage zur Finanzbildung von öffentlichen Stellen und Verbraucherorganisationen, mit den Terminen, die noch bevorstehen.",
+        "hubDescription": "Offizielle Veranstaltungen und Programme zur Finanzbildung, mit den nächsten Terminen.",
+        "listTitle": "Kommende Veranstaltungen",
+        "programmesTitle": "Wiederkehrende Programme",
+        "noUpcoming": "Diese Veranstalter haben gerade keinen datierten Termin angekündigt. Die wiederkehrenden Programme unten finden jedes Jahr statt; auf ihren Seiten stehen die nächsten Termine."
       }
     }
   },
@@ -5635,7 +5930,7 @@
       "irsInReturn": "In der IRS-Erklärung (Erklärung verpflichtend)",
       "irsOnWithdrawal": "Bei der Abhebung",
       "capitalisationRates": "11,2 % bis 28 %, je nach Haltedauer",
-      "pprRates": "8 % bis 20 %, je nach Haltedauer",
+      "pprRates": "8,6 % bis 21,5 %, je nach Haltedauer",
       "pprLegalRate": "8 %, wenn die Abhebung aus gesetzlich vorgesehenem Grund erfolgt"
     },
     "fgd": {
@@ -5661,7 +5956,7 @@
       },
       "ppr": {
         "title": "PPR",
-        "text": "Heben Sie aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 20 %, gesenkt auf 16 % nach 5 Jahren und auf 8 % nach 8 Jahren, wenn mindestens 35 % der Einzahlungen in der ersten Hälfte erfolgten. Außerdem geben Sie den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer nach 5 Jahren in den gesetzlich vorgesehenen Fällen (EBF, Art. 21)."
+        "text": "Heben Sie aus gesetzlich vorgesehenem Grund ab, wird der Gewinn mit 8 % besteuert (20 % auf zwei Fünftel). Außerhalb dieser Fälle gelten 21,5 %, gesenkt auf 17,2 % bei mehr als 5 Jahren Laufzeit und auf 8,6 % bei mehr als 8 Jahren (21,5 % auf vier Fünftel bzw. zwei Fünftel des Gewinns), wenn mindestens 35 % der Einzahlungen in der ersten Hälfte der Laufzeit erfolgten. Außerdem geben Sie den in der IRS-Erklärung abgesetzten Betrag zurück, plus 10 % je Jahr oder angefangenem Jahr, außer im Todesfall des Inhabers oder wenn die Einzahlung mindestens 5 Jahre im Plan war und die Abhebung aus gesetzlich vorgesehenem Grund erfolgt (EBF, Art. 21, und CIRS, Art. 5 Abs. 3)."
       }
     },
     "sources": {
@@ -5676,7 +5971,7 @@
         "cirs71": "Portal das Finanças, CIRS Art. 71: 28 % Quellensteuer und Option des englobamento",
         "cirs72": "Portal das Finanças, CIRS Art. 72: 28 % auf Einkünfte ohne Quellensteuer",
         "cirs5": "Portal das Finanças, CIRS Art. 5 Abs. 3: Rückkäufe von Lebensversicherungen",
-        "ebf21": "Portal das Finanças, EBF Art. 21: Altersvorsorgepläne"
+        "ebf21": "Portal das Finanças, EBF Art. 21 (konsolidierte Fassung): Altersvorsorgepläne"
       }
     },
     "related": {
