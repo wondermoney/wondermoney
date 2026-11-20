@@ -122,13 +122,6 @@
       "newSubheadline": "Conecta tu banco con Open Banking de solo lectura. WonderMoney organiza el resto.",
       "newCta": "Empieza gratis"
     },
-    "trustBar": {
-      "gocardless": "Desarrollado por Enable Banking",
-      "openBanking": "Open Banking",
-      "gdpr": "Privacidad ante todo",
-      "readOnly": "Acceso de solo lectura",
-      "madeIn": "Hecho en Portugal"
-    },
     "howItWorksSteps": {
       "title": "Cómo funciona",
       "subtitle": "Desde la primera conexión hasta una visión financiera completa.",
@@ -238,48 +231,11 @@
         "code": "Código en GitHub"
       }
     },
-    "secondaryFeatures": {
-      "title": "Más funciones",
-      "subTitle": "Metas, categorización inteligente y privacidad — todo lo demás que hace WonderMoney",
-      "goals": {
-        "title": "Metas",
-        "description": "Define metas de ahorro, sigue tu progreso y reserva dinero para lo que importa"
-      },
-      "categorization": {
-        "title": "Categorización inteligente",
-        "description": "WonderMoney categoriza automáticamente tus transacciones bancarias con IA"
-      },
-      "privacy": {
-        "title": "Privacidad y seguridad",
-        "description": "Open Banking de solo lectura. WonderMoney nunca ve tus credenciales bancarias"
-      },
-      "learnMore": "Saber más"
-    },
     "previewLabel": "Vista previa",
     "midCta": {
       "headline": "Tus finanzas, todo en un solo lugar",
       "subheadline": "Únete a quienes buscan una visión más clara de sus finanzas.",
       "microcopy": "Gratis y de código abierto"
-    },
-    "whyWondermoney": {
-      "title": "¿Por qué WonderMoney?",
-      "subtitle": "Diferente por diseño.",
-      "card1": {
-        "title": "Hecho para Europa",
-        "description": "A diferencia de las apps centradas en EE.UU., WonderMoney está diseñado para bancos europeos, regulaciones europeas y la forma en que realmente gestionas tu dinero."
-      },
-      "card2": {
-        "title": "Todo en uno",
-        "description": "A diferencia de las herramientas de un solo propósito, WonderMoney combina banca, presupuestos e inversiones en una sola app — para que nunca tengas que cambiar."
-      },
-      "card3": {
-        "title": "Gratis y de Código Abierto",
-        "description": "WonderMoney es gratuito y de código abierto — sin suscripción. Úsalo en wonder.money o en tu propio servidor."
-      },
-      "card4": {
-        "title": "Privacidad ante todo",
-        "description": "Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking. WonderMoney no puede iniciar transferencias. Introduces tus credenciales con el banco o proveedor y WonderMoney no las ve."
-      }
     },
     "faq": {
       "title": "Preguntas frecuentes",
@@ -566,7 +522,7 @@
         "methodPayment": "El impuesto se paga en un plazo en mayo hasta 100 €, en dos en mayo y noviembre entre 100 € y 500 €, y en tres en mayo, agosto y noviembre por encima de 500 €. Los plazos son iguales; el céntimo de redondeo, si lo hay, va al último.",
         "methodBudget": "La reserva mensual divide el impuesto anual entre 12 para tener el dinero listo cuando venza cada plazo.",
         "exemptionTitle": "Exención para la vivienda habitual",
-        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI. El artículo 46 del Estatuto de los Beneficios Fiscales (EBF) concede tres años de exención tras comprar o construir una vivienda con VPT de hasta 125 000 €, si los ingresos brutos del hogar del año anterior no superaron 153 300 €; hay que destinarla a vivienda habitual en seis meses y solicitar la exención en plazo. El artículo 11-A del Código do IMI exime, sin límite de tiempo, la vivienda de un hogar con ingresos brutos de hasta 2,3 veces 14 IAS (unos 17 300 € con el IAS de 2026, de 537,13 €) y cuyos inmuebles sumen un VPT de hasta 10 veces 14 IAS (75 198,20 € con el IAS de 2026). Hay otras condiciones y los límites pueden cambiar, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
+        "exemption": "Algunos propietarios de su vivienda habitual están exentos de IMI. El artículo 46 del Estatuto de los Beneficios Fiscales (EBF) concede {{ebfYears}} años de exención tras comprar o construir una vivienda con VPT de hasta {{ebfVpt}}, si los ingresos brutos del hogar del año anterior no superaron {{ebfIncome}}. La asamblea municipal puede prorrogarla {{ebfExtraYears}} años más. Hay que destinarla a vivienda habitual en seis meses. En la compra, la exención es automática; tras construir o hacer obras, hay que solicitarla en plazo. Cada hogar solo puede obtenerla dos veces. El artículo 11-A del Código do IMI exime, sin límite de tiempo, la vivienda de un hogar con ingresos brutos de hasta 2,3 veces 14 IAS (unos 17 300 € con el IAS de 2026, de 537,13 €) y cuyos inmuebles sumen un VPT de hasta 10 veces 14 IAS (75 198,20 € con el IAS de 2026). Hay otras condiciones y los límites pueden cambiar, por lo que la calculadora no aplica ninguna exención. Comprueba si te corresponde en el Portal das Finanças antes de usar el resultado.",
         "assumptionsTitle": "Supuestos",
         "assumptionRate": "El tipo municipal lo introduces tú. Esta página no incluye una tabla de tipos municipales, y los municipios pueden subir o bajar el tipo en casos concretos, como edificios vacíos o degradados, que la calculadora ignora.",
         "assumptionScope": "La estimación cubre un único inmueble con las reglas generales. No incluye el IMI adicional (AIMI), las exenciones temporales ni otras deducciones municipales.",
@@ -574,11 +530,11 @@
         "sourcesTitle": "Fuentes",
         "sourceRates": "Código do IMI, artículo 112: tipos (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IMI, artículo 120: pago a plazos (consultado el 19 de noviembre de 2026)",
-        "sourceExemption": "Código do IMI, artículo 11-A: exención por bajos ingresos (consultado el 19 de noviembre de 2026)",
-        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, artículo 11-A: exención por bajos ingresos (consultado el 20 de noviembre de 2026)",
+        "reviewed": "Reglas revisadas el 20 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI (Portal das Finanças).",
         "methodMinimum": "Si el impuesto a cobrar, tras cualquier reducción del IMI Familiar, es inferior a 10 €, no se liquida IMI y la calculadora muestra 0 € con una nota (artículo 113.6 del Código do IMI).",
         "sourceMinimum": "Código do IMI, artículo 113: liquidación, sin IMI por debajo de 10 € (consultado el 19 de noviembre de 2026)",
-        "sourceEbf": "Estatuto de los Beneficios Fiscales, artículo 46: exención de tres años (consultado el 19 de noviembre de 2026, redacción de la Lei 12/2022; comprueba modificaciones posteriores)"
+        "sourceEbf": "Estatuto de los Beneficios Fiscales, artículo 46: exención de la vivienda habitual, en la redacción de la Lei n.º 82/2023, igual a la del texto consolidado del Diário da República (consultado el 20 de noviembre de 2026)"
       },
       "nextStepHeadline": "Que el IMI no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del IMI cada mes, para que los plazos ya estén cubiertos.",
@@ -2733,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Normas de la Série F que sigue la calculadora",
-        "rulesIntro": "Normas publicadas por el IGCP en la ficha de producto de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Las normas pueden cambiar y cuentan las condiciones vigentes del emisor.",
+        "rulesIntro": "Normas de la ficha técnica de la Série F en el sitio del IGCP, consultada en {{rulesDate}} (Portaria n.º 149-A/2023, modificada por el Despacho n.º 11797/2024 y los Despachos n.º 5392/2026 y n.º 5839/2026). Las normas pueden cambiar y cuentan las condiciones vigentes del emisor.",
         "ruleTerm": "Plazo de {{termYears}} años. Puedes reembolsar, total o parcialmente, desde el primer vencimiento de intereses; la calculadora usa años completos de permanencia.",
         "ruleRate": "Cada trimestre rinde el tipo base vigente al inicio del trimestre más la prima de permanencia del año de suscripción. El tipo base es E3, la media del Euríbor a 3 meses de los 10 días hábiles anteriores, redondeada a tres decimales, sin margen añadido. Se fija el antepenúltimo día hábil de cada mes para el mes siguiente, y está limitado entre 0% y {{maxBase}}.",
         "ruleTax": "Los intereses vencen trimestralmente y se capitalizan automáticamente después de IRS, retenido en origen al {{irsRate}}.",
@@ -2741,9 +2697,9 @@
         "premiumTitle": "Prima de permanencia por año de suscripción",
         "premiumYears": "Año",
         "premiumPoints": "Puntos porcentuales",
-        "sourceSheet": "Ficha de producto de la Série F del IGCP (abril de 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "abril de 2026",
+        "sourceSheet": "Ficha técnica de la Série F en el sitio del IGCP (consultada el 20 de noviembre de 2026)",
+        "sourceIgcp": "IGCP: tipo de interés de la Série F para nuevas suscripciones en {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "noviembre de 2026",
         "exampleTitle": "Ejemplo práctico",
         "exampleText": "Suscribes {{amount}} y los mantienes {{years}} años con un tipo base de {{baseRate}}. Los certificados generan {{grossInterest}} de intereses brutos, de los que {{irs}} van a IRS, y quedan {{netInterest}} netos. El saldo llega a {{finalValue}}, una rentabilidad neta de {{netYield}} al año.",
         "methodTitle": "Cómo funciona la estimación",
@@ -2751,7 +2707,7 @@
         "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
         "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
-        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo comunicado para {{referenceMonth}} ({{referenceRate}}, el máximo), que el IGCP vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en AforroNet.",
+        "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRate}}, el máximo) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
         "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros."
       },
@@ -3382,8 +3338,8 @@
         "unsupportedOther": "Menos de 6 meses de remuneraciones registradas, remuneraciones muy variables, indemnizaciones por accidente de trabajo o enfermedad profesional y convenios que complementan la prestación.",
         "sourcesTitle": "Fuentes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de octubre de 2026), con el salario mínimo de 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, en su redacción actual: el régimen de protección en la enfermedad (art. 17 en la redacción del art. 9 del Decreto-Lei n.º 133/2012, publicado por la CITE)",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 con la guía de la Segurança Social y el texto del art. 17 del Decreto-Ley 28/2004 en la redacción del Decreto-Lei n.º 133/2012. Las tres condiciones alternativas del incremento de 5 puntos y el suelo por encima de 500 euros proceden de ese texto. El art. 17.4 dice que el valor de 500 euros se actualiza con el IAS; la guía vigente (ISS 5001 v4.55, 23 de octubre de 2026) sigue indicando 500,00 euros, por eso mantenemos 500. La estimación del salario neto detrás del límite neto es una simplificación nuestra.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, versión consolidada en el Diário da República: el régimen de protección en la enfermedad (art. 17 en la redacción del art. 9 del Decreto-Lei n.º 133/2012)",
+        "reviewed": "Reglas y valores de 2026 revisados el 20 de noviembre de 2026 con la guía de la Segurança Social y el texto consolidado del Decreto-Lei n.º 28/2004 en el Diário da República. Las tres condiciones alternativas del incremento de 5 puntos y el suelo por encima de 500 euros proceden del art. 17. El art. 17.4 dice que el valor de 500 euros se actualiza con el IAS, pero no hemos encontrado ninguna norma que publique un valor actualizado, y la guía vigente (ISS 5001 v4.55, 23 de octubre de 2026) sigue indicando 500,00 euros, por eso mantenemos 500. La estimación del salario neto detrás del límite neto es una simplificación nuestra.",
         "methodFloor": "Por encima de una remuneración de referencia de 500 euros al mes, el subsidio diario al 55% y al 60% no puede ser inferior al subsidio incrementado calculado sobre 500 euros: 60% y 65% de 500 dividido entre 30, es decir, {{floor55}} y {{floor60}} al día (art. 17.2 del Decreto-Ley 28/2004). Solo importa para una remuneración de referencia algo superior a 500 euros, hasta unos 545 euros, cuando no hay incremento. No se aplica a los tramos del 70% y 75%."
       },
       "nextStepHeadline": "Planifica la caída temporal de ingresos",
@@ -3469,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
         "sourceCategoryB": "Código do IUC, artículo 10: tasas de la categoría B, tasas adicionales y coeficientes (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IUC, artículo 17: pago (consultado el 19 de noviembre de 2026)",
-        "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 19 de noviembre de 2026). Su continuidad en 2026 por el artículo 94 de la Ley n.º 73-A/2025 no se ha vuelto a comprobar aquí.",
+        "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 20 de noviembre de 2026)",
         "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}.",
-        "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)"
+        "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)",
+        "sourceBudget": "Diário da República: artículo 94 de la Ley n.º 73-A/2025 (Presupuestos del Estado para 2026), que mantiene el adicional de IUC sin cambiar los importes (consultado el 20 de noviembre de 2026)"
       },
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",
@@ -3682,7 +3639,8 @@
         "seniorityPay": "Complementos mensuales de antigüedad (diuturnidades)",
         "startDate": "Fecha de inicio del contrato",
         "endDate": "Fecha de cese",
-        "contractType": "Tipo de extinción"
+        "contractType": "Tipo de extinción",
+        "fixedTermKind": "Tipo de plazo"
       },
       "help": {
         "baseMonthly": "La retribución base (retribuição base) en euros al mes, antes de la Seguridad Social y del IRS. No incluyas pagas extra, bonus ni horas extra.",
@@ -3690,7 +3648,8 @@
         "startDate": "El día en que empezó el contrato indefinido. Si hubo grupo de empresas o un contrato anterior con el mismo empleador, comprueba cómo se cuenta tu antigüedad.",
         "endDate": "El último día del contrato. Cuenta como día trabajado. Esta estimación cubre ceses en {{year}}.",
         "contractType": "El despido cubre el despido colectivo, la extinción del puesto de trabajo y la inadaptación. La caducidad es el fin de un contrato temporal, de plazo cierto o incierto (arts. 344 y 345 del Código do Trabalho). No se debe cuando el contrato termina porque declaraste que no querías renovarlo.",
-        "startDateFixedTerm": "El día en que empezó el contrato temporal. Si se renovó, cuenta desde el primer día: toda la duración, renovaciones incluidas, se paga a 24 días por año."
+        "startDateFixedTerm": "El día en que empezó el contrato temporal. Si se renovó, cuenta desde el primer día: toda la duración, renovaciones incluidas, se paga a 24 días por año.",
+        "fixedTermKind": "Fija la duración máxima: 2 años de plazo cierto, 4 de plazo incierto (art. 148). La indemnización es la misma, 24 días por año."
       },
       "scope": "Cubre despido colectivo, extinción del puesto de trabajo e inadaptación en un contrato indefinido. No cubre despido con justa causa, despido ilícito, extinción por mutuo acuerdo ni el sector público. Para el fin de un contrato temporal, elige caducidad de un contrato temporal.",
       "errors": {
@@ -3758,12 +3717,15 @@
         "unsupportedPublic": "Los trabajadores del sector público, que siguen otras reglas.",
         "sourcesTitle": "Fuentes",
         "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y regímenes transitorios de los arts. 5 y 6",
-        "sourceCode": "Código do Trabalho, texto consolidado (Diário da República): arts. 148, 344, 345 y 366",
+        "sourceCode": "Código do Trabalho, texto consolidado (Diário da República): arts. 147, 148, 149, 344, 345 y 366",
         "sourceDgert": "DGERT: compensación por despido colectivo (art. 366)",
-        "reviewed": "Reglas revisadas el 20 de noviembre de 2026 con el Diário da República: el Código do Trabalho consolidado (arts. 148, 344, 345 y 366), la Lei n.º 13/2023 (art. 35) y la Lei n.º 69/2013 (arts. 5 y 6), con el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días cuentan solo para la antigüedad desde el 1 de mayo de 2023, como fija el art. 35.2 de la Lei n.º 13/2023. Los 24 días de la caducidad de un contrato temporal cuentan para todo el contrato: es la lectura del art. 35.1 que hace la nota del IGeFE, y un tribunal podría leerlo de otra forma en los contratos firmados antes del 1 de mayo de 2023. Información educativa, no asesoramiento jurídico.",
-        "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y su art. 35.2 limita al tiempo desde esa fecha solo los 14 días del art. 366.1. La nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023: su ejemplo de un contrato del 1 de septiembre de 2021 al 31 de agosto de 2023 cuenta los 730 días a 24 días. Por tanto, toda la duración cuenta a 24 días, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican. Un contrato temporal dura como máximo dos años, o cuatro si es de término incierto (art. 148), así que uno que caduca en 2026 no se firmó antes del 1 de octubre de 2013 y el régimen transitorio del art. 6 de la Lei n.º 69/2013 no se aplica.",
+        "reviewed": "Reglas revisadas el 20 de noviembre de 2026 con el Diário da República: el Código do Trabalho consolidado (arts. 147, 148, 149, 344, 345 y 366), la Lei n.º 93/2019 (arts. 11 y 13), la Lei n.º 13/2023 (art. 35) y la Lei n.º 69/2013 (arts. 5 y 6), con el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días cuentan solo para la antigüedad desde el 1 de mayo de 2023, como fija el art. 35.2 de la Lei n.º 13/2023. Los 24 días de la caducidad de un contrato temporal cuentan para todo el contrato: es la lectura del art. 35.1 que hace la nota del IGeFE, y un tribunal podría leerlo de otra forma en los contratos firmados antes del 1 de mayo de 2023. Información educativa, no asesoramiento jurídico.",
+        "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y su art. 35.2 limita al tiempo desde esa fecha solo los 14 días del art. 366.1. La nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023: su ejemplo de un contrato del 1 de septiembre de 2021 al 31 de agosto de 2023 cuenta los 730 días a 24 días. Por tanto, toda la duración cuenta a 24 días, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican. Un contrato temporal dura como máximo dos años, o cuatro si es de término incierto (art. 148), así que uno que respeta ese límite y caduca en 2026 no se firmó antes del 1 de octubre de 2013 y el régimen transitorio del art. 6 de la Lei n.º 69/2013 no se aplica.",
         "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nueva redacción de los arts. 344.2, 345.4 y 366.1 del Código do Trabalho y art. 35 sobre su aplicación en el tiempo",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julio de 2023): 24 días para todos los contratos temporales que caduquen desde el 1 de mayo de 2023, sea cual sea la fecha de celebración"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julio de 2023): 24 días para todos los contratos temporales que caduquen desde el 1 de mayo de 2023, sea cual sea la fecha de celebración",
+        "methodDurationLimit": "Duración máxima (art. 148 del Código do Trabalho, en la redacción de la Lei n.º 93/2019): 2 años de plazo cierto, renovaciones incluidas, y 4 años de plazo incierto. Un contrato de plazo cierto puede renovarse hasta tres veces, y las renovaciones juntas no pueden durar más que el periodo inicial (art. 149.4). En los 2 años cuentan también los contratos temporales y el trabajo temporal en el mismo puesto, y las prestaciones de servicios con el mismo objeto, con el mismo empleador (art. 148.6). Los contratos firmados antes del 1 de octubre de 2019 mantienen los límites anteriores (art. 11.4 de la Lei n.º 93/2019): 3 años de plazo cierto (18 meses para quien busca su primer empleo y 2 años en los demás casos del art. 140.4) y 6 años de plazo incierto; la calculadora toma la fecha de inicio como fecha de firma. Cuando las fechas superan el límite, la calculadora avisa de que el contrato sería probablemente indefinido (art. 147.2.b) y de que ponerle fin sería un despido, pero sigue mostrando la cifra de la caducidad. No ve renovaciones ni contratos anteriores, así que compruébalos tú.",
+        "sourceLaw93": "Lei n.º 93/2019, de 4 de septiembre (Diário da República): nueva redacción de los arts. 148 y 149 del Código do Trabalho, aplicación en el tiempo (art. 11.4) y entrada en vigor el 1 de octubre de 2019 (art. 13)",
+        "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), con su redacción inicial de 2009: los límites de los contratos firmados antes del 1 de octubre de 2019"
       },
       "nextStepHeadline": "Planifica el cobro antes de que llegue",
       "nextStepDescription": "WonderMoney muestra tus cuentas y tus gastos mensuales juntos, para repartir una indemnización en los meses siguientes.",
@@ -3772,7 +3734,24 @@
         "permanent": "Despido en un contrato indefinido",
         "fixedTerm": "Caducidad de un contrato temporal"
       },
-      "scopeFixedTerm": "Cubre la caducidad de un contrato temporal, de plazo cierto o incierto, con extinción en {{year}}: 24 días de retribución base y diuturnidades por año de toda la duración del contrato, con el importe diario y los límites del art. 366. No cubre contratos que caducaron antes del 1 de mayo de 2023, la extinción anticipada, el despido con justa causa, el despido ilícito, el mutuo acuerdo ni el sector público."
+      "scopeFixedTerm": "Cubre la caducidad de un contrato temporal, de plazo cierto o incierto, con extinción en {{year}}: 24 días de retribución base y diuturnidades por año de toda la duración del contrato, con el importe diario y los límites del art. 366. No cubre contratos que caducaron antes del 1 de mayo de 2023, la extinción anticipada, el despido con justa causa, el despido ilícito, el mutuo acuerdo ni el sector público.",
+      "fixedTermKinds": {
+        "certain": "Plazo cierto (fecha de fin pactada)",
+        "uncertain": "Plazo incierto (termina cuando acaba su causa)"
+      },
+      "durationWarning": {
+        "title": "Este contrato puede considerarse indefinido",
+        "from2019": {
+          "certain": "Un contrato temporal de plazo cierto dura como máximo 2 años, renovaciones incluidas (art. 148.1 del Código do Trabalho, en la redacción de la Lei n.º 93/2019). Con estas fechas, ese límite se alcanzó el {{date}}.",
+          "uncertain": "Un contrato temporal de plazo incierto dura como máximo 4 años (art. 148.5 del Código do Trabalho, en la redacción de la Lei n.º 93/2019). Con estas fechas, ese límite se alcanzó el {{date}}."
+        },
+        "before2019": {
+          "certain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 3 años de plazo cierto, renovaciones incluidas, y menos en algunos casos (redacción inicial del art. 148.1). Con estas fechas, ese límite se alcanzó el {{date}}.",
+          "uncertain": "Un contrato temporal firmado antes del 1 de octubre de 2019 mantiene los límites anteriores (art. 11.4 de la Lei n.º 93/2019): como máximo 6 años de plazo incierto (redacción inicial del art. 148.4). Con estas fechas, ese límite se alcanzó el {{date}}."
+        },
+        "consequence": "Un contrato que supera su duración máxima se convierte en indefinido (art. 147.2.b), y la antigüedad cuenta desde el primer día (art. 147.3). Ponerle fin es entonces un despido, no una caducidad, con otras reglas de indemnización; si el empleador lo hace solo alegando el fin del plazo, puede ser un despido ilícito. La cifra mostrada sigue siendo la indemnización por caducidad.",
+        "action": "Calcular como despido en un contrato indefinido"
+      }
     },
     "statePension": {
       "title": "Calculadora de pensión de jubilación en Portugal 2026",
@@ -3850,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: edad normal de 2027 y factor de sostenibilidad de 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
-        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó con el Despacho n.º 233-A/2026 (reglas y asignación de la tabla) y con una transcripción de su anexo cuyas filas coinciden con la columna oficial de tasa efectiva."
+        "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó fila por fila el 20 de noviembre de 2026 con el anexo del Despacho n.º 233-A/2026 publicado en el Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tablas de retención del IRS de 2026, incluida la tabla VIII de pensiones"
       }
     },
     "sp500History": {

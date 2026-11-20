@@ -53,7 +53,7 @@ describe("localized dismissal compensation tool page", () => {
     const { guide } = localeCopy(lang, "src");
     expect(guide.reviewed).toContain("2026");
     for (const key of [
-      "sourceLaw69", "sourceLaw13Text", "sourceIgefe", "methodFixedTerm", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
+      "sourceLaw69", "sourceLaw13Text", "sourceIgefe", "methodFixedTerm", "methodDurationLimit", "sourceLaw93", "sourceArt148", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
       "unsupportedAgreement", "unsupportedPublic", "supported",
     ]) {
       expect(guide[key]).toBeTruthy();
@@ -65,6 +65,16 @@ describe("localized dismissal compensation tool page", () => {
     expect(guide.methodFixedTerm).toContain("24");
     expect(guide.methodFixedTerm).toContain("148");
     expect(guide.sourceCode).toContain("Diário da República");
+    for (const article of ["147", "148", "149"]) {
+      expect(guide.sourceCode).toContain(article);
+      expect(guide.methodDurationLimit).toContain(article);
+    }
+    expect(guide.methodDurationLimit).toContain("93/2019");
+    expect(guide.methodDurationLimit).toContain("2019");
+    expect(guide.sourceLaw93).toContain("93/2019");
+    expect(guide.sourceLaw93).toContain("Diário da República");
+    expect(guide.sourceArt148).toContain("2009");
+    expect(guide.reviewed).toContain("93/2019");
     expect(guide.sourceLaw13Text).toContain("Diário da República");
     expect(guide.reviewed).toContain("1");
   });

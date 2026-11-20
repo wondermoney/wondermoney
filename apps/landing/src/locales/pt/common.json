@@ -122,13 +122,6 @@
       "newSubheadline": "Liga o teu banco com Open Banking só de leitura. O WonderMoney organiza o resto.",
       "newCta": "Começa grátis"
     },
-    "trustBar": {
-      "gocardless": "Fornecido por Enable Banking",
-      "openBanking": "Open Banking",
-      "gdpr": "Privacidade em primeiro lugar",
-      "readOnly": "Só de leitura",
-      "madeIn": "Feito em Portugal"
-    },
     "howItWorksSteps": {
       "title": "Como funciona",
       "subtitle": "Da primeira ligação ao panorama financeiro completo.",
@@ -238,48 +231,11 @@
         "code": "Código no GitHub"
       }
     },
-    "secondaryFeatures": {
-      "title": "Mais funcionalidades",
-      "subTitle": "Objetivos, categorização inteligente e privacidade — tudo o resto que o WonderMoney faz",
-      "goals": {
-        "title": "Objetivos",
-        "description": "Define metas de poupança, acompanha o progresso e reserva dinheiro para o que importa"
-      },
-      "categorization": {
-        "title": "Categorização inteligente",
-        "description": "O WonderMoney categoriza automaticamente as tuas transações bancárias com IA"
-      },
-      "privacy": {
-        "title": "Privacidade e segurança",
-        "description": "Open Banking só de leitura. O WonderMoney nunca vê as tuas credenciais bancárias"
-      },
-      "learnMore": "Saber mais"
-    },
     "previewLabel": "Pré-visualização",
     "midCta": {
       "headline": "As tuas finanças, todas num só lugar",
       "subheadline": "Junta-te a quem procura uma visão mais clara das suas finanças.",
       "microcopy": "Grátis e open source"
-    },
-    "whyWondermoney": {
-      "title": "Porquê o WonderMoney?",
-      "subtitle": "Pensado ao detalhe.",
-      "card1": {
-        "title": "Feito para a Europa",
-        "description": "Feito para bancos europeus e para a forma como realmente geres o teu dinheiro - não é uma app americana adaptada."
-      },
-      "card2": {
-        "title": "Tudo-em-Um",
-        "description": "Banca, orçamentos e investimentos numa só app. Sem saltar entre ferramentas."
-      },
-      "card3": {
-        "title": "Grátis e Open Source",
-        "description": "O WonderMoney é gratuito e open source — sem subscrição. Usa-o em wonder.money ou no teu próprio servidor."
-      },
-      "card4": {
-        "title": "Privacidade a sério",
-        "description": "As ligações bancárias usam Open Banking só de leitura através da Enable Banking. O WonderMoney não pode iniciar transferências. Introduzes as credenciais junto do banco ou fornecedor, e o WonderMoney não as vê."
-      }
     },
     "faq": {
       "title": "Perguntas frequentes",
@@ -566,7 +522,7 @@
         "methodPayment": "O imposto é pago numa prestação em maio até 100 €, em duas em maio e novembro entre 100 € e 500 €, e em três em maio, agosto e novembro acima de 500 €. As prestações são iguais; o eventual cêntimo de arredondamento fica na última.",
         "methodBudget": "A reserva mensal divide o imposto anual por 12, para teres o dinheiro pronto quando cada prestação vencer.",
         "exemptionTitle": "Isenção para habitação própria e permanente",
-        "exemption": "Alguns proprietários de habitação própria e permanente estão isentos de IMI. O artigo 46.º do Estatuto dos Benefícios Fiscais (EBF) dá três anos de isenção após a compra ou construção de uma casa com VPT até 125 000 €, se o rendimento bruto do agregado no ano anterior não exceder 153 300 €; é preciso afetar a casa a habitação própria e permanente em seis meses e pedir a isenção no prazo. O artigo 11.º-A do Código do IMI isenta, sem limite de tempo, a casa de um agregado com rendimento bruto até 2,3 vezes 14 IAS (cerca de 17 300 € com o IAS de 2026, de 537,13 €) e cujos prédios tenham um VPT total até 10 vezes 14 IAS (75 198,20 € com o IAS de 2026). Há outras condições e os limites podem mudar, por isso o simulador não aplica nenhuma isenção. Confirma se tens direito no Portal das Finanças antes de usares o resultado.",
+        "exemption": "Alguns proprietários de habitação própria e permanente estão isentos de IMI. O artigo 46.º do Estatuto dos Benefícios Fiscais (EBF) dá {{ebfYears}} anos de isenção após a compra ou construção de uma casa com VPT até {{ebfVpt}}, se o rendimento bruto do agregado no ano anterior não exceder {{ebfIncome}}. A assembleia municipal pode prolongar a isenção por mais {{ebfExtraYears}} anos. É preciso afetar a casa a habitação própria e permanente em seis meses. Na compra, a isenção é automática; na construção ou em obras, tem de ser pedida dentro do prazo. Cada agregado só pode beneficiar dela duas vezes. O artigo 11.º-A do Código do IMI isenta, sem limite de tempo, a casa de um agregado com rendimento bruto até 2,3 vezes 14 IAS (cerca de 17 300 € com o IAS de 2026, de 537,13 €) e cujos prédios tenham um VPT total até 10 vezes 14 IAS (75 198,20 € com o IAS de 2026). Há outras condições e os limites podem mudar, por isso o simulador não aplica nenhuma isenção. Confirma se tens direito no Portal das Finanças antes de usares o resultado.",
         "assumptionsTitle": "Pressupostos",
         "assumptionRate": "A taxa municipal é introduzida por ti. Esta página não tem uma tabela das taxas dos municípios, e os municípios podem majorar ou minorar a taxa em casos específicos, por exemplo prédios devolutos ou degradados, que o simulador ignora.",
         "assumptionScope": "A estimativa cobre um único prédio sujeito às regras gerais. Não inclui o adicional ao IMI (AIMI), as isenções temporárias nem outras deduções municipais.",
@@ -574,11 +530,11 @@
         "sourcesTitle": "Fontes",
         "sourceRates": "Código do IMI, artigo 112.º: taxas (consultado a 19 de novembro de 2026)",
         "sourcePayment": "Código do IMI, artigo 120.º: pagamento em prestações (consultado a 19 de novembro de 2026)",
-        "sourceExemption": "Código do IMI, artigo 11.º-A: isenção por baixos rendimentos (consultado a 19 de novembro de 2026)",
-        "reviewed": "Regras revistas a 19 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, artigo 11.º-A: isenção por baixos rendimentos (consultado a 20 de novembro de 2026)",
+        "reviewed": "Regras revistas a 20 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI (Portal das Finanças).",
         "methodMinimum": "Se o imposto a cobrar, depois de qualquer redução do IMI Familiar, for inferior a 10 €, não é liquidado IMI e o simulador mostra 0 € com uma nota (artigo 113.º, n.º 6, do Código do IMI).",
         "sourceMinimum": "Código do IMI, artigo 113.º: liquidação, sem IMI abaixo de 10 € (consultado a 19 de novembro de 2026)",
-        "sourceEbf": "Estatuto dos Benefícios Fiscais, artigo 46.º: isenção de três anos (consultado a 19 de novembro de 2026, redação da Lei 12/2022; confirma alterações posteriores)"
+        "sourceEbf": "Estatuto dos Benefícios Fiscais, artigo 46.º: isenção para habitação própria e permanente, na redação da Lei n.º 82/2023, igual à do texto consolidado no Diário da República (consultado a 20 de novembro de 2026)"
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IMI",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IMI todos os meses, para as prestações já estarem cobertas.",
@@ -2733,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Regras da Série F que o simulador segue",
-        "rulesIntro": "Regras publicadas pelo IGCP na ficha de produto da Série F de {{rulesDate}} (Portaria n.º 149-A/2023). As regras podem mudar, e as condições em vigor do emitente é que contam.",
+        "rulesIntro": "Regras da ficha técnica da Série F no sítio do IGCP, consultada em {{rulesDate}} (Portaria n.º 149-A/2023, alterada pelo Despacho n.º 11797/2024 e pelos Despachos n.º 5392/2026 e n.º 5839/2026). As regras podem mudar, e as condições em vigor do emitente é que contam.",
         "ruleTerm": "Prazo de {{termYears}} anos. Podes resgatar, total ou parcialmente, a partir do primeiro vencimento de juros; o simulador usa anos completos de permanência.",
         "ruleRate": "Cada trimestre rende a taxa base em vigor no início do trimestre mais o prémio de permanência do ano da subscrição. A taxa base é E3, a média da Euribor a 3 meses nos 10 dias úteis anteriores, arredondada à terceira casa decimal, sem margem adicional. É determinada no antepenúltimo dia útil de cada mês para vigorar no mês seguinte, e limitada entre 0% e {{maxBase}}.",
         "ruleTax": "Os juros vencem trimestralmente e são capitalizados automaticamente depois de IRS, retido na fonte a {{irsRate}}.",
@@ -2741,9 +2697,9 @@
         "premiumTitle": "Prémio de permanência por ano da subscrição",
         "premiumYears": "Ano",
         "premiumPoints": "Pontos percentuais",
-        "sourceSheet": "Ficha de produto da Série F do IGCP (abril de 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "abril de 2026",
+        "sourceSheet": "Ficha técnica da Série F no sítio do IGCP (consultada a 20 de novembro de 2026)",
+        "sourceIgcp": "IGCP: taxa de juro da Série F para novas subscrições em {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "novembro de 2026",
         "exampleTitle": "Exemplo prático",
         "exampleText": "Subscreves {{amount}} e manténs durante {{years}} anos, com uma taxa base de {{baseRate}}. Os certificados rendem {{grossInterest}} de juros brutos, dos quais {{irs}} vão para IRS, ficando {{netInterest}} líquidos. O saldo chega a {{finalValue}}, um rendimento líquido de {{netYield}} ao ano.",
         "methodTitle": "Como funciona a estimativa",
@@ -2751,7 +2707,7 @@
         "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
         "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
         "assumptionsTitle": "Pressupostos",
-        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa divulgada para {{referenceMonth}} ({{referenceRate}}, o máximo), que o IGCP volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no AforroNet.",
+        "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRate}}, o máximo) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
         "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
         "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças."
       },
@@ -3382,8 +3338,8 @@
         "unsupportedOther": "Menos de 6 meses de remunerações registadas, remunerações muito variáveis, indemnizações por acidente de trabalho ou doença profissional e acordos coletivos que complementam o subsídio.",
         "sourcesTitle": "Fontes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de outubro de 2026), com a retribuição mínima mensal garantida de 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, na sua redação atual: o regime de proteção na doença (art. 17.º na redação do art. 9.º do Decreto-Lei n.º 133/2012, publicado pela CITE)",
-        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social e ao texto do art. 17.º do Decreto-Lei n.º 28/2004 na redação do Decreto-Lei n.º 133/2012. As três condições alternativas do acréscimo de 5 pontos e o piso acima de 500 euros vêm desse texto. O n.º 4 do art. 17.º diz que o valor de 500 euros é atualizado com o IAS; o guia em vigor (ISS 5001 v4.55, de 23 de outubro de 2026) continua a indicar 500,00 euros, por isso mantemos 500. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, versão consolidada no Diário da República: regime de proteção na doença (art. 17.º na redação do art. 9.º do Decreto-Lei n.º 133/2012)",
+        "reviewed": "Regras e valores de 2026 revistos a 20 de novembro de 2026 face ao guia da Segurança Social e ao texto consolidado do Decreto-Lei n.º 28/2004 no Diário da República. As três condições alternativas do acréscimo de 5 pontos e o piso acima de 500 euros vêm do art. 17.º. O n.º 4 do art. 17.º diz que o valor de 500 euros é atualizado com o IAS, mas não encontrámos nenhum diploma que publique um valor atualizado, e o guia em vigor (ISS 5001 v4.55, de 23 de outubro de 2026) continua a indicar 500,00 euros, por isso mantemos 500. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa.",
         "methodFloor": "Acima de uma remuneração de referência de 500 euros por mês, o subsídio diário a 55% e 60% não pode ser inferior ao subsídio majorado calculado sobre 500 euros: 60% e 65% de 500 a dividir por 30, ou seja, {{floor55}} e {{floor60}} por dia (art. 17.º, n.º 2, do Decreto-Lei n.º 28/2004). Só conta para uma remuneração de referência pouco acima de 500 euros, até cerca de 545 euros, quando não há majoração. Não se aplica aos escalões de 70% e 75%."
       },
       "nextStepHeadline": "Planeie a quebra temporária de rendimento",
@@ -3469,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
         "sourceCategoryB": "Código do IUC, artigo 10.º: taxas da categoria B, taxas adicionais e coeficientes (consultado a 19 de novembro de 2026)",
         "sourcePayment": "Código do IUC, artigo 17.º: pagamento (consultado a 19 de novembro de 2026)",
-        "sourceDiesel": "Portal das Finanças: artigo 216.º da Lei n.º 82-B/2014, tabelas I e II do adicional de gasóleo (consultado a 19 de novembro de 2026). A sua manutenção em 2026 pelo artigo 94.º da Lei n.º 73-A/2025 não foi reconfirmada aqui.",
+        "sourceDiesel": "Portal das Finanças: artigo 216.º da Lei n.º 82-B/2014, tabelas I e II do adicional de gasóleo (consultado a 20 de novembro de 2026)",
         "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026, de 4 de agosto: novas regras de pagamento do IUC, com a transição de 2027 (Portal das Finanças, consultado a 19 de novembro de 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026, de 4 de agosto: novas regras de pagamento do IUC, com a transição de 2027 (Portal das Finanças, consultado a 19 de novembro de 2026)",
+        "sourceBudget": "Diário da República: artigo 94.º da Lei n.º 73-A/2025 (Orçamento do Estado para 2026), que mantém em vigor o adicional de IUC sem alterar os montantes (consultado a 20 de novembro de 2026)"
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
@@ -3682,7 +3639,8 @@
         "seniorityPay": "Diuturnidades mensais",
         "startDate": "Data de início do contrato",
         "endDate": "Data de cessação",
-        "contractType": "Tipo de cessação"
+        "contractType": "Tipo de cessação",
+        "fixedTermKind": "Tipo de termo"
       },
       "help": {
         "baseMonthly": "A retribuição base em euros por mês, antes da Segurança Social e do IRS. Não incluas subsídios, prémios nem horas extra.",
@@ -3690,7 +3648,8 @@
         "startDate": "O dia em que o contrato sem termo começou. Se houve grupo de empresas ou um contrato anterior com o mesmo empregador, confirma como conta a tua antiguidade.",
         "endDate": "O último dia do contrato. Conta como dia trabalhado. Esta estimativa cobre cessações em {{year}}.",
         "contractType": "O despedimento cobre o despedimento coletivo, a extinção do posto de trabalho e a inadaptação. A caducidade é o fim de um contrato a termo, certo ou incerto (arts. 344.º e 345.º do Código do Trabalho). Não é devida quando o contrato termina porque declaraste que não o querias renovar.",
-        "startDateFixedTerm": "O dia em que o contrato a termo começou. Se foi renovado, conta desde o primeiro dia: toda a duração, renovações incluídas, é paga a 24 dias por ano."
+        "startDateFixedTerm": "O dia em que o contrato a termo começou. Se foi renovado, conta desde o primeiro dia: toda a duração, renovações incluídas, é paga a 24 dias por ano.",
+        "fixedTermKind": "Define a duração máxima: 2 anos a termo certo, 4 a termo incerto (art. 148.º). A compensação é a mesma, 24 dias por ano."
       },
       "scope": "Cobre despedimento coletivo, extinção do posto de trabalho e inadaptação num contrato sem termo. Não cobre despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública. Para o fim de um contrato a termo, escolhe caducidade de contrato a termo.",
       "errors": {
@@ -3758,12 +3717,15 @@
         "unsupportedPublic": "Os trabalhadores da função pública, que seguem outras regras.",
         "sourcesTitle": "Fontes",
         "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nova redação do art. 366.º e regimes transitórios dos arts. 5.º e 6.º",
-        "sourceCode": "Código do Trabalho, texto consolidado (Diário da República): arts. 148.º, 344.º, 345.º e 366.º",
+        "sourceCode": "Código do Trabalho, texto consolidado (Diário da República): arts. 147.º, 148.º, 149.º, 344.º, 345.º e 366.º",
         "sourceDgert": "DGERT: compensação por despedimento coletivo (art. 366.º)",
-        "reviewed": "Regras revistas a 20 de novembro de 2026 com o Diário da República: o Código do Trabalho consolidado (arts. 148.º, 344.º, 345.º e 366.º), a Lei n.º 13/2023 (art. 35.º) e a Lei n.º 69/2013 (arts. 5.º e 6.º), com o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias contam só para a antiguidade desde 1 de maio de 2023, como manda o art. 35.º, n.º 2, da Lei n.º 13/2023. Os 24 dias da caducidade de contrato a termo contam para todo o contrato: é a leitura do art. 35.º, n.º 1, feita na nota do IGeFE, e um tribunal pode lê-lo de outra forma nos contratos celebrados antes de 1 de maio de 2023. Informação para aprender, não é aconselhamento jurídico.",
-        "methodFixedTerm": "Caducidade de contrato a termo (arts. 344.º, n.º 2, e 345.º, n.º 4, do Código do Trabalho, na redação da Lei n.º 13/2023): 24 dias de retribuição base e diuturnidades por cada ano completo de antiguidade, calculados como no art. 366.º. Aplicam-se o valor diário, o limite de 20 vezes o salário mínimo para o valor mensal, o limite de 12 valores mensais e a fração proporcional de um ano. O art. 35.º, n.º 1, da Lei n.º 13/2023 sujeita ao novo texto os contratos celebrados antes de 1 de maio de 2023, e o n.º 2 do mesmo artigo limita ao tempo a partir dessa data apenas os 14 dias do art. 366.º, n.º 1. A nota do IGeFE de 5 de julho de 2023 lê-o como 24 dias para todos os contratos que caduquem a partir de 1 de maio de 2023: o seu exemplo de um contrato de 1 de setembro de 2021 a 31 de agosto de 2023 conta os 730 dias a 24 dias. Assim, toda a duração conta a 24 dias, e as taxas dos contratos sem termo (12, 14, 18 e 20 dias) não se aplicam. Um contrato a termo dura no máximo dois anos, ou quatro se for a termo incerto (art. 148.º), por isso um contrato que caduque em 2026 não foi celebrado antes de 1 de outubro de 2013 e o regime transitório do art. 6.º da Lei n.º 69/2013 não se aplica.",
+        "reviewed": "Regras revistas a 20 de novembro de 2026 com o Diário da República: o Código do Trabalho consolidado (arts. 147.º, 148.º, 149.º, 344.º, 345.º e 366.º), a Lei n.º 93/2019 (arts. 11.º e 13.º), a Lei n.º 13/2023 (art. 35.º) e a Lei n.º 69/2013 (arts. 5.º e 6.º), com o salário mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Os 14 dias contam só para a antiguidade desde 1 de maio de 2023, como manda o art. 35.º, n.º 2, da Lei n.º 13/2023. Os 24 dias da caducidade de contrato a termo contam para todo o contrato: é a leitura do art. 35.º, n.º 1, feita na nota do IGeFE, e um tribunal pode lê-lo de outra forma nos contratos celebrados antes de 1 de maio de 2023. Informação para aprender, não é aconselhamento jurídico.",
+        "methodFixedTerm": "Caducidade de contrato a termo (arts. 344.º, n.º 2, e 345.º, n.º 4, do Código do Trabalho, na redação da Lei n.º 13/2023): 24 dias de retribuição base e diuturnidades por cada ano completo de antiguidade, calculados como no art. 366.º. Aplicam-se o valor diário, o limite de 20 vezes o salário mínimo para o valor mensal, o limite de 12 valores mensais e a fração proporcional de um ano. O art. 35.º, n.º 1, da Lei n.º 13/2023 sujeita ao novo texto os contratos celebrados antes de 1 de maio de 2023, e o n.º 2 do mesmo artigo limita ao tempo a partir dessa data apenas os 14 dias do art. 366.º, n.º 1. A nota do IGeFE de 5 de julho de 2023 lê-o como 24 dias para todos os contratos que caduquem a partir de 1 de maio de 2023: o seu exemplo de um contrato de 1 de setembro de 2021 a 31 de agosto de 2023 conta os 730 dias a 24 dias. Assim, toda a duração conta a 24 dias, e as taxas dos contratos sem termo (12, 14, 18 e 20 dias) não se aplicam. Um contrato a termo dura no máximo dois anos, ou quatro se for a termo incerto (art. 148.º), por isso um contrato que respeite esse limite e caduque em 2026 não foi celebrado antes de 1 de outubro de 2013 e o regime transitório do art. 6.º da Lei n.º 69/2013 não se aplica.",
         "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nova redação dos arts. 344.º, n.º 2, 345.º, n.º 4, e 366.º, n.º 1, do Código do Trabalho e art. 35.º sobre a aplicação no tempo",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julho de 2023): 24 dias para todos os contratos a termo que caduquem a partir de 1 de maio de 2023, seja qual for a data de celebração"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julho de 2023): 24 dias para todos os contratos a termo que caduquem a partir de 1 de maio de 2023, seja qual for a data de celebração",
+        "methodDurationLimit": "Duração máxima (art. 148.º do Código do Trabalho, na redação da Lei n.º 93/2019): 2 anos a termo certo, renovações incluídas, e 4 anos a termo incerto. Um contrato a termo certo pode ser renovado até três vezes, e a duração total das renovações não pode exceder a do período inicial (art. 149.º, n.º 4). Para os 2 anos contam também os contratos a termo e o trabalho temporário no mesmo posto de trabalho, e as prestações de serviço para o mesmo objeto, com o mesmo empregador (art. 148.º, n.º 6). Os contratos celebrados antes de 1 de outubro de 2019 mantêm os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): 3 anos a termo certo (18 meses para quem procura o primeiro emprego e 2 anos nos outros casos do art. 140.º, n.º 4) e 6 anos a termo incerto; o simulador usa a data de início como data de celebração. Quando as datas ultrapassam o limite, o simulador avisa que o contrato seria provavelmente sem termo (art. 147.º, n.º 2, alínea b)) e que pôr-lhe fim seria um despedimento, mas continua a mostrar o valor da caducidade. Não vê renovações nem contratos anteriores, por isso confirma-os tu.",
+        "sourceLaw93": "Lei n.º 93/2019, de 4 de setembro (Diário da República): nova redação dos arts. 148.º e 149.º do Código do Trabalho, aplicação no tempo (art. 11.º, n.º 4) e entrada em vigor a 1 de outubro de 2019 (art. 13.º)",
+        "sourceArt148": "Código do Trabalho, art. 148.º (Diário da República), com a redação inicial de 2009: os limites dos contratos celebrados antes de 1 de outubro de 2019"
       },
       "nextStepHeadline": "Planeia o recebimento antes de ele chegar",
       "nextStepDescription": "A WonderMoney mostra as tuas contas e as despesas mensais em conjunto, para repartires uma indemnização pelos meses seguintes.",
@@ -3772,7 +3734,24 @@
         "permanent": "Despedimento num contrato sem termo",
         "fixedTerm": "Caducidade de contrato a termo"
       },
-      "scopeFixedTerm": "Cobre a caducidade de contrato a termo, certo ou incerto, com cessação em {{year}}: 24 dias de retribuição base e diuturnidades por ano de toda a duração do contrato, com o valor diário e os limites do art. 366.º. Não cobre contratos que caducaram antes de 1 de maio de 2023, cessação antecipada, despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública."
+      "scopeFixedTerm": "Cobre a caducidade de contrato a termo, certo ou incerto, com cessação em {{year}}: 24 dias de retribuição base e diuturnidades por ano de toda a duração do contrato, com o valor diário e os limites do art. 366.º. Não cobre contratos que caducaram antes de 1 de maio de 2023, cessação antecipada, despedimento com justa causa, despedimento ilícito, cessação por acordo nem a função pública.",
+      "fixedTermKinds": {
+        "certain": "Termo certo (com data de fim acordada)",
+        "uncertain": "Termo incerto (termina quando acaba o motivo)"
+      },
+      "durationWarning": {
+        "title": "Este contrato pode ser considerado sem termo",
+        "from2019": {
+          "certain": "Um contrato a termo certo dura no máximo 2 anos, renovações incluídas (art. 148.º, n.º 1, do Código do Trabalho, na redação da Lei n.º 93/2019). Com estas datas, esse limite foi atingido a {{date}}.",
+          "uncertain": "Um contrato a termo incerto dura no máximo 4 anos (art. 148.º, n.º 5, do Código do Trabalho, na redação da Lei n.º 93/2019). Com estas datas, esse limite foi atingido a {{date}}."
+        },
+        "before2019": {
+          "certain": "Um contrato a termo celebrado antes de 1 de outubro de 2019 mantém os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): no máximo 3 anos a termo certo, renovações incluídas, e menos em alguns casos (redação inicial do art. 148.º, n.º 1). Com estas datas, esse limite foi atingido a {{date}}.",
+          "uncertain": "Um contrato a termo celebrado antes de 1 de outubro de 2019 mantém os limites anteriores (art. 11.º, n.º 4, da Lei n.º 93/2019): no máximo 6 anos a termo incerto (redação inicial do art. 148.º, n.º 4). Com estas datas, esse limite foi atingido a {{date}}."
+        },
+        "consequence": "Um contrato que ultrapassa a duração máxima converte-se em contrato sem termo (art. 147.º, n.º 2, alínea b)), e a antiguidade conta desde o primeiro dia (art. 147.º, n.º 3). Pôr-lhe fim é então um despedimento, não uma caducidade, com outras regras de compensação; se o empregador o fizer só por invocar o fim do prazo, pode tratar-se de um despedimento ilícito. O valor apresentado continua a ser a compensação por caducidade.",
+        "action": "Calcular como despedimento num contrato sem termo"
+      }
     },
     "statePension": {
       "title": "Simulador da pensão de reforma 2026",
@@ -3850,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: idade normal de 2027 e fator de sustentabilidade de 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: atualização das pensões de 2026 e pensões mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
-        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas. A tabela de retenção de pensões VIII foi verificada face ao Despacho n.º 233-A/2026 (regras e atribuição da tabela) e a uma transcrição do respetivo anexo cujas linhas coincidem com a coluna oficial da taxa efetiva."
+        "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas. A tabela de retenção de pensões VIII foi verificada a 20 de novembro de 2026, linha a linha, face ao anexo do Despacho n.º 233-A/2026 publicado no Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelas de retenção na fonte de 2026, incluindo a tabela VIII de pensões"
       }
     },
     "sp500History": {

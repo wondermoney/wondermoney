@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
-  DISMISSAL_EXAMPLE, RMMG_2026_CENTS, computeDismissalCompensation, splitPayout, validateDismissal,
-  type DismissalCompensationInput,
+  DISMISSAL_EXAMPLE, FIXED_TERM_MAX_YEARS, LEI_93_2019_IN_FORCE, RMMG_2026_CENTS, checkFixedTermDuration,
+  computeDismissalCompensation, splitPayout, validateDismissal, type DismissalCompensationInput, type FixedTermKind,
 } from "./dismissalCompensation";
 
 const base = (overrides: Partial<DismissalCompensationInput>): DismissalCompensationInput => ({
-  contractType: "permanent", baseMonthly: 3000, seniorityPay: 0, startDate: "2020-01-01", endDate: "2026-12-31", ...overrides,
+  contractType: "permanent", fixedTermKind: "certain", baseMonthly: 3000, seniorityPay: 0, startDate: "2020-01-01", endDate: "2026-12-31", ...overrides,
 });
 const run = (overrides: Partial<DismissalCompensationInput>) => {
   const outcome = computeDismissalCompensation(base(overrides), "2026-11-19");
@@ -194,6 +194,89 @@ describe("fixed-term contract expiry (arts. 344(2) and 345(4) CT, Lei 13/2023)",
 
   it("leaves permanent contracts untouched", () => {
     expect(run({ contractType: "permanent" }).regime).toBe("from2013");
+  });
+});
+
+describe("fixed-term duration limits (arts. 147(2)(b) and 148 CT; art. 11(4) of Lei 93/2019)", () => {
+  it("uses 2 and 4 years from 1 October 2019, and 3 and 6 years for contracts signed before (art. 148, initial and Lei 93/2019 wording)", () => {
+    expect(LEI_93_2019_IN_FORCE).toBe("2019-10-01");
+    expect(FIXED_TERM_MAX_YEARS).toEqual({ from2019: { certain: 2, uncertain: 4 }, before2019: { certain: 3, uncertain: 6 } });
+  });
+
+  const cases: { kind: FixedTermKind; start: string; end: string; rules: "from2019" | "before2019"; maxYears: number; lastDay: string; exceeded: boolean }[] = [
+    // Certain term from 1 October 2019: at most 2 years (art. 148(1)).
+    { kind: "certain", start: "2024-07-01", end: "2026-06-29", rules: "from2019", maxYears: 2, lastDay: "2026-06-30", exceeded: false },
+    { kind: "certain", start: "2024-07-01", end: "2026-06-30", rules: "from2019", maxYears: 2, lastDay: "2026-06-30", exceeded: false },
+    { kind: "certain", start: "2024-07-01", end: "2026-07-01", rules: "from2019", maxYears: 2, lastDay: "2026-06-30", exceeded: true },
+    // Uncertain term from 1 October 2019: at most 4 years (art. 148(5)).
+    { kind: "uncertain", start: "2022-03-01", end: "2026-02-27", rules: "from2019", maxYears: 4, lastDay: "2026-02-28", exceeded: false },
+    { kind: "uncertain", start: "2022-03-01", end: "2026-02-28", rules: "from2019", maxYears: 4, lastDay: "2026-02-28", exceeded: false },
+    { kind: "uncertain", start: "2022-03-01", end: "2026-03-01", rules: "from2019", maxYears: 4, lastDay: "2026-02-28", exceeded: true },
+    // Signed before 1 October 2019: the initial wording of art. 148 keeps applying (art. 11(4) of Lei 93/2019).
+    { kind: "certain", start: "2018-06-01", end: "2020-12-31", rules: "before2019", maxYears: 3, lastDay: "2021-05-31", exceeded: false },
+    { kind: "certain", start: "2018-06-01", end: "2021-05-31", rules: "before2019", maxYears: 3, lastDay: "2021-05-31", exceeded: false },
+    { kind: "certain", start: "2018-06-01", end: "2021-06-01", rules: "before2019", maxYears: 3, lastDay: "2021-05-31", exceeded: true },
+    { kind: "uncertain", start: "2015-01-01", end: "2020-12-30", rules: "before2019", maxYears: 6, lastDay: "2020-12-31", exceeded: false },
+    { kind: "uncertain", start: "2015-01-01", end: "2020-12-31", rules: "before2019", maxYears: 6, lastDay: "2020-12-31", exceeded: false },
+    { kind: "uncertain", start: "2015-01-01", end: "2021-01-01", rules: "before2019", maxYears: 6, lastDay: "2020-12-31", exceeded: true },
+    // The day Lei 93/2019 came into force (art. 13(1)) is the first under the new limits.
+    { kind: "certain", start: "2019-09-30", end: "2022-09-29", rules: "before2019", maxYears: 3, lastDay: "2022-09-29", exceeded: false },
+    { kind: "certain", start: "2019-10-01", end: "2022-09-29", rules: "from2019", maxYears: 2, lastDay: "2021-09-30", exceeded: true },
+  ];
+  it.each(cases)("$kind term from $start to $end: $rules, exceeded $exceeded", ({ kind, start, end, rules, maxYears, lastDay, exceeded }) => {
+    expect(checkFixedTermDuration(kind, start, end)).toEqual({ kind, rules, maxYears, lastDay, exceeded });
+  });
+
+  it("gives a start on 29 February the whole of 28 February in a year without one", () => {
+    expect(checkFixedTermDuration("certain", "2024-02-29", "2026-02-28")).toMatchObject({ lastDay: "2026-02-28", exceeded: false });
+    expect(checkFixedTermDuration("certain", "2024-02-29", "2026-03-01")).toMatchObject({ exceeded: true });
+  });
+
+  it("returns nothing for invalid dates", () => {
+    expect(checkFixedTermDuration("certain", "", "2026-01-01")).toBeNull();
+    expect(checkFixedTermDuration("certain", "2026-02-30", "2026-03-01")).toBeNull();
+  });
+
+  describe("in the calculator, non-blocking", () => {
+    const fixed = (overrides: Partial<DismissalCompensationInput>) => run({ contractType: "fixedTerm", ...overrides });
+
+    it("flags a certain-term contract over 2 years and still pays 24 days a year on the whole duration", () => {
+      // 2024-01-01 to 2026-12-31 is 3 years: over the limit, which was reached on 31 December 2025.
+      const result = fixed({ startDate: "2024-01-01", endDate: "2026-12-31" });
+      expect(result.durationLimit).toEqual({ kind: "certain", rules: "from2019", maxYears: 2, lastDay: "2025-12-31", exceeded: true });
+      expect(result.regime).toBe("fixedTerm");
+      expect(result.compensationCents).toBe(3 * 24 * 10_000);
+    });
+
+    it("does not flag the same dates on an uncertain term, which may last 4 years", () => {
+      const result = fixed({ fixedTermKind: "uncertain", startDate: "2024-01-01", endDate: "2026-12-31" });
+      expect(result.durationLimit).toMatchObject({ maxYears: 4, exceeded: false });
+      expect(result.compensationCents).toBe(3 * 24 * 10_000);
+    });
+
+    it("flags an uncertain-term contract over 4 years", () => {
+      expect(fixed({ fixedTermKind: "uncertain", startDate: "2022-06-01", endDate: "2026-06-01" }).durationLimit)
+        .toMatchObject({ lastDay: "2026-05-31", exceeded: true });
+      expect(fixed({ fixedTermKind: "uncertain", startDate: "2022-06-01", endDate: "2026-05-31" }).durationLimit)
+        .toMatchObject({ exceeded: false });
+    });
+
+    it("applies the pre-2019 limits to a contract that started before 1 October 2019; ending in 2026 it has passed them too", () => {
+      expect(fixed({ fixedTermKind: "uncertain", startDate: "2019-09-30", endDate: "2026-01-31" }).durationLimit)
+        .toEqual({ kind: "uncertain", rules: "before2019", maxYears: 6, lastDay: "2025-09-29", exceeded: true });
+    });
+
+    it("has no limit for a permanent contract", () => {
+      expect(run({ contractType: "permanent", fixedTermKind: "uncertain" }).durationLimit).toBeNull();
+    });
+
+    it("does not change the amount: the kind of term only selects the limit", () => {
+      for (const [startDate, endDate] of [["2024-01-01", "2026-12-31"], ["2025-03-15", "2026-03-14"], ["2009-12-31", "2026-12-31"]]) {
+        const certain = fixed({ startDate, endDate });
+        const uncertain = fixed({ fixedTermKind: "uncertain", startDate, endDate });
+        expect({ ...uncertain, durationLimit: null }).toEqual({ ...certain, durationLimit: null });
+      }
+    });
   });
 });
 

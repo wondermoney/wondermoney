@@ -7,6 +7,7 @@ import {
   SUSTAINABILITY_FACTOR_2026_BP,
   STATE_PENSION_EXAMPLE,
   STATE_PENSION_LIMITS,
+  STATE_PENSION_SOURCES,
   computeStatePension,
   type StatePensionInput,
 } from "@/lib/calculators/statePension";
@@ -17,7 +18,7 @@ import { toLocalizedPath } from "@/lib/routes";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 
 const k = (key: string) => `tools.statePension.${key}`;
-export const SIMULATOR_URL = "https://www.seg-social.pt/reforma";
+export const SIMULATOR_URL = STATE_PENSION_SOURCES.simulator;
 
 export default function StatePensionCalculatorComp({ locale }: { locale: Lang }) {
   return (

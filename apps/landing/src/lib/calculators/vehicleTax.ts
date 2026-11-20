@@ -8,10 +8,12 @@
 
 export const IUC_TABLES = {
   taxYear: 2026,
-  reviewed: "2026-11-19",
+  reviewed: "2026-11-20",
   law: "Lei n.º 82/2023, de 29 de dezembro",
   dieselSurchargeSource:
     "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/iuc/Pages/iuc-adicional-lei82-b-2014.aspx",
+  /** Lei n.º 73-A/2025 (State Budget for 2026) in the Diário da República: art. 94 keeps the diesel surcharge. */
+  budgetSource: "https://diariodarepublica.pt/dr/detalhe/lei/73-a-2025-993270096",
   schedule2027Source:
     "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/diplomas_legislativos/Documents/decreto-lei-161-2026.pdf",
   /** Article 10(3): coefficients in hundredths, by year of first registration. */
@@ -60,10 +62,11 @@ export const IUC_TABLES = {
     { upTo: Infinity, cents: { recent: 15831, mid: 8349, old: 3609 } },
   ],
   /**
-   * Diesel "adicional de IUC" (Lei n.º 82-B/2014, art. 216, kept in force each year by the State Budget,
-   * for 2026 by art. 94 of Lei n.º 73-A/2025). Diesel only, categories A and B, never multiplied by
-   * the year coefficient. Amounts in cents, as published in tables I and II of art. 216 on the
-   * Portal das Finanças (checked on 2026-11-19).
+   * Diesel "adicional de IUC" (Lei n.º 82-B/2014, art. 216), kept in force each year by the State Budget.
+   * For 2026, art. 94 of Lei n.º 73-A/2025 ("Mantém-se em vigor o adicional de imposto único de circulação
+   * (IUC) previsto no artigo 216.º da Lei n.º 82-B/2014", read in the Diário da República on 2026-11-20) keeps
+   * it without changing the amounts. Diesel only, categories A and B, never multiplied by the year
+   * coefficient. Amounts in cents, from tables I and II of art. 216 on the Portal das Finanças (2026-11-20).
    */
   dieselSurcharge: {
     categoryA: [

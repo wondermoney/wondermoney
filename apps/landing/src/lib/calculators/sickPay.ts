@@ -11,7 +11,13 @@ export { REFERENCE_DATE, RMMG_2026_CENTS } from "./unemploymentBenefit";
 /**
  * Subsídio de doença for employees (DL 28/2004 as amended), 2026 values from the Segurança Social
  * Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026). Educational estimate.
+ * Arts. 16 and 17 checked on 2026-11-20 against the Diário da República consolidated text (art. 17 last
+ * amended by art. 9 of DL 133/2012).
  */
+export const SICK_PAY_SOURCES = {
+  guide: "https://www.seg-social.pt/ptss/pssd/documento/cmdde8gsx000qi12yzi40plc6",
+  law: "https://diariodarepublica.pt/dr/legislacao-consolidada/decreto-lei/2004-34545075",
+} as const;
 
 /** Daily floor: 30% of the minimum wage (920 EUR), i.e. 9.20 EUR a day. */
 export const MIN_DAILY_CENTS = Math.round((RMMG_2026_CENTS * 30) / 100 / 30);
@@ -19,9 +25,11 @@ export const WAITING_DAYS = 3;
 export const MAX_SICK_DAYS = 1095;
 /**
  * +5 points on the 55% and 60% bands (art. 17 DL 28/2004): when the reference pay is at or below this monthly
- * value, OR the household has 3 or more descendants (the conditions are alternatives, not cumulative). The
- * law (art. 17(4)) says the 500 euro figure is updated with the IAS, but the Segurança Social guide in force
- * (ISS 5001 v4.55, 23 October 2026) still states "igual ou inferior a 500,00" euros, so 500 is kept.
+ * value, OR the household has 3 or more descendants (the conditions are alternatives, not cumulative). Art.
+ * 17(1)(a) and (2) state 500 euros; art. 17(4) says the figure is updated with the IAS, but no act publishing an
+ * updated figure was found and the Segurança Social guide in force (ISS 5001 v4.55, 23 October 2026) still states
+ * "igual ou inferior a 500,00€", so 500 is kept. Art. 17(1)(c), descendants receiving the disability bonus of the
+ * family allowance, is a third alternative condition that the calculator does not ask about.
  */
 export const INCREASE_POINTS = 5;
 export const INCREASE_MAX_REFERENCE_MONTHLY_CENTS = 50_000;
@@ -31,9 +39,13 @@ export const INCREASE_MIN_DESCENDANTS = 3;
  * and 60% cannot be lower than the increased benefit (60% and 65%) computed on a reference pay of 500 euros a month.
  */
 export const FLOOR_REFERENCE_MONTHLY_CENTS = INCREASE_MAX_REFERENCE_MONTHLY_CENTS;
-/** The art. 17(2) floor in cents a day for a 55% or 60% band: the increased percentage applied to 500 euros a month. */
+/**
+ * The art. 17(2) floor in cents a day for a 55% or 60% band: the increased percentage applied to 500 euros a month.
+ * It follows the same rounding as the benefit itself (daily reference pay to the cent first), so a reference pay
+ * just above 500 never pays less than 500 does.
+ */
 export const floorDailyCents = (percent: number) =>
-  Math.round(((FLOOR_REFERENCE_MONTHLY_CENTS / 30) * (percent + INCREASE_POINTS)) / 100);
+  Math.round((Math.round(FLOOR_REFERENCE_MONTHLY_CENTS / 30) * (percent + INCREASE_POINTS)) / 100);
 
 export interface SickBand { fromDay: number; toDay: number; percent: number }
 export const SICK_BANDS: readonly SickBand[] = [

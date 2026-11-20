@@ -199,6 +199,31 @@ describe("pension withholding (Despacho n.º 233-A/2026, table VIII)", () => {
     expect(computePensionWithholdingCents(2_000_000)).toBe(913_088); // 53% x 20000 - 1469.12
   });
 
+  it("matches every row of table VIII as published in the Diário da República (Série II, n.º 3/2026, Suplemento)", () => {
+    // [row limit in euros, marginal rate %, parcela a abater (euros, or [factor, ceiling] for rate x factor x (ceiling - R)),
+    //  "taxa efetiva mensal de retenção no limite do escalão" in %], copied from the published annex.
+    const official: [number, number, number | [number, number], number][] = [
+      [1042, 12.5, [2.6, 1320.92], 3.8],
+      [1100, 15.7, [1.35, 1627.01], 5.5],
+      [1133, 15.7, 111.7, 5.8],
+      [1239, 21.2, 174.02, 7.2],
+      [1869, 24.1, 209.96, 12.9],
+      [2114, 31.1, 340.79, 15.0],
+      [2361, 34.9, 421.13, 17.1],
+      [3462, 43.1, 614.74, 25.3],
+      [5833, 44.6, 666.67, 33.2],
+      [18_332, 50.5, 1010.82, 45.0],
+    ];
+    for (const [limit, rate, parcela, effective] of official) {
+      const deduction = typeof parcela === "number" ? parcela : (rate / 100) * parcela[0] * (parcela[1] - limit);
+      const withheld = computePensionWithholdingCents(limit * 100);
+      expect(withheld).toBe(Math.round(limit * rate - deduction * 100)); // cents
+      expect(Math.round((withheld / (limit * 100)) * 1000) / 10).toBe(effective);
+    }
+    // Above the last limit: 53% minus 1469.12.
+    expect(computePensionWithholdingCents(1_833_201)).toBe(Math.round(18_332.01 * 53 - 146_912));
+  });
+
   it("is lower than the same amount taxed as employment income (no Social Security either)", () => {
     expect(computePensionWithholdingCents(150_000)).toBeLessThan(computeWithholdingCents(150_000, single));
   });

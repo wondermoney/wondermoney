@@ -55,6 +55,10 @@ describe("localized savings certificates tool page", () => {
   it("keeps the CTA wording in English and cites the rules date", () => {
     expect(localeCopy("en", "src").nextStepCta).toBe("Include certificates in your savings overview");
     for (const lang of SUPPORTED_LANGS) expect(localeCopy(lang, "src").guide.rulesDateValue).toMatch(/2026/);
+    for (const lang of SUPPORTED_LANGS) {
+      expect(localeCopy(lang, "src").guide.sourceIgcp).toContain("{{referenceMonth}}");
+      expect(localeCopy(lang, "src").guide.assumptionBase).not.toMatch(/AforroNet\.?$/);
+    }
   });
 
   it("has distinct titles and descriptions", () => {

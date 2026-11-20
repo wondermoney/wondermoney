@@ -122,13 +122,6 @@
       "newSubheadline": "Verbinde deine Bank per Open Banking mit reinem Lesezugriff. WonderMoney sortiert den Rest.",
       "newCta": "Kostenlos starten"
     },
-    "trustBar": {
-      "gocardless": "Betrieben von Enable Banking",
-      "openBanking": "Open Banking",
-      "gdpr": "Datenschutz zuerst",
-      "readOnly": "Nur Lesezugriff",
-      "madeIn": "Hergestellt in Portugal"
-    },
     "howItWorksSteps": {
       "title": "So funktioniert es",
       "subtitle": "Vom ersten Kontakt bis zur vollständigen Finanzübersicht.",
@@ -238,48 +231,11 @@
         "code": "Code auf GitHub"
       }
     },
-    "secondaryFeatures": {
-      "title": "Weitere Funktionen",
-      "subTitle": "Ziele, intelligente Kategorisierung und Datenschutz — alles, was WonderMoney sonst noch kann",
-      "goals": {
-        "title": "Ziele",
-        "description": "Setze Sparziele, verfolge Fortschritte und reserviere Geld für das, was zählt"
-      },
-      "categorization": {
-        "title": "Intelligente Kategorisierung",
-        "description": "WonderMoney kategorisiert deine Banktransaktionen automatisch mit KI"
-      },
-      "privacy": {
-        "title": "Datenschutz & Sicherheit",
-        "description": "Nur-Lese-Open-Banking. WonderMoney sieht deine Bankzugangsdaten nie"
-      },
-      "learnMore": "Mehr erfahren"
-    },
     "previewLabel": "Vorschau",
     "midCta": {
       "headline": "Ihre Finanzen, alle an einem Ort",
       "subheadline": "Schließen Sie sich Menschen an, die einen klareren Überblick über ihre Finanzen möchten.",
       "microcopy": "Kostenlos & Open Source"
-    },
-    "whyWondermoney": {
-      "title": "Warum WonderMoney?",
-      "subtitle": "Bewusst anders gebaut.",
-      "card1": {
-        "title": "Für Europa gebaut",
-        "description": "Anders als US-amerikanische Apps ist WonderMoney für europäische Banken, Vorschriften und den Umgang mit Geld im europäischen Alltag konzipiert."
-      },
-      "card2": {
-        "title": "Alles in einem",
-        "description": "Anders als Einzellösungen vereint WonderMoney Banking, Budgetplanung und Investitionen in einer App — damit Sie nie wieder wechseln müssen."
-      },
-      "card3": {
-        "title": "Kostenlos & Open Source",
-        "description": "WonderMoney ist kostenlos und Open Source — kein Abo. Nutze es auf wonder.money oder auf deinem eigenen Server."
-      },
-      "card4": {
-        "title": "Datenschutz zuerst",
-        "description": "Bankverbindungen nutzen Nur-Lese-Open-Banking über Enable Banking. WonderMoney kann keine Überweisungen veranlassen. Sie geben Ihre Zugangsdaten bei Ihrer Bank oder Ihrem Anbieter ein; WonderMoney sieht sie nicht."
-      }
     },
     "faq": {
       "title": "Häufig gestellte Fragen",
@@ -566,7 +522,7 @@
         "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
         "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
         "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
-        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit. Artikel 46 des Steuervergünstigungsstatuts (EBF) gewährt drei Jahre Befreiung nach Kauf oder Bau einer Wohnung mit einem VPT bis 125.000 €, wenn das Bruttoeinkommen des Haushalts im Vorjahr höchstens 153.300 € betrug; die Wohnung muss binnen sechs Monaten als Hauptwohnsitz genutzt und die Befreiung fristgerecht beantragt werden. Artikel 11-A des Código do IMI befreit zeitlich unbegrenzt die Wohnung eines Haushalts mit einem Bruttoeinkommen von höchstens dem 2,3-Fachen von 14 IAS (rund 17.300 € beim IAS 2026 von 537,13 €), dessen Immobilien zusammen einen VPT von höchstens dem 10-Fachen von 14 IAS haben (75.198,20 € beim IAS 2026). Es gelten weitere Bedingungen, und die Grenzen können sich ändern, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit. Artikel 46 des Steuervergünstigungsstatuts (EBF) gewährt {{ebfYears}} Jahre Befreiung nach Kauf oder Bau einer Wohnung mit einem VPT bis {{ebfVpt}}, wenn das Bruttoeinkommen des Haushalts im Vorjahr höchstens {{ebfIncome}} betrug. Die Gemeindeversammlung kann sie um weitere {{ebfExtraYears}} Jahre verlängern. Die Wohnung muss binnen sechs Monaten als Hauptwohnsitz genutzt werden. Beim Kauf gilt die Befreiung automatisch; nach Bau oder Umbau muss sie fristgerecht beantragt werden. Ein Haushalt kann sie nur zweimal erhalten. Artikel 11-A des Código do IMI befreit zeitlich unbegrenzt die Wohnung eines Haushalts mit einem Bruttoeinkommen von höchstens dem 2,3-Fachen von 14 IAS (rund 17.300 € beim IAS 2026 von 537,13 €), dessen Immobilien zusammen einen VPT von höchstens dem 10-Fachen von 14 IAS haben (75.198,20 € beim IAS 2026). Es gelten weitere Bedingungen, und die Grenzen können sich ändern, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
         "assumptionsTitle": "Annahmen",
         "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
         "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
@@ -574,11 +530,11 @@
         "sourcesTitle": "Quellen",
         "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
-        "sourceExemption": "Código do IMI, Artikel 11-A: Befreiung bei niedrigem Einkommen (abgerufen am 19. November 2026)",
-        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, Artikel 11-A: Befreiung bei niedrigem Einkommen (abgerufen am 20. November 2026)",
+        "reviewed": "Regeln geprüft am 20. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
         "methodMinimum": "Liegt die einzuziehende Steuer nach einer etwaigen IMI-Familiar-Ermäßigung unter 10 €, wird keine IMI festgesetzt, und der Rechner zeigt 0 € mit einem Hinweis (Artikel 113 Nr. 6 des Código do IMI).",
         "sourceMinimum": "Código do IMI, Artikel 113: Festsetzung, keine IMI unter 10 € (abgerufen am 19. November 2026)",
-        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: dreijährige Befreiung (abgerufen am 19. November 2026, Fassung des Lei 12/2022; spätere Änderungen prüfen)"
+        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung des Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
@@ -2733,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Regeln der Série F, denen der Rechner folgt",
-        "rulesIntro": "Regeln, wie der IGCP sie im Produktblatt der Série F von {{rulesDate}} veröffentlicht hat (Portaria n.º 149-A/2023). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
+        "rulesIntro": "Regeln aus dem technischen Datenblatt der Série F auf der Website des IGCP, abgerufen im {{rulesDate}} (Portaria n.º 149-A/2023, geändert durch den Despacho n.º 11797/2024 und die Despachos n.º 5392/2026 und n.º 5839/2026). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
         "ruleTerm": "Laufzeit von {{termYears}} Jahren. Du kannst ab dem ersten Zinstermin ganz oder teilweise zurückgeben; der Rechner nutzt volle Jahre Haltedauer.",
         "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins ist E3, der Durchschnitt des 3-Monats-Euribor der vorangegangenen 10 Werktage, auf drei Dezimalstellen gerundet, ohne Aufschlag. Er wird am drittletzten Werktag jedes Monats für den Folgemonat festgelegt und liegt zwischen 0 % und {{maxBase}}.",
         "ruleTax": "Zinsen fallen vierteljährlich an und werden nach IRS automatisch kapitalisiert; die IRS wird an der Quelle mit {{irsRate}} einbehalten.",
@@ -2741,9 +2697,9 @@
         "premiumTitle": "Treueprämie nach Zeichnungsjahr",
         "premiumYears": "Jahr",
         "premiumPoints": "Prozentpunkte",
-        "sourceSheet": "IGCP-Produktblatt Série F (April 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "April 2026",
+        "sourceSheet": "Technisches Datenblatt der Série F auf der Website des IGCP (abgerufen am 20. November 2026)",
+        "sourceIgcp": "IGCP: Zinssatz der Série F für Neuzeichnungen im {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "November 2026",
         "exampleTitle": "Rechenbeispiel",
         "exampleText": "Du zeichnest {{amount}} und hältst {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
         "methodTitle": "So funktioniert die Schätzung",
@@ -2751,7 +2707,7 @@
         "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
         "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
-        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Er beginnt beim für {{referenceMonth}} gemeldeten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt, die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins findest du bei AforroNet.",
+        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt, die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins findest du auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Einkommen. Deine persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
         "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
       },
@@ -3382,8 +3338,8 @@
         "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
         "sourcesTitle": "Quellen",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012, veröffentlicht von der CITE)",
-        "reviewed": "Regeln und Werte 2026 am 19. November 2026 geprüft anhand des Leitfadens der Segurança Social und des Textes von Art. 17 des Decreto-Lei 28/2004 in der Fassung des Decreto-Lei n.º 133/2012. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus diesem Text. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird; der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: das Krankheitsschutzregime (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012)",
+        "reviewed": "Regeln und Werte 2026 am 20. November 2026 geprüft anhand des Leitfadens der Segurança Social und des konsolidierten Textes des Decreto-Lei n.º 28/2004 im Diário da República. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus Art. 17. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird, doch wir haben keinen Rechtsakt gefunden, der einen angepassten Betrag veröffentlicht, und der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
         "methodFloor": "Über einem Referenzentgelt von 500 Euro im Monat darf das Tagesgeld bei 55 % und 60 % nicht unter dem erhöhten Krankengeld liegen, das auf 500 Euro berechnet wird: 60 % und 65 % von 500 geteilt durch 30, also {{floor55}} und {{floor60}} pro Tag (Art. 17 Abs. 2 des Decreto-Lei 28/2004). Das spielt nur bei einem Referenzentgelt knapp über 500 Euro eine Rolle, bis etwa 545 Euro, wenn keine Erhöhung gilt. Für die Stufen 70 % und 75 % gilt es nicht."
       },
       "nextStepHeadline": "Planen Sie die vorübergehende Einkommenslücke",
@@ -3469,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
         "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
-        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 19. November 2026). Die Fortführung für 2026 durch Artikel 94 des Gesetzes Nr. 73-A/2025 wurde hier nicht erneut geprüft.",
+        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 20. November 2026)",
         "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)"
+        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)",
+        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
@@ -3682,7 +3639,8 @@
         "seniorityPay": "Monatliche Dienstalterszulagen (diuturnidades)",
         "startDate": "Vertragsbeginn",
         "endDate": "Datum der Beendigung",
-        "contractType": "Art der Beendigung"
+        "contractType": "Art der Beendigung",
+        "fixedTermKind": "Art der Befristung"
       },
       "help": {
         "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
@@ -3690,7 +3648,8 @@
         "startDate": "Der Tag, an dem der unbefristete Vertrag begann. Bei einem Konzern oder einem früheren Vertrag mit demselben Arbeitgeber prüfe, wie deine Betriebszugehörigkeit gezählt wird.",
         "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}.",
         "contractType": "Kündigung umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung. Das Auslaufen ist das Ende eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer (Art. 344 und 345 des Código do Trabalho). Es steht dir nicht zu, wenn der Vertrag endet, weil du erklärt hast, ihn nicht verlängern zu wollen.",
-        "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zähle ab dem ersten Tag: die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet."
+        "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zähle ab dem ersten Tag: die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet.",
+        "fixedTermKind": "Sie bestimmt die Höchstdauer: 2 Jahre bei bestimmter Dauer, 4 bei unbestimmter (Art. 148). Die Abfindung ist dieselbe, 24 Tage pro Jahr."
       },
       "scope": "Umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung in einem unbefristeten Vertrag. Nicht umfasst: Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst. Für das Ende eines befristeten Vertrags wähle Auslaufen eines befristeten Vertrags.",
       "errors": {
@@ -3758,12 +3717,15 @@
         "unsupportedPublic": "Beschäftigte im öffentlichen Dienst, für die andere Regeln gelten.",
         "sourcesTitle": "Quellen",
         "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelungen der Art. 5 und 6",
-        "sourceCode": "Código do Trabalho, konsolidierter Text (Diário da República): Art. 148, 344, 345 und 366",
+        "sourceCode": "Código do Trabalho, konsolidierter Text (Diário da República): Art. 147, 148, 149, 344, 345 und 366",
         "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
-        "reviewed": "Regeln am 20. November 2026 anhand des Diário da República geprüft: konsolidierter Código do Trabalho (Art. 148, 344, 345 und 366), Lei n.º 13/2023 (Art. 35) und Lei n.º 69/2013 (Art. 5 und 6), mit dem Mindestlohn 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage zählen nur für die Betriebszugehörigkeit ab dem 1. Mai 2023, wie Art. 35 Abs. 2 der Lei n.º 13/2023 vorsieht. Die 24 Tage beim Auslaufen eines befristeten Vertrags zählen für den ganzen Vertrag: So liest die IGeFE-Note Art. 35 Abs. 1, und ein Gericht könnte das bei vor dem 1. Mai 2023 geschlossenen Verträgen anders sehen. Lehrzwecke, keine Rechtsberatung.",
-        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
+        "reviewed": "Regeln am 20. November 2026 anhand des Diário da República geprüft: konsolidierter Código do Trabalho (Art. 147, 148, 149, 344, 345 und 366), Lei n.º 93/2019 (Art. 11 und 13), Lei n.º 13/2023 (Art. 35) und Lei n.º 69/2013 (Art. 5 und 6), mit dem Mindestlohn 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage zählen nur für die Betriebszugehörigkeit ab dem 1. Mai 2023, wie Art. 35 Abs. 2 der Lei n.º 13/2023 vorsieht. Die 24 Tage beim Auslaufen eines befristeten Vertrags zählen für den ganzen Vertrag: So liest die IGeFE-Note Art. 35 Abs. 1, und ein Gericht könnte das bei vor dem 1. Mai 2023 geschlossenen Verträgen anders sehen. Lehrzwecke, keine Rechtsberatung.",
+        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der diese Grenze einhält und 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
         "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April (Diário da República): neue Fassung von Art. 344 Abs. 2, 345 Abs. 4 und 366 Abs. 1 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum",
+        "methodDurationLimit": "Höchstdauer (Art. 148 des Código do Trabalho in der Fassung der Lei n.º 93/2019): 2 Jahre bei bestimmter Dauer, Verlängerungen eingeschlossen, und 4 Jahre bei unbestimmter Dauer. Ein Vertrag mit bestimmter Dauer kann bis zu dreimal verlängert werden, und die Verlängerungen zusammen dürfen nicht länger dauern als die erste Laufzeit (Art. 149 Abs. 4). Auf die 2 Jahre werden auch frühere befristete Verträge und Leiharbeit auf demselben Arbeitsplatz sowie Dienstverträge für dieselbe Aufgabe beim selben Arbeitgeber angerechnet (Art. 148 Abs. 6). Für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): 3 Jahre bei bestimmter Dauer (18 Monate bei der Suche nach der ersten Stelle und 2 Jahre in den übrigen Fällen von Art. 140 Abs. 4) und 6 Jahre bei unbestimmter Dauer; der Rechner nimmt das Anfangsdatum als Datum des Vertragsschlusses. Überschreiten die Daten die Grenze, weist der Rechner darauf hin, dass der Vertrag wahrscheinlich unbefristet wäre (Art. 147 Abs. 2 Buchst. b) und seine Beendigung eine Kündigung wäre, zeigt aber weiter den Betrag für das Auslaufen. Verlängerungen und frühere Verträge sieht er nicht, prüfe sie also selbst.",
+        "sourceLaw93": "Lei n.º 93/2019 vom 4. September (Diário da República): Neufassung von Art. 148 und 149 des Código do Trabalho, zeitliche Anwendung (Art. 11 Abs. 4) und Inkrafttreten am 1. Oktober 2019 (Art. 13)",
+        "sourceArt148": "Código do Trabalho, Art. 148 (Diário da República), mit der ursprünglichen Fassung von 2009: die Grenzen für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden"
       },
       "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
       "nextStepDescription": "WonderMoney zeigt deine Konten und monatlichen Ausgaben zusammen, damit du eine Abfindung auf die kommenden Monate verteilen kannst.",
@@ -3772,7 +3734,24 @@
         "permanent": "Kündigung in einem unbefristeten Vertrag",
         "fixedTerm": "Auslaufen eines befristeten Vertrags"
       },
-      "scopeFixedTerm": "Umfasst das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr {{year}}: 24 Tage Grundgehalt und diuturnidades pro Jahr der gesamten Vertragsdauer, mit dem Tagessatz und den Obergrenzen von Art. 366. Nicht umfasst: Verträge, die vor dem 1. Mai 2023 ausgelaufen sind, vorzeitige Beendigung, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst."
+      "scopeFixedTerm": "Umfasst das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr {{year}}: 24 Tage Grundgehalt und diuturnidades pro Jahr der gesamten Vertragsdauer, mit dem Tagessatz und den Obergrenzen von Art. 366. Nicht umfasst: Verträge, die vor dem 1. Mai 2023 ausgelaufen sind, vorzeitige Beendigung, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst.",
+      "fixedTermKinds": {
+        "certain": "Bestimmte Dauer (vereinbartes Enddatum)",
+        "uncertain": "Unbestimmte Dauer (endet mit ihrem Grund)"
+      },
+      "durationWarning": {
+        "title": "Dieser Vertrag könnte als unbefristet gelten",
+        "from2019": {
+          "certain": "Ein befristeter Vertrag mit bestimmter Dauer läuft höchstens 2 Jahre, Verlängerungen eingeschlossen (Art. 148 Abs. 1 des Código do Trabalho in der Fassung der Lei n.º 93/2019). Mit diesen Daten war die Grenze am {{date}} erreicht.",
+          "uncertain": "Ein befristeter Vertrag mit unbestimmter Dauer läuft höchstens 4 Jahre (Art. 148 Abs. 5 des Código do Trabalho in der Fassung der Lei n.º 93/2019). Mit diesen Daten war die Grenze am {{date}} erreicht."
+        },
+        "before2019": {
+          "certain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 3 Jahre mit bestimmter Dauer, Verlängerungen eingeschlossen, in manchen Fällen weniger (ursprüngliche Fassung von Art. 148 Abs. 1). Mit diesen Daten war die Grenze am {{date}} erreicht.",
+          "uncertain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 6 Jahre mit unbestimmter Dauer (ursprüngliche Fassung von Art. 148 Abs. 4). Mit diesen Daten war die Grenze am {{date}} erreicht."
+        },
+        "consequence": "Ein Vertrag, der seine Höchstdauer überschreitet, wird zu einem unbefristeten Vertrag (Art. 147 Abs. 2 Buchst. b), und die Betriebszugehörigkeit zählt ab dem ersten Tag (Art. 147 Abs. 3). Ihn zu beenden ist dann eine Kündigung, kein Auslaufen, mit anderen Abfindungsregeln; beendet der Arbeitgeber ihn nur unter Berufung auf das Fristende, kann das eine rechtswidrige Kündigung sein. Der angezeigte Betrag bleibt die Abfindung für das Auslaufen.",
+        "action": "Als Kündigung in einem unbefristeten Vertrag berechnen"
+      }
     },
     "statePension": {
       "title": "Rentenrechner Portugal 2026",
@@ -3850,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: Regelalter für 2027 und Nachhaltigkeitsfaktor für 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: Rentenanpassung 2026 und Mindestrenten",
         "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
-        "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde anhand des Despacho n.º 233-A/2026 (Regeln und Tabellenzuordnung) und einer Abschrift seines Anhangs geprüft, deren Zeilen zur offiziellen Spalte des effektiven Satzes passen."
+        "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde am 20. November 2026 Zeile für Zeile anhand des im Diário da República veröffentlichten Anhangs des Despacho n.º 233-A/2026 geprüft.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII"
       }
     },
     "sp500History": {

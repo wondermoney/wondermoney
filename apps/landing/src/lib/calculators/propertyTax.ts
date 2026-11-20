@@ -14,6 +14,26 @@ export const MINIMUM_COLLECTED = 10;
 export const SINGLE_PAYMENT_MAX = 100;
 export const TWO_PAYMENTS_MAX = 500;
 
+/**
+ * EBF art. 46, the own-home exemption the page describes (the calculator applies no exemption). Wording of
+ * Lei n.º 56/2023 (n.º 5: three years, extendable by two by municipal assembly decision) and Lei n.º 82/2023,
+ * in force since 1 January 2024; Lei n.º 73-A/2025 amends only EBF arts. 19-B and 36-A. Checked on 2026-11-20
+ * against the Portal das Finanças page below and the Diário da República consolidated EBF.
+ */
+export const EBF_46 = {
+  /** N.º 5: VPT ceiling in euros. */
+  vptMax: 125_000,
+  /** N.º 1: household gross income in the previous year, in euros. */
+  incomeMax: 153_300,
+  /** N.º 5: exemption period in years, and the extension a municipal assembly can grant. */
+  years: 3,
+  extensionYears: 2,
+  /** N.º 11: times the exemption can be granted to the same taxpayer or household. */
+  maxGrants: 2,
+  source:
+    "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/bf_rep/Pages/ebf-artigo-46-ordm-.aspx",
+} as const;
+
 export type PropertyKind = "urban" | "rustic";
 export type Dependants = keyof typeof FAMILY_DEDUCTIONS;
 export type PropertyTaxField = "vpt" | "rate" | "dependants";

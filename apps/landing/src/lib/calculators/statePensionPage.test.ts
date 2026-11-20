@@ -55,6 +55,7 @@ describe("localized state pension tool page", () => {
     }
     expect(guide.sourceAges).toContain("476/2025/1");
     expect(guide.sourceMinimum).toContain("480-B/2025/1");
+    expect(guide.sourceWithholding).toContain("233-A/2026");
     expect(guide.unsupportedMixed).toContain("2002");
   });
 

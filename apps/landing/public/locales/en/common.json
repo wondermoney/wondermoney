@@ -122,13 +122,6 @@
       "newSubheadline": "Connect your bank with read-only Open Banking. WonderMoney sorts the rest.",
       "newCta": "Start free"
     },
-    "trustBar": {
-      "gocardless": "Powered by Enable Banking",
-      "openBanking": "Open Banking",
-      "gdpr": "Privacy first",
-      "readOnly": "Read-only Access",
-      "madeIn": "Made in Portugal"
-    },
     "howItWorksSteps": {
       "title": "How it works",
       "subtitle": "From first connection to a complete financial picture.",
@@ -238,48 +231,11 @@
         "code": "Code on GitHub"
       }
     },
-    "secondaryFeatures": {
-      "title": "More features",
-      "subTitle": "Goals, smart categorization, and privacy — everything else WonderMoney does",
-      "goals": {
-        "title": "Goals",
-        "description": "Set savings targets, track progress, and reserve money for what matters"
-      },
-      "categorization": {
-        "title": "Smart categorization",
-        "description": "WonderMoney automatically categorises your bank transactions using AI"
-      },
-      "privacy": {
-        "title": "Privacy & security",
-        "description": "Read-only Open Banking. WonderMoney never sees your bank credentials"
-      },
-      "learnMore": "Learn more"
-    },
     "previewLabel": "Preview",
     "midCta": {
       "headline": "Your Finances, All in One Place",
       "subheadline": "Join people who want a clearer view of their finances.",
       "microcopy": "Free & open source"
-    },
-    "whyWondermoney": {
-      "title": "Why WonderMoney?",
-      "subtitle": "Built different, on purpose.",
-      "card1": {
-        "title": "Built for Europe",
-        "description": "Unlike US-focused apps, WonderMoney is designed for European banks, regulations, and the way you actually manage money."
-      },
-      "card2": {
-        "title": "All-in-One",
-        "description": "Unlike single-purpose tools, WonderMoney combines banking, budgeting, and investing in one app - so you never need to switch."
-      },
-      "card3": {
-        "title": "Free & Open Source",
-        "description": "WonderMoney is free and open source — no subscription. Use it at wonder.money or run your own."
-      },
-      "card4": {
-        "title": "Privacy First",
-        "description": "Bank connections use read-only Open Banking through Enable Banking. WonderMoney cannot initiate transfers. You enter your credentials with your bank or provider, and WonderMoney does not see them."
-      }
     },
     "faq": {
       "title": "Frequently asked questions",
@@ -566,7 +522,7 @@
         "methodPayment": "The bill is paid in one instalment in May up to €100, in two in May and November from €100 up to €500, and in three in May, August and November above €500. Instalments are equal; any cent of rounding goes to the last one.",
         "methodBudget": "The monthly provision divides the annual bill by 12, so the money is ready when each instalment is due.",
         "exemptionTitle": "Exemption for your own permanent home",
-        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives three years of exemption after buying or building a home with a VPT up to €125,000, if the household's gross income in the previous year was at most €153,300; you must use the home as your permanent residence within six months and claim the exemption within the deadline. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
+        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives {{ebfYears}} years of exemption after buying or building a home with a VPT up to {{ebfVpt}}, if the household's gross income in the previous year was at most {{ebfIncome}}. The municipal assembly can extend it by another {{ebfExtraYears}} years. You must make the home your permanent residence within six months. On a purchase the exemption is automatic; after building or improving a home you must claim it within the deadline. A household can get it only twice. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
         "assumptionsTitle": "Assumptions",
         "assumptionRate": "The municipal rate is yours to enter. This page does not hold a table of municipal rates, and municipalities can also raise or lower the rate in specific cases, for example for vacant or dilapidated buildings, which the calculator ignores.",
         "assumptionScope": "The estimate covers a single property taxed under the ordinary rules. It excludes additional IMI (AIMI), the temporary exemptions and any other municipal deduction.",
@@ -574,11 +530,11 @@
         "sourcesTitle": "Sources",
         "sourceRates": "Código do IMI, article 112: rates (consulted 19 November 2026)",
         "sourcePayment": "Código do IMI, article 120: payment in instalments (consulted 19 November 2026)",
-        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 19 November 2026)",
-        "reviewed": "Rules reviewed on 19 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 20 November 2026)",
+        "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: three-year exemption (consulted 19 November 2026, wording of Lei 12/2022; check for later amendments)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
@@ -2733,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Série F rules this calculator follows",
-        "rulesIntro": "Rules as published by IGCP in the Série F product sheet of {{rulesDate}} (Portaria n.º 149-A/2023). Rules can change, and the issuer’s current terms are the ones that count.",
+        "rulesIntro": "Rules from the Série F ficha técnica on the IGCP website, read in {{rulesDate}} (Portaria n.º 149-A/2023, amended by Despacho n.º 11797/2024 and Despachos n.º 5392/2026 and n.º 5839/2026). Rules can change, and the issuer’s current terms are the ones that count.",
         "ruleTerm": "Term of {{termYears}} years. You can redeem, in whole or in part, from the first interest date; the calculator uses whole years held.",
         "ruleRate": "Each quarter earns the base rate at the start of that quarter plus the permanence bonus for the subscription year. The base rate is E3, the average of the 3-month Euribor over the previous 10 business days, rounded to three decimals, with no margin added. It is set on the third-to-last business day of each month for the following month, and limited to between 0% and {{maxBase}}.",
         "ruleTax": "Interest is paid quarterly and capitalised automatically after IRS, withheld at source at {{irsRate}}.",
@@ -2741,9 +2697,9 @@
         "premiumTitle": "Permanence bonus by subscription year",
         "premiumYears": "Year",
         "premiumPoints": "Percentage points",
-        "sourceSheet": "IGCP Série F product sheet (April 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "April 2026",
+        "sourceSheet": "Série F ficha técnica on the IGCP website (read on 20 November 2026)",
+        "sourceIgcp": "IGCP: Série F interest rate for new subscriptions in {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "November 2026",
         "exampleTitle": "Worked example",
         "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
         "methodTitle": "How the estimate works",
@@ -2751,7 +2707,7 @@
         "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
         "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
-        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate reported for {{referenceMonth}} ({{referenceRate}}, the ceiling), which the IGCP sets again every month, so actual interest will differ. Check the current rate on AforroNet.",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRate}}, the ceiling), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
         "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
       },
@@ -3382,8 +3338,8 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, as published by CITE)",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004 in the wording of Decreto-Lei n.º 133/2012. The three alternative conditions for the 5-point increase and the floor above 500 euros come from that text. Art. 17(4) says the 500 euro figure is updated with the IAS; the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012)",
+        "reviewed": "Rules and 2026 values reviewed on 20 November 2026 against the Segurança Social guide and the consolidated text of Decreto-Lei n.º 28/2004 in the Diário da República. The three alternative conditions for the 5-point increase and the floor above 500 euros come from art. 17. Art. 17(4) says the 500 euro figure is updated with the IAS, but we found no act that publishes an updated figure, and the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
         "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },
       "nextStepHeadline": "Plan for the temporary income gap",
@@ -3469,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
         "sourceCategoryB": "Código do IUC, article 10: category B rates, additional rates and coefficients (consulted 19 November 2026)",
         "sourcePayment": "Código do IUC, article 17: payment (consulted 19 November 2026)",
-        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 19 November 2026). Its continuation for 2026 by article 94 of Lei n.º 73-A/2025 is not re-checked here.",
+        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
@@ -3682,7 +3639,8 @@
         "seniorityPay": "Monthly seniority supplements (diuturnidades)",
         "startDate": "Contract start date",
         "endDate": "Termination date",
-        "contractType": "Type of termination"
+        "contractType": "Type of termination",
+        "fixedTermKind": "Kind of term"
       },
       "help": {
         "baseMonthly": "The base pay (retribuição base) in euros a month, before Social Security and IRS. Do not include allowances, bonuses or overtime.",
@@ -3690,7 +3648,8 @@
         "startDate": "The day the permanent contract began. For a company group or a previous contract with the same employer, check how your seniority is counted.",
         "endDate": "The last day of the contract. It counts as a day worked. This estimate covers terminations in {{year}}.",
         "contractType": "Dismissal covers a collective dismissal, extinction of the post or unsuitability. Expiry is the end of a fixed-term contract, of certain or uncertain term (arts. 344 and 345 of the Código do Trabalho). It is not due when the contract ends because you declared you would not renew it.",
-        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year."
+        "startDateFixedTerm": "The day the fixed-term contract began. If it was renewed, count from the first day: the whole duration, renewals included, is paid at 24 days a year.",
+        "fixedTermKind": "It sets the maximum duration: 2 years with a certain term, 4 with an uncertain term (art. 148). The compensation is the same, 24 days a year."
       },
       "scope": "Covers collective dismissal, extinction of the post and unsuitability on a permanent contract. Not covered: dismissal with just cause, unlawful dismissal, mutual agreement and the public sector. For the end of a fixed-term contract, choose expiry of a fixed-term contract.",
       "errors": {
@@ -3758,12 +3717,15 @@
         "unsupportedPublic": "Public-sector workers, who follow different rules.",
         "sourcesTitle": "Sources",
         "sourceLaw69": "Lei n.º 69/2013, of 30 August (Diário da República): new wording of art. 366 and the transitional regimes of arts. 5 and 6",
-        "sourceCode": "Código do Trabalho, consolidated text (Diário da República): arts. 148, 344, 345 and 366",
+        "sourceCode": "Código do Trabalho, consolidated text (Diário da República): arts. 147, 148, 149, 344, 345 and 366",
         "sourceDgert": "DGERT: compensation for collective dismissal (art. 366)",
-        "reviewed": "Rules reviewed on 20 November 2026 against the Diário da República: the consolidated Código do Trabalho (arts. 148, 344, 345 and 366), Lei n.º 13/2023 (art. 35) and Lei n.º 69/2013 (arts. 5 and 6), with the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days count only for seniority from 1 May 2023, as art. 35(2) of Lei n.º 13/2023 sets. The 24 days of a fixed-term expiry count for the whole contract: that reading of art. 35(1) is the one in the IGeFE note, and a court could read it differently for contracts signed before 1 May 2023. Educational, not legal advice.",
-        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and its art. 35(2) limits only the 14 days of art. 366(1) to the time from that date. The IGeFE note of 5 July 2023 reads this as 24 days for every contract that expires from 1 May 2023: its example of a contract from 1 September 2021 to 31 August 2023 counts all 730 days at 24 days. So the whole duration counts at 24 days, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply. A fixed-term contract lasts at most two years, or four with an uncertain term (art. 148), so one that expires in 2026 was not signed before 1 October 2013 and the transitional rules of art. 6 of Lei n.º 69/2013 do not apply.",
+        "reviewed": "Rules reviewed on 20 November 2026 against the Diário da República: the consolidated Código do Trabalho (arts. 147, 148, 149, 344, 345 and 366), Lei n.º 93/2019 (arts. 11 and 13), Lei n.º 13/2023 (art. 35) and Lei n.º 69/2013 (arts. 5 and 6), with the 2026 minimum wage of 920 euros (Decreto-Lei n.º 139/2025). The 14 days count only for seniority from 1 May 2023, as art. 35(2) of Lei n.º 13/2023 sets. The 24 days of a fixed-term expiry count for the whole contract: that reading of art. 35(1) is the one in the IGeFE note, and a court could read it differently for contracts signed before 1 May 2023. Educational, not legal advice.",
+        "methodFixedTerm": "Expiry of a fixed-term contract (arts. 344(2) and 345(4) of the Código do Trabalho, as amended by Lei n.º 13/2023): 24 days of base pay and diuturnidades per full year of seniority, calculated as in art. 366. The daily amount, the 20 times minimum wage cap on the monthly amount, the cap of 12 monthly amounts and the proportional fraction of a year all apply. Art. 35(1) of Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text, and its art. 35(2) limits only the 14 days of art. 366(1) to the time from that date. The IGeFE note of 5 July 2023 reads this as 24 days for every contract that expires from 1 May 2023: its example of a contract from 1 September 2021 to 31 August 2023 counts all 730 days at 24 days. So the whole duration counts at 24 days, and the rates of permanent contracts (12, 14, 18 and 20 days) do not apply. A fixed-term contract lasts at most two years, or four with an uncertain term (art. 148), so one that keeps to those limits and expires in 2026 was not signed before 1 October 2013 and the transitional rules of art. 6 of Lei n.º 69/2013 do not apply.",
         "sourceLaw13Text": "Lei n.º 13/2023, of 3 April (Diário da República): new wording of arts. 344(2), 345(4) and 366(1) of the Código do Trabalho and art. 35 on its application in time",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 July 2023): 24 days for every fixed-term contract that expires from 1 May 2023, whatever its signing date",
+        "methodDurationLimit": "Maximum duration (art. 148 of the Código do Trabalho, as amended by Lei n.º 93/2019): 2 years with a certain term, renewals included, and 4 years with an uncertain term. A certain-term contract can be renewed up to three times, and the renewals together cannot last longer than the first period (art. 149(4)). Earlier fixed-term contracts and temporary agency work in the same job, and service contracts for the same work, with the same employer also count towards the 2 years (art. 148(6)). Contracts signed before 1 October 2019 keep the earlier limits (art. 11(4) of Lei n.º 93/2019): 3 years with a certain term (18 months for a first job seeker and 2 years in the other cases of art. 140(4)) and 6 years with an uncertain term; the calculator takes the start date as the signing date. When the dates pass the limit, the calculator warns that the contract would likely be open-ended (art. 147(2)(b)) and that ending it would be a dismissal, but still shows the expiry figure. It cannot see renewals or earlier contracts, so check those yourself.",
+        "sourceLaw93": "Lei n.º 93/2019, of 4 September (Diário da República): new wording of arts. 148 and 149 of the Código do Trabalho, its application in time (art. 11(4)) and entry into force on 1 October 2019 (art. 13)",
+        "sourceArt148": "Código do Trabalho, art. 148 (Diário da República), with its initial 2009 wording: the limits for contracts signed before 1 October 2019"
       },
       "nextStepHeadline": "Plan the payout before it arrives",
       "nextStepDescription": "WonderMoney shows your accounts and monthly spending together, so you can spread a severance payment over the months ahead.",
@@ -3772,7 +3734,24 @@
         "permanent": "Dismissal on a permanent contract",
         "fixedTerm": "Expiry of a fixed-term contract"
       },
-      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector."
+      "scopeFixedTerm": "Covers the expiry of a fixed-term contract, of certain or uncertain term, with termination in {{year}}: 24 days of base pay and diuturnidades per year of the whole contract, with the daily amount and the caps of art. 366. Not covered: contracts that expired before 1 May 2023, early termination, dismissal with just cause, unlawful dismissal, mutual agreement and the public sector.",
+      "fixedTermKinds": {
+        "certain": "Certain term (an agreed end date)",
+        "uncertain": "Uncertain term (ends when its reason ends)"
+      },
+      "durationWarning": {
+        "title": "This contract may count as open-ended",
+        "from2019": {
+          "certain": "A fixed-term contract with a certain term lasts at most 2 years, renewals included (art. 148(1) of the Código do Trabalho, as amended by Lei n.º 93/2019). With these dates, the limit was reached on {{date}}.",
+          "uncertain": "A fixed-term contract with an uncertain term lasts at most 4 years (art. 148(5) of the Código do Trabalho, as amended by Lei n.º 93/2019). With these dates, the limit was reached on {{date}}."
+        },
+        "before2019": {
+          "certain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 3 years with a certain term, renewals included, and less in some cases (initial wording of art. 148(1)). With these dates, the limit was reached on {{date}}.",
+          "uncertain": "A fixed-term contract signed before 1 October 2019 keeps the earlier limits (art. 11(4) of Lei n.º 93/2019): at most 6 years with an uncertain term (initial wording of art. 148(4)). With these dates, the limit was reached on {{date}}."
+        },
+        "consequence": "A contract that passes its maximum duration converts into an open-ended contract (art. 147(2)(b)), with seniority counted from the first day (art. 147(3)). Ending it is then a dismissal, not an expiry, with different compensation rules; an employer that ends it only by letting the term run out may be dismissing unlawfully. The figure here is still the expiry compensation.",
+        "action": "Calculate as a dismissal on a permanent contract"
+      }
     },
     "statePension": {
       "title": "Portugal state pension estimate 2026",
@@ -3850,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked against Despacho n.º 233-A/2026 (rules and table assignment) and a transcription of its annex whose rows match the official effective-rate column."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked row by row on 20 November 2026 against the annex of Despacho n.º 233-A/2026 as published in the Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII"
       }
     },
     "sp500History": {
