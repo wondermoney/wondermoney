@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildOutline, portableTextToPlain, readingMinutes, sectionNumber } from "./articleOutline";
+import { buildOutline, htmlToPlain, readingMinutes, sectionNumber } from "./articleOutline";
 
 describe("readingMinutes", () => {
   it("rounds to whole minutes at 220 words a minute, never under one", () => {
@@ -14,14 +14,18 @@ describe("readingMinutes", () => {
   });
 });
 
-describe("portableTextToPlain", () => {
-  it("joins the span text of each block", () => {
-    const blocks = [
-      { _type: "block", children: [{ _type: "span", text: "One two" }, { _type: "span", text: " three" }] },
-      { _type: "image" },
-      { _type: "block", children: [{ _type: "span", text: "four" }] },
-    ];
-    expect(portableTextToPlain(blocks)).toBe("One two three\nfour");
+describe("htmlToPlain", () => {
+  it("keeps the text of each block on its own line", () => {
+    const html = '<p>One <strong>two</strong> three</p>\n<ul>\n<li>four</li>\n<li><a href="/pt/learn">five</a></li>\n</ul>';
+    expect(htmlToPlain(html)).toBe("One two three\nfour\nfive");
+  });
+
+  it("decodes the entities the Markdown renderer writes", () => {
+    expect(htmlToPlain("<p>Juros &#x26; capital &lt;5% &quot;já&quot; &#233;</p>")).toBe('Juros & capital <5% "já" é');
+  });
+
+  it("is empty for an empty body", () => {
+    expect(htmlToPlain("")).toBe("");
   });
 });
 

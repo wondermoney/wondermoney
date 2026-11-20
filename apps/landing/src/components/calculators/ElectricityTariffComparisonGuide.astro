@@ -1,0 +1,178 @@
+---
+// Prerendered guide for the electricity tariff comparator: how to use the three ways in, a worked
+// example computed at build time from the same ERSE snapshot and engine the page runs, the method,
+// the sources with the export date (and PVGIS for the solar production), what the totals leave
+// out, and the tools to go on with. The offers module is imported dynamically, as everywhere else,
+// so no client bundle carries it.
+import ToolGuide from "./ToolGuide.astro";
+import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
+import { SOLAR_PRODUCTION_SOURCE } from "@/lib/calculators/data/solarProduction/index";
+import {
+  DEFAULT_OFFER_FILTERS,
+  MONTH_DAYS,
+  formatIsoDate,
+  regulatedMonthlyBill,
+  runComparator,
+  splitTotal,
+} from "@/lib/calculators/electricityTariffComparator";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import { toLocalizedPath, type Lang } from "@/lib/routes";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+}
+
+const { locale } = Astro.props;
+const t = getTranslations(locale);
+const k = (key: string) => `tools.electricityTariffComparison.guide.${key}`;
+
+const { ELECTRICITY_OFFERS, ELECTRICITY_OFFERS_SOURCE } = await import("@/lib/calculators/data/electricityOffers");
+
+// The worked example: 3,45 kVA, 200 kWh a month on the simple option, ERSE's default filters.
+const EXAMPLE_KWH = 200;
+const outcome = runComparator({
+  offers: ELECTRICITY_OFFERS,
+  consumption: splitTotal(EXAMPLE_KWH, MONTH_DAYS, 3.45),
+  contractedPower: 3.45,
+  cycle: "daily",
+  option: "simple",
+  socialTariff: false,
+  largeFamily: false,
+  newClient: false,
+  includeRefunds: true,
+  includeConditioned: true,
+  includeDual: false,
+  cheapestPerSupplier: false,
+  sortBy: "firstYear",
+  filters: DEFAULT_OFFER_FILTERS,
+  myTariff: null,
+});
+if (!outcome.ok) throw new Error("The electricity tariff worked example has invalid inputs");
+const { results } = outcome.view;
+const regulated = results.find((result) => result.offer.regulated);
+if (!regulated) throw new Error("The ERSE snapshot has no regulated tariff at 3,45 kVA");
+const cheapest = results[0];
+const cheaperThanRegulated = results.filter((result) => result.firstYear.total < regulated.firstYear.total).length;
+const turOffer = ELECTRICITY_OFFERS.find((offer) => offer.regulated)!;
+const exampleBill = regulatedMonthlyBill(turOffer, EXAMPLE_KWH, {
+  contractedPower: 3.45,
+  option: "simple",
+  cycle: "daily",
+  socialTariff: false,
+  largeFamily: false,
+}) as number;
+
+const euro = (value: number) => formatMoney(locale, value, { decimals: 2 });
+const values = {
+  kwh: `${formatNumber(locale, EXAMPLE_KWH, 0)} kWh`,
+  bill: euro(exampleBill),
+  regulated: euro(regulated.firstYear.total),
+  cheapest: euro(cheapest.firstYear.total),
+  difference: euro(regulated.firstYear.total - cheapest.firstYear.total),
+  count: formatNumber(locale, results.length, 0),
+  cheaper: formatNumber(locale, cheaperThanRegulated, 0),
+  date: formatIsoDate(locale, ELECTRICITY_OFFERS_SOURCE.exportedOn),
+  offers: formatNumber(locale, ELECTRICITY_OFFERS_SOURCE.offerCount, 0),
+  suppliers: formatNumber(locale, ELECTRICITY_OFFERS_SOURCE.supplierCount - 1, 0),
+  days: formatNumber(locale, MONTH_DAYS, 2),
+  allowance: String(ERSE_TARIFFS.vat.reducedKwhPer30Days),
+  allowanceLarge: String(ERSE_TARIFFS.vat.reducedKwhPer30DaysLargeFamily),
+  reduced: formatPercent(locale, ERSE_TARIFFS.vat.reduced * 100, { decimals: 0 }),
+  standard: formatPercent(locale, ERSE_TARIFFS.vat.standard * 100, { decimals: 0 }),
+  pvgisVersion: SOLAR_PRODUCTION_SOURCE.version,
+  pvgisDatabase: SOLAR_PRODUCTION_SOURCE.radiationDb,
+  pvgisFrom: String(SOLAR_PRODUCTION_SOURCE.yearMin),
+  pvgisTo: String(SOLAR_PRODUCTION_SOURCE.yearMax),
+  pvgisDate: formatIsoDate(locale, SOLAR_PRODUCTION_SOURCE.downloadedOn),
+};
+
+const list = (key: string) => Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
+const steps = list("method.steps");
+const limits = list("limits.items");
+
+const related = [
+  { key: "electricityIndex", href: toLocalizedPath("toolElectricityIndex", locale) },
+  { key: "householdBudget", href: toLocalizedPath("toolHouseholdBudget", locale) },
+] as const;
+
+const { charges, simulator } = ERSE_TARIFFS.sources;
+const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+---
+
+<ToolGuide>
+  <section aria-labelledby="tariff-guide-use">
+    <h2 id="tariff-guide-use" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("use.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("use.quick"))}</p>
+      <p>{t(k("use.full"))}</p>
+      <p>{t(k("use.diagram"))}</p>
+      <p>{t(k("use.mine"))}</p>
+      <p>{t(k("use.solar"))}</p>
+      <p>{t(k("use.options"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="tariff-guide-example">
+    <h2 id="tariff-guide-example" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("example.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("example.setup"), values)}</p>
+      <p>{t(k("example.result"), values)}</p>
+      <p>{t(k("example.bill"), values)}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="tariff-guide-method">
+    <h2 id="tariff-guide-method" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("method.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("method.intro"))}</p>
+      <ol class="list-decimal space-y-2 pl-5">
+        {steps.map((item) => <li>{item}</li>)}
+      </ol>
+      <p>{t(k("method.vat"), values)}</p>
+      <p>{t(k("method.month"), values)}</p>
+      <p>{t(k("method.split"))}</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="tariff-guide-data">
+    <h2 id="tariff-guide-data" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("data.title"))}</h2>
+    <div class="mt-3 space-y-4 leading-7">
+      <p>{t(k("data.erse"), values)}</p>
+      <p>{t(k("data.refresh"))}</p>
+      <p>{t(k("data.names"))}</p>
+      <p>{t(k("data.solar"), values)}</p>
+      <ul class="space-y-1">
+        <li><a href={ELECTRICITY_OFFERS_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.simulatorLink"))}</a></li>
+        <li><a href={charges.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.manualLink"))}</a></li>
+        <li><a href={SOLAR_PRODUCTION_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.pvgisLink"))}</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="tariff-guide-limits">
+    <h2 id="tariff-guide-limits" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("limits.title"))}</h2>
+    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+      {limits.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="mt-4 leading-7">
+      <a href={simulator.url} class={linkClass} rel="noopener" target="_blank">{t(k("limits.simulatorLink"))}</a>
+    </p>
+  </section>
+
+  <section aria-labelledby="tariff-guide-related">
+    <h2 id="tariff-guide-related" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("related.title"))}</h2>
+    <ul class="mt-3 space-y-3 leading-7">
+      {
+        related.map((item) => (
+          <li>
+            <a href={item.href} class={linkClass}>
+              {t(k(`related.${item.key}Link`))}
+            </a>
+            <p>{t(k(`related.${item.key}Body`))}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</ToolGuide>

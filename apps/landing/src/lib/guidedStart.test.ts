@@ -1,11 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { getGuidedDestination, scoreLiteracyQuiz } from "./guidedStart";
 import { getToolStaticPaths, getTopLevelPageStaticPaths } from "./pageStaticPaths";
 import { SUPPORTED_LANGS, toLocalizedPath } from "./routes";
 import { isSitemapPage } from "./sitemap";
-
-// Only content routes use the Sanity client imported by pageStaticPaths.
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
 
 describe("guided start routing", () => {
   const scenarios = [

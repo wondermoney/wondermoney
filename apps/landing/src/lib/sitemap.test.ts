@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { getLegacyRedirects } from "./legacySlugs"
 import {
 	getAdLandingStaticPaths,
@@ -8,9 +8,6 @@ import {
 } from "./pageStaticPaths"
 import { SUPPORTED_LANGS, type Lang } from "./routes"
 import { isSitemapPage } from "./sitemap"
-
-// pageStaticPaths imports the Sanity client for the content routes; these paths never call it.
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
 const SITE = "https://wonder.money"
 

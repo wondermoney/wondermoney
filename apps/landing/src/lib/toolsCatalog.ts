@@ -121,6 +121,12 @@ export const TOOLS_CATALOG = [
 		related: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
 	},
 	{
+		key: "electricityTariffComparison",
+		routeId: "toolElectricityTariffComparison",
+		group: "budgetAndSave",
+		related: ["toolElectricityIndex", "toolHouseholdBudget", "toolEmergencyFund"],
+	},
+	{
 		key: "fuelPrices",
 		routeId: "toolFuelPrices",
 		group: "budgetAndSave",
@@ -234,7 +240,7 @@ export const TOOLS_CATALOG = [
 		key: "investmentReturn",
 		routeId: "toolInvestmentReturn",
 		group: "investAndGrow",
-		related: ["toolSp500History", "toolCompoundInterest", "toolNetWorth"],
+		related: ["toolSp500History", "toolCompoundInterest", "toolNetWorth", "toolBrokerFees"],
 	},
 	{
 		key: "sp500History",
@@ -246,7 +252,7 @@ export const TOOLS_CATALOG = [
 		key: "investorProfile",
 		routeId: "toolInvestorProfile",
 		group: "investAndGrow",
-		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund"],
+		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund", "toolBrokerFees"],
 	},
 	{
 		key: "fire",
@@ -290,12 +296,24 @@ export const TOOLS_CATALOG = [
 		group: "investAndGrow",
 		related: ["toolDepositRateIndex", "toolSavingsCertificates", "toolTermDeposit", "toolHouseholdBudget"],
 	},
+	{
+		key: "brokerFees",
+		routeId: "toolBrokerFees",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "toolNetWorth"],
+	},
 	// Track your wealth
 	{
 		key: "netWorth",
 		routeId: "toolNetWorth",
 		group: "trackWealth",
 		related: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
+	},
+	{
+		key: "goldPrice",
+		routeId: "toolGoldPrice",
+		group: "trackWealth",
+		related: ["toolNetWorth", "toolInflation", "toolInvestmentReturn"],
 	},
 ] as const satisfies readonly ToolCatalogEntry[]
 

@@ -116,12 +116,24 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolFreeBankAccounts",
   },
   {
+    sources: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "toolSp500History"],
+    destination: "toolBrokerFees",
+  },
+  {
     sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
     destination: "toolElectricityIndex",
   },
   {
+    sources: ["toolElectricityIndex", "toolHouseholdBudget"],
+    destination: "toolElectricityTariffComparison",
+  },
+  {
     sources: ["toolCarLoan", "toolVehicleTax", "toolHouseholdBudget"],
     destination: "toolFuelPrices",
+  },
+  {
+    sources: ["toolNetWorth", "toolInflation", "toolInvestmentReturn"],
+    destination: "toolGoldPrice",
   },
 ];
 

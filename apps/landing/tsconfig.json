@@ -7,8 +7,7 @@
       ]
     },
     "jsx": "react-jsx",
-    "jsxImportSource": "react",
-    "types": ["@sanity/astro/module"]
+    "jsxImportSource": "react"
   },
   "exclude": [
     "node_modules",

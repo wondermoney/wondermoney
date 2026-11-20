@@ -512,6 +512,14 @@ const ROUTE_SLUGS = {
 		de: "strompreisindex-portugal",
 		it: "indice-prezzo-elettricita-portogallo",
 	},
+	toolElectricityTariffComparison: {
+		pt: "comparador-tarifarios-eletricidade",
+		en: "electricity-tariff-comparison",
+		es: "comparador-tarifas-electricidad-portugal",
+		fr: "comparateur-tarifs-electricite-portugal",
+		de: "stromtarifvergleich-portugal",
+		it: "confronto-tariffe-elettricita-portogallo",
+	},
 	toolFuelPrices: {
 		pt: "preco-dos-combustiveis",
 		en: "fuel-prices-portugal",
@@ -519,6 +527,14 @@ const ROUTE_SLUGS = {
 		fr: "prix-carburants-portugal",
 		de: "kraftstoffpreise-portugal",
 		it: "prezzi-carburanti-portogallo",
+	},
+	toolGoldPrice: {
+		pt: "preco-do-ouro",
+		en: "gold-price-per-gram",
+		es: "precio-del-oro-gramo",
+		fr: "prix-or-gramme",
+		de: "goldpreis-pro-gramm",
+		it: "prezzo-oro-grammo",
 	},
 	toolFreeBankAccounts: {
 		pt: "contas-bancarias-gratuitas",
@@ -535,6 +551,14 @@ const ROUTE_SLUGS = {
 		fr: "comptes-remuneres-portugal",
 		de: "verzinste-konten-portugal",
 		it: "conti-remunerati-portogallo",
+	},
+	toolBrokerFees: {
+		pt: "comparador-de-corretoras",
+		en: "broker-fees-comparison-portugal",
+		es: "comparador-brokers-portugal",
+		fr: "comparateur-courtiers-portugal",
+		de: "broker-vergleich-portugal",
+		it: "confronto-broker-portogallo",
 	},
 	toolStatePension: {
 		pt: "simulador-pensao-reforma",
@@ -683,9 +707,12 @@ export const TOOL_ROUTE_IDS = [
 	"toolDepositRateIndex",
 	"toolTermDepositOffers",
 	"toolElectricityIndex",
+	"toolElectricityTariffComparison",
 	"toolFuelPrices",
+	"toolGoldPrice",
 	"toolFreeBankAccounts",
 	"toolRemuneratedAccounts",
+	"toolBrokerFees",
 ] as const satisfies ReadonlyArray<RouteId>
 
 export type ToolRouteId = (typeof TOOL_ROUTE_IDS)[number]
@@ -1029,12 +1056,21 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolremuneratedaccounts: "toolRemuneratedAccounts",
 	"savings-accounts": "toolRemuneratedAccounts",
 	"contas-poupanca": "toolRemuneratedAccounts",
+	toolbrokerfees: "toolBrokerFees",
+	"broker-fees": "toolBrokerFees",
+	"comparador-corretoras": "toolBrokerFees",
 	toolelectricityindex: "toolElectricityIndex",
 	"electricity-price-index": "toolElectricityIndex",
 	"indice-da-eletricidade": "toolElectricityIndex",
+	toolelectricitytariffcomparison: "toolElectricityTariffComparison",
+	"electricity-tariff-comparison": "toolElectricityTariffComparison",
+	"comparador-tarifarios-eletricidade": "toolElectricityTariffComparison",
 	toolfuelprices: "toolFuelPrices",
 	"fuel-prices": "toolFuelPrices",
 	"preco-dos-combustiveis": "toolFuelPrices",
+	toolgoldprice: "toolGoldPrice",
+	"gold-price": "toolGoldPrice",
+	"preco-do-ouro": "toolGoldPrice",
 }
 
 function normalizeRouteLookupKey(value: string): string {

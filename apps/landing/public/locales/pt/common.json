@@ -4116,9 +4116,12 @@
         "beforeVat": "Sem IVA",
         "vatRate": "IVA",
         "power": "Potência contratada ({{kva}} kVA, {{days}} dias)",
+        "powerNetwork": "Potência contratada, parte da tarifa de acesso às redes ({{kva}} kVA, {{days}} dias)",
+        "powerRest": "Potência contratada, resto do preço ({{kva}} kVA, {{days}} dias)",
         "energyReduced": "Energia com IVA reduzido ({{kwh}})",
         "energyStandard": "Energia acima do limite de IVA reduzido ({{kwh}})",
         "cav": "Contribuição para o audiovisual (CAV)",
+        "cavExempt": "Contribuição para o audiovisual (CAV), isenta abaixo de 400 kWh por ano",
         "iec": "Imposto especial de consumo de eletricidade (IEC)",
         "subtotal": "Total sem IVA",
         "vat": "IVA",
@@ -4170,11 +4173,11 @@
           "steps": {
             "a": "Potência: o preço diário da tua potência contratada, vezes 30 dias.",
             "b": "Energia: os teus kWh ao preço simples, ou repartidos pelos dois preços do bi-horário segundo a percentagem que indicas.",
-            "c": "Contribuição para o audiovisual (CAV): um valor mensal fixo, com IVA reduzido.",
+            "c": "Contribuição para o audiovisual (CAV): um valor mensal fixo, com IVA reduzido. Quem consome menos de 400 kWh por ano está isento.",
             "d": "Imposto especial de consumo de eletricidade (IEC): um valor fixo por kWh, com IVA à taxa normal.",
             "e": "IVA em cada parcela e, no fim, a soma. O resultado é arredondado ao cêntimo no fim."
           },
-          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, ao termo de potência com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
+          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, à parte do termo de potência que corresponde à tarifa de acesso às redes fixada pela ERSE, com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
           "bi": "Bi-horário contra simples: o preço simples é {{energySimple}}, contra {{energyPeak}} fora de vazio e {{energyValley}} em vazio. Só pela energia, os dois custam o mesmo quando {{breakEven}}% do consumo é em horas de vazio. Com uma parte menor, o simples é mais barato; com uma maior, o bi-horário.",
           "days": "O limite do IVA reduzido é por 30 dias, o período usado aqui. Numa fatura real de um período maior ou menor, o limite ajusta-se ao número de dias."
         },
@@ -4211,13 +4214,371 @@
         }
       }
     },
+    "electricityTariffComparison": {
+      "title": "Comparador de tarifários de eletricidade",
+      "shortName": "Tarifários de eletricidade",
+      "subtitle": "Compara todas as ofertas de eletricidade para casa no teu consumo, com todos os encargos e impostos, a partir dos dados oficiais da ERSE.",
+      "description": "Ordena todas as ofertas de eletricidade doméstica em Portugal continental pelo que te custariam num ano, com os dados oficiais da ERSE.",
+      "pageTitle": "Comparador de Tarifários de Eletricidade: Todas as Ofertas, Dados ERSE",
+      "pageDescription": "Compara todas as ofertas de eletricidade para casa em Portugal continental a partir da tua fatura, dos teus kWh ou do ficheiro de consumos da E-REDES. Com impostos, dados oficiais da ERSE e nada enviado.",
+      "nextStepHeadline": "Põe a nova fatura da luz no teu orçamento",
+      "nextStepDescription": "Quando souberes quanto deve custar a eletricidade, acompanha-a ao lado das outras despesas da casa e vê a poupança mês a mês.",
+      "nextStepCta": "Planear o orçamento familiar",
+      "formLabel": "O teu consumo e contrato",
+      "loading": "A carregar as ofertas da ERSE…",
+      "loadError": "Não foi possível carregar as ofertas. Verifica a ligação e recarrega a página.",
+      "regulatedSupplier": "Tarifa regulada",
+      "mode": {
+        "legend": "Como queres comparar?",
+        "quick": "Rápida",
+        "full": "Completa",
+        "quickHelp": "A partir da fatura mensal ou dos kWh por mês. A repartição pelos períodos segue o perfil de consumo padrão.",
+        "fullHelp": "A partir dos kWh de cada período, de um total para qualquer número de dias ou do ficheiro de consumos da E-REDES."
+      },
+      "fields": {
+        "power": "Potência contratada",
+        "option": "Opção tarifária",
+        "cycle": "Ciclo horário",
+        "quickUnit": "Sei o valor",
+        "unitBill": "Da fatura mensal em euros",
+        "unitKwh": "Do consumo mensal em kWh",
+        "bill": "Fatura mensal",
+        "monthlyKwh": "Consumo mensal",
+        "source": "Consumo",
+        "period": "O consumo corresponde a",
+        "days": "Número de dias",
+        "total": "Consumo total",
+        "periodsLegend": "Consumo por período"
+      },
+      "options": {
+        "simple": "Simples",
+        "biHourly": "Bi-horária",
+        "triHourly": "Tri-horária"
+      },
+      "cycles": {
+        "daily": "Ciclo diário",
+        "weekly": "Ciclo semanal"
+      },
+      "sources": {
+        "periods": "kWh por período",
+        "total": "Um total, repartido pelo perfil padrão",
+        "diagram": "Ficheiro de consumos da E-REDES"
+      },
+      "periodChoices": {
+        "month": "Um mês",
+        "year": "Um ano",
+        "days": "Um número de dias"
+      },
+      "periods": {
+        "simple": "Energia",
+        "offValley": "Fora de vazio",
+        "valley": "Vazio",
+        "peak": "Ponta",
+        "shoulder": "Cheias"
+      },
+      "help": {
+        "power": "Está na tua fatura, em kVA. A maioria das casas tem 3,45, 4,6 ou 6,9 kVA.",
+        "option": "A simples tem um só preço de energia; a bi-horária e a tri-horária têm preços diferentes conforme a hora. A lista mostra as ofertas nesta opção.",
+        "cycle": "O ciclo do teu contador, indicado na fatura. O ciclo semanal muda as horas de vazio ao fim de semana.",
+        "bill": "O que pagas por mês, com IVA. É convertido em kWh como se estivesses na tarifa regulada, como faz a simulação rápida da ERSE.",
+        "billKwh": "Na tarifa regulada, esta fatura corresponde a cerca de {{kwh}} por mês.",
+        "monthlyKwh": "Está na fatura; também podes dividir o consumo anual por 12.",
+        "days": "Os dias a que correspondem os teus kWh, de 1 a 731, como numa fatura ou numa leitura do contador.",
+        "total": "Todos os kWh do período acima. A repartição pelos períodos segue o perfil da E-REDES para a tua potência e consumo.",
+        "periods": "Como na fatura ou na leitura do contador. As outras opções são calculadas com os mesmos kWh, repartidos pelo perfil padrão quando é preciso."
+      },
+      "household": {
+        "legend": "A tua casa",
+        "socialTariff": "Tenho tarifa social",
+        "socialTariffHelp": "Um desconto na potência e na energia, até 6,9 kVA. As ofertas que não aceitam clientes com tarifa social ficam de fora.",
+        "largeFamily": "Agregado de cinco ou mais pessoas",
+        "largeFamilyHelp": "IVA reduzido em até 300 kWh por cada 30 dias, em vez de 200.",
+        "newClient": "Seria cliente novo",
+        "newClientHelp": "Conta os descontos que os comercializadores dão a clientes novos no primeiro ano."
+      },
+      "filters": {
+        "title": "Filtros",
+        "summary": "(tipo de preço, comercializador, condições)",
+        "pricing": "Tipo de preço",
+        "pricingChoices": {
+          "all": "Fixo e indexado",
+          "fixed": "Só preço fixo",
+          "indexed": "Só preço indexado"
+        },
+        "supplier": "Comercializador",
+        "supplierAll": "Todos os comercializadores",
+        "sortBy": "Ordenar por",
+        "sortChoices": {
+          "firstYear": "Primeiro ano",
+          "laterYears": "Anos seguintes (sem desconto de cliente novo)"
+        },
+        "includeConditioned": "Incluir ofertas condicionadas",
+        "includeConditionedHelp": "Ofertas a que só algumas pessoas podem aderir, como sócios de um clube ou titulares de um cartão.",
+        "includeRefunds": "Contar reembolsos e descontos para qualquer cliente",
+        "includeRefundsHelp": "Valores que o comercializador devolve em todas as faturas, como a ERSE os conta.",
+        "mandatoryServices": "Incluir ofertas com serviços obrigatórios pagos",
+        "mandatoryServicesHelp": "Algumas ofertas obrigam a um serviço pago, como assistência. O custo está incluído no total.",
+        "directDebit": "Incluir ofertas que exigem débito direto",
+        "eInvoice": "Incluir ofertas que exigem fatura eletrónica",
+        "renewableOnly": "Só energia 100% renovável",
+        "noLoyalty": "Só ofertas sem fidelização",
+        "includeDual": "Incluir ofertas duais (eletricidade e gás)",
+        "includeDualHelp": "Exigem um contrato de gás com o mesmo comercializador, e os valores fixos podem incluir o gás.",
+        "cheapestPerSupplier": "Só a oferta mais barata de cada comercializador"
+      },
+      "myTariff": {
+        "title": "Comparar com o meu tarifário",
+        "intro": "Introduz os teus preços atuais e cada oferta mostra quanto poupas face a eles, com o mesmo consumo e os mesmos impostos.",
+        "toggle": "Usar os meus preços",
+        "legend": "Os meus preços na opção {{option}}",
+        "power": "Preço da potência",
+        "powerUnit": "€/dia",
+        "energy": "Preço da energia, {{period}}",
+        "energySimple": "Preço da energia",
+        "help": "Sem IVA, como na tua fatura, para a opção {{option}} escolhida acima.",
+        "errors": {
+          "outOfRange": "Introduz um preço entre 0 e 5 euros."
+        },
+        "incomplete": "Introduz todos os teus preços para veres a poupança de cada oferta.",
+        "resultTitle": "O teu tarifário com este consumo",
+        "yearly": "No primeiro ano, com impostos.",
+        "yearlyLater": "Num ano, com impostos.",
+        "cheaper": "{{count}} ofertas custam menos. A mais barata poupa-te {{saving}} por ano.",
+        "noneCheaper": "Nenhuma oferta da lista custa menos do que o teu tarifário."
+      },
+      "solar": {
+        "title": "Painéis solares",
+        "intro": "Estima o que produzem painéis na tua zona e compara as ofertas pelo que ainda compras à rede.",
+        "toggle": "Incluir painéis solares",
+        "alreadyHave": "Se já tens painéis, as tuas faturas e o ficheiro da E-REDES já mostram só o que compras à rede: deixa isto desligado.",
+        "legend": "Os teus painéis solares",
+        "district": "Distrito",
+        "districtHelp": "A produção na capital de distrito, com os painéis virados a sul e a inclinação ótima do PVGIS nesse local ({{slope}}°).",
+        "locate": "Usar a minha localização",
+        "locating": "A obter a tua localização…",
+        "located": "Capital de distrito mais próxima: {{district}}.",
+        "locateFailed": "A tua localização não está disponível. Escolhe o distrito na lista.",
+        "locatePrivacy": "A tua localização serve só para escolher a capital de distrito mais próxima, no teu navegador. Não é enviada para lado nenhum.",
+        "kwp": "Potência de pico",
+        "kwpUnit": "kWp",
+        "kwpHelp": "A potência de pico total dos painéis, como na proposta do instalador.",
+        "losses": "Perdas do sistema",
+        "lossesHelp": "Cabos, inversor, sujidade e calor. 14 % é o valor por omissão do PVGIS.",
+        "surplusPrice": "Preço de venda do excedente (opcional)",
+        "surplusPriceHelp": "O que te pagam por cada kWh que injetas na rede. Aparece à parte, fora da ordenação das ofertas.",
+        "loading": "A carregar a estimativa de produção…",
+        "loadError": "Não foi possível carregar a estimativa de produção, por isso as ofertas estão ordenadas sem painéis. Recarrega a página para tentares de novo.",
+        "errors": {
+          "kwp": "Introduz uma potência acima de 0 e até 50 kWp.",
+          "lossPercent": "Introduz perdas entre 0 e 50 %.",
+          "surplusPrice": "Introduz um preço entre 0 e 1 euro por kWh."
+        },
+        "summary": {
+          "title": "Com os teus painéis solares",
+          "system": "{{kwp}} kWp em {{district}}, virados a sul a {{slope}}°. Valores para um ano.",
+          "production": "Produção",
+          "selfConsumed": "Consumida em casa",
+          "coverage": "Do teu consumo",
+          "surplus": "Excedente para a rede",
+          "savingFirstYear": "Na oferta mais barata, {{supplier}} ({{offer}}), os painéis poupam-te {{amount}} no primeiro ano: {{without}} sem eles, {{with}} com eles.",
+          "savingLaterYears": "Na oferta mais barata, {{supplier}} ({{offer}}), os painéis poupam-te {{amount}} por ano a partir do segundo: {{without}} sem eles, {{with}} com eles.",
+          "surplusIncome": "Vender o excedente a {{price}} €/kWh daria cerca de {{amount}} por ano. Não entra nos totais nem na ordenação.",
+          "fromDiagram": "Hora a hora face ao teu ficheiro da E-REDES, com a produção de um ano típico nas mesmas datas.",
+          "fromProfile": "Sem ficheiro da E-REDES, as tuas horas são reconstruídas a partir do perfil BTN da E-REDES, por isso a parte consumida em casa é uma estimativa. Carrega o teu ficheiro para usares as tuas horas reais.",
+          "ranking": "As ofertas abaixo estão ordenadas pelo que ainda compras à rede.",
+          "source": "Produção: PVGIS {{version}} (Comissão Europeia, Centro Comum de Investigação), dados de radiação {{database}} de {{from}} a {{to}}, um ano típico de 1 kWp de silício cristalino em estrutura livre, à escala do teu sistema. Descarregado a {{date}}.",
+          "sourceLink": "Sobre o PVGIS"
+        }
+      },
+      "diagram": {
+        "label": "Ficheiro de consumos da E-REDES",
+        "help": "No Balcão Digital da E-REDES, abre os consumos da tua instalação, escolhe o período e descarrega-os em folha de cálculo (xlsx). As leituras de cada quarto de hora dão os teus kWh reais em cada período.",
+        "privacy": "O ficheiro é lido no teu navegador e nunca sai dele: nada é enviado.",
+        "reading": "A ler o ficheiro…",
+        "loaded": "De {{first}} a {{last}}: {{days}} dias, {{kwh}}.",
+        "missing": "{{count}} quartos de hora não têm leitura e contam como zero.",
+        "clear": "Remover o ficheiro",
+        "errors": {
+          "unreadable": "Não foi possível ler este ficheiro como folha de cálculo. Descarrega-o de novo da E-REDES em xlsx.",
+          "notERedesExport": "Este não parece um ficheiro de consumos da E-REDES: não há uma coluna de data ao lado de uma coluna de consumo em kW.",
+          "noReadings": "O ficheiro não tem leituras de consumo. Escolhe um período com leituras e descarrega-o de novo.",
+          "invalidRow": "A linha {{row}} não tem uma data, um quarto de hora ou um consumo válidos.",
+          "duplicateReading": "A linha {{row}} repete um quarto de hora que já está no ficheiro."
+        }
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Não pode ser negativo.",
+        "tooLarge": "Introduz {{max}} ou menos.",
+        "outOfRange": "Introduz um número de dias entre 1 e {{max}}.",
+        "notAllowed": "Escolhe uma potência contratada da lista.",
+        "days": "Introduz um número inteiro de dias entre 1 e {{max}}.",
+        "belowFixed": "Nesta potência, um mês na tarifa regulada custa pelo menos {{minimum}}, antes de qualquer consumo. Confirma a fatura ou a potência.",
+        "billTooLarge": "Introduz uma fatura de {{maximum}} ou menos.",
+        "noRegulatedPrice": "A tarifa regulada não tem preço para esta potência e opção, por isso não dá para converter a fatura em kWh. Introduz antes os kWh.",
+        "noDiagram": "Escolhe o teu ficheiro de consumos da E-REDES.",
+        "summary": "Corrige os campos assinalados para veres as ofertas."
+      },
+      "compare": {
+        "title": "Simples, bi-horária ou tri-horária?",
+        "intro": "A oferta mais barata de cada opção com o mesmo consumo, repartido pelo teu ciclo horário.",
+        "yours": "(a tua opção)",
+        "perFirstYear": "no primeiro ano",
+        "perLaterYear": "por ano a partir do segundo",
+        "cheapest": "Opção mais barata",
+        "more": "Mais {{amount}} por ano",
+        "unavailable": "Sem ofertas nesta potência."
+      },
+      "results": {
+        "title": "Ofertas na opção {{option}}",
+        "count": "{{count}} ofertas, calculadas para {{kwh}} por ano.",
+        "none": "Nenhuma oferta corresponde. Alarga os filtros ou muda de opção.",
+        "listLabel": "Ofertas, da mais barata para a mais cara",
+        "showMore": "Mostrar mais {{count}}",
+        "firstYear": "Primeiro ano",
+        "laterYears": "Anos seguintes",
+        "period": "Os teus {{days}} dias",
+        "periodMonth": "Um mês",
+        "periodYear": "Um ano",
+        "saving": "Poupas {{amount}} por ano",
+        "dearer": "Custa mais {{amount}} por ano",
+        "same": "Custa o mesmo que o teu tarifário",
+        "details": "Detalhe e ligações",
+        "estimatedNote": "Preço indexado: estimativa da ERSE para os próximos meses. O que pagas acompanha o mercado.",
+        "conditionsLabel": "Condições, nas palavras da ERSE",
+        "links": {
+          "offer": "Página da oferta",
+          "standardSheet": "Ficha padronizada",
+          "terms": "Condições do contrato"
+        },
+        "breakdownCaption": "Detalhe de {{offer}}",
+        "socialNotApplied": "A tarifa social só se aplica até {{kva}} kVA, por isso não é contada nesta potência."
+      },
+      "badges": {
+        "label": "Características da oferta",
+        "estimated": "Preço estimado",
+        "regulated": "Regulada",
+        "conditioned": "Condicionada",
+        "dual": "Com gás",
+        "loyalty": "Fidelização",
+        "renewable": "100% renovável",
+        "directDebit": "Débito direto",
+        "eInvoice": "Fatura eletrónica",
+        "services": "Serviços pagos"
+      },
+      "lines": {
+        "item": "Parcela",
+        "power": "Potência",
+        "energy": "Energia",
+        "socialDiscount": "dos quais desconto da tarifa social",
+        "cav": "Contribuição audiovisual (CAV)",
+        "iec": "Imposto especial de consumo (IEC)",
+        "services": "Serviços obrigatórios",
+        "refunds": "Reembolsos e descontos",
+        "newClientDiscount": "Desconto de cliente novo",
+        "subtotal": "Sem IVA",
+        "vatReduced": "IVA a 6%",
+        "vatStandard": "IVA a 23%",
+        "total": "Total"
+      },
+      "export": {
+        "button": "Descarregar CSV",
+        "filename": "ofertas-eletricidade",
+        "columns": {
+          "rank": "Posição",
+          "supplier": "Comercializador",
+          "offer": "Oferta",
+          "option": "Opção",
+          "firstYear": "Primeiro ano (EUR)",
+          "laterYears": "Anos seguintes (EUR)",
+          "period": "O teu período (EUR)",
+          "estimated": "Preço estimado",
+          "saving": "Poupança por ano (EUR)",
+          "link": "Ligação"
+        },
+        "yes": "sim",
+        "no": "não"
+      },
+      "source": {
+        "asOf": "Ofertas: ERSE, exportação de {{date}} ({{offers}} ofertas de {{suppliers}} comercializadores e a tarifa regulada).",
+        "negotiation": "Os preços são os publicados, antes de qualquer negociação pessoal. Confirma a oferta com o comercializador antes de assinares.",
+        "indexed": "Os preços indexados são estimativas da ERSE para os próximos meses, não um preço fixo.",
+        "taxes": "Os totais incluem potência, energia, contribuição audiovisual, imposto especial de consumo e IVA.",
+        "dgeg": "A taxa DGEG (alguns cêntimos por mês) não está incluída.",
+        "educational": "Estimativa educativa, não aconselhamento. O WonderMoney não tem relação comercial com nenhum comercializador.",
+        "simulatorLink": "Simulador oficial de preços da ERSE"
+      },
+      "guide": {
+        "use": {
+          "title": "Como usar o comparador",
+          "quick": "O modo rápido só precisa da potência contratada e da fatura ou dos kWh de um mês. Uma fatura em euros é convertida em kWh a partir da fatura da tarifa regulada, com impostos, como faz a simulação rápida da ERSE.",
+          "full": "O modo completo usa os kWh de cada período da tua fatura, ou um total para qualquer número de dias repartido pelos períodos com o perfil padrão da E-REDES para a tua potência e consumo.",
+          "diagram": "Também podes usar o ficheiro de consumos da E-REDES, descarregado do Balcão Digital. As leituras de cada quarto de hora dão os teus kWh reais em cada período e ciclo. O ficheiro é lido no teu navegador e nunca é enviado.",
+          "mine": "Em \"Comparar com o meu tarifário\" introduzes os preços da tua fatura. O teu tarifário passa pelo mesmo cálculo que todas as ofertas, por isso a poupança de cada uma compara igual com igual.",
+          "solar": "Em \"Painéis solares\" juntas um sistema pelo distrito, a potência de pico e as perdas. A produção é subtraída ao teu consumo hora a hora, e as ofertas são ordenadas pelo que ainda compras à rede. O resumo mostra a parte consumida em casa, o excedente e o que os painéis te poupam na oferta mais barata. Um preço de venda do excedente, se o introduzires, aparece à parte da ordenação.",
+          "options": "No topo dos resultados, as ofertas simples, bi-horária e tri-horária mais baratas com o mesmo consumo mostram se outra opção compensa. Os filtros reduzem a lista e o botão CSV descarrega-a."
+        },
+        "example": {
+          "title": "Exemplo",
+          "setup": "Uma casa com 3,45 kVA na opção simples gasta {{kwh}} por mês. Na exportação da ERSE de {{date}} há {{count}} ofertas para ela, incluindo a tarifa regulada.",
+          "result": "A tarifa regulada custa {{regulated}} no primeiro ano, com impostos. A oferta mais barata custa {{cheapest}}, menos {{difference}}. {{cheaper}} ofertas custam menos do que a tarifa regulada.",
+          "bill": "No modo rápido, uma fatura mensal de {{bill}} dá os mesmos {{kwh}}: é a fatura da tarifa regulada para esse consumo."
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "Cada oferta é calculada como no simulador da ERSE (Manual do Simulador de Preços de Energia, junho de 2026):",
+          "steps": {
+            "a": "Potência: o preço por dia vezes os dias.",
+            "b": "Energia: os kWh de cada período vezes o preço desse período.",
+            "c": "Tarifa social: o desconto da ERSE na potência e na energia, até 6,9 kVA.",
+            "d": "A contribuição audiovisual e o imposto especial de consumo, nos valores legais.",
+            "e": "Serviços obrigatórios, reembolsos e descontos para qualquer cliente e o desconto de cliente novo no primeiro ano, como cada oferta os comunica à ERSE.",
+            "f": "IVA às taxas reduzida e normal, como se explica abaixo.",
+            "g": "Um ano é o mesmo consumo em 365 dias; \"anos seguintes\" deixa de fora o desconto de cliente novo."
+          },
+          "vat": "O IVA é de {{reduced}} na contribuição audiovisual, na parte de acesso às redes do preço da potência até 3,45 kVA e nos primeiros {{allowance}} kWh de cada 30 dias até 6,9 kVA ({{allowanceLarge}} kWh num agregado de cinco ou mais pessoas). Tudo o resto paga {{standard}}.",
+          "month": "Um mês é um duodécimo do ano, {{days}} dias, como no simulador da ERSE, por isso um ano são exatamente doze meses.",
+          "split": "Quando só se sabe o total, é repartido pelos períodos com o perfil de consumo da E-REDES da classe da casa: A acima de 13,8 kVA; abaixo disso, B acima de 7140 kWh por ano e C até esse valor."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "erse": "Ofertas: simulador de preços da ERSE, exportação de {{date}}, com {{offers}} ofertas de {{suppliers}} comercializadores e a tarifa regulada. Os comercializadores são obrigados a comunicar as ofertas domésticas à ERSE. Os preços são sem IVA nem impostos; a página acrescenta-os.",
+          "refresh": "A página usa uma nova exportação da ERSE todas as semanas. As ofertas que já terminaram ficam de fora.",
+          "names": "A ERSE identifica cada comercializador por um código; a página mostra o nome comercial que cada um usa no próprio site.",
+          "solar": "Produção solar: PVGIS {{pvgisVersion}}, do Centro Comum de Investigação da Comissão Europeia, com a base de dados de radiação {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Para cada capital de distrito, a página guarda o ano típico do PVGIS, hora a hora, para 1 kWp virado a sul com a inclinação ótima e 14 % de perdas, descarregado a {{pvgisDate}}. Sem ficheiro da E-REDES, as horas do teu consumo são reconstruídas a partir da repartição do perfil padrão pelos períodos de cada mês.",
+          "simulatorLink": "Simulador de preços da ERSE",
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (junho de 2026)",
+          "pvgisLink": "PVGIS, Comissão Europeia"
+        },
+        "limits": {
+          "title": "O que os totais deixam de fora",
+          "items": {
+            "a": "A taxa DGEG, de alguns cêntimos por mês, e outros encargos.",
+            "b": "A negociação pessoal: os preços são os publicados.",
+            "c": "As ofertas indexadas são calculadas com a estimativa da ERSE para os próximos meses; o que pagas acompanha o mercado.",
+            "d": "As ofertas duais podem incluir o gás nos valores fixos; ficam de fora, a não ser que as incluas.",
+            "e": "Com uma fatura ou um total, a repartição pelos períodos é o perfil padrão, não o teu. O ficheiro da E-REDES dá a tua repartição real.",
+            "solar": "A produção solar é um ano típico da capital de distrito, virada a sul com a inclinação ótima: sombras, outra orientação e o tempo de um ano concreto alteram-na.",
+            "f": "É uma estimativa educativa, não aconselhamento. Lê a ficha padronizada e as condições da oferta antes de assinares."
+          },
+          "simulatorLink": "Confirma um resultado no simulador oficial da ERSE"
+        },
+        "related": {
+          "title": "Continua",
+          "electricityIndexLink": "Índice do preço da eletricidade",
+          "electricityIndexBody": "Como o preço da eletricidade em Portugal se compara com a UE e de que é feita a fatura da tarifa regulada.",
+          "householdBudgetLink": "Orçamento familiar",
+          "householdBudgetBody": "Põe a fatura da luz ao lado das restantes despesas do mês."
+        }
+      }
+    },
     "fuelPrices": {
       "title": "Preço dos combustíveis em Portugal e custo mensal",
       "shortName": "Preço dos combustíveis",
-      "subtitle": "Vê o preço médio oficial do gasóleo, da gasolina e do GPL em Portugal, o histórico e quanto te custa conduzir por mês.",
-      "description": "Preços médios oficiais da DGEG dos combustíveis em Portugal continental, com variação semanal e histórico, e uma calculadora do custo mensal de combustível.",
-      "pageTitle": "Preço dos Combustíveis em Portugal: Média Oficial e Custo Mensal",
-      "pageDescription": "O último preço médio da DGEG do gasóleo, da gasolina 95 e do GPL em Portugal, com a variação face à semana anterior e cinco anos de histórico, e uma calculadora do teu custo mensal de combustível. Dados oficiais, sem previsões.",
+      "subtitle": "Vê o preço médio oficial do gasóleo, da gasolina e do GPL em Portugal, os postos mais baratos do teu distrito e concelho, e quanto te custa conduzir por mês.",
+      "description": "Preços médios oficiais da DGEG em Portugal continental, os postos mais baratos por distrito e concelho e uma calculadora do custo mensal de combustível.",
+      "pageTitle": "Preço dos Combustíveis: Postos Mais Baratos e Média Oficial",
+      "pageDescription": "Os postos mais baratos de gasóleo, gasolina 95 e GPL por distrito e concelho, atualizados todos os dias a partir da DGEG, o preço médio oficial com cinco anos de histórico e uma calculadora do custo mensal. Sem previsões.",
       "fuels": {
         "diesel": "Gasóleo simples",
         "gasoline95": "Gasolina simples 95",
@@ -4285,7 +4646,8 @@
           "title": "Como ler esta página",
           "prices": "No topo da página está o último preço médio nacional por litro do gasóleo, da gasolina 95 e do GPL, tal como a DGEG o publicou para {{asOf}}, e quanto cada um variou numa semana: gasóleo {{dieselChange}} e gasolina {{gasolineChange}} face à semana anterior.",
           "calculator": "A calculadora transforma a tua condução num custo mensal de combustível. Indicas a distância, o consumo em litros por 100 km e o combustível; o preço começa na média mais recente e podes alterá-lo para o que realmente pagas.",
-          "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana."
+          "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana.",
+          "stations": "Por baixo estão os postos mais baratos: os {{stationsDistrict}} mais baratos do continente ou de um distrito, ou os {{stationsMunicipality}} mais baratos de um concelho, para o combustível que escolheres. Cada um mostra o preço, o posto e a marca, a morada, uma ligação para o mapa e quando o posto atualizou o preço pela última vez."
         },
         "example": {
           "title": "Exemplo prático",
@@ -4301,21 +4663,25 @@
             "c": "Custo: litros vezes o preço por litro que indicas, arredondado ao cêntimo.",
             "d": "Ano: doze meses assim."
           },
-          "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior."
+          "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior.",
+          "stations": "Os postos mais baratos são os preços por posto da DGEG ordenados do mais baixo para o mais alto; em caso de empate, fica primeiro o preço atualizado mais recentemente. Ficam de fora os preços sem atualização há 30 dias e os que estão muito fora do intervalo habitual (muito provavelmente um erro de digitação). A mediana é o preço do meio de todos os postos da zona, e a poupança num depósito é a mediana menos o preço mais barato, vezes 50 litros."
         },
         "data": {
           "title": "Dados e fontes",
           "dgeg": "Preços: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dos combustíveis rodoviários em Portugal continental, para gasóleo simples, gasolina simples 95 e GPL auto. O último dia é {{asOf}}; a cópia desta página foi criada a {{fetched}}. O histórico é um valor da DGEG de sete em sete dias até {{first}}, copiado tal como a DGEG o publica.",
           "terms": "A DGEG indica que esta informação é gratuita e pode ser usada livremente, desde que a DGEG seja identificada como fonte, se indique a data da última atualização e a informação seja reproduzida fielmente. Os preços são comunicados pelos postos, que são responsáveis por eles.",
           "dgegLink": "DGEG, Preço Médio Diário",
-          "refresh": "A página lê um ficheiro de dados guardado e nunca chama a DGEG enquanto a usas. O ficheiro é atualizado por um script que recusa dados desatualizados ou implausíveis, por isso uma atualização falhada mantém os últimos números bons e a respetiva data ({{asOf}})."
+          "refresh": "A página lê um ficheiro de dados guardado e nunca chama a DGEG enquanto a usas. O ficheiro é atualizado por um script que recusa dados desatualizados ou implausíveis, por isso uma atualização falhada mantém os últimos números bons e a respetiva data ({{asOf}}).",
+          "stations": "Postos: os preços por posto da DGEG, tal como os postos os comunicam, para os mesmos três combustíveis. O retrato foi tirado a {{stationsDate}} às {{stationsTime}} UTC, e cada preço mantém a data e a hora em que o posto o atualizou pela última vez.",
+          "stationsLink": "DGEG, preços dos combustíveis por posto",
+          "stationsRefresh": "A lista de postos é um retrato tirado uma vez por dia, quando o site é reconstruído, e não acompanha as mudanças ao longo do dia. Se a DGEG não responder ou os dados falharem as verificações, a página mantém o retrato anterior e mostra a respetiva data ({{stationsDate}})."
         },
         "limits": {
           "title": "O que estes valores não incluem",
           "items": {
             "noForecast": "Sem previsão: nada aqui prevê preços futuros, e os movimentos passados não dizem para onde o preço vai a seguir.",
             "average": "Média nacional: junta todos os postos de Portugal continental e é ponderada pelas vendas. O preço no teu posto pode ser mais alto ou mais baixo, e os Açores e a Madeira não estão incluídos.",
-            "stations": "Sem postos: esta página não nomeia nem ordena nenhum posto. O site da DGEG lista os preços por posto, se quiseres ver.",
+            "stations": "Postos: a lista mostra só os poucos postos mais baratos de cada zona, tal como a DGEG os publica, e não avalia o serviço nem a qualidade. Um preço pode mudar depois do retrato, por isso confirma-o na bomba.",
             "consumption": "Consumo: o mesmo valor em todas as viagens. O consumo real muda com a velocidade, a carga, o trânsito e a estação do ano, e costuma ser superior ao oficial.",
             "scope": "Só combustível: portagens, seguro, imposto, manutenção e estacionamento não estão incluídos. O carregamento elétrico não é coberto e outros combustíveis não são mostrados.",
             "education": "Apenas para fins educativos, não é aconselhamento."
@@ -4329,6 +4695,172 @@
           "carLoanBody": "Junta a prestação ao combustível para ver quanto custa o carro no total.",
           "vehicleTaxLink": "Simulador de IUC",
           "vehicleTaxBody": "Estima o imposto anual do veículo, mais um custo de ter carro."
+        }
+      },
+      "stations": {
+        "title": "Postos mais baratos",
+        "intro": "Os postos mais baratos de cada combustível em Portugal continental, num distrito ou num concelho, a partir dos preços que os postos comunicam à DGEG.",
+        "asOf": "Retrato dos preços por posto da DGEG tirado a {{date}} às {{time}} UTC. Cada preço mostra quando o posto o atualizou pela última vez.",
+        "stale": "Esta lista tem {{days}} dias: a atualização diária não corre desde {{date}}. Os preços podem ter mudado, por isso confirma no posto antes de ires.",
+        "fuel": "Tipo de combustível",
+        "district": "Distrito",
+        "municipality": "Concelho",
+        "mainland": "Todo o continente",
+        "allMunicipalities": "Todos os concelhos de {{district}}",
+        "pickDistrict": "Escolhe primeiro um distrito",
+        "loading": "A carregar os postos de {{district}}…",
+        "loadError": "Não foi possível carregar a lista deste distrito. Recarrega a página para tentares de novo.",
+        "none": "Nenhum posto de {{area}} indica preço de {{fuel}}. Escolhe o distrito inteiro para veres os mais baratos por perto.",
+        "summary": "Postos com preço de {{fuel}} em {{area}}: {{count}}. Preço mediano: {{median}}. Os mais baratos:",
+        "map": "Ver no mapa",
+        "updated": "Atualizado a {{date}}",
+        "saving": "O mais barato daqui está {{perLitre}} abaixo da mediana: menos {{perTank}} num depósito de {{litres}} L.",
+        "noSaving": "Aqui o posto mais barato cobra o preço mediano.",
+        "nextStepCta": "Poupa a diferença mensal para um objetivo",
+        "note": "Preços tal como os postos os comunicam à DGEG, que os publica; cada posto responde pelo preço que indica. Os preços podem mudar ao longo do dia e não incluem descontos de cartões ou aplicações."
+      }
+    },
+    "goldPrice": {
+      "title": "Preço do ouro por grama em euros e calculadora do valor do ouro",
+      "shortName": "Preço do ouro",
+      "subtitle": "Vê o último preço de um grama de ouro em euros e quanto vale o teu ouro pelo peso e pelos quilates, do ouro de 24 quilates ao ouro português de 19,2.",
+      "description": "O preço de um grama de ouro em euros, datado, a partir de um banco central, e uma calculadora do valor do metal pelo peso e pelos quilates.",
+      "pageTitle": "Preço do Ouro Hoje por Grama e Calculadora do Valor do Ouro",
+      "pageDescription": "O preço de um grama de ouro puro em euros, datado, do Narodowy Bank Polski à taxa do BCE, e uma calculadora do valor do metal em ouro de 24, 22, 19,2, 18, 14 e 9 quilates. Quem compra ouro paga menos.",
+      "purities": {
+        "k24": "{{karat}} quilates ({{fineness}}‰), ouro puro",
+        "k22": "{{karat}} quilates ({{fineness}}‰)",
+        "k19_2": "{{karat}} quilates ({{fineness}}‰), ouro português",
+        "k18": "{{karat}} quilates ({{fineness}}‰)",
+        "k14": "{{karat}} quilates ({{fineness}}‰)",
+        "k9": "{{karat}} quilates ({{fineness}}‰)"
+      },
+      "fields": {
+        "grams": "Peso",
+        "purity": "Toque",
+        "price": "Preço do ouro puro por grama",
+        "resetPrice": "Usar o último preço ({{price}}/g)",
+        "offer": "Oferta de um comprador (opcional)"
+      },
+      "help": {
+        "grams": "O peso da peça em gramas, numa balança que pese ao 0,1 g ou pelo talão de compra. Pedras e outros metais contam no peso, mas não têm ouro.",
+        "purity": "O toque gravado na marca: 800 é ouro português (19,2 quilates), 750 é ouro de 18 quilates. Sem marca, pergunta numa contrastaria ou num ourives.",
+        "price": "Começa no último preço do ouro puro, {{price}}/g a {{date}}. Muda-o para veres o valor a outro preço.",
+        "offer": "O que uma loja ou um comprador te ofereceu, para o veres como parte do valor do metal. Deixa vazio se não quiseres comparar."
+      },
+      "errors": {
+        "required": "Introduz um número válido.",
+        "negative": "Este valor não pode ser negativo.",
+        "tooLarge": "Introduz {{max}} ou menos.",
+        "zero": "Introduz um valor acima de zero.",
+        "summary": "Revê os campos assinalados para veres o valor."
+      },
+      "result": {
+        "value": "Valor do metal",
+        "pureGrams": "Ouro puro na peça",
+        "perGram": "Valor do metal por grama da peça",
+        "nothing": "Sem peso não há ouro para avaliar.",
+        "offerBelow": "A oferta é {{share}} do valor do metal, {{gap}} abaixo dele.",
+        "offerAbove": "A oferta é {{share}} do valor do metal, {{gap}} acima dele. Confirma o peso e o toque.",
+        "offerNoValue": "Sem valor do metal, não dá para comparar a oferta.",
+        "buyers": "Quem compra ouro paga menos do que isto. O valor do metal é o que o próprio ouro vale ao preço de referência, antes da margem do comprador e do custo de ensaiar e refinar.",
+        "netWorth": "O ouro que tens faz parte do teu património. Conta-o por {{amount}}, ou pelo que um comprador pagaria de facto, e atualiza-o quando o preço mudar."
+      },
+      "notes": {
+        "assumptions": "Estimativa: peso vezes toque vezes o preço do ouro puro. Avalia só o metal, não o feitio, as pedras nem a marca. Não é uma oferta nem um conselho."
+      },
+      "latest": {
+        "title": "Último preço do ouro",
+        "asOf": "Preço de {{date}}: o preço do ouro puro do Narodowy Bank Polski, em euros à taxa do BCE do mesmo dia.",
+        "stale": "Este preço tem {{days}} dias: a atualização diária não trouxe um mais recente desde {{date}}. O preço do ouro pode ter mudado entretanto.",
+        "perGram": "Ouro puro (24 quilates), por grama",
+        "perOunce": "Ouro puro, por onça troy (31,1 g)",
+        "portuguese": "Ouro português (19,2 quilates), por grama",
+        "portugueseNote": "800 milésimas do preço do ouro puro",
+        "dayChange": "{{percent}} desde {{date}}",
+        "periodChange": "{{percent}} desde {{date}}",
+        "note": "Um preço de referência do metal, não o que uma loja paga ou cobra. É um preço do passado, não uma previsão: esta página não prevê para onde vai o ouro."
+      },
+      "recent": {
+        "title": "Preços recentes",
+        "intro": "O preço de um grama de ouro puro nos últimos dias publicados pelo NBP, com o preço em zlótis e a taxa do BCE usada na conversão.",
+        "caption": "Preço de um grama de ouro puro nos últimos dias, em euros e em zlótis, e a taxa do euro",
+        "date": "Data",
+        "eurPerGram": "Euros por grama",
+        "plnPerGram": "Zlótis por grama (NBP)",
+        "rate": "Zlótis por euro (BCE)",
+        "asOf": "Dados a {{date}}. A cópia desta página foi criada a {{fetched}}. Fontes: Narodowy Bank Polski (preço do ouro) e Banco Central Europeu (taxa de câmbio de referência do euro)."
+      },
+      "nextStepHeadline": "Conta o teu ouro no teu património",
+      "nextStepDescription": "Ouro, joias e outras coisas que tens fazem parte do teu património. Junta-as no WonderMoney às tuas contas e investimentos e vê o quadro completo.",
+      "nextStepCta": "Inclui os bens físicos no teu património",
+      "guide": {
+        "read": {
+          "title": "Como ler esta página",
+          "price": "O topo da página mostra o preço de um grama de ouro puro em euros a {{asOf}}, cerca de {{ounce}} por onça troy, e quanto vale a esse preço um grama de ouro português de 19,2 quilates.",
+          "calculator": "A calculadora transforma uma peça de ouro no valor do metal que contém. Indicas o peso e o toque; o preço começa no mais recente e podes mudá-lo. Introduz a oferta de um comprador para veres que parte do valor do metal representa.",
+          "noForecast": "Esta página não faz previsões. Mostra um preço publicado e quanto vale o teu ouro a esse preço; não diz para onde vai o preço nem se deves comprar ou vender."
+        },
+        "example": {
+          "title": "Exemplo",
+          "setup": "Um fio de {{grams}} em ouro português (19,2 quilates, 800 milésimas) tem {{grams}} vezes 0,8, ou seja, {{pureGrams}} de ouro puro. A {{price}}, esse ouro vale {{value}}.",
+          "ring": "Um anel de 4 g em ouro de 18 quilates (750 milésimas) tem {{ringPure}} de ouro puro, que valem {{ringValue}} ao mesmo preço."
+        },
+        "purity": {
+          "title": "Quilates e toque",
+          "intro": "A pureza do ouro indica-se em quilates, em 24, ou em milésimas, o número gravado na marca (o toque). Estes são os seis toques legais do ouro em Portugal:",
+          "items": {
+            "k24": "24 quilates, 999 milésimas: ouro puro, como nas barras e moedas de investimento.",
+            "k22": "22 quilates, 916: moedas de ouro como a libra (sovereign) e o Krugerrand, e muitas joias da Índia.",
+            "k19_2": "19,2 quilates, 800: o ouro português, o toque tradicional da ourivesaria portuguesa.",
+            "k18": "18 quilates, 750: o toque mais comum na joalharia europeia.",
+            "k14": "14 quilates, 585: joias mais duras e mais baratas.",
+            "k9": "9 quilates, 375: o toque legal mais baixo."
+          }
+        },
+        "method": {
+          "title": "Como é calculado",
+          "intro": "A página faz quatro coisas:",
+          "steps": {
+            "a": "Preço: o preço de um grama de ouro puro do NBP em zlótis, a dividir pelos zlótis por euro do BCE no mesmo dia.",
+            "b": "Ouro puro: o peso vezes o toque a dividir por 1000. Uma peça de 24 quilates conta com 999 milésimas.",
+            "c": "Valor: os gramas de ouro puro vezes o preço de um grama de ouro puro, arredondado ao cêntimo.",
+            "d": "Oferta: se a introduzires, a oferta a dividir pelo valor, em percentagem, e a diferença em euros."
+          }
+        },
+        "buyers": {
+          "title": "Porque é que quem compra ouro paga menos do que o metal vale",
+          "below": "Uma loja que compra ouro paga menos do que o valor do metal: funde a peça, paga o ensaio e a refinação e fica com uma margem. A diferença varia de loja para loja, por isso pede mais do que uma oferta e compara cada uma com o valor desta página.",
+          "jewellery": "Uma joia nova custa mais do que o valor do metal: o preço inclui o feitio, o design, a marca e o IVA. Ao vendê-la mais tarde recebes, no máximo, o metal, não o que pagaste.",
+          "tips": "Antes de vender, pesa a peça, confirma a marca do toque, pede a oferta por grama e o toque que o comprador considerou, e guarda um recibo escrito."
+        },
+        "data": {
+          "title": "Dados e fontes",
+          "nbp": "Preço do ouro: o Narodowy Bank Polski (NBP), o banco central da Polónia, publica em cada dia útil o preço de 1 g de ouro de toque 1000 que calcula, em zlótis, através de uma API pública. O último dia é {{asOf}}; a cópia desta página foi criada a {{fetched}}.",
+          "why": "Porque não o LBMA Gold Price: esse índice de referência, fixado duas vezes por dia em Londres em dólares, é administrado pela ICE Benchmark Administration, que exige uma licença para o transmitir a terceiros, mesmo com atraso. O preço do NBP é uma publicação de um banco central disponibilizada ao público numa API aberta, sem licença nem chave, por isso esta página usa-o e indica o NBP como fonte.",
+          "ecb": "Euro: a taxa de câmbio de referência do euro para o zlóti no mesmo dia, que o Banco Central Europeu publica a título informativo. Um dia com só um dos dois valores fica de fora.",
+          "nbpLink": "NBP, preço atual do ouro",
+          "ecbLink": "BCE, taxa de referência do euro para o zlóti polaco",
+          "refresh": "A página lê um retrato guardado e nunca chama o NBP nem o BCE enquanto a usas. O site é reconstruído todos os dias com um retrato novo. Uma atualização que falhe ou traga valores implausíveis é recusada, e a página mantém o último preço bom com a respetiva data ({{asOf}})."
+        },
+        "limits": {
+          "title": "O que este valor deixa de fora",
+          "items": {
+            "metal": "Só o metal: o valor é o ouro contido na peça a um preço de referência. Pedras, outros metais, o feitio e a marca não contam.",
+            "buyers": "Não é um preço de venda: quem compra paga menos, e uma loja que vende ouro cobra mais.",
+            "purity": "Toque: a calculadora confia no toque que escolhes. Uma peça sem marca ou banhada a ouro pode ter muito menos ouro, ou nenhum.",
+            "reference": "Preço de referência: o preço diário do NBP, não uma cotação ao minuto. O mercado mexe ao longo do dia.",
+            "education": "Apenas para fins educativos, não é aconselhamento."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "netWorthLink": "Calculadora de património líquido",
+          "netWorthBody": "Junta o teu ouro ao que tens e ao que deves e vê o teu património líquido.",
+          "inflationLink": "Calculadora de inflação",
+          "inflationBody": "Vê como mudaram os preços e quanto valia o dinheiro noutros anos.",
+          "investmentReturnLink": "Calculadora do retorno do investimento",
+          "investmentReturnBody": "Vê quanto rendeu um investimento ao longo dos anos."
         }
       }
     },
@@ -4553,6 +5085,230 @@
           "budgetLink": "Orçamento familiar",
           "budgetBody": "Calcula quanto podes deixar na poupança."
         }
+      }
+    },
+    "brokerFees": {
+      "title": "Comparador de corretoras em Portugal: custódia, transação, câmbio e proteção",
+      "shortName": "Comparador de corretoras",
+      "subtitle": "Uma tabela datada do que as corretoras online e os bancos portugueses cobram para investir, lida no preçário de cada um, com o custo anual de três perfis de investidor.",
+      "description": "Compara comissões de custódia, transação e câmbio, juros sobre o saldo e proteção do investidor nas corretoras disponíveis em Portugal, com cenários de custo anual.",
+      "pageTitle": "Comparador de Corretoras em Portugal: Custódia, Comissões e Câmbio",
+      "pageDescription": "Comissões de custódia, de compra de ETF e de ações americanas, câmbio, juros sobre o saldo, proteção do investidor e reporte fiscal em Portugal, em corretoras e bancos para residentes, com o custo anual de três perfis de investidor.",
+      "review": {
+        "checked": "Comissões verificadas a {{date}}",
+        "confirm": "As comissões mudam. Confirma o preçário em vigor da corretora antes de abrires conta ou dares uma ordem.",
+        "source": "Cada linha foi lida no preçário publicado pela própria corretora, com o link na tabela. Nenhum site de comparação foi usado como fonte.",
+        "staleTitle": "Esta revisão pode estar desatualizada",
+        "stale": "Estas comissões foram verificadas pela última vez a {{date}}, há mais de quatro meses. Algumas podem ter mudado: confirma o preçário de cada corretora."
+      },
+      "calculator": {
+        "title": "Custo anual estimado",
+        "intro": "Escolhe um perfil ou altera os valores. A lista mostra lado a lado o custo estimado de um ano em cada corretora, do mais baixo para o mais alto, com o cálculo por baixo de cada uma.",
+        "profile": "Perfil de investidor",
+        "assumptions": "Pressupostos: as ordens repartem-se ao longo do ano; as ordens nos EUA são convertidas de euros a {{rate}} dólares por euro (taxa de referência do BCE de {{rateDate}}); uma ação americana custa {{price}}, para as comissões cobradas por ação; a custódia é cobrada sobre o valor indicado durante todo o ano; o IVA é o do continente, 23%. Não incluem spreads, taxas de bolsa e regulatórias fora do preçário, nem os impostos sobre os teus ganhos."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Investidor mensal em ETF",
+          "description": "12 compras de 200 € de um ETF cotado na UE, 2400 € investidos."
+        },
+        "occasionalStocks": {
+          "label": "Comprador ocasional de ações",
+          "description": "6 compras de 1000 € de ações americanas, 6000 € investidos."
+        },
+        "largePortfolio": {
+          "label": "Carteira maior",
+          "description": "50 000 € investidos, com 4 compras de ETF de 2500 € por ano."
+        },
+        "custom": "Valores teus: nenhum perfil selecionado."
+      },
+      "fields": {
+        "market": "O que compras",
+        "trades": "Ordens de compra por ano",
+        "tradeAmount": "Valor por ordem",
+        "portfolio": "Valor investido",
+        "savingsPlan": "Usar o plano de investimento em ETF da corretora, quando o publica"
+      },
+      "markets": {
+        "etfEu": "ETF cotado na UE",
+        "usStock": "Ação americana"
+      },
+      "help": {
+        "trades": "Ordens inteiras, repartidas por 12 meses.",
+        "portfolio": "Valor médio na conta ao longo do ano, para a comissão de custódia."
+      },
+      "errors": {
+        "trades": "Indica um número inteiro de ordens entre 0 e {{max}}.",
+        "amount": "Indica um valor entre 0 e {{max}}."
+      },
+      "result": {
+        "title": "Custo por corretora, do mais baixo para o mais alto",
+        "perYear": "por ano",
+        "invalid": "Corrige os campos acima para veres a estimativa.",
+        "trading": "Ordens ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Plano de investimento ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Ordens: nenhuma",
+        "fx": "Câmbio ({{pct}} de {{amount}}): {{total}}",
+        "custody": "Custódia e manutenção: {{total}}",
+        "missing": "Não contado, por não estar publicado: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Inclui {{amount}} de Imposto do Selo ({{pct}})",
+          "vat": "Inclui {{amount}} de IVA ({{pct}})"
+        },
+        "fees": {
+          "trading": "comissão da ordem",
+          "fx": "câmbio",
+          "custody": "custódia"
+        },
+        "custodyMarket": "Custódia e manutenção: {{total}}, incluindo {{market}} de comissão por bolsa",
+        "feePerOrder": "Comissão por ordem: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} por ação",
+        "min": "mín. {{amount}}",
+        "max": "máx. {{amount}}",
+        "maxPct": "máx. {{pct}} da ordem",
+        "freeUpTo": "sem comissão até {{amount}} em ordens por mês; acima disso, {{fee}}",
+        "noFee": "sem comissão",
+        "noCustody": "sem comissão",
+        "period": {
+          "month": "{{fee}} por mês",
+          "quarter": "{{fee}} por trimestre",
+          "semester": "{{fee}} por semestre",
+          "year": "{{fee}} por ano"
+        },
+        "above": "sobre o valor acima de {{amount}}",
+        "tierUpTo": "{{fee}} até {{amount}}",
+        "tierAbove": "{{fee}} acima de {{amount}}",
+        "freeOrders": "{{count}} ordem por mês sem comissão; depois, {{fee}}"
+      },
+      "table": {
+        "title": "Comissões por corretora",
+        "intro": "Corretoras por ordem alfabética. Uma comissão que a corretora não indica no próprio preçário aparece como não publicada.",
+        "caption": "Comissões de corretoras para investidores em Portugal, com a fonte e a data de verificação",
+        "columns": {
+          "broker": "Corretora",
+          "custody": "Custódia",
+          "etfEu": "Ordem de ETF na UE",
+          "usStock": "Ordem de ação americana",
+          "fx": "Câmbio",
+          "cash": "Juros sobre o saldo",
+          "protection": "Proteção do investidor",
+          "tax": "Impostos em Portugal",
+          "source": "Fonte"
+        },
+        "notPublished": "Não publicado",
+        "regulator": "Supervisor: {{name}}",
+        "venue": "Em {{venue}}",
+        "plan": "Plano de investimento: {{fee}}",
+        "noFx": "Sem comissão",
+        "noInterest": "Nenhum",
+        "interest": "{{pct}} por ano",
+        "interestUpTo": "até {{amount}}",
+        "protection": "{{scheme}}: até {{amount}}",
+        "deposit": "Saldo: {{scheme}}, até {{amount}}",
+        "checked": "Verificado a {{date}}",
+        "interestAbove": "sobre o saldo acima de {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} da perda, até {{amount}}",
+        "marketFee": "Acresce {{fee}} por ano por cada bolsa usada (máx. {{pct}} do valor da conta)",
+        "tax": {
+          "stampDuty": "Acresce Imposto do Selo de {{pct}} sobre: {{fees}}",
+          "vat": "Acresce IVA de {{pct}} sobre: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Retém ou reporta impostos em Portugal",
+          "no": "Sem reporte fiscal em Portugal: declaras tu",
+          "unknown": "Não indicado"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Alemanha",
+        "IE": "Irlanda",
+        "PL": "Polónia",
+        "EE": "Estónia"
+      },
+      "notices": {
+        "title": "Antes de te basares nesta tabela",
+        "educationalTitle": "Apenas educativo",
+        "educational": "Esta página é educativa. Não é uma recomendação nem uma oferta, a ordem não é um ranking e o WonderMoney não recomenda nenhuma corretora.",
+        "neutralTitle": "Sem links de afiliados",
+        "neutral": "O WonderMoney não recebe nada de nenhuma corretora desta página. Os links levam ao preçário de cada corretora.",
+        "taxTitle": "Impostos sobre os teus investimentos",
+        "tax": "As mais-valias e os dividendos são tributados em Portugal, em regra a 28%. Um banco português retém e reporta; com uma corretora estrangeira, declaras tu no IRS."
+      },
+      "nextStepHeadline": "Junta numa só vista os investimentos de várias corretoras",
+      "nextStepDescription": "As comissões são só uma parte. Importa o ficheiro de exportação de cada corretora no WonderMoney e vê todos os teus investimentos, com preços diários, ao lado das tuas contas bancárias.",
+      "nextStepCta": "Ver a tua carteira num só sítio",
+      "guide": {
+        "read": {
+          "title": "Como ler esta tabela",
+          "what": "Cada corretora cobra de forma diferente: um valor fixo ou uma percentagem por ordem, muitas vezes com um mínimo; uma comissão de custódia sobre o que tens investido, por mês, trimestre ou semestre; e uma comissão para converter euros em dólares quando compras ações americanas. A tabela escreve cada comissão como o preçário a indica, para uma ordem online, e a calculadora aplica as mesmas fórmulas a um ano inteiro.",
+          "protection": "A proteção do investidor cobre os teus títulos se a corretora falir e não os conseguir devolver, até ao montante indicado; nunca cobre uma descida das cotações. O saldo em dinheiro num banco fica coberto pela garantia de depósitos. O sistema depende do país da entidade onde tens a conta, por isso a tabela indica-o.",
+          "notRec": "A tabela é educativa. Não é uma recomendação, a ordem não é um ranking e a corretora mais barata para um perfil pode ser a mais cara para outro. O serviço, os produtos disponíveis e a forma como cada corretora trata os impostos em Portugal também contam."
+        },
+        "example": {
+          "title": "Exemplo prático",
+          "setup": "Pensa no comprador ocasional de ações: {{count}} compras de {{amount}} em ações americanas num ano, com {{portfolio}} investidos.",
+          "bank": "No {{bank}}, cada ordem custa {{bankFormula}}, por isso as {{count}} ordens custam {{bankTrading}} com Imposto do Selo. Converter {{converted}} em dólares a {{bankFx}} soma {{bankFxTotal}}, e a custódia ({{bankCustodyFormula}}) soma {{bankCustody}} com IVA. O ano custa {{bankTotal}}, dos quais {{bankStampDuty}} são Imposto do Selo e {{bankVat}} são IVA.",
+          "online": "Na {{online}}, cada ordem custa {{onlineFormula}}: {{onlineTrading}} no ano. O câmbio a {{onlineFx}} soma {{onlineFxTotal}} e a custódia {{onlineCustody}}, num total de {{onlineTotal}}.",
+          "takeaway": "Com ordens pequenas e pouco frequentes, pesam mais as comissões mínimas e as custódias de valor fixo; com ordens grandes ou uma carteira grande, pesam mais as comissões em percentagem. Muda o perfil acima para veres como a ordem muda."
+        },
+        "method": {
+          "title": "Método",
+          "intro": "Cada comissão foi lida no preçário publicado pela própria corretora, na data indicada na respetiva linha; a tabela inteira foi revista a {{date}} e é verificada de novo a cada trimestre. As comissões que um preçário não indica aparecem como não publicadas e ficam fora dos totais, que surgem então como incompletos.",
+          "steps": {
+            "a": "Ordens: a comissão de cada ordem é a parte fixa mais a percentagem da ordem, com o mínimo e o máximo por ordem. As comissões por ação contam ações inteiras ao preço assumido. Um valor mensal sem comissão aplica-se mês a mês.",
+            "b": "Plano de investimento: nas compras de ETF, com a opção ativa e quando a corretora publica um plano periódico, a comissão do plano substitui a da ordem.",
+            "c": "Câmbio: as ordens nos EUA pagam a comissão de câmbio da corretora sobre o valor convertido; as comissões em dólares são convertidas a {{rate}} dólares por euro.",
+            "d": "Custódia: a fórmula publicada, por período e com o respetivo mínimo e máximo, é cobrada sobre o valor investido tantas vezes quantos os períodos de um ano.",
+            "e": "Impostos sobre as comissões: quando o preçário diz que as comissões não incluem o Imposto do Selo (4% sobre a corretagem) ou o IVA (23% sobre a custódia), estes somam-se às comissões a que se aplicam.",
+            "f": "O total soma as ordens do ano, o câmbio e a custódia, e as corretoras aparecem da mais barata para a mais cara. As que não publicam uma comissão de que o perfil precisa ficam no fim."
+          }
+        },
+        "limits": {
+          "title": "O que a estimativa deixa de fora",
+          "items": {
+            "a": "Taxas de bolsa, de liquidação e regulatórias que a corretora cobra à parte, o spread no preço a que negoceias e os encargos correntes do próprio ETF.",
+            "b": "Promoções, escalões para quem negoceia muito e condições ligadas a outros produtos do banco.",
+            "c": "Vendas, transferências para outra corretora, dividendos e os impostos sobre dividendos e mais-valias.",
+            "d": "Alterações depois da data de verificação: as comissões mudam e prevalece sempre o preçário em vigor da corretora."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "compoundLink": "Calculadora de juros compostos",
+          "compoundBody": "Vê quanto custa uma comissão anual ao longo de décadas de juros compostos.",
+          "returnLink": "Calculadora de rentabilidade",
+          "returnBody": "A rentabilidade passada de um índice, antes de comissões e impostos.",
+          "profileLink": "Questionário de perfil de investidor",
+          "profileBody": "Quanto risco podes correr, antes de escolheres o que comprar.",
+          "netWorthLink": "Calculadora de património líquido",
+          "netWorthBody": "Junta os teus investimentos a tudo o que tens e deves."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD)",
+        "deInvestor": "Sistema alemão de indemnização aos investidores",
+        "deEdw": "EdW, indemnização aos investidores (Alemanha)",
+        "deDeposit": "Garantia de depósitos alemã",
+        "ieIcs": "Investor Compensation Scheme (Irlanda)",
+        "plKdpw": "Sistema de indemnização KDPW (Polónia)",
+        "eeFund": "Fundo de Proteção dos Investidores (Estónia)"
+      },
+      "brokerNotes": {
+        "degiro": "A comissão de ETF na UE é a da Seleção de ETFs da DEGIRO na Tradegate. Noutras bolsas, como a Euronext Amesterdão ou a Xetra, uma ordem custa 2 € + 1 € de manuseamento, mais 2,50 € por ano por cada bolsa usada (exceto a Euronext Lisbon). Não há plano de investimento automático.",
+        "ibkr": "Preço fixo IBKR Pro. Os ETF na Euronext somam 0,75 € por execução. Câmbio: 0,03% na conversão automática. Os juros são proporcionais ao valor da conta abaixo de 100 000 USD. Acresce IVA às comissões, quando aplicável.",
+        "trading212": "Os juros sobre o saldo aplicam-se a novos clientes da Trading 212 EU que adiram ao programa, até 100 000 €; o dinheiro pode ficar aplicado em fundos do mercado monetário.",
+        "xtb": "Sem comissão até 100 000 € em ordens por mês, somando as tuas contas. A comissão mensal de 10 € só se aplica após um ano sem negociar e 90 dias sem depósitos. Proteção: 100% dos primeiros 3000 € e 90% acima disso. Os juros indicados são a taxa padrão; as contas novas têm taxas de boas-vindas. As comissões já incluem Imposto do Selo ou IVA.",
+        "lightyear": "Ações, ETC e ETN em euros custam 1 € por ordem. Em Portugal, acresce Imposto do Selo de 4% sobre a comissão de câmbio. Os juros sobre o saldo dependem do país de residência; não há taxa publicada para Portugal.",
+        "trade-republic": "O 1 € por ordem é uma taxa de liquidação; os planos de poupança são gratuitos. O câmbio está incluído no preço, sem comissão própria publicada. Juros: 4% para novos clientes até 20 000 €, até 1 de março de 2027, com IBAN português; a taxa padrão não está publicada. A retenção e o reporte fiscal em Portugal aplicam-se aos clientes da sucursal portuguesa.",
+        "activobank": "A primeira ordem de cada mês no site ou na app é gratuita, em qualquer mercado. O preçário indica também uma comissão mensal de guarda para títulos não integrados e estrangeiros (de 4 € a 33 € consoante o valor), e não é claro qual se aplica a ETF estrangeiros e ações americanas. Câmbio às taxas internas do banco, sem spread publicado.",
+        "banco-best": "A partir da 21.ª ordem do mês: 0,10% (mín. 12 €). O serviço Best Trading Pro, na plataforma do Saxo Bank, tem outros preços: ETF a 0,08% (mín. 10 €), sem custódia e indemnização aos investidores até 20 000 €.",
+        "big": "A custódia fica isenta com três negócios por trimestre e ordenado domiciliado ou posição média acima de 100 000 €. O spread cambial é indicativo. Uma Superconta à parte paga juros sobre o saldo.",
+        "millennium-bcp": "A custódia é de 6 € por trimestre só se houve uma transação no site ou na app nos três meses anteriores; caso contrário, 9 €. Câmbio às taxas internas do banco, sem spread publicado. Às vendas nos EUA acresce a SEC fee."
       }
     }
   },

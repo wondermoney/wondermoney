@@ -5,20 +5,10 @@ import ArticleHero from "@/components/shared/ArticleHero.astro";
 import ContentSearch from "@/components/shared/ContentSearch";
 import FigureCards from "@/components/shared/FigureCards.astro";
 import { figureForGuide, PAGE_FIGURES } from "@/lib/hairline/articleFigures";
-import { sanityClient } from "sanity:client";
+import { getGuides } from "@/lib/contentCollections";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
-
-type GuideEntry = {
-  title: string;
-  slug: string;
-  category?: string;
-  excerpt?: string;
-  publishedAt?: string;
-  market?: string;
-  topicKey?: string;
-};
 
 interface Props {
   locale: Lang;
@@ -28,30 +18,11 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}/learn`);
 
-const guides = await sanityClient.fetch<GuideEntry[]>(
-  `*[_type == "guide" && locale == $locale] | order(publishedAt desc) { title, "slug": slug.current, category, excerpt, publishedAt, market, topicKey }`,
-  { locale },
-);
+// Newest first, so each category lists its guides from the latest.
+const guides = (await getGuides()).filter((guide) => guide.locale === locale);
 
-const rankGuideForRouteSelection = (guide: GuideEntry): number => (guide.market ? 0 : 1);
-
-const dedupedGuides = Array.from(
-  guides
-    .reduce((acc, guide, index) => {
-      const key = guide.topicKey || guide.slug || `guide-${index}`;
-      const current = acc.get(key);
-
-      if (!current || rankGuideForRouteSelection(guide) > rankGuideForRouteSelection(current)) {
-        acc.set(key, guide);
-      }
-
-      return acc;
-    }, new Map<string, GuideEntry>())
-    .values(),
-);
-
-const grouped: Record<string, typeof dedupedGuides> = {};
-for (const guide of dedupedGuides) {
+const grouped: Record<string, typeof guides> = {};
+for (const guide of guides) {
   const cat = guide.category || t("learn.hub.defaultCategory");
   if (!grouped[cat]) {
     grouped[cat] = [];
@@ -63,7 +34,7 @@ const categories = Object.keys(grouped).sort();
 const learnPrefix = `/${locale}/learn`;
 const monthlyPrefix = `${learnPrefix}/monthly`;
 
-const searchItems = dedupedGuides.map((g) => ({
+const searchItems = guides.map((g) => ({
   title: g.title,
   description: g.excerpt,
   href: `${learnPrefix}/${g.slug}`,
@@ -76,8 +47,8 @@ const itemListSchema = {
   name: t("learn.hub.title"),
   description: t("learn.hub.pageDescription"),
   url: `https://wonder.money${learnPrefix}`,
-  numberOfItems: dedupedGuides.length,
-  itemListElement: dedupedGuides.map((g, index: number) => ({
+  numberOfItems: guides.length,
+  itemListElement: guides.map((g, index: number) => ({
     "@type": "ListItem",
     position: index + 1,
     name: g.title,
@@ -127,7 +98,7 @@ const itemListSchema = {
     />
 
     {
-      dedupedGuides.length === 0 ? (
+      guides.length === 0 ? (
         <div class="mt-12 rounded-card border border-border bg-paper-2 p-12 text-center">
           <p class="text-lg text-muted-foreground">
             {t("learn.hub.comingSoon")}

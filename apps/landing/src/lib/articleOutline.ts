@@ -13,17 +13,21 @@ export function readingMinutes(texts: Iterable<string>): number {
   return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
 }
 
-type PortableTextLike = Readonly<{ _type: string }> & Readonly<Record<string, unknown>>;
+const NAMED_ENTITIES: Readonly<Record<string, string>> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
 
-/** The plain text of Portable Text blocks, one line per block. */
-export function portableTextToPlain(blocks: ReadonlyArray<PortableTextLike>): string {
-  return blocks
-    .filter((block) => block._type === "block" && Array.isArray(block.children))
-    .map((block) =>
-      (block.children as ReadonlyArray<{ text?: unknown }>)
-        .map((child) => (typeof child.text === "string" ? child.text : ""))
-        .join(""),
-    )
+/** The plain text of rendered Markdown, one line per block. */
+export function htmlToPlain(html: string): string {
+  return html
+    .replace(/<\/(?:p|h[1-6]|li|blockquote|pre|tr|td|th)>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(?:#x([\da-f]+)|#(\d+)|([a-z]+));/gi, (entity, hex?: string, decimal?: string, name?: string) => {
+      if (hex) return String.fromCodePoint(Number.parseInt(hex, 16));
+      if (decimal) return String.fromCodePoint(Number.parseInt(decimal, 10));
+      return NAMED_ENTITIES[name?.toLowerCase() ?? ""] ?? entity;
+    })
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
     .join("\n");
 }
 

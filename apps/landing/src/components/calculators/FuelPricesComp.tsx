@@ -3,6 +3,7 @@ import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
+import CheapestStations from "./CheapestStations";
 import {
   FUEL_COST_LIMITS,
   FUEL_PRICES_SOURCE,
@@ -90,6 +91,7 @@ function FuelPrices() {
   return (
     <>
       <LatestPrices />
+      <CheapestStations />
       <CalculatorLayout>
         <div className="space-y-5 rounded-card border border-border bg-background p-6 shadow-sm">
           <div className="space-y-1.5">

@@ -1,12 +1,10 @@
 import { existsSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { getToolStaticPaths, getTopLevelPageStaticPaths } from "./pageStaticPaths";
 import { buildResourcesHub } from "./resourcesHub";
 import { buildAlternateLinks, SUPPORTED_LANGS, toLocalizedPath, toLocalizedPathname } from "./routes";
 import { isSitemapPage } from "./sitemap";
 import { getTranslations } from "./translations";
-
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
 
 describe("resources hub routes", () => {
   const routeId = "pageResources";

@@ -58,7 +58,7 @@ export function resolveFigure(requested: FigureName): ResolvedFigure {
   return { name, labelKey: `hairline.labels.${name}` };
 }
 
-/** Learn guides (Sanity) by slug, English and Portuguese. Guides exist in those two locales only. */
+/** Learn guides (`src/content/guides`) by slug, English and Portuguese. Guides exist in those two locales only. */
 const GUIDE_FIGURES: Readonly<Record<string, FigureName>> = {
   "emergency-fund-guide": "jar",
   "fundo-de-emergencia": "jar",
@@ -148,13 +148,16 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolEuribor: "easelchart",
   toolDepositRateIndex: "easelchart",
   toolElectricityIndex: "meter",
+  toolElectricityTariffComparison: "meter",
   toolFuelPrices: "pump",
+  toolGoldPrice: "safe",
   toolFreeBankAccounts: "wallet",
   toolRemuneratedAccounts: "wallet",
   toolPersonalLoan: "wallet",
   toolTermDeposit: "safe",
   toolTermDepositOffers: "safe",
   toolSavingsCertificates: "safe",
+  toolBrokerFees: "etfbox",
   pageFireCalculator: "deckchair",
 };
 

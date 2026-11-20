@@ -10,6 +10,7 @@ import {
   fuelCostExample,
   fuelPriceSummaries,
 } from "@/lib/calculators/fuelCost";
+import { FUEL_STATIONS_SOURCE } from "@/lib/calculators/fuelStations";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
@@ -46,6 +47,10 @@ const values = {
   asOf: FUEL_PRICES_SOURCE.asOf,
   fetched: FUEL_PRICES_SOURCE.fetchedOn,
   first: FUEL_PRICES_SOURCE.firstDate,
+  stationsDate: FUEL_STATIONS_SOURCE.fetchedAt.slice(0, 10),
+  stationsTime: FUEL_STATIONS_SOURCE.fetchedAt.slice(11, 16),
+  stationsDistrict: FUEL_STATIONS_SOURCE.top.district,
+  stationsMunicipality: FUEL_STATIONS_SOURCE.top.municipality,
 };
 
 const list = (key: string) =>
@@ -70,6 +75,7 @@ const linkClass =
     </h2>
     <div class="mt-3 space-y-4 leading-7">
       <p>{t(k("read.prices"), values)}</p>
+      <p>{t(k("read.stations"), values)}</p>
       <p>{t(k("read.calculator"))}</p>
       <p>{t(k("read.noForecast"))}</p>
     </div>
@@ -95,6 +101,7 @@ const linkClass =
         {steps.map((item) => <li>{item}</li>)}
       </ol>
       <p>{t(k("method.change"), values)}</p>
+      <p>{t(k("method.stations"), values)}</p>
     </div>
   </section>
 
@@ -104,11 +111,14 @@ const linkClass =
     </h2>
     <div class="mt-3 space-y-4 leading-7">
       <p>{t(k("data.dgeg"), values)}</p>
+      <p>{t(k("data.stations"), values)}</p>
       <p>{t(k("data.terms"))}</p>
       <ul class="space-y-1">
         <li><a href={FUEL_PRICES_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.dgegLink"))}</a></li>
+        <li><a href={FUEL_STATIONS_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.stationsLink"))}</a></li>
       </ul>
       <p>{t(k("data.refresh"), values)}</p>
+      <p>{t(k("data.stationsRefresh"), values)}</p>
     </div>
   </section>
 

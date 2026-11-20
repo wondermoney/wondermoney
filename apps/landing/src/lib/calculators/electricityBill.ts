@@ -4,6 +4,14 @@ import {
   type ContractedPower,
 } from "./data/erseTariffs";
 import {
+  DAYS_PER_YEAR,
+  cavNet,
+  energyVatSplit,
+  iecNet,
+  powerTermVatSplit,
+  reducedVatKwhByPeriod,
+} from "./electricityTaxes";
+import {
   ELECTRICITY_PRICES,
   ELECTRICITY_PRICES_SOURCE,
   type ElectricityPriceRow,
@@ -55,12 +63,18 @@ export interface BillLine {
 }
 
 export interface BillBreakdown {
-  /** Contracted power, 30 days at the daily price. */
+  /**
+   * The network-access tariff's fixed term within the power price, at the reduced VAT rate (contracted
+   * power up to 3.45 kVA, Código do IVA Lista I verba 2.33). Zero above 3.45 kVA.
+   */
+  powerNetwork: BillLine;
+  /** The rest of the contracted power price for 30 days (all of it above 3.45 kVA), at 23%. */
   power: BillLine;
   /** Energy within the reduced-VAT allowance. */
   energyReduced: BillLine;
   /** Energy above it. */
   energyStandard: BillLine;
+  /** Zero when the annual consumption is below 400 kWh (Lei n.º 30/2003, artigo 4.º, n.º 1). */
   cav: BillLine;
   iec: BillLine;
 }
@@ -89,7 +103,8 @@ export type ElectricityBillOutcome =
   | { ok: true; result: ElectricityBillResult }
   | { ok: false; errors: Partial<Record<ElectricityBillField, ElectricityBillError>> };
 
-const cents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
+/** Rounds to the cent; the nudge keeps an exact half cent from rounding down on float error. */
+const cents = (value: number) => Math.round(value * 100 + 1e-7) / 100;
 
 function validate(input: ElectricityBillInput) {
   const errors: Partial<Record<ElectricityBillField, ElectricityBillError>> = {};
@@ -114,38 +129,47 @@ export function breakEvenOffPeakPercent() {
   return ((biPeak - simple) / (biPeak - biOffPeak)) * 100;
 }
 
-function energyNet(option: TariffOption, kwh: number, offPeakShare: number) {
+function energyPeriods(option: TariffOption, kwh: number, offPeakShare: number) {
   const { simple, biPeak, biOffPeak } = ERSE_TARIFFS.energyPerKwh;
-  if (option === "simple") return kwh * simple;
-  return kwh * (1 - offPeakShare) * biPeak + kwh * offPeakShare * biOffPeak;
+  if (option === "simple") return { kwh: [kwh], prices: [simple] };
+  return { kwh: [kwh * (1 - offPeakShare), kwh * offPeakShare], prices: [biPeak, biOffPeak] };
 }
 
 function bill(
   power: number,
   option: TariffOption,
   monthlyKwh: number,
+  annualKwh: number,
   offPeakShare: number,
   largeFamily: boolean,
 ) {
-  const { vat, powerPerDay, cavPerMonth, iecPerKwh } = ERSE_TARIFFS;
+  const { vat, powerPerDay } = ERSE_TARIFFS;
   const powerKey = power as ContractedPower;
-  const allowance = largeFamily ? vat.reducedKwhPer30DaysLargeFamily : vat.reducedKwhPer30Days;
   // Energy up to the allowance gets 6% VAT (contracted power up to 6.9 kVA, all four options).
-  // With two prices the allowance is shared in proportion to the kWh in each period, which gives
-  // the same VAT as splitting the total energy cost in the same proportion.
-  const reducedKwh = power <= vat.energyReducedUpToKva ? Math.min(monthlyKwh, allowance) : 0;
-  const energy = energyNet(option, monthlyKwh, offPeakShare);
-  const energyReducedNet = monthlyKwh > 0 ? (energy * reducedKwh) / monthlyKwh : 0;
+  // With two prices the allowance is shared in proportion to the kWh in each period.
+  const periods = energyPeriods(option, monthlyKwh, offPeakShare);
+  const reducedByPeriod = reducedVatKwhByPeriod(periods.kwh, {
+    contractedPower: power,
+    days: BILL_DAYS,
+    largeFamily,
+    roundToKwh: false,
+  });
+  const reducedKwh = reducedByPeriod.reduce((sum, kwh) => sum + kwh, 0);
+  const energy = energyVatSplit(periods.kwh, periods.prices, reducedByPeriod);
+  const powerTerm = powerTermVatSplit(powerPerDay[powerKey] * BILL_DAYS, {
+    contractedPower: power,
+    days: BILL_DAYS,
+    socialTariff: false,
+  });
 
   const breakdown: BillBreakdown = {
-    power: {
-      net: powerPerDay[powerKey] * BILL_DAYS,
-      vatRate: power <= vat.powerTermReducedUpToKva ? vat.reduced : vat.standard,
-    },
-    energyReduced: { net: energyReducedNet, vatRate: vat.reduced },
-    energyStandard: { net: energy - energyReducedNet, vatRate: vat.standard },
-    cav: { net: cavPerMonth, vatRate: vat.reduced },
-    iec: { net: monthlyKwh * iecPerKwh, vatRate: vat.standard },
+    powerNetwork: { net: powerTerm.reduced, vatRate: vat.reduced },
+    power: { net: powerTerm.standard, vatRate: vat.standard },
+    energyReduced: { net: energy.reduced, vatRate: vat.reduced },
+    energyStandard: { net: energy.standard, vatRate: vat.standard },
+    // A twelfth of the year's CAV is the monthly amount; none below the annual exemption threshold.
+    cav: { net: cavNet({ days: DAYS_PER_YEAR, annualKwh, reduced: false }) / 12, vatRate: vat.reduced },
+    iec: { net: iecNet(monthlyKwh), vatRate: vat.standard },
   };
   const lines = Object.values(breakdown);
   const subtotal = lines.reduce((sum, line) => sum + line.net, 0);
@@ -158,13 +182,15 @@ export function computeElectricityBill(input: ElectricityBillInput): Electricity
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const monthlyKwh = input.period === "year" ? input.consumption / 12 : input.consumption;
+  // Taken from the figure as entered, so 400 kWh a year is not lost to rounding in /12 and x12.
+  const annualKwh = input.period === "year" ? input.consumption : input.consumption * 12;
   const share = input.option === "biHourly" ? input.offPeakPercent / 100 : 0;
-  const main = bill(input.contractedPower, input.option, monthlyKwh, share, input.largeFamily);
+  const main = bill(input.contractedPower, input.option, monthlyKwh, annualKwh, share, input.largeFamily);
 
   const otherOption: TariffOption = input.option === "simple" ? "biHourly" : "simple";
   // The comparison keeps the entered off-peak share (the field keeps its value while hidden).
   const otherShare = otherOption === "biHourly" ? input.offPeakPercent / 100 : 0;
-  const other = bill(input.contractedPower, otherOption, monthlyKwh, otherShare, input.largeFamily);
+  const other = bill(input.contractedPower, otherOption, monthlyKwh, annualKwh, otherShare, input.largeFamily);
   const offPeakKnown = Number.isFinite(input.offPeakPercent) && input.offPeakPercent >= 0 && input.offPeakPercent <= 100;
 
   const total = cents(main.total);
