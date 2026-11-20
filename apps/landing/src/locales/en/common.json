@@ -4554,6 +4554,230 @@
           "budgetBody": "Work out how much you can leave in savings."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Broker fees in Portugal: custody, trading, FX and protection compared",
+      "shortName": "Broker fees",
+      "subtitle": "A dated table of what online brokers and Portuguese banks charge to invest, read from each one's own price list, with the yearly cost for three investor profiles.",
+      "description": "Compare custody, trading and currency fees, cash interest and investor protection at brokers available in Portugal, with yearly cost scenarios.",
+      "pageTitle": "Broker Fees in Portugal Compared: Custody, Trading and FX Costs",
+      "pageDescription": "Custody, ETF and US stock trading fees, FX costs, cash interest, investor protection and Portuguese tax reporting at brokers and banks for Portuguese residents, with the yearly cost of three investor profiles.",
+      "review": {
+        "checked": "Fees checked on {{date}}",
+        "confirm": "Fees change. Check the broker's current price list before you open an account or place an order.",
+        "source": "Each row is read from the broker's own published price list, linked in the table. No comparison site is used as a source.",
+        "staleTitle": "This review may be out of date",
+        "stale": "These fees were last checked on {{date}}, more than four months ago. Some may have changed: check each broker's price list."
+      },
+      "calculator": {
+        "title": "Estimated yearly cost",
+        "intro": "Pick a profile or change the numbers. The list puts every broker's estimated cost for one year side by side, cheapest first, with the calculation under each one.",
+        "profile": "Investor profile",
+        "assumptions": "Assumptions: orders are spread evenly over the year; US orders are converted from euros at {{rate}} dollars per euro (ECB reference rate of {{rateDate}}); a US share costs {{price}}, for fees charged per share; custody is charged on the value entered for the whole year; VAT is at the mainland rate of 23%. Spreads, exchange and regulatory fees not in the price list, and taxes on your gains are not included."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Monthly ETF investor",
+          "description": "12 buys of €200 of an EU-listed ETF, €2,400 invested."
+        },
+        "occasionalStocks": {
+          "label": "Occasional stock buyer",
+          "description": "6 buys of €1,000 of US stocks, €6,000 invested."
+        },
+        "largePortfolio": {
+          "label": "Larger portfolio",
+          "description": "€50,000 held, with 4 ETF buys of €2,500 a year."
+        },
+        "custom": "Your own numbers: no profile selected."
+      },
+      "fields": {
+        "market": "What you buy",
+        "trades": "Buy orders a year",
+        "tradeAmount": "Amount per order",
+        "portfolio": "Value held",
+        "savingsPlan": "Use the broker's ETF savings plan where it publishes one"
+      },
+      "markets": {
+        "etfEu": "ETF listed in the EU",
+        "usStock": "US stock"
+      },
+      "help": {
+        "trades": "Whole orders, spread over 12 months.",
+        "portfolio": "Average value in the account over the year, for custody fees."
+      },
+      "errors": {
+        "trades": "Enter a whole number of orders from 0 to {{max}}.",
+        "amount": "Enter an amount from 0 to {{max}}."
+      },
+      "result": {
+        "title": "Cost per broker, cheapest first",
+        "perYear": "a year",
+        "invalid": "Correct the fields above to see the estimate.",
+        "trading": "Orders ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Savings plan ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Orders: none",
+        "fx": "Currency conversion ({{pct}} of {{amount}}): {{total}}",
+        "custody": "Custody and account fees: {{total}}",
+        "missing": "Not counted, not published: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Includes {{amount}} of stamp duty ({{pct}})",
+          "vat": "Includes {{amount}} of VAT ({{pct}})"
+        },
+        "fees": {
+          "trading": "order fee",
+          "fx": "currency conversion",
+          "custody": "custody"
+        },
+        "custodyMarket": "Custody and account fees: {{total}}, including {{market}} of per-exchange fee",
+        "feePerOrder": "Fee per order: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} per share",
+        "min": "min {{amount}}",
+        "max": "max {{amount}}",
+        "maxPct": "max {{pct}} of the order",
+        "freeUpTo": "free up to {{amount}} of orders a month, then {{fee}}",
+        "noFee": "no commission",
+        "noCustody": "no fee",
+        "period": {
+          "month": "{{fee}} a month",
+          "quarter": "{{fee}} a quarter",
+          "semester": "{{fee}} every six months",
+          "year": "{{fee}} a year"
+        },
+        "above": "on the value above {{amount}}",
+        "tierUpTo": "{{fee}} up to {{amount}}",
+        "tierAbove": "{{fee}} above {{amount}}",
+        "freeOrders": "{{count}} order a month free, then {{fee}}"
+      },
+      "table": {
+        "title": "Fees by broker",
+        "intro": "Brokers in alphabetical order. A fee the broker does not state in its own price list is marked as not published.",
+        "caption": "Broker fees for investors in Portugal, with the source and the date checked",
+        "columns": {
+          "broker": "Broker",
+          "custody": "Custody",
+          "etfEu": "EU ETF order",
+          "usStock": "US stock order",
+          "fx": "Currency conversion",
+          "cash": "Interest on cash",
+          "protection": "Investor protection",
+          "tax": "Portuguese tax",
+          "source": "Source"
+        },
+        "notPublished": "Not published",
+        "regulator": "Regulator: {{name}}",
+        "venue": "On {{venue}}",
+        "plan": "Savings plan: {{fee}}",
+        "noFx": "No fee",
+        "noInterest": "None",
+        "interest": "{{pct}} a year",
+        "interestUpTo": "up to {{amount}}",
+        "protection": "{{scheme}}: up to {{amount}}",
+        "deposit": "Cash: {{scheme}}, up to {{amount}}",
+        "checked": "Checked {{date}}",
+        "interestAbove": "on the balance above {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} of the loss, up to {{amount}}",
+        "marketFee": "Plus {{fee}} a year per exchange used (max {{pct}} of the account value)",
+        "tax": {
+          "stampDuty": "Plus {{pct}} stamp duty on: {{fees}}",
+          "vat": "Plus {{pct}} VAT on: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Withholds or reports Portuguese tax",
+          "no": "No Portuguese tax reporting: you declare it",
+          "unknown": "Not stated"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Germany",
+        "IE": "Ireland",
+        "PL": "Poland",
+        "EE": "Estonia"
+      },
+      "notices": {
+        "title": "Before you rely on this table",
+        "educationalTitle": "Educational only",
+        "educational": "This page is educational. It is not a recommendation or an offer, the order is not a ranking, and WonderMoney does not recommend any broker.",
+        "neutralTitle": "No affiliate links",
+        "neutral": "WonderMoney earns nothing from any broker on this page. Links go to each broker's own price list.",
+        "taxTitle": "Taxes on your investments",
+        "tax": "Gains and dividends are taxed in Portugal, usually at 28%. A Portuguese bank withholds and reports it; with a foreign broker you declare it yourself in your IRS return."
+      },
+      "nextStepHeadline": "Keep investments from different brokers in one overview",
+      "nextStepDescription": "Fees are one part of the picture. Import each broker's export file into WonderMoney and see all your investments, with daily prices, next to your bank accounts.",
+      "nextStepCta": "See your portfolio in one place",
+      "guide": {
+        "read": {
+          "title": "How to read this table",
+          "what": "Each broker charges in its own way: a fixed amount or a percentage per order, often with a minimum; a custody fee on what you hold, per month, quarter or half-year; and a fee to convert euros to dollars when you buy US shares. The table writes each fee as the price list does, for an online order, and the calculator applies the same formulas to a whole year.",
+          "protection": "Investor protection covers your securities if the broker fails and cannot return them, up to the amount shown; it never covers a fall in prices. Cash held at a bank is covered by its deposit guarantee instead. The scheme depends on the country of the entity that holds your account, which is why the table names it.",
+          "notRec": "The table is educational. It is not a recommendation, the order is not a ranking, and the cheapest broker for one profile can be the dearest for another. Service, the products on offer and how each broker handles Portuguese tax matter too."
+        },
+        "example": {
+          "title": "Worked example",
+          "setup": "Take the occasional stock buyer: {{count}} buys of {{amount}} of US shares in a year, {{portfolio}} held.",
+          "bank": "At {{bank}}, each order costs {{bankFormula}}, so the {{count}} orders cost {{bankTrading}} with stamp duty. Converting {{converted}} to dollars at {{bankFx}} adds {{bankFxTotal}}, and custody ({{bankCustodyFormula}}) adds {{bankCustody}} with VAT. The year costs {{bankTotal}}, of which {{bankStampDuty}} is stamp duty and {{bankVat}} is VAT.",
+          "online": "At {{online}}, each order costs {{onlineFormula}}: {{onlineTrading}} for the year. Currency conversion at {{onlineFx}} adds {{onlineFxTotal}} and custody {{onlineCustody}}, for {{onlineTotal}} in total.",
+          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes."
+        },
+        "method": {
+          "title": "Method",
+          "intro": "Every fee was read from the broker's own published price list on the date shown in its row; the whole table was reviewed on {{date}} and is re-checked every quarter. Fees that a price list does not state are marked as not published and left out of the totals, which are then shown as incomplete.",
+          "steps": {
+            "a": "Orders: each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
+            "b": "Savings plan: for ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
+            "c": "Currency: US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
+            "d": "Custody: the published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
+            "e": "Taxes on fees: where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
+            "f": "The total adds the year's orders, currency conversion and custody, and the brokers are listed from cheapest to dearest. Brokers missing a fee the profile needs go last."
+          }
+        },
+        "limits": {
+          "title": "What the estimate leaves out",
+          "items": {
+            "a": "Exchange, clearing and regulatory fees that a broker passes on separately, spreads on the price you trade at, and the ongoing charges of the ETF itself.",
+            "b": "Promotions, fee tiers for very active traders, and conditions tied to other products at the bank.",
+            "c": "Selling, transfers out, dividends and the tax on dividends and gains.",
+            "d": "Changes after the date checked: fees change, so the broker's current price list always prevails."
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "compoundLink": "Compound interest calculator",
+          "compoundBody": "See what a yearly fee costs over decades of compounding.",
+          "returnLink": "Investment return calculator",
+          "returnBody": "Past returns of an index, before fees and taxes.",
+          "profileLink": "Investor profile quiz",
+          "profileBody": "How much risk you could take, before choosing what to buy.",
+          "netWorthLink": "Net worth calculator",
+          "netWorthBody": "Add your investments to everything else you own and owe."
+        }
+      },
+      "schemes": {
+        "ptSii": "Investor Compensation Scheme (SII, Portugal)",
+        "ptFgd": "Deposit Guarantee Fund (FGD, Portugal)",
+        "deInvestor": "German investor compensation scheme",
+        "deEdw": "EdW investor compensation (Germany)",
+        "deDeposit": "German deposit guarantee",
+        "ieIcs": "Investor Compensation Scheme (Ireland)",
+        "plKdpw": "KDPW compensation scheme (Poland)",
+        "eeFund": "Investor Protection Fund (Estonia)"
+      },
+      "brokerNotes": {
+        "degiro": "The EU ETF fee is DEGIRO's ETF selection on Tradegate. On other exchanges, such as Euronext Amsterdam or Xetra, an order costs €2 + €1 handling, plus €2.50 a year for each exchange used (Euronext Lisbon excepted). No automatic savings plan.",
+        "ibkr": "IBKR Pro fixed pricing. ETFs on Euronext add €0.75 per execution. Currency: 0.03% on automatic conversion. Interest is proportional to the account value below USD 100,000. VAT is added to commissions where applicable.",
+        "trading212": "Interest on cash applies to new Trading 212 EU clients who opt in, on up to €100,000; the cash may be held in money market funds.",
+        "xtb": "Commission-free up to €100,000 of orders a month across your accounts. A €10 monthly fee applies only after a year without trades and 90 days without deposits. Protection: 100% of the first €3,000 and 90% above it. The interest shown is the standard rate; new accounts get introductory rates. Fees include stamp duty or VAT.",
+        "lightyear": "EUR-listed shares, ETCs and ETNs cost €1 per order. In Portugal, 4% stamp duty is added to the conversion fee. Interest on cash depends on the country of residence; no rate is published for Portugal.",
+        "trade-republic": "The €1 per order is a settlement fee; savings plans are free. Currency conversion is part of the price, with no separate fee published. Interest: 4% for new clients on up to €20,000 until 1 March 2027, with a Portuguese IBAN; the standard rate is not published. Portuguese tax withholding and reporting apply to clients of the Portuguese branch.",
+        "activobank": "The first order of each month on the website or app is free, on any market. The price list also has a monthly safekeeping fee for non-integrated and foreign securities (€4 to €33 by value), and it is not clear which applies to foreign ETFs and US shares. Currency at the bank's internal rates, spread not published.",
+        "banco-best": "From the 21st order of the month: 0.10% (min €12). The Best Trading Pro service, on Saxo Bank's platform, has other prices: ETFs 0.08% (min €10), no custody fee and investor compensation up to €20,000.",
+        "big": "Custody is waived with three trades a quarter and either a salary credited or an average balance over €100,000. The currency spread is indicative. A separate Superconta pays interest on cash.",
+        "millennium-bcp": "Custody is €6 a quarter only after a trade on the website or app in the previous three months, otherwise €9. Currency at the bank's internal rates, spread not published. The SEC fee is added to US sales."
+      }
     }
   },
   "resources": {

@@ -4554,6 +4554,230 @@
           "budgetBody": "Ermitteln Sie, wie viel Sie sparen können."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Brokergebühren in Portugal: Depot, Orders, Währungstausch und Schutz im Vergleich",
+      "shortName": "Brokergebühren",
+      "subtitle": "Eine datierte Tabelle dessen, was Online-Broker und portugiesische Banken fürs Investieren verlangen, aus dem Preisverzeichnis jedes Anbieters, mit den Jahreskosten für drei Anlegerprofile.",
+      "description": "Vergleichen Sie Depot-, Order- und Währungsgebühren, Zinsen auf Guthaben und Anlegerschutz bei Brokern für Portugal, mit Szenarien für die Jahreskosten.",
+      "pageTitle": "Broker-Vergleich Portugal: Depotgebühren, Ordergebühren und Währungstausch",
+      "pageDescription": "Depotgebühren, Ordergebühren für ETFs und US-Aktien, Währungstausch, Zinsen auf Guthaben, Anlegerschutz und portugiesische Steuermeldung bei Brokern und Banken für Einwohner Portugals, mit den Jahreskosten von drei Anlegerprofilen.",
+      "review": {
+        "checked": "Gebühren geprüft am {{date}}",
+        "confirm": "Gebühren ändern sich. Prüfen Sie das aktuelle Preisverzeichnis des Brokers, bevor Sie ein Konto eröffnen oder eine Order aufgeben.",
+        "source": "Jede Zeile stammt aus dem Preisverzeichnis, das der Broker selbst veröffentlicht, verlinkt in der Tabelle. Kein Vergleichsportal dient als Quelle.",
+        "staleTitle": "Diese Prüfung ist möglicherweise veraltet",
+        "stale": "Diese Gebühren wurden zuletzt am {{date}} geprüft, vor mehr als vier Monaten. Einige können sich geändert haben: Prüfen Sie das Preisverzeichnis jedes Brokers."
+      },
+      "calculator": {
+        "title": "Geschätzte Jahreskosten",
+        "intro": "Wählen Sie ein Profil oder ändern Sie die Werte. Die Liste zeigt die geschätzten Kosten eines Jahres bei jedem Broker nebeneinander, die günstigsten zuerst, mit der Rechnung darunter.",
+        "profile": "Anlegerprofil",
+        "assumptions": "Annahmen: Die Orders verteilen sich gleichmäßig über das Jahr; US-Orders werden zu {{rate}} Dollar je Euro aus Euro umgerechnet (EZB-Referenzkurs vom {{rateDate}}); eine US-Aktie kostet {{price}}, für Gebühren je Aktie; die Depotgebühr fällt auf den angegebenen Wert für das ganze Jahr an; die Mehrwertsteuer entspricht dem Satz des portugiesischen Festlands von 23 %. Nicht enthalten sind Spreads, Börsen- und Aufsichtsentgelte außerhalb des Preisverzeichnisses sowie Steuern auf Ihre Gewinne."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Monatlicher ETF-Anleger",
+          "description": "12 Käufe zu 200 € eines in der EU notierten ETFs, 2.400 € investiert."
+        },
+        "occasionalStocks": {
+          "label": "Gelegentlicher Aktienkäufer",
+          "description": "6 Käufe zu 1.000 € von US-Aktien, 6.000 € investiert."
+        },
+        "largePortfolio": {
+          "label": "Größeres Depot",
+          "description": "50.000 € investiert, mit 4 ETF-Käufen zu 2.500 € im Jahr."
+        },
+        "custom": "Eigene Werte: kein Profil ausgewählt."
+      },
+      "fields": {
+        "market": "Was Sie kaufen",
+        "trades": "Kauforders pro Jahr",
+        "tradeAmount": "Betrag je Order",
+        "portfolio": "Investierter Wert",
+        "savingsPlan": "Den ETF-Sparplan des Brokers nutzen, wo er einen veröffentlicht"
+      },
+      "markets": {
+        "etfEu": "In der EU notierter ETF",
+        "usStock": "US-Aktie"
+      },
+      "help": {
+        "trades": "Ganze Orders, verteilt auf 12 Monate.",
+        "portfolio": "Durchschnittlicher Wert im Konto über das Jahr, für die Depotgebühr."
+      },
+      "errors": {
+        "trades": "Geben Sie eine ganze Zahl von Orders zwischen 0 und {{max}} ein.",
+        "amount": "Geben Sie einen Betrag zwischen 0 und {{max}} ein."
+      },
+      "result": {
+        "title": "Kosten je Broker, die günstigsten zuerst",
+        "perYear": "pro Jahr",
+        "invalid": "Korrigieren Sie die Felder oben, um die Schätzung zu sehen.",
+        "trading": "Orders ({{count}} × {{amount}}): {{total}}",
+        "tradingPlan": "Sparplan ({{count}} × {{amount}}): {{total}}",
+        "noOrders": "Orders: keine",
+        "fx": "Währungstausch ({{pct}} von {{amount}}): {{total}}",
+        "custody": "Depot- und Kontogebühren: {{total}}",
+        "missing": "Nicht eingerechnet, da nicht veröffentlicht: {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Darin {{amount}} Stempelsteuer ({{pct}})",
+          "vat": "Darin {{amount}} Mehrwertsteuer ({{pct}})"
+        },
+        "fees": {
+          "trading": "Ordergebühr",
+          "fx": "Währungstausch",
+          "custody": "Depotgebühr"
+        },
+        "custodyMarket": "Depot- und Kontogebühren: {{total}}, davon {{market}} Gebühr je Börse",
+        "feePerOrder": "Gebühr je Order: {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} je Aktie",
+        "min": "mind. {{amount}}",
+        "max": "max. {{amount}}",
+        "maxPct": "max. {{pct}} der Order",
+        "freeUpTo": "gebührenfrei bis {{amount}} Ordervolumen im Monat, darüber {{fee}}",
+        "noFee": "keine Provision",
+        "noCustody": "keine Gebühr",
+        "period": {
+          "month": "{{fee}} pro Monat",
+          "quarter": "{{fee}} pro Quartal",
+          "semester": "{{fee}} pro Halbjahr",
+          "year": "{{fee}} pro Jahr"
+        },
+        "above": "auf den Wert über {{amount}}",
+        "tierUpTo": "{{fee}} bis {{amount}}",
+        "tierAbove": "{{fee}} über {{amount}}",
+        "freeOrders": "{{count}} Order im Monat gebührenfrei, danach {{fee}}"
+      },
+      "table": {
+        "title": "Gebühren je Broker",
+        "intro": "Broker in alphabetischer Reihenfolge. Eine Gebühr, die der Broker in seinem eigenen Preisverzeichnis nicht angibt, ist als nicht veröffentlicht markiert.",
+        "caption": "Brokergebühren für Anleger in Portugal, mit Quelle und Prüfdatum",
+        "columns": {
+          "broker": "Broker",
+          "custody": "Depot",
+          "etfEu": "Order für EU-ETF",
+          "usStock": "Order für US-Aktie",
+          "fx": "Währungstausch",
+          "cash": "Zinsen auf Guthaben",
+          "protection": "Anlegerschutz",
+          "tax": "Steuer in Portugal",
+          "source": "Quelle"
+        },
+        "notPublished": "Nicht veröffentlicht",
+        "regulator": "Aufsicht: {{name}}",
+        "venue": "An {{venue}}",
+        "plan": "Sparplan: {{fee}}",
+        "noFx": "Keine Gebühr",
+        "noInterest": "Keine",
+        "interest": "{{pct}} pro Jahr",
+        "interestUpTo": "bis {{amount}}",
+        "protection": "{{scheme}}: bis {{amount}}",
+        "deposit": "Guthaben: {{scheme}}, bis {{amount}}",
+        "checked": "Geprüft am {{date}}",
+        "interestAbove": "auf das Guthaben über {{amount}}",
+        "protectionPct": "{{scheme}}: {{pct}} des Verlusts, bis {{amount}}",
+        "marketFee": "Zuzüglich {{fee}} pro Jahr je genutzter Börse (max. {{pct}} des Kontowerts)",
+        "tax": {
+          "stampDuty": "Zuzüglich {{pct}} Stempelsteuer auf: {{fees}}",
+          "vat": "Zuzüglich {{pct}} Mehrwertsteuer auf: {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Führt portugiesische Steuer ab oder meldet sie",
+          "no": "Keine Steuermeldung in Portugal: Sie erklären selbst",
+          "unknown": "Nicht angegeben"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Deutschland",
+        "IE": "Irland",
+        "PL": "Polen",
+        "EE": "Estland"
+      },
+      "notices": {
+        "title": "Bevor Sie sich auf diese Tabelle stützen",
+        "educationalTitle": "Nur zur Information",
+        "educational": "Diese Seite dient der Information. Sie ist weder Empfehlung noch Angebot, die Reihenfolge ist keine Rangliste, und WonderMoney empfiehlt keinen Broker.",
+        "neutralTitle": "Keine Affiliate-Links",
+        "neutral": "WonderMoney erhält von keinem Broker auf dieser Seite etwas. Die Links führen zum Preisverzeichnis des jeweiligen Brokers.",
+        "taxTitle": "Steuern auf Ihre Anlagen",
+        "tax": "Kursgewinne und Dividenden werden in Portugal besteuert, in der Regel mit 28 %. Eine portugiesische Bank behält die Steuer ein und meldet sie; bei einem ausländischen Broker erklären Sie sie selbst in Ihrer IRS-Erklärung."
+      },
+      "nextStepHeadline": "Behalten Sie Anlagen bei verschiedenen Brokern in einer Übersicht",
+      "nextStepDescription": "Gebühren sind nur ein Teil des Bildes. Importieren Sie die Exportdatei jedes Brokers in WonderMoney und sehen Sie alle Ihre Anlagen mit täglichen Kursen neben Ihren Bankkonten.",
+      "nextStepCta": "Ihr Depot an einem Ort sehen",
+      "guide": {
+        "read": {
+          "title": "So lesen Sie diese Tabelle",
+          "what": "Jeder Broker rechnet anders ab: ein fester Betrag oder ein Prozentsatz je Order, oft mit Mindestgebühr; eine Depotgebühr auf den Bestand, pro Monat, Quartal oder Halbjahr; und eine Gebühr für den Tausch von Euro in Dollar, wenn Sie US-Aktien kaufen. Die Tabelle gibt jede Gebühr so wieder, wie das Preisverzeichnis sie für eine Online-Order nennt, und der Rechner wendet dieselben Formeln auf ein ganzes Jahr an.",
+          "protection": "Der Anlegerschutz deckt Ihre Wertpapiere, wenn der Broker insolvent wird und sie nicht zurückgeben kann, bis zum angegebenen Betrag; einen Kursverlust deckt er nie. Guthaben bei einer Bank fällt unter deren Einlagensicherung. Welches System gilt, hängt vom Land der Gesellschaft ab, die Ihr Konto führt, daher nennt die Tabelle es.",
+          "notRec": "Die Tabelle dient der Information. Sie ist keine Empfehlung, die Reihenfolge ist keine Rangliste, und der günstigste Broker für ein Profil kann für ein anderes der teuerste sein. Service, Produktangebot und der Umgang mit der portugiesischen Steuer zählen ebenfalls."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Nehmen wir den gelegentlichen Aktienkäufer: {{count}} Käufe zu {{amount}} in US-Aktien im Jahr, {{portfolio}} investiert.",
+          "bank": "Bei {{bank}} kostet jede Order {{bankFormula}}, die {{count}} Orders kosten also {{bankTrading}} mit Stempelsteuer. Der Tausch von {{converted}} in Dollar zu {{bankFx}} kostet {{bankFxTotal}}, die Depotgebühr ({{bankCustodyFormula}}) {{bankCustody}} mit Mehrwertsteuer. Das Jahr kostet {{bankTotal}}, davon {{bankStampDuty}} Stempelsteuer und {{bankVat}} Mehrwertsteuer.",
+          "online": "Bei {{online}} kostet jede Order {{onlineFormula}}: {{onlineTrading}} im Jahr. Der Währungstausch zu {{onlineFx}} kostet {{onlineFxTotal}} und das Depot {{onlineCustody}}, zusammen {{onlineTotal}}.",
+          "takeaway": "Bei kleinen, seltenen Orders wiegen Mindestgebühren und feste Depotgebühren am schwersten; bei großen Orders oder einem großen Depot wiegen prozentuale Gebühren mehr. Wechseln Sie oben das Profil, um zu sehen, wie sich die Reihenfolge ändert."
+        },
+        "method": {
+          "title": "Methode",
+          "intro": "Jede Gebühr stammt aus dem vom Broker selbst veröffentlichten Preisverzeichnis, an dem in ihrer Zeile genannten Datum; die ganze Tabelle wurde am {{date}} geprüft und wird jedes Quartal erneut geprüft. Gebühren, die ein Preisverzeichnis nicht nennt, sind als nicht veröffentlicht markiert und fehlen in den Summen, die dann als unvollständig erscheinen.",
+          "steps": {
+            "a": "Orders: Die Provision jeder Order ist der feste Teil plus der Prozentsatz der Order, begrenzt durch Mindest- und Höchstbetrag je Order. Gebühren je Aktie zählen ganze Aktien zum angenommenen Kurs. Ein gebührenfreies Monatsvolumen gilt Monat für Monat.",
+            "b": "Sparplan: Bei ETF-Käufen ersetzt die Sparplangebühr die Ordergebühr, wenn die Option aktiv ist und der Broker einen Sparplan veröffentlicht.",
+            "c": "Währung: US-Orders zahlen die Währungsgebühr des Brokers auf den umgetauschten Betrag; Gebühren in Dollar werden zu {{rate}} Dollar je Euro umgerechnet.",
+            "d": "Depot: Die veröffentlichte Formel, je Periode mit Mindest- und Höchstbetrag, wird auf den Bestand so oft berechnet, wie das Jahr Perioden hat.",
+            "e": "Steuern auf Gebühren: Wenn das Preisverzeichnis angibt, dass seine Gebühren die portugiesische Stempelsteuer (4 % auf die Provision) oder die Mehrwertsteuer (23 % auf die Depotgebühr) nicht enthalten, werden sie auf die betreffenden Gebühren aufgeschlagen.",
+            "f": "Die Summe addiert die Orders des Jahres, den Währungstausch und das Depot; die Broker erscheinen vom günstigsten zum teuersten. Broker, denen eine für das Profil nötige Gebühr fehlt, stehen am Ende."
+          }
+        },
+        "limits": {
+          "title": "Was die Schätzung nicht enthält",
+          "items": {
+            "a": "Börsen-, Abwicklungs- und Aufsichtsentgelte, die ein Broker gesondert weitergibt, den Spread auf den Ausführungskurs und die laufenden Kosten des ETFs selbst.",
+            "b": "Aktionen, Staffeln für sehr aktive Anleger und Bedingungen, die an andere Produkte der Bank geknüpft sind.",
+            "c": "Verkäufe, Depotüberträge, Dividenden sowie die Steuer auf Dividenden und Kursgewinne.",
+            "d": "Änderungen nach dem Prüfdatum: Gebühren ändern sich, und es gilt immer das aktuelle Preisverzeichnis des Brokers."
+          }
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "compoundLink": "Zinseszinsrechner",
+          "compoundBody": "Sehen Sie, was eine jährliche Gebühr über Jahrzehnte mit Zinseszins kostet.",
+          "returnLink": "Renditerechner",
+          "returnBody": "Die vergangene Rendite eines Index, vor Gebühren und Steuern.",
+          "profileLink": "Anlegerprofil-Test",
+          "profileBody": "Wie viel Risiko Sie tragen könnten, bevor Sie wählen, was Sie kaufen.",
+          "netWorthLink": "Vermögensrechner",
+          "netWorthBody": "Rechnen Sie Ihre Anlagen zu allem, was Sie besitzen und schulden."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII, Portugal)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD, Portugal)",
+        "deInvestor": "Deutsche Anlegerentschädigung",
+        "deEdw": "Entschädigungseinrichtung der Wertpapierhandelsunternehmen (EdW)",
+        "deDeposit": "Deutsche Einlagensicherung",
+        "ieIcs": "Investor Compensation Scheme (Irland)",
+        "plKdpw": "Entschädigungssystem KDPW (Polen)",
+        "eeFund": "Anlegerschutzfonds (Estland)"
+      },
+      "brokerNotes": {
+        "degiro": "Die EU-ETF-Gebühr ist die der ETF-Auswahl von DEGIRO an der Tradegate. An anderen Börsen wie Euronext Amsterdam oder Xetra kostet eine Order 2 € + 1 € Abwicklungsgebühr, zuzüglich 2,50 € pro Jahr je genutzter Börse (außer Euronext Lissabon). Kein automatischer Sparplan.",
+        "ibkr": "IBKR-Pro-Festpreis. ETFs an der Euronext kosten zusätzlich 0,75 € je Ausführung. Währung: 0,03 % bei automatischer Umrechnung. Zinsen sind bei einem Kontowert unter 100.000 USD anteilig. Auf Provisionen kommt gegebenenfalls Mehrwertsteuer hinzu.",
+        "trading212": "Zinsen auf Guthaben gelten für neue Kunden der Trading 212 EU, die teilnehmen, bis 100.000 €; das Guthaben kann in Geldmarktfonds liegen.",
+        "xtb": "Provisionsfrei bis 100.000 € Ordervolumen im Monat über alle Ihre Konten. Die Monatsgebühr von 10 € fällt nur nach einem Jahr ohne Handel und 90 Tagen ohne Einzahlung an. Schutz: 100 % der ersten 3.000 € und 90 % darüber. Der angegebene Zins ist der Standardsatz; neue Konten erhalten Einführungszinsen. Die Gebühren enthalten Stempelsteuer oder Mehrwertsteuer.",
+        "lightyear": "Aktien, ETCs und ETNs in Euro kosten 1 € je Order. In Portugal kommen 4 % Stempelsteuer auf die Umtauschgebühr. Zinsen auf Guthaben hängen vom Wohnsitzland ab; für Portugal ist kein Satz veröffentlicht.",
+        "trade-republic": "Der 1 € je Order ist eine Abwicklungsgebühr; Sparpläne sind kostenlos. Der Währungstausch ist im Preis enthalten, ohne eigene veröffentlichte Gebühr. Zinsen: 4 % für Neukunden bis 20.000 €, bis 1. März 2027, mit portugiesischer IBAN; der Standardsatz ist nicht veröffentlicht. Steuerabzug und Steuermeldung in Portugal gelten für Kunden der portugiesischen Zweigniederlassung.",
+        "activobank": "Die erste Order jedes Monats über Website oder App ist an jeder Börse kostenlos. Das Preisverzeichnis nennt außerdem eine monatliche Verwahrgebühr für nicht integrierte und ausländische Wertpapiere (4 € bis 33 € je nach Wert), und es ist nicht klar, welche für ausländische ETFs und US-Aktien gilt. Währung zu den internen Kursen der Bank, Spread nicht veröffentlicht.",
+        "banco-best": "Ab der 21. Order im Monat: 0,10 % (mind. 12 €). Der Dienst Best Trading Pro auf der Plattform der Saxo Bank hat andere Preise: ETFs 0,08 % (mind. 10 €), keine Depotgebühr und Anlegerentschädigung bis 20.000 €.",
+        "big": "Die Depotgebühr entfällt bei drei Geschäften im Quartal und Gehaltseingang oder einem Durchschnittsbestand über 100.000 €. Der Währungsspread ist ein Richtwert. Eine separate Superconta verzinst Guthaben.",
+        "millennium-bcp": "Die Depotgebühr beträgt 6 € pro Quartal nur nach einem Geschäft über Website oder App in den drei Vormonaten, sonst 9 €. Währung zu den internen Kursen der Bank, Spread nicht veröffentlicht. Auf US-Verkäufe kommt die SEC Fee hinzu."
+      }
     }
   },
   "resources": {

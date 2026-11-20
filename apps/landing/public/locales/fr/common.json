@@ -4554,6 +4554,230 @@
           "budgetBody": "Calculez combien vous pouvez laisser en épargne."
         }
       }
+    },
+    "brokerFees": {
+      "title": "Frais de courtage au Portugal : garde, ordres, change et protection comparés",
+      "shortName": "Frais de courtage",
+      "subtitle": "Un tableau daté de ce que facturent les courtiers en ligne et les banques portugaises pour investir, relevé dans la grille tarifaire de chacun, avec le coût annuel de trois profils d'investisseur.",
+      "description": "Comparez frais de garde, de transaction et de change, intérêts sur les liquidités et protection de l'investisseur chez les courtiers accessibles au Portugal, avec des scénarios de coût annuel.",
+      "pageTitle": "Comparateur de Courtiers au Portugal : Garde, Courtage et Change",
+      "pageDescription": "Frais de garde, de courtage sur ETF et actions américaines, change, intérêts sur les liquidités, protection de l'investisseur et déclaration fiscale au Portugal, chez les courtiers et banques pour résidents, avec le coût annuel de trois profils d'investisseur.",
+      "review": {
+        "checked": "Frais vérifiés le {{date}}",
+        "confirm": "Les frais changent. Consultez la grille tarifaire en vigueur du courtier avant d'ouvrir un compte ou de passer un ordre.",
+        "source": "Chaque ligne est relevée dans la grille tarifaire publiée par le courtier lui-même, en lien dans le tableau. Aucun comparateur n'est utilisé comme source.",
+        "staleTitle": "Cette vérification n'est peut-être plus à jour",
+        "stale": "Ces frais ont été vérifiés pour la dernière fois le {{date}}, il y a plus de quatre mois. Certains ont pu changer : consultez la grille de chaque courtier."
+      },
+      "calculator": {
+        "title": "Coût annuel estimé",
+        "intro": "Choisissez un profil ou modifiez les valeurs. La liste montre côte à côte le coût estimé d'une année chez chaque courtier, du moins cher au plus cher, avec le calcul sous chacun.",
+        "profile": "Profil d'investisseur",
+        "assumptions": "Hypothèses : les ordres sont répartis sur l'année ; les ordres américains sont convertis depuis l'euro à {{rate}} dollars pour un euro (taux de référence de la BCE du {{rateDate}}) ; une action américaine coûte {{price}}, pour les frais facturés par action ; la garde est facturée sur la valeur indiquée pendant toute l'année ; la TVA est au taux du Portugal continental, 23 %. Les spreads, les frais de bourse et réglementaires hors grille et les impôts sur vos gains ne sont pas inclus."
+      },
+      "profiles": {
+        "monthlyEtf": {
+          "label": "Investisseur mensuel en ETF",
+          "description": "12 achats de 200 € d'un ETF coté dans l'UE, 2 400 € investis."
+        },
+        "occasionalStocks": {
+          "label": "Acheteur occasionnel d'actions",
+          "description": "6 achats de 1 000 € d'actions américaines, 6 000 € investis."
+        },
+        "largePortfolio": {
+          "label": "Portefeuille plus important",
+          "description": "50 000 € investis, avec 4 achats d'ETF de 2 500 € par an."
+        },
+        "custom": "Vos propres valeurs : aucun profil sélectionné."
+      },
+      "fields": {
+        "market": "Ce que vous achetez",
+        "trades": "Ordres d'achat par an",
+        "tradeAmount": "Montant par ordre",
+        "portfolio": "Valeur investie",
+        "savingsPlan": "Utiliser le plan d'investissement programmé en ETF du courtier lorsqu'il en publie un"
+      },
+      "markets": {
+        "etfEu": "ETF coté dans l'UE",
+        "usStock": "Action américaine"
+      },
+      "help": {
+        "trades": "Des ordres entiers, répartis sur 12 mois.",
+        "portfolio": "Valeur moyenne sur le compte pendant l'année, pour les frais de garde."
+      },
+      "errors": {
+        "trades": "Saisissez un nombre entier d'ordres entre 0 et {{max}}.",
+        "amount": "Saisissez un montant entre 0 et {{max}}."
+      },
+      "result": {
+        "title": "Coût par courtier, du moins cher au plus cher",
+        "perYear": "par an",
+        "invalid": "Corrigez les champs ci-dessus pour voir l'estimation.",
+        "trading": "Ordres ({{count}} × {{amount}}) : {{total}}",
+        "tradingPlan": "Plan d'investissement ({{count}} × {{amount}}) : {{total}}",
+        "noOrders": "Ordres : aucun",
+        "fx": "Change ({{pct}} de {{amount}}) : {{total}}",
+        "custody": "Garde et tenue de compte : {{total}}",
+        "missing": "Non compté, car non publié : {{fees}}",
+        "incompleteTotal": "{{total}} + ?",
+        "tax": {
+          "stampDuty": "Dont {{amount}} de droit de timbre ({{pct}})",
+          "vat": "Dont {{amount}} de TVA ({{pct}})"
+        },
+        "fees": {
+          "trading": "frais d'ordre",
+          "fx": "change",
+          "custody": "garde"
+        },
+        "custodyMarket": "Garde et tenue de compte : {{total}}, dont {{market}} de frais par place de cotation",
+        "feePerOrder": "Frais par ordre : {{formula}}"
+      },
+      "formula": {
+        "perShare": "{{amount}} par action",
+        "min": "min. {{amount}}",
+        "max": "max. {{amount}}",
+        "maxPct": "max. {{pct}} de l'ordre",
+        "freeUpTo": "sans frais jusqu'à {{amount}} d'ordres par mois, puis {{fee}}",
+        "noFee": "sans commission",
+        "noCustody": "sans frais",
+        "period": {
+          "month": "{{fee}} par mois",
+          "quarter": "{{fee}} par trimestre",
+          "semester": "{{fee}} par semestre",
+          "year": "{{fee}} par an"
+        },
+        "above": "sur la valeur au-delà de {{amount}}",
+        "tierUpTo": "{{fee}} jusqu'à {{amount}}",
+        "tierAbove": "{{fee}} au-delà de {{amount}}",
+        "freeOrders": "{{count}} ordre par mois sans frais, puis {{fee}}"
+      },
+      "table": {
+        "title": "Frais par courtier",
+        "intro": "Courtiers par ordre alphabétique. Des frais que le courtier n'indique pas dans sa propre grille apparaissent comme non publiés.",
+        "caption": "Frais des courtiers pour les investisseurs au Portugal, avec la source et la date de vérification",
+        "columns": {
+          "broker": "Courtier",
+          "custody": "Garde",
+          "etfEu": "Ordre sur ETF de l'UE",
+          "usStock": "Ordre sur action américaine",
+          "fx": "Change",
+          "cash": "Intérêts sur les liquidités",
+          "protection": "Protection de l'investisseur",
+          "tax": "Impôts au Portugal",
+          "source": "Source"
+        },
+        "notPublished": "Non publié",
+        "regulator": "Autorité : {{name}}",
+        "venue": "Sur {{venue}}",
+        "plan": "Plan d'investissement : {{fee}}",
+        "noFx": "Sans frais",
+        "noInterest": "Aucun",
+        "interest": "{{pct}} par an",
+        "interestUpTo": "jusqu'à {{amount}}",
+        "protection": "{{scheme}} : jusqu'à {{amount}}",
+        "deposit": "Liquidités : {{scheme}}, jusqu'à {{amount}}",
+        "checked": "Vérifié le {{date}}",
+        "interestAbove": "sur le solde au-delà de {{amount}}",
+        "protectionPct": "{{scheme}} : {{pct}} de la perte, jusqu'à {{amount}}",
+        "marketFee": "Plus {{fee}} par an par place de cotation utilisée (max. {{pct}} de la valeur du compte)",
+        "tax": {
+          "stampDuty": "Plus {{pct}} de droit de timbre sur : {{fees}}",
+          "vat": "Plus {{pct}} de TVA sur : {{fees}}"
+        },
+        "ptTax": {
+          "yes": "Prélève ou déclare l'impôt au Portugal",
+          "no": "Pas de déclaration fiscale au Portugal : vous déclarez vous-même",
+          "unknown": "Non indiqué"
+        }
+      },
+      "countries": {
+        "PT": "Portugal",
+        "DE": "Allemagne",
+        "IE": "Irlande",
+        "PL": "Pologne",
+        "EE": "Estonie"
+      },
+      "notices": {
+        "title": "Avant de vous fier à ce tableau",
+        "educationalTitle": "À titre éducatif",
+        "educational": "Cette page est éducative. Ce n'est ni une recommandation ni une offre, l'ordre n'est pas un classement et WonderMoney ne recommande aucun courtier.",
+        "neutralTitle": "Aucun lien d'affiliation",
+        "neutral": "WonderMoney ne reçoit rien d'aucun courtier de cette page. Les liens mènent à la grille tarifaire de chaque courtier.",
+        "taxTitle": "Impôts sur vos placements",
+        "tax": "Les plus-values et les dividendes sont imposés au Portugal, en général à 28 %. Une banque portugaise prélève et déclare ; avec un courtier étranger, vous les déclarez vous-même dans votre déclaration d'IRS."
+      },
+      "nextStepHeadline": "Réunissez les placements de plusieurs courtiers dans une seule vue",
+      "nextStepDescription": "Les frais ne sont qu'une partie du tableau. Importez le fichier d'export de chaque courtier dans WonderMoney et voyez tous vos placements, avec des cours quotidiens, à côté de vos comptes bancaires.",
+      "nextStepCta": "Voir votre portefeuille au même endroit",
+      "guide": {
+        "read": {
+          "title": "Comment lire ce tableau",
+          "what": "Chaque courtier facture à sa façon : un montant fixe ou un pourcentage par ordre, souvent avec un minimum ; des frais de garde sur ce que vous détenez, par mois, trimestre ou semestre ; et des frais de conversion des euros en dollars quand vous achetez des actions américaines. Le tableau écrit chaque frais comme la grille l'indique, pour un ordre en ligne, et le calculateur applique les mêmes formules à une année entière.",
+          "protection": "La protection de l'investisseur couvre vos titres si le courtier fait faillite et ne peut pas les restituer, jusqu'au montant indiqué ; elle ne couvre jamais une baisse des cours. Les liquidités détenues dans une banque relèvent de sa garantie des dépôts. Le dispositif dépend du pays de l'entité qui tient votre compte, d'où sa mention dans le tableau.",
+          "notRec": "Le tableau est éducatif. Ce n'est pas une recommandation, l'ordre n'est pas un classement et le courtier le moins cher pour un profil peut être le plus cher pour un autre. Le service, les produits proposés et la façon dont chaque courtier traite la fiscalité portugaise comptent aussi."
+        },
+        "example": {
+          "title": "Exemple chiffré",
+          "setup": "Prenons l'acheteur occasionnel d'actions : {{count}} achats de {{amount}} d'actions américaines dans l'année, {{portfolio}} investis.",
+          "bank": "Chez {{bank}}, chaque ordre coûte {{bankFormula}}, donc les {{count}} ordres coûtent {{bankTrading}} droit de timbre compris. Convertir {{converted}} en dollars à {{bankFx}} ajoute {{bankFxTotal}}, et la garde ({{bankCustodyFormula}}) ajoute {{bankCustody}} TVA comprise. L'année coûte {{bankTotal}}, dont {{bankStampDuty}} de droit de timbre et {{bankVat}} de TVA.",
+          "online": "Chez {{online}}, chaque ordre coûte {{onlineFormula}} : {{onlineTrading}} sur l'année. Le change à {{onlineFx}} ajoute {{onlineFxTotal}} et la garde {{onlineCustody}}, soit {{onlineTotal}} au total.",
+          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre changer."
+        },
+        "method": {
+          "title": "Méthode",
+          "intro": "Chaque frais a été relevé dans la grille tarifaire publiée par le courtier lui-même, à la date indiquée sur sa ligne ; tout le tableau a été revu le {{date}} et est revérifié chaque trimestre. Les frais qu'une grille n'indique pas apparaissent comme non publiés et sont exclus des totaux, alors signalés comme incomplets.",
+          "steps": {
+            "a": "Ordres : la commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
+            "b": "Plan d'investissement : pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
+            "c": "Change : les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
+            "d": "Garde : la formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
+            "e": "Taxes sur les frais : quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
+            "f": "Le total additionne les ordres de l'année, le change et la garde, et les courtiers sont listés du moins cher au plus cher. Ceux qui ne publient pas un frais dont le profil a besoin viennent en dernier."
+          }
+        },
+        "limits": {
+          "title": "Ce que l'estimation laisse de côté",
+          "items": {
+            "a": "Les frais de bourse, de règlement et réglementaires refacturés à part, le spread sur le prix d'exécution et les frais courants de l'ETF lui-même.",
+            "b": "Les promotions, les paliers pour les investisseurs très actifs et les conditions liées à d'autres produits de la banque.",
+            "c": "Les ventes, les transferts vers un autre courtier, les dividendes et l'impôt sur les dividendes et les plus-values.",
+            "d": "Les changements après la date de vérification : les frais changent et la grille en vigueur du courtier prévaut toujours."
+          }
+        },
+        "related": {
+          "title": "Pour aller plus loin",
+          "compoundLink": "Calculateur d'intérêts composés",
+          "compoundBody": "Voyez ce que coûtent des frais annuels sur des décennies d'intérêts composés.",
+          "returnLink": "Calculateur de rendement",
+          "returnBody": "Le rendement passé d'un indice, avant frais et impôts.",
+          "profileLink": "Questionnaire de profil d'investisseur",
+          "profileBody": "Le risque que vous pourriez prendre, avant de choisir quoi acheter.",
+          "netWorthLink": "Calculateur de patrimoine net",
+          "netWorthBody": "Ajoutez vos placements à tout ce que vous possédez et devez."
+        }
+      },
+      "schemes": {
+        "ptSii": "Sistema de Indemnização aos Investidores (SII, Portugal)",
+        "ptFgd": "Fundo de Garantia de Depósitos (FGD, Portugal)",
+        "deInvestor": "Dispositif allemand d'indemnisation des investisseurs",
+        "deEdw": "EdW, indemnisation des investisseurs (Allemagne)",
+        "deDeposit": "Garantie des dépôts allemande",
+        "ieIcs": "Investor Compensation Scheme (Irlande)",
+        "plKdpw": "Dispositif d'indemnisation KDPW (Pologne)",
+        "eeFund": "Fonds de protection des investisseurs (Estonie)"
+      },
+      "brokerNotes": {
+        "degiro": "Les frais d'ETF de l'UE sont ceux de la sélection d'ETF de DEGIRO sur Tradegate. Sur les autres places, comme Euronext Amsterdam ou Xetra, un ordre coûte 2 € + 1 € de frais de traitement, plus 2,50 € par an par place utilisée (sauf Euronext Lisbonne). Pas de plan d'investissement automatique.",
+        "ibkr": "Tarif fixe IBKR Pro. Les ETF sur Euronext ajoutent 0,75 € par exécution. Change : 0,03 % sur la conversion automatique. Les intérêts sont proportionnels à la valeur du compte en dessous de 100 000 USD. La TVA s'ajoute aux commissions le cas échéant.",
+        "trading212": "Les intérêts sur les liquidités s'appliquent aux nouveaux clients de Trading 212 EU qui y adhèrent, jusqu'à 100 000 € ; les liquidités peuvent être placées dans des fonds monétaires.",
+        "xtb": "Sans commission jusqu'à 100 000 € d'ordres par mois, tous comptes confondus. Les frais mensuels de 10 € ne s'appliquent qu'après un an sans transaction et 90 jours sans dépôt. Protection : 100 % des premiers 3 000 € et 90 % au-delà. Le taux d'intérêt indiqué est le taux standard ; les nouveaux comptes ont des taux de bienvenue. Les frais incluent le droit de timbre ou la TVA.",
+        "lightyear": "Les actions, ETC et ETN en euros coûtent 1 € par ordre. Au Portugal, un droit de timbre de 4 % s'ajoute aux frais de change. Les intérêts sur les liquidités dépendent du pays de résidence ; aucun taux n'est publié pour le Portugal.",
+        "trade-republic": "Le 1 € par ordre est un frais de règlement ; les plans d'épargne sont gratuits. Le change est inclus dans le prix, sans frais distincts publiés. Intérêts : 4 % pour les nouveaux clients jusqu'à 20 000 €, jusqu'au 1er mars 2027, avec un IBAN portugais ; le taux standard n'est pas publié. Le prélèvement et la déclaration fiscale au Portugal s'appliquent aux clients de la succursale portugaise.",
+        "activobank": "Le premier ordre de chaque mois sur le site ou l'appli est gratuit, sur tout marché. La grille prévoit aussi des frais mensuels de garde pour les titres non intégrés et étrangers (de 4 € à 33 € selon la valeur), et on ne sait pas lesquels s'appliquent aux ETF étrangers et aux actions américaines. Change aux taux internes de la banque, spread non publié.",
+        "banco-best": "À partir du 21e ordre du mois : 0,10 % (min. 12 €). Le service Best Trading Pro, sur la plateforme de Saxo Bank, a d'autres prix : ETF à 0,08 % (min. 10 €), sans frais de garde et indemnisation des investisseurs jusqu'à 20 000 €.",
+        "big": "La garde est offerte avec trois transactions par trimestre et un salaire domicilié ou un encours moyen supérieur à 100 000 €. Le spread de change est indicatif. Une Superconta distincte rémunère les liquidités.",
+        "millennium-bcp": "La garde coûte 6 € par trimestre seulement après une transaction sur le site ou l'appli dans les trois mois précédents, sinon 9 €. Change aux taux internes de la banque, spread non publié. La SEC fee s'ajoute aux ventes américaines."
+      }
     }
   },
   "resources": {
