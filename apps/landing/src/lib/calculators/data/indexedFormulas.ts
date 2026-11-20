@@ -34,8 +34,14 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
   {
     supplier: "EDPC",
     product: "Eletricidade Indexada média",
-    // The electricity-only offers and every dual and "Pack Funciona" offer built on it: their fichas
-    // in the same bundle carry the same K1, K2, K3 and losses.
+    // The electricity-only offers and every dual and "Pack Funciona" offer built on it. Each one's
+    // ficha in the bundle (PDF page of its electricity K1 = 1.10) carries the same K1, K2, K3 and
+    // losses: EDPC_33 p. 15; _34 p. 43; _35 and _36 p. 75; _92 p. 31; _93 and _94 p. 91; _95 pp. 59
+    // and 238; _114 p. 24; _115 p. 52; _116 and _117 p. 84; _141 p. 290; _142 p. 278; _143 and _144
+    // p. 266; _160 p. 326; _161 p. 314; _162 and _163 p. 302; _179 p. 362; _180 p. 350; _181 and _182
+    // p. 338. The bundle's other K1 values are not this product's: 1.08 is "Eletricidade Indexada
+    // Horária" (quarter-hourly, not in ERSE's export), 1.09 the gas term of the dual offers (e.g.
+    // p. 26). indexedPricing.test.ts checks every one of these offers against ERSE's figures.
     offerIds: [
       "EDPC_33", "EDPC_34", "EDPC_35", "EDPC_36", "EDPC_92", "EDPC_93", "EDPC_94", "EDPC_95",
       "EDPC_114", "EDPC_115", "EDPC_116", "EDPC_117", "EDPC_141", "EDPC_142", "EDPC_143", "EDPC_144",
@@ -207,12 +213,15 @@ export const INDEXED_FORMULAS: readonly IndexedFormula[] = [
     // TS, the social-tariff financing charge.
     levies: 0.0020666,
     tar: "added",
-    options: ["simple", "biHourly"],
+    // The ficha's "Opção Tarifária" ticks Simples only (p. 2). ERSE also lists bi-hourly prices for
+    // LOGICA_02 that this formula does not give (off-valley about 0,08 EUR/kWh above it at ERSE's
+    // own OMIE figure), so the bi-hourly option stays on ERSE's estimate.
+    options: ["simple"],
     sources: [
       {
         document: "Logica Energy, Ficha normalizada de oferta de fornecimento de energia, Base Index (v.5.05, promocional até 30/11/2026)",
         url: "https://logicaenergy.pt/wp-content/uploads/2026/11/Ficha-Padronizada_BIS.v.5.05_V2.pdf",
-        location: "p. 2 (formula) and p. 4 (100 kWh example at October 2026's OMIE PT)",
+        location: "p. 2 (formula; Opção Tarifária: Simples) and p. 4 (100 kWh example at October 2026's OMIE PT)",
         readOn: READ_ON,
         quote:
           "PE = max(Lim_min, min(Lim_max, PO × (1 + FP) + CGS + CO + DS)) + TAR + TS. Lim_min ... 0,1400 €/kWh; Lim_max ... 1,0000 €/kWh; PO: Custo da Energia horária no Mercado Diário OMIE- Portugal; " +

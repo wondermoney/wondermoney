@@ -106,18 +106,30 @@ describe("the formulas read the way each supplier reported its offer to ERSE", (
     expect(notes).toContain("(0,15201 €/kWh)");
   });
 
-  const cases: [string, ContractedPowerKva, TariffOption, MarketBasis][] = [
-    ["EDPC_33", 6.9, "simple", flatMarket(ERSE_OMIE)],
-    ["EDPC_33", 6.9, "biHourly", flatMarket(ERSE_OMIE)],
-    ["EDPC_33", 6.9, "triHourly", flatMarket(ERSE_OMIE)],
-    ["EDPC_33", 41.4, "triHourly", flatMarket(ERSE_OMIE)],
-    // Goldenergy's losses change by month: ERSE's flat year averages them.
-    ["GOLD_85", 6.9, "simple", flatMarket(ERSE_OMIE, { months: YEAR })],
-    ["GOLD_87", 3.45, "simple", flatMarket(ERSE_OMIE, { months: YEAR })],
-    ["END_90", 6.9, "simple", flatMarket(ERSE_OMIE)],
-    ["END_90", 6.9, "biHourly", flatMarket(ERSE_OMIE)],
-  ];
-  it.each(cases)("%s at %d kVA, %s", (id, power, option, market) => {
+  // Every mapped offer, at every power and option ERSE lists for it. A formula with a fixed or a
+  // monthly loss factor can be checked against ERSE's flat figure exactly (ERSE's flat year weighs
+  // Goldenergy's twelve monthly factors alike). A formula on the quarter-hour loss profile cannot:
+  // ERSE's figure for it rests on a loss value the supplier does not publish, so Galp and Lógica
+  // are left out of this check (Lógica's gap is measured against its own example below).
+  const checkable = INDEXED_FORMULAS.filter((f) => f.losses.kind !== "profile");
+  const marketFor = (f: IndexedFormula) => flatMarket(ERSE_OMIE, { months: f.losses.kind === "monthly" ? YEAR : ["2026-10"] });
+  const cases = checkable.flatMap((f) =>
+    f.offerIds.flatMap((id) =>
+      Object.entries(offer(id).prices).flatMap(([power, prices]) =>
+        (["simple", "biHourly", "triHourly"] as const)
+          .filter((option) => prices?.[option] !== undefined)
+          .map((option) => [id, Number(power) as ContractedPowerKva, option, f] as const),
+      ),
+    ),
+  );
+
+  it("checks every offer the fixed- and monthly-loss formulas cover", () => {
+    expect(new Set(cases.map(([id]) => id))).toEqual(new Set(checkable.flatMap((f) => f.offerIds)));
+    expect(checkable.map((f) => f.supplier)).toEqual(["EDPC", "GOLD", "GOLD", "END"]);
+    expect(cases.length).toBeGreaterThan(300);
+  });
+
+  it.each(cases)("%s at %d kVA, %s", (id, power, option, f) => {
     const prices = offer(id).prices[power]!;
     const erse =
       option === "simple"
@@ -125,8 +137,29 @@ describe("the formulas read the way each supplier reported its offer to ERSE", (
         : option === "biHourly"
           ? [prices.biHourly!.offValley, prices.biHourly!.valley]
           : [prices.triHourly!.peak, prices.triHourly!.shoulder, prices.triHourly!.valley];
-    const ours = formulaEnergyPrices(formulaFor(INDEXED_FORMULAS, id)!, market, power, option, "daily")!;
-    ours.forEach((price, index) => expect(Math.abs(price - erse[index])).toBeLessThan(1e-4));
+    const ours = formulaEnergyPrices(f, marketFor(f), power, option, "daily");
+    expect(ours, "the formula covers what ERSE lists").not.toBeNull();
+    ours!.forEach((price, index) => expect(Math.abs(price - erse[index])).toBeLessThan(1e-4));
+  });
+
+  it("would tell EDP's K1 = 1,10 (média) from 1,08 (Horária) and 1,09 (the gas K1)", () => {
+    const edp = formula("EDPC");
+    const erse = offer("EDPC_33").prices[6.9]!.simple!.energy;
+    for (const k1 of [1.08, 1.09]) {
+      const [price] = formulaEnergyPrices({ ...edp, multiplier: k1 }, flatMarket(ERSE_OMIE), 6.9, "simple", "daily")!;
+      expect(Math.abs(price - erse)).toBeGreaterThan(1e-3);
+    }
+  });
+});
+
+describe("Lógica Base Index S: the simple option only", () => {
+  it("prices the simple option its ficha ticks, and leaves bi-hourly on ERSE's estimate", () => {
+    const logica = formula("LOGICA");
+    expect(logica.options).toEqual(["simple"]);
+    expect(formulaEnergyPrices(logica, flatMarket(152.01), 6.9, "biHourly", "daily")).toBeNull();
+    // ERSE's bi-hourly off-valley price is far from anything this formula gives at ERSE's figure.
+    const [offValley] = formulaEnergyPrices({ ...logica, options: ["simple", "biHourly"] }, flatMarket(152.01), 6.9, "biHourly", "daily")!;
+    expect(offer("LOGICA_02").prices[6.9]!.biHourly!.offValley - offValley).toBeGreaterThan(0.07);
   });
 });
 
