@@ -3503,7 +3503,8 @@
         "joint": "Imposition commune (couple)",
         "ownHome": "C'était ma résidence principale et je compte réinvestir le produit",
         "reinvested": "Montant réinvesti dans une autre résidence principale",
-        "loanRepaid": "Capital de prêt remboursé grâce à la vente"
+        "loanRepaid": "Capital de prêt remboursé grâce à la vente",
+        "taxValue": "Valeur fiscale (VPT), facultatif"
       },
       "help": {
         "dates": "Le coefficient ne s'applique que si le bien a été détenu plus de 24 mois. Le calculateur couvre les ventes de {{saleYear}}.",
@@ -3513,7 +3514,9 @@
         "otherIncome": "Les autres revenus du foyer soumis à l'IRS dans l'année, après les déductions spécifiques et avant les déductions de l'impôt. Indiquez 0 s'il n'y en a pas.",
         "joint": "Divise le revenu en deux, comme en imposition commune. Laissez désactivé pour une déclaration individuelle.",
         "reinvested": "Compte les achats de 24 mois avant à 36 mois après la vente, au Portugal ou dans l'UE/EEE.",
-        "loanRepaid": "La part du prix de vente qui rembourse le prêt du bien vendu."
+        "loanRepaid": "La part du prix de vente qui rembourse le prêt du bien vendu.",
+        "taxValue": "Le valor patrimonial tributário inscrit sur la caderneta predial du bien à la date de la vente. S'il dépasse le prix, la plus-value est calculée sur lui. Laissez vide si vous ne le connaissez pas.",
+        "purchaseValue": "La valeur sur laquelle vous avez payé l'IMT à l'achat : le prix, ou le VPT de l'époque s'il était plus élevé (art. 46, n° 1, du CIRS)."
       },
       "errors": {
         "required": "Saisissez un nombre valide.",
@@ -3540,7 +3543,9 @@
         "expenses": "Frais déduits",
         "exemptPercent": "Exclu par le remploi",
         "taxableGain": "Plus-value à imposer",
-        "includedIncome": "Ajouté à vos revenus (50 %)"
+        "includedIncome": "Ajouté à vos revenus (50 %)",
+        "realizationValue": "Valeur de vente retenue pour la plus-value",
+        "taxValueApplied": "Le VPT est plus élevé que le prix : la plus-value est donc calculée sur lui, la valeur sur laquelle est payé l'IMT de la vente (art. 44, n° 2, du CIRS). Le montant qui vous reste utilise le prix que vous recevez."
       },
       "checklist": {
         "title": "Conditions à vérifier pour l'exclusion par remploi",
@@ -3555,7 +3560,7 @@
         "exampleTitle": "Exemple chiffré",
         "example": "Un logement acheté en {{purchaseYear}} pour {{purchaseValue}} et vendu en {{saleYear}} pour {{saleValue}}. Le prix d'acquisition est actualisé par le coefficient {{coefficient}} à {{adjustedPurchase}} et {{expenses}} de frais sont déduits, ce qui laisse une plus-value de {{gain}}. La moitié, {{included}}, s'ajoute à d'autres revenus de {{otherIncome}} et ajoute environ {{extraTax}} d'IRS.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodGain": "Plus-value = prix de vente moins le prix d'acquisition actualisé par le coefficient, moins les frais d'acquisition et de vente et les travaux des 12 dernières années (CIRS, articles 46, 50 et 51).",
+        "methodGain": "Plus-value = prix de vente moins le prix d'acquisition actualisé par le coefficient, moins les frais d'acquisition et de vente et les travaux des 12 dernières années (CIRS, articles 44, 46, 50 et 51). Le prix d'acquisition est la valeur sur laquelle l'IMT de l'achat a été payé (art. 46, n° 1).",
         "methodCoefficient": "Le coefficient de dévaluation monétaire de l'année d'achat ne s'applique que si le bien a été détenu plus de 24 mois. Les valeurs de {{saleYear}} viennent de la {{portaria}} et sont conservées pour les achats depuis {{firstYear}}.",
         "methodExpenses": "Les frais doivent être nécessaires, effectivement payés et justifiés : IMT et Imposto do Selo de l'achat, commissions d'agence et travaux des 12 dernières années sur facture.",
         "methodHalf": "Seuls 50 % d'une plus-value positive s'ajoutent aux autres revenus de l'année et sont imposés selon le barème progressif de l'IRS de {{saleYear}}. L'IRS supplémentaire affiché est l'impôt avec la plus-value moins l'impôt sans elle.",
@@ -3563,16 +3568,22 @@
         "methodCash": "Le solde retranche du prix de vente les frais de vente, le prêt remboursé et l'IRS estimé. Il ne retranche pas ce que vous dépensez pour le logement suivant.",
         "scopeTitle": "Ce qui est couvert",
         "scopeSupported": "Les personnes physiques résidentes fiscales au Portugal qui vendent en {{saleYear}} un bien de leur patrimoine privé acheté depuis {{firstYear}}.",
-        "scopeUnsupported": "Non couvert : non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, ventes sous la valeur fiscale du bien, la surtaxe de solidarité et les déductions de l'impôt.",
+        "scopeUnsupported": "Non couvert : non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, la surtaxe de solidarité et les déductions de l'impôt.",
         "assumptionsTitle": "Hypothèses",
         "assumptionBrackets": "L'IRS supplémentaire utilise le barème annuel de l'IRS de {{saleYear}} sur le revenu saisi, comme estimation de l'effet sur la déclaration annuelle. L'imposition commune est modélisée en divisant le revenu par deux.",
-        "assumptionNotModelled": "Le calculateur ne vérifie ni les conditions du remploi ni la valeur fiscale du bien. Les coefficients ont été lus dans un résumé secondaire de la Portaria et sont à confirmer au Diário da República.",
+        "assumptionNotModelled": "Le calculateur ne vérifie pas les conditions du remploi. Les coefficients ont été vérifiés sur le tableau de la {{portaria}} au Diário da República.",
         "assumptionEducational": "Il s'agit d'une estimation pédagogique, pas d'un conseil fiscal. Seul l'avis d'imposition de l'administration fiscale fait foi.",
         "sourcesTitle": "Sources",
-        "sourceGains": "CIRS, article 43 : plus-values et moins-values (consulté le 19 novembre 2026)",
-        "sourceExemption": "CIRS, article 10 : exclusion par remploi dans la résidence principale (consulté le 19 novembre 2026)",
+        "sourceGains": "CIRS, article 43 : plus-values et moins-values (consulté le 20 novembre 2026)",
+        "sourceExemption": "CIRS, article 10 : exclusion par remploi dans la résidence principale (consulté le 20 novembre 2026)",
         "sourceCoefficients": "{{portaria}} : coefficients de dévaluation pour {{saleYear}}",
-        "reviewed": "Règles et coefficients de {{saleYear}} revus le {{reviewed}}."
+        "reviewed": "Règles et coefficients de {{saleYear}} revus le {{reviewed}}.",
+        "methodTaxValue": "La valeur de vente est le prix, sauf si la valeur sur laquelle est payé l'IMT de la vente est plus élevée (art. 44, n° 2, du CIRS). L'IMT est payé sur le plus élevé du prix et du VPT (art. 12, n° 1, du CIMT) : un VPT supérieur au prix augmente donc la plus-value et le montant à réinvestir pour l'exclusion. Vous pouvez prouver que le prix réel était inférieur par la procédure de l'art. 139 du CIRC (art. 44, n° 5 et 6, du CIRS) ; le calculateur ne modélise pas cette preuve.",
+        "sourceRealization": "CIRS, article 44 : valeur de réalisation et primauté de la valeur retenue pour l'IMT (consulté le 20 novembre 2026)",
+        "sourceAcquisition": "CIRS, article 46 : valeur d'acquisition d'un bien acheté à titre onéreux (consulté le 20 novembre 2026)",
+        "sourceCorrection": "CIRS, article 50 : correction monétaire après 24 mois (consulté le 20 novembre 2026)",
+        "sourceExpenses": "CIRS, article 51 : travaux des 12 dernières années et frais d'acquisition et de vente (consulté le 20 novembre 2026)",
+        "sourceImt": "CIMT, article 12 : l'IMT est payé sur le plus élevé du prix et du VPT (consulté le 20 novembre 2026)"
       },
       "nextStepHeadline": "Sachez ce que vous pouvez vraiment utiliser de la vente",
       "nextStepDescription": "WonderMoney vous aide à mettre l'impôt de côté et à voir ce qui reste pour votre prochain logement.",
@@ -3745,13 +3756,12 @@
         "unsupportedAgreement": "La rupture d'un commun accord, où le montant est négocié sans formule légale.",
         "unsupportedPublic": "Les agents du secteur public, qui suivent d'autres règles.",
         "sourcesTitle": "Sources",
-        "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régime transitoire de l'art. 5",
-        "sourceLaw13": "Guide de l'APEL sur l'Agenda do Trabalho Digno : Lei n.º 13/2023, qui a porté le taux de l'art. 366, n° 1, à 14 jours depuis le 1er mai 2023",
-        "sourceCode": "Código do Trabalho, texte consolidé (PGDL) : art. 344, 345 et 366",
+        "sourceLaw69": "Lei n.º 69/2013 du 30 août (Diário da República) : nouvelle rédaction de l'art. 366 et régimes transitoires des art. 5 et 6",
+        "sourceCode": "Código do Trabalho, texte consolidé (Diário da República) : art. 148, 344, 345 et 366",
         "sourceDgert": "DGERT : indemnité de licenciement collectif (art. 366)",
-        "reviewed": "Règles vérifiées le 19 novembre 2026 sur le texte de la Lei n.º 69/2013, publié par l'Assemblée de la République, et le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours par an de la Lei n.º 13/2023, en vigueur depuis le 1er mai 2023, ainsi que les 12 jours et le plafond de l'art. 366 proviennent des résumés de l'APEL et de la DGERT et du Código do Trabalho consolidé, pas du texte du Diário da República. Nous appliquons les 14 jours uniquement à l'ancienneté depuis le 1er mai 2023, la lecture habituelle de la règle transitoire. Les 24 jours de l'arrivée à terme d'un CDD et leur application à tous les contrats qui arrivent à terme à partir du 1er mai 2023 viennent du texte de la Lei n.º 13/2023 reproduit par la PGDL (art. 344, 345 et 35) et de la note de l'IGeFE, pas de la page du Diário da República. Information pédagogique, pas un conseil juridique.",
-        "methodFixedTerm": "Arrivée à terme d'un CDD (art. 344, n° 2, et 345, n° 4, du Código do Trabalho, tels que modifiés par la Lei n.º 13/2023) : 24 jours de salaire de base et de diuturnidades par année complète d'ancienneté, calculés comme à l'art. 366. Le montant journalier, le plafond de 20 fois le salaire minimum pour le montant mensuel, le plafond de 12 montants mensuels et la fraction proportionnelle d'une année s'appliquent. L'art. 35, n° 1, de la Lei n.º 13/2023 soumet au nouveau texte les contrats conclus avant le 1er mai 2023, et la note de l'IGeFE du 5 juillet 2023 la lit comme 24 jours pour tous les contrats qui arrivent à terme à partir du 1er mai 2023. Toute la durée compte donc à 24 jours, quelle que soit la date de début, et les taux des CDI (12, 14, 18 et 20 jours) ne s'appliquent pas.",
-        "sourceLaw13Text": "Lei n.º 13/2023, du 3 avril : nouvelle rédaction des art. 344, n° 2, et 345, n° 4, du Código do Trabalho et art. 35 sur son application dans le temps (reproduction de la PGDL du texte du Diário da República)",
+        "reviewed": "Règles vérifiées le 20 novembre 2026 sur le Diário da República : le Código do Trabalho consolidé (art. 148, 344, 345 et 366), la Lei n.º 13/2023 (art. 35) et la Lei n.º 69/2013 (art. 5 et 6), avec le salaire minimum 2026 de 920 euros (Decreto-Lei n.º 139/2025). Les 14 jours ne comptent que pour l'ancienneté depuis le 1er mai 2023, comme le prévoit l'art. 35, n° 2, de la Lei n.º 13/2023. Les 24 jours de l'arrivée à terme d'un CDD comptent pour tout le contrat : c'est la lecture de l'art. 35, n° 1, retenue par la note de l'IGeFE, et un tribunal pourrait la lire autrement pour les contrats conclus avant le 1er mai 2023. Information pédagogique, pas un conseil juridique.",
+        "methodFixedTerm": "Arrivée à terme d'un CDD (art. 344, n° 2, et 345, n° 4, du Código do Trabalho, tels que modifiés par la Lei n.º 13/2023) : 24 jours de salaire de base et de diuturnidades par année complète d'ancienneté, calculés comme à l'art. 366. Le montant journalier, le plafond de 20 fois le salaire minimum pour le montant mensuel, le plafond de 12 montants mensuels et la fraction proportionnelle d'une année s'appliquent. L'art. 35, n° 1, de la Lei n.º 13/2023 soumet au nouveau texte les contrats conclus avant le 1er mai 2023, et son n° 2 ne limite à la période postérieure à cette date que les 14 jours de l'art. 366, n° 1. La note de l'IGeFE du 5 juillet 2023 la lit comme 24 jours pour tous les contrats qui arrivent à terme à partir du 1er mai 2023 : son exemple d'un contrat du 1er septembre 2021 au 31 août 2023 compte les 730 jours à 24 jours. Toute la durée compte donc à 24 jours, et les taux des CDI (12, 14, 18 et 20 jours) ne s'appliquent pas. Un CDD dure au plus deux ans, ou quatre à terme incertain (art. 148) : un contrat qui arrive à terme en 2026 n'a donc pas été conclu avant le 1er octobre 2013 et le régime transitoire de l'art. 6 de la Lei n.º 69/2013 ne s'applique pas.",
+        "sourceLaw13Text": "Lei n.º 13/2023, du 3 avril (Diário da República) : nouvelle rédaction des art. 344, n° 2, 345, n° 4, et 366, n° 1, du Código do Trabalho et art. 35 sur son application dans le temps",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 juillet 2023) : 24 jours pour tous les CDD qui arrivent à terme à partir du 1er mai 2023, quelle que soit leur date de conclusion"
       },
       "nextStepHeadline": "Planifiez le versement avant qu'il n'arrive",

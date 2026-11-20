@@ -2,15 +2,18 @@
  * Portuguese IRS capital gain on the sale of a property held as a private asset by an individual
  * tax resident. Educational estimate only.
  *
- * Rules (CIRS): the gain is the sale value minus the acquisition value updated by the currency
- * devaluation coefficient (art. 50, when the property was held for more than 24 months) minus the
- * necessary and effective acquisition and sale expenses and the works of the last 12 years
- * (art. 51); 50% of the gain is added to the other income (art. 43(2)(b)) and taxed at the annual
- * IRS brackets already kept in payroll.ts. A gain on the own permanent home is excluded when the
- * proceeds, net of the loan repaid, are reinvested in another one (art. 10(5)), in proportion to
- * the amount reinvested (art. 10(12)). Not supported: non-residents, properties acquired before
- * 1989, companies, inheritances and gifts, the VPT floor on the sale value (art. 44), solidarity
- * surcharge and deductions from tax.
+ * Rules (CIRS, Portal das Finanças text checked on 2026-11-20): the gain is the realisation value
+ * (art. 44: the price, or the value the IMT of the sale was assessed on when higher, art. 44(2); IMT
+ * is assessed on the higher of the price and the VPT, art. 12(1) CIMT) minus the acquisition value
+ * (art. 46(1): the value the IMT of the purchase was assessed on) updated by the currency
+ * devaluation coefficient (art. 50(1), when more than 24 months passed between acquisition and sale)
+ * minus the works of the last 12 years and the necessary and effective acquisition and sale
+ * expenses (art. 51(1)(a)); 50% of the gain is added to the other income (art. 43(2)(b)) and taxed
+ * at the annual IRS brackets already kept in payroll.ts. A gain on the own permanent home is
+ * excluded when the realisation value, net of the loan repaid, is reinvested in another one (art.
+ * 10(5)(a)), in proportion to the amount reinvested (art. 10(12)). Not supported: non-residents,
+ * properties acquired before 1989, companies, inheritances and gifts, proof of a lower price under
+ * art. 44(5)-(6), solidarity surcharge and deductions from tax.
  *
  * Money is handled in integer cents internally and returned in euros.
  */
@@ -23,7 +26,7 @@ function byYears(hundredths: number, from: number, to = from): Array<[number, nu
 
 export const CAPITAL_GAINS_TABLES = {
   saleYear: 2026,
-  reviewed: "2026-11-19",
+  reviewed: "2026-11-20",
   portaria: "Portaria n.º 457/2026/1, de 15 de outubro",
   /** Properties acquired before 1 January 1989 have their own regime and are not supported. */
   firstYear: 1989,
@@ -46,14 +49,21 @@ export const CAPITAL_GAINS_TABLES = {
 export const CAPITAL_GAINS_LIMITS = { amount: 100_000_000 } as const;
 
 export type CapitalGainsField =
-  | "saleValue" | "purchaseValue" | "purchaseYear" | "purchaseMonth" | "saleMonth" | "purchaseExpenses"
+  | "saleValue" | "taxValue" | "purchaseValue" | "purchaseYear" | "purchaseMonth" | "saleMonth" | "purchaseExpenses"
   | "worksExpenses" | "saleExpenses" | "otherIncome" | "reinvested" | "loanRepaid";
 type FieldError =
   | "required" | "zero" | "negative" | "tooLarge" | "yearTooOld" | "yearTooNew" | "month"
   | "afterSale" | "loanTooLarge";
 
 export interface CapitalGainsInput {
+  /** Price received. */
   saleValue: number;
+  /**
+   * Valor patrimonial tributário (VPT) of the property at the sale. When above the price, the IMT of the sale is assessed
+   * on it (art. 12(1) CIMT) and it becomes the realisation value (art. 44(2) CIRS). Empty (NaN), 0 or absent: not entered.
+   */
+  taxValue?: number;
+  /** Value the IMT of the purchase was assessed on (art. 46(1) CIRS): the price, or the VPT then if higher. */
   purchaseValue: number;
   purchaseYear: number;
   purchaseMonth: number;
@@ -107,6 +117,8 @@ export function computeCapitalGains(input: CapitalGainsInput) {
   };
   set("saleValue", checkAmount(input.saleValue, { allowZero: false }));
   set("purchaseValue", checkAmount(input.purchaseValue, { allowZero: false }));
+  const taxValueEntered = input.taxValue !== undefined && !Number.isNaN(input.taxValue);
+  if (taxValueEntered) set("taxValue", checkAmount(input.taxValue!, { allowZero: true }));
   for (const field of ["purchaseExpenses", "worksExpenses", "saleExpenses", "otherIncome"] as const) {
     set(field, checkAmount(input[field], { allowZero: true }));
   }
@@ -134,12 +146,17 @@ export function computeCapitalGains(input: CapitalGainsInput) {
   const coefficientApplied = monthsHeld > CAPITAL_GAINS_TABLES.coefficientAfterMonths;
   const coefficientHundredths = coefficientApplied ? (CAPITAL_GAINS_TABLES.coefficients[input.purchaseYear] ?? 100) : 100;
   const saleCents = cents(input.saleValue);
+  // Art. 44(2) CIRS: the value the IMT of the sale was assessed on prevails when higher than the price.
+  const taxValueCents = taxValueEntered ? cents(input.taxValue!) : 0;
+  const taxValueApplied = taxValueCents > saleCents;
+  const realizationCents = taxValueApplied ? taxValueCents : saleCents;
   const adjustedPurchaseCents = Math.round((cents(input.purchaseValue) * coefficientHundredths) / 100);
   const expensesCents = cents(input.purchaseExpenses) + cents(input.worksExpenses) + cents(input.saleExpenses);
-  const gainCents = saleCents - adjustedPurchaseCents - expensesCents;
+  const gainCents = realizationCents - adjustedPurchaseCents - expensesCents;
 
   const loanCents = input.ownPermanentHome ? cents(input.loanRepaid) : 0;
-  const reinvestableCents = saleCents - loanCents;
+  // Art. 10(5)(a): the realisation value net of the loan repaid is what has to be reinvested.
+  const reinvestableCents = realizationCents - loanCents;
   let exemptBp = 0;
   if (input.ownPermanentHome) {
     exemptBp = reinvestableCents <= 0
@@ -155,6 +172,8 @@ export function computeCapitalGains(input: CapitalGainsInput) {
     ok: true as const,
     result: {
       monthsHeld,
+      realizationValue: euros(realizationCents),
+      taxValueApplied,
       coefficientApplied,
       coefficient: coefficientHundredths / 100,
       adjustedPurchase: euros(adjustedPurchaseCents),

@@ -103,6 +103,49 @@ describe("property capital gains", () => {
     expect(zero).toMatchObject({ gain: 0, isLoss: false, extraTax: 0 });
   });
 
+  describe("tax value floor on the sale value (art. 44(2) CIRS, art. 12(1) CIMT)", () => {
+    it("computes the gain on the VPT when it is above the price, and keeps the proceeds on the price", () => {
+      // Worked example: price 300,000, VPT 350,000. IMT of the sale is assessed on 350,000 (art. 12(1) CIMT), so the
+      // realisation value is 350,000: gain 350,000 - 184,500 - 25,000 = 140,500, half of it (70,250) added to income.
+      const r = resultFor({ taxValue: 350_000 });
+      expect(r).toMatchObject({
+        taxValueApplied: true, realizationValue: 350_000, gain: 140_500, taxableGain: 140_500, includedIncome: 70_250,
+      });
+      const extra = annualBracketTaxCents(3_000_000 + 7_025_000) - annualBracketTaxCents(3_000_000);
+      expect(r.extraTax).toBe(extra / 100);
+      // The cash received is still the price.
+      expect(r.cashAfter).toBe(300_000 - 9_000 - extra / 100);
+    });
+
+    it("keeps the price when the VPT is lower, equal, zero or not entered", () => {
+      const current = resultFor();
+      expect(current).toMatchObject({ taxValueApplied: false, realizationValue: 300_000, gain: 90_500 });
+      for (const taxValue of [undefined, Number.NaN, 0, 120_000, 300_000]) {
+        expect(resultFor({ taxValue })).toEqual(current);
+      }
+    });
+
+    it("turns a declared loss into a gain when the VPT is high enough", () => {
+      // Price 120,000 under a 150,000 purchase (no coefficient, held 17 months): a loss of 55,000 on the price.
+      const base = { saleValue: 120_000, purchaseValue: 150_000, purchaseYear: 2025, purchaseMonth: 1 } as const;
+      expect(resultFor(base).isLoss).toBe(true);
+      // VPT 200,000: 200,000 - 150,000 - 25,000 = 25,000 of gain.
+      expect(resultFor({ ...base, taxValue: 200_000 })).toMatchObject({ isLoss: false, gain: 25_000, includedIncome: 12_500 });
+    });
+
+    it("measures a partial reinvestment against the realisation value net of the loan (art. 10(5)(a) and (12))", () => {
+      // Realisation 350,000 - loan 100,000 = 250,000; reinvesting 125,000 excludes 50% of the 140,500 gain.
+      const r = resultFor({ taxValue: 350_000, ownPermanentHome: true, loanRepaid: 100_000, reinvested: 125_000 });
+      expect(r).toMatchObject({ exemptPercent: 50, taxableGain: 70_250, includedIncome: 35_125 });
+    });
+
+    it("rejects a negative or huge VPT", () => {
+      expect(errorsFor({ taxValue: -1 }).taxValue).toBe("negative");
+      expect(errorsFor({ taxValue: CAPITAL_GAINS_LIMITS.amount + 1 }).taxValue).toBe("tooLarge");
+      expect(errorsFor({ taxValue: Number.NaN })).toEqual({});
+    });
+  });
+
   it("validates empty, zero, negative, huge and out-of-range values", () => {
     expect(errorsFor({ saleValue: NaN }).saleValue).toBe("required");
     expect(errorsFor({ saleValue: 0 }).saleValue).toBe("zero");
