@@ -87,6 +87,7 @@ describe("article figure registry", () => {
     expect(figureForTool("toolNetSalary")).toBe("payslip");
     expect(figureForTool("toolEuribor")).toBe("easelchart");
     expect(figureForTool("toolTermDeposit")).toBe("safe");
+    expect(figureForTool("pageFireCalculator")).toBe("deckchair");
     expect(figureForTool("toolSomethingNew")).toBe("calculator");
     expect(figureForTool(undefined)).toBe("calculator");
   });

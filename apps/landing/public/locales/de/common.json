@@ -5935,7 +5935,8 @@
       "meter": "Strichzeichnung eines alten Stromzählers mit einer Reihe von Zählwerk-Zifferblättern und einer Drehscheibe hinter Glas, die sich bei steigender Last schneller dreht.",
       "pump": "Strichzeichnung einer Zapfsäule auf ihrer Insel, deren Zapfpistole am Schlauch aus der Halterung gehoben wird, während die Füllanzeige steigt.",
       "wallet": "Strichzeichnung einer aufgeklappten Geldbörse mit drei Karten in gestuften Fächern, von denen eine herausgleitet.",
-      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt."
+      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt.",
+      "deckchair": "Strichzeichnung eines Liegestuhls neben einem Münzstapel, der zu einer gestrichelten Münze aufsteigt, der Summe, die deine Ausgaben auf Dauer trägt; erreicht der Stapel sie, lehnt sich der Stuhl zurück."
     }
   }
 }

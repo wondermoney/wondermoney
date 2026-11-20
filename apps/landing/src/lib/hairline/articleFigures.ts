@@ -35,6 +35,7 @@ export const FIGURE_NAMES = [
   "pump",
   "wallet",
   "safe",
+  "deckchair",
 ] as const;
 
 export type FigureName = (typeof FIGURE_NAMES)[number];
@@ -152,6 +153,7 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolTermDeposit: "safe",
   toolTermDepositOffers: "safe",
   toolSavingsCertificates: "safe",
+  pageFireCalculator: "deckchair",
 };
 
 export function figureForTool(routeId: string | undefined): FigureName {

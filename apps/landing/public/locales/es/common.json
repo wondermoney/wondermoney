@@ -5935,7 +5935,8 @@
       "meter": "Dibujo lineal de un contador eléctrico antiguo, con una fila de esferas y un disco que gira tras el cristal, más rápido cuando sube la carga.",
       "pump": "Dibujo lineal de un surtidor de gasolina en su isleta, con la pistola saliendo de su soporte unida a la manguera mientras sube el indicador de llenado.",
       "wallet": "Dibujo lineal de una cartera abierta con tres tarjetas en ranuras escalonadas, una de ellas deslizándose hacia fuera.",
-      "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas."
+      "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas.",
+      "deckchair": "Dibujo lineal de una tumbona junto a una pila de monedas que sube hacia una moneda discontinua, la cantidad que paga tus gastos para siempre, y la tumbona se reclina cuando la pila llega."
     }
   }
 }
