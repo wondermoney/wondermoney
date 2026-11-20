@@ -598,9 +598,6 @@ importers:
       '@astrojs/check':
         specifier: ^0.9.12
         version: 0.9.12(prettier-plugin-astro@1.1.2(prettier@3.9.10))(prettier@3.9.10)(typescript@6.0.3)
-      '@astrojs/partytown':
-        specifier: ^2.1.9
-        version: 2.1.9
       '@astrojs/react':
         specifier: ^7.1.4
         version: 7.1.8(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
@@ -655,9 +652,6 @@ importers:
       astro:
         specifier: ^7.4.6
         version: 7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
-      astro-gtm:
-        specifier: ^7.0.1
-        version: 7.0.2(astro@7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
       astro-portabletext:
         specifier: ^1.0.1
         version: 1.0.1(astro@7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
@@ -667,9 +661,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      framer-motion:
-        specifier: ^14.14.0
-        version: 14.14.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       lucide-react:
         specifier: ^1.69.0
         version: 1.72.0(@types/react@19.3.0)(react@19.3.0)
@@ -743,6 +734,9 @@ importers:
       eslint-plugin-astro:
         specifier: ^3.2.1
         version: 3.2.1(@typescript-eslint/parser@8.72.2(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))(eslint-plugin-jsx-a11y@6.10.2(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1)))(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript-eslint@8.72.2(eslint@10.14.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3))
+      globals:
+        specifier: ^17.14.0
+        version: 17.14.0
       jsdom:
         specifier: ^31.0.0
         version: 31.0.0(@napi-rs/canvas@1.1.0)(@noble/hashes@2.4.0)
@@ -758,6 +752,9 @@ importers:
       vitest:
         specifier: 5.1.0
         version: 5.1.0(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+      xlsx:
+        specifier: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
+        version: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz
 
   apps/mobile:
     dependencies:
@@ -1650,9 +1647,6 @@ packages:
 
   '@astrojs/markdown-satteri@0.4.9':
     resolution: {integrity: sha512-ixhXGrlvYNdVvSLU3L+ju+tGoMbRdH1iXee593xReVAcDhXJ7yvuNIV8M0KzCQAeiZo1VIleaaI9lH4RzCKYWA==}
-
-  '@astrojs/partytown@2.1.9':
-    resolution: {integrity: sha512-jAywLxinR9XRHH8NB4AOJL0cohFlqX+VWEsC9WUWTWNxfDun774rpi8DMaXPOieGjuAOSkr2BM5ejcdY/eZhsQ==}
 
   '@astrojs/prism@4.1.2':
     resolution: {integrity: sha512-jMrUEpFDarDO1KWPvVc9eSa8DSfwBlwEOHwX+8zvZQpiqXRGDxFnOXHsYqV6DP7w+0qIgTr98gS1GdQlm8ypWg==}
@@ -4901,11 +4895,6 @@ packages:
 
   '@prettier/parse-srcset@3.1.0':
     resolution: {integrity: sha512-FIRv2rZotO9NP/r66taYqD1zICpPiBbrECqjKV/xqNotqDxF7fLzzUeK+1RSRx9Tenk0DajR/GcRmTJ2qtHaKQ==}
-
-  '@qwik.dev/partytown@1.0.5':
-    resolution: {integrity: sha512-E912WTT6XibcM9d4WJpMg6fjiYCYQS8j039oqYznnHis2uSjZ5622QTRaxykaveznGcwB4VhGXUEju4YCC2GOA==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
 
   '@radix-ui/number@1.1.3':
     resolution: {integrity: sha512-Road2bidD0uu/1BGDOWNdPI06g0lIRy6IF9GZcIrDK2KGItfor8IQwQa+yM2ERgHM1MmHxaxpTzk0/Jp42lNfA==}
@@ -8602,11 +8591,6 @@ packages:
     resolution: {integrity: sha512-WavQUarfgwSbpCq4xsdcIBdX5KArfI2d6DD8EIloJIMthnB1508iNpx4C77EhUyMd03LpEt8HAPzwF/cG0V39g==}
     engines: {node: ^22.22.3 || ^24.16.0 || >=26.3.0}
 
-  astro-gtm@7.0.2:
-    resolution: {integrity: sha512-9BU/RP2EquQsw92UIfnhMk0DRNiVO3AxuaR8DQjqEs4h4RyfciNvkPO479kPOvas5TgB0HQpcBMeCVf2Kg4taA==}
-    peerDependencies:
-      astro: ^7.0.0
-
   astro-portabletext@1.0.1:
     resolution: {integrity: sha512-QyBj7IcWSK4mQlVEX1yes8U7mV1yF2nVRlP0DIpNgh+rvwYwErkr8on8pOZqsV0LRjfCbOloUKycIBuFNzNDXA==}
     engines: {node: '>=22.12.0'}
@@ -10676,20 +10660,6 @@ packages:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
 
-  framer-motion@14.14.0:
-    resolution: {integrity: sha512-fidRX0VzkZdA9OovFiBSzJtt9/jLcJpna78Z+KCqQQZIWoIpN3tOhEXAhhAw/FObUUh+o3Y18yx1F4BP0mVJ8Q==}
-    peerDependencies:
-      react: 19.3.0
-      react-dom: 19.3.0
-      remix: ^3.1.0
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      remix:
-        optional: true
-
   framer-motion@14.13.0:
     resolution: {integrity: sha512-62FgGVeqEI3pgI5jG/d6yagg/hX9z7Vw3ytE0gGAsDXWBBruUCr74b5LQJXMSF1E62Zp7HKO88nDu/hhUdRSCQ==}
     peerDependencies:
@@ -12566,9 +12536,6 @@ packages:
 
   mlly@1.8.2:
     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
-
-  motion-dom@14.14.0:
-    resolution: {integrity: sha512-IAxcKhYkuQA2W0Tlx1AvVgImfqEoF3/t3IovbPQJlYkefmGsmrXjn967lMII5VmFmLpQEab4+ZkHo/ijJ4Esig==}
 
   motion-dom@14.13.0:
     resolution: {integrity: sha512-nWrB6Psw7mFTBNL9r5hw9nm/a5+21WZ1LymOml/V2b43LdiIDO1oi+oBMSR3bcyuzEQKJoaa+t5qnsCWYhcNvA==}
@@ -16257,11 +16224,6 @@ snapshots:
       github-slugger: 2.0.0
       satteri: 0.11.7
 
-  '@astrojs/partytown@2.1.9':
-    dependencies:
-      '@qwik.dev/partytown': 1.0.5
-      mrmime: 2.0.1
-
   '@astrojs/prism@4.1.2':
     dependencies:
       prismjs: 1.30.0
@@ -19657,8 +19619,6 @@ snapshots:
   '@posthog/types@1.424.1': {}
 
   '@prettier/parse-srcset@3.1.0': {}
-
-  '@qwik.dev/partytown@1.0.5': {}
 
   '@radix-ui/number@1.1.3': {}
 
@@ -23541,10 +23501,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  astro-gtm@7.0.2(astro@7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)):
-    dependencies:
-      astro: 7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
-
   astro-portabletext@1.0.1(astro@7.4.11(@types/node@26.6.6)(@vercel/functions@2.2.13(@aws-sdk/credential-provider-web-identity@3.972.81))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)):
     dependencies:
       '@portabletext/toolkit': 6.0.0
@@ -26130,15 +26086,6 @@ snapshots:
       once: 1.4.0
 
   forwarded@0.2.0: {}
-
-  framer-motion@14.14.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
-    dependencies:
-      motion-dom: 14.14.0
-      motion-utils: 14.7.0
-      tslib: 2.8.1
-    optionalDependencies:
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
 
   framer-motion@14.13.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
@@ -28741,10 +28688,6 @@ snapshots:
       pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.6.4
-
-  motion-dom@14.14.0:
-    dependencies:
-      motion-utils: 14.7.0
 
   motion-dom@14.13.0:
     dependencies:
