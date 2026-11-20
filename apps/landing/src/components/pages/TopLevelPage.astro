@@ -15,7 +15,7 @@ import PortfolioTracker from "@/components/landing/PortfolioTracker";
 import NetWorthTracker from "@/components/landing/NetWorthTracker";
 import YnabAlternative from "@/components/landing/YnabAlternative";
 import FireCalculatorPage from "@/components/landing/FireCalculatorPage.astro";
-import HowToCalculateNetWorth from "@/components/landing/HowToCalculateNetWorth";
+import HowToCalculateNetWorth from "@/components/landing/HowToCalculateNetWorth.astro";
 import PersonalFinanceApp from "@/components/landing/PersonalFinanceApp";
 import OpenBankingApp from "@/components/landing/OpenBankingApp";
 import BudgetApp from "@/components/landing/BudgetApp";
@@ -187,20 +187,24 @@ const pageMeta: Record<TopLevelRouteId, { title: string; description: string }> 
 
 const meta = pageMeta[routeId];
 const alternateLinks = buildAlternateLinks(routeId);
-const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<TopLevelRouteId>([
+// Pages in the article shape (Direction B) close with their own disclaimer, CTA card and figure
+// cards, so the shared disclaimer and related-pages band below are left out for them.
+const ARTICLE_ROUTE_IDS = new Set<TopLevelRouteId>([
   "pageFireCalculator",
+  "pageHowToCalculateNetWorth",
+  "pageGuidedStart",
+]);
+const isArticle = ARTICLE_ROUTE_IDS.has(routeId);
+const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<TopLevelRouteId>([
   "pagePortfolioTracker",
   "pageNetWorthTracker",
-  "pageHowToCalculateNetWorth",
 ]);
 const showFinancialDisclaimer = FINANCIAL_DISCLAIMER_ROUTE_IDS.has(routeId);
 const NOT_A_BANK_ROUTE_IDS = new Set<TopLevelRouteId>([
-  "pageFireCalculator",
   "pagePortfolioTracker",
   "pageEtfTracker",
   "pageNetWorthTracker",
   "pageYnabAlternative",
-  "pageHowToCalculateNetWorth",
   "pageAbout",
   "pagePersonalFinanceApp",
   "pageOpenBankingApp",
@@ -233,9 +237,7 @@ const structuredData = softwareSchemas[routeId]
     {routeId === "pageNetWorthTracker" && <NetWorthTracker locale={locale} client:idle />}
     {routeId === "pageYnabAlternative" && <YnabAlternative locale={locale} client:idle />}
     {routeId === "pageFireCalculator" && <FireCalculatorPage locale={locale} />}
-    {routeId === "pageHowToCalculateNetWorth" && (
-      <HowToCalculateNetWorth locale={locale} client:idle />
-    )}
+    {routeId === "pageHowToCalculateNetWorth" && <HowToCalculateNetWorth locale={locale} />}
     {routeId === "pagePersonalFinanceApp" && <PersonalFinanceApp locale={locale} client:idle />}
     {routeId === "pageOpenBankingApp" && <OpenBankingApp locale={locale} client:idle />}
     {routeId === "pageBudgetApp" && <BudgetApp locale={locale} client:idle />}
@@ -250,7 +252,7 @@ const structuredData = softwareSchemas[routeId]
         <NotABank locale={locale} client:idle />
       </div>
     )}
-    {routeId !== "pageGuidedStart" && <RelatedSeoPages locale={locale} routeId={routeId} client:idle />}
+    {!isArticle && <RelatedSeoPages locale={locale} routeId={routeId} client:idle />}
   </main>
   <Footer locale={locale} client:idle />
   {structuredData && <StructuredData data={structuredData} />}

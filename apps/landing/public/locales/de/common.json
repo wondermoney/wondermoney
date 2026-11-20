@@ -97,7 +97,8 @@
       "calculator": "Rechner",
       "guide": "Ratgeber",
       "glossary": "Glossar",
-      "view": "Ansehen"
+      "view": "Ansehen",
+      "feature": "Funktion"
     },
     "notABank": "WonderMoney ist keine Bank, kein Broker und kein Finanzberater. Wir sind eine Technologieplattform, die Nur-Lese-Open-Banking nutzt, um Ihre Finanzdaten an einem Ort anzuzeigen. Wir bieten keine Finanz-, Anlage- oder Steuerberatung an.",
     "pivotBanner": {
@@ -3503,7 +3504,8 @@
         "joint": "Zusammenveranlagung (Paar)",
         "ownHome": "Es war meine Hauptwohnung und ich will den Erlös reinvestieren",
         "reinvested": "In eine andere Hauptwohnung reinvestierter Betrag",
-        "loanRepaid": "Mit dem Verkauf getilgtes Darlehenskapital"
+        "loanRepaid": "Mit dem Verkauf getilgtes Darlehenskapital",
+        "taxValue": "Steuerwert (VPT), optional"
       },
       "help": {
         "dates": "Der Koeffizient gilt nur, wenn die Immobilie länger als 24 Monate gehalten wurde. Der Rechner deckt Verkäufe in {{saleYear}} ab.",
@@ -3513,7 +3515,9 @@
         "otherIncome": "Das übrige IRS-pflichtige Einkommen des Haushalts im Jahr, nach den spezifischen Abzügen und vor den Steuerabzügen. Geben Sie 0 an, wenn es keines gibt.",
         "joint": "Teilt das Einkommen durch zwei, wie bei der Zusammenveranlagung. Für eine Einzelveranlagung ausgeschaltet lassen.",
         "reinvested": "Zählt Käufe von 24 Monaten vor bis 36 Monate nach dem Verkauf, in Portugal oder der EU/dem EWR.",
-        "loanRepaid": "Der Teil des Verkaufserlöses, der das Darlehen der verkauften Immobilie tilgt."
+        "loanRepaid": "Der Teil des Verkaufserlöses, der das Darlehen der verkauften Immobilie tilgt.",
+        "taxValue": "Der valor patrimonial tributário aus der caderneta predial der Immobilie am Verkaufstag. Liegt er über dem Preis, wird der Gewinn auf ihn berechnet. Lassen Sie das Feld leer, wenn Sie ihn nicht kennen.",
+        "purchaseValue": "Der Wert, auf den Sie beim Kauf die IMT gezahlt haben: der Preis oder der damalige VPT, falls er höher war (Art. 46 Abs. 1 CIRS)."
       },
       "errors": {
         "required": "Geben Sie eine gültige Zahl ein.",
@@ -3540,7 +3544,9 @@
         "expenses": "Abgezogene Kosten",
         "exemptPercent": "Durch Reinvestition ausgenommen",
         "taxableGain": "Zu versteuernder Gewinn",
-        "includedIncome": "Ihrem Einkommen hinzugerechnet (50 %)"
+        "includedIncome": "Ihrem Einkommen hinzugerechnet (50 %)",
+        "realizationValue": "Für den Gewinn verwendeter Verkaufswert",
+        "taxValueApplied": "Der VPT liegt über dem Preis, daher wird der Gewinn auf ihn berechnet, den Wert, auf den die IMT des Verkaufs gezahlt wird (Art. 44 Abs. 2 CIRS). Der verbleibende Erlös rechnet mit dem Preis, den Sie erhalten."
       },
       "checklist": {
         "title": "Voraussetzungen für die Reinvestitionsbefreiung",
@@ -3555,7 +3561,7 @@
         "exampleTitle": "Rechenbeispiel",
         "example": "Eine {{purchaseYear}} für {{purchaseValue}} gekaufte und {{saleYear}} für {{saleValue}} verkaufte Wohnung. Der Anschaffungswert wird mit dem Koeffizienten {{coefficient}} auf {{adjustedPurchase}} angehoben und {{expenses}} Kosten werden abgezogen, es bleibt ein Gewinn von {{gain}}. Die Hälfte, {{included}}, wird dem übrigen Einkommen von {{otherIncome}} hinzugerechnet und erhöht die IRS um etwa {{extraTax}}.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodGain": "Gewinn = Verkaufspreis minus der mit dem Koeffizienten aktualisierte Anschaffungswert, minus Anschaffungs- und Verkaufskosten und Arbeiten der letzten 12 Jahre (CIRS, Artikel 46, 50 und 51).",
+        "methodGain": "Gewinn = Verkaufspreis minus der mit dem Koeffizienten aktualisierte Anschaffungswert, minus Anschaffungs- und Verkaufskosten und Arbeiten der letzten 12 Jahre (CIRS, Artikel 44, 46, 50 und 51). Der Anschaffungswert ist der Wert, auf den die IMT des Kaufs gezahlt wurde (Art. 46 Abs. 1).",
         "methodCoefficient": "Der Geldentwertungskoeffizient des Kaufjahres gilt nur, wenn die Immobilie länger als 24 Monate gehalten wurde. Die Werte für {{saleYear}} stammen aus der {{portaria}} und sind für Käufe ab {{firstYear}} hinterlegt.",
         "methodExpenses": "Kosten müssen notwendig, tatsächlich bezahlt und belegt sein: IMT und Imposto do Selo des Kaufs, Maklerprovisionen und Arbeiten der letzten 12 Jahre mit Rechnung.",
         "methodHalf": "Nur 50 % eines positiven Gewinns werden dem übrigen Einkommen des Jahres hinzugerechnet und nach den progressiven IRS-Stufen von {{saleYear}} besteuert. Die gezeigte zusätzliche IRS ist die Steuer mit dem Gewinn minus die Steuer ohne ihn.",
@@ -3563,16 +3569,22 @@
         "methodCash": "Der verbleibende Erlös zieht vom Verkaufspreis die Verkaufskosten, das getilgte Darlehen und die geschätzte IRS ab. Was Sie in die nächste Wohnung stecken, wird nicht abgezogen.",
         "scopeTitle": "Was abgedeckt ist",
         "scopeSupported": "Natürliche Personen mit steuerlichem Wohnsitz in Portugal, die {{saleYear}} eine seit {{firstYear}} gekaufte Immobilie aus dem Privatvermögen verkaufen.",
-        "scopeUnsupported": "Nicht abgedeckt: Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, Verkäufe unter dem Steuerwert der Immobilie, der Solidaritätszuschlag und Steuerabzüge.",
+        "scopeUnsupported": "Nicht abgedeckt: Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, der Solidaritätszuschlag und Steuerabzüge.",
         "assumptionsTitle": "Annahmen",
         "assumptionBrackets": "Die zusätzliche IRS nutzt die Jahrestarifstufen der IRS von {{saleYear}} auf das eingegebene Einkommen, als Schätzung der Wirkung auf die Jahreserklärung. Die Zusammenveranlagung wird durch Teilung des Einkommens durch zwei abgebildet.",
-        "assumptionNotModelled": "Der Rechner prüft weder die Reinvestitionsvoraussetzungen noch den Steuerwert der Immobilie. Die Koeffizienten wurden aus einer Sekundärzusammenfassung der Portaria gelesen und sollten im Diário da República bestätigt werden.",
+        "assumptionNotModelled": "Der Rechner prüft die Reinvestitionsvoraussetzungen nicht. Die Koeffizienten wurden mit der Tabelle der {{portaria}} im Diário da República abgeglichen.",
         "assumptionEducational": "Dies ist eine Schätzung zu Lernzwecken, keine Steuerberatung. Maßgeblich ist der IRS-Bescheid der Steuerbehörde.",
         "sourcesTitle": "Quellen",
-        "sourceGains": "CIRS, Artikel 43: Gewinne und Verluste (abgerufen am 19. November 2026)",
-        "sourceExemption": "CIRS, Artikel 10: Ausnahme bei Reinvestition in die eigene Hauptwohnung (abgerufen am 19. November 2026)",
+        "sourceGains": "CIRS, Artikel 43: Gewinne und Verluste (abgerufen am 20. November 2026)",
+        "sourceExemption": "CIRS, Artikel 10: Ausnahme bei Reinvestition in die eigene Hauptwohnung (abgerufen am 20. November 2026)",
         "sourceCoefficients": "{{portaria}}: Entwertungskoeffizienten für {{saleYear}}",
-        "reviewed": "Regeln und Koeffizienten für {{saleYear}} geprüft am {{reviewed}}."
+        "reviewed": "Regeln und Koeffizienten für {{saleYear}} geprüft am {{reviewed}}.",
+        "methodTaxValue": "Der Verkaufswert ist der Preis, es sei denn, der Wert, auf den die IMT des Verkaufs gezahlt wird, ist höher (Art. 44 Abs. 2 CIRS). Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (Art. 12 Abs. 1 CIMT), daher erhöht ein VPT über dem Preis den Gewinn und den für die Ausnahme zu reinvestierenden Betrag. Dass der tatsächliche Preis niedriger war, können Sie im Verfahren nach Art. 139 CIRC nachweisen (Art. 44 Abs. 5 und 6 CIRS); der Rechner bildet diesen Nachweis nicht ab.",
+        "sourceRealization": "CIRS, Artikel 44: Veräußerungswert und Vorrang des IMT-Werts (abgerufen am 20. November 2026)",
+        "sourceAcquisition": "CIRS, Artikel 46: Anschaffungswert entgeltlich erworbener Immobilien (abgerufen am 20. November 2026)",
+        "sourceCorrection": "CIRS, Artikel 50: Geldwertkorrektur nach 24 Monaten (abgerufen am 20. November 2026)",
+        "sourceExpenses": "CIRS, Artikel 51: Arbeiten der letzten 12 Jahre sowie Anschaffungs- und Verkaufskosten (abgerufen am 20. November 2026)",
+        "sourceImt": "CIMT, Artikel 12: Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Wissen, wie viel vom Verkauf Sie wirklich nutzen können",
       "nextStepDescription": "WonderMoney hilft Ihnen, die Steuer zurückzulegen und zu sehen, was für die nächste Wohnung bleibt.",
@@ -3745,13 +3757,12 @@
         "unsupportedAgreement": "Aufhebungsvertrag, bei dem der Betrag verhandelt wird und es keine gesetzliche Formel gibt.",
         "unsupportedPublic": "Beschäftigte im öffentlichen Dienst, für die andere Regeln gelten.",
         "sourcesTitle": "Quellen",
-        "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelung des Art. 5",
-        "sourceLaw13": "APEL-Leitfaden zur Agenda do Trabalho Digno: Lei n.º 13/2023, die den Satz des Art. 366 Abs. 1 ab 1. Mai 2023 auf 14 Tage erhöhte",
-        "sourceCode": "Código do Trabalho, konsolidierter Text (PGDL): Art. 344, 345 und 366",
+        "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelungen der Art. 5 und 6",
+        "sourceCode": "Código do Trabalho, konsolidierter Text (Diário da República): Art. 148, 344, 345 und 366",
         "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
-        "reviewed": "Regeln am 19. November 2026 geprüft anhand des Textes der Lei n.º 69/2013, veröffentlicht von der Assembleia da República, und des Mindestlohns 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage pro Jahr der Lei n.º 13/2023, in Kraft seit dem 1. Mai 2023, sowie die 12 Tage und die Obergrenze von Art. 366 stammen aus den Zusammenfassungen von APEL und DGERT und dem konsolidierten Código do Trabalho, nicht aus dem Text des Diário da República. Wir wenden die 14 Tage nur auf die Betriebszugehörigkeit ab dem 1. Mai 2023 an, die übliche Lesart der Übergangsregel. Die 24 Tage beim Auslaufen eines befristeten Vertrags und ihre Anwendung auf alle Verträge, die ab dem 1. Mai 2023 auslaufen, stammen aus dem von der PGDL wiedergegebenen Text der Lei n.º 13/2023 (Art. 344, 345 und 35) und der IGeFE-Note, nicht von der Seite des Diário da República. Lehrzwecke, keine Rechtsberatung.",
-        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen. Die gesamte Dauer zählt also mit 24 Tagen, egal wann der Vertrag begann, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht.",
-        "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April: neue Fassung von Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung (PGDL-Wiedergabe des Textes aus dem Diário da República)",
+        "reviewed": "Regeln am 20. November 2026 anhand des Diário da República geprüft: konsolidierter Código do Trabalho (Art. 148, 344, 345 und 366), Lei n.º 13/2023 (Art. 35) und Lei n.º 69/2013 (Art. 5 und 6), mit dem Mindestlohn 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage zählen nur für die Betriebszugehörigkeit ab dem 1. Mai 2023, wie Art. 35 Abs. 2 der Lei n.º 13/2023 vorsieht. Die 24 Tage beim Auslaufen eines befristeten Vertrags zählen für den ganzen Vertrag: So liest die IGeFE-Note Art. 35 Abs. 1, und ein Gericht könnte das bei vor dem 1. Mai 2023 geschlossenen Verträgen anders sehen. Lehrzwecke, keine Rechtsberatung.",
+        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
+        "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April (Diário da República): neue Fassung von Art. 344 Abs. 2, 345 Abs. 4 und 366 Abs. 1 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum"
       },
       "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
@@ -5930,12 +5941,13 @@
       "house": "Strichzeichnung eines kleinen Hauses auf seinem Grundstück, mit Schornstein, Tür, Fenstern und einem Weg aus Trittsteinen, dessen Dachziegel verlegt werden, während der Kredit abbezahlt wird.",
       "deed": "Strichzeichnung einer Eigentumsurkunde mit Wachssiegel und Band, auf der ein Hausschlüssel liegt.",
       "car": "Strichzeichnung eines kleinen Kompaktwagens auf einem Straßenstück, dessen Räder sich beim Rollen drehen.",
-      "payslip": "Strichzeichnung einer Gehaltsabrechnung mit Zeilen von Beträgen neben einer Lohntüte, in der der Nettoanteil einer Zeile als Geldschein steckt.",
+      "payslip": "Strichzeichnung einer Gehaltsabrechnung, die aus ihrem Umschlag ragt, oben das Brutto, darunter Steuer und Sozialabgaben abgezogen und unten fett das Netto.",
       "easelchart": "Strichzeichnung eines Flipchart-Ständers auf drei Beinen, auf dem Block ein Liniendiagramm über die Jahre, das trotz Einbrüchen steigt, und ein Cursor, der ein Jahr markiert.",
       "meter": "Strichzeichnung eines alten Stromzählers mit einer Reihe von Zählwerk-Zifferblättern und einer Drehscheibe hinter Glas, die sich bei steigender Last schneller dreht.",
       "pump": "Strichzeichnung einer Zapfsäule auf ihrer Insel, deren Zapfpistole am Schlauch aus der Halterung gehoben wird, während die Füllanzeige steigt.",
       "wallet": "Strichzeichnung einer aufgeklappten Geldbörse mit drei Karten in gestuften Fächern, von denen eine herausgleitet.",
-      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt."
+      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt.",
+      "deckchair": "Strichzeichnung eines Liegestuhls neben einem Münzstapel, der zu einer gestrichelten Münze aufsteigt, der Summe, die deine Ausgaben auf Dauer trägt; erreicht der Stapel sie, lehnt sich der Stuhl zurück."
     }
   }
 }

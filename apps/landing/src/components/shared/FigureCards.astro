@@ -3,9 +3,15 @@
  * Link cards that lead with the destination's figure (Direction B): "Keep
  * reading" under an article, and the hub grids. The whole card is the link;
  * the figure is decorative, the title names it.
+ *
+ * `grid` (the default) draws every card with its figure. `index` is for a
+ * long list, such as a task group on the tools hub: the first card leads with
+ * its figure (a lone card too) and the rest are rows of title, two lines and an
+ * arrow beside and under it, so the list scans and only one figure mounts per
+ * list.
  */
 import HairlineFigure from "./HairlineFigure.astro";
-import type { FigureCard } from "@/lib/figureCards";
+import { figureIndexLayout, type FigureCard } from "@/lib/figureCards";
 import type { Lang } from "@/lib/i18nLocale";
 
 interface Props {
@@ -13,33 +19,83 @@ interface Props {
   cards: ReadonlyArray<FigureCard>;
   /** Rendered as a heading-level title per card: h2 on a hub, h3 under an article's h2. */
   headingLevel?: 2 | 3;
+  variant?: "grid" | "index";
   id?: string;
   class?: string;
 }
 
-const { locale, cards, headingLevel = 3, id, class: className } = Astro.props;
+const { locale, cards, headingLevel = 3, variant = "grid", id, class: className } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
+const index = variant === "index";
+const layout = figureIndexLayout(cards.length);
+// The lead spans the grid rows its siblings fill beside it: two to a row from sm, three from xl.
+const leadSpan = index && layout.lead ? `--lead-span-2: ${layout.spanTwo}; --lead-span-3: ${layout.spanThree};` : undefined;
 ---
 
-<ul id={id} role="list" class:list={["grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3", className]}>
-  {cards.map((card) => (
-    <li class="min-w-0">
-      <a
-        href={card.href}
-        {...card.data}
-        class="group grid h-full grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-4 rounded-card border border-border bg-card p-3 pr-4 transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:flex sm:flex-col sm:items-stretch sm:gap-0 sm:px-5 sm:pb-6 sm:pt-3"
+<ul
+  id={id}
+  role="list"
+  style={leadSpan}
+  class:list={[
+    "grid grid-cols-1",
+    index ? "gap-x-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "gap-4 sm:grid-cols-2 lg:grid-cols-3",
+    className,
+  ]}
+>
+  {cards.map((card, position) => {
+    const row = index && !(layout.lead && position === 0);
+    const lead = index && !row;
+    return row ? (
+      <li class="min-w-0 border-t border-border">
+        <a
+          href={card.href}
+          {...card.data}
+          class="group flex h-full items-start gap-3 rounded-sm py-3.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          <div class="min-w-0 flex-1">
+            <Heading class="text-base font-semibold leading-6 tracking-[-0.01em] text-foreground group-hover:text-primary">
+              {card.title}
+            </Heading>
+            {card.description && <p class="mt-0.5 line-clamp-2 text-sm leading-6 text-muted-foreground">{card.description}</p>}
+          </div>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="mt-1 size-4 shrink-0 text-muted-foreground transition-transform group-hover:text-primary motion-safe:group-hover:translate-x-0.5"
+          >
+            <path d="M3 8h10M9 4l4 4-4 4" />
+          </svg>
+        </a>
+      </li>
+    ) : (
+      <li
+        class:list={[
+          "min-w-0",
+          lead && "mb-4 sm:row-span-(--lead-span-2) sm:mb-0 sm:self-start xl:row-span-(--lead-span-3)",
+        ]}
       >
-        <HairlineFigure figure={card.figure} locale={locale} variant="thumb" class="pointer-events-none" />
-        <div class="min-w-0">
-          {card.kind && <span class="text-sm text-muted-foreground sm:mt-1 sm:block">{card.kind}</span>}
-          <Heading class="mt-0.5 text-base font-semibold tracking-[-0.01em] text-foreground group-hover:text-primary sm:mt-1 sm:text-lg">
-            {card.title}
-          </Heading>
-          {card.description && (
-            <p class="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground sm:mt-2 sm:line-clamp-none">{card.description}</p>
-          )}
-        </div>
-      </a>
-    </li>
-  ))}
+        <a
+          href={card.href}
+          {...card.data}
+          class="group grid h-full grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-4 rounded-card border border-border bg-card p-3 pr-4 transition-colors hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:flex sm:flex-col sm:items-stretch sm:gap-0 sm:px-5 sm:pb-6 sm:pt-3"
+        >
+          <HairlineFigure figure={card.figure} locale={locale} variant="thumb" class="pointer-events-none" />
+          <div class="min-w-0">
+            {card.kind && <span class="text-sm text-muted-foreground sm:mt-1 sm:block">{card.kind}</span>}
+            <Heading class="mt-0.5 text-base font-semibold tracking-[-0.01em] text-foreground group-hover:text-primary sm:mt-1 sm:text-lg">
+              {card.title}
+            </Heading>
+            {card.description && (
+              <p class="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground sm:mt-2 sm:line-clamp-none">{card.description}</p>
+            )}
+          </div>
+        </a>
+      </li>
+    );
+  })}
 </ul>

@@ -35,7 +35,12 @@ const values = {
 const cirs = "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cirs_rep/Pages/";
 const sources = [
   ["sourceGains", `${cirs}irs43.aspx`],
+  ["sourceRealization", `${cirs}irs44.aspx`],
+  ["sourceAcquisition", `${cirs}irs46.aspx`],
+  ["sourceCorrection", `${cirs}irs50.aspx`],
+  ["sourceExpenses", `${cirs}irs51.aspx`],
   ["sourceExemption", `${cirs}irs10.aspx`],
+  ["sourceImt", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimt/Pages/cimt12.aspx"],
   ["sourceCoefficients", "https://diariodarepublica.pt/dr/detalhe/portaria/457-2026-1180341125"],
 ] as const;
 ---
@@ -52,7 +57,7 @@ const sources = [
       {t(k("methodTitle"))}
     </h2>
     <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodGain", "methodCoefficient", "methodExpenses", "methodHalf", "methodExemption", "methodCash"].map((key) => <li>{t(k(key), values)}</li>)}
+      {["methodGain", "methodTaxValue", "methodCoefficient", "methodExpenses", "methodHalf", "methodExemption", "methodCash"].map((key) => <li>{t(k(key), values)}</li>)}
     </ul>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("scopeTitle"))}</h3>
     <ul class="mt-3 list-disc space-y-2 pl-6">

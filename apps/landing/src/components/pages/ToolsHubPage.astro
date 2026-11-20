@@ -4,10 +4,9 @@ import ContentLayout from "@/layouts/ContentLayout.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import FigureCards from "@/components/shared/FigureCards.astro";
 import { sectionNumber } from "@/lib/articleOutline";
-import type { FigureCard } from "@/lib/figureCards";
-import { figureForTool } from "@/lib/hairline/articleFigures";
+import { toolsHubGroupCards } from "@/lib/figureCards";
 import { buildAlternateLinksForPath, toToolsHubPath, type Lang } from "@/lib/routes";
-import { buildToolsHub, buildToolsHubItemList, toolAnalyticsName } from "@/lib/toolsCatalog";
+import { buildToolsHub, buildToolsHubItemList } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
 
 interface Props {
@@ -19,21 +18,6 @@ const t = getTranslations(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => toToolsHubPath(lang));
 const groups = buildToolsHub(locale);
 const itemListSchema = buildToolsHubItemList(locale, t);
-const calculatorLabel = t("tools.hub.badge");
-const cardsFor = (group: (typeof groups)[number]): FigureCard[] =>
-  group.tools.map((tool) => ({
-    href: tool.href,
-    title: t(`tools.${tool.key}.title`),
-    description: t(`tools.${tool.key}.description`),
-    figure: figureForTool(tool.routeId),
-    kind: calculatorLabel,
-    data: {
-      "data-tools-hub-link": "tool",
-      "data-tool": toolAnalyticsName(tool.key),
-      "data-group": group.id,
-      "data-position": String(tool.position),
-    },
-  }));
 ---
 
 <ContentLayout
@@ -76,7 +60,7 @@ const cardsFor = (group: (typeof groups)[number]): FigureCard[] =>
       </nav>
     </ArticleHero>
 
-    <div class="mx-auto max-w-7xl space-y-16 px-6 pb-16 pt-12 lg:px-8 lg:pt-16">
+    <div class="mx-auto max-w-7xl space-y-14 px-6 pb-16 pt-12 lg:px-8 lg:pt-14">
       {
         groups.map((group, index) => (
           <section id={group.anchor} class="scroll-mt-28" aria-labelledby={`${group.anchor}-title`}>
@@ -92,7 +76,7 @@ const cardsFor = (group: (typeof groups)[number]): FigureCard[] =>
             <p class="mt-3 max-w-[40rem] text-lg leading-[1.7] text-ink-2">
               {t(`tools.hub.groups.${group.id}.intro`)}
             </p>
-            <FigureCards locale={locale} cards={cardsFor(group)} class="mt-6" />
+            <FigureCards locale={locale} cards={toolsHubGroupCards(group, t)} variant="index" class="mt-6" />
           </section>
         ))
       }

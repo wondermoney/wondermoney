@@ -26,13 +26,15 @@ export interface ToolCatalogEntry {
 	readonly key: string
 	readonly routeId: CatalogRouteId
 	readonly group: ToolGroupId
-	/** The tools a /tools page suggests next, in order. Only /tools pages have them. */
+	/** The tools a calculator page suggests next, in order: every /tools page, and the FIRE page. */
 	readonly related?: readonly ToolRouteId[]
 }
 
 /**
  * Every calculator on the landing site, the one list the tools hub, its ItemList and the related
- * tools of each /tools page read. Entries are written group by group in display order.
+ * tools of each /tools page read. Entries are written group by group in display order. The first
+ * tool of a group leads it on the hub as the one card with a figure, so put the group's most
+ * sought-after tool first.
  *
  * Adding a tool: add its route to `TOOL_ROUTE_IDS`, one entry here, in its group, and its
  * `title`, `shortName` and `description` under `tools.<key>` in every locale. The hub, the header's
@@ -246,7 +248,12 @@ export const TOOLS_CATALOG = [
 		group: "investAndGrow",
 		related: ["toolInvestmentReturn", "toolCompoundInterest", "toolEmergencyFund"],
 	},
-	{ key: "fire", routeId: "pageFireCalculator", group: "investAndGrow" },
+	{
+		key: "fire",
+		routeId: "pageFireCalculator",
+		group: "investAndGrow",
+		related: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
+	},
 	{
 		key: "statePension",
 		routeId: "toolStatePension",

@@ -35,6 +35,7 @@ export const FIGURE_NAMES = [
   "pump",
   "wallet",
   "safe",
+  "deckchair",
 ] as const;
 
 export type FigureName = (typeof FIGURE_NAMES)[number];
@@ -82,9 +83,11 @@ export function figureForGuide(slug: string): FigureName | undefined {
   return GUIDE_FIGURES[slug];
 }
 
-/** The standalone articles, by route id. */
+/** The standalone articles, by route id, and the product pages their cards link to. */
 export const PAGE_FIGURES = {
   pageHowToCalculateNetWorth: "scale",
+  pageNetWorthTracker: "scale",
+  pagePortfolioTracker: "easelchart",
   guideMoneyCheckin: "timer",
   pageSavingsGuide: "containers",
   learnHub: "booklets",
@@ -152,6 +155,7 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolTermDeposit: "safe",
   toolTermDepositOffers: "safe",
   toolSavingsCertificates: "safe",
+  pageFireCalculator: "deckchair",
 };
 
 export function figureForTool(routeId: string | undefined): FigureName {

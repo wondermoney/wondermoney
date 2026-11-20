@@ -97,7 +97,8 @@
       "calculator": "Calcolatore",
       "guide": "Guida",
       "glossary": "Glossario",
-      "view": "Visualizza"
+      "view": "Visualizza",
+      "feature": "Funzionalità"
     },
     "notABank": "WonderMoney non è una banca, un broker o un consulente finanziario. Siamo una piattaforma tecnologica che utilizza l'Open Banking in sola lettura per mostrare i tuoi dati finanziari in un unico posto. Non forniamo consulenza finanziaria, di investimento o fiscale.",
     "pivotBanner": {
@@ -3503,7 +3504,8 @@
         "joint": "Tassazione congiunta (coppia)",
         "ownHome": "Era la mia abitazione principale e intendo reinvestire il ricavato",
         "reinvested": "Importo reinvestito in un'altra abitazione principale",
-        "loanRepaid": "Capitale del mutuo estinto con la vendita"
+        "loanRepaid": "Capitale del mutuo estinto con la vendita",
+        "taxValue": "Valore fiscale (VPT), facoltativo"
       },
       "help": {
         "dates": "Il coefficiente si applica solo se l'immobile è stato posseduto per più di 24 mesi. Il calcolatore copre le vendite del {{saleYear}}.",
@@ -3513,7 +3515,9 @@
         "otherIncome": "Gli altri redditi della famiglia soggetti a IRS nell'anno, dopo le deduzioni specifiche e prima delle detrazioni d'imposta. Indica 0 se non ce ne sono.",
         "joint": "Divide il reddito per due, come nella tassazione congiunta. Lascialo spento per una dichiarazione individuale.",
         "reinvested": "Conta gli acquisti da 24 mesi prima a 36 mesi dopo la vendita, in Portogallo o nell'UE/SEE.",
-        "loanRepaid": "La parte del ricavato che estingue il mutuo dell'immobile venduto."
+        "loanRepaid": "La parte del ricavato che estingue il mutuo dell'immobile venduto.",
+        "taxValue": "Il valor patrimonial tributário indicato nella caderneta predial dell'immobile alla data della vendita. Se supera il prezzo, la plusvalenza si calcola su di esso. Lascia vuoto se non lo conosci.",
+        "purchaseValue": "Il valore su cui hai pagato l'IMT all'acquisto: il prezzo, o il VPT di allora se era più alto (art. 46, n. 1, del CIRS)."
       },
       "errors": {
         "required": "Inserisci un numero valido.",
@@ -3540,7 +3544,9 @@
         "expenses": "Spese dedotte",
         "exemptPercent": "Escluso per reinvestimento",
         "taxableGain": "Plusvalenza da tassare",
-        "includedIncome": "Aggiunto al reddito (50%)"
+        "includedIncome": "Aggiunto al reddito (50%)",
+        "realizationValue": "Valore di vendita usato per la plusvalenza",
+        "taxValueApplied": "Il VPT è più alto del prezzo, quindi la plusvalenza si calcola su di esso, il valore su cui si paga l'IMT della vendita (art. 44, n. 2, del CIRS). Il ricavato che ti resta usa il prezzo che ricevi."
       },
       "checklist": {
         "title": "Condizioni da verificare per l'esclusione per reinvestimento",
@@ -3555,7 +3561,7 @@
         "exampleTitle": "Esempio pratico",
         "example": "Una casa acquistata nel {{purchaseYear}} per {{purchaseValue}} e venduta nel {{saleYear}} per {{saleValue}}. Il valore di acquisto è rivalutato con il coefficiente {{coefficient}} a {{adjustedPurchase}} e si dedudono {{expenses}} di spese, lasciando una plusvalenza di {{gain}}. La metà, {{included}}, si somma ad altri redditi di {{otherIncome}} e aggiunge circa {{extraTax}} di IRS.",
         "methodTitle": "Come funziona la stima",
-        "methodGain": "Plusvalenza = prezzo di vendita meno il valore di acquisto rivalutato con il coefficiente, meno le spese di acquisto e di vendita e i lavori degli ultimi 12 anni (CIRS, articoli 46, 50 e 51).",
+        "methodGain": "Plusvalenza = prezzo di vendita meno il valore di acquisto rivalutato con il coefficiente, meno le spese di acquisto e di vendita e i lavori degli ultimi 12 anni (CIRS, articoli 44, 46, 50 e 51). Il valore di acquisto è il valore su cui è stata pagata l'IMT dell'acquisto (art. 46, n. 1).",
         "methodCoefficient": "Il coefficiente di svalutazione monetaria dell'anno di acquisto si applica solo se l'immobile è stato posseduto per più di 24 mesi. I valori del {{saleYear}} provengono dalla {{portaria}} e sono memorizzati per acquisti dal {{firstYear}}.",
         "methodExpenses": "Le spese devono essere necessarie, effettivamente pagate e documentate: IMT e Imposto do Selo dell'acquisto, provvigioni di agenzia e lavori degli ultimi 12 anni con fattura.",
         "methodHalf": "Solo il 50% di una plusvalenza positiva si somma agli altri redditi dell'anno ed è tassato negli scaglioni progressivi dell'IRS del {{saleYear}}. L'IRS aggiuntivo mostrato è l'imposta con la plusvalenza meno l'imposta senza.",
@@ -3563,16 +3569,22 @@
         "methodCash": "Il ricavato che resta sottrae dal prezzo di vendita le spese di vendita, il mutuo estinto e l'IRS stimato. Non sottrae ciò che spendi per la casa successiva.",
         "scopeTitle": "Cosa è coperto",
         "scopeSupported": "Persone fisiche residenti fiscali in Portogallo che vendono nel {{saleYear}} un immobile del patrimonio privato acquistato dal {{firstYear}}.",
-        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività, successioni e donazioni, case con aiuto pubblico superiore al 30% del valore fiscale, vendite sotto il valore fiscale dell'immobile, la sovrattassa di solidarietà e le detrazioni d'imposta.",
+        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività, successioni e donazioni, case con aiuto pubblico superiore al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
         "assumptionsTitle": "Ipotesi",
         "assumptionBrackets": "L'IRS aggiuntivo usa gli scaglioni annuali dell'IRS del {{saleYear}} sul reddito indicato, come stima dell'effetto sulla dichiarazione annuale. La tassazione congiunta è modellata dividendo il reddito per due.",
-        "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento né il valore fiscale dell'immobile. I coefficienti sono stati letti da un riepilogo secondario della Portaria e vanno confermati nel Diário da República.",
+        "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento. I coefficienti sono stati confrontati con la tabella della {{portaria}} nel Diário da República.",
         "assumptionEducational": "Questa è una stima a scopo educativo, non una consulenza fiscale. Conta l'avviso di liquidazione dell'IRS dell'amministrazione fiscale.",
         "sourcesTitle": "Fonti",
-        "sourceGains": "CIRS, articolo 43: plusvalenze e minusvalenze (consultato il 19 novembre 2026)",
-        "sourceExemption": "CIRS, articolo 10: esclusione per reinvestimento nell'abitazione principale (consultato il 19 novembre 2026)",
+        "sourceGains": "CIRS, articolo 43: plusvalenze e minusvalenze (consultato il 20 novembre 2026)",
+        "sourceExemption": "CIRS, articolo 10: esclusione per reinvestimento nell'abitazione principale (consultato il 20 novembre 2026)",
         "sourceCoefficients": "{{portaria}}: coefficienti di svalutazione per il {{saleYear}}",
-        "reviewed": "Regole e coefficienti del {{saleYear}} rivisti il {{reviewed}}."
+        "reviewed": "Regole e coefficienti del {{saleYear}} rivisti il {{reviewed}}.",
+        "methodTaxValue": "Il valore di vendita è il prezzo, a meno che il valore su cui si paga l'IMT della vendita sia più alto (art. 44, n. 2, del CIRS). L'IMT si paga sul maggiore tra il prezzo e il VPT (art. 12, n. 1, del CIMT), quindi un VPT sopra il prezzo aumenta la plusvalenza e l'importo da reinvestire per l'esclusione. Puoi provare che il prezzo reale era più basso con la procedura dell'art. 139 del CIRC (art. 44, nn. 5 e 6, del CIRS); il calcolatore non modella questa prova.",
+        "sourceRealization": "CIRS, articolo 44: valore di realizzo e prevalenza del valore ai fini IMT (consultato il 20 novembre 2026)",
+        "sourceAcquisition": "CIRS, articolo 46: valore di acquisto degli immobili acquistati a titolo oneroso (consultato il 20 novembre 2026)",
+        "sourceCorrection": "CIRS, articolo 50: correzione monetaria dopo 24 mesi (consultato il 20 novembre 2026)",
+        "sourceExpenses": "CIRS, articolo 51: lavori degli ultimi 12 anni e spese di acquisto e di vendita (consultato il 20 novembre 2026)",
+        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)"
       },
       "nextStepHeadline": "Scopri quanto della vendita puoi davvero usare",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'imposta e a vedere cosa resta per la prossima casa.",
@@ -3745,13 +3757,12 @@
         "unsupportedAgreement": "La risoluzione consensuale, in cui l'importo è negoziato e non c'è una formula di legge.",
         "unsupportedPublic": "I dipendenti del settore pubblico, che seguono altre regole.",
         "sourcesTitle": "Fonti",
-        "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regime transitorio dell'art. 5",
-        "sourceLaw13": "Guida APEL all'Agenda do Trabalho Digno: Lei n.º 13/2023, che ha portato l'aliquota dell'art. 366, n. 1, a 14 giorni dal 1° maggio 2023",
-        "sourceCode": "Código do Trabalho, testo consolidato (PGDL): artt. 344, 345 e 366",
+        "sourceLaw69": "Lei n.º 69/2013 del 30 agosto (Diário da República): nuova formulazione dell'art. 366 e regimi transitori degli artt. 5 e 6",
+        "sourceCode": "Código do Trabalho, testo consolidato (Diário da República): artt. 148, 344, 345 e 366",
         "sourceDgert": "DGERT: indennità per licenziamento collettivo (art. 366)",
-        "reviewed": "Regole verificate il 19 novembre 2026 sul testo della Lei n.º 69/2013, pubblicato dall'Assembleia da República, e sul salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni per anno della Lei n.º 13/2023, in vigore dal 1° maggio 2023, e i 12 giorni e il limite dell'art. 366 vengono dai riassunti di APEL e DGERT e dal Código do Trabalho consolidato, non dal testo del Diário da República. Applichiamo i 14 giorni solo all'anzianità dal 1° maggio 2023, la lettura abituale della norma transitoria. I 24 giorni della scadenza del contratto a termine e la loro applicazione a tutti i contratti che scadono dal 1° maggio 2023 vengono dal testo della Lei n.º 13/2023 riprodotto dalla PGDL (artt. 344, 345 e 35) e dalla nota dell'IGeFE, non dalla pagina del Diário da República. Informazione didattica, non consulenza legale.",
-        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e la nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023. Quindi tutta la durata conta a 24 giorni, qualunque sia la data di inizio, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano.",
-        "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile: nuovo testo degli artt. 344, n. 2, e 345, n. 4, del Código do Trabalho e art. 35 sull'applicazione nel tempo (riproduzione della PGDL del testo del Diário da República)",
+        "reviewed": "Regole verificate il 20 novembre 2026 sul Diário da República: il Código do Trabalho consolidato (artt. 148, 344, 345 e 366), la Lei n.º 13/2023 (art. 35) e la Lei n.º 69/2013 (artt. 5 e 6), con il salario minimo 2026 di 920 euro (Decreto-Lei n.º 139/2025). I 14 giorni contano solo per l'anzianità dal 1° maggio 2023, come stabilisce l'art. 35, n. 2, della Lei n.º 13/2023. I 24 giorni della scadenza di un contratto a termine contano per tutto il contratto: è la lettura dell'art. 35, n. 1, data dalla nota dell'IGeFE, e un tribunale potrebbe leggerlo diversamente per i contratti conclusi prima del 1° maggio 2023. Informazione didattica, non consulenza legale.",
+        "methodFixedTerm": "Scadenza di un contratto a termine (artt. 344, n. 2, e 345, n. 4, del Código do Trabalho, nel testo della Lei n.º 13/2023): 24 giorni di retribuzione base e diuturnidades per ogni anno completo di anzianità, calcolati come all'art. 366. Valgono l'importo giornaliero, il limite di 20 volte il salario minimo per l'importo mensile, il limite di 12 importi mensili e la frazione proporzionale di un anno. L'art. 35, n. 1, della Lei n.º 13/2023 sottopone al nuovo testo i contratti conclusi prima del 1° maggio 2023, e il suo n. 2 limita al periodo da quella data solo i 14 giorni dell'art. 366, n. 1. La nota dell'IGeFE del 5 luglio 2023 la legge come 24 giorni per tutti i contratti che scadono dal 1° maggio 2023: il suo esempio di un contratto dal 1° settembre 2021 al 31 agosto 2023 conta tutti i 730 giorni a 24 giorni. Quindi tutta la durata conta a 24 giorni, e le aliquote dei contratti a tempo indeterminato (12, 14, 18 e 20 giorni) non si applicano. Un contratto a termine dura al massimo due anni, o quattro se a termine incerto (art. 148): uno che scade nel 2026 non è stato concluso prima del 1° ottobre 2013 e il regime transitorio dell'art. 6 della Lei n.º 69/2013 non si applica.",
+        "sourceLaw13Text": "Lei n.º 13/2023, del 3 aprile (Diário da República): nuovo testo degli artt. 344, n. 2, 345, n. 4, e 366, n. 1, del Código do Trabalho e art. 35 sull'applicazione nel tempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 luglio 2023): 24 giorni per tutti i contratti a termine che scadono dal 1° maggio 2023, qualunque sia la data di stipula"
       },
       "nextStepHeadline": "Pianifica l'incasso prima che arrivi",
@@ -5930,12 +5941,13 @@
       "house": "Disegno al tratto di una piccola casa sul suo terreno, con camino, porta, finestre e un vialetto di pietre, le cui tegole vengono posate man mano che il mutuo viene pagato.",
       "deed": "Disegno al tratto di un atto di proprietà con un sigillo di ceralacca e un nastro, con la chiave di una casa appoggiata sopra.",
       "car": "Disegno al tratto di una piccola utilitaria su un tratto di strada, con le ruote che girano mentre avanza.",
-      "payslip": "Disegno al tratto di un cedolino dello stipendio con righe di importi accanto a una busta, dove la quota netta di una riga è infilata come una banconota.",
+      "payslip": "Disegno al tratto di un cedolino che esce dalla busta, con il lordo in alto, le imposte e i contributi detratti sotto e il netto in evidenza in fondo.",
       "easelchart": "Disegno al tratto di un cavalletto per lavagna a fogli su tre gambe, con sul blocco un grafico a linee degli anni che sale tra alcune cadute e un cursore che segna un anno.",
       "meter": "Disegno al tratto di un vecchio contatore elettrico, con una fila di quadranti e un disco che gira dietro il vetro, più veloce quando il carico sale.",
       "pump": "Disegno al tratto di una pompa di benzina sulla sua isola, con la pistola che si solleva dal supporto attaccata al tubo mentre l’indicatore di riempimento sale.",
       "wallet": "Disegno al tratto di un portafoglio aperto con tre carte in fessure a scalini, una delle quali scivola fuori.",
-      "safe": "Disegno al tratto di una piccola cassaforte con un disco a combinazione e una maniglia a raggi, la cui porta si apre su pile di monete."
+      "safe": "Disegno al tratto di una piccola cassaforte con un disco a combinazione e una maniglia a raggi, la cui porta si apre su pile di monete.",
+      "deckchair": "Disegno al tratto di una sdraio accanto a una pila di monete che sale verso una moneta tratteggiata, la somma che paga le spese per sempre, e la sdraio si reclina quando la pila la raggiunge."
     }
   }
 }

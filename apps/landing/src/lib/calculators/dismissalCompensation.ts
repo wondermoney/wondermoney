@@ -27,8 +27,11 @@ export const SUPPORTED_END_YEAR = 2026;
  * Fixed-term expiry: 24 days of base pay and diuturnidades per full year of seniority (arts. 344(2) and 345(4) CT, Lei
  * n.º 13/2023), "calculada nos termos do artigo 366.º": same daily value, caps and proportional fraction. Art. 35(1) of
  * Lei n.º 13/2023 submits contracts signed before 1 May 2023 to the new text when they expire from that date on (IGeFE
- * nota informativa 10/2023), so the rate depends on the expiry date, not the contract date. Every expiry this
- * calculator accepts is in 2026, so the earlier 18 days a year (expiry up to 30 April 2023) is never used.
+ * nota informativa 10/2023), so the rate depends on the expiry date, not the contract date; art. 35(2) restricts only
+ * the 14 days of art. 366(1) to seniority from 1 May 2023, not arts. 344 and 345. Every expiry this calculator accepts
+ * is in 2026, so the earlier 18 days a year (expiry up to 30 April 2023) is never used, and a fixed-term contract lasts
+ * at most 2 years, or 4 with an uncertain term (art. 148(1) and (5) CT), so none signed before 1 October 2013 (art. 6
+ * of Lei n.º 69/2013) can expire in 2026. Texts checked on diariodarepublica.pt on 2026-11-20.
  */
 export const FIXED_TERM_DAYS_PER_YEAR = 24;
 

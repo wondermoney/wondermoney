@@ -1,7 +1,15 @@
 ---
+// The guided entry into the resources, in the shape of the resources hub
+// (ResourcesHubPage.astro): the hero with the compass, then the two-question
+// finder, every destination as figure cards, and the literacy quiz.
+// TopLevelPage.astro supplies the document and the header.
+import ArticleHero from "@/components/shared/ArticleHero.astro";
+import FigureCards from "@/components/shared/FigureCards.astro";
 import { buttonVariants } from "@/components/ui/button";
-import { GUIDED_GOALS, GUIDED_TASKS, LITERACY_CHOICES, LITERACY_QUESTIONS, getGuidedDestination } from "@/lib/guidedStart";
-import { toLocalizedPath, type Lang } from "@/lib/routes";
+import type { FigureCard } from "@/lib/figureCards";
+import { GUIDED_GOALS, GUIDED_TASKS, LITERACY_CHOICES, LITERACY_QUESTIONS, getGuidedDestination, type GuidedGoal } from "@/lib/guidedStart";
+import { figureForResource, figureForTool } from "@/lib/hairline/articleFigures";
+import { toLocalizedPath, type Lang, type ToolRouteId } from "@/lib/routes";
 import { getToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
 
@@ -14,25 +22,41 @@ const t = getTranslations(locale);
 const destinations = GUIDED_GOALS.flatMap((goal) =>
   GUIDED_TASKS.map((task) => getGuidedDestination(goal, task)),
 );
-const linkClass = "inline-block py-1 text-primary underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-ring";
+// A destination's card; `placement` is what the click tracking reports (guidedStartInteraction.ts).
+const toolCard = (routeId: ToolRouteId, placement: "result" | "browse", kind: string): FigureCard => {
+  const { key } = getToolCatalogEntry(routeId);
+  return {
+    href: toLocalizedPath(routeId, locale),
+    title: t(`tools.${key}.title`),
+    description: t(`tools.${key}.description`),
+    figure: figureForTool(routeId),
+    kind,
+    data: { "data-guided-link": placement, "data-route-id": routeId },
+  };
+};
+// The goal is each card's label, so the six read as three pairs.
+const browseCards = (goal: GuidedGoal) =>
+  GUIDED_TASKS.map((task) => toolCard(getGuidedDestination(goal, task), "browse", t(`guidedStart.goals.${goal}`)));
+const finderOptionClass = "flex min-h-10 cursor-pointer items-start gap-3 rounded-md px-2 py-2 hover:bg-muted";
 const optionClass = "flex min-h-10 cursor-pointer items-start gap-3 rounded-md px-2 py-2 hover:bg-background";
 const radioClass = "mt-1 size-4 shrink-0 accent-primary focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 ---
 
-<div data-guided-start class="mx-auto max-w-5xl px-6 py-10 sm:py-16 lg:px-8">
-  <header class="max-w-2xl">
-    <h1 class="break-words text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-      {t("guidedStart.title")}
-    </h1>
-    <p class="mt-4 text-lg text-muted-foreground">{t("guidedStart.intro")}</p>
-  </header>
+<ArticleHero
+  locale={locale}
+  title={t("guidedStart.title")}
+  dek={t("guidedStart.intro")}
+  breadcrumbs={[{ label: t("footer.resources"), href: toLocalizedPath("pageResources", locale) }]}
+  figure={figureForResource("guided_start")}
+/>
 
-  <form data-guided-discovery hidden class="ph-no-capture mt-8 rounded-card border border-border bg-muted p-4 sm:p-6">
-    <div class="grid gap-5 sm:grid-cols-2">
+<div data-guided-start class="mx-auto max-w-7xl px-6 pb-16 pt-10 lg:px-8">
+  <form data-guided-discovery hidden class="ph-no-capture">
+    <div class="grid max-w-[48rem] gap-5 sm:grid-cols-2">
       <fieldset class="min-w-0">
         <legend class="mb-2 font-semibold">{t("guidedStart.goalQuestion")}</legend>
         {GUIDED_GOALS.map((goal) => (
-          <label class={optionClass}>
+          <label class={finderOptionClass}>
             <input required type="radio" name="goal" value={goal} class={radioClass} />
             {t(`guidedStart.goals.${goal}`)}
           </label>
@@ -41,7 +65,7 @@ const radioClass = "mt-1 size-4 shrink-0 accent-primary focus-visible:ring-2 foc
       <fieldset class="min-w-0">
         <legend class="mb-2 font-semibold">{t("guidedStart.taskQuestion")}</legend>
         {GUIDED_TASKS.map((task) => (
-          <label class={optionClass}>
+          <label class={finderOptionClass}>
             <input required type="radio" name="task" value={task} class={radioClass} />
             {t(`guidedStart.tasks.${task}`)}
           </label>
@@ -49,46 +73,22 @@ const radioClass = "mt-1 size-4 shrink-0 accent-primary focus-visible:ring-2 foc
       </fieldset>
     </div>
     <button type="submit" class:list={[buttonVariants(), "mt-5 whitespace-normal"]}>{t("guidedStart.findTool")}</button>
-    <section data-guided-result hidden class="mt-5 border-t border-border pt-4">
-      <h2 tabindex="-1" class="scroll-mt-24 font-semibold focus-visible:outline-none">{t("guidedStart.resultTitle")}</h2>
-      {destinations.map((routeId) => {
-        const { key } = getToolCatalogEntry(routeId);
-        return (
-          <div data-guided-destination={routeId} hidden>
-            <p class="mt-1 max-w-2xl text-muted-foreground">{t(`tools.${key}.description`)}</p>
-            <a href={toLocalizedPath(routeId, locale)} data-guided-link="result" data-route-id={routeId} class:list={[linkClass, "mt-2"]}>
-              {t(`tools.${key}.title`)}
-            </a>
-          </div>
-        );
-      })}
+    <section data-guided-result hidden class="mt-8">
+      <h2 tabindex="-1" class="scroll-mt-24 text-base font-semibold text-foreground focus-visible:outline-none">{t("guidedStart.resultTitle")}</h2>
+      {destinations.map((routeId) => (
+        <div data-guided-destination={routeId} hidden>
+          <FigureCards locale={locale} cards={[toolCard(routeId, "result", t("global.relatedContent.calculator"))]} class="mt-4" />
+        </div>
+      ))}
     </section>
   </form>
 
-  <details class="mt-7 rounded-card border border-border p-4 sm:px-6">
-    <summary class="cursor-pointer rounded-md font-semibold focus-visible:ring-2 focus-visible:ring-ring">{t("guidedStart.browse")}</summary>
-    <div class="mt-4 grid gap-4 sm:grid-cols-3">
-      {GUIDED_GOALS.map((goal) => (
-        <section>
-          <h2 class="font-medium">{t(`guidedStart.goals.${goal}`)}</h2>
-          <ul class="mt-1">
-            {GUIDED_TASKS.map((task) => {
-              const routeId = getGuidedDestination(goal, task);
-              return (
-                <li>
-                  <a href={toLocalizedPath(routeId, locale)} data-guided-link="browse" data-route-id={routeId} class={linkClass}>
-                    {t(`tools.${getToolCatalogEntry(routeId).key}.title`)}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-    </div>
-  </details>
+  <section aria-labelledby="guided-browse-title" class="mt-12 border-t border-border pt-10 sm:mt-14">
+    <h2 id="guided-browse-title" class="text-2xl font-semibold tracking-tight">{t("guidedStart.browse")}</h2>
+    <FigureCards locale={locale} cards={GUIDED_GOALS.flatMap(browseCards)} class="mt-6" />
+  </section>
 
-  <section aria-labelledby="literacy-title" class="mt-10 border-t border-border pt-7 sm:mt-14 sm:pt-9">
+  <section aria-labelledby="literacy-title" class="mt-12 border-t border-border pt-10 sm:mt-14">
     <h2 id="literacy-title" class="text-2xl font-semibold tracking-tight">{t("guidedStart.quiz.title")}</h2>
     <p class="mt-2 text-muted-foreground">{t("guidedStart.quiz.intro")}</p>
     <div data-literacy-quiz hidden class="ph-no-capture mt-4">

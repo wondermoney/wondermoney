@@ -97,7 +97,8 @@
       "calculator": "Calculadora",
       "guide": "Guía",
       "glossary": "Glosario",
-      "view": "Ver"
+      "view": "Ver",
+      "feature": "Funcionalidad"
     },
     "notABank": "WonderMoney no es un banco, bróker ni asesor financiero. Somos una plataforma tecnológica que utiliza Open Banking de solo lectura para mostrar tus datos financieros en un solo lugar. No proporcionamos asesoramiento financiero, de inversión ni fiscal.",
     "pivotBanner": {
@@ -3503,7 +3504,8 @@
         "joint": "Tributación conjunta (pareja)",
         "ownHome": "Era mi vivienda habitual y pienso reinvertir el importe",
         "reinvested": "Importe reinvertido en otra vivienda habitual",
-        "loanRepaid": "Capital del préstamo amortizado con la venta"
+        "loanRepaid": "Capital del préstamo amortizado con la venta",
+        "taxValue": "Valor patrimonial tributário (VPT), opcional"
       },
       "help": {
         "dates": "El coeficiente solo se aplica si el inmueble se tuvo más de 24 meses. La calculadora cubre ventas en {{saleYear}}.",
@@ -3513,7 +3515,9 @@
         "otherIncome": "Los demás ingresos del hogar sujetos a IRS en el año, tras las deducciones específicas y antes de las deducciones de la cuota. Indica 0 si no hay.",
         "joint": "Divide los ingresos entre dos, como en la tributación conjunta. Déjalo apagado para una declaración individual.",
         "reinvested": "Cuenta compras desde 24 meses antes hasta 36 meses después de la venta, en Portugal o en la UE/EEE.",
-        "loanRepaid": "La parte del importe de la venta que paga la hipoteca del inmueble vendido."
+        "loanRepaid": "La parte del importe de la venta que paga la hipoteca del inmueble vendido.",
+        "taxValue": "El valor patrimonial tributário que figura en la caderneta predial en la fecha de la venta. Si supera el precio, la plusvalía se calcula sobre él. Déjalo vacío si no lo sabes.",
+        "purchaseValue": "El valor sobre el que pagaste el IMT en la compra: el precio, o el VPT de entonces si era mayor (art. 46.1 del CIRS)."
       },
       "errors": {
         "required": "Introduce un número válido.",
@@ -3540,7 +3544,9 @@
         "expenses": "Gastos deducidos",
         "exemptPercent": "Excluido por reinversión",
         "taxableGain": "Plusvalía a tributar",
-        "includedIncome": "Sumado a tus ingresos (50%)"
+        "includedIncome": "Sumado a tus ingresos (50%)",
+        "realizationValue": "Valor de venta usado para la plusvalía",
+        "taxValueApplied": "El VPT es mayor que el precio, así que la plusvalía se calcula sobre él, el valor sobre el que se paga el IMT de la venta (art. 44.2 del CIRS). Lo que te queda usa el precio que recibes."
       },
       "checklist": {
         "title": "Condiciones que conviene comprobar para la exclusión por reinversión",
@@ -3555,7 +3561,7 @@
         "exampleTitle": "Ejemplo práctico",
         "example": "Una vivienda comprada en {{purchaseYear}} por {{purchaseValue}} y vendida en {{saleYear}} por {{saleValue}}. El valor de adquisición se actualiza con el coeficiente {{coefficient}} hasta {{adjustedPurchase}} y se deducen {{expenses}} de gastos, lo que deja una plusvalía de {{gain}}. La mitad, {{included}}, se suma a otros ingresos de {{otherIncome}} y añade unos {{extraTax}} de IRS.",
         "methodTitle": "Cómo funciona la estimación",
-        "methodGain": "Plusvalía = valor de venta menos el valor de adquisición actualizado con el coeficiente, menos los gastos de adquisición y de venta y las obras de los últimos 12 años (CIRS, artículos 46, 50 y 51).",
+        "methodGain": "Plusvalía = valor de venta menos el valor de adquisición actualizado con el coeficiente, menos los gastos de adquisición y de venta y las obras de los últimos 12 años (CIRS, artículos 44, 46, 50 y 51). El valor de adquisición es el valor sobre el que se pagó el IMT de la compra (art. 46.1).",
         "methodCoefficient": "El coeficiente de devaluación de la moneda del año de compra solo se aplica si el inmueble se tuvo más de 24 meses. Los valores de {{saleYear}} proceden de la {{portaria}} y se guardan para compras desde {{firstYear}}.",
         "methodExpenses": "Los gastos deben ser necesarios, efectivamente pagados y justificados: IMT e Imposto do Selo de la compra, comisiones de agencia y obras de los últimos 12 años con factura.",
         "methodHalf": "Solo el 50% de una plusvalía positiva se suma a los demás ingresos del año y tributa en los tramos progresivos del IRS de {{saleYear}}. El IRS adicional mostrado es el impuesto con la plusvalía menos el impuesto sin ella.",
@@ -3563,16 +3569,22 @@
         "methodCash": "El dinero que queda resta del valor de venta los gastos de venta, el préstamo amortizado y el IRS estimado. No resta lo que gastes en la siguiente vivienda.",
         "scopeTitle": "Qué cubre",
         "scopeSupported": "Personas físicas residentes fiscales en Portugal que venden en {{saleYear}} un inmueble de su patrimonio privado comprado desde {{firstYear}}.",
-        "scopeUnsupported": "No cubre: no residentes, inmuebles comprados antes de {{firstYear}}, empresas e inmuebles afectos a una actividad, herencias y donaciones, viviendas con ayuda pública superior al 30% de su valor tributario, ventas por debajo del valor tributario, el recargo de solidaridad y las deducciones de la cuota.",
+        "scopeUnsupported": "No cubre: no residentes, inmuebles comprados antes de {{firstYear}}, empresas e inmuebles afectos a una actividad, herencias y donaciones, viviendas con ayuda pública superior al 30% de su valor tributario, el recargo de solidaridad y las deducciones de la cuota.",
         "assumptionsTitle": "Supuestos",
         "assumptionBrackets": "El IRS adicional usa los tramos anuales del IRS de {{saleYear}} sobre los ingresos que introduces, como estimación del efecto en la declaración anual. La tributación conjunta se modela dividiendo los ingresos entre dos.",
-        "assumptionNotModelled": "La calculadora no comprueba las condiciones de la reinversión ni el valor tributario del inmueble. Los coeficientes se leyeron de un resumen secundario de la Portaria y conviene confirmarlos en el Diário da República.",
+        "assumptionNotModelled": "La calculadora no comprueba las condiciones de la reinversión. Los coeficientes se cotejaron con la tabla de la {{portaria}} en el Diário da República.",
         "assumptionEducational": "Es una estimación educativa, no asesoramiento fiscal. Cuenta la liquidación de IRS de la Autoridad Tributaria.",
         "sourcesTitle": "Fuentes",
-        "sourceGains": "CIRS, artículo 43: ganancias y pérdidas (consultado el 19 de noviembre de 2026)",
-        "sourceExemption": "CIRS, artículo 10: exclusión por reinversión en la vivienda habitual (consultado el 19 de noviembre de 2026)",
+        "sourceGains": "CIRS, artículo 43: ganancias y pérdidas (consultado el 20 de noviembre de 2026)",
+        "sourceExemption": "CIRS, artículo 10: exclusión por reinversión en la vivienda habitual (consultado el 20 de noviembre de 2026)",
         "sourceCoefficients": "{{portaria}}: coeficientes de devaluación para {{saleYear}}",
-        "reviewed": "Reglas y coeficientes de {{saleYear}} revisados el {{reviewed}}."
+        "reviewed": "Reglas y coeficientes de {{saleYear}} revisados el {{reviewed}}.",
+        "methodTaxValue": "El valor de venta es el precio, salvo que el valor sobre el que se paga el IMT de la venta sea mayor (art. 44.2 del CIRS). El IMT se paga sobre el mayor entre el precio y el VPT (art. 12.1 del CIMT), así que un VPT por encima del precio aumenta la plusvalía y el importe que hay que reinvertir para la exclusión. Puedes probar que el precio real fue menor mediante el procedimiento del art. 139 del CIRC (art. 44.5 y 44.6 del CIRS); la calculadora no modela esa prueba.",
+        "sourceRealization": "CIRS, artículo 44: valor de realización y prevalencia del valor del IMT (consultado el 20 de noviembre de 2026)",
+        "sourceAcquisition": "CIRS, artículo 46: valor de adquisición de inmuebles comprados a título oneroso (consultado el 20 de noviembre de 2026)",
+        "sourceCorrection": "CIRS, artículo 50: corrección monetaria después de 24 meses (consultado el 20 de noviembre de 2026)",
+        "sourceExpenses": "CIRS, artículo 51: obras de los últimos 12 años y gastos de adquisición y de venta (consultado el 20 de noviembre de 2026)",
+        "sourceImt": "CIMT, artículo 12: el IMT se paga sobre el mayor entre el precio y el VPT (consultado el 20 de noviembre de 2026)"
       },
       "nextStepHeadline": "Sabe cuánto de la venta puedes usar de verdad",
       "nextStepDescription": "WonderMoney te ayuda a apartar el impuesto y a ver qué queda para tu próxima vivienda.",
@@ -3745,13 +3757,12 @@
         "unsupportedAgreement": "El cese por mutuo acuerdo, en el que el importe se negocia y no hay fórmula legal.",
         "unsupportedPublic": "Los trabajadores del sector público, que siguen otras reglas.",
         "sourcesTitle": "Fuentes",
-        "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y régimen transitorio del art. 5",
-        "sourceLaw13": "Guía de APEL sobre la Agenda do Trabalho Digno: Lei n.º 13/2023, que subió la tasa del art. 366.1 a 14 días desde el 1 de mayo de 2023",
-        "sourceCode": "Código do Trabalho, texto consolidado (PGDL): arts. 344, 345 y 366",
+        "sourceLaw69": "Lei n.º 69/2013, de 30 de agosto (Diário da República): nueva redacción del art. 366 y regímenes transitorios de los arts. 5 y 6",
+        "sourceCode": "Código do Trabalho, texto consolidado (Diário da República): arts. 148, 344, 345 y 366",
         "sourceDgert": "DGERT: compensación por despido colectivo (art. 366)",
-        "reviewed": "Reglas revisadas el 19 de noviembre de 2026 con el texto de la Lei n.º 69/2013, publicado por la Assembleia da República, y el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días por año de la Lei n.º 13/2023, en vigor desde el 1 de mayo de 2023, y los 12 días y el límite del art. 366 proceden de los resúmenes de la APEL y la DGERT y del Código do Trabalho consolidado, no del texto del Diário da República. Aplicamos los 14 días solo a la antigüedad desde el 1 de mayo de 2023, la lectura habitual de la norma transitoria. Los 24 días de la caducidad del contrato temporal y su aplicación a todos los contratos que caduquen desde el 1 de mayo de 2023 proceden del texto de la Lei n.º 13/2023 reproducido por la PGDL (arts. 344, 345 y 35) y de la nota del IGeFE, no de la página del Diário da República. Información educativa, no asesoramiento jurídico.",
-        "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y la nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023. Por tanto, toda la duración cuenta a 24 días, sea cual sea la fecha de inicio, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican.",
-        "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril: nueva redacción de los arts. 344.2 y 345.4 del Código do Trabalho y art. 35 sobre su aplicación en el tiempo (reproducción de la PGDL del texto del Diário da República)",
+        "reviewed": "Reglas revisadas el 20 de noviembre de 2026 con el Diário da República: el Código do Trabalho consolidado (arts. 148, 344, 345 y 366), la Lei n.º 13/2023 (art. 35) y la Lei n.º 69/2013 (arts. 5 y 6), con el salario mínimo de 2026 de 920 euros (Decreto-Lei n.º 139/2025). Los 14 días cuentan solo para la antigüedad desde el 1 de mayo de 2023, como fija el art. 35.2 de la Lei n.º 13/2023. Los 24 días de la caducidad de un contrato temporal cuentan para todo el contrato: es la lectura del art. 35.1 que hace la nota del IGeFE, y un tribunal podría leerlo de otra forma en los contratos firmados antes del 1 de mayo de 2023. Información educativa, no asesoramiento jurídico.",
+        "methodFixedTerm": "Caducidad de un contrato temporal (arts. 344.2 y 345.4 del Código do Trabalho, en la redacción de la Lei n.º 13/2023): 24 días de retribución base y diuturnidades por cada año completo de antigüedad, calculados como en el art. 366. Se aplican el importe diario, el límite de 20 veces el salario mínimo para el importe mensual, el límite de 12 importes mensuales y la fracción proporcional de un año. El art. 35.1 de la Lei n.º 13/2023 somete al nuevo texto los contratos celebrados antes del 1 de mayo de 2023, y su art. 35.2 limita al tiempo desde esa fecha solo los 14 días del art. 366.1. La nota del IGeFE de 5 de julio de 2023 lo lee como 24 días para todos los contratos que caduquen desde el 1 de mayo de 2023: su ejemplo de un contrato del 1 de septiembre de 2021 al 31 de agosto de 2023 cuenta los 730 días a 24 días. Por tanto, toda la duración cuenta a 24 días, y las tasas de los contratos indefinidos (12, 14, 18 y 20 días) no se aplican. Un contrato temporal dura como máximo dos años, o cuatro si es de término incierto (art. 148), así que uno que caduca en 2026 no se firmó antes del 1 de octubre de 2013 y el régimen transitorio del art. 6 de la Lei n.º 69/2013 no se aplica.",
+        "sourceLaw13Text": "Lei n.º 13/2023, de 3 de abril (Diário da República): nueva redacción de los arts. 344.2, 345.4 y 366.1 del Código do Trabalho y art. 35 sobre su aplicación en el tiempo",
         "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5 de julio de 2023): 24 días para todos los contratos temporales que caduquen desde el 1 de mayo de 2023, sea cual sea la fecha de celebración"
       },
       "nextStepHeadline": "Planifica el cobro antes de que llegue",
@@ -5930,12 +5941,13 @@
       "house": "Dibujo lineal de una casa pequeña en su parcela, con chimenea, puerta, ventanas y un camino de piedras, cuyas tejas se colocan a medida que se paga el préstamo.",
       "deed": "Dibujo lineal de una escritura de propiedad con un sello de lacre y una cinta, y la llave de una casa encima.",
       "car": "Dibujo lineal de un coche compacto en un tramo de carretera, con las ruedas girando mientras avanza.",
-      "payslip": "Dibujo lineal de una nómina con filas de importes junto a un sobre, con la parte neta de una fila guardada en el sobre como un billete.",
+      "payslip": "Dibujo lineal de una nómina que asoma del sobre, con el bruto arriba, el impuesto y la seguridad social descontados debajo y el neto destacado al final.",
       "easelchart": "Dibujo lineal de un caballete de rotafolio sobre tres patas, con un gráfico de líneas de los años que sube entre caídas y un cursor que marca un año.",
       "meter": "Dibujo lineal de un contador eléctrico antiguo, con una fila de esferas y un disco que gira tras el cristal, más rápido cuando sube la carga.",
       "pump": "Dibujo lineal de un surtidor de gasolina en su isleta, con la pistola saliendo de su soporte unida a la manguera mientras sube el indicador de llenado.",
       "wallet": "Dibujo lineal de una cartera abierta con tres tarjetas en ranuras escalonadas, una de ellas deslizándose hacia fuera.",
-      "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas."
+      "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas.",
+      "deckchair": "Dibujo lineal de una tumbona junto a una pila de monedas que sube hacia una moneda discontinua, la cantidad que paga tus gastos para siempre, y la tumbona se reclina cuando la pila llega."
     }
   }
 }

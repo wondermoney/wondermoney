@@ -171,6 +171,27 @@ describe("fixed-term contract expiry (arts. 344(2) and 345(4) CT, Lei 13/2023)",
     expect(long.caps.earlyPartExceedsCap).toBe(false);
   });
 
+  describe("worked examples of IGeFE Nota Informativa n.º 10/2023 (24 x daily pay x days / 365), moved to 2026 dates", () => {
+    // IGeFE rounds the daily pay to the cent before multiplying; the calculator keeps it unrounded, so the totals differ
+    // by a few cents. The note's examples run from 1 September to 31 August, and from 1 April to 8 August.
+    const igefe = (monthly: number, days: number) => Math.round(Math.round((monthly / 30) * 100) / 100 * 24 * days / 365 * 100);
+    const cases = [
+      // Técnico especializado, one school year at 1,456.18 a month: IGeFE 1,164.96.
+      { monthly: 1456.18, start: "2025-09-01", end: "2026-08-31", days: 365, igefeCents: 116_496, cents: 116_494 },
+      // The same contract renewed for a second year (730 days): IGeFE 2,329.92.
+      { monthly: 1456.18, start: "2024-09-01", end: "2026-08-31", days: 730, igefeCents: 232_992, cents: 232_989 },
+      // Docente, 1 April to 8 August (130 days) at 1,604.90 a month: IGeFE 457.32.
+      { monthly: 1604.9, start: "2026-04-01", end: "2026-08-08", days: 130, igefeCents: 45_732, cents: 45_729 },
+    ];
+    it.each(cases)("$start to $end at $monthly a month", ({ monthly, start, end, days, igefeCents, cents }) => {
+      expect(igefe(monthly, days)).toBe(igefeCents);
+      const result = fixed({ baseMonthly: monthly, startDate: start, endDate: end });
+      expect(result.seniorityYears).toBeCloseTo(days / 365, 10);
+      expect(result.compensationCents).toBe(cents);
+      expect(Math.abs(result.compensationCents - igefeCents)).toBeLessThanOrEqual(5);
+    });
+  });
+
   it("leaves permanent contracts untouched", () => {
     expect(run({ contractType: "permanent" }).regime).toBe("from2013");
   });

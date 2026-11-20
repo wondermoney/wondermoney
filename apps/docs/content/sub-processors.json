@@ -23,7 +23,7 @@
       "id": "google-analytics",
       "heading": { "en": "Google Analytics", "pt": "Google Analytics", "es": "Google Analytics" },
       "purpose": "Web analytics and tag delivery.",
-      "evidence": "web/components/analytics/AnalyticsInit.tsx loads googletagmanager.com/gtm.js; lp depends on astro-gtm.",
+      "evidence": "web/components/analytics/AnalyticsInit.tsx loads googletagmanager.com/gtm.js; landing/src/lib/gtm.ts loads the same script after analytics consent.",
       "personalData": "Usage and device data, IP address.",
       "location": "United States",
       "notes": "The loaded product is Google Tag Manager; the heading says Google Analytics. Corrected in the policy body rather than the heading, so existing anchors keep resolving."

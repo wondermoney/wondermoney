@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { glossaryTermCards, guideKeepReading } from "./figureCards";
+import { figureIndexLayout, glossaryTermCards, guideKeepReading, toolsHubGroupCards } from "./figureCards";
+import { figureForTool } from "./hairline/articleFigures";
 import { toLocalizedPath, toToolsHubPath } from "./routes";
+import { buildToolsHub, TOOLS_IN_DISPLAY_ORDER, toolAnalyticsName } from "./toolsCatalog";
 import { getTranslations } from "./translations";
 
 vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
@@ -82,5 +84,55 @@ describe("glossaryTermCards", () => {
 
   it("is empty with nothing to link", () => {
     expect(glossaryTermCards({ locale: "en", t: getTranslations("en") })).toEqual([]);
+  });
+});
+
+describe("toolsHubGroupCards", () => {
+  const t = getTranslations("en");
+  const groups = buildToolsHub("en");
+
+  it("gives a group of one tool its figure: net worth draws the scale", () => {
+    const trackWealth = groups.find((group) => group.id === "trackWealth")!;
+    expect(figureIndexLayout(trackWealth.tools.length).lead).toBe(true);
+    expect(toolsHubGroupCards(trackWealth, t)[0].figure).toBe("scale");
+  });
+
+  it("makes one card per tool, in catalog order, so no tool drops off the hub", () => {
+    const hrefs = groups.flatMap((group) => toolsHubGroupCards(group, t).map((card) => card.href));
+    expect(hrefs).toEqual(TOOLS_IN_DISPLAY_ORDER.map((tool) => toLocalizedPath(tool.routeId, "en")));
+  });
+
+  it("names each tool and carries the hub's click tracking", () => {
+    const [group] = groups;
+    const [tool] = group.tools;
+    expect(toolsHubGroupCards(group, t)[0]).toEqual({
+      href: tool.href,
+      title: t(`tools.${tool.key}.title`),
+      description: t(`tools.${tool.key}.description`),
+      figure: figureForTool(tool.routeId),
+      kind: "Calculator",
+      data: {
+        "data-tools-hub-link": "tool",
+        "data-tool": toolAnalyticsName(tool.key),
+        "data-group": group.id,
+        "data-position": String(tool.position),
+      },
+    });
+  });
+});
+
+describe("figureIndexLayout", () => {
+  it("leads with a figure card spanning the rows beside it, two or three to a row", () => {
+    expect(figureIndexLayout(15)).toEqual({ lead: true, spanTwo: 7, spanThree: 5 });
+    expect(figureIndexLayout(11)).toEqual({ lead: true, spanTwo: 5, spanThree: 4 });
+    expect(figureIndexLayout(2)).toEqual({ lead: true, spanTwo: 1, spanThree: 1 });
+  });
+
+  it("draws a lone card as the lead figure card too, not as a row", () => {
+    expect(figureIndexLayout(1)).toEqual({ lead: true, spanTwo: 1, spanThree: 1 });
+  });
+
+  it("has nothing to lead with no cards", () => {
+    expect(figureIndexLayout(0)).toEqual({ lead: false, spanTwo: 0, spanThree: 0 });
   });
 });

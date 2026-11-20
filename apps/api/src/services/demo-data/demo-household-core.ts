@@ -198,7 +198,7 @@ export async function upsertDemoHouseholdCore(em: EntityManager, appuser: Appuse
 async function upsertByCriteria<T extends object>(
   em: EntityManager,
   entity: EntityName<T>,
-  criteria: FilterQuery<NoInfer<T>>,
+  criteria: NoInfer<FilterQuery<T>>,
   data: object,
 ) {
   const existing = await em.findOne<T>(entity, criteria);

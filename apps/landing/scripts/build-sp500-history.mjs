@@ -17,7 +17,7 @@
 //    sheet "Data": monthly consumer prices (CPI). Inflation for a year is December's CPI over the
 //    previous December's.  http://www.econ.yale.edu/~shiller/data.htm
 //
-// Usage (xlsx is installed in the workspace through packages/shared; run from apps/landing):
+// Usage (xlsx is a devDependency, loaded only here; run from apps/landing):
 //
 //   node scripts/build-sp500-history.mjs <histretSP.xls> <damodaran download date> \
 //        <ie_data.xls> <shiller download date>     (dates as YYYY-MM-DD)

@@ -1,6 +1,7 @@
 /**
  * Taxwedge: a round tray holding a stack of coins cut like a pie. One wedge,
- * the tax share, sits slid out of the pie. The pointer's left-to-right
+ * the tax share, sits slid out of the pie; at rest a modest one, a
+ * seven-year hold half slid out, so the pie still reads whole. The pointer's left-to-right
  * position is the holding period, one to ten years, marked by ten dots along
  * the tray's front rim; the longer the hold, the thinner the wedge that slides
  * out. The wedge's width and slide each ride a spring. The slider is how far
@@ -15,8 +16,10 @@ const {
   spring, stepS, disposer, mk, pointer, put, register, solid,
 } = HL;
 
-const PR = 54, T = 5.6, LAY = 5, PH = LAY * T, TR = 86, TW = 4.5, TH = 7, A0 = -15, YRS = 10, REST = 3;
+const PR = 54, T = 5.6, LAY = 5, PH = LAY * T, TR = 86, TW = 4.5, TH = 7, A0 = -15, YRS = 10, REST = 7, OUT = 0.5;
 /** The wedge's width in degrees after y years: a sharp drop past the first year, then a slow one. */
+/** Where the rest of the pie is cut, on its far side so no cut shows on a wall facing the viewer; each piece stays under 180°. */
+const CUT = [160, 250];
 const width = (y) => 34 + 86 * Math.exp(-(y - 1) / 2.4);
 
 /** Ring samples for a closed outline: drops repeated points and gives each an outward normal. */
@@ -98,16 +101,16 @@ function mount({ stage, svg, read }, value) {
     pc.rim.setAttribute("d", rimArc(P, a0, a1, d));
   }
 
-  const th = spring(width(REST)), sl = spring(slide * 0.7);
+  const th = spring(width(REST)), sl = spring(slide * OUT);
   let drawn = "";
   function draw() {
     const w = clamp(th.x, 20, 130), d = clamp(sl.x, 0, 26), key = `${w.toFixed(2)},${d.toFixed(2)}`;
     if (key === drawn) return;
     drawn = key;
-    slice(back, A0 + 120, A0 + 240, 0);
-    slice(right, A0 + 240, A0 + 360 - w / 2, 0);
+    slice(back, CUT[0], CUT[1], 0);
+    slice(right, CUT[1], A0 + 360 - w / 2, 0);
     slice(wedge, A0 - w / 2, A0 + w / 2, d);
-    slice(left, A0 + w / 2, A0 + 120, 0);
+    slice(left, A0 + w / 2, CUT[0], 0);
   }
 
   const B = register(stage, (dt) => {
@@ -131,7 +134,7 @@ function mount({ stage, svg, read }, value) {
     if (y === yr) return;
     yr = y;
     th.t = width(y < 0 ? REST : y);
-    sl.t = y < 0 ? slide * 0.7 : slide;
+    sl.t = y < 0 ? slide * OUT : slide;
     dots.forEach((el, k) => el.setAttribute("class", k === y - 1 ? "dot m" : "dot off"));
     read.textContent = y < 0 ? "rest" : `yr ${y}`;
     B.wake();
@@ -142,7 +145,7 @@ function mount({ stage, svg, read }, value) {
   bag.add(() => svg.replaceChildren());
 
   return {
-    set: (v) => { slide = v; sl.t = yr < 0 ? v * 0.7 : v; B.wake(); },
+    set: (v) => { slide = v; sl.t = yr < 0 ? v * OUT : v; B.wake(); },
     destroy: bag.dispose,
   };
 }
