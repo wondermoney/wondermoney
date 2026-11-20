@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
-        "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 19 novembre 2026). Son maintien en 2026 par l'article 94 de la loi n.º 73-A/2025 n'a pas été revérifié ici.",
+        "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 20 novembre 2026)",
         "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}.",
-        "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)"
+        "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)",
+        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)"
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",

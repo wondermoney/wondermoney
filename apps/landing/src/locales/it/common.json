@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, articolo 9: aliquote della categoria A (consultato il 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, articolo 10: aliquote della categoria B, aliquote aggiuntive e coefficienti (consultato il 19 novembre 2026)",
         "sourcePayment": "Código do IUC, articolo 17: pagamento (consultato il 19 novembre 2026)",
-        "sourceDiesel": "Portal das Finanças: articolo 216 della legge n.º 82-B/2014, tabelle I e II del supplemento diesel (consultato il 19 novembre 2026). Il mantenimento per il 2026 dall'articolo 94 della legge n.º 73-A/2025 non è stato ricontrollato qui.",
+        "sourceDiesel": "Portal das Finanças: articolo 216 della legge n.º 82-B/2014, tabelle I e II del supplemento diesel (consultato il 20 novembre 2026)",
         "reviewed": "Aliquote {{taxYear}} verificate il {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026 del 4 agosto: nuove regole di pagamento dell'IUC, con la transizione 2027 (Portal das Finanças, consultato il 19 novembre 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026 del 4 agosto: nuove regole di pagamento dell'IUC, con la transizione 2027 (Portal das Finanças, consultato il 19 novembre 2026)",
+        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)"
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così la scadenza è già coperta.",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  computeVehicleTax, instalmentMonths, transitionalMonths2027, VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS, type VehicleTaxInput,
+  computeVehicleTax, instalmentMonths, IUC_TABLES, transitionalMonths2027, VEHICLE_TAX_EXAMPLE, VEHICLE_TAX_LIMITS,
+  type VehicleTaxInput,
 } from "./vehicleTax";
 
 function resultFor(overrides: Partial<VehicleTaxInput> = {}) {
@@ -160,5 +161,30 @@ describe("annual vehicle tax (IUC)", () => {
     expect(errors({ year: NaN })).toEqual({ year: "required" });
     expect(errors({ month: 13 })).toEqual({ month: "month" });
     expect(errors({ fuel: "electric", year: 2005, month: 1 })).toEqual({ fuel: "electricCategoryA" });
+  });
+});
+
+describe("diesel surcharge (adicional de IUC)", () => {
+  it("uses tables I and II of art. 216 of Lei n.º 82-B/2014, in cents", () => {
+    // Table I (category A): up to 1500, 1500-2000, 2000-3000, over 3000 cm3; after 1995, 1990-1995, 1981-1989.
+    expect(IUC_TABLES.dieselSurcharge.categoryA.map((band) => band.cents)).toEqual([
+      { recent: 314, mid: 198, old: 139 },
+      { recent: 631, mid: 355, old: 198 },
+      { recent: 986, mid: 551, old: 276 },
+      { recent: 2501, mid: 1319, old: 570 },
+    ]);
+    expect(IUC_TABLES.dieselSurcharge.categoryA.map((band) => band.upTo)).toEqual([1500, 2000, 3000, Infinity]);
+    // Table II (category B): up to 1250, 1250-1750, 1750-2500, over 2500 cm3.
+    expect(IUC_TABLES.dieselSurcharge.categoryB).toEqual([
+      { upTo: 1250, cents: 502 },
+      { upTo: 1750, cents: 1007 },
+      { upTo: 2500, cents: 2012 },
+      { upTo: Infinity, cents: 6885 },
+    ]);
+  });
+
+  it("cites art. 94 of the 2026 State Budget, which keeps the surcharge in force", () => {
+    expect(IUC_TABLES.taxYear).toBe(2026);
+    expect(IUC_TABLES.budgetSource).toBe("https://diariodarepublica.pt/dr/detalhe/lei/73-a-2025-993270096");
   });
 });

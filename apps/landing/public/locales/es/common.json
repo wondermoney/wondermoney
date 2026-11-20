@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, artículo 9: tasas de la categoría A (consultado el 19 de noviembre de 2026)",
         "sourceCategoryB": "Código do IUC, artículo 10: tasas de la categoría B, tasas adicionales y coeficientes (consultado el 19 de noviembre de 2026)",
         "sourcePayment": "Código do IUC, artículo 17: pago (consultado el 19 de noviembre de 2026)",
-        "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 19 de noviembre de 2026). Su continuidad en 2026 por el artículo 94 de la Ley n.º 73-A/2025 no se ha vuelto a comprobar aquí.",
+        "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 20 de noviembre de 2026)",
         "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}.",
-        "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)"
+        "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)",
+        "sourceBudget": "Diário da República: artículo 94 de la Ley n.º 73-A/2025 (Presupuestos del Estado para 2026), que mantiene el adicional de IUC sin cambiar los importes (consultado el 20 de noviembre de 2026)"
       },
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",

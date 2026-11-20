@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
         "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
-        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 19. November 2026). Die Fortführung für 2026 durch Artikel 94 des Gesetzes Nr. 73-A/2025 wurde hier nicht erneut geprüft.",
+        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 20. November 2026)",
         "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)"
+        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)",
+        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",

@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
         "sourceCategoryB": "Código do IUC, article 10: category B rates, additional rates and coefficients (consulted 19 November 2026)",
         "sourcePayment": "Código do IUC, article 17: payment (consulted 19 November 2026)",
-        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 19 November 2026). Its continuation for 2026 by article 94 of Lei n.º 73-A/2025 is not re-checked here.",
+        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",

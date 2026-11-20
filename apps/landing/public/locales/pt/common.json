@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, artigo 9.º: taxas da categoria A (consultado a 19 de novembro de 2026)",
         "sourceCategoryB": "Código do IUC, artigo 10.º: taxas da categoria B, taxas adicionais e coeficientes (consultado a 19 de novembro de 2026)",
         "sourcePayment": "Código do IUC, artigo 17.º: pagamento (consultado a 19 de novembro de 2026)",
-        "sourceDiesel": "Portal das Finanças: artigo 216.º da Lei n.º 82-B/2014, tabelas I e II do adicional de gasóleo (consultado a 19 de novembro de 2026). A sua manutenção em 2026 pelo artigo 94.º da Lei n.º 73-A/2025 não foi reconfirmada aqui.",
+        "sourceDiesel": "Portal das Finanças: artigo 216.º da Lei n.º 82-B/2014, tabelas I e II do adicional de gasóleo (consultado a 20 de novembro de 2026)",
         "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026, de 4 de agosto: novas regras de pagamento do IUC, com a transição de 2027 (Portal das Finanças, consultado a 19 de novembro de 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026, de 4 de agosto: novas regras de pagamento do IUC, com a transição de 2027 (Portal das Finanças, consultado a 19 de novembro de 2026)",
+        "sourceBudget": "Diário da República: artigo 94.º da Lei n.º 73-A/2025 (Orçamento do Estado para 2026), que mantém em vigor o adicional de IUC sem alterar os montantes (consultado a 20 de novembro de 2026)"
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
