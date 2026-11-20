@@ -5493,6 +5493,64 @@
       }
     }
   },
+  "curatedLists": {
+    "common": {
+      "reviewed": "Reviewed by WonderMoney on {{date}}",
+      "howTitle": "How we chose them",
+      "howIntro": "WonderMoney researched this list and checked every entry against these rules on the review date:",
+      "criteria": {
+        "active": "It has published in the last six months, checked on its own site or feed.",
+        "independent": "It is independent education. Regulators and central banks count; the sales channels of banks, brokers and fund houses do not.",
+        "noHype": "No get-rich-quick promises, promotion of speculative digital coins or paid trading signals.",
+        "free": "You can follow it for free.",
+        "market": "It was chosen for people in the UK, Ireland and elsewhere in English, not translated from another country's list."
+      },
+      "order": "Entries are in alphabetical order, not ranked. We have no commercial relationship with any of them, and the links carry no affiliate or tracking codes.",
+      "owner": "The WonderMoney team keeps this list and re-checks every entry every six months. An entry can come off the list at any review.",
+      "audience": "Who it's for",
+      "value": "What you'll get",
+      "applyIt": "Try it with:",
+      "checked": "checked {{date}}",
+      "formats": {
+        "podcast": "Podcast",
+        "newsletter": "Newsletter",
+        "youtube": "YouTube channel"
+      },
+      "staleTitle": "This list is due for a review",
+      "stale": "We last checked these entries on {{date}}, more than six months ago. Some may have stopped publishing or changed since; check each one before you rely on it.",
+      "practiceTitle": "Put one idea into practice",
+      "practiceIntro": "Take one thing you heard or read and try it with your own numbers."
+    },
+    "lists": {
+      "podcasts": {
+        "title": "Personal finance podcasts",
+        "metaTitle": "Personal finance podcasts (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of active, independent and free personal finance podcasts for the UK, Ireland and English speakers elsewhere, with who each one is for.",
+        "dek": "Shows on saving, investing and everyday money that are still publishing, with who each one suits and a tool to try what you hear.",
+        "hubDescription": "Active, independent shows on saving, investing and everyday money.",
+        "listTitle": "The podcasts",
+        "latest": "Latest episode {{date}}"
+      },
+      "newsletters": {
+        "title": "Personal finance newsletters",
+        "metaTitle": "Personal finance newsletters (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of active, independent and free personal finance newsletters for the UK, Ireland and English speakers elsewhere, with what each one covers.",
+        "dek": "Emails on saving, investing and consumer money matters that are still going out, with who each one suits and a tool to try what you read.",
+        "hubDescription": "Active, independent emails on saving, investing and consumer money matters.",
+        "listTitle": "The newsletters",
+        "latest": "Latest issue {{date}}"
+      },
+      "youtube": {
+        "title": "Personal finance YouTube channels",
+        "metaTitle": "Personal finance YouTube channels (UK and Ireland) | WonderMoney",
+        "metaDescription": "A reviewed list of active, independent personal finance YouTube channels for the UK, Ireland and English speakers elsewhere, with who each one is for.",
+        "dek": "Channels that explain saving, investing and everyday money and still post, with who each one suits and a tool to try what you watch.",
+        "hubDescription": "Active, independent channels that explain saving, investing and everyday money.",
+        "listTitle": "The channels",
+        "latest": "Latest video {{date}}"
+      }
+    }
+  },
   "savingsGuide": {
     "metaTitle": "Where to keep your savings in Portugal: products compared | WonderMoney",
     "metaDescription": "Compare savings certificates, treasury certificates, remunerated accounts, savings accounts, term deposits and capitalisation or PPR insurance in Portugal: guarantee, top-ups, withdrawals, interest and IRS.",

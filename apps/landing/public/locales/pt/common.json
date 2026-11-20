@@ -5493,6 +5493,64 @@
       }
     }
   },
+  "curatedLists": {
+    "common": {
+      "reviewed": "Verificada pelo WonderMoney a {{date}}",
+      "howTitle": "Como escolhemos",
+      "howIntro": "O WonderMoney pesquisou esta lista e verificou cada entrada segundo estas regras na data da revisão:",
+      "criteria": {
+        "active": "Publicou nos últimos seis meses, confirmado no próprio site ou feed.",
+        "independent": "É educação independente. Reguladores e bancos centrais contam; canais de venda de bancos, corretoras ou gestoras de fundos não.",
+        "noHype": "Sem promessas de enriquecer depressa, promoção de moedas digitais especulativas nem sinais de trading pagos.",
+        "free": "Podes acompanhar sem pagar.",
+        "market": "Foi escolhida para quem vive em Portugal ou fala português, e não traduzida da lista de outro país."
+      },
+      "order": "As entradas estão por ordem alfabética, sem classificação. Não temos relação comercial com nenhuma delas e as ligações não levam códigos de afiliado nem de seguimento.",
+      "owner": "A equipa do WonderMoney mantém esta lista e volta a verificar cada entrada de seis em seis meses. Uma entrada pode sair da lista em qualquer revisão.",
+      "audience": "Para quem é",
+      "value": "O que vais tirar daqui",
+      "applyIt": "Experimenta com:",
+      "checked": "verificado a {{date}}",
+      "formats": {
+        "podcast": "Podcast",
+        "newsletter": "Newsletter",
+        "youtube": "Canal de YouTube"
+      },
+      "staleTitle": "Esta lista precisa de ser revista",
+      "stale": "Verificámos estas entradas pela última vez a {{date}}, há mais de seis meses. Algumas podem ter deixado de publicar ou mudado; confirma cada uma antes de confiares nela.",
+      "practiceTitle": "Põe uma ideia em prática",
+      "practiceIntro": "Pega numa coisa que ouviste ou leste e experimenta-a com os teus números."
+    },
+    "lists": {
+      "podcasts": {
+        "title": "Podcasts de finanças pessoais",
+        "metaTitle": "Podcasts de finanças pessoais em português | WonderMoney",
+        "metaDescription": "Lista verificada de podcasts portugueses sobre poupança, investimento e dinheiro do dia a dia: ativos, independentes e gratuitos, com o público de cada um.",
+        "dek": "Programas sobre poupar, investir e gerir o dinheiro que continuam a publicar, com o público de cada um e uma ferramenta para pores em prática o que ouves.",
+        "hubDescription": "Programas ativos e independentes sobre poupança, investimento e dinheiro do dia a dia.",
+        "listTitle": "Os podcasts",
+        "latest": "Último episódio a {{date}}"
+      },
+      "newsletters": {
+        "title": "Newsletters de finanças pessoais",
+        "metaTitle": "Newsletters de finanças pessoais em português | WonderMoney",
+        "metaDescription": "Lista verificada de newsletters portuguesas sobre poupança, investimento e consumo: ativas, independentes e gratuitas, com o que cada uma trata.",
+        "dek": "Emails sobre poupar, investir e os teus direitos como consumidor que continuam a sair, com o público de cada um e uma ferramenta para pores em prática o que lês.",
+        "hubDescription": "Emails ativos e independentes sobre poupança, investimento e consumo.",
+        "listTitle": "As newsletters",
+        "latest": "Última edição a {{date}}"
+      },
+      "youtube": {
+        "title": "Canais de YouTube de finanças pessoais",
+        "metaTitle": "Canais de YouTube de finanças pessoais em português | WonderMoney",
+        "metaDescription": "Lista verificada de canais de YouTube portugueses que explicam poupança, investimento e dinheiro do dia a dia: ativos e independentes, com o público de cada um.",
+        "dek": "Canais que explicam poupar, investir e gerir o dinheiro e continuam a publicar, com o público de cada um e uma ferramenta para pores em prática o que vês.",
+        "hubDescription": "Canais ativos e independentes que explicam poupança, investimento e dinheiro do dia a dia.",
+        "listTitle": "Os canais",
+        "latest": "Último vídeo a {{date}}"
+      }
+    }
+  },
   "savingsGuide": {
     "metaTitle": "Onde guardar as tuas poupanças em Portugal: produtos comparados | WonderMoney",
     "metaDescription": "Compara certificados de aforro, certificados do tesouro, contas à ordem remuneradas, contas poupança, depósitos a prazo e seguros de capitalização ou PPR em Portugal: garantia, reforço, levantamento, juros e IRS.",

@@ -5493,6 +5493,64 @@
       }
     }
   },
+  "curatedLists": {
+    "common": {
+      "reviewed": "Von WonderMoney geprüft am {{date}}",
+      "howTitle": "So haben wir ausgewählt",
+      "howIntro": "WonderMoney hat diese Liste recherchiert und jeden Eintrag am Prüfdatum nach diesen Regeln geprüft:",
+      "criteria": {
+        "active": "Er hat in den letzten sechs Monaten veröffentlicht, geprüft auf der eigenen Website oder im Feed.",
+        "independent": "Er ist unabhängige Bildung. Aufsichtsbehörden und Zentralbanken zählen dazu, Verkaufskanäle von Banken, Brokern und Fondsgesellschaften nicht.",
+        "noHype": "Keine Versprechen vom schnellen Reichtum, keine Werbung für spekulative Digitalwährungen und keine bezahlten Trading-Signale.",
+        "free": "Sie können ihn kostenlos verfolgen.",
+        "market": "Er wurde für Menschen in Deutschland, Österreich und der Schweiz ausgewählt, nicht aus der Liste eines anderen Landes übersetzt."
+      },
+      "order": "Die Einträge stehen in alphabetischer Reihenfolge, ohne Rangfolge. Wir haben mit keinem eine geschäftliche Beziehung, und die Links enthalten keine Affiliate- oder Tracking-Codes.",
+      "owner": "Das WonderMoney-Team pflegt diese Liste und prüft jeden Eintrag alle sechs Monate erneut. Bei jeder Prüfung kann ein Eintrag wegfallen.",
+      "audience": "Für wen",
+      "value": "Was Sie davon haben",
+      "applyIt": "Ausprobieren mit:",
+      "checked": "geprüft am {{date}}",
+      "formats": {
+        "podcast": "Podcast",
+        "newsletter": "Newsletter",
+        "youtube": "YouTube-Kanal"
+      },
+      "staleTitle": "Diese Liste ist fällig für eine Prüfung",
+      "stale": "Wir haben diese Einträge zuletzt am {{date}} geprüft, vor mehr als sechs Monaten. Manche erscheinen vielleicht nicht mehr oder haben sich verändert; prüfen Sie jeden, bevor Sie sich darauf verlassen.",
+      "practiceTitle": "Eine Idee in die Praxis umsetzen",
+      "practiceIntro": "Nehmen Sie eine Sache, die Sie gehört oder gelesen haben, und probieren Sie sie mit Ihren eigenen Zahlen aus."
+    },
+    "lists": {
+      "podcasts": {
+        "title": "Podcasts über persönliche Finanzen",
+        "metaTitle": "Finanz-Podcasts für Deutschland, Österreich und die Schweiz | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste aktiver, unabhängiger und kostenloser Podcasts über Sparen, Geldanlage und Alltagsfinanzen für Deutschland, Österreich und die Schweiz.",
+        "dek": "Sendungen über Sparen, Geldanlage und Alltagsfinanzen, die noch erscheinen, mit ihrem Publikum und einem Rechner, um das Gehörte auszuprobieren.",
+        "hubDescription": "Aktive, unabhängige Sendungen über Sparen, Geldanlage und Alltagsfinanzen.",
+        "listTitle": "Die Podcasts",
+        "latest": "Neueste Folge am {{date}}"
+      },
+      "newsletters": {
+        "title": "Newsletter über persönliche Finanzen",
+        "metaTitle": "Finanz-Newsletter für Deutschland, Österreich und die Schweiz | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste aktiver, unabhängiger und kostenloser Newsletter über Sparen, Geldanlage und Verbraucherfragen für Deutschland, Österreich und die Schweiz.",
+        "dek": "E-Mails über Sparen, Geldanlage und Verbraucherrechte, die noch erscheinen, mit ihrem Publikum und einem Rechner, um das Gelesene auszuprobieren.",
+        "hubDescription": "Aktive, unabhängige E-Mails über Sparen, Geldanlage und Verbraucherfragen.",
+        "listTitle": "Die Newsletter",
+        "latest": "Neueste Ausgabe am {{date}}"
+      },
+      "youtube": {
+        "title": "YouTube-Kanäle über persönliche Finanzen",
+        "metaTitle": "Finanz-YouTube-Kanäle für Deutschland, Österreich und die Schweiz | WonderMoney",
+        "metaDescription": "Eine geprüfte Liste aktiver, unabhängiger YouTube-Kanäle, die Sparen, Geldanlage und Alltagsfinanzen erklären, für Deutschland, Österreich und die Schweiz.",
+        "dek": "Kanäle, die Sparen, Geldanlage und Alltagsfinanzen erklären und noch veröffentlichen, mit ihrem Publikum und einem Rechner, um das Gesehene auszuprobieren.",
+        "hubDescription": "Aktive, unabhängige Kanäle, die Sparen, Geldanlage und Alltagsfinanzen erklären.",
+        "listTitle": "Die Kanäle",
+        "latest": "Neuestes Video am {{date}}"
+      }
+    }
+  },
   "savingsGuide": {
     "metaTitle": "Wo Ersparnisse in Portugal anlegen: Produkte im Vergleich | WonderMoney",
     "metaDescription": "Vergleichen Sie Sparzertifikate, Schatzzertifikate, verzinste Girokonten, Sparkonten, Festgeld sowie Kapitalisierungs- und PPR-Versicherungen in Portugal: Sicherung, Einzahlungen, Abhebungen, Zinsen und IRS.",

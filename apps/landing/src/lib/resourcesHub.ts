@@ -1,8 +1,19 @@
 import type { Lang } from "./i18nLocale";
+import type { FigureName } from "./hairline/articleFigures";
+import { curatedListHubCards } from "./resources/curatedLists";
 import { toLocalizedPath, toToolsHubPath } from "./routes";
 import { getTranslations } from "./translations";
 
-export function buildResourcesHub(locale: Lang) {
+export interface ResourcesHubLink {
+  destination: string;
+  href: string;
+  title: string;
+  description: string;
+  /** Set when the destination brings its own figure (a curated list); otherwise figureForResource. */
+  figure?: FigureName;
+}
+
+export function buildResourcesHub(locale: Lang): ResourcesHubLink[] {
   const t = getTranslations(locale);
   const destinations = {
     guides: `/${locale}/learn`,
@@ -40,5 +51,6 @@ export function buildResourcesHub(locale: Lang) {
       title: t("tools.investorProfile.title"),
       description: t("tools.investorProfile.description"),
     },
+    ...curatedListHubCards(locale, t),
   ];
 }

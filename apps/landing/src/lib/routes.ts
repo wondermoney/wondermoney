@@ -23,6 +23,32 @@ const ROUTE_SLUGS = {
 		de: "wo-ersparnisse-anlegen-portugal",
 		it: "dove-tenere-risparmi-portogallo",
 	},
+	// Curated lists under the resources hub (`/{lang}/{resources}/{slug}`), see
+	// CURATED_LIST_ROUTE_IDS and src/lib/resources/curatedLists.
+	resourcePodcasts: {
+		pt: "podcasts-financas-pessoais",
+		en: "personal-finance-podcasts",
+		es: "podcasts-finanzas-personales",
+		fr: "podcasts-finances-personnelles",
+		de: "finanz-podcasts",
+		it: "podcast-finanza-personale",
+	},
+	resourceNewsletters: {
+		pt: "newsletters-financas-pessoais",
+		en: "personal-finance-newsletters",
+		es: "newsletters-finanzas-personales",
+		fr: "newsletters-finances-personnelles",
+		de: "finanz-newsletter",
+		it: "newsletter-finanza-personale",
+	},
+	resourceYoutube: {
+		pt: "canais-youtube-financas-pessoais",
+		en: "personal-finance-youtube-channels",
+		es: "canales-youtube-finanzas-personales",
+		fr: "chaines-youtube-finances-personnelles",
+		de: "finanz-youtube-kanaele",
+		it: "canali-youtube-finanza-personale",
+	},
 	pagePricing: {
 		pt: "precos",
 		en: "pricing",
@@ -655,6 +681,17 @@ const OTHER_TOP_LEVEL_ROUTE_IDS = [
 	"guideMoneyCheckin",
 ] as const satisfies ReadonlyArray<RouteId>
 
+// Curated lists of outside resources (podcasts, newsletters…), each a page under the
+// resources hub: `/{lang}/{pageResources slug}/{slug}`. One dynamic route file per
+// locale tree serves them all (`src/pages/{lang}/{resources}/[list].astro`).
+export const CURATED_LIST_ROUTE_IDS = [
+	"resourcePodcasts",
+	"resourceNewsletters",
+	"resourceYoutube",
+] as const satisfies ReadonlyArray<RouteId>
+
+export type CuratedListRouteId = (typeof CURATED_LIST_ROUTE_IDS)[number]
+
 export const FEATURE_ROUTE_IDS = [
 	"featureAccounts",
 	"featureBudgeting",
@@ -731,6 +768,7 @@ export type AdLandingRouteId = (typeof AD_LANDING_ROUTE_IDS)[number]
 const FEATURE_ROUTE_ID_SET = new Set<RouteId>(FEATURE_ROUTE_IDS)
 const TOOL_ROUTE_ID_SET = new Set<RouteId>(TOOL_ROUTE_IDS)
 const AD_LANDING_ROUTE_ID_SET = new Set<RouteId>(AD_LANDING_ROUTE_IDS)
+const CURATED_LIST_ROUTE_ID_SET = new Set<RouteId>(CURATED_LIST_ROUTE_IDS)
 
 export { SUPPORTED_LANGS, toLang }
 export type { Lang }
@@ -758,6 +796,10 @@ export function toLocalizedPath(routeId: RouteId, lang: Lang): string {
 
 	if (AD_LANDING_ROUTE_ID_SET.has(routeId)) {
 		return `/${lang}/go/${slug}`
+	}
+
+	if (CURATED_LIST_ROUTE_ID_SET.has(routeId)) {
+		return `/${lang}/${getLocalizedSlug("pageResources", lang)}/${slug}`
 	}
 
 	return `/${lang}/${slug}`
@@ -847,6 +889,16 @@ export function toLocalizedPathname(pathname: string, nextLang: Lang): string {
 			return `/${nextLang}/go/${localizedSlug}${suffix}`
 		} catch {
 			return `/${nextLang}/go/${second}${rest.length > 0 ? `/${rest.join("/")}` : ""}`
+		}
+	}
+
+	if (second && first === getLocalizedSlug("pageResources", currentLang)) {
+		try {
+			const routeId = resolveRouteIdFor(CURATED_LIST_ROUTE_IDS, currentLang, second)
+			const suffix = rest.length > 0 ? `/${rest.join("/")}` : ""
+			return `${toLocalizedPath(routeId, nextLang)}${suffix}`
+		} catch {
+			// Not a curated list: handled as a top-level page below.
 		}
 	}
 
