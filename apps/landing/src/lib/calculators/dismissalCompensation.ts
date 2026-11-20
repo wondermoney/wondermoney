@@ -3,7 +3,8 @@ import { REFERENCE_DATE, RMMG_2026_CENTS } from "./unemploymentBenefit";
 /**
  * Compensation for a collective dismissal, the extinction of a post or the unsuitability of the worker, on a permanent
  * contract (Código do Trabalho, art. 366, as amended by Lei n.º 69/2013, and its transitional regime, art. 5), or for the
- * expiry of a fixed-term contract at the employer's initiative (arts. 344(2) and 345(4), as amended by Lei n.º 13/2023).
+ * expiry of a fixed-term contract at the employer's initiative (arts. 344(2) and 345(4), as amended by Lei n.º 13/2023),
+ * with a warning when its dates pass the art. 148 maximum duration.
  * Amounts in cents, dates as ISO `YYYY-MM-DD` strings.
  */
 export { REFERENCE_DATE, RMMG_2026_CENTS };
@@ -31,13 +32,37 @@ export const SUPPORTED_END_YEAR = 2026;
  * the 14 days of art. 366(1) to seniority from 1 May 2023, not arts. 344 and 345. Every expiry this calculator accepts
  * is in 2026, so the earlier 18 days a year (expiry up to 30 April 2023) is never used, and a fixed-term contract lasts
  * at most 2 years, or 4 with an uncertain term (art. 148(1) and (5) CT), so none signed before 1 October 2013 (art. 6
- * of Lei n.º 69/2013) can expire in 2026. Texts checked on diariodarepublica.pt on 2026-11-20.
+ * of Lei n.º 69/2013) can lawfully expire in 2026. Dates past those limits get a warning (see `checkFixedTermDuration`)
+ * but the same 24-day figure. Texts checked on diariodarepublica.pt on 2026-11-20.
  */
 export const FIXED_TERM_DAYS_PER_YEAR = 24;
+
+/**
+ * Lei n.º 93/2019 came into force on the first working day of the month after its publication on 4 September 2019 (art.
+ * 13(1)): 1 October 2019. Its art. 11(4) keeps the earlier rules on the admissibility, renewal and duration of fixed-term
+ * contracts signed before that day.
+ */
+export const LEI_93_2019_IN_FORCE = "2019-10-01";
+
+/**
+ * Maximum duration of a fixed-term contract, renewals included (art. 149(5): a renewed contract is one contract), in years.
+ * From 1 October 2019, art. 148(1) and (5) CT as amended by Lei n.º 93/2019 (unchanged by Lei n.º 13/2023): 2 years with a
+ * certain term (art. 148(4) only shortens it, for a new activity), 4 with an uncertain term. Before, the initial wording of
+ * art. 148(1) and (4): 18 months for a first job seeker, 2 years in the other cases of art. 140(4) and 3 years otherwise,
+ * so the longest, 3 years, is the one that rules out every case; 6 years with an uncertain term. Exceeding it converts the
+ * contract into an open-ended one (art. 147(2)(b)). Checked on diariodarepublica.pt (art. 148 with its version history) on
+ * 2026-11-20.
+ */
+export const FIXED_TERM_MAX_YEARS = {
+  from2019: { certain: 2, uncertain: 4 },
+  before2019: { certain: 3, uncertain: 6 },
+} as const;
 
 export const DISMISSAL_LIMITS = { monthly: 1_000_000 } as const;
 
 export type ContractType = "permanent" | "fixedTerm";
+/** `certain`: termo certo, an agreed end date (art. 344); `uncertain`: termo incerto, ends with its reason (art. 345). */
+export type FixedTermKind = "certain" | "uncertain";
 export type DismissalField = "baseMonthly" | "seniorityPay" | "startDate" | "endDate";
 export type DismissalError =
   | "required" | "tooSmall" | "tooLarge" | "invalidDate" | "endBeforeStart" | "startFuture" | "endOutsideYear";
@@ -45,6 +70,8 @@ export type DismissalError =
 export interface DismissalCompensationInput {
   /** `permanent`: dismissal under art. 366 or 367 to 379; `fixedTerm`: expiry of a fixed-term contract, arts. 344 and 345. */
   contractType: ContractType;
+  /** The kind of term of a fixed-term contract. It selects the duration limit only: both pay 24 days a year. */
+  fixedTermKind: FixedTermKind;
   /** Monthly base pay (retribuição base) in euros. */
   baseMonthly: number;
   /** Monthly seniority supplements (diuturnidades) in euros; 0 when there are none. */
@@ -56,7 +83,7 @@ export interface DismissalCompensationInput {
 }
 
 export const DISMISSAL_EXAMPLE: DismissalCompensationInput = {
-  contractType: "permanent", baseMonthly: 1500, seniorityPay: 50, startDate: "2012-03-01", endDate: "2026-12-31",
+  contractType: "permanent", fixedTermKind: "certain", baseMonthly: 1500, seniorityPay: 50, startDate: "2012-03-01", endDate: "2026-12-31",
 };
 
 export type PeriodKey = "oneMonth" | "twentyDays" | "eighteenDays" | "twelveDays" | "fourteenDays" | "twentyFourDays";
@@ -84,6 +111,19 @@ export interface DismissalCompensationResult {
   capCents: number;
   compensationCents: number;
   caps: { monthlyBase: boolean; total: boolean; earlyPartExceedsCap: boolean };
+  /** For a fixed-term expiry, the legal maximum duration and whether the dates pass it; `null` for a dismissal. */
+  durationLimit: FixedTermDurationCheck | null;
+}
+
+export interface FixedTermDurationCheck {
+  kind: FixedTermKind;
+  /** Which wording of art. 148 applies, by the start date (art. 11(4) of Lei n.º 93/2019). */
+  rules: keyof typeof FIXED_TERM_MAX_YEARS;
+  maxYears: number;
+  /** The last day the contract may run, as `YYYY-MM-DD`. */
+  lastDay: string;
+  /** The end date is after `lastDay`, so the contract would likely be open-ended under art. 147(2)(b). */
+  exceeded: boolean;
 }
 
 const DAY_MS = 86_400_000;
@@ -114,6 +154,25 @@ function seniority(start: number, at: number): number {
   while (whole > 0 && addYears(start, whole) > at) whole -= 1;
   const from = addYears(start, whole);
   return whole + (at - from) / (addYears(start, whole + 1) - from);
+}
+
+const isoDate = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+
+/**
+ * The art. 148 limit for a fixed-term contract running from `startDate` to `endDate` (both days worked). The start date
+ * stands for the signing date of art. 11(4) of Lei n.º 93/2019. A start on 29 February keeps all of 28 February in a year
+ * without one. Returns `null` when a date is invalid.
+ */
+export function checkFixedTermDuration(kind: FixedTermKind, startDate: string, endDate: string): FixedTermDurationCheck | null {
+  const start = parseDate(startDate);
+  const end = parseDate(endDate);
+  if (start === null || end === null) return null;
+  const rules = start < parseDate(LEI_93_2019_IN_FORCE)! ? "before2019" : "from2019";
+  const maxYears = FIXED_TERM_MAX_YEARS[rules][kind];
+  const date = new Date(start);
+  // Date.UTC rolls 29 February over to 1 March, the day after the last one allowed.
+  const limitExclusive = Date.UTC(date.getUTCFullYear() + maxYears, date.getUTCMonth(), date.getUTCDate());
+  return { kind, rules, maxYears, lastDay: isoDate(limitExclusive - DAY_MS), exceeded: end >= limitExclusive };
 }
 
 export function validateDismissal(
@@ -206,6 +265,7 @@ export function computeDismissalCompensation(input: DismissalCompensationInput, 
       regime, seniorityYears: seniorityAtEnd, usedMonthlyCents, dailyCents: Math.round(dailyCents), lines, uncappedCents,
       capCents, compensationCents,
       caps: { monthlyBase: baseCents > baseCapCents, total, earlyPartExceedsCap },
+      durationLimit: fixedTerm ? checkFixedTermDuration(input.fixedTermKind, input.startDate, input.endDate) : null,
     } satisfies DismissalCompensationResult,
   };
 }

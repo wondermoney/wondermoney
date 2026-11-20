@@ -58,3 +58,44 @@ it("switches to fixed-term expiry: 24 days a year on the whole duration, with it
   expect(screen.getByText(/Covers the expiry of a fixed-term contract/)).toBeTruthy();
   expect(screen.getByText(/If it was renewed, count from the first day/)).toBeTruthy();
 });
+
+it("warns, without blocking the figure, when a fixed-term contract passes the art. 148 limit, and offers the dismissal option", () => {
+  render(<DismissalCompensationCalculatorComp locale="en" />);
+  expect(screen.queryByLabelText("Kind of term")).toBeNull();
+  fireEvent.change(screen.getByLabelText("Type of termination"), { target: { value: "fixedTerm" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly base pay (gross)" }), { target: { value: "3000" } });
+  fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly seniority supplements (diuturnidades)" }), { target: { value: "0" } });
+  const start = screen.getByLabelText("Contract start date");
+  const end = screen.getByLabelText("Termination date");
+  const kind = screen.getByLabelText("Kind of term") as HTMLSelectElement;
+  expect(kind.value).toBe("certain");
+  const euros = (amount: number) => new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(amount);
+
+  // Exactly 2 years with a certain term: at the limit, no warning.
+  fireEvent.change(start, { target: { value: "2025-01-01" } });
+  fireEvent.change(end, { target: { value: "2026-12-31" } });
+  expect(screen.queryByText("This contract may count as open-ended")).toBeNull();
+
+  // 3 years: over it. The warning names the limit and the last lawful day, and the figure stays.
+  fireEvent.change(start, { target: { value: "2024-01-01" } });
+  expect(screen.getByText("This contract may count as open-ended")).toBeTruthy();
+  expect(screen.getByText(/at most 2 years, renewals included \(art\. 148\(1\)/)).toBeTruthy();
+  expect(screen.getByText(/December 31, 2025/)).toBeTruthy();
+  expect(screen.getByText(/converts into an open-ended contract \(art\. 147\(2\)\(b\)/)).toBeTruthy();
+  expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros(7200));
+
+  // An uncertain term may last 4 years.
+  fireEvent.change(kind, { target: { value: "uncertain" } });
+  expect(screen.queryByText("This contract may count as open-ended")).toBeNull();
+  fireEvent.change(start, { target: { value: "2022-06-01" } });
+  expect(screen.getByText(/at most 4 years \(art\. 148\(5\)/)).toBeTruthy();
+
+  // A start before 1 October 2019 cites the earlier limits.
+  fireEvent.change(start, { target: { value: "2019-09-30" } });
+  expect(screen.getByText(/signed before 1 October 2019 keeps the earlier limits \(art\. 11\(4\) of Lei n\.º 93\/2019\): at most 6 years/)).toBeTruthy();
+
+  fireEvent.click(screen.getByRole("button", { name: "Calculate as a dismissal on a permanent contract" }));
+  expect((screen.getByLabelText("Type of termination") as HTMLSelectElement).value).toBe("permanent");
+  expect(screen.queryByText("This contract may count as open-ended")).toBeNull();
+  expect(screen.queryByLabelText("Kind of term")).toBeNull();
+});

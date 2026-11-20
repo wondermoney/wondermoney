@@ -3638,7 +3638,8 @@
         "seniorityPay": "Monatliche Dienstalterszulagen (diuturnidades)",
         "startDate": "Vertragsbeginn",
         "endDate": "Datum der Beendigung",
-        "contractType": "Art der Beendigung"
+        "contractType": "Art der Beendigung",
+        "fixedTermKind": "Art der Befristung"
       },
       "help": {
         "baseMonthly": "Das Grundgehalt (retribuição base) in Euro pro Monat, vor Sozialversicherung und IRS. Ohne Urlaubs- und Weihnachtsgeld, Boni und Überstunden.",
@@ -3646,7 +3647,8 @@
         "startDate": "Der Tag, an dem der unbefristete Vertrag begann. Bei einem Konzern oder einem früheren Vertrag mit demselben Arbeitgeber prüfe, wie deine Betriebszugehörigkeit gezählt wird.",
         "endDate": "Der letzte Tag des Vertrags. Er zählt als Arbeitstag. Diese Schätzung gilt für Beendigungen im Jahr {{year}}.",
         "contractType": "Kündigung umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung. Das Auslaufen ist das Ende eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer (Art. 344 und 345 des Código do Trabalho). Es steht dir nicht zu, wenn der Vertrag endet, weil du erklärt hast, ihn nicht verlängern zu wollen.",
-        "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zähle ab dem ersten Tag: die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet."
+        "startDateFixedTerm": "Der Tag, an dem der befristete Vertrag begann. Wurde er verlängert, zähle ab dem ersten Tag: die gesamte Dauer, Verlängerungen eingeschlossen, wird mit 24 Tagen pro Jahr vergütet.",
+        "fixedTermKind": "Sie bestimmt die Höchstdauer: 2 Jahre bei bestimmter Dauer, 4 bei unbestimmter (Art. 148). Die Abfindung ist dieselbe, 24 Tage pro Jahr."
       },
       "scope": "Umfasst Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung in einem unbefristeten Vertrag. Nicht umfasst: Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst. Für das Ende eines befristeten Vertrags wähle Auslaufen eines befristeten Vertrags.",
       "errors": {
@@ -3714,12 +3716,15 @@
         "unsupportedPublic": "Beschäftigte im öffentlichen Dienst, für die andere Regeln gelten.",
         "sourcesTitle": "Quellen",
         "sourceLaw69": "Lei n.º 69/2013 vom 30. August (Diário da República): neue Fassung des Art. 366 und Übergangsregelungen der Art. 5 und 6",
-        "sourceCode": "Código do Trabalho, konsolidierter Text (Diário da República): Art. 148, 344, 345 und 366",
+        "sourceCode": "Código do Trabalho, konsolidierter Text (Diário da República): Art. 147, 148, 149, 344, 345 und 366",
         "sourceDgert": "DGERT: Abfindung bei Massenentlassung (Art. 366)",
-        "reviewed": "Regeln am 20. November 2026 anhand des Diário da República geprüft: konsolidierter Código do Trabalho (Art. 148, 344, 345 und 366), Lei n.º 13/2023 (Art. 35) und Lei n.º 69/2013 (Art. 5 und 6), mit dem Mindestlohn 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage zählen nur für die Betriebszugehörigkeit ab dem 1. Mai 2023, wie Art. 35 Abs. 2 der Lei n.º 13/2023 vorsieht. Die 24 Tage beim Auslaufen eines befristeten Vertrags zählen für den ganzen Vertrag: So liest die IGeFE-Note Art. 35 Abs. 1, und ein Gericht könnte das bei vor dem 1. Mai 2023 geschlossenen Verträgen anders sehen. Lehrzwecke, keine Rechtsberatung.",
-        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
+        "reviewed": "Regeln am 20. November 2026 anhand des Diário da República geprüft: konsolidierter Código do Trabalho (Art. 147, 148, 149, 344, 345 und 366), Lei n.º 93/2019 (Art. 11 und 13), Lei n.º 13/2023 (Art. 35) und Lei n.º 69/2013 (Art. 5 und 6), mit dem Mindestlohn 2026 von 920 Euro (Decreto-Lei n.º 139/2025). Die 14 Tage zählen nur für die Betriebszugehörigkeit ab dem 1. Mai 2023, wie Art. 35 Abs. 2 der Lei n.º 13/2023 vorsieht. Die 24 Tage beim Auslaufen eines befristeten Vertrags zählen für den ganzen Vertrag: So liest die IGeFE-Note Art. 35 Abs. 1, und ein Gericht könnte das bei vor dem 1. Mai 2023 geschlossenen Verträgen anders sehen. Lehrzwecke, keine Rechtsberatung.",
+        "methodFixedTerm": "Auslaufen eines befristeten Vertrags (Art. 344 Abs. 2 und 345 Abs. 4 des Código do Trabalho in der Fassung der Lei n.º 13/2023): 24 Tage Grundgehalt und diuturnidades pro vollem Dienstjahr, berechnet wie in Art. 366. Es gelten der Tagessatz, die Obergrenze von 20 Mindestlöhnen für den Monatsbetrag, die Obergrenze von 12 Monatsbeträgen und der anteilige Bruchteil eines Jahres. Art. 35 Abs. 1 der Lei n.º 13/2023 unterwirft vor dem 1. Mai 2023 geschlossene Verträge dem neuen Text, und Art. 35 Abs. 2 beschränkt nur die 14 Tage von Art. 366 Abs. 1 auf die Zeit ab diesem Datum. Die IGeFE-Note vom 5. Juli 2023 liest das als 24 Tage für alle Verträge, die ab dem 1. Mai 2023 auslaufen: Ihr Beispiel eines Vertrags vom 1. September 2021 bis 31. August 2023 zählt alle 730 Tage mit 24 Tagen. Die gesamte Dauer zählt also mit 24 Tagen, und die Sätze unbefristeter Verträge (12, 14, 18 und 20 Tage) gelten nicht. Ein befristeter Vertrag dauert höchstens zwei Jahre, bei unbestimmtem Enddatum vier (Art. 148). Ein Vertrag, der diese Grenze einhält und 2026 ausläuft, wurde also nicht vor dem 1. Oktober 2013 geschlossen, und die Übergangsregelung von Art. 6 der Lei n.º 69/2013 gilt nicht.",
         "sourceLaw13Text": "Lei n.º 13/2023 vom 3. April (Diário da República): neue Fassung von Art. 344 Abs. 2, 345 Abs. 4 und 366 Abs. 1 des Código do Trabalho und Art. 35 zur zeitlichen Anwendung",
-        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum"
+        "sourceIgefe": "IGeFE, Nota Informativa n.º 10/2023 (5. Juli 2023): 24 Tage für alle befristeten Verträge, die ab dem 1. Mai 2023 auslaufen, unabhängig vom Abschlussdatum",
+        "methodDurationLimit": "Höchstdauer (Art. 148 des Código do Trabalho in der Fassung der Lei n.º 93/2019): 2 Jahre bei bestimmter Dauer, Verlängerungen eingeschlossen, und 4 Jahre bei unbestimmter Dauer. Ein Vertrag mit bestimmter Dauer kann bis zu dreimal verlängert werden, und die Verlängerungen zusammen dürfen nicht länger dauern als die erste Laufzeit (Art. 149 Abs. 4). Auf die 2 Jahre werden auch frühere befristete Verträge und Leiharbeit auf demselben Arbeitsplatz sowie Dienstverträge für dieselbe Aufgabe beim selben Arbeitgeber angerechnet (Art. 148 Abs. 6). Für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): 3 Jahre bei bestimmter Dauer (18 Monate bei der Suche nach der ersten Stelle und 2 Jahre in den übrigen Fällen von Art. 140 Abs. 4) und 6 Jahre bei unbestimmter Dauer; der Rechner nimmt das Anfangsdatum als Datum des Vertragsschlusses. Überschreiten die Daten die Grenze, weist der Rechner darauf hin, dass der Vertrag wahrscheinlich unbefristet wäre (Art. 147 Abs. 2 Buchst. b) und seine Beendigung eine Kündigung wäre, zeigt aber weiter den Betrag für das Auslaufen. Verlängerungen und frühere Verträge sieht er nicht, prüfe sie also selbst.",
+        "sourceLaw93": "Lei n.º 93/2019 vom 4. September (Diário da República): Neufassung von Art. 148 und 149 des Código do Trabalho, zeitliche Anwendung (Art. 11 Abs. 4) und Inkrafttreten am 1. Oktober 2019 (Art. 13)",
+        "sourceArt148": "Código do Trabalho, Art. 148 (Diário da República), mit der ursprünglichen Fassung von 2009: die Grenzen für Verträge, die vor dem 1. Oktober 2019 geschlossen wurden"
       },
       "nextStepHeadline": "Plane die Auszahlung, bevor sie kommt",
       "nextStepDescription": "WonderMoney zeigt deine Konten und monatlichen Ausgaben zusammen, damit du eine Abfindung auf die kommenden Monate verteilen kannst.",
@@ -3728,7 +3733,24 @@
         "permanent": "Kündigung in einem unbefristeten Vertrag",
         "fixedTerm": "Auslaufen eines befristeten Vertrags"
       },
-      "scopeFixedTerm": "Umfasst das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr {{year}}: 24 Tage Grundgehalt und diuturnidades pro Jahr der gesamten Vertragsdauer, mit dem Tagessatz und den Obergrenzen von Art. 366. Nicht umfasst: Verträge, die vor dem 1. Mai 2023 ausgelaufen sind, vorzeitige Beendigung, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst."
+      "scopeFixedTerm": "Umfasst das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr {{year}}: 24 Tage Grundgehalt und diuturnidades pro Jahr der gesamten Vertragsdauer, mit dem Tagessatz und den Obergrenzen von Art. 366. Nicht umfasst: Verträge, die vor dem 1. Mai 2023 ausgelaufen sind, vorzeitige Beendigung, Kündigung aus wichtigem Grund, rechtswidrige Kündigung, Aufhebungsvertrag und öffentlicher Dienst.",
+      "fixedTermKinds": {
+        "certain": "Bestimmte Dauer (vereinbartes Enddatum)",
+        "uncertain": "Unbestimmte Dauer (endet mit ihrem Grund)"
+      },
+      "durationWarning": {
+        "title": "Dieser Vertrag könnte als unbefristet gelten",
+        "from2019": {
+          "certain": "Ein befristeter Vertrag mit bestimmter Dauer läuft höchstens 2 Jahre, Verlängerungen eingeschlossen (Art. 148 Abs. 1 des Código do Trabalho in der Fassung der Lei n.º 93/2019). Mit diesen Daten war die Grenze am {{date}} erreicht.",
+          "uncertain": "Ein befristeter Vertrag mit unbestimmter Dauer läuft höchstens 4 Jahre (Art. 148 Abs. 5 des Código do Trabalho in der Fassung der Lei n.º 93/2019). Mit diesen Daten war die Grenze am {{date}} erreicht."
+        },
+        "before2019": {
+          "certain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 3 Jahre mit bestimmter Dauer, Verlängerungen eingeschlossen, in manchen Fällen weniger (ursprüngliche Fassung von Art. 148 Abs. 1). Mit diesen Daten war die Grenze am {{date}} erreicht.",
+          "uncertain": "Für einen befristeten Vertrag, der vor dem 1. Oktober 2019 geschlossen wurde, gelten die früheren Grenzen (Art. 11 Abs. 4 der Lei n.º 93/2019): höchstens 6 Jahre mit unbestimmter Dauer (ursprüngliche Fassung von Art. 148 Abs. 4). Mit diesen Daten war die Grenze am {{date}} erreicht."
+        },
+        "consequence": "Ein Vertrag, der seine Höchstdauer überschreitet, wird zu einem unbefristeten Vertrag (Art. 147 Abs. 2 Buchst. b), und die Betriebszugehörigkeit zählt ab dem ersten Tag (Art. 147 Abs. 3). Ihn zu beenden ist dann eine Kündigung, kein Auslaufen, mit anderen Abfindungsregeln; beendet der Arbeitgeber ihn nur unter Berufung auf das Fristende, kann das eine rechtswidrige Kündigung sein. Der angezeigte Betrag bleibt die Abfindung für das Auslaufen.",
+        "action": "Als Kündigung in einem unbefristeten Vertrag berechnen"
+      }
     },
     "statePension": {
       "title": "Rentenrechner Portugal 2026",
