@@ -39,3 +39,22 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     event: "tool_used", tool: "sick_pay", page_type: "tools/portugal-sick-pay-calculator",
   });
 });
+
+it("asks about the disability bonus and adds the 5-point increase when the answer is yes", () => {
+  const euros = (cents: number) =>
+    new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(cents / 100);
+  const expected = computeSickPay({ ...SICK_PAY_EXAMPLE, disabilityBonus: true });
+  if (!expected.ok) throw new Error("input must be valid");
+
+  render(<SickPayCalculatorComp locale="en" />);
+  const question = screen.getByRole("combobox", {
+    name: "Does your household receive the disability bonus for a child or dependant?",
+  }) as HTMLSelectElement;
+  expect(question.value).toBe("no");
+  expect(screen.queryByText(/5-point increase .* is included/)).toBeNull();
+
+  fireEvent.change(question, { target: { value: "yes" } });
+  expect(document.getElementById("sick-total")?.textContent).toBe(euros(expected.result.totalCents));
+  expect(screen.getByText(/Days 1 to 30 \(60%\)/)).toBeTruthy();
+  expect(screen.getByText(/5-point increase .* is included/)).toBeTruthy();
+});

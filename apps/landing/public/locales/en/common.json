@@ -2461,6 +2461,7 @@
       "checkIntro": "Informational only. This list shows which conditions the answers below meet; it does not say whether you are eligible. The bank and the State decide.",
       "checkSummary": "{{met}} of {{total}} conditions met by your answers.",
       "checkNote": "Conditions reviewed on {{date}}. The guarantee covers up to {{percent}}% of the transaction value, so financing can reach 100%. It does not change the interest rate.",
+      "deadlineNotice": "The State guarantee for buyers up to 35 only covers loan contracts signed by 31 December 2026. This page will be updated once the rules for 2027 are known.",
       "estimateTitle": "2. Estimate your mortgage and cash needed",
       "years": "years",
       "fields": {
@@ -2528,9 +2529,10 @@
         "conditionProperty": "You do not own, in whole or in part, another residential property.",
         "conditionPrice": "The home costs up to {{maxPrice}} (the bank valuation can lower the transaction value).",
         "conditionIncome": "Income up to the 8th IRS bracket: {{maxIncome}} a year in 2026 (it was 83,696 euros in 2025).",
-        "conditionDate": "Only loan contracts signed by 31 December 2026 qualify, and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
+        "conditionDate": "Only loan contracts signed by 31 December 2026 qualify (art. 5(4) of Portaria n.º 236-A/2024/1), and the guarantee covers up to {{percent}}% of the transaction value for at most 10 years.",
         "sourceGovernment": "Portuguese Government: Garantia Pública",
         "sourceLiteracia": "Literacia Financeira: Crédito habitação jovem",
+        "sourcePortaria": "Portaria n.º 236-A/2024/1, art. 5(4), consolidated version in the Diário da República: contracts signed by 31 December 2026",
         "review": "Conditions last reviewed on {{date}}. The 2026 income limit is the upper limit of the 8th IRS bracket in article 68 of the IRS Code, updated by 3.51% by Lei 73-A/2025 (State Budget 2026). Banks decide on each application.",
         "assumptionsTitle": "Assumptions and limits",
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
@@ -3266,17 +3268,23 @@
         "allowances": "Allowances",
         "sickDays": "Days of sick leave",
         "dependants": "Children up to 16 (or 24 with child benefit)",
+        "disabilityBonus": "Does your household receive the disability bonus for a child or dependant?",
         "hospitalisation": "Hospital stay or outpatient surgery"
       },
       "allowanceOptions": {
         "fourteen": "14 payments (holiday and Christmas paid separately)",
         "twelfths": "In twelfths (the salary already includes them)"
       },
+      "disabilityBonusOptions": {
+        "no": "No",
+        "yes": "Yes"
+      },
       "help": {
         "gross": "The base salary in the months counted, before Social Security and IRS. Holiday and Christmas allowances are not part of the reference pay.",
         "allowances": "In twelfths, the calculator takes out the two allowances to get the base salary the reference pay uses.",
         "sickDays": "Total days on the sick note (CIT), counted from the first day. Employees can receive up to 1,095 days.",
-        "dependants": "Used for the 5-point increase, which applies with 3 or more children, or when the reference pay is 500 euros a month or less.",
+        "dependants": "Used for the 5-point increase, which applies with 3 or more children, with the disability bonus, or when the reference pay is 500 euros a month or less.",
+        "disabilityBonus": "The bonificação por deficiência, paid with child benefit (abono de família) for a descendant with a disability. It also gives the 5-point increase, whatever the reference pay.",
         "hospitalisation": "With a hospital stay or outpatient surgery the benefit is paid from day 1, with no waiting period."
       },
       "errors": {
@@ -3299,7 +3307,7 @@
         "bandsTitle": "By duration band",
         "bandLabel": "Days {{from}} to {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} paid days × {{daily}} = {{amount}}",
-        "increaseApplied": "The 5-point increase (reference pay of 500 euros or less, or 3 or more children) is included.",
+        "increaseApplied": "The 5-point increase (reference pay of 500 euros or less, 3 or more children, or the disability bonus) is included.",
         "allWaiting": "Every day of this leave is a waiting day, so Segurança Social pays nothing. Check whether your contract or collective agreement makes your employer pay these days.",
         "waitingNote": "Segurança Social does not pay the first 3 days. Whether your employer pays them depends on your contract or collective agreement.",
         "estimate": "An estimate for planning, not a decision. Segurança Social calculates the real amount from your registered pay.",
@@ -3327,7 +3335,7 @@
         "methodBands": "The daily benefit is a percentage of the RR that grows with the length of the leave: 55% up to 30 days, 60% from day 31 to 90, 70% from day 91 to 365 and 75% beyond that, up to 1,095 days for employees. The days count from the first day of the leave, waiting days included.",
         "methodWaiting": "Employees have a waiting period of 3 days that Segurança Social does not pay. With a hospital stay or outpatient surgery, tuberculosis, or an illness that starts during parental benefit and goes beyond it, payment starts on day 1.",
         "methodMinimum": "The daily benefit cannot be below {{min}} (30% of the {{rmmg}} minimum wage). If the RR itself is lower, the benefit equals the RR.",
-        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when any one of these applies (art. 17 of Decree-Law 28/2004): the RR is at most 500 euros a month, the household has 3 or more children up to 16 (or 24 with child benefit), or the household has children with the disability bonus. The conditions are alternatives, not cumulative. The calculator models the first two and does not model the disability bonus.",
+        "methodIncrease": "At 55% and 60%, the percentage goes up 5 points when any one of these applies (art. 17(1) of Decree-Law 28/2004): the RR is at most 500 euros a month, the household has 3 or more children up to 16 (or 24 with child benefit), or the household has children who receive the disability bonus on child benefit. The conditions are alternatives, and the 5 points are added once even when more than one applies (art. 17(3)). The calculator asks about all three.",
         "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
         "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
         "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
@@ -3338,7 +3346,7 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, with the disability bonus condition in art. 17(1)(c))",
         "reviewed": "Rules and 2026 values reviewed on 20 November 2026 against the Segurança Social guide and the consolidated text of Decreto-Lei n.º 28/2004 in the Diário da República. The three alternative conditions for the 5-point increase and the floor above 500 euros come from art. 17. Art. 17(4) says the 500 euro figure is updated with the IAS, but we found no act that publishes an updated figure, and the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
         "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },

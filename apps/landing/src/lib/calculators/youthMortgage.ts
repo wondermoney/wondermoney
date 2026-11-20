@@ -22,11 +22,17 @@ export const YOUTH_GUARANTEE = {
   maxIncome: 86_634,
   /** Share of the transaction value the State can guarantee, in percent. */
   guaranteePercent: 15,
-  /** Contracts signed up to this date can use the guarantee. */
+  /**
+   * Contracts signed up to this date can use the guarantee: art. 5(4) of Portaria n.º 236-A/2024/1, which regulates
+   * Decreto-Lei n.º 44/2024 ("devem ser formalizados até ao dia 31 de dezembro de 2026"). Art. 5(5) allows an
+   * extension after an impact assessment; none was published by 2026-11-20 (consolidated text, unchanged by
+   * Portaria n.º 187/2025/1). The page shows a notice that it will be updated once the 2027 rules are known.
+   */
   lastContractDate: "2026-12-31",
   sources: {
     government: "https://portugal.gov.pt/gc24/comunicacao/noticias/garantia-publica-o-que-e-e-como-funciona",
     literacia: "https://www.literaciafinanceira.pt/artigos/credito-habitacao-jovem",
+    portaria: "https://diariodarepublica.pt/dr/legislacao-consolidada/portaria/2024-915235693",
   },
 } as const;
 

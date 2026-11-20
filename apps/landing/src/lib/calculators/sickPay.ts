@@ -24,12 +24,14 @@ export const MIN_DAILY_CENTS = Math.round((RMMG_2026_CENTS * 30) / 100 / 30);
 export const WAITING_DAYS = 3;
 export const MAX_SICK_DAYS = 1095;
 /**
- * +5 points on the 55% and 60% bands (art. 17 DL 28/2004): when the reference pay is at or below this monthly
- * value, OR the household has 3 or more descendants (the conditions are alternatives, not cumulative). Art.
- * 17(1)(a) and (2) state 500 euros; art. 17(4) says the figure is updated with the IAS, but no act publishing an
- * updated figure was found and the Segurança Social guide in force (ISS 5001 v4.55, 23 October 2026) still states
- * "igual ou inferior a 500,00€", so 500 is kept. Art. 17(1)(c), descendants receiving the disability bonus of the
- * family allowance, is a third alternative condition that the calculator does not ask about.
+ * +5 points on the 55% and 60% bands (art. 17(1) DL 28/2004) when "uma das seguintes situações" applies: (a) the
+ * reference pay is at or below this monthly value, (b) the household has 3 or more descendants, or (c) the
+ * household has descendants receiving the disability bonus of the family allowance ("bonificação por deficiência
+ * do abono de família para crianças e jovens"). The conditions are alternatives, and art. 17(3) makes the increases
+ * non-cumulative, so the 5 points are added once whichever conditions apply. Art. 17(1)(a) and (2) state 500 euros;
+ * art. 17(4) says the figure is updated with the IAS, but no act publishing an updated figure was found and the
+ * Segurança Social guide in force (ISS 5001 v4.55, 23 October 2026) still states "igual ou inferior a 500,00€", so
+ * 500 is kept.
  */
 export const INCREASE_POINTS = 5;
 export const INCREASE_MAX_REFERENCE_MONTHLY_CENTS = 50_000;
@@ -70,10 +72,12 @@ export interface SickPayInput {
   hospitalisation: boolean;
   /** Descendants up to 16 (or 24 with family allowance) in the household. */
   dependants: number;
+  /** A descendant in the household receives the disability bonus on child benefit (art. 17(1)(c) DL 28/2004). */
+  disabilityBonus: boolean;
 }
 
 export const SICK_PAY_EXAMPLE: SickPayInput = {
-  grossMonthly: 1500, allowances: "fourteen", sickDays: 45, hospitalisation: false, dependants: 0,
+  grossMonthly: 1500, allowances: "fourteen", sickDays: 45, hospitalisation: false, dependants: 0, disabilityBonus: false,
 };
 
 export function validateSickPay(input: SickPayInput): Partial<Record<SickPayField, FieldError>> {
@@ -141,8 +145,11 @@ export function computeSickPay(input: SickPayInput) {
     Math.round((baseMonthlyCents - withholding - (baseMonthlyCents * EMPLOYEE_SOCIAL_SECURITY_BP) / 10_000) / 30),
   );
 
+  // Art. 17(1) and (3): any one condition adds the 5 points, and they are added once however many apply.
   const increaseApplied =
-    baseMonthlyCents <= INCREASE_MAX_REFERENCE_MONTHLY_CENTS || input.dependants >= INCREASE_MIN_DESCENDANTS;
+    baseMonthlyCents <= INCREASE_MAX_REFERENCE_MONTHLY_CENTS
+    || input.dependants >= INCREASE_MIN_DESCENDANTS
+    || input.disabilityBonus;
   const waitingTotal = input.hospitalisation ? 0 : WAITING_DAYS;
   let limit: SickPayResult["limit"] = "none";
 

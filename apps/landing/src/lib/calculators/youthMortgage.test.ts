@@ -103,3 +103,12 @@ describe("guarantee checklist", () => {
     expect(status({ ...ok, ownPermanentHome: false }, "ownHome")).toBe("notMet");
   });
 });
+
+describe("guarantee deadline", () => {
+  it("covers contracts signed by 31 December 2026, from the consolidated Portaria n.º 236-A/2024/1 (art. 5(4))", () => {
+    expect(YOUTH_GUARANTEE.lastContractDate).toBe("2026-12-31");
+    expect(YOUTH_GUARANTEE.sources.portaria).toBe(
+      "https://diariodarepublica.pt/dr/legislacao-consolidada/portaria/2024-915235693",
+    );
+  });
+});
