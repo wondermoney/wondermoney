@@ -49,6 +49,17 @@
 // Any other code in a household electricity offer (gas-only and business-only rows are not read)
 // stops the script: it never guesses.
 //
+// Consumption band. ConsIni_ELE and ConsFim_ELE are the annual kWh an offer is open to (AUDAX_09
+// to 13, "Para clientes com consumos inferiores a 20MWh/ano", carry ConsFim_ELE 20000); an empty
+// cell is no limit. They are kept as minAnnualKwh and maxAnnualKwh. A cell that is not a number,
+// a negative one, or a minimum above the maximum stops the script. ERSE's simulator applies the
+// band on its server (erse.max.js does not read it) to the annualised total consumption, both ends
+// included: probed on 2026-11-20 at 20,7 kVA for Audax without loyalty offers, it lists AUDAX_09
+// at 20 000 kWh a year (simple, or bi-hourly 10 000 + 10 000, or 1 666 kWh in one month, which is
+// 19 992 a year) and nothing at 20 001 (or 10 000 + 10 001, or 1 667 in one month). No household
+// offer in the 17 November 2026 export has a minimum, so the lower end could not be probed; it is
+// taken as inclusive like the upper one.
+//
 // Refunds and new-customer discounts are copied as ERSE gives them: the % columns are fractions
 // (0.02 is 2%), the EUR/kWh columns are EUR per kWh and the fixed amounts EUR a year. ERSE labels
 // the new-customer fixed discount and the mandatory services "c/IVA" (VAT included); it does not say
@@ -127,6 +138,8 @@ const LINK_COLUMNS = {
   supplier: "LinkCOM",
 };
 
+export const BAND_COLUMNS = { min: "ConsIni_ELE", max: "ConsFim_ELE" };
+
 export const CONDITIONS_COLUMNS = [
   "COM",
   "COD_Proposta",
@@ -139,6 +152,8 @@ export const CONDITIONS_COLUMNS = [
   "Data fim",
   ...Object.keys(MULTI_OPTION_FILTERS),
   ...YES_NO_FILTERS,
+  BAND_COLUMNS.min,
+  BAND_COLUMNS.max,
   AMOUNT_COLUMNS.mandatoryServices,
   ...Object.values(AMOUNT_COLUMNS.refunds),
   ...Object.values(AMOUNT_COLUMNS.newClient),
@@ -330,6 +345,7 @@ function offerFrom(row) {
     durationMonths: duration ?? null,
     validFrom,
     validTo,
+    ...consumptionBand(row),
     mandatoryServicesPerYear: amount(row, AMOUNT_COLUMNS.mandatoryServices),
     refunds: amounts(row, AMOUNT_COLUMNS.refunds),
     newClient: amounts(row, AMOUNT_COLUMNS.newClient),
@@ -342,6 +358,23 @@ function offerFrom(row) {
     links,
     prices: {},
   };
+}
+
+/** ConsIni_ELE / ConsFim_ELE to { minAnnualKwh, maxAnnualKwh }, null when empty; throws otherwise. */
+export function consumptionBand(row) {
+  const id = row.COD_Proposta;
+  const bound = (column) => {
+    const value = parseNumber(row[column], `${column} of ${id}`);
+    if (value === undefined) return null;
+    if (!(value >= 0)) throw new Error(`Implausible ${column} ${value} for ${id}`);
+    return value;
+  };
+  const minAnnualKwh = bound(BAND_COLUMNS.min);
+  const maxAnnualKwh = bound(BAND_COLUMNS.max);
+  if (minAnnualKwh !== null && maxAnnualKwh !== null && minAnnualKwh > maxAnnualKwh) {
+    throw new Error(`${BAND_COLUMNS.min} ${minAnnualKwh} is above ${BAND_COLUMNS.max} ${maxAnnualKwh} for ${id}`);
+  }
+  return { minAnnualKwh, maxAnnualKwh };
 }
 
 function price(row, column, limit) {
@@ -381,7 +414,7 @@ const compareIds = (a, b) => a.localeCompare(b, "en", { numeric: true });
 /**
  * The two CSV texts of the export to the electricity offers valid on `date`, regulated tariff
  * first, then by supplier and id. Throws on missing columns, an unreadable cell or filter code,
- * an implausible price, a kept offer without prices, no regulated tariff, or too few offers.
+ * a consumption band that is not one, an implausible price, a kept offer without prices, no regulated tariff, or too few offers.
  */
 export function deriveOffers({ conditions, prices }, { date, minOffers = MIN_OFFERS } = {}) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? "")) throw new Error("The snapshot date must be YYYY-MM-DD");
@@ -511,7 +544,7 @@ export const ELECTRICITY_OFFERS_SOURCE = {
   offerCount: ${offers.length},
   supplierCount: ${suppliers.size},
   /** Bump when the derivation changes, not when the offers change. */
-  version: 1,
+  version: 2,
 } as const;
 
 export const ELECTRICITY_OFFERS: readonly ElectricityOffer[] = [

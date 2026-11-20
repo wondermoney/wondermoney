@@ -9,6 +9,7 @@ export const PRICE_LIMITS: { energyPerKwh: number; powerPerDay: number };
 export const MIN_OFFERS: number;
 export const MULTI_OPTION_FILTERS: Record<"FiltroContratacao" | "Filtrofaturacao" | "FiltroPagamento" | "FiltroAtendimento", string[]>;
 export const YES_NO_FILTERS: readonly string[];
+export const BAND_COLUMNS: { min: string; max: string };
 export const CONDITIONS_COLUMNS: readonly string[];
 export const PRICES_COLUMNS: readonly string[];
 
@@ -24,6 +25,10 @@ export function parseNumber(text: string | undefined, what?: string): number | u
 export function parseDate(text: string | undefined, what?: string): string | null;
 export function decodeOptions(column: string, code: string): string[];
 export function decodeYesNo(column: string, code: string): boolean;
+export function consumptionBand(row: Record<string, string>): {
+  minAnnualKwh: number | null;
+  maxAnnualKwh: number | null;
+};
 export function normalizeLink(text: string | undefined): string | undefined;
 export function deriveOffers(
   csv: { conditions: string; prices: string },

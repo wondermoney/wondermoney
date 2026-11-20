@@ -11,6 +11,7 @@ import {
   ERSE_FORM,
   ERSE_NEGATIVE_BILL,
   ERSE_NO_SOCIAL_TARIFF_ABOVE_6_9,
+  ERSE_OUT_OF_BAND,
   ERSE_READINGS,
   FIXTURE_OFFERS,
   type ErseReading,
@@ -113,6 +114,50 @@ describe("compareElectricityOffers against ERSE's simulator (read on 2026-11-20)
       expect(best.offer.loyalty).toBe(true);
       expect(best.firstYear.total).toBeCloseTo(reading.erse[5], 2);
     }
+  });
+
+  it("leaves out an offer outside its consumption band, as ERSE does, both ends included (#567)", () => {
+    const audax09 = offer("AUDAX_09");
+    expect([audax09.minAnnualKwh, audax09.maxAnnualKwh]).toEqual([null, 20000]);
+    const reading = (name: string) => ERSE_READINGS.find((candidate) => candidate.name === name) as ErseReading;
+    for (const [name, annualKwh] of [
+      ["band, Audax indexed at 19 000 kWh", 19000],
+      ["band, Audax indexed at 20 000 kWh, the limit", 20000],
+      ["band, Audax indexed at 1 666 kWh in one month", 19992],
+      ["band, Audax indexed at 10 000 + 10 000 kWh bi-hourly", 20000],
+    ] as const) {
+      const result = run([audax09], inputFor(reading(name)));
+      expect(result.annualKwh, name).toBeCloseTo(annualKwh, 6);
+      expect(only(result.results).firstYear.total, name).toBeCloseTo(reading(name).erse[5], 1);
+    }
+    for (const { name, form, results } of ERSE_OUT_OF_BAND) {
+      const option = form.cycle === "2" ? "biHourly" : "simple";
+      const result = run([audax09], inputFor({ name, form, offer: "AUDAX_09", option } as ErseReading));
+      expect(result.annualKwh, name).toBeGreaterThan(20000);
+      expect(result.results, name).toHaveLength(results);
+      // Every option is left out, not only the one ERSE was asked for.
+      expect(run([audax09], { ...inputFor({ name, form, offer: "AUDAX_09", option } as ErseReading), options: undefined }).results).toEqual([]);
+    }
+  });
+
+  it("ranks Audax at 20,7 kVA as ERSE does on each side of 20 MWh (#567)", () => {
+    const audax = FIXTURE_OFFERS.filter((candidate) => candidate.supplier === "AUDAX");
+    const cheapest = (name: string, more: Partial<TariffComparisonInput> = {}) => {
+      const reading = ERSE_READINGS.find((candidate) => candidate.name === name) as ErseReading;
+      const input = { ...inputFor(reading), options: ["simple"] as const, cheapestPerSupplier: true, ...more };
+      return run(audax, input).results;
+    };
+    // Loyalty offers in: TOP T4 (AUDAX_05) is cheaper than the indexed offer on both sides.
+    for (const name of ["band, Audax TOP T4 at 19 000 kWh with loyalty", "band, Audax TOP T4 at 21 000 kWh with loyalty"]) {
+      const best = only(cheapest(name));
+      expect(best.offer.id, name).toBe("AUDAX_05");
+    }
+    // Without the loyalty offers, as ERSE was asked: AUDAX_09 at 19 000 kWh, nothing at 21 000.
+    const withoutLoyalty = audax.filter((candidate) => !candidate.loyalty);
+    const at = (kwh: number) =>
+      run(withoutLoyalty, { contractedPower: 20.7, kwh: periodKwh(365, { simple: kwh }), options: ["simple"] }).results;
+    expect(only(at(19000)).offer.id).toBe("AUDAX_09");
+    expect(at(21000)).toEqual([]);
   });
 
   it("stops at zero where ERSE shows a negative bill", () => {
@@ -408,6 +453,32 @@ describe("periods, discounts and the ranking", () => {
       for (const bill of [firstYear, laterYears, period]) expect(Number.isFinite(bill.total)).toBe(true);
     }
     expect(result.results.some((priced) => priced.offer.regulated)).toBe(true);
+  });
+
+  it("checks the band on the annual kWh it is given, so on the grid kWh when solar is netted", () => {
+    const banded = (minAnnualKwh: number | null, maxAnnualKwh: number | null): ElectricityOffer => ({
+      ...offer("TUR"),
+      id: "BANDED",
+      regulated: false,
+      minAnnualKwh,
+      maxAnnualKwh,
+    });
+    const year = (kwh: number) => periodKwh(365, { simple: kwh });
+    const listed = (candidate: ElectricityOffer, kwh: PeriodKwh) => run([candidate], { kwh, options: ["simple"] }).results.length;
+    // The lower end is taken as inclusive like ERSE's upper end: no household offer has one to probe.
+    expect(listed(banded(7000, null), year(6999))).toBe(0);
+    expect(listed(banded(7000, null), year(7000))).toBe(1);
+    expect(listed(banded(7000, 8000), year(8000))).toBe(1);
+    expect(listed(banded(7000, 8000), year(8001))).toBe(0);
+    expect(listed(banded(null, null), year(1e6))).toBe(1);
+    expect(listed(banded(0, 0), year(0))).toBe(1);
+    // A quarter's bill is scaled to a year first: 1 900 kWh in 73 days is 9 500 a year.
+    expect(listed(banded(null, 9500), periodKwh(73, { simple: 1900 }))).toBe(1);
+    expect(listed(banded(null, 9499), periodKwh(73, { simple: 1900 }))).toBe(0);
+    // A year entered as a part of it lands on the limit, not a float error past it.
+    for (const days of [1, 7, 30, 73, 91, 200]) {
+      expect(listed(banded(20000, 20000), periodKwh(days, { simple: (20000 * days) / 365 })), `${days} days`).toBe(1);
+    }
   });
 
   it("skips offers with no price for the power or option", () => {
