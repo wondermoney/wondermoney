@@ -1,6 +1,6 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { ChartPie, MousePointerClick, Shapes, Split, Store, Tags } from "lucide-react";
 import CTABanner from "@/components/shared/CTABanner";
 import CategorizationPreview from "@/components/homepage/previews/CategorizationPreview";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
@@ -8,27 +8,18 @@ import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
+import TransactionsPreview from "@/components/homepage/previews/TransactionsPreview";
 import { CTA_URL } from "@/hooks/useCtaUrl";
 
 function StepCard({ number, title, body }: { number: number; title: string; body: string }) {
 	return (
-		<div className="flex gap-5">
-			<div className="shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
+		<div className="rounded-card border border-border bg-background p-6">
+			<div className="mb-4 inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
 				{number}
 			</div>
-			<div>
-				<h3 className="text-base font-semibold text-foreground">{title}</h3>
-				<p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p>
-			</div>
-		</div>
-	);
-}
-
-function FeatureItem({ text }: { text: string }) {
-	return (
-		<div className="flex items-start gap-3">
-			<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-			<span className="text-foreground text-base">{text}</span>
+			<h3 className="text-base font-semibold text-foreground">{title}</h3>
+			<p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
 		</div>
 	);
 }
@@ -45,12 +36,12 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 	const { t } = useTranslations();
 
 	const features = [
-		t("lp.featureCategorization.feature1"),
-		t("lp.featureCategorization.feature2"),
-		t("lp.featureCategorization.feature3"),
-		t("lp.featureCategorization.feature4"),
-		t("lp.featureCategorization.feature5"),
-		t("lp.featureCategorization.feature6"),
+		{ icon: Tags, text: t("lp.featureCategorization.feature1") },
+		{ icon: MousePointerClick, text: t("lp.featureCategorization.feature2") },
+		{ icon: Store, text: t("lp.featureCategorization.feature3") },
+		{ icon: Shapes, text: t("lp.featureCategorization.feature4") },
+		{ icon: Split, text: t("lp.featureCategorization.feature5") },
+		{ icon: ChartPie, text: t("lp.featureCategorization.feature6") },
 	];
 
 	return (
@@ -90,11 +81,11 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 
 			{/* How It Works */}
 			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
+				<div className="mx-auto max-w-6xl px-6 lg:px-8">
 					<h2 className="text-3xl font-semibold tracking-tight text-foreground text-center mb-12">
 						{t("lp.featureCategorization.howTitle")}
 					</h2>
-					<div className="flex flex-col gap-10">
+					<div className="grid gap-6 md:grid-cols-3">
 						<StepCard number={1} title={t("lp.featureCategorization.step1Title")} body={t("lp.featureCategorization.step1Body")} />
 						<StepCard number={2} title={t("lp.featureCategorization.step2Title")} body={t("lp.featureCategorization.step2Body")} />
 						<StepCard number={3} title={t("lp.featureCategorization.step3Title")} body={t("lp.featureCategorization.step3Body")} />
@@ -102,17 +93,13 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			{/* Features */}
-			<section className="py-16 md:py-20 bg-paper-2">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-10 text-center">
-						{t("lp.featureCategorization.featuresTitle")}
-					</h2>
-					<div className="grid gap-4 sm:grid-cols-2">
-						{features.map((f, i) => <FeatureItem key={i} text={f} />)}
-					</div>
-				</div>
-			</section>
+			{/* Features, beside categorised transactions */}
+			<FeatureExplainer
+				title={t("lp.featureCategorization.featuresTitle")}
+				points={features}
+				visual={<TransactionsPreview />}
+				tone="muted"
+			/>
 
 			<TrustStripInline />
 

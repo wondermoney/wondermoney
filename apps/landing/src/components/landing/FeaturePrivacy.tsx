@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { EyeOff, Ban, Server, KeyRound, LogOut, FingerprintPattern } from "lucide-react";
+import { EyeOff, Ban, Server, KeyRound, Landmark, LogOut, FingerprintPattern } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CTABanner from "@/components/shared/CTABanner";
 import SecurityDashboardPreview from "@/components/homepage/previews/SecurityDashboardPreview";
@@ -8,6 +8,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
 
 const principles = [
@@ -102,23 +103,19 @@ function FeaturePrivacyContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			{/* Open Banking trust details */}
-			<section className="py-16 md:py-20 bg-paper-2">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-4">
-						{t("lp.featurePrivacy.gdprTitle")}
-					</h2>
-					<p className="text-muted-foreground leading-7 mb-10">
-						{t("lp.featurePrivacy.gdprBody")}
-					</p>
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-4 mt-10">
-						{t("lp.featurePrivacy.openBankingTitle")}
-					</h2>
-					<p className="max-w-[60ch] text-muted-foreground leading-7">
-						{t("lp.featurePrivacy.openBankingBody")}
-					</p>
-				</div>
-			</section>
+			{/* Read-only open banking, beside the provider behind it */}
+			<FeatureExplainer
+				title={t("lp.featurePrivacy.gdprTitle")}
+				body={t("lp.featurePrivacy.gdprBody")}
+				points={[
+					{
+						icon: Landmark,
+						title: t("lp.featurePrivacy.openBankingTitle"),
+						text: t("lp.featurePrivacy.openBankingBody"),
+					},
+				]}
+				tone="muted"
+			/>
 
 			<TrustStripInline />
 
