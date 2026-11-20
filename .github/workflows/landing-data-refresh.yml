@@ -2,7 +2,7 @@ name: Landing data refresh
 
 # Regenerates the dated data snapshots behind the landing tools and, when the figures changed,
 # opens or updates one pull request into develop per set of snapshots. A run with no new figures
-# opens nothing. Three sets, each with its own fixed branch:
+# opens nothing. Four sets, each with its own fixed branch:
 #
 #   market  Euribor from BPstat, deposit rates from the ECB, household electricity prices from
 #           Eurostat, fuel prices from DGEG, and the Série F savings certificates base rate from
@@ -22,6 +22,12 @@ name: Landing data refresh
 #           REN profiles they are weighted by (the indexed offers' real cost). A new month is
 #           complete on the 1st, so it runs on the 8th, apart from the market set so that an OMIE
 #           failure never holds up Euribor or fuel. Branch bot/landing-omie-refresh.
+#   ppr     The PPR investment funds from the CMVM's list (Portal do Investidor), for the PPR
+#           comparison. The list's annual returns and costs change rarely, so it runs monthly, on
+#           the 10th, apart from the market set because it reads an OutSystems page whose screen
+#           services can change with any CMVM deploy. The ASF half of the comparison (insurance and
+#           pension funds) is refreshed by hand: the ASF site answers browsers only. Branch
+#           bot/landing-ppr-refresh.
 #
 # A separate branch per set keeps a weekly offers run from rebuilding (and dropping) a market
 # refresh that is still waiting for review, and a failure in one set from blocking the other.
@@ -46,12 +52,13 @@ on:
     - cron: '17 6 6 * *'
     - cron: '41 6 * * 1'
     - cron: '29 6 8 * *'
+    - cron: '47 6 10 * *'
   workflow_dispatch:
     inputs:
       set:
         description: Which snapshots to refresh
         type: choice
-        options: [market, offers, omie]
+        options: [market, offers, omie, ppr]
         default: market
 
 permissions:
@@ -86,6 +93,7 @@ jobs:
             '41 6 * * 1') set=offers ;;
             '17 6 6 * *') set=market ;;
             '29 6 8 * *') set=omie ;;
+            '47 6 10 * *') set=ppr ;;
             *) set="${INPUT_SET:-market}" ;;
           esac
           if [ "$set" = offers ]; then
@@ -95,6 +103,13 @@ jobs:
               echo "title=chore(landing): refresh the electricity offers"
               # The formulas of the indexed offers are checked against each new export's prices.
               echo "tests=electricityOffers indexedPricing"
+            } >> "$GITHUB_OUTPUT"
+          elif [ "$set" = ppr ]; then
+            {
+              echo "scripts=build-ppr-products"
+              echo "branch=bot/landing-ppr-refresh"
+              echo "title=chore(landing): refresh the PPR funds"
+              echo "tests=pprComparison pprProductsScript PprComparison"
             } >> "$GITHUB_OUTPUT"
           elif [ "$set" = omie ]; then
             {
@@ -188,6 +203,7 @@ jobs:
           row "OMIE prices (Portugal)" omiePrices.ts lastMonth fetchedOn
           row "Série F base rate (IGCP)" savingsCertificatesRate.ts month publishedOn
           row "Electricity offers (ERSE export date)" electricityOffers.ts exportedOn fetchedOn
+          row "PPR funds (CMVM)" pprFunds.ts fetchedOn fetchedOn
 
           body_file=$(mktemp)
           {
