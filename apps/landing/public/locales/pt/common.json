@@ -3266,17 +3266,23 @@
         "allowances": "Subsídios",
         "sickDays": "Dias de baixa",
         "dependants": "Filhos até 16 anos (ou 24 com abono de família)",
+        "disabilityBonus": "O teu agregado familiar recebe a bonificação por deficiência de um filho ou dependente?",
         "hospitalisation": "Internamento hospitalar ou cirurgia de ambulatório"
       },
       "allowanceOptions": {
         "fourteen": "14 pagamentos (subsídios de férias e de Natal à parte)",
         "twelfths": "Em duodécimos (o salário já os inclui)"
       },
+      "disabilityBonusOptions": {
+        "no": "Não",
+        "yes": "Sim"
+      },
       "help": {
         "gross": "O salário base dos meses considerados, antes de Segurança Social e IRS. Os subsídios de férias e de Natal não entram na remuneração de referência.",
         "allowances": "Em duodécimos, o simulador retira os dois subsídios para obter o salário base que a remuneração de referência usa.",
         "sickDays": "Total de dias do certificado de incapacidade temporária (CIT), contados desde o primeiro dia. Os trabalhadores por conta de outrem podem receber até 1095 dias.",
-        "dependants": "Usado no acréscimo de 5 pontos, que se aplica com 3 ou mais filhos, ou quando a remuneração de referência é de 500 euros por mês ou menos.",
+        "dependants": "Usado no acréscimo de 5 pontos, que se aplica com 3 ou mais filhos, com a bonificação por deficiência, ou quando a remuneração de referência é de 500 euros por mês ou menos.",
+        "disabilityBonus": "A bonificação por deficiência é paga com o abono de família a descendentes com deficiência. Também dá direito ao acréscimo de 5 pontos, seja qual for a remuneração de referência.",
         "hospitalisation": "Com internamento hospitalar ou cirurgia de ambulatório, o subsídio é pago desde o 1.º dia, sem período de espera."
       },
       "errors": {
@@ -3299,7 +3305,7 @@
         "bandsTitle": "Por escalão de duração",
         "bandLabel": "Dias {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} dias pagos × {{daily}} = {{amount}}",
-        "increaseApplied": "Inclui o acréscimo de 5 pontos (remuneração de referência até 500 euros, ou 3 ou mais filhos).",
+        "increaseApplied": "Inclui o acréscimo de 5 pontos (remuneração de referência até 500 euros, 3 ou mais filhos, ou bonificação por deficiência).",
         "allWaiting": "Todos os dias desta baixa são dias de espera, por isso a Segurança Social não paga nada. Verifique se o contrato ou o instrumento de regulamentação coletiva obriga a entidade patronal a pagá-los.",
         "waitingNote": "A Segurança Social não paga os 3 primeiros dias. Se a entidade patronal os paga depende do contrato ou do instrumento de regulamentação coletiva.",
         "estimate": "Uma estimativa para planear, não uma decisão. A Segurança Social calcula o valor real com as remunerações registadas.",
@@ -3327,7 +3333,7 @@
         "methodBands": "O subsídio diário é uma percentagem da RR que aumenta com a duração da baixa: 55% até 30 dias, 60% do dia 31 ao 90, 70% do dia 91 ao 365 e 75% depois, até 1095 dias para trabalhadores por conta de outrem. Os dias contam desde o primeiro dia da baixa, incluindo os de espera.",
         "methodWaiting": "Os trabalhadores por conta de outrem têm um período de espera de 3 dias que a Segurança Social não paga. Com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e vai além dele, o pagamento começa no 1.º dia.",
         "methodMinimum": "O subsídio diário não pode ser inferior a {{min}} (30% da retribuição mínima mensal garantida de {{rmmg}}). Se a própria RR for inferior, o subsídio é igual à RR.",
-        "methodIncrease": "Nos escalões de 55% e 60%, a percentagem sobe 5 pontos quando se verifica uma destas situações (art. 17.º do Decreto-Lei n.º 28/2004): a RR é de, no máximo, 500 euros por mês, o agregado tem 3 ou mais filhos até 16 anos (ou 24 com abono de família), ou o agregado tem filhos com bonificação por deficiência. As condições são alternativas, não cumulativas. O simulador considera as duas primeiras e não considera a bonificação por deficiência.",
+        "methodIncrease": "Nos escalões de 55% e 60%, a percentagem sobe 5 pontos quando se verifica uma destas situações (n.º 1 do art. 17.º do Decreto-Lei n.º 28/2004): a RR é de, no máximo, 500 euros por mês, o agregado tem 3 ou mais filhos até 16 anos (ou 24 com abono de família), ou o agregado tem filhos que recebem a bonificação por deficiência do abono de família. As condições são alternativas e os 5 pontos somam-se uma só vez, mesmo que se verifique mais do que uma (n.º 3 do art. 17.º). O simulador pergunta pelas três.",
         "methodNetCap": "O subsídio diário também não pode ultrapassar o valor líquido da RR. O simulador estima-o com 11% de Segurança Social e a taxa de retenção de IRS de 2026 do continente para um titular não casado.",
         "methodGap": "A perda de rendimento compara o seu salário líquido normal (14 ou 12 pagamentos, em média por 12 meses) com o que a Segurança Social paga. Os subsídios de férias e de Natal não são repostos pelos dias de baixa.",
         "methodBudget": "A diferença é o rendimento que tem de cobrir com poupanças ou cortando despesas durante a baixa. Use-a para dimensionar a sua reserva.",
@@ -3338,7 +3344,7 @@
         "unsupportedOther": "Menos de 6 meses de remunerações registadas, remunerações muito variáveis, indemnizações por acidente de trabalho ou doença profissional e acordos coletivos que complementam o subsídio.",
         "sourcesTitle": "Fontes",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 de outubro de 2026), com a retribuição mínima mensal garantida de 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, versão consolidada no Diário da República: regime de proteção na doença (art. 17.º na redação do art. 9.º do Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, versão consolidada no Diário da República: regime de proteção na doença (art. 17.º na redação do art. 9.º do Decreto-Lei n.º 133/2012, com a bonificação por deficiência na alínea c) do n.º 1)",
         "reviewed": "Regras e valores de 2026 revistos a 20 de novembro de 2026 face ao guia da Segurança Social e ao texto consolidado do Decreto-Lei n.º 28/2004 no Diário da República. As três condições alternativas do acréscimo de 5 pontos e o piso acima de 500 euros vêm do art. 17.º. O n.º 4 do art. 17.º diz que o valor de 500 euros é atualizado com o IAS, mas não encontrámos nenhum diploma que publique um valor atualizado, e o guia em vigor (ISS 5001 v4.55, de 23 de outubro de 2026) continua a indicar 500,00 euros, por isso mantemos 500. A estimativa do salário líquido por trás do limite líquido é uma simplificação nossa.",
         "methodFloor": "Acima de uma remuneração de referência de 500 euros por mês, o subsídio diário a 55% e 60% não pode ser inferior ao subsídio majorado calculado sobre 500 euros: 60% e 65% de 500 a dividir por 30, ou seja, {{floor55}} e {{floor60}} por dia (art. 17.º, n.º 2, do Decreto-Lei n.º 28/2004). Só conta para uma remuneração de referência pouco acima de 500 euros, até cerca de 545 euros, quando não há majoração. Não se aplica aos escalões de 70% e 75%."
       },

@@ -3266,17 +3266,23 @@
         "allowances": "Urlaubs- und Weihnachtsgeld",
         "sickDays": "Tage der Krankschreibung",
         "dependants": "Kinder bis 16 Jahre (oder 24 mit Kindergeld)",
+        "disabilityBonus": "Erhält Ihr Haushalt den Behinderungszuschlag für ein Kind oder eine unterhaltsberechtigte Person?",
         "hospitalisation": "Krankenhausaufenthalt oder ambulante Operation"
       },
       "allowanceOptions": {
         "fourteen": "14 Zahlungen (Urlaubs- und Weihnachtsgeld getrennt)",
         "twelfths": "In Zwölfteln (das Gehalt enthält sie bereits)"
       },
+      "disabilityBonusOptions": {
+        "no": "Nein",
+        "yes": "Ja"
+      },
       "help": {
         "gross": "Das Grundgehalt der berücksichtigten Monate, vor Sozialversicherung und IRS. Urlaubs- und Weihnachtsgeld zählen nicht zum Referenzentgelt.",
         "allowances": "Bei Zahlung in Zwölfteln zieht der Rechner die beiden Sonderzahlungen ab, um das Grundgehalt für das Referenzentgelt zu erhalten.",
         "sickDays": "Gesamtzahl der Tage laut Krankschreibung (CIT), ab dem ersten Tag gezählt. Arbeitnehmer erhalten bis zu 1095 Tage.",
-        "dependants": "Wird für die Erhöhung um 5 Punkte verwendet, die bei 3 oder mehr Kindern gilt oder wenn das Referenzentgelt höchstens 500 Euro im Monat beträgt.",
+        "dependants": "Wird für die Erhöhung um 5 Punkte verwendet, die bei 3 oder mehr Kindern, beim Behinderungszuschlag oder bei einem Referenzentgelt von höchstens 500 Euro im Monat gilt.",
+        "disabilityBonus": "Der Behinderungszuschlag (bonificação por deficiência) wird mit dem Kindergeld (abono de família) für Nachkommen mit Behinderung gezahlt. Er führt ebenfalls zur Erhöhung um 5 Punkte, unabhängig vom Referenzentgelt.",
         "hospitalisation": "Bei Krankenhausaufenthalt oder ambulanter Operation wird das Krankengeld ab dem ersten Tag gezahlt, ohne Karenzzeit."
       },
       "errors": {
@@ -3299,7 +3305,7 @@
         "bandsTitle": "Nach Dauerstufe",
         "bandLabel": "Tage {{from}} bis {{to}} ({{percent}} %)",
         "bandValue": "{{paid}} bezahlte Tage × {{daily}} = {{amount}}",
-        "increaseApplied": "Die Erhöhung um 5 Punkte (Referenzentgelt bis 500 Euro oder 3 oder mehr Kinder) ist enthalten.",
+        "increaseApplied": "Die Erhöhung um 5 Punkte (Referenzentgelt bis 500 Euro, 3 oder mehr Kinder oder Behinderungszuschlag) ist enthalten.",
         "allWaiting": "Jeder Tag dieser Krankschreibung ist ein Karenztag, die Segurança Social zahlt daher nichts. Prüfen Sie, ob Ihr Vertrag oder Tarifvertrag den Arbeitgeber zur Zahlung verpflichtet.",
         "waitingNote": "Die Segurança Social zahlt die ersten 3 Tage nicht. Ob der Arbeitgeber sie zahlt, hängt von Ihrem Vertrag oder Tarifvertrag ab.",
         "estimate": "Eine Schätzung zur Planung, keine Entscheidung. Die Segurança Social berechnet den tatsächlichen Betrag aus Ihren gemeldeten Entgelten.",
@@ -3327,7 +3333,7 @@
         "methodBands": "Der Tagessatz ist ein Prozentsatz der RR, der mit der Dauer steigt: 55 % bis 30 Tage, 60 % von Tag 31 bis 90, 70 % von Tag 91 bis 365 und danach 75 %, für Arbeitnehmer bis 1095 Tage. Die Tage zählen ab dem ersten Tag, Karenztage eingeschlossen.",
         "methodWaiting": "Arbeitnehmer haben 3 Karenztage, die die Segurança Social nicht zahlt. Bei Krankenhausaufenthalt oder ambulanter Operation, Tuberkulose oder einer Krankheit, die während des Elterngelds beginnt und darüber hinausgeht, beginnt die Zahlung am ersten Tag.",
         "methodMinimum": "Der Tagessatz darf nicht unter {{min}} liegen (30 % des Mindestlohns von {{rmmg}}). Liegt die RR selbst darunter, entspricht das Krankengeld der RR.",
-        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn eine dieser Bedingungen erfüllt ist (Art. 17 des Decreto-Lei 28/2004): Die RR beträgt höchstens 500 Euro im Monat, der Haushalt hat 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder der Haushalt hat Kinder mit Behinderungszuschlag. Die Bedingungen gelten alternativ, nicht kumulativ. Der Rechner berücksichtigt die ersten beiden, nicht den Behinderungszuschlag.",
+        "methodIncrease": "In den Stufen 55 % und 60 % steigt der Prozentsatz um 5 Punkte, wenn eine dieser Bedingungen erfüllt ist (Art. 17 Abs. 1 des Decreto-Lei 28/2004): Die RR beträgt höchstens 500 Euro im Monat, der Haushalt hat 3 oder mehr Kinder bis 16 Jahre (oder 24 mit Kindergeld) oder der Haushalt hat Kinder, die den Behinderungszuschlag zum Kindergeld erhalten. Die Bedingungen gelten alternativ, und die 5 Punkte kommen nur einmal hinzu, auch wenn mehrere erfüllt sind (Art. 17 Abs. 3). Der Rechner fragt alle drei ab.",
         "methodNetCap": "Der Tagessatz darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Quellensteuersatz 2026 des Festlands für einen Alleinstehenden.",
         "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
         "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
@@ -3338,7 +3344,7 @@
         "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
         "sourcesTitle": "Quellen",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: Regelung des Schutzes bei Krankheit (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: Regelung des Schutzes bei Krankheit (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012, mit der Bedingung des Behinderungszuschlags in Art. 17 Abs. 1 Buchst. c)",
         "reviewed": "Regeln und Werte 2026 am 20. November 2026 geprüft anhand des Leitfadens der Segurança Social und des konsolidierten Textes des Decreto-Lei n.º 28/2004 im Diário da República. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus Art. 17. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird, doch wir haben keinen Rechtsakt gefunden, der einen angepassten Betrag veröffentlicht, und der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
         "methodFloor": "Über einem Referenzentgelt von 500 Euro im Monat darf der Tagessatz bei 55 % und 60 % nicht unter dem erhöhten Krankengeld liegen, das auf 500 Euro berechnet wird: 60 % und 65 % von 500 geteilt durch 30, also {{floor55}} und {{floor60}} pro Tag (Art. 17 Abs. 2 des Decreto-Lei 28/2004). Das spielt nur bei einem Referenzentgelt knapp über 500 Euro eine Rolle, bis etwa 545 Euro, wenn keine Erhöhung gilt. Für die Stufen 70 % und 75 % gilt es nicht."
       },

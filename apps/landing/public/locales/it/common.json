@@ -3266,17 +3266,23 @@
         "allowances": "Tredicesima e quattordicesima",
         "sickDays": "Giorni di malattia",
         "dependants": "Figli fino a 16 anni (o 24 con assegno familiare)",
+        "disabilityBonus": "La tua famiglia riceve il bonus per disabilità per un figlio o una persona a carico?",
         "hospitalisation": "Ricovero ospedaliero o chirurgia ambulatoriale"
       },
       "allowanceOptions": {
         "fourteen": "14 pagamenti (mensilità aggiuntive a parte)",
         "twelfths": "In dodicesimi (lo stipendio le include già)"
       },
+      "disabilityBonusOptions": {
+        "no": "No",
+        "yes": "Sì"
+      },
       "help": {
         "gross": "Lo stipendio base dei mesi considerati, prima dei contributi previdenziali e dell'IRS. Le mensilità aggiuntive non fanno parte della retribuzione di riferimento.",
         "allowances": "In dodicesimi, il calcolatore toglie le due mensilità per ottenere lo stipendio base usato dalla retribuzione di riferimento.",
         "sickDays": "Totale dei giorni del certificato (CIT), contati dal primo giorno. I lavoratori dipendenti possono ricevere fino a 1095 giorni.",
-        "dependants": "Serve per la maggiorazione di 5 punti, che si applica con 3 o più figli, oppure quando la retribuzione di riferimento è di 500 euro al mese o meno.",
+        "dependants": "Serve per la maggiorazione di 5 punti, che si applica con 3 o più figli, con il bonus per disabilità, oppure quando la retribuzione di riferimento è di 500 euro al mese o meno.",
+        "disabilityBonus": "Il bonus per disabilità (bonificação por deficiência) è pagato con l'assegno familiare (abono de família) per un discendente con disabilità. Dà anche diritto alla maggiorazione di 5 punti, qualunque sia la retribuzione di riferimento.",
         "hospitalisation": "Con ricovero ospedaliero o chirurgia ambulatoriale l'indennità è pagata dal primo giorno, senza periodo di carenza."
       },
       "errors": {
@@ -3299,7 +3305,7 @@
         "bandsTitle": "Per fascia di durata",
         "bandLabel": "Giorni da {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} giorni pagati × {{daily}} = {{amount}}",
-        "increaseApplied": "Inclusa la maggiorazione di 5 punti (retribuzione di riferimento fino a 500 euro, oppure 3 o più figli).",
+        "increaseApplied": "Inclusa la maggiorazione di 5 punti (retribuzione di riferimento fino a 500 euro, 3 o più figli, oppure bonus per disabilità).",
         "allWaiting": "Ogni giorno di questa malattia è di carenza, quindi la Segurança Social non paga nulla. Verifica se il contratto o il contratto collettivo obbliga il datore di lavoro a pagarli.",
         "waitingNote": "La Segurança Social non paga i primi 3 giorni. Se li paga il datore di lavoro dipende dal contratto o dal contratto collettivo.",
         "estimate": "Una stima per pianificare, non una decisione. La Segurança Social calcola l'importo reale dalle retribuzioni registrate.",
@@ -3327,7 +3333,7 @@
         "methodBands": "L'indennità giornaliera è una percentuale della RR che cresce con la durata: 55% fino a 30 giorni, 60% dal giorno 31 al 90, 70% dal giorno 91 al 365 e 75% oltre, fino a 1095 giorni per i dipendenti. I giorni si contano dal primo giorno di malattia, compresi quelli di carenza.",
         "methodWaiting": "I dipendenti hanno 3 giorni di carenza che la Segurança Social non paga. Con ricovero ospedaliero o chirurgia ambulatoriale, tubercolosi, o malattia che inizia durante il sussidio parentale e lo supera, il pagamento parte dal giorno 1.",
         "methodMinimum": "L'indennità giornaliera non può essere inferiore a {{min}} (30% del salario minimo di {{rmmg}}). Se la RR stessa è più bassa, l'indennità è uguale alla RR.",
-        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando si verifica una di queste situazioni (art. 17 del Decreto-Lei 28/2004): la RR è al massimo di 500 euro al mese, la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure la famiglia ha figli con bonus per disabilità. Le condizioni sono alternative, non cumulative. Il calcolatore considera le prime due e non il bonus per disabilità.",
+        "methodIncrease": "Nelle fasce del 55% e del 60%, la percentuale sale di 5 punti quando si verifica una di queste situazioni (art. 17, n. 1, del Decreto-Lei 28/2004): la RR è al massimo di 500 euro al mese, la famiglia ha 3 o più figli fino a 16 anni (o 24 con assegno familiare), oppure la famiglia ha figli che ricevono il bonus per disabilità dell'assegno familiare. Le condizioni sono alternative e i 5 punti si aggiungono una sola volta, anche se se ne verifica più di una (art. 17, n. 3). Il calcolatore chiede tutte e tre.",
         "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di contributi previdenziali e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
         "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive relative ai giorni di malattia non vengono reintegrate.",
         "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
@@ -3338,7 +3344,7 @@
         "unsupportedOther": "Meno di 6 mesi di retribuzioni registrate, retribuzioni molto variabili, indennizzi per infortunio sul lavoro o malattia professionale e contratti collettivi che integrano l'indennità.",
         "sourcesTitle": "Fonti",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 ottobre 2026), con il salario minimo 2026 di 920 euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, versione consolidata nel Diário da República: il regime di protezione in caso di malattia (art. 17 nel testo dell'art. 9 del Decreto-Lei n.º 133/2012)",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, versione consolidata nel Diário da República: il regime di protezione in caso di malattia (art. 17 nel testo dell'art. 9 del Decreto-Lei n.º 133/2012, con la condizione del bonus per disabilità all'art. 17, n. 1, lettera c)",
         "reviewed": "Regole e valori 2026 verificati il 20 novembre 2026 sulla guida della Segurança Social e sul testo consolidato del Decreto-Lei n.º 28/2004 nel Diário da República. Le tre condizioni alternative della maggiorazione di 5 punti e il minimo sopra 500 euro vengono dall'art. 17. L'art. 17, n. 4, dice che il valore di 500 euro è aggiornato con l'IAS, ma non abbiamo trovato alcun atto che pubblichi un valore aggiornato, e la guida in vigore (ISS 5001 v4.55, 23 ottobre 2026) indica ancora 500,00 euro, quindi manteniamo 500. La stima dello stipendio netto su cui si basa il limite netto è una nostra semplificazione.",
         "methodFloor": "Sopra una retribuzione di riferimento di 500 euro al mese, l'indennità giornaliera al 55% e 60% non può essere inferiore all'indennità maggiorata calcolata su 500 euro: 60% e 65% di 500 diviso 30, cioè {{floor55}} e {{floor60}} al giorno (art. 17, n. 2, del Decreto-Lei 28/2004). Conta solo per una retribuzione di riferimento poco sopra 500 euro, fino a circa 545 euro, quando non c'è maggiorazione. Non si applica alle fasce del 70% e 75%."
       },
