@@ -3,6 +3,7 @@ term: Variable Expense
 definition: A variable expense changes from month to month based on usage or behavior.
 category: budgeting
 example: Grocery spending ranging from 250 to 380 monthly is a variable expense.
+relatedCalculator: household-budget-calculator
 relatedGuide: build-monthly-budget
 relatedTerms:
   - fixed-expense

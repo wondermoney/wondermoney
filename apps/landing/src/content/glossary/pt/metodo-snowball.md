@@ -3,7 +3,7 @@ term: Método Snowball
 definition: Método snowball prioriza pagamentos extra na menor dívida primeiro.
 category: budgeting
 example: Quando liquidas a menor dívida, transferes essa prestação para a seguinte.
-relatedCalculator: debt-payoff-calculator
+relatedCalculator: early-repayment-calculator
 relatedGuide: plano-para-pagar-dividas
 relatedTerms:
   - metodo-avalanche

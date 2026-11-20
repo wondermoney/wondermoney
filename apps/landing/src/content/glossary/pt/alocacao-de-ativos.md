@@ -3,7 +3,7 @@ term: Alocação de Ativos
 definition: Alocação de ativos é a distribuição da carteira por classes como ações, obrigações e liquidez.
 category: investing-concepts
 example: Uma carteira 70/30 tem 70% em ativos de risco e 30% em ativos mais conservadores.
-relatedCalculator: portfolio-allocation-calculator
+relatedCalculator: investor-profile-quiz
 relatedGuide: investir-em-etfs-iniciantes
 relatedTerms:
   - etf-pt

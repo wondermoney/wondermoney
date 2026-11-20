@@ -3,7 +3,7 @@ term: Taxa de Esforço
 definition: Taxa de esforço é a percentagem do rendimento mensal usada para pagar créditos.
 category: banking
 example: Com prestações de 700 e rendimento líquido de 2.000, a taxa de esforço é 35%.
-relatedCalculator: loan-calculator
+relatedCalculator: debt-to-income-calculator
 relatedGuide: plano-para-pagar-dividas
 relatedTerms:
   - taeg

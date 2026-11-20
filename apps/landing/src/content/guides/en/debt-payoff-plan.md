@@ -4,8 +4,8 @@ excerpt: Create a focused debt strategy using minimum payments plus a targeted e
 category: budgeting
 publishedAt: 2026-03-01T09:20:00.000Z
 relatedCalculators:
-  - loan-calculator
-  - debt-payoff-calculator
+  - debt-to-income-calculator
+  - early-repayment-calculator
 relatedTerms:
   - debt-avalanche
   - debt-snowball

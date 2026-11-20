@@ -4,7 +4,7 @@ excerpt: Aprende a distribuir risco por ativos, setores e geografias para maior 
 category: investing
 publishedAt: 2026-03-01T09:40:00.000Z
 relatedCalculators:
-  - portfolio-allocation-calculator
+  - investor-profile-quiz
 relatedTerms:
   - diversificacao
   - alocacao-de-ativos

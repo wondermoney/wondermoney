@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { parseDocument } from "yaml";
 import { buildGlossaryTerms, buildGuides, buildMonthlyItems, type ContentEntry } from "@/lib/contentEntries";
-import { SUPPORTED_LANGS } from "@/lib/routes";
+import { resolveCalculatorRouteIdFromLegacy, SUPPORTED_LANGS, type Lang } from "@/lib/routes";
 import {
   CONTENT_DIRECTORIES,
   contentSlug,
@@ -88,6 +88,21 @@ describe("learn content files", () => {
     expect(() => buildGuides(guides.entries, glossary.entries)).not.toThrow();
     expect(() => buildGlossaryTerms(glossary.entries, guides.entries)).not.toThrow();
     expect(() => buildMonthlyItems(monthly.entries)).not.toThrow();
+  });
+
+  // A name the resolver does not know would send the reader to the tools hub instead of a tool.
+  it("names a real tool in every related calculator", () => {
+    const named = [
+      ...guides.entries.flatMap((entry) => entry.data.relatedCalculators.map((value) => ({ file: `guides/${entry.id}`, entry, value }))),
+      ...glossary.entries.flatMap((entry) =>
+        entry.data.relatedCalculator ? [{ file: `glossary/${entry.id}`, entry, value: entry.data.relatedCalculator }] : [],
+      ),
+    ];
+    expect(named.length).toBeGreaterThan(0);
+    const unresolved = named
+      .filter(({ entry, value }) => !resolveCalculatorRouteIdFromLegacy(value, localeOf(entry.id) as Lang))
+      .map(({ file, value }) => `${file}.md: ${value}`);
+    expect(unresolved).toEqual([]);
   });
 
   it.each(Object.entries(collections))("keeps %s topic keys unique within a locale", (_name, collection) => {
