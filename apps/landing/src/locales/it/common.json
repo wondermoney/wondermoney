@@ -5316,6 +5316,220 @@
         "millennium-bcp": "La custodia costa 6 € al trimestre solo dopo un'operazione dal sito o dall'app nei tre mesi precedenti, altrimenti 9 €. Cambio ai tassi interni della banca, spread non pubblicato. Alle vendite negli USA si aggiunge la SEC fee."
       }
     },
+    "pprComparison": {
+      "title": "Confronto PPR: piani di risparmio per la pensione in Portogallo",
+      "shortName": "Confronto PPR",
+      "subtitle": "Tutti i PPR in commercializzazione elencati da CMVM e ASF, con classe di rischio, costi annui, commissioni e rendimenti passati così come li pubblicano le autorità di vigilanza, più la deduzione IRS e le regole di riscatto.",
+      "description": "Confronta fondi PPR, assicurazioni PPR e fondi pensione PPR per classe di rischio, costi e rendimenti passati, dagli elenchi delle stesse autorità di vigilanza.",
+      "pageTitle": "Confronto PPR in Portogallo: costi, rischio e rendimento dei piani",
+      "pageDescription": "Fondi d'investimento, assicurazioni e fondi pensione PPR in commercializzazione in Portogallo, dagli elenchi di CMVM e ASF: classe di rischio, costi annui, commissioni, rendimenti da 1 a 10 anni, garanzie, deduzione IRS e regole di riscatto.",
+      "data": {
+        "title": "Da dove vengono i numeri",
+        "funds": "Fondi d'investimento PPR: l'elenco della CMVM, letto il {{date}}, con rendimenti fino alla fine del {{year}}.",
+        "cmvmLink": "Elenco della CMVM",
+        "insurance": "Assicurazioni e fondi pensione PPR: la piattaforma di confronto dell'ASF, con i dati del {{year}}, letti il {{date}}.",
+        "asfLink": "Piattaforma dell'ASF",
+        "source": "Entrambi gli elenchi sono pubblicati dalle autorità di vigilanza, con i dati che società di gestione e assicuratori comunicano loro. Nessun sito di confronto né venditore è una fonte. Un dato che l'elenco non pubblica compare come \"non pubblicato\".",
+        "staleTitle": "Questi dati potrebbero non essere aggiornati",
+        "staleFunds": "L'elenco della CMVM è stato letto l'ultima volta il {{date}}, più di due mesi fa. Controlla i dati attuali nell'elenco della CMVM.",
+        "staleInsurance": "I dati ASF mostrati si riferiscono al {{year}}, e l'ASF ha poi pubblicato un anno più recente. Controlla i dati attuali sulla piattaforma dell'ASF."
+      },
+      "compare": {
+        "title": "Confronta i PPR in commercializzazione",
+        "intro": "Scegli un tipo e una classe di rischio, poi ordina per costi annui o per un rendimento passato. Confronta all'interno della stessa classe di rischio: prodotti con rischio diverso si comportano in modo diverso, quindi un rendimento passato più alto in una classe più rischiosa dice poco del prodotto.",
+        "kind": "Tipo",
+        "allKinds": "Tutti i tipi",
+        "risk": "Classe di rischio",
+        "allRisks": "Tutte le classi di rischio",
+        "noRisk": "Classe di rischio non pubblicata",
+        "sort": "Ordina per",
+        "search": "Cerca",
+        "searchPlaceholder": "Prodotto o società di gestione",
+        "mixedRisk": "Stai ordinando per rendimento su tutte le classi di rischio. I prodotti più rischiosi oscillano di più, al rialzo e al ribasso, quindi questo ordine mescola prodotti non confrontabili: scegli una classe di rischio per confrontare in modo equo.",
+        "riskSummary": "Classe di rischio {{risk}}: {{count}} PPR in questa vista, con costi annui da {{min}} a {{max}} (mediana {{median}}).",
+        "empty": "Nessun PPR corrisponde a questi filtri.",
+        "count": "{{count}} PPR trovati",
+        "showMore": "Mostra altri {{count}} (su {{total}})"
+      },
+      "kinds": {
+        "fund": "Fondo d'investimento (CMVM)",
+        "insuranceLinked": "Assicurazione collegata a fondi (ASF)",
+        "insuranceGuaranteed": "Assicurazione non collegata a fondi (ASF)",
+        "pensionFund": "Fondo pensione (ASF)"
+      },
+      "sorts": {
+        "name": "Nome",
+        "cost": "Costi annui, dal più basso",
+        "return1": "Rendimento a 1 anno, dal più alto",
+        "return3": "Rendimento a 3 anni, dal più alto",
+        "return5": "Rendimento a 5 anni, dal più alto"
+      },
+      "categories": {
+        "ucits": "armonizzato (OICVM)",
+        "ucitsEquity": "armonizzato (OICVM), azioni",
+        "ucitsBond": "armonizzato (OICVM), obbligazioni",
+        "ucitsFlexible": "armonizzato (OICVM), flessibile",
+        "alternative": "alternativo (non armonizzato)"
+      },
+      "guarantees": {
+        "always": "in ogni momento",
+        "atMaturity": "a scadenza",
+        "other": "in altre condizioni",
+        "none": "nessuna"
+      },
+      "labels": {
+        "notPublished": "Non pubblicato",
+        "feeRange": "da {{min}} a {{max}}",
+        "withClass": "{{name}}, classe {{shareClass}}",
+        "riskValue": "Classe {{risk}}",
+        "risk": "Rischio",
+        "costFund": "TEC",
+        "costAsf": "Costi annui",
+        "y1": "1 anno",
+        "y3": "3 anni",
+        "y5": "5 anni",
+        "y10": "10 anni",
+        "capitalGuarantee": "Garanzia del capitale: {{value}}",
+        "returnGuarantee": "garanzia di rendimento: {{value}}",
+        "minRate": "tasso minimo garantito quest'anno: {{pct}}",
+        "fundFees": "Commissioni di sottoscrizione, riscatto e trasferimento: non nell'elenco della CMVM; sono nell'IFI del fondo.",
+        "fees": "Sottoscrizione {{subscription}} · riscatto {{redemption}} · trasferimento {{transfer}}",
+        "ifi": "IFI del fondo sul sito della CMVM",
+        "asfSource": "Piattaforma dell'ASF"
+      },
+      "deduction": {
+        "title": "La tua deduzione IRS per i versamenti nei PPR",
+        "intro": "Puoi dedurre dall'imposta IRS il {{rate}} di quanto versi nei PPR in un anno, fino a un limite che dipende dalla tua età al 1° gennaio di quell'anno (Estatuto dos Benefícios Fiscais, articolo 21).",
+        "age": "Età al 1° gennaio",
+        "ageHelp": "In anni compiuti, al 1° gennaio dell'anno del versamento.",
+        "contribution": "Versamenti di quest'anno",
+        "retired": "Ero già in pensione quando ho versato",
+        "errors": {
+          "age": "Inserisci un'età in anni compiuti, da 0 a {{max}}.",
+          "contribution": "Inserisci un importo da 0 € a {{max}}."
+        },
+        "invalid": "Correggi i campi sopra per vedere la deduzione.",
+        "retiredResult": "I versamenti fatti dopo il pensionamento non sono deducibili (articolo 21, n.º 10).",
+        "result": "Deduzione dall'imposta IRS: {{amount}}",
+        "limit": "Il tuo limite a {{age}} anni: {{limit}} all'anno, raggiunto con {{full}} di versamenti.",
+        "capped": "I versamenti oltre {{full}} non aumentano la deduzione di quest'anno.",
+        "cap": "La deduzione rientra anche nel limite complessivo delle deduzioni dell'articolo 78 del Codice IRS: nessun limite per i redditi imponibili più bassi, poi tra {{max}} e {{min}} per nucleo familiare, in calo al crescere del reddito. Riduce solo l'imposta che altrimenti pagheresti."
+      },
+      "notices": {
+        "title": "Prima di fidarti di questo confronto",
+        "educationalTitle": "Solo a scopo informativo",
+        "educational": "Questa pagina è informativa. Non è una raccomandazione né un'offerta, l'ordine non è una classifica e WonderMoney non raccomanda alcun PPR. I rendimenti passati non sono indicativi di quelli futuri.",
+        "neutralTitle": "Nessun link di affiliazione",
+        "neutral": "WonderMoney non riceve nulla da nessuna società di gestione o assicuratore di questa pagina. I link portano alle pagine delle stesse autorità di vigilanza.",
+        "taxTitle": "Commissioni e imposte fuori dai rendimenti",
+        "tax": "I rendimenti sono al netto dei costi annui del prodotto, ma non delle commissioni di sottoscrizione e riscatto né delle imposte. Un riscatto anticipato fuori dai casi di legge può anche costarti la deduzione ottenuta."
+      },
+      "nextStepHeadline": "Segui i saldi dei tuoi PPR nel tuo portafoglio di lungo periodo",
+      "nextStepDescription": "Un PPR è una parte del tuo risparmio per la pensione. Aggiungi il suo saldo a WonderMoney e vedilo accanto ai tuoi altri investimenti e conti.",
+      "nextStepCta": "Vedi il tuo portafoglio in un unico posto",
+      "guide": {
+        "what": {
+          "title": "Che cos'è un PPR",
+          "body": "Un PPR (plano de poupança-reforma) è un prodotto portoghese di risparmio per la pensione con regole fiscali proprie: parte di quanto versi ogni anno è deducibile dall'imposta IRS, e il denaro deve restare investito fino alla pensione o a uno degli altri casi previsti dalla legge. Esiste in tre forme giuridiche:",
+          "forms": {
+            "fund": "Un fondo d'investimento (fundo de poupança-reforma), vigilato dalla CMVM. Il suo valore segue gli investimenti del fondo, di norma senza garanzia.",
+            "linked": "Un'assicurazione vita collegata a fondi d'investimento, vigilata dall'ASF. Di norma senza garanzia del capitale né del rendimento.",
+            "guaranteed": "Un'assicurazione vita non collegata a fondi, vigilata dall'ASF. Garantisce il capitale e talvolta un rendimento minimo, secondo il contratto.",
+            "pension": "Un'adesione individuale a un fondo pensione aperto, vigilato dall'ASF. Può garantire o meno il capitale o un rendimento."
+          },
+          "supervisors": "Ogni autorità pubblica il proprio elenco: la CMVM per i fondi, l'ASF per assicurazioni e fondi pensione. Questa pagina li affianca, con ogni dato così come lo indica l'elenco."
+        },
+        "fair": {
+          "title": "Perché confrontare all'interno della stessa classe di rischio",
+          "risk": "Entrambe le autorità classificano un prodotto da 1 a 7 in base alla volatilità dei suoi rendimenti, con le stesse fasce: classe 1 sotto lo 0,5% annuo, classe 4 dal 5% al 10%, classe 7 oltre il 25%. Un prodotto di classe 6 può guadagnare di più in un anno buono e perdere molto di più in uno cattivo rispetto a uno di classe 3, quindi un rendimento passato più alto in una classe più rischiosa non è un risultato migliore. Confronta i rendimenti all'interno della stessa classe.",
+          "returns": "I rendimenti sono medie annualizzate su anni solari completi, fino alla fine del {{fundsYear}} per i fondi CMVM e del {{insuranceYear}} per i prodotti ASF. Sono al netto dei costi annui del prodotto, ma non delle commissioni di sottoscrizione e riscatto né delle imposte. Le serie brevi sono rumorose: un dato a un anno dice poco.",
+          "costs": "I costi annui sono certi, i rendimenti no. Per un fondo il dato è la sua TEC (spese correnti: commissioni di gestione e di deposito, revisione e contributo di vigilanza). Per assicurazioni e fondi pensione l'ASF pubblica un tasso di costo annuo delle commissioni di gestione e di deposito. I due sono vicini ma non identici, quindi tratta con cautela le piccole differenze tra tipi."
+        },
+        "example": {
+          "title": "Un esempio di confronto",
+          "setup": "La classe di rischio {{risk}} è quella con più prodotti che pubblicano sia i costi annui sia un rendimento a 5 anni: {{count}} (su {{total}} PPR nella classe).",
+          "pair": "Tra questi, i costi annui più bassi sono pari a {{lowCost}}, per {{lowName}} ({{lowKind}}), con un rendimento annualizzato a 5 anni pari a {{lowReturn}}. I più alti sono pari a {{highCost}}, per {{highName}} ({{highKind}}), con un rendimento pari a {{highReturn}}.",
+          "cost": "Su {{invested}} investiti, questa differenza di costi annui vale circa {{costGap}} all'anno, ogni anno, qualunque cosa facciano i mercati.",
+          "takeaway": "È un'illustrazione, non una raccomandazione. I rendimenti passati dipendono dalla strategia di ciascun prodotto e non prevedono quelli futuri, e le due autorità definiscono i costi annui in modo leggermente diverso. Il confronto mostra l'entità della differenza di costi all'interno della stessa classe di rischio.",
+          "kinds": {
+            "fund": "fondo d'investimento",
+            "insuranceLinked": "assicurazione collegata a fondi",
+            "insuranceGuaranteed": "assicurazione non collegata a fondi",
+            "pensionFund": "fondo pensione"
+          }
+        },
+        "tax": {
+          "title": "La deduzione IRS (EBF, articolo 21)",
+          "deduction": "L'articolo 21, n.º 2, dell'Estatuto dos Benefícios Fiscais consente a ogni contribuente (a ciascun coniuge separatamente) di dedurre dall'imposta IRS il {{rate}} delle somme versate nei PPR nell'anno, fino a:",
+          "limits": {
+            "under35": "{{under35}} all'anno sotto i 35 anni (raggiunti con {{full35}} di versamenti);",
+            "from35": "{{from35}} all'anno dai 35 ai 50 anni ({{full50}});",
+            "over50": "{{over50}} all'anno oltre i 50 anni ({{fullOver}})."
+          },
+          "example": "Conta l'età al 1° gennaio dell'anno del versamento (n.º 9). A {{age}} anni, {{exampleContribution}} versati nell'anno danno {{exampleDeduction}}, la deduzione massima.",
+          "conditions": "La deduzione rientra nel limite complessivo delle deduzioni dell'articolo 78, n.º 7, del Codice IRS: nessun limite per i redditi imponibili più bassi, poi da {{capMax}} a {{capMin}} per nucleo familiare. Riduce l'imposta dovuta e non viene pagata in denaro, e i versamenti fatti dopo il pensionamento non sono deducibili (n.º 10).",
+          "payout": "Quando il piano viene liquidato in un caso previsto dalla legge, un riscatto in un'unica soluzione è tassato sul guadagno al {{legalRate}} su due quinti di esso, cioè un {{legalEffective}} effettivo del guadagno (n.º 3); i pagamenti periodici sono tassati come pensioni."
+        },
+        "redemption": {
+          "title": "Quando puoi riscattare e quanto costa un riscatto anticipato",
+          "intro": "Il Decreto-Lei n.º 158/2002, articolo 4, stabilisce i casi in cui puoi riscattare un PPR senza penalità:",
+          "cases": {
+            "retirement": "pensione di vecchiaia;",
+            "unemployment": "disoccupazione di lunga durata del risparmiatore o di un membro del nucleo familiare;",
+            "incapacity": "inabilità permanente al lavoro del risparmiatore o di un membro del nucleo familiare;",
+            "illness": "malattia grave del risparmiatore o di un membro del nucleo familiare;",
+            "age": "dai 60 anni di età;",
+            "mortgage": "pagamento delle rate di un mutuo ipotecario sull'abitazione principale del risparmiatore;",
+            "death": "morte del risparmiatore, con il valore agli eredi."
+          },
+          "fiveYears": "Per pensione, 60 anni e rate del mutuo, ogni versamento deve essere nel piano da almeno {{years}} anni; lo stesso vale per disoccupazione, inabilità o malattia già presenti al momento del versamento. Dopo {{years}} anni dal primo versamento, in questi casi si può riscattare l'intero valore se i versamenti della prima metà della durata del piano sono almeno il {{firstHalf}} del totale.",
+          "outside": "Puoi riscattare in qualsiasi altro momento, secondo il contratto, ma allora le deduzioni ottenute tornano come imposta, maggiorate del {{clawback}} per ogni anno o frazione da quando sono state fatte (EBF, articolo 21, n.º 4), e il guadagno è tassato al {{otherRate}} invece che all'aliquota ridotta, con qualche agevolazione per i piani tenuti più a lungo (n.º 5). Possono applicarsi anche le commissioni di riscatto del contratto.",
+          "transfer": "Puoi trasferire il valore su un altro PPR (articolo 6); il trasferimento non dà diritto a una nuova deduzione. Senza garanzia del capitale o del rendimento non si può applicare alcuna commissione di trasferimento; con garanzia, al massimo pari a {{transferFee}} del valore."
+        },
+        "method": {
+          "title": "Come è costruito il confronto",
+          "intro": "Due elenchi ufficiali, letti così come pubblicati. Fondi: {{funds}} classi di quote dall'elenco CMVM del {{fundsDate}}. Assicurazioni e fondi pensione: {{insurance}} prodotti in commercializzazione dalla piattaforma ASF, letti il {{insuranceDate}}.",
+          "steps": {
+            "cmvm": "È inclusa ogni classe dell'elenco CMVM dei PPR in forma di fondi d'investimento per cui è pubblicata una TEC o un rendimento, con società di gestione, tipo di fondo, classe di rischio, TEC e rendimenti annualizzati. L'elenco CMVM non pubblica commissioni di sottoscrizione né di riscatto: sono nell'IFI di ciascun fondo, collegato nella sua riga.",
+            "asf": "È incluso ogni PPR che la piattaforma ASF mostra in commercializzazione: assicurazioni collegate a fondi, assicurazioni non collegate a fondi e fondi pensione, con le commissioni minime e massime di sottoscrizione, riscatto e trasferimento, il tasso di costo annuo, i rendimenti annualizzati, l'indicatore di rischio e le garanzie di capitale e di rendimento.",
+            "missing": "Un dato che l'elenco omette resta \"non pubblicato\"; nulla è stimato. Entrambi gli elenchi mostrano 0,00% per le durate senza storico, quindi una serie di 0,00% sulle durate più lunghe è letta come non pubblicata.",
+            "refresh": "I dati CMVM sono aggiornati ogni mese dal suo elenco. Quelli ASF cambiano una volta all'anno (comunicati entro il 15 aprile, per l'anno precedente) e sono aggiornati dopo. Se un aggiornamento fallisce, la pagina mantiene gli ultimi dati con le loro date e avvisa quando sono vecchi."
+          }
+        },
+        "limits": {
+          "title": "Cosa resta fuori",
+          "items": {
+            "closed": "I PPR non più in commercializzazione, che possono ancora detenere risparmi, e il prodotto pensionistico individuale paneuropeo (PEPP).",
+            "fees": "Le commissioni di sottoscrizione e riscatto dei fondi (in ciascun IFI) e le imposte, che i rendimenti non includono.",
+            "future": "Qualsiasi previsione. Rendimenti passati, classi di rischio e costi possono cambiare, e le autorità non rispondono dei dati che gli operatori comunicano.",
+            "personal": "La tua situazione: quanto manca alla pensione, i tuoi altri risparmi e quanto rischio puoi correre. Il questionario sul profilo d'investitore aiuta con l'ultimo punto."
+          }
+        },
+        "sources": {
+          "title": "Fonti",
+          "intro": "I dati dei prodotti vengono dagli elenchi delle due autorità; le regole fiscali e di riscatto dai testi di legge consolidati, verificati il {{rulesDate}}.",
+          "items": {
+            "cmvm": "CMVM, Portal do Investidor: elenco dei PPR in forma di fondi d'investimento",
+            "asf": "ASF: piattaforma di confronto dei PPR (assicurazioni e fondi pensione)",
+            "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: come sono calcolati i dati ASF",
+            "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, articolo 21 (testo consolidato)",
+            "cirs": "Portal das Finanças: Código do IRS, articolo 78 (testo consolidato)",
+            "dl158": "Diário da República: Decreto-Lei n.º 158/2002, regime giuridico dei PPR (consolidato)"
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "statePensionLink": "Calcolatore della pensione pubblica",
+          "statePensionBody": "Stima la pensione della Previdenza sociale a cui un PPR si aggiungerebbe.",
+          "compoundLink": "Calcolatore di interesse composto",
+          "compoundBody": "Guarda cosa fa un costo annuo in decenni di interesse composto.",
+          "profileLink": "Questionario sul profilo d'investitore",
+          "profileBody": "Quanto rischio potresti correre, prima di scegliere una classe di rischio.",
+          "brokersLink": "Confronto broker",
+          "brokersBody": "I costi di investire per la pensione fuori da un PPR, con gli ETF."
+        }
+      }
+    },
     "goldPrice": {
       "title": "Prezzo dell'oro al grammo in euro e calcolatore del valore dell'oro",
       "shortName": "Prezzo dell'oro",

@@ -137,4 +137,5 @@ export const SAVINGS_GUIDE_RELATED_ROUTE_IDS = [
 	"toolTermDepositOffers",
 	"toolRemuneratedAccounts",
 	"toolFreeBankAccounts",
+	"toolPprComparison",
 ] as const satisfies ReadonlyArray<RouteId>

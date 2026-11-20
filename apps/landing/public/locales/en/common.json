@@ -5459,6 +5459,220 @@
         "big": "Custody is waived with three trades a quarter and either a salary credited or an average balance over €100,000. The currency spread is indicative. A separate Superconta pays interest on cash.",
         "millennium-bcp": "Custody is €6 a quarter only after a trade on the website or app in the previous three months, otherwise €9. Currency at the bank's internal rates, spread not published. The SEC fee is added to US sales."
       }
+    },
+    "pprComparison": {
+      "title": "PPR comparison: retirement savings plans in Portugal",
+      "shortName": "PPR comparison",
+      "subtitle": "Every PPR on sale that the CMVM and the ASF list, with its risk class, yearly costs, fees and past returns as the supervisors publish them, plus the IRS deduction and the redemption rules.",
+      "description": "Compare PPR funds, PPR insurance and PPR pension funds by risk class, costs and past returns, from the supervisors' own lists.",
+      "pageTitle": "PPR Comparison Portugal: Costs, Risk and Returns of Retirement Plans",
+      "pageDescription": "PPR investment funds, insurance and pension funds on sale in Portugal, from the CMVM and ASF lists: risk class, yearly costs, fees, 1 to 10-year returns, guarantees, the IRS deduction and the redemption rules.",
+      "data": {
+        "title": "Where the figures come from",
+        "funds": "PPR investment funds: the CMVM's list, read on {{date}}, with returns to the end of {{year}}.",
+        "cmvmLink": "CMVM list",
+        "insurance": "PPR insurance and pension funds: the ASF's comparison platform, with figures for {{year}}, read on {{date}}.",
+        "asfLink": "ASF platform",
+        "source": "Both lists are published by the supervisors, with figures the managers and insurers report to them. No comparison site or seller is a source. A figure a list does not publish shows as \"not published\".",
+        "staleTitle": "These figures may be out of date",
+        "staleFunds": "The CMVM list was last read on {{date}}, more than two months ago. Check the CMVM list for the current figures.",
+        "staleInsurance": "The ASF figures shown are for {{year}}, and the ASF has since published a newer year. Check the ASF platform for the current figures."
+      },
+      "compare": {
+        "title": "Compare PPR on sale",
+        "intro": "Pick a type and a risk class, then sort by yearly costs or by a past return. Compare within one risk class: products with different risk behave differently, so a higher past return in a riskier class says little about the product.",
+        "kind": "Type",
+        "allKinds": "All types",
+        "risk": "Risk class",
+        "allRisks": "All risk classes",
+        "noRisk": "Risk class not published",
+        "sort": "Sort by",
+        "search": "Search",
+        "searchPlaceholder": "Product or manager",
+        "mixedRisk": "You are sorting by return across every risk class. Riskier products swing more, up and down, so this order mixes products that are not like for like: choose a risk class to compare fairly.",
+        "riskSummary": "Risk class {{risk}}: {{count}} PPR in this view, with yearly costs from {{min}} to {{max}} (median {{median}}).",
+        "empty": "No PPR matches these filters.",
+        "count": "{{count}} PPR match",
+        "showMore": "Show {{count}} more (of {{total}})"
+      },
+      "kinds": {
+        "fund": "Investment fund (CMVM)",
+        "insuranceLinked": "Insurance linked to funds (ASF)",
+        "insuranceGuaranteed": "Insurance not linked to funds (ASF)",
+        "pensionFund": "Pension fund (ASF)"
+      },
+      "sorts": {
+        "name": "Name",
+        "cost": "Yearly costs, lowest first",
+        "return1": "1-year return, highest first",
+        "return3": "3-year return, highest first",
+        "return5": "5-year return, highest first"
+      },
+      "categories": {
+        "ucits": "harmonised (UCITS)",
+        "ucitsEquity": "harmonised (UCITS), equities",
+        "ucitsBond": "harmonised (UCITS), bonds",
+        "ucitsFlexible": "harmonised (UCITS), flexible",
+        "alternative": "alternative (non-harmonised)"
+      },
+      "guarantees": {
+        "always": "at all times",
+        "atMaturity": "at maturity",
+        "other": "in other conditions",
+        "none": "none"
+      },
+      "labels": {
+        "notPublished": "Not published",
+        "feeRange": "{{min}} to {{max}}",
+        "withClass": "{{name}}, class {{shareClass}}",
+        "riskValue": "Class {{risk}}",
+        "risk": "Risk",
+        "costFund": "TEC",
+        "costAsf": "Yearly costs",
+        "y1": "1 year",
+        "y3": "3 years",
+        "y5": "5 years",
+        "y10": "10 years",
+        "capitalGuarantee": "Capital guarantee: {{value}}",
+        "returnGuarantee": "return guarantee: {{value}}",
+        "minRate": "guaranteed minimum rate this year: {{pct}}",
+        "fundFees": "Subscription, redemption and transfer fees: not in the CMVM list; they are in the fund's IFI.",
+        "fees": "Subscription {{subscription}} · redemption {{redemption}} · transfer {{transfer}}",
+        "ifi": "Fund's IFI on the CMVM site",
+        "asfSource": "ASF platform"
+      },
+      "deduction": {
+        "title": "Your IRS deduction for PPR contributions",
+        "intro": "You can deduct {{rate}} of what you put into PPR in a year from your IRS tax, up to a limit that depends on your age on 1 January of that year (Estatuto dos Benefícios Fiscais, article 21).",
+        "age": "Age on 1 January",
+        "ageHelp": "In whole years, on 1 January of the year you contribute.",
+        "contribution": "Contributions this year",
+        "retired": "I was already retired when I contributed",
+        "errors": {
+          "age": "Enter an age in whole years, from 0 to {{max}}.",
+          "contribution": "Enter an amount from €0 to {{max}}."
+        },
+        "invalid": "Correct the fields above to see the deduction.",
+        "retiredResult": "Contributions made after you retire are not deductible (article 21, n.º 10).",
+        "result": "Deduction from your IRS tax: {{amount}}",
+        "limit": "Your limit at {{age}}: {{limit}} a year, reached with {{full}} of contributions.",
+        "capped": "Contributions above {{full}} add nothing to this year's deduction.",
+        "cap": "The deduction also counts towards the overall cap on deductions in article 78 of the IRS code: none for the lowest taxable incomes, then between {{max}} and {{min}} for the household, falling as income rises. It only lowers tax you would otherwise pay."
+      },
+      "notices": {
+        "title": "Before you rely on this comparison",
+        "educationalTitle": "Educational only",
+        "educational": "This page is educational. It is not a recommendation or an offer, the order is not a ranking, and WonderMoney does not recommend any PPR. Past returns do not predict future returns.",
+        "neutralTitle": "No affiliate links",
+        "neutral": "WonderMoney earns nothing from any manager or insurer on this page. Links go to the supervisors' own pages.",
+        "taxTitle": "Fees and tax not in the returns",
+        "tax": "The returns are after the product's yearly costs but before subscription and redemption fees and before tax. An early redemption outside the legal cases can also cost the deduction you had."
+      },
+      "nextStepHeadline": "Track PPR balances in your long-term portfolio",
+      "nextStepDescription": "A PPR is one part of your retirement savings. Add its balance to WonderMoney and see it next to your other investments and accounts.",
+      "nextStepCta": "See your portfolio in one place",
+      "guide": {
+        "what": {
+          "title": "What a PPR is",
+          "body": "A PPR (plano de poupança-reforma) is a savings product for retirement with its own tax rules: part of what you put in each year can be deducted from your IRS tax, and the money is meant to stay in until retirement or one of the other cases the law sets out. It comes in three legal forms:",
+          "forms": {
+            "fund": "An investment fund (fundo de poupança-reforma), supervised by the CMVM. Its value moves with the fund's investments, usually with no guarantee.",
+            "linked": "Life insurance linked to investment funds, supervised by the ASF. Usually no guarantee of capital or return.",
+            "guaranteed": "Life insurance not linked to funds, supervised by the ASF. It guarantees the capital, and sometimes a minimum return, under its terms.",
+            "pension": "A membership of an open pension fund, supervised by the ASF. It may or may not guarantee capital or a return."
+          },
+          "supervisors": "Each supervisor publishes its own list: the CMVM for the funds, the ASF for insurance and pension funds. This page puts both side by side, with each figure as the list states it."
+        },
+        "fair": {
+          "title": "Why compare within one risk class",
+          "risk": "Both supervisors class a product from 1 to 7 by the volatility of its returns, on the same bands: class 1 below 0.5% a year, class 4 from 5% to 10%, class 7 above 25%. A class 6 product can gain more in a good year and lose much more in a bad one than a class 3 product, so a higher past return in a riskier class is not a better result. Compare returns within one class.",
+          "returns": "Returns are annualised averages over complete calendar years, to the end of {{fundsYear}} for the CMVM funds and of {{insuranceYear}} for the ASF products. They are after the product's yearly costs, but before subscription and redemption fees and tax. Short histories are noisy: a one-year figure says little.",
+          "costs": "Yearly costs are certain, returns are not. For a fund the figure is its TEC (ongoing charges: management, deposit, audit and supervision fees). For insurance and pension funds the ASF publishes a yearly cost rate of management and deposit fees. The two are close but not identical, so treat small differences across types with care."
+        },
+        "example": {
+          "title": "A worked comparison",
+          "setup": "Risk class {{risk}} holds the most products that publish both a yearly cost and a 5-year return: {{count}} of them (of {{total}} PPR in the class).",
+          "pair": "Among them, the lowest yearly cost is {{lowCost}}, for {{lowName}} ({{lowKind}}), with a 5-year annualised return of {{lowReturn}}. The highest is {{highCost}}, for {{highName}} ({{highKind}}), with {{highReturn}}.",
+          "cost": "On {{invested}} invested, that gap in yearly costs is about {{costGap}} a year, every year, whatever the markets do.",
+          "takeaway": "This is an illustration, not a recommendation. Past returns depend on each product's strategy and do not predict future ones, and the two supervisors define yearly costs slightly differently. What the comparison shows is the size of the cost difference within one class of risk.",
+          "kinds": {
+            "fund": "investment fund",
+            "insuranceLinked": "insurance linked to funds",
+            "insuranceGuaranteed": "insurance not linked to funds",
+            "pensionFund": "pension fund"
+          }
+        },
+        "tax": {
+          "title": "The IRS deduction (EBF, article 21)",
+          "deduction": "Article 21, n.º 2 of the Estatuto dos Benefícios Fiscais lets each taxpayer (each spouse separately) deduct from the IRS tax {{rate}} of the amounts put into PPR in the year, up to:",
+          "limits": {
+            "under35": "{{under35}} a year under 35 (reached with {{full35}} of contributions);",
+            "from35": "{{from35}} a year from 35 to 50 ({{full50}});",
+            "over50": "{{over50}} a year over 50 ({{fullOver}})."
+          },
+          "example": "The age that counts is the one on 1 January of the year of the contribution (n.º 9). At {{age}}, {{exampleContribution}} contributed in the year gives {{exampleDeduction}}, the full deduction.",
+          "conditions": "The deduction is part of the overall cap on deductions in article 78, n.º 7 of the IRS code: no cap for the lowest taxable incomes, then from {{capMax}} down to {{capMin}} for the household. It lowers tax due and is not paid out, and contributions made after retirement are not deductible (n.º 10).",
+          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions."
+        },
+        "redemption": {
+          "title": "When you can redeem, and what an early redemption costs",
+          "intro": "Decreto-Lei n.º 158/2002, article 4, sets out the cases in which you can redeem a PPR without penalty:",
+          "cases": {
+            "retirement": "old-age retirement;",
+            "unemployment": "long-term unemployment of the saver or a member of the household;",
+            "incapacity": "permanent incapacity for work of the saver or a member of the household;",
+            "illness": "serious illness of the saver or a member of the household;",
+            "age": "from the age of 60;",
+            "mortgage": "to pay instalments of a mortgage-backed loan on the saver's own permanent home;",
+            "death": "the death of the saver, with the value going to the heirs."
+          },
+          "fiveYears": "For retirement, age 60 and mortgage payments, each contribution must have been in the plan for at least {{years}} years; the same applies to unemployment, incapacity or illness that already existed when the contribution was made. After {{years}} years from the first contribution, the whole value can be redeemed in those cases if the contributions in the first half of the plan's life were at least {{firstHalf}} of all contributions.",
+          "outside": "You can redeem at any other time, under the contract's terms, but then the deductions you had come back as tax, increased by {{clawback}} for each year or part of a year since they were made (EBF article 21, n.º 4), and the gain is taxed at {{otherRate}} rather than the lower rate, with some relief for long-held plans (n.º 5). Redemption fees in the contract may apply as well.",
+          "transfer": "You can move the value to another PPR (article 6); the transfer gives no new deduction. Without a capital or return guarantee no transfer fee can be charged; with one, the fee is at most {{transferFee}} of the value."
+        },
+        "method": {
+          "title": "How the comparison is built",
+          "intro": "Two official lists, read as published. Funds: {{funds}} share classes from the CMVM list of {{fundsDate}}. Insurance and pension funds: {{insurance}} products on sale from the ASF platform, read on {{insuranceDate}}.",
+          "steps": {
+            "cmvm": "Every share class in the CMVM's list of PPR investment funds for which it publishes a TEC or a return is included, with its manager, fund type, risk class, TEC and annualised returns. The CMVM list publishes no subscription or redemption fees: they are in each fund's IFI, linked on its row.",
+            "asf": "Every PPR the ASF platform shows as on sale is included: insurance linked to funds, insurance not linked to funds and pension funds, with the minimum and maximum subscription, redemption and transfer fees, the yearly cost rate, the annualised returns, the risk indicator and the capital and return guarantees.",
+            "missing": "A figure a list leaves out stays \"not published\"; nothing is estimated. Both lists show 0.00% for horizons a product has no history for, so a run of 0.00% at the longest horizons is read as not published.",
+            "refresh": "The CMVM figures are refreshed every month from its list. The ASF figures change once a year (reported by 15 April, for the year before) and are refreshed after that. If a refresh fails, the page keeps the last figures with their dates and warns when they are old."
+          }
+        },
+        "limits": {
+          "title": "What this leaves out",
+          "items": {
+            "closed": "PPR no longer on sale, which may still hold savers' money, and pan-European personal pension products (PEPP).",
+            "fees": "Entry and exit fees of the funds (in each IFI), and taxes, which the returns do not include.",
+            "future": "Any forecast. Past returns, risk classes and costs can change, and the supervisors take no responsibility for the figures the managers report.",
+            "personal": "Your situation: how long until you retire, your other savings and how much risk you can take. The investor profile quiz can help with the last one."
+          }
+        },
+        "sources": {
+          "title": "Sources",
+          "intro": "The product figures come from the two supervisors' lists; the tax and redemption rules from the consolidated laws, checked on {{rulesDate}}.",
+          "items": {
+            "cmvm": "CMVM, Portal do Investidor: list of PPR in the form of investment funds",
+            "asf": "ASF: PPR comparison platform (insurance and pension funds)",
+            "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: how the ASF figures are calculated",
+            "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, article 21 (consolidated text)",
+            "cirs": "Portal das Finanças: Código do IRS, article 78 (consolidated text)",
+            "dl158": "Diário da República: Decreto-Lei n.º 158/2002, the legal regime of PPR (consolidated)"
+          }
+        },
+        "related": {
+          "title": "Keep going",
+          "statePensionLink": "State pension calculator",
+          "statePensionBody": "Estimate the Social Security pension a PPR would add to.",
+          "compoundLink": "Compound interest calculator",
+          "compoundBody": "See what a yearly cost does over decades of compounding.",
+          "profileLink": "Investor profile quiz",
+          "profileBody": "How much risk you could take, before choosing a risk class.",
+          "brokersLink": "Broker fees comparison",
+          "brokersBody": "The costs of investing for retirement outside a PPR, with ETFs."
+        }
+      }
     }
   },
   "resources": {
