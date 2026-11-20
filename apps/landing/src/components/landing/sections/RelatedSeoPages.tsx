@@ -8,8 +8,6 @@ const SEO_PAGE_ADJACENCY: Partial<Record<RouteId, ReadonlyArray<RouteId>>> = {
   pageYnabAlternative: ["pageBudgetApp", "pageNetWorthTracker", "pagePortfolioTracker"],
   pageNetWorthTracker: ["pageHowToCalculateNetWorth", "featureAccounts", "pageFireCalculator"],
   pagePortfolioTracker: ["pageEtfTracker", "pageNetWorthTracker"],
-  pageFireCalculator: ["pageNetWorthTracker", "pageHowToCalculateNetWorth", "pagePortfolioTracker"],
-  pageHowToCalculateNetWorth: ["pageNetWorthTracker", "pageFireCalculator"],
   pageEtfTracker: ["pagePortfolioTracker", "pageNetWorthTracker"],
   pagePersonalFinanceApp: ["pageBudgetApp", "pageOpenBankingApp", "pageNetWorthTracker"],
   pageOpenBankingApp: ["featureAccounts", "pagePersonalFinanceApp", "pageBudgetApp"],

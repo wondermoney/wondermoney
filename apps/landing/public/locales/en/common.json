@@ -97,7 +97,8 @@
       "calculator": "Calculator",
       "guide": "Guide",
       "glossary": "Glossary",
-      "view": "View"
+      "view": "View",
+      "feature": "Feature"
     },
     "notABank": "WonderMoney is not a bank, brokerage, or financial advisor. We are a technology platform that uses read-only Open Banking to show your financial data in one place. We do not provide financial, investment, or tax advice.",
     "pivotBanner": {

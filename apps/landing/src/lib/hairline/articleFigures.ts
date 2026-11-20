@@ -83,9 +83,11 @@ export function figureForGuide(slug: string): FigureName | undefined {
   return GUIDE_FIGURES[slug];
 }
 
-/** The standalone articles, by route id. */
+/** The standalone articles, by route id, and the product pages their cards link to. */
 export const PAGE_FIGURES = {
   pageHowToCalculateNetWorth: "scale",
+  pageNetWorthTracker: "scale",
+  pagePortfolioTracker: "easelchart",
   guideMoneyCheckin: "timer",
   pageSavingsGuide: "containers",
   learnHub: "booklets",

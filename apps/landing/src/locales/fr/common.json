@@ -97,7 +97,8 @@
       "calculator": "Calculatrice",
       "guide": "Guide",
       "glossary": "Glossaire",
-      "view": "Voir"
+      "view": "Voir",
+      "feature": "Fonctionnalité"
     },
     "notABank": "WonderMoney n'est pas une banque, un courtier ou un conseiller financier. Nous sommes une plateforme technologique qui utilise l'Open Banking en lecture seule pour afficher vos données financières en un seul endroit. Nous ne fournissons pas de conseil financier, d'investissement ou fiscal.",
     "pivotBanner": {
