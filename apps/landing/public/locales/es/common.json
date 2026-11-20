@@ -4296,6 +4296,19 @@
         "newClient": "Sería cliente nuevo",
         "newClientHelp": "Cuenta los descuentos que las comercializadoras dan a los clientes nuevos el primer año."
       },
+      "indexed": {
+        "legend": "Ofertas indexadas",
+        "range": "{{from}} a {{to}}",
+        "erse": "Estimación de la ERSE",
+        "market": "Coste real de los últimos 12 meses con precios OMIE",
+        "marketDiagram": "Coste real en las fechas de tu archivo de consumos con precios OMIE",
+        "help": "La ERSE da un único precio a cada oferta indexada, la media de los futuros de los próximos tres meses. Con los precios OMIE, las ofertas cuya fórmula publica la comercializadora se calculan con lo que el mercado costó de verdad, en las condiciones de hoy. Las demás siguen con la estimación de la ERSE.",
+        "loading": "Cargando los precios OMIE…",
+        "loadError": "No se han podido cargar los precios OMIE. Las ofertas indexadas siguen con la estimación de la ERSE.",
+        "diagramLoadError": "No se han podido cargar los precios OMIE por cuarto de hora. Usamos los últimos 12 meses.",
+        "diagramOutOfRange": "Ningún día de tu archivo de consumos tiene precios OMIE cargados (solo los últimos 12 meses). Usamos los últimos 12 meses.",
+        "coverage": "El {{percent}}% del consumo de tu archivo cae en días con precios OMIE ({{period}}). El resto se calcula al precio medio de esos días."
+      },
       "filters": {
         "title": "Filtros",
         "summary": "(tipo de precio, comercializadora, condiciones)",
@@ -4479,6 +4492,10 @@
         "same": "Cuesta lo mismo que tu tarifa",
         "details": "Desglose y enlaces",
         "estimatedNote": "Precio indexado: estimación de ERSE para los próximos meses. Lo que pagas sigue al mercado.",
+        "marketNote": "Precio de la energía con la fórmula publicada por la comercializadora y los precios OMIE de {{period}}, ponderados por el perfil de consumo de E-REDES, con los peajes de acceso de hoy.",
+        "marketDiagramNote": "Precio de la energía con la fórmula publicada por la comercializadora y el precio OMIE de cada cuarto de hora de tu archivo de consumos ({{period}}), con los peajes de acceso de hoy.",
+        "marketPrices": "Energía, sin IVA: {{prices}}.",
+        "formulaLink": "Fórmula de la comercializadora (leída el {{date}})",
         "conditionsLabel": "Condiciones, en palabras de ERSE",
         "links": {
           "offer": "Página de la oferta",
@@ -4491,6 +4508,7 @@
       "badges": {
         "label": "Características de la oferta",
         "estimated": "Precio estimado",
+        "market": "Coste real (OMIE)",
         "regulated": "Regulada",
         "conditioned": "Condicionada",
         "dual": "Con gas",
@@ -4537,10 +4555,14 @@
         "asOf": "Ofertas: ERSE, exportación del {{date}} ({{offers}} ofertas de {{suppliers}} comercializadoras y la tarifa regulada).",
         "negotiation": "Los precios son los publicados, antes de cualquier negociación personal. Confirma la oferta con la comercializadora antes de firmar.",
         "indexed": "Los precios indexados son estimaciones de ERSE para los próximos meses, no un precio fijo.",
+        "indexedMarket": "Ofertas indexadas con fórmula publicada: coste real con los precios OMIE de Portugal de {{period}}, ponderados por el perfil de consumo BTN C de E-REDES, con las pérdidas de E-REDES y REN y los peajes de acceso de hoy. Es lo que habrían costado, no una previsión. Las demás siguen con la estimación de la ERSE.",
+        "indexedMarketDiagram": "Ofertas indexadas con fórmula publicada: coste real con el precio OMIE de Portugal de cada cuarto de hora de tu archivo de consumos ({{period}}), con las pérdidas de E-REDES y REN y los peajes de acceso de hoy. Es lo que habrían costado, no una previsión. Las demás siguen con la estimación de la ERSE.",
         "taxes": "Los totales incluyen la potencia, la energía, la contribución audiovisual, el impuesto sobre la electricidad y el IVA.",
         "dgeg": "No se incluye la tasa de la DGEG (unos céntimos al mes).",
         "educational": "Estimación educativa, no asesoramiento. WonderMoney no tiene relación comercial con ninguna comercializadora.",
-        "simulatorLink": "Simulador oficial de precios de ERSE"
+        "simulatorLink": "Simulador oficial de precios de ERSE",
+        "omieLink": "Precios del mercado diario (OMIE, Portugal)",
+        "profilesLink": "Perfiles de consumo y de pérdidas (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4589,7 +4611,7 @@
           "items": {
             "a": "La tasa de la DGEG, de unos céntimos al mes, y cualquier cargo por el contador u otros cargos.",
             "b": "La negociación personal: los precios son los publicados.",
-            "c": "Las ofertas indexadas se calculan con la estimación de ERSE para los próximos meses; lo que pagas sigue al mercado.",
+            "c": "Las ofertas indexadas se calculan con la estimación de ERSE para los próximos meses. Si eliges los precios OMIE, las que tienen la fórmula publicada por la comercializadora muestran lo que habrían costado en los últimos 12 meses (o en las fechas de tu archivo), no lo que costarán: lo que pagas sigue al mercado.",
             "d": "Las ofertas duales pueden incluir el gas en sus importes fijos; quedan fuera salvo que las incluyas.",
             "e": "Con una factura o un total, el reparto entre periodos es el del perfil estándar, no el tuyo. El archivo de E-REDES da tu reparto real.",
             "solar": "La producción solar es un año típico de la capital de distrito, orientada al sur con la inclinación óptima: las sombras, otra orientación y el tiempo de un año concreto la cambian.",

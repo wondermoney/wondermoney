@@ -10,7 +10,11 @@ import {
   runComparator,
   splitTotal,
 } from "@/lib/calculators/electricityTariffComparator";
-import type { OffersLoader } from "./ElectricityTariffComparisonComp";
+import { INDEXED_FORMULAS } from "@/lib/calculators/data/indexedFormulas";
+import { OMIE_MONTHS, OMIE_PRICES_SOURCE } from "@/lib/calculators/data/omiePrices";
+import { legalMidnight, QUARTER_HOUR_MS } from "@/lib/calculators/electricityPeriods";
+import { diagramBasis, profileBasis } from "@/lib/calculators/indexedPricing";
+import type { MarketLoader, OffersLoader, QuarterHoursLoader } from "./ElectricityTariffComparisonComp";
 
 const pushGtmEvent = vi.fn();
 vi.mock("@/lib/gtm", () => ({
@@ -32,6 +36,7 @@ const SOURCE = {
 } as const;
 const loadFixtures: OffersLoader = async () => ({ ELECTRICITY_OFFERS: FIXTURE_OFFERS, ELECTRICITY_OFFERS_SOURCE: SOURCE });
 const TUR = FIXTURE_OFFERS.find((offer) => offer.regulated)!;
+const loadMarket: MarketLoader = async () => ({ OMIE_MONTHS, OMIE_PRICES_SOURCE, INDEXED_FORMULAS });
 
 const eur = (value: number) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -183,6 +188,83 @@ describe("electricity tariff comparator", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove the file" }));
     fireEvent.change(upload, { target: { files: [new File(["just,some,text\n1,2,3\n"], "other.csv", { type: "text/csv" })] } });
     expect(await screen.findByText(/This does not look like an E-REDES consumption file/)).toBeTruthy();
+  });
+
+  it("prices indexed offers with a published formula from OMIE's last 12 months, on request", async () => {
+    const market = vi.fn(loadMarket);
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={market} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+    fireEvent.change(screen.getByLabelText("Price type"), { target: { value: "indexed" } });
+    expect(market).not.toHaveBeenCalled();
+    const card = (name: string) => cards().find((each) => within(each).queryByText(name)) as HTMLElement;
+    expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).getByText("Estimated price")).toBeTruthy();
+
+    fireEvent.click(screen.getByLabelText("Real cost over the last 12 months with OMIE prices"));
+    await waitFor(() => expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).queryByText("Real cost (OMIE)")).toBeTruthy());
+    expect(market).toHaveBeenCalledOnce();
+    const edp = card("Eletricidade Indexada média DD + FE Oferta 100€");
+    expect(within(edp).queryByText("Estimated price")).toBeNull();
+    const view = expected(200, { indexedPricing: { basis: profileBasis(OMIE_MONTHS), formulas: INDEXED_FORMULAS }, filters: { ...DEFAULT_OFFER_FILTERS, pricing: "indexed" } });
+    const priced = view.results.find((result) => result.offer.id === "EDPC_36")!;
+    expect(priced.priceBasis).toBe("market");
+    expect(shows(edp, eur(priced.firstYear.total))).toBe(true);
+    expect(within(edp).getByText(/supplier's published formula and OMIE prices from November 2025 to October 2026/)).toBeTruthy();
+    expect(within(edp).getByRole("link", { name: "Supplier's formula (read on 20 November 2026)", hidden: true }).getAttribute("href")).toBe(
+      "https://www.edp.pt/media/uknapr1m/fin-indexada.pdf",
+    );
+    // An offer whose supplier publishes no complete formula stays on ERSE's estimate.
+    expect(within(card("TOP -T0 INDEXADO 12 meses")).getByText("Estimated price")).toBeTruthy();
+    expect(screen.getByText(/real cost with OMIE's Portuguese prices from November 2025 to October 2026/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Day-ahead market prices (OMIE, Portugal)" }).getAttribute("href")).toBe(OMIE_PRICES_SOURCE.url);
+
+    fireEvent.click(screen.getByLabelText("ERSE's estimate"));
+    expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).getByText("Estimated price")).toBeTruthy();
+  });
+
+  it("prices them on the consumption file's own quarter-hours, and falls back when OMIE cannot be loaded", async () => {
+    // Two January 2026 days of quarter-hour prices: 100 EUR/MWh, then 200.
+    const start = legalMidnight(2026, 1, 14);
+    const data = {
+      start: new Date(start).toISOString(),
+      omie: Array.from({ length: 192 }, (_, i) => (i < 96 ? 10000 : 20000)),
+      loss: Array.from({ length: 192 }, () => 16000),
+    };
+    const quarterHours = vi.fn<QuarterHoursLoader>(async () => data);
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={loadMarket} loadQuarterHours={quarterHours} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.click(screen.getByLabelText("Full"));
+    fireEvent.change(screen.getByLabelText("Consumption"), { target: { value: "diagram" } });
+    const header = ["Data", "Hora", "Consumo registado, Ativa (kW)"];
+    const rows = ["2026/01/14", "2026/01/15"].flatMap((date) =>
+      Array.from({ length: 96 }, (_, i) => {
+        const end = (i + 1) * 15;
+        return [date, `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`, "0,4"];
+      }),
+    );
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet([["Diagrama de carga"], header, ...rows]), "Consumos");
+    const bytes = XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+    fireEvent.change(screen.getByLabelText("E-REDES consumption file"), { target: { files: [new File([bytes], "consumos.xlsx")] } });
+    await screen.findByText("2026-01-14 to 2026-01-15: 2 days, 19 kWh.");
+    fireEvent.click(screen.getByLabelText("Real cost on the dates of your consumption file with OMIE prices"));
+    await waitFor(() => expect(screen.getByText(/Portuguese price of each quarter-hour in your consumption file \(January 2026\), with E-REDES/)).toBeTruthy());
+    expect(quarterHours).toHaveBeenCalledExactlyOnceWith("/data/omie-pt-quarter-hours.json");
+    // The same quarter-hours, in the readings' instants, as the engine sees them.
+    const readings = Array.from({ length: 192 }, (_, i) => ({ start: start + i * QUARTER_HOUR_MS, kwh: 0.1 }));
+    const basis = diagramBasis(readings, data)!;
+    expect(basis.coverage).toBe(1);
+    const edp = cards().find((each) => within(each).queryByText("Eletricidade Indexada média DD + FE Oferta 100€")) as HTMLElement;
+    expect(within(edp).getByText("Real cost (OMIE)")).toBeTruthy();
+    expect(within(edp).getByText(/the OMIE price of each quarter-hour in your consumption file \(January 2026\)/)).toBeTruthy();
+    cleanup();
+
+    // OMIE's data cannot be loaded: the offers stay on ERSE's estimate, and the page says so.
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={() => Promise.reject(new Error("offline"))} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.click(screen.getByLabelText("Real cost over the last 12 months with OMIE prices"));
+    expect(await screen.findByText(/OMIE prices could not be loaded/)).toBeTruthy();
+    expect(screen.queryAllByText("Real cost (OMIE)")).toHaveLength(0);
   });
 
   it("filters on the offer fields and on the engine's options", async () => {

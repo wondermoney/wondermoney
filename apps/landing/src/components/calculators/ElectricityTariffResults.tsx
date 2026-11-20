@@ -1,13 +1,15 @@
 // The comparator's results: the comparison across tariff options, the visitor's own tariff, the
-// ranked offers with their breakdown and links, the CSV export and the ERSE source note.
+// ranked offers with their breakdown and links, the CSV export and the ERSE source note. Indexed
+// offers priced from OMIE's prices say so on their card and cite the supplier's formula.
 import { ChevronDown } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import type { OffersSource } from "./ElectricityTariffComparisonComp";
+import type { MarketView, OffersSource } from "./ElectricityTariffComparisonComp";
 import type { ElectricityOffer } from "@/lib/calculators/electricityOfferTypes";
 import { supplierName } from "@/lib/calculators/electricitySuppliers";
 import {
   comparisonCsv,
   formatIsoDate,
+  formatIsoMonth,
   MONTH_DAYS,
   type ComparatorView,
   type CsvLabels,
@@ -15,6 +17,7 @@ import {
 } from "@/lib/calculators/electricityTariffComparator";
 import type { ComparisonSort, TariffBreakdown, TariffOption } from "@/lib/calculators/electricityTariffComparison";
 import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
+import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
 
@@ -26,6 +29,12 @@ export const PERIOD_KEYS: Record<TariffOption, readonly string[]> = {
   biHourly: ["offValley", "valley"],
   triHourly: ["peak", "shoulder", "valley"],
 };
+
+/** A span of months in words: one month alone, or "from to to" in the locale's words. */
+export function monthRange(t: (key: string, values?: Record<string, string>) => string, locale: Lang, from: string, to: string) {
+  if (from === to) return formatIsoMonth(locale, from);
+  return t(k("indexed.range"), { from: formatIsoMonth(locale, from), to: formatIsoMonth(locale, to) });
+}
 
 const PAGE_SIZE = 20;
 const OPTIONS: readonly TariffOption[] = ["simple", "biHourly", "triHourly"];
@@ -39,6 +48,8 @@ interface Props {
   sortBy: ComparisonSort;
   socialTariffAsked: boolean;
   myTariffOn: boolean;
+  /** The OMIE basis indexed offers were priced on, or null for ERSE's estimate. */
+  market?: MarketView | null;
 }
 
 /** A translated sentence with its amount set in the figures' face (Geist Mono). */
@@ -69,7 +80,7 @@ function useLabels() {
   return { t, locale, euro, supplierOf, optionLabel, periodLabel };
 }
 
-export default function ElectricityTariffResults({ outcome, error, source, option, sortBy, socialTariffAsked, myTariffOn }: Props) {
+export default function ElectricityTariffResults({ outcome, error, source, option, sortBy, socialTariffAsked, myTariffOn, market = null }: Props) {
   const { t, locale, supplierOf, optionLabel } = useLabels();
   const [shown, setShown] = useState(PAGE_SIZE);
   const date = formatIsoDate(locale, source.exportedOn);
@@ -156,7 +167,7 @@ export default function ElectricityTariffResults({ outcome, error, source, optio
           </section>
         </>
       )}
-      <SourceNote source={source} date={date} />
+      <SourceNote source={source} date={date} market={market} />
     </div>
   );
 }
@@ -235,6 +246,7 @@ function badges(result: RankedOffer, t: (key: string) => string) {
   const { offer } = result;
   const list: { key: string; label: string; tone: "warning" | "neutral" }[] = [];
   if (result.estimated) list.push({ key: "estimated", label: t(k("badges.estimated")), tone: "warning" });
+  if (result.priceBasis === "market") list.push({ key: "market", label: t(k("badges.market")), tone: "neutral" });
   if (offer.regulated) list.push({ key: "regulated", label: t(k("badges.regulated")), tone: "neutral" });
   if (offer.conditioned) list.push({ key: "conditioned", label: t(k("badges.conditioned")), tone: "neutral" });
   if (result.dual) list.push({ key: "dual", label: t(k("badges.dual")), tone: "neutral" });
@@ -247,7 +259,7 @@ function badges(result: RankedOffer, t: (key: string) => string) {
 }
 
 function ResultCard({ result, rank, sortBy }: { result: RankedOffer; rank: number; sortBy: ComparisonSort }) {
-  const { t, euro, supplierOf, periodLabel } = useLabels();
+  const { t, locale, euro, supplierOf, periodLabel } = useLabels();
   const { offer } = result;
   const other: ComparisonSort = sortBy === "firstYear" ? "laterYears" : "firstYear";
   const links = (["offer", "standardSheet", "terms"] as const).filter((key) => offer.links[key]);
@@ -304,6 +316,32 @@ function ResultCard({ result, rank, sortBy }: { result: RankedOffer; rank: numbe
         <div className="mt-3 space-y-3">
           <Breakdown result={result} />
           {result.estimated && <p className="text-xs text-warning-text">{t(k("results.estimatedNote"))}</p>}
+          {result.market && (
+            <div className="space-y-1 text-xs text-muted-foreground">
+              <p>
+                {t(k(result.market.kind === "diagram" ? "results.marketDiagramNote" : "results.marketNote"), {
+                  period: monthRange(t, locale, result.market.from, result.market.to),
+                })}
+              </p>
+              <p>
+                {t(k("results.marketPrices"), {
+                  prices: result.market.energy
+                    .map((price, index) =>
+                      result.option === "simple"
+                        ? `${formatNumber(locale, price, 4)} €/kWh`
+                        : `${t(k(`periods.${PERIOD_KEYS[result.option][index]}`))} ${formatNumber(locale, price, 4)} €/kWh`,
+                    )
+                    .join(" · "),
+                })}
+              </p>
+              {/* The formula's first source is the supplier's own document it was read from. */}
+              <p>
+                <a href={result.market.formula.sources[0].url} rel="noopener nofollow" target="_blank" className={linkClass}>
+                  {t(k("results.formulaLink"), { date: formatIsoDate(locale, result.market.formula.sources[0].readOn) })}
+                </a>
+              </p>
+            </div>
+          )}
           {(offer.conditions || offer.notes) && (
             <div className="text-xs text-muted-foreground">
               <p className="font-medium">{t(k("results.conditionsLabel"))}</p>
@@ -394,7 +432,7 @@ function Breakdown({ result }: { result: RankedOffer }) {
   );
 }
 
-function SourceNote({ source, date }: { source: OffersSource; date: string }) {
+function SourceNote({ source, date, market }: { source: OffersSource; date: string; market: MarketView | null }) {
   const { t, locale } = useTranslations();
   return (
     <div className="space-y-2 rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">
@@ -407,7 +445,13 @@ function SourceNote({ source, date }: { source: OffersSource; date: string }) {
       </p>
       <ul className="list-disc space-y-1 pl-5">
         <li>{t(k("source.negotiation"))}</li>
-        <li>{t(k("source.indexed"))}</li>
+        <li>
+          {market
+            ? t(k(market.basis.kind === "diagram" ? "source.indexedMarketDiagram" : "source.indexedMarket"), {
+                period: monthRange(t, locale, market.basis.from, market.basis.to),
+              })
+            : t(k("source.indexed"))}
+        </li>
         <li>{t(k("source.taxes"))}</li>
         <li>{t(k("source.dgeg"))}</li>
         <li>{t(k("source.educational"))}</li>
@@ -417,6 +461,16 @@ function SourceNote({ source, date }: { source: OffersSource; date: string }) {
           {t(k("source.simulatorLink"))}
         </a>
       </p>
+      {market && (
+        <p className="flex flex-wrap gap-x-4 gap-y-1">
+          <a href={market.source.url} rel="noopener" target="_blank" className={linkClass}>
+            {t(k("source.omieLink"))}
+          </a>
+          <a href={market.source.profilesUrl} rel="noopener" target="_blank" className={linkClass}>
+            {t(k("source.profilesLink"))}
+          </a>
+        </p>
+      )}
     </div>
   );
 }

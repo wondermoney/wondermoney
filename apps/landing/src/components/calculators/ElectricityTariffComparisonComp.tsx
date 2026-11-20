@@ -1,12 +1,15 @@
 // The electricity tariff comparator island. It renders the form on the server and loads ERSE's
 // offers (data/electricityOffers.ts, about 60 kB gzipped) with a dynamic import once it runs in
 // the browser, so the offers never reach another page's bundle. The page logic is in
-// lib/calculators/electricityTariffComparator.ts; this file holds the form state.
+// lib/calculators/electricityTariffComparator.ts; this file holds the form state. Asked to price
+// indexed offers from OMIE's prices, it loads the monthly market data and the suppliers' formulas
+// (data/indexedMarket.ts) the same way, and with a load diagram the quarter-hour prices
+// (public/data/omie-pt-quarter-hours.json) with a fetch.
 import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import ElectricityInvoiceUpload from "./ElectricityInvoiceUpload";
-import ElectricityTariffResults, { k, PERIOD_KEYS } from "./ElectricityTariffResults";
+import ElectricityTariffResults, { k, monthRange, PERIOD_KEYS } from "./ElectricityTariffResults";
 import { ElectricitySolarPanel, ElectricitySolarSummary, INITIAL_SOLAR, useSolar, type SolarLoader, type SolarSettings } from "./ElectricitySolarPanel";
 import type { ContractedPowerKva, ElectricityOffer } from "@/lib/calculators/electricityOfferTypes";
 import {
@@ -24,6 +27,15 @@ import {
   type LoadReading,
   type PeriodKwh,
 } from "@/lib/calculators/electricityPeriods";
+import {
+  diagramBasis,
+  profileBasis,
+  type IndexedFormula,
+  type IndexedPricing,
+  type MarketBasis,
+  type OmieMonth,
+  type OmieQuarterHours,
+} from "@/lib/calculators/indexedPricing";
 import {
   COMPARATOR_LIMITS,
   DEFAULT_OFFER_FILTERS,
@@ -63,18 +75,51 @@ export type OffersLoader = () => Promise<{
 
 const loadErseOffers: OffersLoader = () => import("@/lib/calculators/data/electricityOffers");
 
+/** What the page shows of OMIE_PRICES_SOURCE. */
+export interface MarketSource {
+  url: string;
+  profilesUrl: string;
+  quarterHoursPath: string;
+}
+
+/** Loads the monthly OMIE data and the suppliers' formulas (data/indexedMarket.ts). */
+export type MarketLoader = () => Promise<{
+  OMIE_MONTHS: readonly OmieMonth[];
+  OMIE_PRICES_SOURCE: MarketSource;
+  INDEXED_FORMULAS: readonly IndexedFormula[];
+}>;
+
+/** Loads the quarter-hour prices for the diagram mode. */
+export type QuarterHoursLoader = (path: string) => Promise<OmieQuarterHours>;
+
+const loadIndexedMarket: MarketLoader = () => import("@/lib/calculators/data/indexedMarket");
+const fetchQuarterHours: QuarterHoursLoader = async (path) => {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return (await response.json()) as OmieQuarterHours;
+};
+
 export default function ElectricityTariffComparisonComp({
   locale,
   loadOffers,
   loadSolar,
+  loadMarket,
+  loadQuarterHours,
 }: {
   locale: Lang;
   loadOffers?: OffersLoader;
   loadSolar?: SolarLoader;
+  loadMarket?: MarketLoader;
+  loadQuarterHours?: QuarterHoursLoader;
 }) {
   return (
     <ReactTranslationsProvider locale={locale}>
-      <ElectricityTariffComparison loadOffers={loadOffers ?? loadErseOffers} loadSolar={loadSolar} />
+      <ElectricityTariffComparison
+        loadOffers={loadOffers ?? loadErseOffers}
+        loadSolar={loadSolar}
+        loadMarket={loadMarket ?? loadIndexedMarket}
+        loadQuarterHours={loadQuarterHours ?? fetchQuarterHours}
+      />
     </ReactTranslationsProvider>
   );
 }
@@ -83,6 +128,8 @@ type Mode = "quick" | "full";
 type QuickUnit = "bill" | "kwh";
 type Source = "periods" | "total" | "diagram";
 type PeriodChoice = "month" | "year" | "days";
+/** How indexed offers are priced: ERSE's estimate, or OMIE's real prices with each formula. */
+type IndexedChoice = "erse" | "market";
 
 interface FormState {
   mode: Mode;
@@ -109,6 +156,7 @@ interface FormState {
   myTariffOn: boolean;
   myPower: number;
   myEnergy: number[];
+  indexed: IndexedChoice;
 }
 
 const INITIAL: FormState = {
@@ -136,6 +184,7 @@ const INITIAL: FormState = {
   myTariffOn: false,
   myPower: Number.NaN,
   myEnergy: [Number.NaN, Number.NaN, Number.NaN],
+  indexed: "erse",
 };
 
 type Load =
@@ -149,6 +198,16 @@ type Diagram =
   | { state: "error"; message: string }
   | { state: "ready"; name: string; summary: LoadDiagramSummary; readings: readonly LoadReading[] };
 
+type Async<T> = { state: "idle" } | { state: "loading" } | { state: "error" } | { state: "ready"; value: T };
+
+/** The market basis the page priced on, for the results' notes. */
+export interface MarketView {
+  basis: MarketBasis;
+  source: MarketSource;
+  /** A diagram was uploaded but none of its days has quarter-hour prices: the last 12 months were used. */
+  diagramOutOfRange: boolean;
+}
+
 const summaryClass =
   "flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden";
 const chevronClass = "size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none";
@@ -156,11 +215,23 @@ const chevronClass = "size-4 shrink-0 text-muted-foreground transition-transform
 const selectClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: OffersLoader; loadSolar?: SolarLoader }) {
+function ElectricityTariffComparison({
+  loadOffers,
+  loadSolar,
+  loadMarket,
+  loadQuarterHours,
+}: {
+  loadOffers: OffersLoader;
+  loadSolar?: SolarLoader;
+  loadMarket: MarketLoader;
+  loadQuarterHours: QuarterHoursLoader;
+}) {
   const { t, locale } = useTranslations();
   const [form, setForm] = useState<FormState>(INITIAL);
   const [load, setLoad] = useState<Load>({ state: "loading" });
   const [diagram, setDiagram] = useState<Diagram>({ state: "none" });
+  const [market, setMarket] = useState<Async<Awaited<ReturnType<MarketLoader>>>>({ state: "idle" });
+  const [quarterHours, setQuarterHours] = useState<Async<OmieQuarterHours>>({ state: "idle" });
   const [edited, setEdited] = useState(false);
   const [solarSettings, setSolarSettings] = useState<SolarSettings>(INITIAL_SOLAR);
   const usageSent = useRef(false);
@@ -178,6 +249,38 @@ function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: Of
       cancelled = true;
     };
   }, [loadOffers]);
+
+  const wantsMarket = form.indexed === "market";
+  const usesDiagram = form.mode === "full" && form.source === "diagram" && diagram.state === "ready";
+  useEffect(() => {
+    if (!wantsMarket || market.state !== "idle") return;
+    setMarket({ state: "loading" });
+    loadMarket()
+      .then((value) => setMarket({ state: "ready", value }))
+      .catch(() => setMarket({ state: "error" }));
+  }, [wantsMarket, market.state, loadMarket]);
+  useEffect(() => {
+    if (!wantsMarket || !usesDiagram || market.state !== "ready" || quarterHours.state !== "idle") return;
+    setQuarterHours({ state: "loading" });
+    loadQuarterHours(market.value.OMIE_PRICES_SOURCE.quarterHoursPath)
+      .then((value) => setQuarterHours({ state: "ready", value }))
+      .catch(() => setQuarterHours({ state: "error" }));
+  }, [wantsMarket, usesDiagram, market, quarterHours.state, loadQuarterHours]);
+
+  // The market basis: the diagram's own dates when it has priced days, else the last 12 months.
+  const marketView = useMemo((): MarketView | null => {
+    if (!wantsMarket || market.state !== "ready") return null;
+    const { OMIE_MONTHS, OMIE_PRICES_SOURCE } = market.value;
+    if (usesDiagram && diagram.state === "ready") {
+      if (quarterHours.state === "loading" || quarterHours.state === "idle") return null;
+      const basis = quarterHours.state === "ready" ? diagramBasis(diagram.readings, quarterHours.value) : null;
+      if (basis) return { basis, source: OMIE_PRICES_SOURCE, diagramOutOfRange: false };
+      return { basis: profileBasis(OMIE_MONTHS), source: OMIE_PRICES_SOURCE, diagramOutOfRange: quarterHours.state === "ready" };
+    }
+    return { basis: profileBasis(OMIE_MONTHS), source: OMIE_PRICES_SOURCE, diagramOutOfRange: false };
+  }, [wantsMarket, market, usesDiagram, diagram, quarterHours]);
+  const indexedPricing: IndexedPricing | undefined =
+    marketView && market.state === "ready" ? { basis: marketView.basis, formulas: market.value.INDEXED_FORMULAS } : undefined;
 
   useEffect(() => {
     if (!edited || usageSent.current) return;
@@ -300,12 +403,13 @@ function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: Of
       sortBy: form.sortBy,
       filters: form.filters,
       myTariff,
+      indexedPricing,
     };
     const outcome = runComparator(request);
     const solarSaving = solar.result && outcome.ok ? solarBillSaving(request, outcome.view, grossKwh) : null;
     return { outcome, solarSaving };
-    // myTariff is rebuilt from form on every render; form covers it.
-  }, [offers, grossKwh, solar.result, form]);
+    // myTariff and indexedPricing are rebuilt on every render; form and marketView cover them.
+  }, [offers, grossKwh, solar.result, form, marketView]);
   const outcome = comparison?.outcome ?? null;
 
   const suppliers = useMemo(() => (offers ? supplierChoices(offers, t(k("regulatedSupplier"))) : []), [offers, t]);
@@ -555,6 +659,15 @@ function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: Of
             {checkbox("tariff-family", t(k("household.largeFamily")), form.largeFamily, (value) => update("largeFamily", value), t(k("household.largeFamilyHelp")))}
             {checkbox("tariff-newclient", t(k("household.newClient")), form.newClient, (value) => update("newClient", value), t(k("household.newClientHelp")))}
           </fieldset>
+
+          <IndexedChoiceField
+            value={form.indexed}
+            onChange={(value) => update("indexed", value)}
+            diagram={usesDiagram}
+            market={market.state}
+            quarterHours={quarterHours.state}
+            view={marketView}
+          />
         </div>
 
         <ElectricitySolarPanel
@@ -676,10 +789,78 @@ function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: Of
             sortBy={form.sortBy}
             socialTariffAsked={form.socialTariff}
             myTariffOn={form.myTariffOn}
+            market={indexedPricing ? marketView : null}
           />
         )}
       </div>
     </div>
+  );
+}
+
+function IndexedChoiceField({
+  value,
+  onChange,
+  diagram,
+  market,
+  quarterHours,
+  view,
+}: {
+  value: IndexedChoice;
+  onChange: (value: IndexedChoice) => void;
+  diagram: boolean;
+  market: Async<unknown>["state"];
+  quarterHours: Async<unknown>["state"];
+  view: MarketView | null;
+}) {
+  const { t, locale } = useTranslations();
+  const choices: { value: IndexedChoice; label: string }[] = [
+    { value: "erse", label: t(k("indexed.erse")) },
+    { value: "market", label: t(k(diagram ? "indexed.marketDiagram" : "indexed.market")) },
+  ];
+  const coverage = view?.basis.coverage;
+  return (
+    <fieldset className="space-y-2 border-t border-border pt-5">
+      <legend className="sr-only">{t(k("indexed.legend"))}</legend>
+      <p aria-hidden="true" className="text-sm font-medium text-foreground">
+        {t(k("indexed.legend"))}
+      </p>
+      {choices.map((choice) => (
+        <label key={choice.value} className="flex items-start gap-2 text-sm text-foreground">
+          <input
+            type="radio"
+            name="tariff-indexed"
+            value={choice.value}
+            checked={value === choice.value}
+            onChange={() => onChange(choice.value)}
+            aria-describedby="tariff-indexed-help"
+            className="mt-0.5 size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+          <span>{choice.label}</span>
+        </label>
+      ))}
+      <p id="tariff-indexed-help" className="pl-6 text-xs text-muted-foreground">
+        {t(k("indexed.help"))}
+      </p>
+      {value === "market" && (market === "loading" || quarterHours === "loading") && (
+        <p role="status" className="pl-6 text-xs text-foreground">
+          {t(k("indexed.loading"))}
+        </p>
+      )}
+      {value === "market" && (market === "error" || (diagram && quarterHours === "error")) && (
+        <p role="alert" className="pl-6 text-xs text-destructive-text">
+          {t(k(market === "error" ? "indexed.loadError" : "indexed.diagramLoadError"))}
+        </p>
+      )}
+      {value === "market" && view?.diagramOutOfRange && <p className="pl-6 text-xs text-muted-foreground">{t(k("indexed.diagramOutOfRange"))}</p>}
+      {value === "market" && view && coverage !== undefined && coverage < 0.995 && (
+        <p className="pl-6 text-xs text-muted-foreground">
+          {t(k("indexed.coverage"), {
+            percent: formatNumber(locale, coverage * 100, 0),
+            period: monthRange(t, locale, view.basis.from, view.basis.to),
+          })}
+        </p>
+      )}
+    </fieldset>
   );
 }
 
