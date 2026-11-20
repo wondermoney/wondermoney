@@ -4,7 +4,7 @@
 // lib/calculators/electricitySolar.ts. The visitor's location, when they share it, only picks the
 // nearest district capital in the browser: it is never sent or stored.
 import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import { k } from "./ElectricityTariffResults";
 import type { HourlyCycle, LoadReading, PeriodKwh } from "@/lib/calculators/electricityPeriods";
@@ -62,6 +62,14 @@ export interface SolarState {
   result: SolarConsumption | null;
 }
 
+/** The previous value while the new one has the same content (a small, JSON-able object). */
+function useSameValue<T>(value: T): T {
+  const last = useRef<{ key: string; value: T } | null>(null);
+  const key = JSON.stringify(value) ?? "";
+  if (last.current?.key !== key) last.current = { key, value };
+  return last.current.value;
+}
+
 /**
  * The district's table, loaded when solar is on, and the consumption netted against it. `readings`
  * are the uploaded diagram's quarter-hours, or null when the consumption was typed in.
@@ -92,7 +100,10 @@ export function useSolar(
   }, [settings.on, settings.district, loader]);
 
   const valid = Object.keys(solarInputErrors(settings)).length === 0;
-  const { consumption, readings, contractedPower, cycle } = input;
+  const { readings, contractedPower, cycle } = input;
+  // The page rebuilds its consumption object on any form change; netting a year of quarter-hours
+  // is only redone when the kWh themselves change.
+  const consumption = useSameValue(input.consumption);
   const result = useMemo(() => {
     if (!settings.on || !valid || production.state !== "ready" || !consumption) return null;
     return solarConsumption({

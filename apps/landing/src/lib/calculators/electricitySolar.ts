@@ -264,6 +264,30 @@ function periodKwhOf(summary: PeriodBreakdown, days: number, factor = 1): Period
   };
 }
 
+/**
+ * The kWh of a profile year's quarter-hours (profileReadings, netted: the same quarter-hours in the
+ * same order) by period, for both cycles of the current schedule. The same as summarizeLoadDiagram
+ * gives, from the periods the profile year already holds, without classifying 35 040 instants again.
+ */
+export function profileYearByPeriod(readings: readonly LoadReading[]): PeriodBreakdown {
+  profileYear ??= buildProfileYear();
+  const { starts, periods } = profileYear;
+  if (readings.length !== starts.length || readings.some((reading, q) => reading.start !== starts[q])) {
+    return summarizeLoadDiagram(readings);
+  }
+  const byCycle = (cycle: HourlyCycle): CycleKwh => {
+    const labels = periods[PARTITIONS.findIndex((partition) => partition.schedule === "current" && partition.cycle === cycle)];
+    const tri = [0, 0, 0];
+    readings.forEach((reading, q) => (tri[labels[q]] += reading.kwh));
+    return { biHourly: { offValley: tri[0] + tri[1], valley: tri[2] }, triHourly: { peak: tri[0], shoulder: tri[1], valley: tri[2] } };
+  };
+  return {
+    simple: { energy: readings.reduce((sum, reading) => sum + reading.kwh, 0) },
+    daily: byCycle("daily"),
+    weekly: byCycle("weekly"),
+  };
+}
+
 export interface SolarConsumptionInput {
   /** The consumption without solar, as the comparator has it. */
   consumption: PeriodKwh;
@@ -294,7 +318,7 @@ export function solarConsumption(input: SolarConsumptionInput): SolarConsumption
   const { net, balance } = netWithSolar(year, input.system);
   const factor = input.consumption.days / DAYS_PER_YEAR;
   const scaled = Object.fromEntries(Object.entries(balance).map(([key, value]) => [key, value * factor])) as unknown as SolarBalance;
-  return { kwh: periodKwhOf(summarizeLoadDiagram(net), input.consumption.days, factor), balance: scaled, fromDiagram: false, readings: null };
+  return { kwh: periodKwhOf(profileYearByPeriod(net), input.consumption.days, factor), balance: scaled, fromDiagram: false, readings: null };
 }
 
 /** A balance over `days` days as a year's figures (365 days), as the comparator's yearly totals are. */

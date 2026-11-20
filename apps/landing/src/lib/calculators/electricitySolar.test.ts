@@ -20,6 +20,7 @@ import {
   netWithSolar,
   productionKwhAt,
   profileReadings,
+  profileYearByPeriod,
   profileShape,
   solarBillSaving,
   solarConsumption,
@@ -160,6 +161,13 @@ describe("consumption rebuilt from the BTN profile", () => {
     const result = solarConsumption({ consumption: gross, readings: null, contractedPower: 3.45, cycle: "daily", system: { typicalYear: lisboa, kwp: 2, lossPercent: 14 } });
     expect(result.fromDiagram).toBe(false);
     expect(result.readings).toBeNull();
+    // Summed from the profile year's own periods, as summarizeLoadDiagram would classify them.
+    const { net } = netWithSolar(profileReadings(gross, 3.45, "daily"), { typicalYear: lisboa, kwp: 2, lossPercent: 14 });
+    const fast = profileYearByPeriod(net);
+    const slow = summarizeLoadDiagram(net);
+    expect(fast.simple).toEqual(slow.simple);
+    expect(fast.daily).toEqual(slow.daily);
+    expect(fast.weekly).toEqual(slow.weekly);
     expect(result.kwh.days).toBe(MONTH_DAYS);
     expect(result.balance.consumption).toBeCloseTo(250, 6);
     expect(result.kwh.simple.energy).toBeCloseTo(result.balance.net, 6);
