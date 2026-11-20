@@ -141,6 +141,22 @@ describe('recordSignup', () => {
     });
   });
 
+  it('records the landing page the signup came from on the signup event', async () => {
+    const db = fakeDatabase();
+
+    await recordSignup({ ...signupInput, landingSource: 'toolMortgage' });
+
+    expect(db.outbox[0]?.properties).toMatchObject({ landing_source: 'toolMortgage' });
+  });
+
+  it('leaves the landing source off a signup that did not come from a landing page', async () => {
+    const db = fakeDatabase();
+
+    await recordSignup(signupInput);
+
+    expect(db.outbox[0]?.properties).not.toHaveProperty('landing_source');
+  });
+
   it('creates the appuser but no analytics event while delivery is off', async () => {
     vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'off');
     const db = fakeDatabase();

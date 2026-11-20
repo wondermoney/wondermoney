@@ -5,6 +5,7 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { GoalType } from '@entity/Goal';
 import { accountActor, assertTransactionWritable } from '@service/account/account-access';
+import { recordFirstActivation } from '@service/analytics/first-activation.service';
 import { GoalService } from '@service/goal/goal.service';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError } from '@utils/errors';
@@ -23,7 +24,7 @@ import {
 } from '@validators/goal';
 import { zParse } from '@validators/parser';
 
-type GoalRequest = Request & { user: { appuserKey: number; currencyKey: { currencyKey: number } } };
+type GoalRequest = Request & { user: { appuserKey: number; currencyKey: { currencyKey: number }; externalUserId: string } };
 
 export async function archiveGoal(req: Request, res: Response) {
   const { params } = await zParse(goalParamsRequestSchema, req);
@@ -63,6 +64,7 @@ export async function createGoal(req: Request, res: Response) {
     tenantKey,
     type: isDebt ? GoalType.DEBT_PAYDOWN : GoalType.SAVE_UP,
   });
+  await recordFirstActivation(DI.em, user, 'goal');
   return res.status(201).json({ goal });
 }
 

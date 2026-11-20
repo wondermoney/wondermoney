@@ -15,6 +15,8 @@ export type SignupRecordInput = Readonly<{
   email: string;
   externalUserId: string;
   firstName?: string;
+  /** The landing tool or list route id the signup came from, sent only with analytics consent. */
+  landingSource?: string;
   language?: SupportedLanguages;
   lastName?: string;
   method: string;
@@ -33,7 +35,8 @@ export type SignupRecordResult = Readonly<{
  * flush hits the unique external-id constraint, and it re-reads the winner's row.
  *
  * The `signup` analytics event commits in the same transaction, so it exists exactly when the
- * appuser does (and only while analytics delivery is on). It carries no email or name.
+ * appuser does (and only while analytics delivery is on). It carries no email or name; its
+ * `landing_source` is the landing page the signup came from, when the visitor consented.
  */
 export async function recordSignup(input: SignupRecordInput): Promise<SignupRecordResult> {
   const externalUserId = externalUserIdSchema.parse(input.externalUserId);
@@ -62,6 +65,7 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
         outbox.properties = {
           $insert_id: eventId,
           appuser_key: appuser.appuserKey.toString(),
+          ...(input.landingSource ? { landing_source: input.landingSource } : {}),
           locale: appuser.language,
           method: input.method,
         };
