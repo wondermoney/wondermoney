@@ -4526,10 +4526,10 @@
     "fuelPrices": {
       "title": "Spritpreise in Portugal und monatliche Tankkosten",
       "shortName": "Spritpreise",
-      "subtitle": "Sehen Sie den offiziellen Durchschnittspreis für Diesel, Benzin und Autogas in Portugal, seinen Verlauf und was Ihr Fahren im Monat kostet.",
-      "description": "Offizielle DGEG-Durchschnittspreise für Kraftstoffe in Festlandportugal mit Wochenänderung und Verlauf sowie ein Rechner für die monatlichen Tankkosten.",
-      "pageTitle": "Spritpreise in Portugal: Offizieller Durchschnitt und Monatskosten",
-      "pageDescription": "Der aktuelle DGEG-Durchschnittspreis für Diesel, Benzin 95 und Autogas in Portugal mit Änderung zur Vorwoche und fünf Jahren Verlauf, plus ein Rechner für Ihre monatlichen Tankkosten. Offizielle Daten, keine Prognose.",
+      "subtitle": "Sehen Sie den offiziellen Durchschnittspreis für Diesel, Benzin und Autogas in Portugal, die günstigsten Tankstellen in Ihrem Distrikt und Ihrer Gemeinde und was Sie das Fahren im Monat kostet.",
+      "description": "Offizielle DGEG-Durchschnittspreise für Kraftstoff auf dem portugiesischen Festland, die günstigsten Tankstellen nach Distrikt und Gemeinde und ein Rechner für die monatlichen Spritkosten.",
+      "pageTitle": "Kraftstoffpreise in Portugal: günstigste Tankstellen und offizieller Durchschnitt",
+      "pageDescription": "Die günstigsten Tankstellen für Diesel, Benzin 95 und Autogas nach Distrikt und Gemeinde, täglich aus DGEG-Daten aktualisiert, der offizielle Durchschnittspreis mit fünf Jahren Verlauf und ein Rechner für die monatlichen Spritkosten. Keine Prognose.",
       "fuels": {
         "diesel": "Diesel (gasóleo simples)",
         "gasoline95": "Benzin 95 (gasolina simples 95)",
@@ -4597,7 +4597,8 @@
           "title": "So lesen Sie diese Seite",
           "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
           "calculator": "Der Rechner macht aus Ihrem Fahren monatliche Tankkosten. Sie geben Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und Sie können ihn auf den Preis ändern, den Sie wirklich zahlen.",
-          "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird."
+          "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird.",
+          "stations": "Darunter stehen die günstigsten Tankstellen: die {{stationsDistrict}} günstigsten des Festlands oder eines Distrikts oder die {{stationsMunicipality}} günstigsten einer Gemeinde, für den gewählten Kraftstoff. Jede zeigt den Preis, die Tankstelle und ihre Marke, die Adresse, einen Kartenlink und wann die Tankstelle den Preis zuletzt aktualisiert hat."
         },
         "example": {
           "title": "Rechenbeispiel",
@@ -4613,21 +4614,25 @@
             "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
             "d": "Jahr: zwölf solche Monate."
           },
-          "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises."
+          "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises.",
+          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter."
         },
         "data": {
           "title": "Daten und Quellen",
           "dgeg": "Preise: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário der Straßenkraftstoffe in Festlandportugal, für gasóleo simples, gasolina simples 95 und GPL auto. Der letzte Tag ist der {{asOf}}; die Datenkopie dieser Seite wurde am {{fetched}} erstellt. Der Verlauf ist ein DGEG-Wert alle sieben Tage, zurück bis zum {{first}}, so übernommen, wie die DGEG ihn veröffentlicht.",
           "terms": "Die DGEG erklärt, diese Informationen seien kostenlos und frei nutzbar, sofern die DGEG als Quelle genannt, das Datum der letzten Aktualisierung angegeben und die Information originalgetreu wiedergegeben wird. Die Preise melden die Tankstellen, die dafür verantwortlich sind.",
           "dgegLink": "DGEG, Preço Médio Diário",
-          "refresh": "Die Seite liest eine gespeicherte Datendatei und fragt die DGEG nie ab, während Sie sie nutzen. Die Datei wird von einem Skript aktualisiert, das veraltete oder unplausible Daten ablehnt; eine fehlgeschlagene Aktualisierung behält daher die letzten guten Zahlen mit ihrem Datum ({{asOf}})."
+          "refresh": "Die Seite liest eine gespeicherte Datendatei und fragt die DGEG nie ab, während Sie sie nutzen. Die Datei wird von einem Skript aktualisiert, das veraltete oder unplausible Daten ablehnt; eine fehlgeschlagene Aktualisierung behält daher die letzten guten Zahlen mit ihrem Datum ({{asOf}}).",
+          "stations": "Tankstellen: die DGEG-Preise je Tankstelle, so wie die Tankstellen sie melden, für dieselben drei Kraftstoffe. Die Momentaufnahme stammt vom {{stationsDate}} um {{stationsTime}} UTC, und jeder Preis behält Datum und Uhrzeit seiner letzten Aktualisierung durch die Tankstelle.",
+          "stationsLink": "DGEG, Kraftstoffpreise je Tankstelle",
+          "stationsRefresh": "Die Tankstellenliste ist eine Momentaufnahme, die einmal am Tag beim Neuaufbau der Website entsteht, kein Live-Feed. Antwortet die DGEG nicht oder bestehen ihre Daten die Prüfungen nicht, behält die Seite die vorige Momentaufnahme und zeigt deren Datum ({{stationsDate}})."
         },
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
             "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
             "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
-            "stations": "Keine Tankstellen: Diese Seite nennt und bewertet keine Tankstelle. Die Website der DGEG listet die Preise je Tankstelle, falls Sie nachsehen möchten.",
+            "stations": "Tankstellen: Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule.",
             "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
             "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
             "education": "Nur zu Informationszwecken, keine Beratung."
@@ -4642,6 +4647,28 @@
           "vehicleTaxLink": "Kfz-Steuer-Rechner (IUC)",
           "vehicleTaxBody": "Schätzen Sie die jährliche Kfz-Steuer, eine weitere Kostenposition des Autos."
         }
+      },
+      "stations": {
+        "title": "Günstigste Tankstellen",
+        "intro": "Die günstigsten Tankstellen für jeden Kraftstoff auf dem portugiesischen Festland, in einem Distrikt oder in einer Gemeinde, nach den Preisen, die die Tankstellen der DGEG melden.",
+        "asOf": "Momentaufnahme der DGEG-Preise je Tankstelle vom {{date}} um {{time}} UTC. Bei jedem Preis steht, wann die Tankstelle ihn zuletzt aktualisiert hat.",
+        "stale": "Diese Liste ist {{days}} Tage alt: Die tägliche Aktualisierung läuft seit dem {{date}} nicht. Die Preise können sich geändert haben, prüfen Sie sie also an der Tankstelle, bevor Sie losfahren.",
+        "fuel": "Kraftstoffart",
+        "district": "Distrikt",
+        "municipality": "Gemeinde",
+        "mainland": "Ganzes portugiesisches Festland",
+        "allMunicipalities": "Alle Gemeinden von {{district}}",
+        "pickDistrict": "Zuerst einen Distrikt wählen",
+        "loading": "Die Tankstellen von {{district}} werden geladen…",
+        "loadError": "Die Liste für diesen Distrikt konnte nicht geladen werden. Laden Sie die Seite neu, um es noch einmal zu versuchen.",
+        "none": "Keine Tankstelle in {{area}} meldet einen Preis für {{fuel}}. Wählen Sie den ganzen Distrikt, um die günstigsten in der Nähe zu sehen.",
+        "summary": "Tankstellen mit einem Preis für {{fuel}} in {{area}}: {{count}}. Medianpreis: {{median}}. Die günstigsten:",
+        "map": "Auf der Karte ansehen",
+        "updated": "Aktualisiert am {{date}}",
+        "saving": "Die günstigste hier liegt {{perLitre}} unter dem Median: {{perTank}} weniger für eine Tankfüllung von {{litres}} L.",
+        "noSaving": "Hier verlangt die günstigste Tankstelle den Medianpreis.",
+        "nextStepCta": "Monatliche Differenz für ein Ziel sparen",
+        "note": "Preise so, wie die Tankstellen sie der DGEG melden, die sie veröffentlicht; jede Tankstelle ist für ihren Preis verantwortlich. Die Preise können sich im Lauf des Tages ändern und enthalten keine Rabatte von Tankkarten oder Apps."
       }
     },
     "bankAccountsShared": {
@@ -5089,6 +5116,150 @@
         "banco-best": "Ab der 21. Order im Monat: 0,10 % (mind. 12 €). Der Dienst Best Trading Pro auf der Plattform der Saxo Bank hat andere Preise: ETFs 0,08 % (mind. 10 €), keine Depotgebühr und Anlegerentschädigung bis 20.000 €.",
         "big": "Die Depotgebühr entfällt bei drei Geschäften im Quartal und entweder einem Gehaltseingang oder einem Durchschnittsguthaben über 100.000 €. Der Währungsspread ist ein Richtwert. Eine separate Superconta verzinst Guthaben.",
         "millennium-bcp": "Die Depotgebühr beträgt 6 € pro Quartal nur nach einem Geschäft über Website oder App in den drei Vormonaten, sonst 9 €. Währung zu den internen Kursen der Bank, Spread nicht veröffentlicht. Auf US-Verkäufe kommt die SEC Fee hinzu."
+      }
+    },
+    "goldPrice": {
+      "title": "Goldpreis pro Gramm in Euro und Goldwert-Rechner",
+      "shortName": "Goldpreis",
+      "subtitle": "Sehen Sie den neuesten Preis für ein Gramm Gold in Euro und was Ihr Gold nach Gewicht und Karat wert ist, von 24 Karat bis zu portugiesischem Gold mit 19,2 Karat.",
+      "description": "Der Preis für ein Gramm Gold in Euro von einer Zentralbank, mit Datum, und ein Rechner für den Metallwert von Gold nach Gewicht und Karat.",
+      "pageTitle": "Goldpreis pro Gramm in Euro und Goldwert-Rechner",
+      "pageDescription": "Der Preis für ein Gramm reines Gold in Euro, mit Datum, von der Narodowy Bank Polski zum EZB-Kurs, und ein Rechner für den Metallwert von Gold mit 24, 22, 19,2, 18, 14 und 9 Karat. Ankäufer zahlen weniger.",
+      "purities": {
+        "k24": "{{karat}} Karat ({{fineness}} ‰), reines Gold",
+        "k22": "{{karat}} Karat ({{fineness}} ‰)",
+        "k19_2": "{{karat}} Karat ({{fineness}} ‰), portugiesisches Gold",
+        "k18": "{{karat}} Karat ({{fineness}} ‰)",
+        "k14": "{{karat}} Karat ({{fineness}} ‰)",
+        "k9": "{{karat}} Karat ({{fineness}} ‰)"
+      },
+      "fields": {
+        "grams": "Gewicht",
+        "purity": "Feingehalt",
+        "price": "Preis für reines Gold pro Gramm",
+        "resetPrice": "Neuesten Preis verwenden ({{price}}/g)",
+        "offer": "Angebot eines Ankäufers (optional)"
+      },
+      "help": {
+        "grams": "Das Gewicht des Stücks in Gramm, von einer Waage, die auf 0,1 g genau wiegt, oder vom Kaufbeleg. Steine und andere Metalle zählen zum Gewicht, enthalten aber kein Gold.",
+        "purity": "Der Feingehalt im Stempel: 800 ist portugiesisches Gold (19,2 Karat), 750 ist 18-karätiges Gold. Ohne Stempel fragen Sie bei einem Prüfamt oder einem Juwelier nach.",
+        "price": "Beginnt beim neuesten Preis für reines Gold, {{price}}/g am {{date}}. Ändern Sie ihn, um den Wert zu einem anderen Preis zu sehen.",
+        "offer": "Was Ihnen ein Geschäft oder Ankäufer angeboten hat, um es als Anteil am Metallwert zu sehen. Lassen Sie das Feld leer, wenn Sie nicht vergleichen möchten."
+      },
+      "errors": {
+        "required": "Geben Sie eine gültige Zahl ein.",
+        "negative": "Das darf nicht negativ sein.",
+        "tooLarge": "Geben Sie {{max}} oder weniger ein.",
+        "zero": "Geben Sie einen Wert über null ein.",
+        "summary": "Prüfen Sie die markierten Felder, um den Wert zu sehen."
+      },
+      "result": {
+        "value": "Metallwert des Goldes",
+        "pureGrams": "Reines Gold im Stück",
+        "perGram": "Metallwert pro Gramm des Stücks",
+        "nothing": "Ohne Gewicht gibt es kein Gold zu bewerten.",
+        "offerBelow": "Das Angebot entspricht {{share}} des Metallwerts, {{gap}} darunter.",
+        "offerAbove": "Das Angebot entspricht {{share}} des Metallwerts, {{gap}} darüber. Prüfen Sie Gewicht und Feingehalt.",
+        "offerNoValue": "Ohne Metallwert lässt sich das Angebot nicht vergleichen.",
+        "buyers": "Goldankäufer zahlen weniger als das. Der Metallwert ist, was das Gold selbst zum Referenzpreis wert ist, vor der Marge des Ankäufers und den Kosten für Prüfung und Scheidung.",
+        "netWorth": "Gold, das Sie besitzen, gehört zu Ihrem Vermögen. Erfassen Sie es mit {{amount}} oder mit dem, was ein Ankäufer wirklich zahlen würde, und aktualisieren Sie es, wenn sich der Preis bewegt."
+      },
+      "notes": {
+        "assumptions": "Schätzung: Gewicht mal Feingehalt mal Preis für reines Gold. Bewertet wird nur das Metall, nicht die Verarbeitung, die Steine oder die Marke. Kein Angebot und keine Beratung."
+      },
+      "latest": {
+        "title": "Neuester Goldpreis",
+        "asOf": "Preis vom {{date}}: der Preis für reines Gold der Narodowy Bank Polski, in Euro zum EZB-Kurs desselben Tages.",
+        "stale": "Dieser Preis ist {{days}} Tage alt: Die tägliche Aktualisierung hat seit dem {{date}} keinen neueren gebracht. Der Goldpreis kann sich seitdem bewegt haben.",
+        "perGram": "Reines Gold (24 Karat), pro Gramm",
+        "perOunce": "Reines Gold, pro Feinunze (31,1 g)",
+        "portuguese": "Portugiesisches Gold (19,2 Karat), pro Gramm",
+        "portugueseNote": "800 Tausendstel des Preises für reines Gold",
+        "dayChange": "{{percent}} seit dem {{date}}",
+        "periodChange": "{{percent}} seit dem {{date}}",
+        "note": "Ein Referenzpreis für das Metall, nicht das, was ein Geschäft zahlt oder verlangt. Es ist ein vergangener Preis, keine Prognose: Diese Seite sagt nicht voraus, wohin sich Gold bewegt."
+      },
+      "recent": {
+        "title": "Letzte Preise",
+        "intro": "Der Preis für ein Gramm reines Gold an den letzten von der NBP veröffentlichten Tagen, mit dem Zloty-Preis und dem EZB-Kurs, mit dem er umgerechnet wurde.",
+        "caption": "Preis für ein Gramm reines Gold an den letzten Tagen, in Euro und in Zloty, und der Euro-Kurs",
+        "date": "Datum",
+        "eurPerGram": "Euro pro Gramm",
+        "plnPerGram": "Zloty pro Gramm (NBP)",
+        "rate": "Zloty pro Euro (EZB)",
+        "asOf": "Daten vom {{date}}. Diese Seite wurde am {{fetched}} erstellt. Quellen: Narodowy Bank Polski (Goldpreis) und Europäische Zentralbank (Euro-Referenzkurs)."
+      },
+      "nextStepHeadline": "Gold zum Vermögen zählen",
+      "nextStepDescription": "Gold, Schmuck und andere Dinge, die Sie besitzen, gehören zu Ihrem Vermögen. Erfassen Sie sie in WonderMoney neben Ihren Konten und Anlagen und sehen Sie das ganze Bild.",
+      "nextStepCta": "Sachwerte ins Nettovermögen aufnehmen",
+      "guide": {
+        "read": {
+          "title": "So lesen Sie diese Seite",
+          "price": "Oben steht der Preis für ein Gramm reines Gold in Euro am {{asOf}}, etwa {{ounce}} pro Feinunze, und was ein Gramm portugiesisches Gold mit 19,2 Karat zu diesem Preis wert ist.",
+          "calculator": "Der Rechner macht aus einem Stück Gold seinen Metallwert. Sie geben Gewicht und Feingehalt an; der Preis beginnt beim neuesten, und Sie können ihn ändern. Geben Sie das Angebot eines Ankäufers ein, um zu sehen, welchen Anteil am Metallwert es ausmacht.",
+          "noForecast": "Diese Seite macht keine Prognosen. Sie zeigt einen veröffentlichten Preis und was Ihr Gold dazu wert ist; sie sagt nicht, wohin der Preis geht oder ob Sie kaufen oder verkaufen sollten."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Eine Kette von {{grams}} aus portugiesischem Gold (19,2 Karat, 800 Tausendstel) enthält {{grams}} mal 0,8, also {{pureGrams}} reines Gold. Bei {{price}} ist ihr Metall {{value}} wert.",
+          "ring": "Ein Ring von 4 g aus 18-karätigem Gold (750 Tausendstel) enthält {{ringPure}} reines Gold, zum selben Preis {{ringValue}} wert."
+        },
+        "purity": {
+          "title": "Karat und Feingehalt",
+          "intro": "Die Reinheit von Gold wird in Karat angegeben, von 24, oder in Tausendsteln, der Zahl im Stempel. Das sind die sechs gesetzlichen Feingehalte für Gold in Portugal:",
+          "items": {
+            "k24": "24 Karat, 999 Tausendstel: reines Gold, wie in Anlagebarren und -münzen.",
+            "k22": "22 Karat, 916: Goldmünzen wie der Sovereign und der Krugerrand und viel Schmuck aus Indien.",
+            "k19_2": "19,2 Karat, 800: portugiesisches Gold („ouro português“), der traditionelle Feingehalt portugiesischer Goldschmiedekunst.",
+            "k18": "18 Karat, 750: der häufigste Feingehalt bei Schmuck in Europa.",
+            "k14": "14 Karat, 585: härterer, günstigerer Schmuck.",
+            "k9": "9 Karat, 375: der niedrigste gesetzliche Feingehalt."
+          }
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Die Seite macht vier Dinge:",
+          "steps": {
+            "a": "Preis: der NBP-Preis für ein Gramm reines Gold in Zloty, geteilt durch die Zloty pro Euro der EZB am selben Tag.",
+            "b": "Reines Gold: das Gewicht mal den Feingehalt geteilt durch 1.000. Ein 24-karätiges Stück zählt mit 999 Tausendsteln.",
+            "c": "Wert: die Gramm reines Gold mal den Preis für ein Gramm reines Gold, auf den Cent gerundet.",
+            "d": "Angebot: wenn Sie eines eingeben, das Angebot geteilt durch den Wert, in Prozent, und die Differenz in Euro."
+          }
+        },
+        "buyers": {
+          "title": "Warum Ankäufer weniger als den Metallwert zahlen",
+          "below": "Ein Geschäft, das Gold ankauft, zahlt weniger als den Metallwert: Es schmilzt das Stück ein, bezahlt Prüfung und Scheidung und behält eine Marge. Wie viel weniger, ist von Geschäft zu Geschäft verschieden; holen Sie also mehrere Angebote ein und vergleichen Sie jedes mit dem Wert hier.",
+          "jewellery": "Neuer Schmuck kostet mehr als seinen Metallwert: Der Preis enthält Verarbeitung, Design, Marke und Mehrwertsteuer. Verkaufen Sie ihn später, bekommen Sie höchstens das Metall zurück, nicht das, was Sie bezahlt haben.",
+          "tips": "Wiegen Sie das Stück vor dem Verkauf, prüfen Sie den Stempel, fragen Sie nach dem Angebot pro Gramm und dem Feingehalt, den der Ankäufer angenommen hat, und lassen Sie sich eine schriftliche Quittung geben."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "nbp": "Goldpreis: Die Narodowy Bank Polski (NBP), die Zentralbank Polens, veröffentlicht an jedem Geschäftstag den von ihr berechneten Preis für 1 g Gold mit Feingehalt 1000, in Zloty, über ihre öffentliche API. Der neueste Tag ist der {{asOf}}; diese Seite wurde am {{fetched}} erstellt.",
+          "why": "Warum nicht der LBMA Gold Price: Diese Referenz, die zweimal täglich in London in US-Dollar festgestellt wird, verwaltet ICE Benchmark Administration, die für die Weitergabe an Dritte eine Lizenz verlangt, auch zeitverzögert. Der NBP-Preis ist eine Veröffentlichung einer Zentralbank, die über eine offene API ohne Lizenz und ohne Schlüssel bereitsteht. Deshalb verwendet diese Seite ihn und nennt die NBP als Quelle.",
+          "ecb": "Euro: der Euro-Referenzkurs der EZB für den Zloty am selben Tag, den die Europäische Zentralbank zu Informationszwecken veröffentlicht. Ein Tag, an dem einer der beiden Werte fehlt, wird übersprungen.",
+          "nbpLink": "NBP, aktueller Goldpreis",
+          "ecbLink": "EZB, Euro-Referenzkurs für den polnischen Zloty",
+          "refresh": "Die Seite liest eine gespeicherte Momentaufnahme und ruft während der Nutzung weder die NBP noch die EZB auf. Die Website wird jeden Tag mit einer neuen Momentaufnahme neu aufgebaut. Eine Aktualisierung, die fehlschlägt oder unplausible Werte liefert, wird abgelehnt, und die Seite behält den letzten guten Preis mit seinem Datum ({{asOf}})."
+        },
+        "limits": {
+          "title": "Was dieser Wert nicht enthält",
+          "items": {
+            "metal": "Nur das Metall: Der Wert ist der Goldgehalt zu einem Referenzpreis. Steine, andere Metalle, Verarbeitung und Marke zählen nicht.",
+            "buyers": "Kein Verkaufspreis: Ankäufer zahlen weniger, und ein Geschäft, das Gold verkauft, verlangt mehr.",
+            "purity": "Feingehalt: Der Rechner verlässt sich auf den Feingehalt, den Sie wählen. Ein ungestempeltes oder vergoldetes Stück kann viel weniger Gold enthalten oder gar keines.",
+            "reference": "Referenzpreis: der Tagespreis der NBP, kein Live-Kurs. Der Markt bewegt sich im Lauf des Tages.",
+            "education": "Nur zu Informationszwecken, keine Beratung."
+          }
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "netWorthLink": "Nettovermögensrechner",
+          "netWorthBody": "Rechnen Sie Ihr Gold zu dem, was Sie besitzen und schulden, und sehen Sie Ihr Nettovermögen.",
+          "inflationLink": "Inflationsrechner",
+          "inflationBody": "Sehen Sie, wie sich die Preise verändert haben und was Geld in anderen Jahren wert war.",
+          "investmentReturnLink": "Renditerechner",
+          "investmentReturnBody": "Sehen Sie, was eine Anlage über die Jahre gebracht hat."
+        }
       }
     }
   },

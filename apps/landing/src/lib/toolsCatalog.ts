@@ -309,6 +309,12 @@ export const TOOLS_CATALOG = [
 		group: "trackWealth",
 		related: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
 	},
+	{
+		key: "goldPrice",
+		routeId: "toolGoldPrice",
+		group: "trackWealth",
+		related: ["toolNetWorth", "toolInflation", "toolInvestmentReturn"],
+	},
 ] as const satisfies readonly ToolCatalogEntry[]
 
 const CATALOG: readonly ToolCatalogEntry[] = TOOLS_CATALOG

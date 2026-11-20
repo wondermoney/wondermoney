@@ -528,6 +528,14 @@ const ROUTE_SLUGS = {
 		de: "kraftstoffpreise-portugal",
 		it: "prezzi-carburanti-portogallo",
 	},
+	toolGoldPrice: {
+		pt: "preco-do-ouro",
+		en: "gold-price-per-gram",
+		es: "precio-del-oro-gramo",
+		fr: "prix-or-gramme",
+		de: "goldpreis-pro-gramm",
+		it: "prezzo-oro-grammo",
+	},
 	toolFreeBankAccounts: {
 		pt: "contas-bancarias-gratuitas",
 		en: "free-bank-accounts-portugal",
@@ -701,6 +709,7 @@ export const TOOL_ROUTE_IDS = [
 	"toolElectricityIndex",
 	"toolElectricityTariffComparison",
 	"toolFuelPrices",
+	"toolGoldPrice",
 	"toolFreeBankAccounts",
 	"toolRemuneratedAccounts",
 	"toolBrokerFees",
@@ -1059,6 +1068,9 @@ const LEGACY_TOOL_ROUTE_ID_BY_KEY: Record<string, ToolRouteId> = {
 	toolfuelprices: "toolFuelPrices",
 	"fuel-prices": "toolFuelPrices",
 	"preco-dos-combustiveis": "toolFuelPrices",
+	toolgoldprice: "toolGoldPrice",
+	"gold-price": "toolGoldPrice",
+	"preco-do-ouro": "toolGoldPrice",
 }
 
 function normalizeRouteLookupKey(value: string): string {

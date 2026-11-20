@@ -4526,10 +4526,10 @@
     "fuelPrices": {
       "title": "Prezzi dei carburanti in Portogallo e costo mensile",
       "shortName": "Prezzi dei carburanti",
-      "subtitle": "Guarda il prezzo medio ufficiale di gasolio, benzina e GPL in Portogallo, il suo storico e quanto ti costa guidare ogni mese.",
-      "description": "Prezzi medi ufficiali della DGEG dei carburanti nel Portogallo continentale, con variazione settimanale e storico, e un calcolatore del costo mensile del carburante.",
-      "pageTitle": "Prezzi dei carburanti in Portogallo: media ufficiale e costo mensile",
-      "pageDescription": "L'ultimo prezzo medio della DGEG di gasolio, benzina 95 e GPL in Portogallo, con la variazione rispetto alla settimana precedente e cinque anni di storico, e un calcolatore del tuo costo mensile di carburante. Dati ufficiali, nessuna previsione.",
+      "subtitle": "Consulta il prezzo medio ufficiale di gasolio, benzina e GPL in Portogallo, i distributori più economici del tuo distretto e comune e quanto ti costa guidare ogni mese.",
+      "description": "Prezzi medi ufficiali DGEG nel Portogallo continentale, i distributori più economici per distretto e comune e un calcolatore del costo mensile del carburante.",
+      "pageTitle": "Prezzi dei carburanti in Portogallo: distributori più economici e media ufficiale",
+      "pageDescription": "I distributori più economici per gasolio, benzina 95 e GPL per distretto e comune, aggiornati ogni giorno con i dati DGEG, il prezzo medio ufficiale con cinque anni di storico e un calcolatore del costo mensile. Nessuna previsione.",
       "fuels": {
         "diesel": "Gasolio (gasóleo simples)",
         "gasoline95": "Benzina 95 (gasolina simples 95)",
@@ -4597,7 +4597,8 @@
           "title": "Come leggere questa pagina",
           "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
           "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
-          "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima."
+          "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima.",
+          "stations": "Sotto ci sono i distributori più economici: i {{stationsDistrict}} più economici del Portogallo continentale o di un distretto, oppure i {{stationsMunicipality}} più economici di un comune, per il carburante scelto. Ognuno mostra il prezzo, il distributore e il marchio, l'indirizzo, un link alla mappa e quando il distributore ha aggiornato il prezzo l'ultima volta."
         },
         "example": {
           "title": "Esempio pratico",
@@ -4613,21 +4614,25 @@
             "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
             "d": "Anno: dodici mesi così."
           },
-          "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente."
+          "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente.",
+          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri."
         },
         "data": {
           "title": "Dati e fonti",
           "dgeg": "Prezzi: DGEG (Direção-Geral de Energia e Geologia), Preço Médio Diário dei carburanti stradali nel Portogallo continentale, per gasóleo simples, gasolina simples 95 e GPL auto. L'ultimo giorno è il {{asOf}}; la copia di questa pagina è stata creata il {{fetched}}. Lo storico è un valore della DGEG ogni sette giorni, a ritroso fino al {{first}}, copiato come la DGEG lo pubblica.",
           "terms": "La DGEG indica che queste informazioni sono gratuite e possono essere usate liberamente, a patto di citare la DGEG come fonte, indicare la data dell'ultimo aggiornamento e riprodurre fedelmente l'informazione. I prezzi sono comunicati dai distributori, che ne sono responsabili.",
           "dgegLink": "DGEG, Preço Médio Diário",
-          "refresh": "La pagina legge un file di dati salvato e non interroga mai la DGEG mentre la usi. Il file è aggiornato da uno script che rifiuta dati obsoleti o inverosimili, quindi un aggiornamento fallito conserva gli ultimi dati validi e la loro data ({{asOf}})."
+          "refresh": "La pagina legge un file di dati salvato e non interroga mai la DGEG mentre la usi. Il file è aggiornato da uno script che rifiuta dati obsoleti o inverosimili, quindi un aggiornamento fallito conserva gli ultimi dati validi e la loro data ({{asOf}}).",
+          "stations": "Distributori: i prezzi per distributore della DGEG, come li comunicano i distributori, per gli stessi tre carburanti. L'istantanea è stata presa il {{stationsDate}} alle {{stationsTime}} UTC, e ogni prezzo conserva la data e l'ora in cui il distributore lo ha aggiornato l'ultima volta.",
+          "stationsLink": "DGEG, prezzi dei carburanti per distributore",
+          "stationsRefresh": "L'elenco dei distributori è un'istantanea presa una volta al giorno, quando il sito viene ricostruito, e non segue i cambiamenti durante il giorno. Se la DGEG non risponde o i suoi dati non superano i controlli, la pagina mantiene l'istantanea precedente e ne mostra la data ({{stationsDate}})."
         },
         "limits": {
           "title": "Cosa non includono questi valori",
           "items": {
             "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
             "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
-            "stations": "Nessun distributore: questa pagina non nomina né classifica alcun distributore. Il sito della DGEG elenca i prezzi per distributore, se vuoi guardare.",
+            "stations": "Distributori: l'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa.",
             "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
             "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
             "education": "Solo a scopo informativo, non è una consulenza."
@@ -4642,6 +4647,28 @@
           "vehicleTaxLink": "Calcolo del bollo auto portoghese (IUC)",
           "vehicleTaxBody": "Stima l'imposta annuale del veicolo, un altro costo dell'auto."
         }
+      },
+      "stations": {
+        "title": "Distributori più economici",
+        "intro": "I distributori più economici per ogni carburante nel Portogallo continentale, in un distretto o in un comune, in base ai prezzi che i distributori comunicano alla DGEG.",
+        "asOf": "Istantanea dei prezzi per distributore della DGEG presa il {{date}} alle {{time}} UTC. Ogni prezzo indica quando il distributore lo ha aggiornato l'ultima volta.",
+        "stale": "Questo elenco ha {{days}} giorni: l'aggiornamento quotidiano non viene eseguito dal {{date}}. I prezzi potrebbero essere cambiati, quindi verificali al distributore prima di andare.",
+        "fuel": "Tipo di carburante",
+        "district": "Distretto",
+        "municipality": "Comune",
+        "mainland": "Tutto il Portogallo continentale",
+        "allMunicipalities": "Tutti i comuni di {{district}}",
+        "pickDistrict": "Scegli prima un distretto",
+        "loading": "Caricamento dei distributori di {{district}}…",
+        "loadError": "Non è stato possibile caricare l'elenco di questo distretto. Ricarica la pagina per riprovare.",
+        "none": "Nessun distributore di {{area}} indica un prezzo per {{fuel}}. Scegli l'intero distretto per vedere i più economici nei dintorni.",
+        "summary": "Distributori con un prezzo per {{fuel}} a {{area}}: {{count}}. Prezzo mediano: {{median}}. I più economici:",
+        "map": "Vedi sulla mappa",
+        "updated": "Aggiornato il {{date}}",
+        "saving": "Il più economico qui è {{perLitre}} sotto la mediana: {{perTank}} in meno per un pieno da {{litres}} L.",
+        "noSaving": "Qui il distributore più economico applica il prezzo mediano.",
+        "nextStepCta": "Risparmia la differenza mensile per un obiettivo",
+        "note": "Prezzi come i distributori li comunicano alla DGEG, che li pubblica; ogni distributore è responsabile del proprio prezzo. I prezzi possono cambiare nel corso della giornata e non includono gli sconti di carte carburante o app."
       }
     },
     "bankAccountsShared": {
@@ -5089,6 +5116,150 @@
         "banco-best": "Dal 21° ordine del mese: 0,10% (min. 12 €). Il servizio Best Trading Pro, sulla piattaforma di Saxo Bank, ha altri prezzi: ETF allo 0,08% (min. 10 €), nessuna commissione di custodia e indennizzo degli investitori fino a 20.000 €.",
         "big": "La custodia è gratuita con tre operazioni al trimestre e, in più, l'accredito dello stipendio o una giacenza media oltre 100.000 €. Lo spread di cambio è indicativo. Una Superconta separata remunera la liquidità.",
         "millennium-bcp": "La custodia costa 6 € al trimestre solo dopo un'operazione dal sito o dall'app nei tre mesi precedenti, altrimenti 9 €. Cambio ai tassi interni della banca, spread non pubblicato. Alle vendite negli USA si aggiunge la SEC fee."
+      }
+    },
+    "goldPrice": {
+      "title": "Prezzo dell'oro al grammo in euro e calcolatore del valore dell'oro",
+      "shortName": "Prezzo dell'oro",
+      "subtitle": "Consulta l'ultimo prezzo di un grammo d'oro in euro e quanto vale il tuo oro in base a peso e carati, dall'oro a 24 carati all'oro portoghese a 19,2.",
+      "description": "Il prezzo di un grammo d'oro in euro, datato, da una banca centrale, e un calcolatore del valore del metallo in base a peso e carati.",
+      "pageTitle": "Prezzo dell'oro al grammo in euro e calcolatore del valore dell'oro",
+      "pageDescription": "Il prezzo di un grammo d'oro puro in euro, datato, della Narodowy Bank Polski al cambio BCE, e un calcolatore del valore del metallo per oro a 24, 22, 19,2, 18, 14 e 9 carati. Chi compra oro paga meno.",
+      "purities": {
+        "k24": "{{karat}} carati ({{fineness}}‰), oro puro",
+        "k22": "{{karat}} carati ({{fineness}}‰)",
+        "k19_2": "{{karat}} carati ({{fineness}}‰), oro portoghese",
+        "k18": "{{karat}} carati ({{fineness}}‰)",
+        "k14": "{{karat}} carati ({{fineness}}‰)",
+        "k9": "{{karat}} carati ({{fineness}}‰)"
+      },
+      "fields": {
+        "grams": "Peso",
+        "purity": "Titolo",
+        "price": "Prezzo dell'oro puro al grammo",
+        "resetPrice": "Usa l'ultimo prezzo ({{price}}/g)",
+        "offer": "Offerta di un acquirente (facoltativa)"
+      },
+      "help": {
+        "grams": "Il peso del pezzo in grammi, con una bilancia che pesi al decimo di grammo o dallo scontrino. Pietre e altri metalli contano nel peso, ma non contengono oro.",
+        "purity": "Il titolo inciso nel marchio: 800 è l'oro portoghese (19,2 carati), 750 l'oro a 18 carati. Senza marchio, chiedi a un ufficio del saggio o a un gioielliere.",
+        "price": "Parte dall'ultimo prezzo dell'oro puro, {{price}}/g il {{date}}. Cambialo per vedere il valore a un altro prezzo.",
+        "offer": "Quello che un negozio o un acquirente ti ha offerto, per vederlo come parte del valore del metallo. Lascia vuoto se non vuoi confrontare."
+      },
+      "errors": {
+        "required": "Inserisci un numero valido.",
+        "negative": "Questo valore non può essere negativo.",
+        "tooLarge": "Inserisci {{max}} o meno.",
+        "zero": "Inserisci un valore maggiore di zero.",
+        "summary": "Controlla i campi evidenziati per vedere il valore."
+      },
+      "result": {
+        "value": "Valore del metallo",
+        "pureGrams": "Oro puro nel pezzo",
+        "perGram": "Valore del metallo per grammo del pezzo",
+        "nothing": "Senza peso non c'è oro da valutare.",
+        "offerBelow": "L'offerta è il {{share}} del valore del metallo, {{gap}} in meno.",
+        "offerAbove": "L'offerta è il {{share}} del valore del metallo, {{gap}} in più. Controlla peso e titolo.",
+        "offerNoValue": "Senza valore del metallo non si può confrontare l'offerta.",
+        "buyers": "Chi compra oro paga meno di così. Il valore del metallo è quanto vale l'oro in sé al prezzo di riferimento, prima del margine dell'acquirente e del costo di saggio e affinazione.",
+        "netWorth": "L'oro che possiedi fa parte del tuo patrimonio. Contalo per {{amount}}, o per quanto pagherebbe davvero un acquirente, e aggiornalo quando il prezzo si muove."
+      },
+      "notes": {
+        "assumptions": "Stima: peso per titolo per prezzo dell'oro puro. Valuta solo il metallo, non la lavorazione, le pietre o il marchio. Non è un'offerta né una consulenza."
+      },
+      "latest": {
+        "title": "Ultimo prezzo dell'oro",
+        "asOf": "Prezzo del {{date}}: il prezzo dell'oro puro della Narodowy Bank Polski, in euro al cambio BCE dello stesso giorno.",
+        "stale": "Questo prezzo ha {{days}} giorni: l'aggiornamento quotidiano non ne ha portato uno più recente dal {{date}}. Il prezzo dell'oro potrebbe essersi mosso nel frattempo.",
+        "perGram": "Oro puro (24 carati), al grammo",
+        "perOunce": "Oro puro, all'oncia troy (31,1 g)",
+        "portuguese": "Oro portoghese (19,2 carati), al grammo",
+        "portugueseNote": "800 millesimi del prezzo dell'oro puro",
+        "dayChange": "{{percent}} dal {{date}}",
+        "periodChange": "{{percent}} dal {{date}}",
+        "note": "Un prezzo di riferimento del metallo, non quanto paga o chiede un negozio. È un prezzo passato, non una previsione: questa pagina non prevede dove andrà l'oro."
+      },
+      "recent": {
+        "title": "Prezzi recenti",
+        "intro": "Il prezzo di un grammo d'oro puro negli ultimi giorni pubblicati dalla NBP, con il prezzo in zloty e il cambio BCE usato per convertirlo.",
+        "caption": "Prezzo di un grammo d'oro puro negli ultimi giorni, in euro e in zloty, e il cambio dell'euro",
+        "date": "Data",
+        "eurPerGram": "Euro al grammo",
+        "plnPerGram": "Zloty al grammo (NBP)",
+        "rate": "Zloty per euro (BCE)",
+        "asOf": "Dati al {{date}}. La copia di questa pagina è stata creata il {{fetched}}. Fonti: Narodowy Bank Polski (prezzo dell'oro) e Banca centrale europea (tasso di cambio di riferimento dell'euro)."
+      },
+      "nextStepHeadline": "Conta il tuo oro nel tuo patrimonio",
+      "nextStepDescription": "Oro, gioielli e altre cose che possiedi fanno parte del tuo patrimonio. Aggiungili in WonderMoney accanto a conti e investimenti e guarda il quadro completo.",
+      "nextStepCta": "Includi i beni fisici nel tuo patrimonio",
+      "guide": {
+        "read": {
+          "title": "Come leggere questa pagina",
+          "price": "In alto c'è il prezzo di un grammo d'oro puro in euro il {{asOf}}, circa {{ounce}} all'oncia troy, e quanto vale a quel prezzo un grammo d'oro portoghese a 19,2 carati.",
+          "calculator": "Il calcolatore trasforma un pezzo d'oro nel valore del suo metallo. Indichi peso e titolo; il prezzo parte dal più recente e puoi cambiarlo. Inserisci l'offerta di un acquirente per vedere che parte del valore del metallo rappresenta.",
+          "noForecast": "Questa pagina non fa previsioni. Mostra un prezzo pubblicato e quanto vale il tuo oro a quel prezzo; non dice dove andrà il prezzo né se comprare o vendere."
+        },
+        "example": {
+          "title": "Esempio",
+          "setup": "Una catenina da {{grams}} in oro portoghese (19,2 carati, 800 millesimi) contiene {{grams}} per 0,8, cioè {{pureGrams}} d'oro puro. A {{price}}, il suo metallo vale {{value}}.",
+          "ring": "Un anello da 4 g in oro a 18 carati (750 millesimi) contiene {{ringPure}} d'oro puro, che allo stesso prezzo valgono {{ringValue}}."
+        },
+        "purity": {
+          "title": "Carati e titolo",
+          "intro": "La purezza dell'oro si indica in carati, su 24, o in millesimi, il numero inciso nel marchio. Questi sono i sei titoli legali dell'oro in Portogallo:",
+          "items": {
+            "k24": "24 carati, 999 millesimi: oro puro, come nei lingotti e nelle monete da investimento.",
+            "k22": "22 carati, 916: monete d'oro come la sterlina (sovereign) e il Krugerrand, e molti gioielli indiani.",
+            "k19_2": "19,2 carati, 800: l'oro portoghese, il titolo tradizionale dell'oreficeria portoghese.",
+            "k18": "18 carati, 750: il titolo più comune della gioielleria europea.",
+            "k14": "14 carati, 585: gioielli più duri e più economici.",
+            "k9": "9 carati, 375: il titolo legale più basso."
+          }
+        },
+        "method": {
+          "title": "Come si calcola",
+          "intro": "La pagina fa quattro cose:",
+          "steps": {
+            "a": "Prezzo: il prezzo NBP di un grammo d'oro puro in zloty, diviso per gli zloty per euro della BCE dello stesso giorno.",
+            "b": "Oro puro: il peso per il titolo diviso per 1.000. Un pezzo a 24 carati conta 999 millesimi.",
+            "c": "Valore: i grammi d'oro puro per il prezzo di un grammo d'oro puro, arrotondato al centesimo.",
+            "d": "Offerta: se ne inserisci una, l'offerta divisa per il valore, in percentuale, e la differenza in euro."
+          }
+        },
+        "buyers": {
+          "title": "Perché chi compra oro paga meno del valore del metallo",
+          "below": "Un negozio che compra oro paga meno del valore del metallo: fonde il pezzo, paga saggio e affinazione e tiene un margine. Quanto meno varia da un negozio all'altro, quindi chiedi più di un'offerta e confronta ognuna con il valore di questa pagina.",
+          "jewellery": "Un gioiello nuovo costa più del valore del suo metallo: il prezzo comprende lavorazione, design, marchio e IVA. Rivendendolo più avanti recuperi al massimo il metallo, non quanto hai pagato.",
+          "tips": "Prima di vendere, pesa il pezzo, controlla il marchio, chiedi l'offerta al grammo e il titolo considerato dall'acquirente, e conserva una ricevuta scritta."
+        },
+        "data": {
+          "title": "Dati e fonti",
+          "nbp": "Prezzo dell'oro: la Narodowy Bank Polski (NBP), la banca centrale della Polonia, pubblica ogni giorno lavorativo il prezzo di 1 g d'oro di titolo 1000 che calcola, in zloty, tramite la sua API pubblica. L'ultimo giorno è il {{asOf}}; la copia di questa pagina è stata creata il {{fetched}}.",
+          "why": "Perché non il LBMA Gold Price: quel riferimento, fissato due volte al giorno a Londra in dollari, è amministrato da ICE Benchmark Administration, che richiede una licenza per trasmetterlo a terzi, anche in differita. Il prezzo NBP è una pubblicazione di una banca centrale offerta al pubblico con un'API aperta, senza licenza né chiave, quindi questa pagina lo usa e indica la NBP come fonte.",
+          "ecb": "Euro: il tasso di cambio di riferimento dell'euro per lo zloty dello stesso giorno, che la Banca centrale europea pubblica a titolo informativo. Un giorno con uno solo dei due valori viene saltato.",
+          "nbpLink": "NBP, prezzo attuale dell'oro",
+          "ecbLink": "BCE, tasso di riferimento dell'euro per lo zloty polacco",
+          "refresh": "La pagina legge un'istantanea salvata e non chiama mai la NBP né la BCE mentre la usi. Il sito viene ricostruito ogni giorno con una nuova istantanea. Un aggiornamento che fallisce o porta valori non plausibili viene rifiutato, e la pagina mantiene l'ultimo prezzo valido con la sua data ({{asOf}})."
+        },
+        "limits": {
+          "title": "Cosa lascia fuori questo valore",
+          "items": {
+            "metal": "Solo il metallo: il valore è l'oro contenuto nel pezzo a un prezzo di riferimento. Pietre, altri metalli, lavorazione e marchio non contano.",
+            "buyers": "Non è un prezzo di vendita: chi compra paga meno, e un negozio che vende oro chiede di più.",
+            "purity": "Titolo: il calcolatore si fida del titolo che scegli. Un pezzo senza marchio o placcato oro può contenere molto meno oro, o nessuno.",
+            "reference": "Prezzo di riferimento: il prezzo giornaliero NBP, non una quotazione minuto per minuto. Il mercato si muove durante il giorno.",
+            "education": "Solo a scopo educativo, non è una consulenza."
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "netWorthLink": "Calcolatore del patrimonio netto",
+          "netWorthBody": "Aggiungi il tuo oro a ciò che possiedi e devi e guarda il tuo patrimonio netto.",
+          "inflationLink": "Calcolatore dell'inflazione",
+          "inflationBody": "Guarda come sono cambiati i prezzi e quanto valeva il denaro in altri anni.",
+          "investmentReturnLink": "Calcolatore del rendimento degli investimenti",
+          "investmentReturnBody": "Guarda quanto ha reso un investimento negli anni."
+        }
       }
     }
   },

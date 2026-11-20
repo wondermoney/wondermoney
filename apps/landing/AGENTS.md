@@ -124,6 +124,8 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
 | `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
 | `data/electricityOffers.ts` | ERSE price simulator export (`csvPath` in its `Settings.json`): every supplier's household electricity offer. Types in `calculators/electricityOfferTypes.ts`; loaded only with a dynamic `import()` | weekly, automated (Mondays) | `node scripts/build-electricity-offers.mjs` (`--from-file <zip>` for a saved export) |
+| `data/fuelStations/` (`index.ts` and a JSON file per district) | DGEG station prices, the cheapest per district and municipality | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
+| `data/goldPrice.ts` | NBP gold price per gram, converted with the ECB euro reference rate | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-gold-price.mjs` |
 | `data/sp500History.ts` | Damodaran `histretSP.xls` and Shiller `ie_data.xls`, downloaded by hand | each January, after the year-end data is out | `node scripts/build-sp500-history.mjs <histretSP.xls> <date> <ie_data.xls> <date>` |
 | `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
 | `data/erseTariffs.ts` | ERSE tariff documents (diretivas, price simulator) | quarterly: check in the first week of January, April, July and October | Edit by hand, bump `version`, update the "downloaded on" date |
@@ -134,6 +136,43 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 
 When the data changes a number a page quotes in prose, update the pages in all six locales in the
 same pull request.
+
+## DAILY DATA
+
+The cheapest fuel stations (fuel prices page) and the gold price page show data that changes every
+day. Production deploys only from `main`, so instead of committing data daily the production build
+fetches it:
+
+- `pnpm build` runs `scripts/build-daily-snapshots.mjs` before `astro build`. In a production build
+  (`VERCEL_ENV=production`) it runs the two refresh scripts above, one request per source, with the
+  site's own User-Agent. Each validates the whole response and replaces its committed files only
+  when every check passed. A source that fails or fails a check leaves its committed snapshot in
+  place, with a warning in the build log; the build carries on and the page shows that snapshot's
+  older date, and after two days (five for gold) a notice that the data is old. The step never
+  fails the build.
+- Preview, CI and local builds use the committed snapshots and call nothing.
+  `LANDING_DAILY_SNAPSHOTS=1` fetches in any build, `=0` never; `LANDING_SNAPSHOT_FETCH_FAIL=1`
+  makes every fetch fail, to see the fallback.
+- `.github/workflows/landing-daily-deploy.yml` calls a Vercel deploy hook at 05:23 UTC every day,
+  which rebuilds production from the commit `main` already has. `vercel.json` passes
+  `--always-build-production` to the ignored-build-step script so that rebuild is not skipped.
+- The committed snapshots are the fallback; the monthly data refresh keeps them recent.
+- Committed station snapshots hold no station names and no street addresses (`redacted: true`):
+  many stations are sole traders named after their owner, and many streets are named after people.
+  Only a Vercel build (`VERCEL=1`), whose files are never committed, writes them; the page shows
+  the brand and locality ("GALP · Colmeias") when the name is missing. `fuelStations.test.ts` fails
+  if a committed file carries either.
+
+**One-time setup (a maintainer, in Vercel and GitHub).** Until it is done the workflow logs a
+notice and does nothing, and the pages show the committed snapshots.
+
+1. In the Vercel project of the landing site: Settings > Git > Deploy Hooks. Create a hook named
+   `daily-data` for the branch `main`, and copy its URL.
+2. In GitHub: Settings > Secrets and variables > Actions > New repository secret, named
+   `LANDING_DEPLOY_HOOK_URL`, with that URL. Anyone with the URL can trigger a deploy, so keep it
+   in the secret only; revoke the hook in Vercel and create a new one if it leaks.
+3. Run Actions > Landing daily deploy by hand once, and check that Vercel builds a production
+   deployment (not "Ignored") whose log shows `Daily snapshots: refreshed`.
 
 ## ANTI-PATTERNS
 
