@@ -3,8 +3,6 @@ title: "Tax Planning for Investors: Keep More of Your Returns"
 excerpt: A practical framework to manage capital gains, withholding, and tax drag over time.
 category: tax
 publishedAt: 2026-03-01T10:10:00.000Z
-relatedCalculators:
-  - capital-gains-calculator
 relatedTerms:
   - capital-gain
   - capital-gains-tax

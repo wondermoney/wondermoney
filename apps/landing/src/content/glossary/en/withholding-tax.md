@@ -3,6 +3,7 @@ term: Withholding Tax
 definition: Withholding tax is tax deducted at source from income like dividends or interest.
 category: tax
 example: A dividend of 100 with 15% withholding pays 85 net before additional local taxation.
+relatedCalculator: term-deposit-calculator
 relatedGuide: tax-planning-investors
 relatedTerms:
   - capital-gains-tax

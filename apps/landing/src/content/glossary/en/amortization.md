@@ -3,7 +3,7 @@ term: Amortization
 definition: Amortization is the process of repaying debt over time through scheduled payments.
 category: banking
 example: A mortgage statement often shows how much of each payment went to interest versus principal.
-relatedCalculator: loan-calculator
+relatedCalculator: mortgage-calculator
 relatedGuide: debt-payoff-plan
 relatedTerms:
   - loan-term

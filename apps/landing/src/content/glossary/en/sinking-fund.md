@@ -3,6 +3,7 @@ term: Sinking Fund
 definition: A sinking fund is money set aside regularly for a known future expense.
 category: budgeting
 example: Saving 50 monthly for annual car insurance creates a dedicated sinking fund.
+relatedCalculator: savings-goal-calculator
 relatedGuide: build-monthly-budget
 relatedTerms:
   - variable-expense

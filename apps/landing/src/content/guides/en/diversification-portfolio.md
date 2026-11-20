@@ -4,7 +4,7 @@ excerpt: Use diversification across assets, sectors, and regions to make your po
 category: investing
 publishedAt: 2026-03-01T09:40:00.000Z
 relatedCalculators:
-  - portfolio-allocation-calculator
+  - investor-profile-quiz
 relatedTerms:
   - diversification
   - asset-allocation

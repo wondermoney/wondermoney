@@ -3,7 +3,7 @@ term: Debt Avalanche
 definition: Debt avalanche prioritizes extra payments toward the highest-interest debt first.
 category: budgeting
 example: Pay minimums on all debts and direct all extra cash to the highest APR balance.
-relatedCalculator: debt-payoff-calculator
+relatedCalculator: early-repayment-calculator
 relatedGuide: debt-payoff-plan
 relatedTerms:
   - debt-snowball

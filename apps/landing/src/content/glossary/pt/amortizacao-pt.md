@@ -3,7 +3,7 @@ term: Amortização
 definition: Amortização é o reembolso progressivo de uma dívida através de prestações.
 category: banking
 example: O plano de amortização mostra quanto pagas de juros e capital em cada prestação.
-relatedCalculator: loan-calculator
+relatedCalculator: mortgage-calculator
 relatedGuide: plano-para-pagar-dividas
 relatedTerms:
   - prazo-do-emprestimo

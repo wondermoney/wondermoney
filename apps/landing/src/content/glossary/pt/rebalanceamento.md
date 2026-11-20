@@ -3,7 +3,6 @@ term: Rebalanceamento
 definition: Rebalanceamento é ajustar a carteira para regressar aos pesos alvo definidos.
 category: investing-concepts
 example: Se ações sobem para 75% de uma carteira alvo 60/40, rebalancear pode implicar reduzir ações e reforçar obrigações.
-relatedCalculator: portfolio-allocation-calculator
 relatedGuide: diversificacao-da-carteira
 relatedTerms:
   - alocacao-de-ativos

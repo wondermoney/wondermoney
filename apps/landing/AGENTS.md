@@ -98,6 +98,11 @@ monthly item's commentary.
   (`patrimonio-liquido`). Correct the title instead.
 - `relatedTerms` and `relatedGuide` hold slugs in the same locale; the build fails on one with no
   file.
+- `relatedCalculator` (a term) and `relatedCalculators` (a guide, at most three; the page shows
+  two) name tools by a key from `LEGACY_TOOL_ROUTE_ID_BY_KEY` in `src/lib/routes.ts` (such as
+  `debt-to-income-calculator`), the tool's slug in the document's locale or its route id; `fire`
+  names the FIRE calculator. The build fails on a name that resolves to no tool, rather than
+  linking the tools hub. Use a key in both en and pt: the parity check compares the values.
 - en and pt hold the same guides and terms (matched by category and calculators), so add each
   document in both. es, fr, de and it have none and show the hubs' "coming soon" state.
 - `topicKey` pairs the translations of one document for hreflang alternates; no document sets it

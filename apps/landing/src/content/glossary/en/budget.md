@@ -3,7 +3,7 @@ term: Budget
 definition: A budget is a spending and saving plan that assigns your income to clear categories and goals.
 category: budgeting
 example: You assign 50% to needs, 30% to wants, and 20% to savings and debt reduction.
-relatedCalculator: budget-planner
+relatedCalculator: household-budget-calculator
 relatedGuide: build-monthly-budget
 relatedTerms:
   - cash-flow

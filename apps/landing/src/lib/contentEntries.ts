@@ -6,7 +6,7 @@
  */
 import type { GlossaryTermData, GuideData, MonthlyData } from "@/content/schemas";
 import { htmlToPlain } from "./articleOutline";
-import { SUPPORTED_LANGS, type Lang } from "./routes";
+import { resolveCalculatorRouteIdFromLegacy, SUPPORTED_LANGS, type Lang } from "./routes";
 
 /** What these functions need of an Astro collection entry. */
 export type ContentEntry<TData> = {
@@ -77,6 +77,17 @@ function resolve<TData>(
   return target;
 }
 
+/**
+ * Checks that a related calculator names a tool or calculator page (`resolveCalculatorRouteIdFromLegacy`):
+ * the cards would otherwise lead to the tools hub without saying so.
+ */
+function checkCalculator(from: string, locale: Lang, value: string): string {
+  if (!resolveCalculatorRouteIdFromLegacy(value, locale)) {
+    throw new Error(`${from} names the calculator "${value}", which is no tool: use a key from LEGACY_TOOL_ROUTE_ID_BY_KEY in routes.ts, the tool's ${locale} slug or its route id`);
+  }
+  return value;
+}
+
 /** Folds accents away, so "Património" files under P next to "Patrimonio" and the order stays the code-point one. */
 const sortKey = (value: string) => value.normalize("NFD").replace(/\p{M}/gu, "");
 const byText = (a: string, b: string) => {
@@ -98,6 +109,7 @@ export function buildGuides(
       return {
         ...data,
         ...place,
+        relatedCalculators: data.relatedCalculators.map((value) => checkCalculator(`guides/${entry.id}`, place.locale, value)),
         publishedAt: publishedAt.toISOString(),
         lastReviewedAt: lastReviewedAt?.toISOString(),
         ogImageUrl: ogImage,
@@ -127,6 +139,7 @@ export function buildGlossaryTerms(
       return {
         ...data,
         ...place,
+        relatedCalculator: data.relatedCalculator && checkCalculator(from, place.locale, data.relatedCalculator),
         relatedTerms: relatedTerms.map((slug) => ({
           slug,
           term: resolve(termIndex, from, "glossary", place.locale, slug).data.term,

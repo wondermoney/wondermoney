@@ -3,7 +3,7 @@ term: APR (Annual Percentage Rate)
 definition: APR is the yearly cost of borrowing, including interest and most mandatory fees, expressed as a percentage.
 category: banking
 example: Loan A has 8.9% APR and Loan B has 11.2% APR; Loan A is generally cheaper if other terms are equal.
-relatedCalculator: loan-calculator
+relatedCalculator: personal-loan-calculator
 relatedGuide: debt-payoff-plan
 relatedTerms:
   - debt-to-income-ratio

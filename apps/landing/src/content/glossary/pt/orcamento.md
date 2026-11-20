@@ -3,7 +3,7 @@ term: Orçamento
 definition: Orçamento é um plano para distribuir rendimento por despesas, poupança e objetivos.
 category: budgeting
 example: Definir limites mensais por categorias é um passo central na criação de um orçamento.
-relatedCalculator: budget-planner
+relatedCalculator: household-budget-calculator
 relatedGuide: como-criar-orcamento-mensal
 relatedTerms:
   - fluxo-de-caixa

@@ -5,6 +5,7 @@ category: budgeting
 publishedAt: 2026-03-01T09:10:00.000Z
 relatedCalculators:
   - emergency-fund-calculator
+  - savings-accounts
 relatedTerms:
   - emergency-fund
   - liquidity

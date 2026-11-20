@@ -4,6 +4,8 @@ excerpt: Percebe como funcionam os ETFs e cria uma base simples para investir a 
 category: investing
 publishedAt: 2026-03-01T09:30:00.000Z
 relatedCalculators:
+  - investment-return-calculator
+  - broker-fees
   - compound-interest-calculator
 relatedTerms:
   - etf-pt

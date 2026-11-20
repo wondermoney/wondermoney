@@ -3,7 +3,6 @@ term: Rebalancing
 definition: Rebalancing is adjusting your portfolio back to target asset weights.
 category: investing-concepts
 example: If equities rise from 60% to 70% of your portfolio, rebalancing may involve selling some equities and adding bonds.
-relatedCalculator: portfolio-allocation-calculator
 relatedGuide: diversification-portfolio
 relatedTerms:
   - asset-allocation

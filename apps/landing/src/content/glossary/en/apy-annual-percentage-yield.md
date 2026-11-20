@@ -3,7 +3,7 @@ term: APY (Annual Percentage Yield)
 definition: APY is the yearly return on savings including compound interest.
 category: banking
 example: An account paying 4.5% APY grows 1,000 to about 1,045 in a year, before taxes.
-relatedCalculator: compound-interest-calculator
+relatedCalculator: term-deposit-calculator
 relatedGuide: inflation-real-return
 relatedTerms:
   - compound-interest

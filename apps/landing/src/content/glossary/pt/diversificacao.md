@@ -3,7 +3,6 @@ term: Diversificação
 definition: Diversificação é distribuir investimentos para reduzir risco de concentração.
 category: investing-concepts
 example: Ter exposição global em vez de concentrar tudo num único setor reduz risco específico.
-relatedCalculator: portfolio-allocation-calculator
 relatedGuide: diversificacao-da-carteira
 relatedTerms:
   - alocacao-de-ativos

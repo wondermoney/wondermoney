@@ -3,7 +3,6 @@ term: Diversification
 definition: Diversification means spreading investments to reduce concentration risk.
 category: investing-concepts
 example: Holding global equities plus bonds is usually less concentrated than owning only local tech stocks.
-relatedCalculator: portfolio-allocation-calculator
 relatedGuide: diversification-portfolio
 relatedTerms:
   - asset-allocation

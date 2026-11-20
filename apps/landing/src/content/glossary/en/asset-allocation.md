@@ -3,7 +3,7 @@ term: Asset Allocation
 definition: Asset allocation is how you divide investments across asset classes like stocks, bonds, and cash.
 category: investing-concepts
 example: A 70/30 portfolio means 70% in equities and 30% in bonds or cash-like assets.
-relatedCalculator: portfolio-allocation-calculator
+relatedCalculator: investor-profile-quiz
 relatedGuide: etf-investing-beginners
 relatedTerms:
   - etf

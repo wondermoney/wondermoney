@@ -3,6 +3,7 @@ term: Expense Ratio
 definition: Expense ratio is the annual fee charged by a fund, shown as a percentage of assets.
 category: investing-concepts
 example: A 0.20% expense ratio means 20 yearly for each 10,000 invested.
+relatedCalculator: investment-return-calculator
 relatedGuide: etf-investing-beginners
 relatedTerms:
   - etf
