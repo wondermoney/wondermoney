@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { getToolStaticPaths, getTopLevelPageStaticPaths } from "./pageStaticPaths"
 import { SUPPORTED_LANGS, TOOL_ROUTE_IDS, toLocalizedPath, type Lang } from "./routes"
 import {
@@ -13,9 +13,6 @@ import {
 	toolAnalyticsName,
 } from "./toolsCatalog"
 import { getTranslations } from "./translations"
-
-// pageStaticPaths imports the Sanity client for the content routes; tool and top-level paths never call it.
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
 const HUB_ROUTE_IDS = [...TOOL_ROUTE_IDS, "pageFireCalculator"] as const
 

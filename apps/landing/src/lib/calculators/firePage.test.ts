@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { getTopLevelPageStaticPaths } from "../pageStaticPaths"
 import {
 	SUPPORTED_LANGS,
@@ -11,9 +11,6 @@ import {
 	toLocalizedPathname,
 } from "../routes"
 import { buildToolsHub } from "../toolsCatalog"
-
-// pageStaticPaths imports the Sanity client for the content routes; top-level paths never call it.
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }))
 
 const landingRoot = fileURLToPath(new URL("../../../", import.meta.url))
 

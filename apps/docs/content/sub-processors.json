@@ -62,14 +62,6 @@
       "location": "United States (company), European Union (primary regions)"
     },
     {
-      "id": "sanity",
-      "heading": { "en": "Sanity", "pt": "Sanity", "es": "Sanity" },
-      "purpose": "Content management for marketing and editorial content.",
-      "evidence": "lp depends on @sanity/astro, @sanity/client.",
-      "personalData": "None — public editorial content only.",
-      "location": "European Union"
-    },
-    {
       "id": "resend",
       "heading": { "en": "Resend", "pt": "Resend", "es": "Resend" },
       "purpose": "Transactional and lifecycle email.",

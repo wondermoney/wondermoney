@@ -8,15 +8,13 @@ import ArticleSection from "@/components/learning/ArticleSection.astro";
 import GlossaryFormula from "@/components/learning/GlossaryFormula.astro";
 import DataTable from "@/components/learning/DataTable.astro";
 import ReferenceList from "@/components/learning/ReferenceList.astro";
-import { PortableText } from "astro-portabletext";
-import type { PortableTextProps } from "astro-portabletext/types";
-import { buildOutline, portableTextToPlain, readingMinutes } from "@/lib/articleOutline";
+import { getEntry, render } from "astro:content";
+import { buildOutline, readingMinutes } from "@/lib/articleOutline";
+import type { GlossaryTermEntry } from "@/lib/contentCollections";
 import { glossaryTermCards } from "@/lib/figureCards";
 import { hasFormulaContent } from "@/lib/glossaryFormula";
-import type { PortableTextBlock } from "@/lib/learningContent";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
-import type { GlossaryTermEntry } from "@/lib/pageStaticPaths";
 
 interface Props {
   locale: Lang;
@@ -37,51 +35,14 @@ const whyItMatters = term.whyItMatters;
 const miniExample = term.miniExample;
 const hasStructuredExample = Boolean(miniExample);
 
-const miniTableColumns =
-  (Array.isArray(term.miniTable?.columns) && term.miniTable.columns) ||
-  (Array.isArray(term.miniTable?.headers) && term.miniTable.headers) ||
-  [];
+const miniTableColumns = term.miniTable?.columns ?? [];
+const miniTableRows = (term.miniTable?.rows ?? []).filter((row) => row.length > 0);
 
-const miniTableRows = (Array.isArray(term.miniTable?.rows) ? term.miniTable.rows : [])
-  .map((row: unknown) => {
-    if (Array.isArray(row)) {
-      return row.map((cell) => String(cell ?? ""));
-    }
+const normalizedReferences = term.references.filter(
+  (reference) => Boolean(reference.title || reference.url || reference.publisher),
+);
 
-    if (row && typeof row === "object") {
-      const record = row as Record<string, unknown>;
-      if (miniTableColumns.length > 0) {
-        return miniTableColumns.map((column: string) => String(record[column] ?? ""));
-      }
-
-      return Object.values(record).map((cell) => String(cell ?? ""));
-    }
-
-    return [];
-  })
-  .filter((row: string[]) => row.length > 0);
-
-const normalizedReferences: Array<{ title?: string; url?: string; publisher?: string }> =
-  (Array.isArray(term.references) ? term.references : []).reduce((acc, item) => {
-    if (!item || typeof item !== "object") {
-      return acc;
-    }
-
-    const record = item as Record<string, unknown>;
-    const normalized = {
-      title: typeof record.title === "string" ? record.title : undefined,
-      url: typeof record.url === "string" ? record.url : undefined,
-      publisher: typeof record.publisher === "string" ? record.publisher : undefined,
-    };
-
-    if (normalized.title || normalized.url || normalized.publisher) {
-      acc.push(normalized);
-    }
-
-    return acc;
-  }, [] as Array<{ title?: string; url?: string; publisher?: string }>);
-
-const relatedTerms = (term.relatedTerms ?? []).filter((related) => related.slug && related.locale === locale);
+const relatedTerms = term.relatedTerms;
 
 const relatedLinks = glossaryTermCards({
   locale,
@@ -94,8 +55,11 @@ const KEEP_READING = 3;
 const relatedCards = relatedLinks.slice(0, KEEP_READING);
 const moreTools = relatedLinks.slice(KEEP_READING);
 
-const explanationBlocks = Array.isArray(term.explanation) ? (term.explanation as PortableTextBlock[]) : [];
-const showExplanation = !technicalDefinition && Boolean(term.explanation);
+// The Markdown body is the explanation; a technical definition takes its place.
+const entry = await getEntry("glossary", term.id);
+if (!entry) throw new Error(`No glossary term at src/content/glossary/${term.id}.md`);
+const { Content: Explanation } = await render(entry);
+const showExplanation = !technicalDefinition && Boolean(term.bodyText);
 const exampleText = miniExample || term.example;
 
 // The body's titled sections, in reading order; numbered when there are two or more.
@@ -119,7 +83,7 @@ const readMinutes = readingMinutes([
   primaryDefinition ?? "",
   whyItMatters ?? "",
   technicalDefinition ?? "",
-  showExplanation ? portableTextToPlain(explanationBlocks) : "",
+  showExplanation ? term.bodyText : "",
   term.formula?.notes ?? "",
   exampleText ?? "",
 ]);
@@ -139,7 +103,6 @@ const definedTermSchema = {
   },
 };
 
-const explanationValue = term.explanation;
 const whyItMattersSection = section("whyItMatters");
 const technicalSection = section("technicalDefinition");
 const explanationSection = section("explanation");
@@ -191,7 +154,7 @@ const miniTableSection = section("miniTable");
 
         {explanationSection && (
           <ArticleSection {...explanationSection}>
-            <PortableText value={explanationValue as PortableTextProps["value"]} />
+            <Explanation />
           </ArticleSection>
         )}
 

@@ -1,0 +1,29 @@
+---
+import ReferenceList from "./ReferenceList.astro"
+
+type ReferenceItem = {
+	title?: string
+	url?: string
+	publisher?: string
+}
+
+interface Props {
+	/** The guide's sources, listed under its text. */
+	references?: ReadonlyArray<ReferenceItem>
+}
+
+/**
+ * A learn guide's article: its Markdown body (the default slot) set in the
+ * article prose, then its references.
+ */
+const { references = [] } = Astro.props
+const referenceItems = references.filter((reference) => Boolean(reference.title || reference.url))
+---
+
+<div class="max-w-[40rem] space-y-10">
+	<section class="prose prose-lg article-prose">
+		<slot />
+	</section>
+
+	{referenceItems.length > 0 && <ReferenceList references={referenceItems} />}
+</div>

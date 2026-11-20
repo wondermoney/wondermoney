@@ -1,12 +1,10 @@
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { getToolStaticPaths } from "../pageStaticPaths";
 import { getRelatedContentTools } from "../relatedContentTools";
 import { SUPPORTED_LANGS, resolveToolRouteIdFromLegacy, toLocalizedPath, type Lang } from "../routes";
 import { buildToolsHub } from "../toolsCatalog";
 import { getTranslations } from "../translations";
-
-vi.mock("sanity:client", () => ({ sanityClient: { fetch: vi.fn() } }));
 
 const slugs = {
   pt: "simulador-credito-habitacao-jovem",

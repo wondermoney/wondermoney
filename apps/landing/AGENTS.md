@@ -2,8 +2,8 @@
 
 ## OVERVIEW
 
-Astro 7 marketing site (wonder.money) with React 19 islands, Tailwind 4, Sanity-backed
-content, and application/API seams. Node 26 (root `.nvmrc`) and pnpm from the repository
+Astro 7 marketing site (wonder.money) with React 19 islands, Tailwind 4, learn content as
+Markdown in the repository, and application/API seams. Node 26 (root `.nvmrc`) and pnpm from the repository
 root; `pnpm dev:landing` at the root starts it. It has six locale-prefixed route trees
 (`pt`, `en`, `es`, `fr`, `de`, `it`), with `pt` as the default locale. Deployed through
 Vercel's Git integration as SSR output (`@astrojs/vercel`); localized pages are largely
@@ -15,8 +15,8 @@ prerendered.
 src/pages/             # Root redirect and mirrored locale route files
 src/components/pages/  # Shared page archetypes/composition
 src/components/shared/ # Layout, SEO, structured data
-src/lib/               # Locale, routes, static paths, Sanity queries
-src/content/           # Local content/config
+src/lib/               # Locale, routes, static paths, content collection readers
+src/content/           # Learn content (Markdown per locale) and local content modules
 src/locales/           # Translation catalogues (mirrored in public/locales/)
 scripts/               # Offer and claims alignment checks, and the data-snapshot refresh scripts
 public/                # Static assets
@@ -28,7 +28,8 @@ public/                # Static assets
 |------|----------|-------|
 | Route parity | `src/pages/`, "Localized routes" below | Thin locale wrappers |
 | Localized URLs | `src/lib/routes.ts` | Typed localized slug map |
-| Static content expansion | `src/lib/pageStaticPaths.ts` | Guides, glossary, tools, monthly pages |
+| Static content expansion | `src/lib/pageStaticPaths.ts` | Top-level, feature, tool and ad pages |
+| Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
@@ -49,9 +50,8 @@ public/                # Static assets
   are not otherwise changing.
 - `pt` copy is European Portuguese and addresses the reader as **tu** ("Começa grátis", "as tuas
   contas"), never "você" or the formal third person (`CONTRIBUTING.md` has the rule and examples).
-- Analytics IDs in `src/lib/gtm.ts` and `src/lib/posthog.ts` are public client keys, and
-  the Sanity project id in `astro.config.mjs` is public too. Secrets stay in Vercel environment
-  variables, never in code.
+- Analytics IDs in `src/lib/gtm.ts` and `src/lib/posthog.ts` are public client keys. Secrets
+  stay in Vercel environment variables, never in code.
 
 ## LOCALIZED ROUTES
 
@@ -81,6 +81,29 @@ src/pages/index.astro         # Root redirect only
   generates Vercel HTTP 301 redirects from those maps. `pnpm build` checks each rule in
   Vercel output and verifies that the sitemap lists its destination only.
 - Verify generated URLs for all six locales, not only the default route.
+
+## LEARN CONTENT
+
+Guides (`/learn/<slug>`), glossary terms (`/glossary/<slug>`) and monthly items
+(`/learn/monthly/<slug>`) are Markdown files, one per document and locale:
+`src/content/<guides|glossary|monthly>/<locale>/<slug>.md`. The directory is the locale and the
+file name is the URL slug. The frontmatter schemas, with a comment on each field, are in
+`src/content/schemas.ts`; the Markdown body is the guide's text, the term's explanation or the
+monthly item's commentary.
+
+- To add a document, copy a sibling in the same collection and locale, then rename it to the
+  new slug (lowercase words and hyphens). A monthly item also needs `title`, `year` and `month`;
+  none exist yet, so the build warns that the `monthly` collection is empty until the first one.
+- A slug is a route and a canonical URL: keep it once published, even when it lacks accents
+  (`patrimonio-liquido`). Correct the title instead.
+- `relatedTerms` and `relatedGuide` hold slugs in the same locale; the build fails on one with no
+  file.
+- en and pt hold the same guides and terms (matched by category and calculators), so add each
+  document in both. es, fr, de and it have none and show the hubs' "coming soon" state.
+- `topicKey` pairs the translations of one document for hreflang alternates; no document sets it
+  yet.
+- `src/content/content.test.ts` validates every file, its path, its references and the en/pt
+  parity; run it after editing content.
 
 ## CALCULATOR DATA REFRESH
 
@@ -116,7 +139,7 @@ same pull request.
 - Never add a page to one locale tree only.
 - Never duplicate route/content fetching logic across six wrappers.
 - Never copy full page markup into locale wrappers or translate slugs outside the typed route table.
-- Never silently omit missing Sanity content for one locale without an explicit fallback policy.
+- Never add a guide or glossary term to en or pt alone: the other needs its translation.
 - Never assume `output: server` means localized pages are runtime-only; they explicitly prerender.
 - Never put Markdown or other non-route files under `src/pages/`: Astro publishes them as pages.
 
