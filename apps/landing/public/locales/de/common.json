@@ -4251,9 +4251,9 @@
         "periodsLegend": "Verbrauch je Zeitraum"
       },
       "options": {
-        "simple": "Einfach",
-        "biHourly": "Zweizeitig",
-        "triHourly": "Dreizeitig"
+        "simple": "Eintarif",
+        "biHourly": "Zweitarif",
+        "triHourly": "Dreitarif"
       },
       "cycles": {
         "daily": "Täglicher Zyklus",
@@ -4278,7 +4278,7 @@
       },
       "help": {
         "power": "Auf Ihrer Rechnung, in kVA. Die meisten Haushalte haben 3,45, 4,6 oder 6,9 kVA.",
-        "option": "Einfach hat einen einzigen Energiepreis; zweizeitig und dreizeitig berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
+        "option": "Der Eintarif hat einen einzigen Energiepreis; Zweitarif und Dreitarif berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
         "cycle": "Der Zyklus Ihres Zählers, auf der Rechnung. Der wöchentliche Zyklus verschiebt die Schwachlastzeiten am Wochenende.",
         "bill": "Was Sie im Monat zahlen, inklusive Mehrwertsteuer. Der Betrag wird in kWh umgerechnet, als hätten Sie den regulierten Tarif, wie bei der Schnellsimulation der ERSE.",
         "billKwh": "Im regulierten Tarif entspricht diese Rechnung etwa {{kwh}} im Monat.",
@@ -4468,7 +4468,7 @@
         "summary": "Prüfen Sie die markierten Felder, um die Angebote zu sehen."
       },
       "compare": {
-        "title": "Einfach, zweizeitig oder dreizeitig?",
+        "title": "Eintarif, Zweitarif oder Dreitarif?",
         "intro": "Das günstigste Angebot jeder Option bei gleichem Verbrauch, aufgeteilt nach Ihrem Zeitzyklus.",
         "yours": "(Ihre Option)",
         "perFirstYear": "im ersten Jahr",
@@ -4568,7 +4568,7 @@
         "indexedMarketDiagram": "Indexierte Angebote mit veröffentlichter Formel: tatsächliche Kosten mit dem portugiesischen OMIE-Preis jeder Viertelstunde Ihrer Verbrauchsdatei ({{period}}), mit den Netzverlusten von E-REDES und REN und den heutigen Netzentgelten. So viel hätten sie gekostet, keine Prognose. Die übrigen bleiben bei der Schätzung der ERSE.",
         "taxes": "Die Summen enthalten Leistung, Energie, den Rundfunkbeitrag, die Stromverbrauchsteuer und die Mehrwertsteuer.",
         "dgeg": "Die DGEG-Gebühr (einige Cent im Monat) ist nicht enthalten.",
-        "educational": "Schätzung zu Bildungszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
+        "educational": "Schätzung zu Informationszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
         "simulatorLink": "Offizieller Preissimulator der ERSE",
         "omieLink": "Day-Ahead-Marktpreise (OMIE, Portugal)",
         "profilesLink": "Verbrauchs- und Verlustprofile (E-REDES)"
@@ -4581,11 +4581,11 @@
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
           "mine": "Unter „Mit meinem Tarif vergleichen“ geben Sie die Preise von Ihrer Rechnung ein. Ihr Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
           "solar": "Unter „Solaranlage“ fügen Sie eine Anlage nach Distrikt, Spitzenleistung und Verlusten hinzu. Die Erzeugung der Anlage wird Stunde für Stunde von Ihrem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was Sie noch aus dem Netz beziehen. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn Sie einen eingeben, wird getrennt von der Rangfolge gezeigt.",
-          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für einfach, zweizeitig und dreizeitig bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
+          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für Eintarif, Zweitarif und Dreitarif bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
         },
         "example": {
           "title": "Rechenbeispiel",
-          "setup": "Ein Haushalt mit 3,45 kVA in der einfachen Option verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
+          "setup": "Ein Haushalt mit 3,45 kVA im Eintarif verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
           "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
           "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
         },
@@ -4624,7 +4624,7 @@
             "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, es sei denn, Sie beziehen sie ein.",
             "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht Ihrem eigenen. Die E-REDES-Datei liefert Ihre tatsächliche Aufteilung.",
             "solar": "Die Solarerzeugung ist ein typisches Jahr der Distrikthauptstadt, nach Süden mit optimaler Neigung: Verschattung, eine andere Ausrichtung und das Wetter eines bestimmten Jahres ändern sie.",
-            "f": "Dies ist eine Schätzung zu Bildungszwecken, keine Beratung. Lesen Sie das standardisierte Datenblatt und die Bedingungen des Angebots, bevor Sie unterschreiben."
+            "f": "Dies ist eine Schätzung zu Informationszwecken, keine Beratung. Lesen Sie das standardisierte Datenblatt und die Bedingungen des Angebots, bevor Sie unterschreiben."
           },
           "simulatorLink": "Ein Ergebnis im offiziellen Simulator der ERSE prüfen"
         },
