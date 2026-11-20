@@ -1,0 +1,49 @@
+name: Landing daily deploy
+
+# Rebuilds the production landing site (wonder.money) once a day, so the pages with daily data
+# show that day's figures: the cheapest fuel stations (DGEG) and the gold price (NBP, ECB).
+#
+# It only calls a Vercel deploy hook. The production build then runs
+# apps/landing/scripts/build-daily-snapshots.mjs before astro build, which fetches each source
+# once, validates it and keeps the committed snapshot when a source fails (the page then shows
+# that older snapshot's date). Nothing is committed and nothing reaches main: the hook rebuilds
+# the commit main already has.
+#
+# Needs the repository secret LANDING_DEPLOY_HOOK_URL, the URL of a deploy hook on the landing
+# Vercel project for the main branch (apps/landing/AGENTS.md, "Daily data"). Without the secret
+# the job says so and ends without failing. Runs in the main repository only.
+on:
+  schedule:
+    # 05:23 UTC: after DGEG's overnight station updates and NBP's and the ECB's previous-day
+    # publications, before the morning in Portugal.
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: landing-daily-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Trigger the production landing build
+    if: github.repository == 'wondermoney/wondermoney'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Call the Vercel deploy hook
+        env:
+          HOOK_URL: ${{ secrets.LANDING_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${HOOK_URL:-}" ]; then
+            echo "::notice::LANDING_DEPLOY_HOOK_URL is not set: no deploy triggered. apps/landing/AGENTS.md says how to create it."
+            echo "LANDING_DEPLOY_HOOK_URL is not set: no deploy triggered." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # The URL is a secret: never echo it. -f fails on an HTTP error, --retry covers a blip.
+          status=$(curl -sS -f -X POST --retry 3 --retry-delay 10 --max-time 30 -o response.json -w '%{http_code}' "$HOOK_URL")
+          job=$(jq -r '.job.id // "unknown"' response.json 2>/dev/null || echo unknown)
+          rm -f response.json
+          echo "Vercel answered $status; deploy job $job." | tee -a "$GITHUB_STEP_SUMMARY"

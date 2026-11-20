@@ -6,7 +6,9 @@ name: Landing data refresh
 #
 #   market  Euribor from BPstat, deposit rates from the ECB, household electricity prices from
 #           Eurostat, fuel prices from DGEG. The sources publish monthly, so it runs on the 6th.
-#           Branch bot/landing-data-refresh.
+#           Also the committed fallback of the two daily snapshots, the cheapest fuel stations
+#           (DGEG) and the gold price (NBP, ECB), which every production build refreshes anyway
+#           (landing-daily-deploy.yml). Branch bot/landing-data-refresh.
 #   offers  Every supplier's electricity offer, from ERSE's price simulator export. Offers start
 #           and end every week, so it runs every Monday. Branch bot/landing-offers-refresh.
 #
@@ -80,10 +82,10 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           else
             {
-              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices"
+              echo "scripts=build-euribor build-deposit-rates build-electricity-prices build-fuel-prices build-fuel-stations build-gold-price"
               echo "branch=bot/landing-data-refresh"
               echo "title=chore(landing): refresh the market-data snapshots"
-              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision"
+              echo "tests=euribor depositRate electricity fuel termDeposit rateRevision gold CheapestStations"
             } >> "$GITHUB_OUTPUT"
           fi
           echo "set=$set" >> "$GITHUB_OUTPUT"
@@ -158,6 +160,8 @@ jobs:
           row "Deposit rates (ECB MIR)" depositRates.ts lastMonth retrievedOn
           row "Electricity prices (Eurostat)" electricityPrices.ts lastPeriod updatedOn
           row "Fuel prices (DGEG)" fuelPrices.ts asOf fetchedOn
+          row "Fuel stations (DGEG)" fuelStations/index.ts asOf fetchedAt
+          row "Gold price (NBP, ECB)" goldPrice.ts asOf fetchedOn
           row "Electricity offers (ERSE export date)" electricityOffers.ts exportedOn fetchedOn
 
           body_file=$(mktemp)

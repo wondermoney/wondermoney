@@ -3,7 +3,7 @@
   "framework": "astro",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
-  "ignoreCommand": "bash ../../scripts/vercel-ignore-build.sh . ../../pnpm-lock.yaml",
+  "ignoreCommand": "bash ../../scripts/vercel-ignore-build.sh --always-build-production . ../../pnpm-lock.yaml",
   "redirects": [
     {
       "source": "/:locale/net-worth-app",

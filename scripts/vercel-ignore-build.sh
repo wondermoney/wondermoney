@@ -9,9 +9,22 @@
 # deployment yet builds in production; a preview branch's first push compares with its parent
 # commit, as before, rather than building every project for every new branch. Builds whenever the
 # commits can't be fetched or compared.
-#   bash ../../scripts/vercel-ignore-build.sh <path>...   (paths relative to the project's root)
+#   bash ../../scripts/vercel-ignore-build.sh [--always-build-production] <path>...
+#   (paths relative to the project's root)
+#
+# --always-build-production builds every production deployment. apps/landing passes it: its
+# production site is rebuilt daily by a deploy hook (.github/workflows/landing-daily-deploy.yml) to
+# fetch that day's data, and a hook rebuilds the commit main already has, which the comparison
+# below would skip.
 set -uo pipefail
 
+if [ "${1:-}" = "--always-build-production" ]; then
+  shift
+  if [ "${VERCEL_ENV:-}" = production ]; then
+    echo "Production deployment of a project that rebuilds daily: building."
+    exit 1
+  fi
+fi
 if [ "$#" -eq 0 ]; then
   echo "No paths given: building."
   exit 1
