@@ -122,13 +122,6 @@
       "newSubheadline": "Connectez votre banque grâce à l'Open Banking en lecture seule. WonderMoney s'occupe du reste.",
       "newCta": "Commencer gratuitement"
     },
-    "trustBar": {
-      "gocardless": "Propulsé par Enable Banking",
-      "openBanking": "Open Banking",
-      "gdpr": "Confidentialité avant tout",
-      "readOnly": "Accès en lecture seule",
-      "madeIn": "Fabriqué au Portugal"
-    },
     "howItWorksSteps": {
       "title": "Comment ça marche",
       "subtitle": "De la première connexion à une vision financière complète.",
@@ -238,48 +231,11 @@
         "code": "Code sur GitHub"
       }
     },
-    "secondaryFeatures": {
-      "title": "Plus de fonctionnalités",
-      "subTitle": "Objectifs, catégorisation intelligente et confidentialité — tout ce que WonderMoney fait",
-      "goals": {
-        "title": "Objectifs",
-        "description": "Définissez des objectifs d'épargne, suivez vos progrès et réservez de l'argent pour ce qui compte"
-      },
-      "categorization": {
-        "title": "Catégorisation intelligente",
-        "description": "WonderMoney catégorise automatiquement vos transactions bancaires grâce à l'IA"
-      },
-      "privacy": {
-        "title": "Confidentialité et sécurité",
-        "description": "Open Banking en lecture seule. WonderMoney ne voit jamais vos identifiants bancaires"
-      },
-      "learnMore": "En savoir plus"
-    },
     "previewLabel": "Aperçu",
     "midCta": {
       "headline": "Vos finances, toutes au même endroit",
       "subheadline": "Rejoignez celles et ceux qui souhaitent une vision plus claire de leurs finances.",
       "microcopy": "Gratuit et open source"
-    },
-    "whyWondermoney": {
-      "title": "Pourquoi WonderMoney ?",
-      "subtitle": "Pensé différemment, et ce n'est pas un hasard.",
-      "card1": {
-        "title": "Conçu pour l'Europe",
-        "description": "Contrairement aux applications centrées sur les États-Unis, WonderMoney est pensé pour les banques européennes, la réglementation en vigueur et la façon dont vous gérez réellement votre argent."
-      },
-      "card2": {
-        "title": "Tout-en-un",
-        "description": "Contrairement aux outils à usage unique, WonderMoney combine banque, budget et investissement dans une seule application — sans jamais avoir à basculer entre elles."
-      },
-      "card3": {
-        "title": "Gratuit et Open Source",
-        "description": "WonderMoney est gratuit et open source — sans abonnement. Utilisez-le sur wonder.money ou sur votre propre serveur."
-      },
-      "card4": {
-        "title": "La vie privée d'abord",
-        "description": "Les connexions bancaires utilisent l’Open Banking en lecture seule via Enable Banking. WonderMoney ne peut pas initier de virements. Vous saisissez vos identifiants auprès de votre banque ou fournisseur, et WonderMoney ne les voit pas."
-      }
     },
     "faq": {
       "title": "Questions fréquentes",
