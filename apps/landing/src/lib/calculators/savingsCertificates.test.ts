@@ -95,4 +95,18 @@ describe("computeSavingsCertificates", () => {
     expect(referenceBaseRate.rate).toBeLessThanOrEqual(maxBaseRate);
     expect(SAVINGS_CERTIFICATES_EXAMPLE.baseRate).toBe(referenceBaseRate.rate);
   });
+
+  it("takes the default base rate and the rules from IGCP's own pages", () => {
+    const { referenceBaseRate, rulesSource } = SAVINGS_CERTIFICATES_RULES;
+    // IGCP, 30 October 2026: the gross rate for new Série F subscriptions in November 2026 is 2,500%. A new
+    // subscription has no permanence premium in year 1, so that is the base rate.
+    expect(referenceBaseRate).toEqual({
+      rate: 2.5,
+      month: "2026-11",
+      source: "https://www.igcp.pt/pt/noticias/taxas-de-juro-dos-certificados-de-aforro-das-series-b-d-e-e-f-em-novembro-de-2026",
+    });
+    expect(rulesSource).toBe(
+      "https://www.igcp.pt/pt/aforristas/produtos-de-aforro/certificados-de-aforro/ficha-tecnica-certificados-de-aforro-serie-f",
+    );
+  });
 });

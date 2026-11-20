@@ -522,7 +522,7 @@
         "methodPayment": "Die Steuer wird bis 100 € in einer Rate im Mai gezahlt, von 100 € bis 500 € in zwei Raten im Mai und November und über 500 € in drei Raten im Mai, August und November. Die Raten sind gleich hoch; ein Rundungscent geht an die letzte.",
         "methodBudget": "Die monatliche Rücklage teilt die Jahressteuer durch 12, damit das Geld zu jeder Fälligkeit bereitliegt.",
         "exemptionTitle": "Befreiung für den eigenen Hauptwohnsitz",
-        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit. Artikel 46 des Steuervergünstigungsstatuts (EBF) gewährt drei Jahre Befreiung nach Kauf oder Bau einer Wohnung mit einem VPT bis 125.000 €, wenn das Bruttoeinkommen des Haushalts im Vorjahr höchstens 153.300 € betrug; die Wohnung muss binnen sechs Monaten als Hauptwohnsitz genutzt und die Befreiung fristgerecht beantragt werden. Artikel 11-A des Código do IMI befreit zeitlich unbegrenzt die Wohnung eines Haushalts mit einem Bruttoeinkommen von höchstens dem 2,3-Fachen von 14 IAS (rund 17.300 € beim IAS 2026 von 537,13 €), dessen Immobilien zusammen einen VPT von höchstens dem 10-Fachen von 14 IAS haben (75.198,20 € beim IAS 2026). Es gelten weitere Bedingungen, und die Grenzen können sich ändern, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
+        "exemption": "Manche Eigentümer ihres Hauptwohnsitzes sind von der IMI befreit. Artikel 46 des Steuervergünstigungsstatuts (EBF) gewährt {{ebfYears}} Jahre Befreiung nach Kauf oder Bau einer Wohnung mit einem VPT bis {{ebfVpt}}, wenn das Bruttoeinkommen des Haushalts im Vorjahr höchstens {{ebfIncome}} betrug. Die Gemeindeversammlung kann sie um weitere {{ebfExtraYears}} Jahre verlängern. Die Wohnung muss binnen sechs Monaten als Hauptwohnsitz genutzt werden. Beim Kauf gilt die Befreiung automatisch; nach Bau oder Umbau muss sie fristgerecht beantragt werden. Ein Haushalt kann sie nur zweimal erhalten. Artikel 11-A des Código do IMI befreit zeitlich unbegrenzt die Wohnung eines Haushalts mit einem Bruttoeinkommen von höchstens dem 2,3-Fachen von 14 IAS (rund 17.300 € beim IAS 2026 von 537,13 €), dessen Immobilien zusammen einen VPT von höchstens dem 10-Fachen von 14 IAS haben (75.198,20 € beim IAS 2026). Es gelten weitere Bedingungen, und die Grenzen können sich ändern, daher wendet der Rechner keine Befreiung an. Prüfen Sie Ihren Anspruch im Portal das Finanças, bevor Sie das Ergebnis nutzen.",
         "assumptionsTitle": "Annahmen",
         "assumptionRate": "Den kommunalen Satz geben Sie selbst ein. Diese Seite enthält keine Tabelle der Gemeindesätze, und Gemeinden können den Satz in bestimmten Fällen erhöhen oder senken, etwa bei leerstehenden oder verfallenen Gebäuden, was der Rechner ignoriert.",
         "assumptionScope": "Die Schätzung betrifft eine einzelne Immobilie nach den allgemeinen Regeln. Nicht enthalten sind die Zusatz-IMI (AIMI), befristete Befreiungen und andere kommunale Abzüge.",
@@ -530,11 +530,11 @@
         "sourcesTitle": "Quellen",
         "sourceRates": "Código do IMI, Artikel 112: Sätze (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IMI, Artikel 120: Zahlung in Raten (abgerufen am 19. November 2026)",
-        "sourceExemption": "Código do IMI, Artikel 11-A: Befreiung bei niedrigem Einkommen (abgerufen am 19. November 2026)",
-        "reviewed": "Regeln geprüft am 19. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, Artikel 11-A: Befreiung bei niedrigem Einkommen (abgerufen am 20. November 2026)",
+        "reviewed": "Regeln geprüft am 20. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
         "methodMinimum": "Liegt die einzuziehende Steuer nach einer etwaigen IMI-Familiar-Ermäßigung unter 10 €, wird keine IMI festgesetzt, und der Rechner zeigt 0 € mit einem Hinweis (Artikel 113 Nr. 6 des Código do IMI).",
         "sourceMinimum": "Código do IMI, Artikel 113: Festsetzung, keine IMI unter 10 € (abgerufen am 19. November 2026)",
-        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: dreijährige Befreiung (abgerufen am 19. November 2026, Fassung des Lei 12/2022; spätere Änderungen prüfen)"
+        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung des Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
@@ -2689,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Regeln der Série F, denen der Rechner folgt",
-        "rulesIntro": "Regeln, wie der IGCP sie im Produktblatt der Série F von {{rulesDate}} veröffentlicht hat (Portaria n.º 149-A/2023). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
+        "rulesIntro": "Regeln aus dem technischen Datenblatt der Série F auf der Website des IGCP, abgerufen im {{rulesDate}} (Portaria n.º 149-A/2023, geändert durch den Despacho n.º 11797/2024 und die Despachos n.º 5392/2026 und n.º 5839/2026). Regeln können sich ändern, maßgeblich sind die aktuellen Bedingungen des Emittenten.",
         "ruleTerm": "Laufzeit von {{termYears}} Jahren. Du kannst ab dem ersten Zinstermin ganz oder teilweise zurückgeben; der Rechner nutzt volle Jahre Haltedauer.",
         "ruleRate": "Jedes Quartal verzinst sich mit dem Basiszins zu Beginn des Quartals plus der Treueprämie des Zeichnungsjahres. Der Basiszins ist E3, der Durchschnitt des 3-Monats-Euribor der vorangegangenen 10 Werktage, auf drei Dezimalstellen gerundet, ohne Aufschlag. Er wird am drittletzten Werktag jedes Monats für den Folgemonat festgelegt und liegt zwischen 0 % und {{maxBase}}.",
         "ruleTax": "Zinsen fallen vierteljährlich an und werden nach IRS automatisch kapitalisiert; die IRS wird an der Quelle mit {{irsRate}} einbehalten.",
@@ -2697,9 +2697,9 @@
         "premiumTitle": "Treueprämie nach Zeichnungsjahr",
         "premiumYears": "Jahr",
         "premiumPoints": "Prozentpunkte",
-        "sourceSheet": "IGCP-Produktblatt Série F (April 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "April 2026",
+        "sourceSheet": "Technisches Datenblatt der Série F auf der Website des IGCP (abgerufen am 20. November 2026)",
+        "sourceIgcp": "IGCP: Zinssatz der Série F für Neuzeichnungen im {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "November 2026",
         "exampleTitle": "Rechenbeispiel",
         "exampleText": "Du zeichnest {{amount}} und hältst {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
         "methodTitle": "So funktioniert die Schätzung",
@@ -2707,7 +2707,7 @@
         "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
         "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
-        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Er beginnt beim für {{referenceMonth}} gemeldeten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt, die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins findest du bei AforroNet.",
+        "assumptionBase": "Der Basiszins ist der von dir eingegebene und bleibt die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRate}}, die Obergrenze), den das IGCP jeden Monat neu festlegt, die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins findest du auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Einkommen. Deine persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
         "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen."
       },
@@ -3338,8 +3338,8 @@
         "unsupportedOther": "Weniger als 6 Monate gemeldetes Entgelt, stark schwankendes Entgelt, Entschädigungen für Arbeitsunfälle oder Berufskrankheiten und Tarifverträge, die das Krankengeld aufstocken.",
         "sourcesTitle": "Quellen",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23. Oktober 2026), mit dem Mindestlohn 2026 von 920 Euro",
-        "sourceLaw": "Decreto-Lei n.º 28/2004 in geltender Fassung: das Krankheitsschutzregime (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012, veröffentlicht von der CITE)",
-        "reviewed": "Regeln und Werte 2026 am 19. November 2026 geprüft anhand des Leitfadens der Segurança Social und des Textes von Art. 17 des Decreto-Lei 28/2004 in der Fassung des Decreto-Lei n.º 133/2012. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus diesem Text. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird; der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, konsolidierte Fassung im Diário da República: das Krankheitsschutzregime (Art. 17 in der Fassung von Art. 9 des Decreto-Lei n.º 133/2012)",
+        "reviewed": "Regeln und Werte 2026 am 20. November 2026 geprüft anhand des Leitfadens der Segurança Social und des konsolidierten Textes des Decreto-Lei n.º 28/2004 im Diário da República. Die drei alternativen Bedingungen für die Erhöhung um 5 Punkte und die Untergrenze über 500 Euro stammen aus Art. 17. Art. 17 Abs. 4 sagt, dass der Betrag von 500 Euro mit dem IAS angepasst wird, doch wir haben keinen Rechtsakt gefunden, der einen angepassten Betrag veröffentlicht, und der geltende Leitfaden (ISS 5001 v4.55, 23. Oktober 2026) nennt weiterhin 500,00 Euro, deshalb bleiben wir bei 500. Die Schätzung des Nettogehalts hinter der Netto-Obergrenze ist unsere Vereinfachung.",
         "methodFloor": "Über einem Referenzentgelt von 500 Euro im Monat darf das Tagesgeld bei 55 % und 60 % nicht unter dem erhöhten Krankengeld liegen, das auf 500 Euro berechnet wird: 60 % und 65 % von 500 geteilt durch 30, also {{floor55}} und {{floor60}} pro Tag (Art. 17 Abs. 2 des Decreto-Lei 28/2004). Das spielt nur bei einem Referenzentgelt knapp über 500 Euro eine Rolle, bis etwa 545 Euro, wenn keine Erhöhung gilt. Für die Stufen 70 % und 75 % gilt es nicht."
       },
       "nextStepHeadline": "Planen Sie die vorübergehende Einkommenslücke",
@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, Artikel 9: Sätze der Kategorie A (abgerufen am 19. November 2026)",
         "sourceCategoryB": "Código do IUC, Artikel 10: Sätze der Kategorie B, Zusatzsätze und Koeffizienten (abgerufen am 19. November 2026)",
         "sourcePayment": "Código do IUC, Artikel 17: Zahlung (abgerufen am 19. November 2026)",
-        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 19. November 2026). Die Fortführung für 2026 durch Artikel 94 des Gesetzes Nr. 73-A/2025 wurde hier nicht erneut geprüft.",
+        "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 20. November 2026)",
         "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)"
+        "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)",
+        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)"
       },
       "nextStepHeadline": "Lass dich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft dir, jeden Monat ein Zwölftel deiner Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
@@ -3828,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: Regelalter für 2027 und Nachhaltigkeitsfaktor für 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: Rentenanpassung 2026 und Mindestrenten",
         "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
-        "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde anhand des Despacho n.º 233-A/2026 (Regeln und Tabellenzuordnung) und einer Abschrift seines Anhangs geprüft, deren Zeilen zur offiziellen Spalte des effektiven Satzes passen."
+        "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die Jahresraten, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde am 20. November 2026 Zeile für Zeile anhand des im Diário da República veröffentlichten Anhangs des Despacho n.º 233-A/2026 geprüft.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII"
       }
     },
     "sp500History": {

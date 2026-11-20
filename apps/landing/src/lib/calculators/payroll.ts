@@ -249,8 +249,8 @@ export const WITHHOLDING_TABLE_SETS: Readonly<Record<PayrollRegion, WithholdingT
 /**
  * Pension withholding table VIII (Despacho n.º 233-A/2026, n.º 1 c): pensions of an unmarried holder or a married
  * holder in a two-earner couple, without disability, mainland. Withholding is R x rate - parcela, with no Social
- * Security. Rows transcribed from the annex as reproduced by Maisvalias and checked against the effective-rate
- * column of the official table (the annex PDF text could not be extracted).
+ * Security. Every row checked on 2026-11-20 against table VIII as published in the Diário da República (Série II,
+ * n.º 3/2026, Suplemento, 6 January 2026) and in the signed despacho on the Portal das Finanças.
  */
 const PENSION_TABLE_VIII = buildTable("VIII", DEPENDANT_PARCELA.II, [
   [920, 0, 0],

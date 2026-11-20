@@ -522,7 +522,7 @@
         "methodPayment": "The bill is paid in one instalment in May up to €100, in two in May and November from €100 up to €500, and in three in May, August and November above €500. Instalments are equal; any cent of rounding goes to the last one.",
         "methodBudget": "The monthly provision divides the annual bill by 12, so the money is ready when each instalment is due.",
         "exemptionTitle": "Exemption for your own permanent home",
-        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives three years of exemption after buying or building a home with a VPT up to €125,000, if the household's gross income in the previous year was at most €153,300; you must use the home as your permanent residence within six months and claim the exemption within the deadline. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
+        "exemption": "Some owners of a permanent home are exempt from IMI. Article 46 of the tax benefits statute (EBF) gives {{ebfYears}} years of exemption after buying or building a home with a VPT up to {{ebfVpt}}, if the household's gross income in the previous year was at most {{ebfIncome}}. The municipal assembly can extend it by another {{ebfExtraYears}} years. You must make the home your permanent residence within six months. On a purchase the exemption is automatic; after building or improving a home you must claim it within the deadline. A household can get it only twice. Article 11-A of the Código do IMI exempts, with no time limit, a home of a household whose gross income is at most 2.3 times 14 IAS (about €17,300 with the 2026 IAS of €537.13) and whose properties have a combined VPT of at most 10 times 14 IAS (€75,198.20 at the 2026 IAS). Other conditions apply and limits can change, so the calculator does not apply any exemption. Check your eligibility on the Portal das Finanças before using the result.",
         "assumptionsTitle": "Assumptions",
         "assumptionRate": "The municipal rate is yours to enter. This page does not hold a table of municipal rates, and municipalities can also raise or lower the rate in specific cases, for example for vacant or dilapidated buildings, which the calculator ignores.",
         "assumptionScope": "The estimate covers a single property taxed under the ordinary rules. It excludes additional IMI (AIMI), the temporary exemptions and any other municipal deduction.",
@@ -530,11 +530,11 @@
         "sourcesTitle": "Sources",
         "sourceRates": "Código do IMI, article 112: rates (consulted 19 November 2026)",
         "sourcePayment": "Código do IMI, article 120: payment in instalments (consulted 19 November 2026)",
-        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 19 November 2026)",
-        "reviewed": "Rules reviewed on 19 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, article 11-A: low-income exemption (consulted 20 November 2026)",
+        "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: three-year exemption (consulted 19 November 2026, wording of Lei 12/2022; check for later amendments)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
@@ -2689,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Série F rules this calculator follows",
-        "rulesIntro": "Rules as published by IGCP in the Série F product sheet of {{rulesDate}} (Portaria n.º 149-A/2023). Rules can change, and the issuer’s current terms are the ones that count.",
+        "rulesIntro": "Rules from the Série F ficha técnica on the IGCP website, read in {{rulesDate}} (Portaria n.º 149-A/2023, amended by Despacho n.º 11797/2024 and Despachos n.º 5392/2026 and n.º 5839/2026). Rules can change, and the issuer’s current terms are the ones that count.",
         "ruleTerm": "Term of {{termYears}} years. You can redeem, in whole or in part, from the first interest date; the calculator uses whole years held.",
         "ruleRate": "Each quarter earns the base rate at the start of that quarter plus the permanence bonus for the subscription year. The base rate is E3, the average of the 3-month Euribor over the previous 10 business days, rounded to three decimals, with no margin added. It is set on the third-to-last business day of each month for the following month, and limited to between 0% and {{maxBase}}.",
         "ruleTax": "Interest is paid quarterly and capitalised automatically after IRS, withheld at source at {{irsRate}}.",
@@ -2697,9 +2697,9 @@
         "premiumTitle": "Permanence bonus by subscription year",
         "premiumYears": "Year",
         "premiumPoints": "Percentage points",
-        "sourceSheet": "IGCP Série F product sheet (April 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "April 2026",
+        "sourceSheet": "Série F ficha técnica on the IGCP website (read on 20 November 2026)",
+        "sourceIgcp": "IGCP: Série F interest rate for new subscriptions in {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "November 2026",
         "exampleTitle": "Worked example",
         "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
         "methodTitle": "How the estimate works",
@@ -2707,7 +2707,7 @@
         "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
         "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
-        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate reported for {{referenceMonth}} ({{referenceRate}}, the ceiling), which the IGCP sets again every month, so actual interest will differ. Check the current rate on AforroNet.",
+        "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRate}}, the ceiling), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
         "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings."
       },
@@ -3338,8 +3338,8 @@
         "unsupportedOther": "Fewer than 6 months of registered pay, pay that varied a lot, compensation for work accidents or occupational disease, and collective agreements that top up the benefit.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social: Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 October 2026), with the 2026 minimum wage of 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, as amended: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012, as published by CITE)",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against the Segurança Social guide and the text of art. 17 of Decree-Law 28/2004 in the wording of Decreto-Lei n.º 133/2012. The three alternative conditions for the 5-point increase and the floor above 500 euros come from that text. Art. 17(4) says the 500 euro figure is updated with the IAS; the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, consolidated version in the Diário da República: the sickness protection regime (art. 17 in the wording of art. 9 of Decreto-Lei n.º 133/2012)",
+        "reviewed": "Rules and 2026 values reviewed on 20 November 2026 against the Segurança Social guide and the consolidated text of Decreto-Lei n.º 28/2004 in the Diário da República. The three alternative conditions for the 5-point increase and the floor above 500 euros come from art. 17. Art. 17(4) says the 500 euro figure is updated with the IAS, but we found no act that publishes an updated figure, and the guide in force (ISS 5001 v4.55, 23 October 2026) still gives 500,00 euros, so we keep 500. The estimate of net pay behind the net cap is our simplification.",
         "methodFloor": "Above a reference pay of 500 euros a month, the daily benefit at 55% and 60% cannot be lower than the increased benefit computed on 500 euros: 60% and 65% of 500 divided by 30, which is {{floor55}} and {{floor60}} a day (art. 17(2) of Decree-Law 28/2004). It only matters for a reference pay a little above 500 euros, up to about 545 euros, when no increase applies. It does not apply to the 70% and 75% bands."
       },
       "nextStepHeadline": "Plan for the temporary income gap",
@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, article 9: category A rates (consulted 19 November 2026)",
         "sourceCategoryB": "Código do IUC, article 10: category B rates, additional rates and coefficients (consulted 19 November 2026)",
         "sourcePayment": "Código do IUC, article 17: payment (consulted 19 November 2026)",
-        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 19 November 2026). Its continuation for 2026 by article 94 of Lei n.º 73-A/2025 is not re-checked here.",
+        "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
-        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)"
+        "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
@@ -3828,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1: normal age for 2027 and sustainability factor for 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
-        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked against Despacho n.º 233-A/2026 (rules and table assignment) and a transcription of its annex whose rows match the official effective-rate column."
+        "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked row by row on 20 November 2026 against the annex of Despacho n.º 233-A/2026 as published in the Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII"
       }
     },
     "sp500History": {

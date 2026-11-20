@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { INCREASE_MAX_REFERENCE_MONTHLY_CENTS, MIN_DAILY_CENTS, SICK_PAY_EXAMPLE, computeSickPay, type SickPayInput } from "./sickPay";
+import {
+  INCREASE_MAX_REFERENCE_MONTHLY_CENTS, MIN_DAILY_CENTS, SICK_PAY_EXAMPLE, SICK_PAY_SOURCES, computeSickPay, floorDailyCents,
+  type SickPayInput,
+} from "./sickPay";
 
 function run(overrides: Partial<SickPayInput> = {}) {
   const outcome = computeSickPay({ ...SICK_PAY_EXAMPLE, ...overrides });
@@ -86,12 +89,12 @@ describe("limits and increase", () => {
   });
 
   it("never pays less above 500 than the increased benefit on 500 (art. 17(2) DL 28/2004)", () => {
-    // 520 a month, 17.33 a day: 55% is 9.53 and 60% is 10.40, below the floors of 10.00 (60% of 500/30) and 10.83 (65%).
+    // 520 a month, 17.33 a day: 55% is 9.53 and 60% is 10.40, below the floors of 10.00 (60% of 16.67) and 10.84 (65%).
     const result = run({ grossMonthly: 520, dependants: 0, sickDays: 100 });
     expect(result.increaseApplied).toBe(false);
     expect(result.bands.map((band) => band.percent)).toEqual([55, 60, 70]);
     expect(result.bands[0].dailyCents).toBe(1000);
-    expect(result.bands[1].dailyCents).toBe(1083);
+    expect(result.bands[1].dailyCents).toBe(1084);
     expect(result.limit).toBe("floor");
     // 70% is not covered by art. 17(2): 520 / 30 x 70% = 12.13.
     expect(result.bands[2].dailyCents).toBe(Math.round((1733 * 70) / 100));
@@ -104,6 +107,22 @@ describe("limits and increase", () => {
     expect(run({ grossMonthly: 500, sickDays: 10 }).bands[0].dailyCents).toBe(Math.round((1667 * 60) / 100));
     // With 3 children the 5 points already apply, so 60% of 520 / 30 is above 10.00.
     expect(run({ grossMonthly: 520, dependants: 3, sickDays: 10 }).bands[0].dailyCents).toBe(Math.round((1733 * 60) / 100));
+  });
+
+  it("sets the art. 17(2) floor at the increased 60% and 65% of 500 euros a month", () => {
+    // 500 / 30 = 16.67 a day, rounded to the cent like any reference pay.
+    expect(floorDailyCents(55)).toBe(1000); // 16.67 x 60% = 10.002
+    expect(floorDailyCents(60)).toBe(1084); // 16.67 x 65% = 10.8355
+  });
+
+  it("keeps the benefit continuous across 500 euros, as art. 17(2) intends", () => {
+    // Without the floor, 500.01 would drop to 55% of 16.67 = 9.17 a day, below what 500.00 pays.
+    const at500 = run({ grossMonthly: 500, dependants: 0, sickDays: 60 });
+    const above = run({ grossMonthly: 500.01, dependants: 0, sickDays: 60 });
+    expect(at500.increaseApplied).toBe(true);
+    expect(above.increaseApplied).toBe(false);
+    expect(above.limit).toBe("floor");
+    expect(above.bands.map((band) => band.dailyCents)).toEqual(at500.bands.map((band) => band.dailyCents));
   });
 
   it("never pays more than the net reference pay", () => {
@@ -135,5 +154,13 @@ describe("validation", () => {
     if (!bad.ok) expect(bad.errors).toEqual({ sickDays: "tooSmall", grossMonthly: "required", dependants: "whole" });
     const tooLong = computeSickPay({ ...SICK_PAY_EXAMPLE, sickDays: 1096 });
     expect(tooLong.ok).toBe(false);
+  });
+});
+
+describe("sources", () => {
+  it("cites the Diário da República consolidated decree-law and the Segurança Social guide document", () => {
+    expect(SICK_PAY_SOURCES.law).toBe("https://diariodarepublica.pt/dr/legislacao-consolidada/decreto-lei/2004-34545075");
+    // The old www.seg-social.pt/subsidio-de-doenca address now redirects to the portal home page.
+    expect(SICK_PAY_SOURCES.guide).toMatch(/^https:\/\/www\.seg-social\.pt\/ptss\/pssd\/documento\//);
   });
 });

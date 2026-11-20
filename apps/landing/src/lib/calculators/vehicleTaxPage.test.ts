@@ -52,6 +52,12 @@ describe("localized vehicle tax (IUC) tool page", () => {
     expect(localeCopy(lang, "public")).toEqual(copy);
   });
 
+  it.each(SUPPORTED_LANGS)("names the State Budget article that keeps the diesel surcharge in %s", (lang) => {
+    const { guide } = localeCopy(lang, "src");
+    expect(guide.sourceBudget).toMatch(/94.*73-A\/2025/);
+    expect(guide.sourceDiesel).toContain("82-B/2014");
+  });
+
   it("has distinct titles and descriptions", () => {
     const copies = SUPPORTED_LANGS.map((lang) => localeCopy(lang, "src"));
     expect(new Set(copies.map((copy) => copy.pageTitle)).size).toBe(SUPPORTED_LANGS.length);

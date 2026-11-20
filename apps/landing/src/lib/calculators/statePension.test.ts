@@ -3,6 +3,7 @@ import {
   IAS_2026_CENTS,
   NORMAL_AGE_2026_MONTHS,
   STATE_PENSION_EXAMPLE,
+  STATE_PENSION_SOURCES,
   computeStatePension,
   lateBonusBp,
   minimumPensionCents,
@@ -163,5 +164,17 @@ describe("validation", () => {
 
   it("returns errors instead of a result", () => {
     expect(computeStatePension({ ...STATE_PENSION_EXAMPLE, years: 5 }).ok).toBe(false);
+  });
+});
+
+describe("sources", () => {
+  it("links the Diário da República act behind pension table VIII", () => {
+    expect(STATE_PENSION_SOURCES.withholding).toBe("https://diariodarepublica.pt/dr/detalhe/despacho/233-a-2026-998488151");
+  });
+
+  it("links Segurança Social pages that still exist", () => {
+    // www.seg-social.pt/pensao-de-velhice and /reforma now redirect to the portal home page.
+    expect(STATE_PENSION_SOURCES.guide).toMatch(/^https:\/\/www\.seg-social\.pt\/ptss\/pssd\/documento\//);
+    expect(STATE_PENSION_SOURCES.simulator).toBe("https://www.seg-social.pt/ptss/pssd/menu/simuladores/simulador-pensoes");
   });
 });

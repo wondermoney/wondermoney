@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  computePropertyTax, instalmentCount, PROPERTY_TAX_EXAMPLE, PROPERTY_TAX_LIMITS,
+  computePropertyTax, EBF_46, instalmentCount, PROPERTY_TAX_EXAMPLE, PROPERTY_TAX_LIMITS,
   type PropertyTaxInput,
 } from "./propertyTax";
 
@@ -81,5 +81,19 @@ describe("annual property tax (IMI)", () => {
       .toEqual({ ok: false, errors: { vpt: "tooLarge", rate: "required" } });
     expect(resultFor({ rate: 0.3 }).annualTax).toBe(450);
     expect(resultFor({ rate: 0.45 }).annualTax).toBe(675);
+  });
+});
+
+describe("own-home exemption shown on the page (EBF art. 46)", () => {
+  it("states the limits of the wording in force since Lei n.º 56/2023 and Lei n.º 82/2023", () => {
+    // Art. 46(1) income cap, art. 46(5) VPT cap, three years plus two by municipal decision, art. 46(11) twice.
+    expect(EBF_46).toMatchObject({ vptMax: 125_000, incomeMax: 153_300, years: 3, extensionYears: 2, maxGrants: 2 });
+  });
+
+  it("cites the current wording, not a superseded one", () => {
+    expect(EBF_46.source).toBe(
+      "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/bf_rep/Pages/ebf-artigo-46-ordm-.aspx",
+    );
+    expect(EBF_46.source).not.toContain("/ra/");
   });
 });

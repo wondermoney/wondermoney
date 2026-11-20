@@ -1,5 +1,6 @@
 /**
- * Certificados de Aforro, Série F (Portaria n.º 149-A/2023; IGCP product sheet of April 2026).
+ * Certificados de Aforro, Série F (Portaria n.º 149-A/2023, amended by Despachos n.º 11797/2024, 5392/2026 and
+ * 5839/2026), as stated in the IGCP ficha técnica read on 2026-11-20.
  *
  * The rules the page states and this module models:
  * - Term of 15 years. Interest accrues quarterly and is capitalised automatically, net of IRS.
@@ -21,14 +22,21 @@ export const SAVINGS_CERTIFICATES_RULES = {
   seriesLabel: "F",
   termYears: 15,
   maxBaseRate: 2.5,
-  /** Rule date of the IGCP sheet the premiums come from. */
-  rulesDate: "2026-04",
+  /** Month the IGCP ficha técnica below was read: term, base-rate formula, ceiling, premiums and limits. */
+  rulesDate: "2026-11",
+  rulesSource:
+    "https://www.igcp.pt/pt/aforristas/produtos-de-aforro/certificados-de-aforro/ficha-tecnica-certificados-de-aforro-serie-f",
   /**
-   * The base rate in force in the month below, used as the calculator default. It was at the 2.50%
-   * ceiling for September to November 2026 (press reports of the IGCP announcements; AforroNet
-   * has the current value). The December rate is set on 26 November 2026.
+   * The base rate in force in the month below, used as the calculator default: IGCP's announcement of
+   * 30 October 2026 fixes the gross rate for new subscriptions in November 2026 at 2,500% (the ceiling).
+   * A new subscription has no premium in year 1, so that rate is the base rate. The December rate is set
+   * on 26 November 2026, the third-to-last business day of the month.
    */
-  referenceBaseRate: { rate: 2.5, month: "2026-11" },
+  referenceBaseRate: {
+    rate: 2.5,
+    month: "2026-11",
+    source: "https://www.igcp.pt/pt/noticias/taxas-de-juro-dos-certificados-de-aforro-das-series-b-d-e-e-f-em-novembro-de-2026",
+  },
   /** IRS withheld at source on the interest, in percent. */
   irsRate: 28,
   /** Euros (one unit is 1 euro). */

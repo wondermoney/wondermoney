@@ -522,7 +522,7 @@
         "methodPayment": "L'impôt se paie en une échéance en mai jusqu'à 100 €, en deux en mai et novembre de 100 € à 500 €, et en trois en mai, août et novembre au-delà de 500 €. Les échéances sont égales ; l'éventuel centime d'arrondi va à la dernière.",
         "methodBudget": "La provision mensuelle divise l'impôt annuel par 12 pour que l'argent soit prêt à chaque échéance.",
         "exemptionTitle": "Exonération pour la résidence principale",
-        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI. L'article 46 du statut des avantages fiscaux (EBF) accorde trois ans d'exonération après l'achat ou la construction d'un logement dont le VPT ne dépasse pas 125 000 €, si le revenu brut du foyer de l'année précédente n'excédait pas 153 300 € ; il faut y établir sa résidence principale dans les six mois et demander l'exonération dans le délai. L'article 11-A du Código do IMI exonère, sans limite de durée, le logement d'un foyer dont le revenu brut ne dépasse pas 2,3 fois 14 IAS (environ 17 300 € avec l'IAS 2026 de 537,13 €) et dont les biens ont un VPT total d'au plus 10 fois 14 IAS (75 198,20 € avec l'IAS 2026). D'autres conditions s'appliquent et les plafonds peuvent changer : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
+        "exemption": "Certains propriétaires de leur résidence principale sont exonérés d'IMI. L'article 46 du statut des avantages fiscaux (EBF) accorde {{ebfYears}} ans d'exonération après l'achat ou la construction d'un logement dont le VPT ne dépasse pas {{ebfVpt}}, si le revenu brut du foyer de l'année précédente n'excédait pas {{ebfIncome}}. L'assemblée municipale peut la prolonger de {{ebfExtraYears}} ans. Il faut y établir sa résidence principale dans les six mois. En cas d'achat, l'exonération est automatique ; après une construction ou des travaux, il faut la demander dans le délai. Un foyer ne peut en bénéficier que deux fois. L'article 11-A du Código do IMI exonère, sans limite de durée, le logement d'un foyer dont le revenu brut ne dépasse pas 2,3 fois 14 IAS (environ 17 300 € avec l'IAS 2026 de 537,13 €) et dont les biens ont un VPT total d'au plus 10 fois 14 IAS (75 198,20 € avec l'IAS 2026). D'autres conditions s'appliquent et les plafonds peuvent changer : le calculateur n'applique donc aucune exonération. Vérifiez votre éligibilité sur le Portal das Finanças avant d'utiliser le résultat.",
         "assumptionsTitle": "Hypothèses",
         "assumptionRate": "Le taux municipal est à saisir par vos soins. Cette page ne contient pas de table des taux communaux, et les communes peuvent majorer ou minorer le taux dans certains cas, par exemple pour des bâtiments vacants ou dégradés, ce que le calculateur ignore.",
         "assumptionScope": "L'estimation porte sur un seul bien soumis aux règles générales. Elle exclut l'IMI additionnel (AIMI), les exonérations temporaires et les autres déductions communales.",
@@ -530,11 +530,11 @@
         "sourcesTitle": "Sources",
         "sourceRates": "Código do IMI, article 112 : taux (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IMI, article 120 : paiement par échéances (consulté le 19 novembre 2026)",
-        "sourceExemption": "Código do IMI, article 11-A : exonération pour faibles revenus (consulté le 19 novembre 2026)",
-        "reviewed": "Règles vérifiées le 19 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI (Portal das Finanças).",
+        "sourceExemption": "Código do IMI, article 11-A : exonération pour faibles revenus (consulté le 20 novembre 2026)",
+        "reviewed": "Règles vérifiées le 20 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI (Portal das Finanças).",
         "methodMinimum": "Si l'impôt à percevoir, après toute réduction de l'IMI Familiar, est inférieur à 10 €, aucun IMI n'est liquidé et le calculateur affiche 0 € avec une note (article 113, n.º 6, du Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113 : liquidation, pas d'IMI en dessous de 10 € (consulté le 19 novembre 2026)",
-        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de trois ans (consulté le 19 novembre 2026, rédaction de la Lei 12/2022 ; vérifiez les modifications ultérieures)"
+        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de la résidence principale, dans la rédaction de la Lei n.º 82/2023, identique au texte consolidé du Diário da República (consulté le 20 novembre 2026)"
       },
       "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
@@ -2689,7 +2689,7 @@
       },
       "guide": {
         "rulesTitle": "Règles de la Série F suivies par le simulateur",
-        "rulesIntro": "Règles publiées par l’IGCP dans la fiche produit de la Série F de {{rulesDate}} (Portaria n.º 149-A/2023). Les règles peuvent changer et ce sont les conditions en vigueur de l’émetteur qui comptent.",
+        "rulesIntro": "Règles de la fiche technique de la Série F sur le site de l’IGCP, consultée en {{rulesDate}} (Portaria n.º 149-A/2023, modifiée par le Despacho n.º 11797/2024 et les Despachos n.º 5392/2026 et n.º 5839/2026). Les règles peuvent changer et ce sont les conditions en vigueur de l’émetteur qui comptent.",
         "ruleTerm": "Durée de {{termYears}} ans. Vous pouvez racheter, en tout ou en partie, à partir de la première échéance d’intérêts ; le simulateur utilise des années entières de détention.",
         "ruleRate": "Chaque trimestre rapporte le taux de base en vigueur au début du trimestre plus la prime de permanence de l’année de souscription. Le taux de base est E3, la moyenne de l’Euribor à 3 mois des 10 jours ouvrés précédents, arrondie à trois décimales, sans marge ajoutée. Il est fixé l’avant-avant-dernier jour ouvré de chaque mois pour le mois suivant, et limité entre 0 % et {{maxBase}}.",
         "ruleTax": "Les intérêts sont versés chaque trimestre et capitalisés automatiquement après IRS, retenu à la source à {{irsRate}}.",
@@ -2697,9 +2697,9 @@
         "premiumTitle": "Prime de permanence selon l’année de souscription",
         "premiumYears": "Année",
         "premiumPoints": "Points de pourcentage",
-        "sourceSheet": "Fiche produit Série F de l’IGCP (avril 2026)",
-        "sourceIgcp": "AforroNet (IGCP)",
-        "rulesDateValue": "avril 2026",
+        "sourceSheet": "Fiche technique de la Série F sur le site de l’IGCP (consultée le 20 novembre 2026)",
+        "sourceIgcp": "IGCP : taux d’intérêt de la Série F pour les nouvelles souscriptions en {{referenceMonth}} ({{referenceRate}})",
+        "rulesDateValue": "novembre 2026",
         "exampleTitle": "Exemple chiffré",
         "exampleText": "Vous souscrivez {{amount}} et conservez {{years}} ans avec un taux de base de {{baseRate}}. Les certificats rapportent {{grossInterest}} d’intérêts bruts, dont {{irs}} d’IRS, soit {{netInterest}} nets. Le solde atteint {{finalValue}}, un rendement net de {{netYield}} par an.",
         "methodTitle": "Comment fonctionne l’estimation",
@@ -2707,7 +2707,7 @@
         "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s’ajoutent au solde, de sorte que les trimestres suivants rapportent des intérêts dessus.",
         "methodYield": "Le rendement net annuel est la croissance composée annuelle entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
         "assumptionsTitle": "Hypothèses",
-        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Il part du taux annoncé pour {{referenceMonth}} ({{referenceRate}}, le plafond), que l’IGCP fixe de nouveau chaque mois : les intérêts effectifs seront différents. Vérifiez le taux actuel sur AforroNet.",
+        "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Il part du taux fixé par l’IGCP pour {{referenceMonth}} ({{referenceRate}}, le plafond), qu’il fixe de nouveau chaque mois : les intérêts effectifs seront différents. Vérifiez le taux actuel sur le site de l’IGCP.",
         "assumptionRules": "Le taux d’IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
         "assumptionScope": "Information générale, pas une recommandation de souscrire ou d’éviter un produit, et aucune comparaison avec d’autres épargnes."
       },
@@ -3338,8 +3338,8 @@
         "unsupportedOther": "Moins de 6 mois de rémunérations enregistrées, rémunérations très variables, indemnisations pour accident du travail ou maladie professionnelle et conventions collectives qui complètent l'indemnité.",
         "sourcesTitle": "Sources",
         "sourceGuide": "Segurança Social : Guia Prático Subsídio de Doença (ISS 5001, v4.55, 23 octobre 2026), avec le salaire minimum 2026 de 920 euros",
-        "sourceLaw": "Decreto-Lei n.º 28/2004, dans sa rédaction actuelle : le régime de protection en cas de maladie (art. 17 dans la rédaction de l'art. 9 du Decreto-Lei n.º 133/2012, publié par la CITE)",
-        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 d'après le guide de la Segurança Social et le texte de l'art. 17 du décret-loi 28/2004 dans la rédaction du Decreto-Lei n.º 133/2012. Les trois conditions alternatives de la majoration de 5 points et le plancher au-dessus de 500 euros viennent de ce texte. L'art. 17, n° 4, dit que le montant de 500 euros est actualisé avec l'IAS ; le guide en vigueur (ISS 5001 v4.55, 23 octobre 2026) indique toujours 500,00 euros, nous gardons donc 500. L'estimation du salaire net derrière le plafond net est une simplification de notre part.",
+        "sourceLaw": "Decreto-Lei n.º 28/2004, version consolidée au Diário da República : le régime de protection en cas de maladie (art. 17 dans la rédaction de l'art. 9 du Decreto-Lei n.º 133/2012)",
+        "reviewed": "Règles et valeurs 2026 vérifiées le 20 novembre 2026 d'après le guide de la Segurança Social et le texte consolidé du Decreto-Lei n.º 28/2004 au Diário da República. Les trois conditions alternatives de la majoration de 5 points et le plancher au-dessus de 500 euros viennent de l'art. 17. L'art. 17, n° 4, dit que le montant de 500 euros est actualisé avec l'IAS, mais nous n'avons trouvé aucun texte publiant un montant actualisé, et le guide en vigueur (ISS 5001 v4.55, 23 octobre 2026) indique toujours 500,00 euros : nous gardons donc 500. L'estimation du salaire net derrière le plafond net est une simplification de notre part.",
         "methodFloor": "Au-dessus d'une rémunération de référence de 500 euros par mois, l'indemnité journalière à 55 % et 60 % ne peut pas être inférieure à l'indemnité majorée calculée sur 500 euros : 60 % et 65 % de 500 divisé par 30, soit {{floor55}} et {{floor60}} par jour (art. 17, n° 2, du décret-loi 28/2004). Cela ne compte que pour une rémunération de référence un peu supérieure à 500 euros, jusqu'à environ 545 euros, quand aucune majoration ne s'applique. Les tranches de 70 % et 75 % ne sont pas concernées."
       },
       "nextStepHeadline": "Préparez la baisse temporaire de revenu",
@@ -3425,9 +3425,10 @@
         "sourceCategoryA": "Código do IUC, article 9 : taux de la catégorie A (consulté le 19 novembre 2026)",
         "sourceCategoryB": "Código do IUC, article 10 : taux de la catégorie B, taux additionnels et coefficients (consulté le 19 novembre 2026)",
         "sourcePayment": "Código do IUC, article 17 : paiement (consulté le 19 novembre 2026)",
-        "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 19 novembre 2026). Son maintien en 2026 par l'article 94 de la loi n.º 73-A/2025 n'a pas été revérifié ici.",
+        "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 20 novembre 2026)",
         "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}.",
-        "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)"
+        "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)",
+        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)"
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
@@ -3828,7 +3829,8 @@
         "sourceAges": "Portaria n.º 476/2025/1 : âge normal pour 2027 et facteur de durabilité pour 2026",
         "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
         "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
-        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée d'après le Despacho n.º 233-A/2026 (règles et attribution de la table) et une transcription de son annexe dont les lignes correspondent à la colonne officielle du taux effectif."
+        "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée ligne par ligne le 20 novembre 2026 d'après l'annexe du Despacho n.º 233-A/2026 publiée au Diário da República.",
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions"
       }
     },
     "sp500History": {

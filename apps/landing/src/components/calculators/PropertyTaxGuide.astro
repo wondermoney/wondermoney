@@ -1,6 +1,6 @@
 ---
 import ToolGuide from "./ToolGuide.astro";
-import { PROPERTY_TAX_EXAMPLE, computePropertyTax } from "@/lib/calculators/propertyTax";
+import { EBF_46, PROPERTY_TAX_EXAMPLE, computePropertyTax } from "@/lib/calculators/propertyTax";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
@@ -24,12 +24,18 @@ const values = {
   instalment: money(schedule[0].amount),
   monthly: money(monthlyProvision),
 };
+const exemptionValues = {
+  ebfYears: String(EBF_46.years),
+  ebfExtraYears: String(EBF_46.extensionYears),
+  ebfVpt: money(EBF_46.vptMax, 0),
+  ebfIncome: money(EBF_46.incomeMax, 0),
+};
 const sources = [
   ["sourceRates", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi112.aspx"],
   ["sourcePayment", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi120.aspx"],
   ["sourceMinimum", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi113.aspx"],
   ["sourceExemption", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/cimi/Pages/cimi11a.aspx"],
-  ["sourceEbf", "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/bf_rep/ra/Pages/ebf46_ra202310.aspx"],
+  ["sourceEbf", EBF_46.source],
 ] as const;
 ---
 
@@ -48,7 +54,7 @@ const sources = [
       {["methodTax", "methodFamily", "methodMinimum", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key))}</li>)}
     </ul>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
-    <p class="mt-3">{t(k("exemption"))}</p>
+    <p class="mt-3">{t(k("exemption"), exemptionValues)}</p>
     <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
     <ul class="mt-3 list-disc space-y-2 pl-6">
       {["assumptionRate", "assumptionScope", "assumptionEducational"].map((key) => <li>{t(k(key))}</li>)}

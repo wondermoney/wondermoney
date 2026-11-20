@@ -6,6 +6,17 @@ export { IAS_2026_CENTS };
 /** Date the rules and values below were checked against the sources. */
 export const STATE_PENSION_REVIEWED = "2026-11-19";
 
+/** Sources the page links. The old www.seg-social.pt/pensao-de-velhice and /reforma addresses redirect to the home page. */
+export const STATE_PENSION_SOURCES = {
+  guide: "https://www.seg-social.pt/ptss/pssd/documento/cmc1zt9ae00lskl2ye2zwphdb",
+  law: "https://data.dre.pt/eli/dec-lei/187/2007/05/10/p/dre/pt/html",
+  ages: "https://data.dre.pt/eli/port/476/2025/12/29/p/dre/pt/html",
+  minimum: "https://data.dre.pt/eli/port/480-B/2025/12/30/p/dre/pt/html",
+  /** Despacho n.º 233-A/2026: the 2026 withholding tables, including pension table VIII. */
+  withholding: "https://diariodarepublica.pt/dr/detalhe/despacho/233-a-2026-998488151",
+  simulator: "https://www.seg-social.pt/ptss/pssd/menu/simuladores/simulador-pensoes",
+} as const;
+
 /** Normal age of access to the old-age pension in the general regime, in months (Portaria n.º 358/2024/1: 66 years and 9 months). */
 export const NORMAL_AGE_2026_MONTHS = 66 * 12 + 9;
 /** The 2027 value, already published (Portaria n.º 476/2025/1: 66 years and 11 months). Shown, not used. */
