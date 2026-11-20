@@ -4296,6 +4296,20 @@
         "newClient": "Ich wäre Neukunde",
         "newClientHelp": "Berücksichtigt die Rabatte, die Versorger Neukunden im ersten Jahr geben."
       },
+      "indexed": {
+        "legend": "Indexierte Angebote",
+        "range": "{{from}} bis {{to}}",
+        "erse": "Schätzung der ERSE",
+        "market": "Tatsächliche Kosten der letzten 12 Monate mit OMIE-Preisen",
+        "marketDiagram": "Tatsächliche Kosten an den Tagen deiner Verbrauchsdatei mit OMIE-Preisen",
+        "help": "Die ERSE gibt jedem indexierten Angebot einen einzigen Preis, den Durchschnitt der Terminpreise der nächsten drei Monate. Mit OMIE-Preisen werden die Angebote, deren Versorger die Formel veröffentlicht, mit dem berechnet, was der Markt tatsächlich gekostet hat, zu den heutigen Bedingungen. Die übrigen bleiben bei der Schätzung der ERSE.",
+        "loading": "OMIE-Preise werden geladen…",
+        "loadError": "Die OMIE-Preise konnten nicht geladen werden. Indexierte Angebote bleiben bei der Schätzung der ERSE.",
+        "diagramLoadError": "Die OMIE-Viertelstundenpreise konnten nicht geladen werden. Stattdessen werden die letzten 12 Monate verwendet.",
+        "diagramOutOfRange": "Für keinen Tag deiner Verbrauchsdatei sind OMIE-Preise geladen (nur für die letzten 12 Monate). Stattdessen werden die letzten 12 Monate verwendet.",
+        "diagramShort": "Deine Verbrauchsdatei deckt {{months}} der 12 Monate mit OMIE-Preisen ab; nötig sind mindestens {{minimum}}. Stattdessen werden die letzten 12 Monate verwendet.",
+        "coverage": "{{percent}} % des Verbrauchs in deiner Datei fällt auf Tage mit OMIE-Preisen ({{period}}). Der Rest wird zum Durchschnittspreis dieser Tage berechnet."
+      },
       "filters": {
         "title": "Filter",
         "summary": "(Preisart, Versorger, Bedingungen)",
@@ -4479,6 +4493,12 @@
         "same": "Kostet so viel wie dein Tarif",
         "details": "Aufschlüsselung und Links",
         "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was du zahlst, folgt dem Markt.",
+        "estimatedLeft": "{{count}} indexierte Angebote ohne veröffentlichte Formel bleiben bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
+        "estimatedLeftOne": "1 indexiertes Angebot ohne veröffentlichte Formel bleibt bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
+        "marketNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und den OMIE-Preisen von {{period}}, gewichtet mit dem Verbrauchsprofil von E-REDES, zu den heutigen Netzentgelten.",
+        "marketDiagramNote": "Energiepreis mit der vom Versorger veröffentlichten Formel und dem OMIE-Preis jeder Viertelstunde deiner Verbrauchsdatei ({{period}}), zu den heutigen Netzentgelten.",
+        "marketPrices": "Energie, ohne MwSt.: {{prices}}.",
+        "formulaLink": "Formel des Versorgers (gelesen am {{date}})",
         "conditionsLabel": "Bedingungen, in den Worten der ERSE",
         "links": {
           "offer": "Angebotsseite",
@@ -4491,6 +4511,7 @@
       "badges": {
         "label": "Merkmale des Angebots",
         "estimated": "Geschätzter Preis",
+        "market": "Tatsächliche Kosten (OMIE)",
         "regulated": "Reguliert",
         "conditioned": "Mit Bedingungen",
         "dual": "Mit Gas",
@@ -4527,20 +4548,30 @@
           "laterYears": "Folgejahre (EUR)",
           "period": "Dein Zeitraum (EUR)",
           "estimated": "Geschätzter Preis",
+          "priceBasis": "Preisgrundlage",
           "saving": "Ersparnis pro Jahr (EUR)",
           "link": "Link"
         },
         "yes": "ja",
-        "no": "nein"
+        "no": "nein",
+        "basis": {
+          "fixed": "Festpreis",
+          "erseEstimate": "Schätzung der ERSE (Terminpreise für 3 Monate)",
+          "market": "Tatsächliche Kosten OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Angebote: ERSE, Export vom {{date}} ({{offers}} Angebote von {{suppliers}} Versorgern und der regulierte Tarif).",
         "negotiation": "Die Preise sind die veröffentlichten, vor jeder persönlichen Verhandlung. Bestätige das Angebot beim Versorger, bevor du unterschreibst.",
         "indexed": "Indexierte Preise sind Schätzungen der ERSE für die kommenden Monate, kein Festpreis.",
+        "indexedMarket": "Indexierte Angebote mit veröffentlichter Formel: tatsächliche Kosten mit den portugiesischen OMIE-Preisen von {{period}}, gewichtet mit dem Verbrauchsprofil BTN C von E-REDES, mit den Netzverlusten von E-REDES und REN und den heutigen Netzentgelten. So viel hätten sie gekostet, keine Prognose. Die übrigen bleiben bei der Schätzung der ERSE.",
+        "indexedMarketDiagram": "Indexierte Angebote mit veröffentlichter Formel: tatsächliche Kosten mit dem portugiesischen OMIE-Preis jeder Viertelstunde deiner Verbrauchsdatei ({{period}}), mit den Netzverlusten von E-REDES und REN und den heutigen Netzentgelten. So viel hätten sie gekostet, keine Prognose. Die übrigen bleiben bei der Schätzung der ERSE.",
         "taxes": "Die Summen enthalten Leistung, Energie, den Rundfunkbeitrag, die Stromverbrauchsteuer und die Mehrwertsteuer.",
         "dgeg": "Die DGEG-Gebühr (einige Cent im Monat) ist nicht enthalten.",
         "educational": "Schätzung zu Bildungszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
-        "simulatorLink": "Offizieller Preissimulator der ERSE"
+        "simulatorLink": "Offizieller Preissimulator der ERSE",
+        "omieLink": "Day-Ahead-Marktpreise (OMIE, Portugal)",
+        "profilesLink": "Verbrauchs- und Verlustprofile (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4589,7 +4620,7 @@
           "items": {
             "a": "Die DGEG-Gebühr von einigen Cent im Monat sowie etwaige Zähler- oder sonstige Entgelte.",
             "b": "Persönliche Verhandlungen: Die Preise sind die veröffentlichten.",
-            "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet; was du zahlst, folgt dem Markt.",
+            "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet. Wenn du OMIE-Preise wählst, zeigen die Angebote, deren Versorger die Formel veröffentlicht, was sie in den letzten 12 Monaten (oder an den Tagen deiner Datei) gekostet hätten, nicht was sie kosten werden: Was du zahlst, folgt dem Markt.",
             "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, außer du beziehst sie ein.",
             "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht deinem eigenen. Die E-REDES-Datei liefert deine tatsächliche Aufteilung.",
             "solar": "Die Solarerzeugung ist ein typisches Jahr der Distrikthauptstadt, nach Süden mit optimaler Neigung: Verschattung, eine andere Ausrichtung und das Wetter eines bestimmten Jahres ändern sie.",

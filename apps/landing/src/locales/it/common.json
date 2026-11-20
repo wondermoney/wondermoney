@@ -4296,6 +4296,20 @@
         "newClient": "Sarei un nuovo cliente",
         "newClientHelp": "Tiene conto degli sconti che i fornitori offrono ai nuovi clienti nel primo anno."
       },
+      "indexed": {
+        "legend": "Offerte indicizzate",
+        "range": "{{from}} a {{to}}",
+        "erse": "Stima dell'ERSE",
+        "market": "Costo reale degli ultimi 12 mesi con i prezzi OMIE",
+        "marketDiagram": "Costo reale nelle date del tuo file dei consumi con i prezzi OMIE",
+        "help": "L'ERSE dà un solo prezzo a ogni offerta indicizzata, la media dei futures dei prossimi tre mesi. Con i prezzi OMIE, le offerte di cui il fornitore pubblica la formula sono calcolate con quanto il mercato è costato davvero, alle condizioni di oggi. Le altre restano sulla stima dell'ERSE.",
+        "loading": "Caricamento dei prezzi OMIE…",
+        "loadError": "Non è stato possibile caricare i prezzi OMIE. Le offerte indicizzate restano sulla stima dell'ERSE.",
+        "diagramLoadError": "Non è stato possibile caricare i prezzi OMIE al quarto d'ora. Usiamo gli ultimi 12 mesi.",
+        "diagramOutOfRange": "Nessun giorno del tuo file dei consumi ha prezzi OMIE caricati (solo gli ultimi 12 mesi). Usiamo gli ultimi 12 mesi.",
+        "diagramShort": "Il tuo file dei consumi copre {{months}} dei 12 mesi con prezzi OMIE; ne servono almeno {{minimum}}. Usiamo gli ultimi 12 mesi.",
+        "coverage": "Il {{percent}}% del consumo del tuo file cade in giorni con prezzi OMIE ({{period}}). Il resto è calcolato al prezzo medio di quei giorni."
+      },
       "filters": {
         "title": "Filtri",
         "summary": "(tipo di prezzo, fornitore, condizioni)",
@@ -4479,6 +4493,12 @@
         "same": "Costa quanto la tua tariffa",
         "details": "Dettaglio e link",
         "estimatedNote": "Prezzo indicizzato: stima dell'ERSE per i prossimi mesi. Quello che paghi segue il mercato.",
+        "estimatedLeft": "{{count}} offerte indicizzate senza formula pubblicata restano sulla stima dell'ERSE (futures a 3 mesi).",
+        "estimatedLeftOne": "1 offerta indicizzata senza formula pubblicata resta sulla stima dell'ERSE (futures a 3 mesi).",
+        "marketNote": "Prezzo dell'energia con la formula pubblicata dal fornitore e i prezzi OMIE da {{period}}, ponderati con il profilo di consumo di E-REDES, alle tariffe di rete di oggi.",
+        "marketDiagramNote": "Prezzo dell'energia con la formula pubblicata dal fornitore e il prezzo OMIE di ogni quarto d'ora del tuo file dei consumi ({{period}}), alle tariffe di rete di oggi.",
+        "marketPrices": "Energia, IVA esclusa: {{prices}}.",
+        "formulaLink": "Formula del fornitore (letta il {{date}})",
         "conditionsLabel": "Condizioni, come le descrive l'ERSE",
         "links": {
           "offer": "Pagina dell'offerta",
@@ -4491,6 +4511,7 @@
       "badges": {
         "label": "Caratteristiche dell'offerta",
         "estimated": "Prezzo stimato",
+        "market": "Costo reale (OMIE)",
         "regulated": "Regolata",
         "conditioned": "Riservata",
         "dual": "Con gas",
@@ -4527,20 +4548,30 @@
           "laterYears": "Anni successivi (EUR)",
           "period": "Il tuo periodo (EUR)",
           "estimated": "Prezzo stimato",
+          "priceBasis": "Base del prezzo",
           "saving": "Risparmio annuo (EUR)",
           "link": "Link"
         },
         "yes": "sì",
-        "no": "no"
+        "no": "no",
+        "basis": {
+          "fixed": "Prezzo fisso",
+          "erseEstimate": "Stima dell'ERSE (futures a 3 mesi)",
+          "market": "Costo reale OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offerte: ERSE, esportazione del {{date}} ({{offers}} offerte di {{suppliers}} fornitori e la tariffa regolata).",
         "negotiation": "I prezzi sono quelli pubblicati, prima di qualsiasi trattativa personale. Conferma l'offerta con il fornitore prima di firmare.",
         "indexed": "I prezzi indicizzati sono stime dell'ERSE per i prossimi mesi, non un prezzo fisso.",
+        "indexedMarket": "Offerte indicizzate con formula pubblicata: costo reale con i prezzi OMIE del Portogallo da {{period}}, ponderati con il profilo di consumo BTN C di E-REDES, con le perdite di rete di E-REDES e REN e le tariffe di rete di oggi. È quanto sarebbero costate, non una previsione. Le altre restano sulla stima dell'ERSE.",
+        "indexedMarketDiagram": "Offerte indicizzate con formula pubblicata: costo reale con il prezzo OMIE del Portogallo di ogni quarto d'ora del tuo file dei consumi ({{period}}), con le perdite di rete di E-REDES e REN e le tariffe di rete di oggi. È quanto sarebbero costate, non una previsione. Le altre restano sulla stima dell'ERSE.",
         "taxes": "I totali comprendono potenza, energia, contributo audiovisivo, imposta sull'elettricità e IVA.",
         "dgeg": "La tassa DGEG (pochi centesimi al mese) non è inclusa.",
         "educational": "Stima a scopo informativo, non una consulenza. WonderMoney non ha rapporti commerciali con alcun fornitore.",
-        "simulatorLink": "Simulatore ufficiale dei prezzi dell'ERSE"
+        "simulatorLink": "Simulatore ufficiale dei prezzi dell'ERSE",
+        "omieLink": "Prezzi del mercato del giorno prima (OMIE, Portogallo)",
+        "profilesLink": "Profili di consumo e di perdita (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4589,7 +4620,7 @@
           "items": {
             "a": "La tassa DGEG, pochi centesimi al mese, ed eventuali costi del contatore o altri oneri.",
             "b": "La trattativa personale: i prezzi sono quelli pubblicati.",
-            "c": "Le offerte indicizzate sono calcolate con la stima dell'ERSE per i prossimi mesi; quello che paghi segue il mercato.",
+            "c": "Le offerte indicizzate sono calcolate con la stima di ERSE per i prossimi mesi. Se scegli i prezzi OMIE, quelle di cui il fornitore pubblica la formula mostrano quanto sarebbero costate negli ultimi 12 mesi (o nelle date del tuo file), non quanto costeranno: quello che paghi segue il mercato.",
             "d": "Le offerte dual possono includere il gas nei loro importi fissi; sono escluse a meno che tu non le includa.",
             "e": "Con una bolletta o un totale, la ripartizione tra le fasce è quella del profilo standard, non la tua. Il file di E-REDES dà la tua ripartizione reale.",
             "solar": "La produzione solare è un anno tipo del capoluogo di distretto, rivolta a sud con l'inclinazione ottimale: ombre, un altro orientamento e il meteo di un anno specifico la cambiano.",

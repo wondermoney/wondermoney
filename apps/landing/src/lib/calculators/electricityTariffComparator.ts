@@ -24,6 +24,7 @@ import {
 } from "./electricityTariffComparison";
 import { profileClassFor, profilePeriodShares, type CycleKwh, type HourlyCycle, type PeriodKwh } from "./electricityPeriods";
 import { DAYS_PER_YEAR } from "./electricityTaxes";
+import type { IndexedPricing } from "./indexedPricing";
 import { supplierName } from "./electricitySuppliers";
 import type { Lang } from "../i18nLocale";
 import { toIntlLocale } from "../numberFormat";
@@ -298,6 +299,8 @@ export interface ComparatorRequest {
   filters: OfferFilters;
   /** The visitor's own prices for `option`, or null. */
   myTariff: MyTariffPrices | null;
+  /** Price indexed offers with a published formula from OMIE's prices (indexedPricing.ts). */
+  indexedPricing?: IndexedPricing;
 }
 
 export interface RankedOffer extends OfferComparison {
@@ -333,6 +336,7 @@ export function runComparator(request: ComparatorRequest): ComparatorOutcome {
     includeConditioned: request.includeConditioned,
     includeDual: request.includeDual,
     sortBy: request.sortBy,
+    indexedPricing: request.indexedPricing,
   };
   const list = compareElectricityOffers(offers, {
     ...base,
@@ -384,6 +388,8 @@ export interface CsvLabels {
   laterYears: string;
   period: string;
   estimated: string;
+  /** The price-basis column's header. */
+  priceBasis: string;
   saving: string;
   link: string;
   options: Record<TariffOption, string>;
@@ -391,6 +397,8 @@ export interface CsvLabels {
   no: string;
   /** The supplier's display name for a result (the regulated tariff has its own label). */
   supplierOf: (offer: ElectricityOffer) => string;
+  /** How a result was priced, in words: fixed, ERSE's estimate, or OMIE's real cost with its months. */
+  basisOf: (result: RankedOffer) => string;
 }
 
 /** Comma and decimal point in English; semicolon and decimal comma where the comma is decimal. */
@@ -417,6 +425,7 @@ export function comparisonCsv(results: readonly RankedOffer[], lang: string, lab
     labels.laterYears,
     labels.period,
     labels.estimated,
+    labels.priceBasis,
     ...(withSaving ? [labels.saving] : []),
     labels.link,
   ];
@@ -429,10 +438,19 @@ export function comparisonCsv(results: readonly RankedOffer[], lang: string, lab
     amount(result.laterYears.total),
     amount(result.period.total),
     result.estimated ? labels.yes : labels.no,
+    labels.basisOf(result),
     ...(withSaving ? [result.saving === null ? "" : amount(result.saving)] : []),
     result.offer.links.offer ?? result.offer.links.supplier ?? "",
   ]);
   return `\uFEFF${[header, ...rows].map((row) => row.map(cell).join(separator)).join("\r\n")}\r\n`;
+}
+
+/** An ISO month ("2026-10") in words ("outubro de 2026"), the same in Node and browsers (UTC). */
+export function formatIsoMonth(locale: Lang, iso: string): string {
+  const [year, month] = iso.split("-").map(Number);
+  return new Intl.DateTimeFormat(toIntlLocale(locale), { month: "long", year: "numeric", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, month - 1, 1)),
+  );
 }
 
 /** An ISO day in words ("17 de novembro de 2026"), the same in Node and browsers (UTC). */

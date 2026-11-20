@@ -4296,6 +4296,20 @@
         "newClient": "Je serais un nouveau client",
         "newClientHelp": "Tient compte des réductions que les fournisseurs accordent aux nouveaux clients la première année."
       },
+      "indexed": {
+        "legend": "Offres indexées",
+        "range": "{{from}} à {{to}}",
+        "erse": "Estimation de l'ERSE",
+        "market": "Coût réel des 12 derniers mois avec les prix OMIE",
+        "marketDiagram": "Coût réel aux dates de votre fichier de consommation avec les prix OMIE",
+        "help": "L'ERSE donne un seul prix à chaque offre indexée, la moyenne des contrats à terme des trois prochains mois. Avec les prix OMIE, les offres dont le fournisseur publie la formule sont calculées avec ce que le marché a réellement coûté, aux conditions d'aujourd'hui. Les autres restent sur l'estimation de l'ERSE.",
+        "loading": "Chargement des prix OMIE…",
+        "loadError": "Les prix OMIE n'ont pas pu être chargés. Les offres indexées restent sur l'estimation de l'ERSE.",
+        "diagramLoadError": "Les prix OMIE au quart d'heure n'ont pas pu être chargés. Les 12 derniers mois sont utilisés.",
+        "diagramOutOfRange": "Aucun jour de votre fichier de consommation n'a de prix OMIE chargés (seulement les 12 derniers mois). Les 12 derniers mois sont utilisés.",
+        "diagramShort": "Votre fichier de consommation couvre {{months}} des 12 mois avec des prix OMIE ; il en faut au moins {{minimum}}. Les 12 derniers mois sont utilisés.",
+        "coverage": "{{percent}} % de la consommation de votre fichier tombe sur des jours avec des prix OMIE ({{period}}). Le reste est calculé au prix moyen de ces jours."
+      },
       "filters": {
         "title": "Filtres",
         "summary": "(type de prix, fournisseur, conditions)",
@@ -4479,6 +4493,12 @@
         "same": "Coûte autant que votre tarif",
         "details": "Détail et liens",
         "estimatedNote": "Prix indexé : estimation de l'ERSE pour les prochains mois. Ce que vous payez suit le marché.",
+        "estimatedLeft": "{{count}} offres indexées sans formule publiée restent sur l'estimation de l'ERSE (contrats à terme à 3 mois).",
+        "estimatedLeftOne": "1 offre indexée sans formule publiée reste sur l'estimation de l'ERSE (contrats à terme à 3 mois).",
+        "marketNote": "Énergie calculée avec la formule publiée par le fournisseur et les prix OMIE de {{period}}, pondérés par le profil de consommation d'E-REDES, aux tarifs d'accès au réseau d'aujourd'hui.",
+        "marketDiagramNote": "Énergie calculée avec la formule publiée par le fournisseur et le prix OMIE de chaque quart d'heure de votre fichier de consommation ({{period}}), aux tarifs d'accès au réseau d'aujourd'hui.",
+        "marketPrices": "Énergie, hors TVA : {{prices}}.",
+        "formulaLink": "Formule du fournisseur (lue le {{date}})",
         "conditionsLabel": "Conditions, selon les termes de l'ERSE",
         "links": {
           "offer": "Page de l'offre",
@@ -4491,6 +4511,7 @@
       "badges": {
         "label": "Caractéristiques de l'offre",
         "estimated": "Prix estimé",
+        "market": "Coût réel (OMIE)",
         "regulated": "Réglementé",
         "conditioned": "Sous conditions",
         "dual": "Avec gaz",
@@ -4527,20 +4548,30 @@
           "laterYears": "Années suivantes (EUR)",
           "period": "Votre période (EUR)",
           "estimated": "Prix estimé",
+          "priceBasis": "Base du prix",
           "saving": "Économie par an (EUR)",
           "link": "Lien"
         },
         "yes": "oui",
-        "no": "non"
+        "no": "non",
+        "basis": {
+          "fixed": "Prix fixe",
+          "erseEstimate": "Estimation de l'ERSE (contrats à terme à 3 mois)",
+          "market": "Coût réel OMIE, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offres : ERSE, export du {{date}} ({{offers}} offres de {{suppliers}} fournisseurs et le tarif réglementé).",
         "negotiation": "Les prix sont ceux publiés, avant toute négociation personnelle. Confirmez l'offre auprès du fournisseur avant de signer.",
         "indexed": "Les prix indexés sont des estimations de l'ERSE pour les prochains mois, pas un prix fixe.",
+        "indexedMarket": "Offres indexées à formule publiée : coût réel avec les prix OMIE du Portugal de {{period}}, pondérés par le profil de consommation BTN C d'E-REDES, avec les pertes d'E-REDES et de REN et les tarifs d'accès d'aujourd'hui. C'est ce qu'elles auraient coûté, pas une prévision. Les autres restent sur l'estimation de l'ERSE.",
+        "indexedMarketDiagram": "Offres indexées à formule publiée : coût réel avec le prix OMIE du Portugal de chaque quart d'heure de votre fichier de consommation ({{period}}), avec les pertes d'E-REDES et de REN et les tarifs d'accès d'aujourd'hui. C'est ce qu'elles auraient coûté, pas une prévision. Les autres restent sur l'estimation de l'ERSE.",
         "taxes": "Les totaux comprennent la puissance, l'énergie, la contribution audiovisuelle, la taxe sur l'électricité et la TVA.",
         "dgeg": "La taxe de la DGEG (quelques centimes par mois) n'est pas incluse.",
         "educational": "Estimation éducative, pas un conseil. WonderMoney n'a aucune relation commerciale avec un fournisseur.",
-        "simulatorLink": "Simulateur de prix officiel de l'ERSE"
+        "simulatorLink": "Simulateur de prix officiel de l'ERSE",
+        "omieLink": "Prix du marché journalier (OMIE, Portugal)",
+        "profilesLink": "Profils de consommation et de pertes (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4589,7 +4620,7 @@
           "items": {
             "a": "La taxe de la DGEG, quelques centimes par mois, et les éventuels frais de compteur ou autres frais.",
             "b": "La négociation personnelle : les prix sont ceux publiés.",
-            "c": "Les offres indexées sont calculées selon l'estimation de l'ERSE pour les prochains mois ; ce que vous payez suit le marché.",
+            "c": "Les offres indexées sont calculées selon l'estimation de l'ERSE pour les prochains mois. Si vous choisissez les prix OMIE, celles dont le fournisseur publie la formule montrent ce qu'elles auraient coûté sur les 12 derniers mois (ou aux dates de votre fichier), pas ce qu'elles coûteront : ce que vous payez suit le marché.",
             "d": "Les offres duales peuvent inclure le gaz dans leurs montants fixes ; elles sont exclues, sauf si vous les incluez.",
             "e": "Avec une facture ou un total, la répartition entre les périodes suit le profil type, pas le vôtre. Le fichier E-REDES donne votre répartition réelle.",
             "solar": "La production solaire est une année type du chef-lieu de district, orientée plein sud à l'inclinaison optimale : l'ombre, une autre orientation et la météo d'une année donnée la modifient.",

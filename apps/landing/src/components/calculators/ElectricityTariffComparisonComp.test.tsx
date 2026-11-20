@@ -10,7 +10,11 @@ import {
   runComparator,
   splitTotal,
 } from "@/lib/calculators/electricityTariffComparator";
-import type { OffersLoader } from "./ElectricityTariffComparisonComp";
+import { INDEXED_FORMULAS } from "@/lib/calculators/data/indexedFormulas";
+import { OMIE_MONTHS, OMIE_PRICES_SOURCE } from "@/lib/calculators/data/omiePrices";
+import { legalMidnight, QUARTER_HOUR_MS } from "@/lib/calculators/electricityPeriods";
+import { profileBasis } from "@/lib/calculators/indexedPricing";
+import type { MarketLoader, OffersLoader, QuarterHoursLoader } from "./ElectricityTariffComparisonComp";
 
 const pushGtmEvent = vi.fn();
 vi.mock("@/lib/gtm", () => ({
@@ -32,6 +36,7 @@ const SOURCE = {
 } as const;
 const loadFixtures: OffersLoader = async () => ({ ELECTRICITY_OFFERS: FIXTURE_OFFERS, ELECTRICITY_OFFERS_SOURCE: SOURCE });
 const TUR = FIXTURE_OFFERS.find((offer) => offer.regulated)!;
+const loadMarket: MarketLoader = async () => ({ OMIE_MONTHS, OMIE_PRICES_SOURCE, INDEXED_FORMULAS });
 
 const eur = (value: number) =>
   new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
@@ -185,6 +190,96 @@ describe("electricity tariff comparator", () => {
     expect(await screen.findByText(/This does not look like an E-REDES consumption file/)).toBeTruthy();
   });
 
+  it("prices indexed offers with a published formula from OMIE's last 12 months, on request", async () => {
+    const market = vi.fn(loadMarket);
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={market} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+    fireEvent.change(screen.getByLabelText("Price type"), { target: { value: "indexed" } });
+    expect(market).not.toHaveBeenCalled();
+    const card = (name: string) => cards().find((each) => within(each).queryByText(name)) as HTMLElement;
+    expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).getByText("Estimated price")).toBeTruthy();
+
+    fireEvent.click(screen.getByLabelText("Real cost over the last 12 months with OMIE prices"));
+    await waitFor(() => expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).queryByText("Real cost (OMIE)")).toBeTruthy());
+    expect(market).toHaveBeenCalledOnce();
+    const edp = card("Eletricidade Indexada média DD + FE Oferta 100€");
+    expect(within(edp).queryByText("Estimated price")).toBeNull();
+    const view = expected(200, { indexedPricing: { basis: profileBasis(OMIE_MONTHS), formulas: INDEXED_FORMULAS }, filters: { ...DEFAULT_OFFER_FILTERS, pricing: "indexed" } });
+    const priced = view.results.find((result) => result.offer.id === "EDPC_36")!;
+    expect(priced.priceBasis).toBe("market");
+    expect(shows(edp, eur(priced.firstYear.total))).toBe(true);
+    expect(within(edp).getByText(/supplier's published formula and OMIE prices from November 2025 to October 2026/)).toBeTruthy();
+    expect(within(edp).getByRole("link", { name: "Supplier's formula (read on 20 November 2026)", hidden: true }).getAttribute("href")).toBe(
+      "https://www.edp.pt/media/uknapr1m/fin-indexada.pdf",
+    );
+    // An offer whose supplier publishes no complete formula stays on ERSE's estimate.
+    expect(within(card("TOP -T0 INDEXADO 12 meses")).getByText("Estimated price")).toBeTruthy();
+    expect(screen.getByText("1 indexed offer without a published formula stays on ERSE's estimate (3-month futures).")).toBeTruthy();
+    expect(screen.getByText(/real cost with OMIE's Portuguese prices from November 2025 to October 2026/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Day-ahead market prices (OMIE, Portugal)" }).getAttribute("href")).toBe(OMIE_PRICES_SOURCE.url);
+
+    fireEvent.click(screen.getByLabelText("ERSE's estimate"));
+    expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).getByText("Estimated price")).toBeTruthy();
+  });
+
+  it("prices them on the consumption file's own quarter-hours when it covers six months, and falls back otherwise", async () => {
+    // January to June 2026 of quarter-hour prices: 100 EUR/MWh, loss factor 1,16, a flat profile.
+    const start = legalMidnight(2026, 1, 1);
+    const count = (legalMidnight(2026, 7, 1) - start) / QUARTER_HOUR_MS;
+    const data = {
+      start: new Date(start).toISOString(),
+      omie: Array.from({ length: count }, () => 10000),
+      loss: Array.from({ length: count }, () => 16000),
+      profile: Array.from({ length: count }, () => 28539),
+    };
+    const quarterHours = vi.fn<QuarterHoursLoader>(async () => data);
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={loadMarket} loadQuarterHours={quarterHours} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.click(screen.getByLabelText("Full"));
+    fireEvent.change(screen.getByLabelText("Consumption"), { target: { value: "diagram" } });
+    const upload = (dates: string[]) => {
+      const header = ["Data", "Hora", "Consumo registado, Ativa (kW)"];
+      const rows = dates.flatMap((date) =>
+        Array.from({ length: 96 }, (_, i) => {
+          const end = (i + 1) * 15;
+          return [date, `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`, "0,4"];
+        }),
+      );
+      const book = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet([["Diagrama de carga"], header, ...rows]), "Consumos");
+      const bytes = XLSX.write(book, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
+      fireEvent.change(screen.getByLabelText("E-REDES consumption file"), { target: { files: [new File([bytes], "consumos.xlsx")] } });
+    };
+    const edp = () => cards().find((each) => within(each).queryByText("Eletricidade Indexada média DD + FE Oferta 100€")) as HTMLElement;
+
+    // Two January days: one month of the twelve, too few. The last 12 months are used, and said.
+    upload(["2026/01/14", "2026/01/15"]);
+    await screen.findByText("2026-01-14 to 2026-01-15: 2 days, 19 kWh.");
+    fireEvent.click(screen.getByLabelText("Real cost on the dates of your consumption file with OMIE prices"));
+    expect(await screen.findByText(/covers 1 of the 12 months with OMIE prices; at least 6 are needed/)).toBeTruthy();
+    expect(quarterHours).toHaveBeenCalledExactlyOnceWith("/data/omie-pt-quarter-hours.json");
+    expect(within(edp()).getByText(/OMIE prices from November 2025 to October 2026/)).toBeTruthy();
+
+    // A day in each of six months: priced on the file's own quarter-hours.
+    fireEvent.click(screen.getByRole("button", { name: "Remove the file" }));
+    upload(["2026/01/14", "2026/02/14", "2026/03/14", "2026/04/14", "2026/05/14", "2026/06/14"]);
+    await screen.findByText("2026-01-14 to 2026-06-14: 6 days, 58 kWh.");
+    await waitFor(() => expect(screen.getByText(/Portuguese price of each quarter-hour in your consumption file \(January 2026 to June 2026\)/)).toBeTruthy());
+    expect(within(edp()).getByText("Real cost (OMIE)")).toBeTruthy();
+    // EDP's formula on 100 EUR/MWh: 0,1 x 1,164 x 1,10 + 0,0185 + TAR 0,0607 EUR/kWh.
+    expect(within(edp()).getByText(`Energy, before VAT: ${(0.1 * 1.164 * 1.1 + 0.0185 + 0.0607).toFixed(4)} €/kWh.`)).toBeTruthy();
+    expect(screen.queryByText(/at least 6 are needed/)).toBeNull();
+    cleanup();
+
+    // OMIE's data cannot be loaded: the offers stay on ERSE's estimate, and the page says so.
+    render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={() => Promise.reject(new Error("offline"))} />);
+    await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.click(screen.getByLabelText("Real cost over the last 12 months with OMIE prices"));
+    expect(await screen.findByText(/OMIE prices could not be loaded/)).toBeTruthy();
+    expect(screen.queryAllByText("Real cost (OMIE)")).toHaveLength(0);
+  });
+
   it("filters on the offer fields and on the engine's options", async () => {
     await renderPage();
     fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
@@ -261,7 +356,9 @@ describe("electricity tariff comparator", () => {
     expect(click).toHaveBeenCalledOnce();
     const text = await (createObjectURL.mock.calls[0][0] as Blob).text();
     const lines = text.replace(/^\uFEFF/, "").trimEnd().split("\r\n");
-    expect(lines[0]).toBe("Rank,Supplier,Offer,Option,First year (EUR),Later years (EUR),Your period (EUR),Estimated price,Link");
+    expect(lines[0]).toBe("Rank,Supplier,Offer,Option,First year (EUR),Later years (EUR),Your period (EUR),Estimated price,Price basis,Link");
+    expect(lines.slice(1).some((line) => line.includes(",ERSE estimate (3-month futures),"))).toBe(true);
+    expect(lines.slice(1).some((line) => line.includes(",Fixed price,"))).toBe(true);
     expect(lines.length - 1).toBe(cards().length + Math.max(0, Number(/Show (\d+) more/.exec(document.body.textContent ?? "")?.[1] ?? 0)));
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:offers");
     click.mockRestore();

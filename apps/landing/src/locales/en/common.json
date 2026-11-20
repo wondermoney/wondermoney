@@ -4296,6 +4296,20 @@
         "newClient": "I would be a new client",
         "newClientHelp": "Counts the discounts suppliers give new clients in the first year."
       },
+      "indexed": {
+        "legend": "Indexed offers",
+        "range": "{{from}} to {{to}}",
+        "erse": "ERSE's estimate",
+        "market": "Real cost over the last 12 months with OMIE prices",
+        "marketDiagram": "Real cost on the dates of your consumption file with OMIE prices",
+        "help": "ERSE gives each indexed offer one price, the average of the next three months' futures. With OMIE prices, the offers whose supplier publishes its formula are priced with what the market really cost, on today's terms. The others stay on ERSE's estimate.",
+        "loading": "Loading OMIE prices…",
+        "loadError": "OMIE prices could not be loaded. Indexed offers stay on ERSE's estimate.",
+        "diagramLoadError": "OMIE's quarter-hour prices could not be loaded. The last 12 months are used instead.",
+        "diagramOutOfRange": "None of the days in your consumption file has OMIE prices loaded (only the last 12 months are). The last 12 months are used instead.",
+        "diagramShort": "Your consumption file covers {{months}} of the 12 months with OMIE prices; at least {{minimum}} are needed. The last 12 months are used instead.",
+        "coverage": "{{percent}}% of the consumption in your file falls on days with OMIE prices ({{period}}). The rest is priced at those days' average."
+      },
       "filters": {
         "title": "Filters",
         "summary": "(price type, supplier, conditions)",
@@ -4479,6 +4493,12 @@
         "same": "Costs the same as your tariff",
         "details": "Breakdown and links",
         "estimatedNote": "Indexed price: ERSE's estimate for the coming months. What you pay follows the market.",
+        "estimatedLeft": "{{count}} indexed offers without a published formula stay on ERSE's estimate (3-month futures).",
+        "estimatedLeftOne": "1 indexed offer without a published formula stays on ERSE's estimate (3-month futures).",
+        "marketNote": "Energy priced with the supplier's published formula and OMIE prices from {{period}}, weighted by the E-REDES consumption profile, at today's network access tariffs.",
+        "marketDiagramNote": "Energy priced with the supplier's published formula and the OMIE price of each quarter-hour in your consumption file ({{period}}), at today's network access tariffs.",
+        "marketPrices": "Energy, before VAT: {{prices}}.",
+        "formulaLink": "Supplier's formula (read on {{date}})",
         "conditionsLabel": "Conditions, in ERSE's words",
         "links": {
           "offer": "Offer page",
@@ -4491,6 +4511,7 @@
       "badges": {
         "label": "Offer features",
         "estimated": "Estimated price",
+        "market": "Real cost (OMIE)",
         "regulated": "Regulated",
         "conditioned": "Conditioned",
         "dual": "With gas",
@@ -4527,20 +4548,30 @@
           "laterYears": "Later years (EUR)",
           "period": "Your period (EUR)",
           "estimated": "Estimated price",
+          "priceBasis": "Price basis",
           "saving": "Saving a year (EUR)",
           "link": "Link"
         },
         "yes": "yes",
-        "no": "no"
+        "no": "no",
+        "basis": {
+          "fixed": "Fixed price",
+          "erseEstimate": "ERSE estimate (3-month futures)",
+          "market": "OMIE real cost, {{period}}"
+        }
       },
       "source": {
         "asOf": "Offers: ERSE, export of {{date}} ({{offers}} offers from {{suppliers}} suppliers and the regulated tariff).",
         "negotiation": "Prices are the published ones, before any personal negotiation. Confirm the offer with the supplier before you sign.",
         "indexed": "Indexed prices are ERSE's estimates for the coming months, not a fixed price.",
+        "indexedMarket": "Indexed offers with a published formula: real cost with OMIE's Portuguese prices from {{period}}, weighted by the E-REDES BTN C consumption profile, with E-REDES and REN network losses and today's access tariffs. It is what they would have cost, not a forecast. The others stay on ERSE's estimate.",
+        "indexedMarketDiagram": "Indexed offers with a published formula: real cost with OMIE's Portuguese price of each quarter-hour in your consumption file ({{period}}), with E-REDES and REN network losses and today's access tariffs. It is what they would have cost, not a forecast. The others stay on ERSE's estimate.",
         "taxes": "Totals include power, energy, the audiovisual contribution, the electricity tax and VAT.",
         "dgeg": "The DGEG fee (a few cents a month) is not included.",
         "educational": "Educational estimate, not advice. WonderMoney has no commercial relationship with any supplier.",
-        "simulatorLink": "ERSE's official price simulator"
+        "simulatorLink": "ERSE's official price simulator",
+        "omieLink": "Day-ahead market prices (OMIE, Portugal)",
+        "profilesLink": "Consumption and loss profiles (E-REDES)"
       },
       "guide": {
         "use": {
@@ -4589,7 +4620,7 @@
           "items": {
             "a": "The DGEG fee, a few cents a month, and any meter or other charges.",
             "b": "Personal negotiation: the prices are the published ones.",
-            "c": "Indexed offers are priced at ERSE's estimate for the coming months; what you pay follows the market.",
+            "c": "Indexed offers are priced at ERSE's estimate for the coming months. If you choose OMIE prices, those whose supplier publishes its formula show what they would have cost over the last 12 months (or on your file's dates), not what they will cost: what you pay follows the market.",
             "d": "Dual offers can include gas in their fixed amounts; they are left out unless you include them.",
             "e": "With a bill or a total, the split across periods is the standard profile, not your own. The E-REDES file gives your real split.",
             "solar": "Solar production is a typical year for the district capital, facing south at the optimal tilt: shade, another orientation and a given year's weather change it.",

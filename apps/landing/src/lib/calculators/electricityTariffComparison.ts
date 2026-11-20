@@ -8,7 +8,10 @@
 //
 // How the offer data is read (ERSE's CSV columns, as electricityOfferTypes.ts maps them):
 // - Prices are before VAT and taxes. Indexed offers carry ERSE's estimate (the three-month futures
-//   average, one price for the twelve months), so their results are marked `estimated`.
+//   average, one price for the twelve months), so their results are marked `estimated`. With
+//   `indexedPricing`, an indexed offer whose supplier publishes its formula is priced instead from
+//   OMIE's real prices (indexedPricing.ts, data/indexedFormulas.ts): its energy prices are replaced,
+//   everything else is billed as below, and the result says which market basis it used.
 // - `mandatoryServicesPerYear` and `newClient.fixedPerYear` include VAT (ERSE's "c/IVA" columns).
 //   `refunds.fixedPerYear` (ReembFixo) has no stated VAT basis: it comes off the total as a flat EUR
 //   amount. ERSE's simulator does the same and books it as an amount with 23% VAT (79 EUR shows as
@@ -30,6 +33,13 @@
 import type { ContractedPowerKva, ElectricityOffer } from "./electricityOfferTypes";
 import type { HourlyCycle, PeriodKwh } from "./electricityPeriods";
 import { ERSE_TARIFFS } from "./data/erseTariffs";
+import {
+  formulaEnergyPrices,
+  formulaFor,
+  type IndexedFormula,
+  type IndexedPricing,
+  type MarketBasisKind,
+} from "./indexedPricing";
 import {
   DAYS_PER_YEAR,
   cavNet,
@@ -78,6 +88,11 @@ export interface TariffComparisonInput {
   cheapestPerSupplier?: boolean;
   /** Which total ranks the results. Default "firstYear", ERSE's annual figure. */
   sortBy?: ComparisonSort;
+  /**
+   * Price indexed offers that have a published formula from OMIE's real prices on this market basis
+   * (the last 12 months, or a load diagram's dates), instead of ERSE's estimate. Off by default.
+   */
+  indexedPricing?: IndexedPricing;
 }
 
 /** One bill, in EUR. Amounts are not rounded except `total`, which is rounded to the cent. */
@@ -110,11 +125,29 @@ export interface TariffBreakdown {
   total: number;
 }
 
+/** How an offer's energy was priced. */
+export type PriceBasis = "fixed" | "erseEstimate" | "market";
+
+/** The market an indexed offer was priced on, with the supplier's formula. */
+export interface MarketPricing {
+  kind: MarketBasisKind;
+  /** First and last month of market prices, "YYYY-MM". */
+  from: string;
+  to: string;
+  formula: IndexedFormula;
+  /** The energy price of each period, EUR/kWh before VAT, in the order of the option's periods. */
+  energy: readonly number[];
+}
+
 export interface OfferComparison {
   offer: ElectricityOffer;
   option: TariffOption;
-  /** Indexed offer: priced at ERSE's estimate of the coming months, not a fixed price. */
+  /** Indexed offer priced at ERSE's estimate of the coming months, not a fixed or past price. */
   estimated: boolean;
+  /** "fixed": the offer's prices; "erseEstimate": ERSE's indexed estimate; "market": OMIE and formula. */
+  priceBasis: PriceBasis;
+  /** With `priceBasis` "market", what it was priced on. */
+  market?: MarketPricing;
   /** Dual offer: needs a gas contract too, and its fixed amounts may cover gas. */
   dual: boolean;
   /** The bill for the entered days, on first-year terms. */
@@ -354,6 +387,18 @@ function cheapestOfEachSupplier(sorted: readonly OfferComparison[]) {
   });
 }
 
+/** An indexed offer's energy prices from its formula and the market basis, or null. */
+function marketPrices(offer: ElectricityOffer, input: TariffComparisonInput, option: TariffOption): MarketPricing | null {
+  const pricing = input.indexedPricing;
+  if (!pricing) return null;
+  const formula = formulaFor(pricing.formulas, offer.id);
+  if (!formula) return null;
+  const energy = formulaEnergyPrices(formula, pricing.basis, input.contractedPower, option, input.cycle);
+  if (!energy) return null;
+  const { kind, from, to } = pricing.basis;
+  return { kind, from, to, formula, energy };
+}
+
 export function compareElectricityOffers(
   offers: readonly ElectricityOffer[],
   input: TariffComparisonInput,
@@ -372,8 +417,10 @@ export function compareElectricityOffers(
   for (const offer of offers) {
     if (!eligible(offer, input, socialTariff)) continue;
     for (const option of options) {
-      const prices = offerPrices(offer, contractedPower, option);
-      if (!prices) continue;
+      const listed = offerPrices(offer, contractedPower, option);
+      if (!listed) continue;
+      const market = offer.indexed ? marketPrices(offer, input, option) : null;
+      const prices = market ? { powerPerDay: listed.powerPerDay, energy: market.energy } : listed;
       const terms: BillTerms = {
         contractedPower,
         days,
@@ -387,7 +434,9 @@ export function compareElectricityOffers(
       results.push({
         offer,
         option,
-        estimated: offer.indexed,
+        estimated: offer.indexed && !market,
+        priceBasis: market ? "market" : offer.indexed ? "erseEstimate" : "fixed",
+        ...(market ? { market } : {}),
         dual: offer.dual,
         period: priceBill(offer, prices, terms),
         firstYear: priceBill(offer, prices, year),

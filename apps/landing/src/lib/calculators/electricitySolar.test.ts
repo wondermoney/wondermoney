@@ -20,6 +20,7 @@ import {
   netWithSolar,
   productionKwhAt,
   profileReadings,
+  profileYearByPeriod,
   profileShape,
   solarBillSaving,
   solarConsumption,
@@ -76,7 +77,7 @@ describe("netting production against consumption", () => {
   });
 
   it("splits the net hours across the tariff periods at their quarter-hour boundaries", () => {
-    const { kwh, balance, fromDiagram } = solarConsumption({
+    const { kwh, balance, fromDiagram, readings } = solarConsumption({
       consumption: summarizeLoadDiagram(flatDay()),
       readings: flatDay(),
       contractedPower: 3.45,
@@ -84,6 +85,8 @@ describe("netting production against consumption", () => {
       system: TWO_KWP,
     });
     expect(fromDiagram).toBe(true);
+    // The netted quarter-hours, for indexed offers priced on the metered hours.
+    expect(readings).toEqual(netWithSolar(flatDay(), TWO_KWP).net);
     expect(kwh.days).toBe(1);
     expect(kwh.simple.energy).toBeCloseTo(balance.net, 9);
     // Daily cycle in summer: peak 10:30-13:00 and 19:30-21:00, legal time (UTC+1). Half of 09:00 UTC,
@@ -157,6 +160,14 @@ describe("consumption rebuilt from the BTN profile", () => {
     const gross = splitTotal(250, MONTH_DAYS, 3.45);
     const result = solarConsumption({ consumption: gross, readings: null, contractedPower: 3.45, cycle: "daily", system: { typicalYear: lisboa, kwp: 2, lossPercent: 14 } });
     expect(result.fromDiagram).toBe(false);
+    expect(result.readings).toBeNull();
+    // Summed from the profile year's own periods, as summarizeLoadDiagram would classify them.
+    const { net } = netWithSolar(profileReadings(gross, 3.45, "daily"), { typicalYear: lisboa, kwp: 2, lossPercent: 14 });
+    const fast = profileYearByPeriod(net);
+    const slow = summarizeLoadDiagram(net);
+    expect(fast.simple).toEqual(slow.simple);
+    expect(fast.daily).toEqual(slow.daily);
+    expect(fast.weekly).toEqual(slow.weekly);
     expect(result.kwh.days).toBe(MONTH_DAYS);
     expect(result.balance.consumption).toBeCloseTo(250, 6);
     expect(result.kwh.simple.energy).toBeCloseTo(result.balance.net, 6);
