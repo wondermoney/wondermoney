@@ -5717,7 +5717,19 @@
         "independent": "C'est de l'éducation indépendante. Les régulateurs et les banques centrales en font partie ; les canaux de vente des banques, courtiers et sociétés de gestion, non.",
         "noHype": "Pas de promesses d'enrichissement rapide, de promotion de monnaies numériques spéculatives ni de signaux de trading payants.",
         "free": "Vous pouvez la suivre gratuitement.",
-        "market": "Elle a été choisie pour un public en France et en Belgique, et non traduite de la liste d'un autre pays."
+        "market": "Elle a été choisie pour un public en France et en Belgique, et non traduite de la liste d'un autre pays.",
+        "activeCommunity": "Elle a reçu de nouveaux messages au cours du dernier mois, vérifié sur la communauté elle-même.",
+        "openModerated": "Tout le monde peut la lire et la rejoindre gratuitement, et elle a des règles écrites et une modération active.",
+        "independentCommunity": "Aucune banque, aucun courtier ni aucune société de gestion ne la gère, et elle n'existe pas pour vendre un produit.",
+        "noSignals": "Elle n'est pas centrée sur les signaux de trading, le day trading ou les monnaies numériques spéculatives.",
+        "inPrint": "Son éditeur a une édition en français à son catalogue, et nous renvoyons vers cette page, pas vers une boutique.",
+        "publicProvider": "Un organisme public, une association de consommateurs, une université publique ou une autre organisation non commerciale le propose.",
+        "freeOrPriced": "Il est gratuit, ou nous indiquons son prix.",
+        "noFunnel": "Il ne mène pas à la vente d'un programme payant ni d'un produit financier.",
+        "open": "On pouvait le suivre ou s'y inscrire au moment de notre vérification.",
+        "officialOrganiser": "Il est organisé par une stratégie nationale d'éducation financière, une banque centrale ou un régulateur, une association de consommateurs, une bibliothèque publique ou une université.",
+        "freeToAttend": "La participation est gratuite.",
+        "upcoming": "Les événements datés restent affichés jusqu'à leur fin. Les programmes récurrents ont tenu une édition au cours de l'année écoulée."
       },
       "order": "Les entrées sont classées par ordre alphabétique, sans hiérarchie. Nous n'avons aucune relation commerciale avec elles, et les liens ne contiennent aucun code d'affiliation ni de suivi.",
       "owner": "L'équipe WonderMoney tient cette liste et revérifie chaque entrée tous les six mois. Une entrée peut être retirée à chaque révision.",
@@ -5728,12 +5740,46 @@
       "formats": {
         "podcast": "Podcast",
         "newsletter": "Newsletter",
-        "youtube": "Chaîne YouTube"
+        "youtube": "Chaîne YouTube",
+        "forum": "Communauté",
+        "book": "Livre",
+        "course": "Formation",
+        "event": "Événement",
+        "programme": "Programme"
       },
       "staleTitle": "Cette liste doit être révisée",
       "stale": "Nous avons vérifié ces entrées pour la dernière fois le {{date}}, il y a plus de six mois. Certaines ont pu cesser de publier ou changer ; vérifiez chacune avant de vous y fier.",
       "practiceTitle": "Mettez une idée en pratique",
-      "practiceIntro": "Prenez une chose que vous avez entendue ou lue et essayez-la avec vos propres chiffres."
+      "practiceIntro": "Prenez une chose que vous avez entendue ou lue et essayez-la avec vos propres chiffres.",
+      "orderEvents": "Les événements suivent l'ordre des dates et les programmes l'ordre alphabétique, sans classement. Nous n'avons aucune relation commerciale avec les organisateurs, et les liens ne contiennent aucun code d'affiliation ni de suivi.",
+      "ownerMonthly": "L'équipe WonderMoney tient cette liste et consulte chaque mois les calendriers des organisateurs. Les événements passés disparaissent d'eux-mêmes de la page.",
+      "staleMonthly": "Nous avons consulté ces calendriers pour la dernière fois le {{date}}, il y a plus de six semaines. De nouveaux événements ont pu être annoncés et des dates changer ; vérifiez sur la page de l'organisateur avant de vous déplacer.",
+      "platforms": {
+        "subreddit": "Subreddit",
+        "forum": "Forum",
+        "discord": "Serveur Discord",
+        "telegram": "Groupe Telegram"
+      },
+      "moderation": "Modération et règles",
+      "edition": "Édition",
+      "translatedFrom": "traduction de « {{title}} »",
+      "courseFacts": "Niveau, format et coût",
+      "levels": {
+        "beginner": "Débutant",
+        "intermediate": "Intermédiaire",
+        "advanced": "Avancé",
+        "all": "Tous niveaux"
+      },
+      "deliveries": {
+        "selfPaced": "En ligne, à votre rythme",
+        "liveOnline": "En ligne, en direct",
+        "inPerson": "En présentiel",
+        "blended": "En ligne et en présentiel"
+      },
+      "free": "Gratuit",
+      "when": "Quand",
+      "nextEdition": "prochaine édition : {{dates}}",
+      "lastHeld": "Dernière édition le {{date}}"
     },
     "lists": {
       "podcasts": {
@@ -5762,6 +5808,41 @@
         "hubDescription": "Des chaînes actives et indépendantes qui expliquent l'épargne, l'investissement et l'argent au quotidien.",
         "listTitle": "Les chaînes",
         "latest": "Dernière vidéo le {{date}}"
+      },
+      "books": {
+        "title": "Livres de finances personnelles",
+        "metaTitle": "Livres de finances personnelles en français | WonderMoney",
+        "metaDescription": "Une liste vérifiée de livres sur l'épargne, les dettes, l'investissement et la retraite disponibles en français, avec le lecteur visé et comment appliquer ce qu'ils enseignent.",
+        "dek": "Des livres pour épargner, investir et mieux décider avec votre argent, édités en français, avec le lecteur visé par chacun et un outil pour mettre en pratique ce que vous lisez.",
+        "hubDescription": "Des livres en français sur l'épargne, les dettes, l'investissement et la retraite.",
+        "listTitle": "Les livres"
+      },
+      "courses": {
+        "title": "Formations en éducation financière",
+        "metaTitle": "Formations en éducation financière (France et Belgique) | WonderMoney",
+        "metaDescription": "Une liste vérifiée de formations en éducation financière proposées par des organismes publics, des régulateurs et des universités, avec le niveau, le format, le coût et le public de chacune.",
+        "dek": "Des formations sur le budget, le crédit, l'épargne et l'investissement par des organismes publics et non commerciaux, avec niveau, format et coût, et un outil pour mettre en pratique ce que vous apprenez.",
+        "hubDescription": "Des formations d'organismes publics et d'universités, avec niveau, format et coût.",
+        "listTitle": "Les formations"
+      },
+      "forums": {
+        "title": "Forums et communautés de finances personnelles",
+        "metaTitle": "Forums et communautés de finances personnelles (France et Belgique) | WonderMoney",
+        "metaDescription": "Une liste vérifiée de communautés actives et modérées où l'on parle d'épargne, d'impôts et d'investissement en France et en Belgique, avec les règles et le public de chacune.",
+        "dek": "Des espaces actifs et modérés pour poser vos questions et partager vos expériences d'argent, avec les règles de chacun et un outil pour faire vos calculs.",
+        "hubDescription": "Des communautés actives et modérées pour parler d'épargne, d'impôts et d'investissement.",
+        "listTitle": "Les communautés",
+        "latest": "Dernier message le {{date}}"
+      },
+      "events": {
+        "title": "Événements d'éducation financière",
+        "metaTitle": "Événements d'éducation financière (France et Belgique) | WonderMoney",
+        "metaDescription": "Un calendrier vérifié d'événements et de programmes d'éducation financière en France et en Belgique, par des organismes officiels et des associations de consommateurs, dates à venir uniquement.",
+        "dek": "Sessions, semaines et journées d'éducation financière organisées par des organismes publics et des associations de consommateurs, avec les dates encore à venir.",
+        "hubDescription": "Événements et programmes officiels d'éducation financière, avec les prochaines dates.",
+        "listTitle": "Événements à venir",
+        "programmesTitle": "Programmes récurrents",
+        "noUpcoming": "Ces organisateurs n'ont pas d'événement daté annoncé pour le moment. Les programmes récurrents ci-dessous reviennent chaque année ; leurs pages annoncent les prochaines dates."
       }
     }
   },

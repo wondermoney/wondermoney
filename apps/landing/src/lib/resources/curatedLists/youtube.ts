@@ -4,7 +4,9 @@ import type { CuratedList } from "./types";
 export const YOUTUBE = {
   id: "youtube",
   routeId: "resourceYoutube",
-  format: "youtube",
+  formats: ["youtube"],
+  criteria: ["active", "independent", "noHype", "free", "market"],
+  review: "halfYearly",
   figure: "easelchart",
   reviewed: "2026-11-20",
   entries: {
