@@ -62,7 +62,7 @@ function PropertyCapitalGainsCalculator() {
     <CalculatorInput
       id={`capitalGains-${field}`}
       label={t(k(`fields.${field}`))}
-      value={input[field]}
+      value={input[field] ?? Number.NaN}
       onChange={(value) => setInput((current) => ({ ...current, [field]: value }))}
       min={0}
       max={CAPITAL_GAINS_LIMITS.amount}
@@ -100,7 +100,8 @@ function PropertyCapitalGainsCalculator() {
         <fieldset className="space-y-4">
           <legend className="pr-3 text-lg font-semibold">{t(k("sections.property"))}</legend>
           {amountField("saleValue")}
-          {amountField("purchaseValue")}
+          {amountField("taxValue", true)}
+          {amountField("purchaseValue", true)}
           <div className="grid gap-4 sm:grid-cols-2">
             <CalculatorInput
               id="capitalGains-purchaseYear"
@@ -168,6 +169,7 @@ function PropertyCapitalGainsCalculator() {
               <p className="mt-2 text-sm text-muted-foreground">{t(k("result.estimateNote"))}</p>
               {result.isLoss && <p className="mt-2 text-sm text-foreground">{t(k("result.loss"))}</p>}
               {!result.isLoss && result.gain === 0 && <p className="mt-2 text-sm text-foreground">{t(k("result.zero"))}</p>}
+              {result.taxValueApplied && <p className="mt-2 text-sm text-foreground">{t(k("result.taxValueApplied"))}</p>}
             </>
           ) : (
             <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
@@ -178,6 +180,9 @@ function PropertyCapitalGainsCalculator() {
             <CalculatorResult
               items={[
                 { label: t(k("result.cashAfter")), value: money(result.cashAfter), highlight: true },
+                ...(result.taxValueApplied
+                  ? [{ label: t(k("result.realizationValue")), value: money(result.realizationValue) }]
+                  : []),
                 { label: t(k("result.gain")), value: money(result.gain) },
                 {
                   label: t(k("result.adjustedPurchase")),

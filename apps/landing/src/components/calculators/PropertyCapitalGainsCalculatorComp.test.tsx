@@ -43,3 +43,21 @@ it("shows the example, validates, shows the checklist and tracks one edit with m
     event: "tool_used", tool: "property_capital_gains", page_type: "tools/portugal-property-capital-gains-calculator",
   });
 });
+
+it("uses the tax value (VPT) for the gain when it is above the price (art. 44(2) CIRS)", () => {
+  render(<PropertyCapitalGainsCalculatorComp locale="en" />);
+  const vpt = screen.getByRole("spinbutton", { name: /Tax value \(VPT\)/ });
+  expect((vpt as HTMLInputElement).value).toBe("");
+  expect(screen.queryByText("Sale value used for the gain")).toBeNull();
+
+  fireEvent.change(vpt, { target: { value: "350000" } });
+  const withVpt = computeCapitalGains({ ...CAPITAL_GAINS_EXAMPLE, taxValue: 350_000 });
+  if (!withVpt.ok) throw new Error("vpt");
+  expect(screen.getByText(money(withVpt.result.extraTax), { selector: "#capitalGains-extraTax" })).toBeTruthy();
+  expect(screen.getByText("Sale value used for the gain")).toBeTruthy();
+  expect(screen.getByText(/higher than the price, so the gain is calculated on it/)).toBeTruthy();
+
+  fireEvent.change(vpt, { target: { value: "200000" } });
+  expect(screen.getByText(money(example.result.extraTax), { selector: "#capitalGains-extraTax" })).toBeTruthy();
+  expect(screen.queryByText("Sale value used for the gain")).toBeNull();
+});

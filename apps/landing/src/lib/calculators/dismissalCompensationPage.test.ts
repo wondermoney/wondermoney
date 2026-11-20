@@ -53,16 +53,19 @@ describe("localized dismissal compensation tool page", () => {
     const { guide } = localeCopy(lang, "src");
     expect(guide.reviewed).toContain("2026");
     for (const key of [
-      "sourceLaw69", "sourceLaw13", "sourceLaw13Text", "sourceIgefe", "methodFixedTerm", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
+      "sourceLaw69", "sourceLaw13Text", "sourceIgefe", "methodFixedTerm", "sourceCode", "sourceDgert", "unsupportedFixedTerm", "unsupportedJustCause", "unsupportedUnlawful",
       "unsupportedAgreement", "unsupportedPublic", "supported",
     ]) {
       expect(guide[key]).toBeTruthy();
     }
     expect(guide.sourceLaw69).toContain("69/2013");
-    expect(guide.sourceLaw13).toContain("13/2023");
+    expect(guide.sourceLaw13).toBeUndefined(); // the APEL summary gave way to the Diário da República text
     expect(guide.sourceLaw13Text).toContain("13/2023");
     expect(guide.sourceIgefe).toContain("10/2023");
     expect(guide.methodFixedTerm).toContain("24");
+    expect(guide.methodFixedTerm).toContain("148");
+    expect(guide.sourceCode).toContain("Diário da República");
+    expect(guide.sourceLaw13Text).toContain("Diário da República");
     expect(guide.reviewed).toContain("1");
   });
 
