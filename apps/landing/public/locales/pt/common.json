@@ -5459,6 +5459,220 @@
         "big": "A custódia fica isenta com três negócios por trimestre e ordenado domiciliado ou posição média acima de 100 000 €. O spread cambial é indicativo. Uma Superconta à parte paga juros sobre o saldo.",
         "millennium-bcp": "A custódia é de 6 € por trimestre só se houve uma transação no site ou na app nos três meses anteriores; caso contrário, 9 €. Câmbio às taxas internas do banco, sem spread publicado. Às vendas nos EUA acresce a SEC fee."
       }
+    },
+    "pprComparison": {
+      "title": "Comparador de PPR: planos de poupança-reforma em Portugal",
+      "shortName": "Comparador de PPR",
+      "subtitle": "Todos os PPR em comercialização que a CMVM e a ASF listam, com a classe de risco, os custos anuais, as comissões e as rendibilidades passadas tal como os supervisores as publicam, e ainda a dedução no IRS e as regras de reembolso.",
+      "description": "Compara fundos PPR, seguros PPR e fundos de pensões PPR por classe de risco, custos e rendibilidades passadas, a partir das listas dos próprios supervisores.",
+      "pageTitle": "Comparador de PPR: Custos, Risco e Rendibilidade dos PPR em Portugal",
+      "pageDescription": "Fundos de investimento, seguros e fundos de pensões PPR em comercialização em Portugal, das listas da CMVM e da ASF: classe de risco, custos anuais, comissões, rendibilidades a 1 a 10 anos, garantias, dedução no IRS e regras de reembolso.",
+      "data": {
+        "title": "De onde vêm os números",
+        "funds": "Fundos de investimento PPR: a lista da CMVM, lida a {{date}}, com rendibilidades até ao fim de {{year}}.",
+        "cmvmLink": "Lista da CMVM",
+        "insurance": "Seguros e fundos de pensões PPR: a plataforma de comparação da ASF, com valores de {{year}}, lidos a {{date}}.",
+        "asfLink": "Plataforma da ASF",
+        "source": "As duas listas são publicadas pelos supervisores, com os valores que as entidades gestoras e as seguradoras lhes reportam. Nenhum site de comparação nem nenhum comercializador é fonte. Um valor que a lista não publica aparece como \"não publicado\".",
+        "staleTitle": "Estes valores podem estar desatualizados",
+        "staleFunds": "A lista da CMVM foi lida pela última vez a {{date}}, há mais de dois meses. Consulta a lista da CMVM para ver os valores atuais.",
+        "staleInsurance": "Os valores da ASF aqui mostrados são de {{year}}, e a ASF já publicou um ano mais recente. Consulta a plataforma da ASF para ver os valores atuais."
+      },
+      "compare": {
+        "title": "Compara os PPR em comercialização",
+        "intro": "Escolhe um tipo e uma classe de risco e ordena por custos anuais ou por uma rendibilidade passada. Compara dentro da mesma classe de risco: produtos com risco diferente comportam-se de forma diferente, por isso uma rendibilidade passada mais alta numa classe mais arriscada diz pouco sobre o produto.",
+        "kind": "Tipo",
+        "allKinds": "Todos os tipos",
+        "risk": "Classe de risco",
+        "allRisks": "Todas as classes de risco",
+        "noRisk": "Classe de risco não publicada",
+        "sort": "Ordenar por",
+        "search": "Pesquisar",
+        "searchPlaceholder": "Produto ou entidade gestora",
+        "mixedRisk": "Estás a ordenar por rendibilidade em todas as classes de risco. Os produtos mais arriscados oscilam mais, para cima e para baixo, por isso esta ordem mistura produtos que não são comparáveis: escolhe uma classe de risco para comparar de forma justa.",
+        "riskSummary": "Classe de risco {{risk}}: {{count}} PPR nesta vista, com custos anuais de {{min}} a {{max}} (mediana {{median}}).",
+        "empty": "Nenhum PPR corresponde a estes filtros.",
+        "count": "{{count}} PPR correspondem",
+        "showMore": "Mostrar mais {{count}} (de {{total}})"
+      },
+      "kinds": {
+        "fund": "Fundo de investimento (CMVM)",
+        "insuranceLinked": "Seguro ligado a fundos (ASF)",
+        "insuranceGuaranteed": "Seguro não ligado a fundos (ASF)",
+        "pensionFund": "Fundo de pensões (ASF)"
+      },
+      "sorts": {
+        "name": "Nome",
+        "cost": "Custos anuais, do mais baixo",
+        "return1": "Rendibilidade a 1 ano, da mais alta",
+        "return3": "Rendibilidade a 3 anos, da mais alta",
+        "return5": "Rendibilidade a 5 anos, da mais alta"
+      },
+      "categories": {
+        "ucits": "harmonizado (OICVM)",
+        "ucitsEquity": "harmonizado (OICVM), ações",
+        "ucitsBond": "harmonizado (OICVM), obrigações",
+        "ucitsFlexible": "harmonizado (OICVM), flexível",
+        "alternative": "alternativo (não harmonizado)"
+      },
+      "guarantees": {
+        "always": "a todo o tempo",
+        "atMaturity": "no vencimento",
+        "other": "noutras condições",
+        "none": "nenhuma"
+      },
+      "labels": {
+        "notPublished": "Não publicado",
+        "feeRange": "{{min}} a {{max}}",
+        "withClass": "{{name}}, categoria {{shareClass}}",
+        "riskValue": "Classe {{risk}}",
+        "risk": "Risco",
+        "costFund": "TEC",
+        "costAsf": "Custos anuais",
+        "y1": "1 ano",
+        "y3": "3 anos",
+        "y5": "5 anos",
+        "y10": "10 anos",
+        "capitalGuarantee": "Garantia de capital: {{value}}",
+        "returnGuarantee": "garantia de rendibilidade: {{value}}",
+        "minRate": "taxa mínima garantida este ano: {{pct}}",
+        "fundFees": "Comissões de subscrição, resgate e transferência: não constam da lista da CMVM; estão no IFI do fundo.",
+        "fees": "Subscrição {{subscription}} · reembolso {{redemption}} · transferência {{transfer}}",
+        "ifi": "IFI do fundo no site da CMVM",
+        "asfSource": "Plataforma da ASF"
+      },
+      "deduction": {
+        "title": "A tua dedução no IRS pelas entregas em PPR",
+        "intro": "Podes deduzir à coleta do IRS {{rate}} do que aplicas em PPR num ano, até um limite que depende da tua idade a 1 de janeiro desse ano (Estatuto dos Benefícios Fiscais, artigo 21.º).",
+        "age": "Idade a 1 de janeiro",
+        "ageHelp": "Em anos completos, a 1 de janeiro do ano da entrega.",
+        "contribution": "Entregas este ano",
+        "retired": "Já estava reformado quando fiz a entrega",
+        "errors": {
+          "age": "Indica uma idade em anos completos, de 0 a {{max}}.",
+          "contribution": "Indica um valor de 0 € a {{max}}."
+        },
+        "invalid": "Corrige os campos acima para veres a dedução.",
+        "retiredResult": "As entregas feitas depois da passagem à reforma não são dedutíveis (artigo 21.º, n.º 10).",
+        "result": "Dedução à coleta do IRS: {{amount}}",
+        "limit": "O teu limite aos {{age}} anos: {{limit}} por ano, atingido com {{full}} de entregas.",
+        "capped": "Entregas acima de {{full}} não aumentam a dedução deste ano.",
+        "cap": "A dedução conta também para o limite global das deduções do artigo 78.º do Código do IRS: sem limite para os rendimentos coletáveis mais baixos, depois entre {{max}} e {{min}} por agregado, a descer à medida que o rendimento sobe. Só reduz imposto que terias a pagar."
+      },
+      "notices": {
+        "title": "Antes de confiares nesta comparação",
+        "educationalTitle": "Apenas informativo",
+        "educational": "Esta página é informativa. Não é uma recomendação nem uma oferta, a ordem não é um ranking e a WonderMoney não recomenda nenhum PPR. As rendibilidades passadas não garantem rendibilidades futuras.",
+        "neutralTitle": "Sem links de afiliados",
+        "neutral": "A WonderMoney não recebe nada de nenhuma entidade gestora ou seguradora desta página. As ligações levam às páginas dos próprios supervisores.",
+        "taxTitle": "Comissões e impostos fora das rendibilidades",
+        "tax": "As rendibilidades são líquidas dos custos anuais do produto, mas não das comissões de subscrição e de reembolso nem dos impostos. Um reembolso antecipado fora dos casos previstos na lei pode também custar-te a dedução que tiveste."
+      },
+      "nextStepHeadline": "Acompanha os saldos dos teus PPR no teu portefólio de longo prazo",
+      "nextStepDescription": "Um PPR é uma parte da tua poupança para a reforma. Junta o saldo à WonderMoney e vê-o ao lado dos teus outros investimentos e contas.",
+      "nextStepCta": "Vê o teu portefólio num só lugar",
+      "guide": {
+        "what": {
+          "title": "O que é um PPR",
+          "body": "Um PPR (plano de poupança-reforma) é um produto de poupança para a reforma com regras fiscais próprias: parte do que aplicas em cada ano pode ser deduzida à coleta do IRS, e o dinheiro deve ficar aplicado até à reforma ou a outro dos casos que a lei prevê. Existe em três formas jurídicas:",
+          "forms": {
+            "fund": "Fundo de investimento (fundo de poupança-reforma), supervisionado pela CMVM. O valor acompanha os investimentos do fundo, em regra sem garantia.",
+            "linked": "Seguro de vida ligado a fundos de investimento, supervisionado pela ASF. Em regra sem garantia de capital nem de rendibilidade.",
+            "guaranteed": "Seguro de vida não ligado a fundos, supervisionado pela ASF. Garante o capital e, por vezes, uma rendibilidade mínima, nos termos do contrato.",
+            "pension": "Adesão individual a um fundo de pensões aberto, supervisionado pela ASF. Pode ou não garantir capital ou rendibilidade."
+          },
+          "supervisors": "Cada supervisor publica uma lista própria: a CMVM para os fundos, a ASF para os seguros e os fundos de pensões. Esta página junta as duas, com cada valor tal como a lista o indica."
+        },
+        "fair": {
+          "title": "Porque se compara dentro da mesma classe de risco",
+          "risk": "Os dois supervisores classificam um produto de 1 a 7 pela volatilidade das rendibilidades, com os mesmos intervalos: classe 1 abaixo de 0,5% ao ano, classe 4 de 5% a 10%, classe 7 acima de 25%. Um produto da classe 6 pode ganhar mais num bom ano e perder muito mais num mau ano do que um da classe 3, por isso uma rendibilidade passada mais alta numa classe mais arriscada não é um resultado melhor. Compara rendibilidades dentro da mesma classe.",
+          "returns": "As rendibilidades são médias anualizadas de anos civis completos, até ao fim de {{fundsYear}} para os fundos da CMVM e de {{insuranceYear}} para os produtos da ASF. São líquidas dos custos anuais do produto, mas não das comissões de subscrição e de reembolso nem dos impostos. Históricos curtos têm muito ruído: um valor a um ano diz pouco.",
+          "costs": "Os custos anuais são certos, as rendibilidades não. Para um fundo, o valor é a TEC (taxa de encargos correntes: comissões de gestão e de depósito, custos de auditoria e taxa de supervisão). Para seguros e fundos de pensões, a ASF publica uma taxa de custos anual das comissões de gestão e de depósito. As duas são próximas mas não iguais, por isso trata com cuidado as diferenças pequenas entre tipos."
+        },
+        "example": {
+          "title": "Um exemplo de comparação",
+          "setup": "A classe de risco {{risk}} é a que tem mais produtos com custo anual e rendibilidade a 5 anos publicados: {{count}} (de {{total}} PPR nessa classe).",
+          "pair": "Entre eles, o custo anual mais baixo é de {{lowCost}}, do {{lowName}} ({{lowKind}}), com uma rendibilidade anualizada a 5 anos de {{lowReturn}}. O mais alto é de {{highCost}}, do {{highName}} ({{highKind}}), com {{highReturn}}.",
+          "cost": "Sobre {{invested}} aplicados, essa diferença de custos anuais é de cerca de {{costGap}} por ano, todos os anos, faça o mercado o que fizer.",
+          "takeaway": "É uma ilustração, não uma recomendação. As rendibilidades passadas dependem da estratégia de cada produto e não preveem as futuras, e os dois supervisores definem os custos anuais de forma ligeiramente diferente. O que a comparação mostra é o tamanho da diferença de custos dentro da mesma classe de risco.",
+          "kinds": {
+            "fund": "fundo de investimento",
+            "insuranceLinked": "seguro ligado a fundos",
+            "insuranceGuaranteed": "seguro não ligado a fundos",
+            "pensionFund": "fundo de pensões"
+          }
+        },
+        "tax": {
+          "title": "A dedução no IRS (EBF, artigo 21.º)",
+          "deduction": "O artigo 21.º, n.º 2, do Estatuto dos Benefícios Fiscais permite a cada sujeito passivo (a cada cônjuge, separadamente) deduzir à coleta do IRS {{rate}} dos valores aplicados em PPR no ano, até:",
+          "limits": {
+            "under35": "{{under35}} por ano abaixo dos 35 anos (atingido com {{full35}} de entregas);",
+            "from35": "{{from35}} por ano dos 35 aos 50 anos ({{full50}});",
+            "over50": "{{over50}} por ano acima dos 50 anos ({{fullOver}})."
+          },
+          "example": "A idade que conta é a de 1 de janeiro do ano da entrega (n.º 9). Aos {{age}} anos, {{exampleContribution}} aplicados no ano dão {{exampleDeduction}}, a dedução máxima.",
+          "conditions": "A dedução entra no limite global das deduções do artigo 78.º, n.º 7, do Código do IRS: sem limite para os rendimentos coletáveis mais baixos, depois de {{capMax}} a {{capMin}} por agregado. Reduz o imposto devido e não é paga em dinheiro, e as entregas feitas depois da passagem à reforma não são dedutíveis (n.º 10).",
+          "payout": "Quando o plano é reembolsado num caso previsto na lei, um reembolso de uma só vez é tributado sobre o rendimento à taxa de {{legalRate}} sobre dois quintos dele, o que dá {{legalEffective}} do rendimento (n.º 3); as prestações regulares são tributadas como pensões."
+        },
+        "redemption": {
+          "title": "Quando podes pedir o reembolso e quanto custa um reembolso antecipado",
+          "intro": "O Decreto-Lei n.º 158/2002, artigo 4.º, prevê os casos em que podes pedir o reembolso de um PPR sem penalização:",
+          "cases": {
+            "retirement": "reforma por velhice;",
+            "unemployment": "desemprego de longa duração do participante ou de um membro do agregado familiar;",
+            "incapacity": "incapacidade permanente para o trabalho do participante ou de um membro do agregado familiar;",
+            "illness": "doença grave do participante ou de um membro do agregado familiar;",
+            "age": "a partir dos 60 anos de idade;",
+            "mortgage": "pagamento de prestações de crédito garantido por hipoteca sobre a habitação própria e permanente do participante;",
+            "death": "morte do participante, com o valor a passar para os herdeiros."
+          },
+          "fiveYears": "Na reforma, aos 60 anos e no pagamento do crédito à habitação, cada entrega tem de estar no plano há pelo menos {{years}} anos; o mesmo vale para o desemprego, a incapacidade ou a doença que já existiam na data da entrega. Passados {{years}} anos da primeira entrega, podes reaver todo o valor nesses casos se as entregas da primeira metade da vigência do plano forem pelo menos {{firstHalf}} do total.",
+          "outside": "Podes pedir o reembolso em qualquer outra altura, nos termos do contrato, mas aí as deduções que tiveste voltam como imposto, majoradas em {{clawback}} por cada ano ou fração desde que foram feitas (EBF, artigo 21.º, n.º 4), e o rendimento é tributado a {{otherRate}} em vez da taxa mais baixa, com algum alívio para planos mantidos mais tempo (n.º 5). Podem aplicar-se também as comissões de reembolso do contrato.",
+          "transfer": "Podes transferir o valor para outro PPR (artigo 6.º); a transferência não dá direito a nova dedução. Sem garantia de capital ou de rendibilidade não pode ser cobrada comissão de transferência; com garantia, a comissão é no máximo {{transferFee}} do valor."
+        },
+        "method": {
+          "title": "Como a comparação é feita",
+          "intro": "Duas listas oficiais, lidas tal como são publicadas. Fundos: {{funds}} categorias de unidades de participação da lista da CMVM de {{fundsDate}}. Seguros e fundos de pensões: {{insurance}} produtos em comercialização da plataforma da ASF, lidos a {{insuranceDate}}.",
+          "steps": {
+            "cmvm": "Entra cada categoria da lista de PPR sob a forma de fundos de investimento da CMVM para a qual é publicada uma TEC ou uma rendibilidade, com a entidade gestora, o tipo de fundo, a classe de risco, a TEC e as rendibilidades anualizadas. A lista da CMVM não publica comissões de subscrição nem de resgate: estão no IFI de cada fundo, com ligação na respetiva linha.",
+            "asf": "Entra cada PPR que a plataforma da ASF mostra em comercialização: seguros ligados a fundos, seguros não ligados a fundos e fundos de pensões, com as comissões mínimas e máximas de subscrição, reembolso e transferência, a taxa de custos anual, as rendibilidades anualizadas, o indicador de risco e as garantias de capital e de rendibilidade.",
+            "missing": "Um valor que a lista não indica fica \"não publicado\"; nada é estimado. As duas listas mostram 0,00% nos prazos para os quais um produto não tem histórico, por isso uma sequência de 0,00% nos prazos mais longos é lida como não publicada.",
+            "refresh": "Os valores da CMVM são atualizados todos os meses a partir da lista da CMVM. Os da ASF mudam uma vez por ano (reportados até 15 de abril, relativos ao ano anterior) e são atualizados depois disso. Se uma atualização falhar, a página mantém os últimos valores com as respetivas datas e avisa quando estão antigos."
+          }
+        },
+        "limits": {
+          "title": "O que fica de fora",
+          "items": {
+            "closed": "PPR que já não estão em comercialização, que podem ainda ter poupanças de participantes, e os produtos individuais de reforma pan-europeus (PEPP).",
+            "fees": "As comissões de subscrição e de resgate dos fundos (em cada IFI) e os impostos, que as rendibilidades não incluem.",
+            "future": "Qualquer previsão. As rendibilidades passadas, as classes de risco e os custos podem mudar, e os supervisores não respondem pelos valores que as entidades lhes reportam.",
+            "personal": "A tua situação: quanto falta para a reforma, as tuas outras poupanças e quanto risco podes correr. O questionário de perfil de investidor ajuda com o último ponto."
+          }
+        },
+        "sources": {
+          "title": "Fontes",
+          "intro": "Os valores dos produtos vêm das listas dos dois supervisores; as regras fiscais e de reembolso, das leis consolidadas, verificadas a {{rulesDate}}.",
+          "items": {
+            "cmvm": "CMVM, Portal do Investidor: lista de PPR sob a forma de fundos de investimento",
+            "asf": "ASF: plataforma de comparação de PPR (seguros e fundos de pensões)",
+            "asfRule": "ASF, Norma Regulamentar n.º 11/2024-R: como são calculados os valores da ASF",
+            "ebf": "Portal das Finanças: Estatuto dos Benefícios Fiscais, artigo 21.º (texto consolidado)",
+            "cirs": "Portal das Finanças: Código do IRS, artigo 78.º (texto consolidado)",
+            "dl158": "Diário da República: Decreto-Lei n.º 158/2002, regime jurídico dos PPR (consolidado)"
+          }
+        },
+        "related": {
+          "title": "Continua",
+          "statePensionLink": "Simulador da pensão de reforma",
+          "statePensionBody": "Estima a pensão da Segurança Social a que um PPR se somaria.",
+          "compoundLink": "Calculadora de juros compostos",
+          "compoundBody": "Vê o que um custo anual faz ao longo de décadas de juros compostos.",
+          "profileLink": "Questionário de perfil de investidor",
+          "profileBody": "Quanto risco podes correr, antes de escolheres uma classe de risco.",
+          "brokersLink": "Comparador de corretoras",
+          "brokersBody": "Os custos de investir para a reforma fora de um PPR, com ETF."
+        }
+      }
     }
   },
   "resources": {

@@ -120,6 +120,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolBrokerFees",
   },
   {
+    sources: ["toolStatePension", "toolCompoundInterest", "toolInvestorProfile"],
+    destination: "toolPprComparison",
+  },
+  {
     sources: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
     destination: "toolElectricityIndex",
   },

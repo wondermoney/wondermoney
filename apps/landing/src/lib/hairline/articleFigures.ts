@@ -158,6 +158,7 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolTermDepositOffers: "safe",
   toolSavingsCertificates: "safe",
   toolBrokerFees: "etfbox",
+  toolPprComparison: "jar",
   pageFireCalculator: "deckchair",
 };
 

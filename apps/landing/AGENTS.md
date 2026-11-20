@@ -174,10 +174,11 @@ follow from those; no new page file is needed.
 Dated data modules live in `src/lib/calculators/data/` (plus a few tables inside the calculator
 modules). Each carries its own "as of" date, which the page shows. The open-API snapshots refresh
 themselves: `.github/workflows/landing-data-refresh.yml` runs the market-data scripts on the 6th of
-every month, the ERSE offers script every Monday and the OMIE prices script on the 8th (and any
-set by hand: Actions > Landing data refresh), and opens or updates one pull request per set into
-`develop` when the figures changed, from `bot/landing-data-refresh` (market data),
-`bot/landing-offers-refresh` (offers) or `bot/landing-omie-refresh` (OMIE). The offers run also
+every month, the ERSE offers script every Monday, the OMIE prices script on the 8th and the PPR
+funds script on the 10th (and any set by hand: Actions > Landing data refresh), and opens or
+updates one pull request per set into `develop` when the figures changed, from
+`bot/landing-data-refresh` (market data), `bot/landing-offers-refresh` (offers),
+`bot/landing-omie-refresh` (OMIE) or `bot/landing-ppr-refresh` (PPR funds). The offers run also
 checks the indexed-offer formulas against the new export (`indexedPricing.test.ts`).
 Those pull requests get no CI run (they are opened with `GITHUB_TOKEN`): close and reopen them
 before merging. A script that fails fails the job and leaves the data as it was. Everything else
@@ -202,6 +203,9 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/solarProduction/` (`index.ts` and a JSON file per district) | PVGIS 5.3 API (EU JRC): for each district capital, the optimal tilt (`PVcalc`), the TMY's selected months (`tmy`) and those years' hourly PV output (`seriescalc`), PVGIS-SARAH3. The API has no CORS, so the page cannot call it; any other tilt, orientation or point goes through `/api/solar-production` ("Server routes") | when PVGIS publishes a new version or extends its database (the version is in the API path) | `node scripts/build-solar-production.mjs --cache-dir <dir>` (about 200 calls; `--offline` rebuilds from the cache) |
 | `calculators/electricityCycles.ts` | ERSE period hours (Despacho n.º 26 126-A/2004, ciclo diário 2009, Diretiva n.º 3/2026) | when ERSE changes the periods; BTN meters move to the Diretiva n.º 3/2026 hours in the second half of 2027 | Edit by hand against the official table and rerun the profiles script |
 | `data/brokerFees.ts` | Each broker's own price list (preçário, fee page or PDF), linked per row in `sources` | quarterly: check in the first week of January, April, July and October; the page warns after about four months | Edit by hand, update each row's `checked` and `BROKER_FEES_REVIEWED`, run `brokerFees.test.ts` |
+| `data/pprFunds.ts` | CMVM Portal do Investidor, "Lista de PPR sob a forma de Fundos de Investimento": the screen services its page calls (every share class's returns, TEC and risk class), its "Exportar em Excel" file (the managers) and its IFI links. Types in `calculators/pprTypes.ts` | monthly (the 10th), automated, its own set (ppr) | `node scripts/build-ppr-products.mjs` |
+| `data/pprInsurance.ts` | ASF "Plataforma de comparação de PPR" (Norma Regulamentar n.º 11/2024-R): its JSON lists of the products on sale, `https://www.asf.com.pt/o/servicosasf/get-list-ppr/1/0/<type>` (1 insurance not linked to funds, 2 linked to funds, 3 pension funds). The site's bot check answers browsers only, so the lists are saved by hand | yearly, in May (insurers report by 15 April for the year before), and when a product launch matters; the page warns from June of the second year after the figures' year | Open the three URLs in a browser, save them as `asf-1.json`, `asf-2.json` and `asf-3.json` in an empty folder, then `node scripts/build-ppr-products.mjs --asf-dir <folder>` and run the PPR tests |
+| `data/pprTaxRules.ts` | Portal das Finanças consolidated EBF (art. 21.º) and CIRS (art. 78.º, n.º 7), Diário da República consolidated Decreto-Lei n.º 158/2002 (arts. 4.º and 6.º) | each January, and when a State Budget or a change to those laws is published | Edit by hand, update `PPR_TAX_RULES_REVIEWED`, run `pprComparison.test.ts` |
 | IMT and stamp duty (`purchaseTaxes.ts`), IMI (`propertyTax.ts`), IUC (`vehicleTax.ts`), IRS withholding and Social Security (`payroll.ts`), IAS and benefits (`unemploymentBenefit.ts`, `statePension.ts`, `sickPay.ts`) | Portal das Finanças, Diário da República, Segurança Social | each January, and again when the State Budget or a Portaria changes them | Edit by hand against the official table, update the module's year and review date, run the calculator's tests |
 
 When the data changes a number a page quotes in prose, update the pages in all six locales in the

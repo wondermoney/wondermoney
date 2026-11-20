@@ -87,6 +87,8 @@ import RemuneratedAccountsComp from "@/components/calculators/RemuneratedAccount
 import RemuneratedAccountsGuide from "@/components/calculators/RemuneratedAccountsGuide.astro";
 import BrokerFeesComp from "@/components/calculators/BrokerFeesComp";
 import BrokerFeesGuide from "@/components/calculators/BrokerFeesGuide.astro";
+import PprComparisonComp from "@/components/calculators/PprComparisonComp";
+import PprComparisonGuide from "@/components/calculators/PprComparisonGuide.astro";
 import ArticleHero from "@/components/shared/ArticleHero.astro";
 import CTABanner from "@/components/shared/CTABanner";
 import FigureCards from "@/components/shared/FigureCards.astro";
@@ -170,6 +172,12 @@ const nextStepCtaByRouteId: Partial<
     headline: t("tools.investorProfile.nextStepHeadline"),
     description: t("tools.investorProfile.nextStepDescription"),
     ctaText: t("tools.investorProfile.nextStepCta"),
+    ctaHref: toLocalizedPath("featurePortfolio", locale),
+  },
+  toolPprComparison: {
+    headline: t("tools.pprComparison.nextStepHeadline"),
+    description: t("tools.pprComparison.nextStepDescription"),
+    ctaText: t("tools.pprComparison.nextStepCta"),
     ctaHref: toLocalizedPath("featurePortfolio", locale),
   },
   toolRateRevision: {
@@ -466,6 +474,7 @@ const schema = {
         {routeId === "toolFreeBankAccounts" && <FreeBankAccountsComp locale={locale} client:load />}
         {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsComp locale={locale} client:load />}
         {routeId === "toolBrokerFees" && <BrokerFeesComp locale={locale} client:load />}
+        {routeId === "toolPprComparison" && <PprComparisonComp locale={locale} client:load />}
         {routeId === "toolElectricityIndex" && <ElectricityIndexComp locale={locale} client:load />}
         {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonComp locale={locale} client:load />}
         {routeId === "toolFuelPrices" && <FuelPricesComp locale={locale} client:load />}
@@ -512,6 +521,7 @@ const schema = {
           {routeId === "toolFreeBankAccounts" && <FreeBankAccountsGuide locale={locale} />}
           {routeId === "toolRemuneratedAccounts" && <RemuneratedAccountsGuide locale={locale} />}
           {routeId === "toolBrokerFees" && <BrokerFeesGuide locale={locale} />}
+          {routeId === "toolPprComparison" && <PprComparisonGuide locale={locale} />}
           {routeId === "toolElectricityIndex" && <ElectricityIndexGuide locale={locale} />}
           {routeId === "toolElectricityTariffComparison" && <ElectricityTariffComparisonGuide locale={locale} />}
           {routeId === "toolFuelPrices" && <FuelPricesGuide locale={locale} />}

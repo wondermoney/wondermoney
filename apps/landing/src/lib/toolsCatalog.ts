@@ -264,7 +264,7 @@ export const TOOLS_CATALOG = [
 		key: "statePension",
 		routeId: "toolStatePension",
 		group: "investAndGrow",
-		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary"],
+		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolNetSalary", "toolPprComparison"],
 	},
 	{
 		key: "termDeposit",
@@ -301,6 +301,12 @@ export const TOOLS_CATALOG = [
 		routeId: "toolBrokerFees",
 		group: "investAndGrow",
 		related: ["toolCompoundInterest", "toolInvestmentReturn", "toolInvestorProfile", "toolNetWorth"],
+	},
+	{
+		key: "pprComparison",
+		routeId: "toolPprComparison",
+		group: "investAndGrow",
+		related: ["toolStatePension", "toolCompoundInterest", "toolInvestorProfile", "toolBrokerFees"],
 	},
 	// Track your wealth
 	{
