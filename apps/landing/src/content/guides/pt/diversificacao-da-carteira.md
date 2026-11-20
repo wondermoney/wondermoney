@@ -1,5 +1,5 @@
 ---
-title: "Diversificacao da Carteira: Reduzir Risco Sem Adivinhar o Mercado"
+title: "Diversificação da Carteira: Reduzir Risco Sem Adivinhar o Mercado"
 excerpt: Aprende a distribuir risco por ativos, setores e geografias para maior resiliência.
 category: investing
 publishedAt: 2026-03-01T09:40:00.000Z
@@ -11,7 +11,7 @@ relatedTerms:
   - rebalanceamento
   - tolerancia-ao-risco
   - volatilidade
-seoTitle: Diversificacao da Carteira
+seoTitle: Diversificação da Carteira
 seoDescription: Distribui risco por classes de ativos e regiões para evitar concentração excessiva.
 ---
 

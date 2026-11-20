@@ -1,14 +1,14 @@
 ---
-term: Despesa Variavel
-definition: Despesa variavel e um custo que muda de valor de mes para mes.
+term: Despesa Variável
+definition: Despesa variável é um custo que muda de valor de mês para mês.
 category: budgeting
 example: Gastos em supermercado e lazer variam frequentemente entre meses.
 relatedGuide: como-criar-orcamento-mensal
 relatedTerms:
   - despesa-fixa
   - orcamento
-seoTitle: Despesa Variavel
-seoDescription: Aprende o que sao despesas variaveis e como controla-las no orcamento.
+seoTitle: Despesa Variável
+seoDescription: Aprende o que são despesas variáveis e como controlá-las no orçamento.
 ---
 
-Estas despesas sao o principal ponto de ajuste no orcamento. Acompanhar tendencia de consumo melhora previsao.
+Estas despesas são o principal ponto de ajuste no orçamento. Acompanhar tendência de consumo melhora previsão.

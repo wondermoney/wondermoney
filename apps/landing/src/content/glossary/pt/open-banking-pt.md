@@ -1,14 +1,14 @@
 ---
 term: Open Banking
-definition: Open Banking permite partilhar dados bancarios, com consentimento, entre bancos e apps autorizadas.
+definition: Open Banking permite partilhar dados bancários, com consentimento, entre bancos e apps autorizadas.
 category: banking
-example: Ligas a tua conta bancaria a uma app de orcamento sem revelar palavra-passe ao fornecedor.
+example: Ligas a tua conta bancária a uma app de orçamento sem revelar palavra-passe ao fornecedor.
 relatedGuide: open-banking-e-seguranca
 relatedTerms:
   - score-de-credito
   - liquidez
-seoTitle: "Open Banking: definicao"
-seoDescription: Percebe o que e Open Banking e como funciona a partilha segura de dados.
+seoTitle: "Open Banking: definição"
+seoDescription: Percebe o que é Open Banking e como funciona a partilha segura de dados.
 ---
 
-A partilha e feita por APIs seguras e o acesso pode ser revogado. O objetivo e melhorar servicos financeiros e visibilidade de contas.
+A partilha é feita por APIs seguras e o acesso pode ser revogado. O objetivo é melhorar serviços financeiros e visibilidade de contas.

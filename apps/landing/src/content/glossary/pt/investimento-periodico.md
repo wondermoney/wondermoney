@@ -1,15 +1,15 @@
 ---
-term: Investimento Periodico
-definition: Investimento periodico e aplicar montante fixo em intervalos regulares.
+term: Investimento Periódico
+definition: Investimento periódico é aplicar montante fixo em intervalos regulares.
 category: investing-concepts
-example: Investir 150 todos os meses no mesmo ETF e uma estrategia de investimento periodico.
+example: Investir 150 todos os meses no mesmo ETF é uma estratégia de investimento periódico.
 relatedCalculator: compound-interest-calculator
 relatedGuide: investir-em-etfs-iniciantes
 relatedTerms:
   - juro-composto
   - etf-pt
-seoTitle: Investimento Periodico
-seoDescription: O que e investimento periodico e porque ajuda investidores de longo prazo.
+seoTitle: Investimento Periódico
+seoDescription: O que é investimento periódico e porque ajuda investidores de longo prazo.
 ---
 
-Esta abordagem reduz dependencia do timing de mercado e promove disciplina. Compra mais unidades quando os precos descem e menos quando sobem.
+Esta abordagem reduz dependência do timing de mercado e promove disciplina. Compra mais unidades quando os preços descem e menos quando sobem.

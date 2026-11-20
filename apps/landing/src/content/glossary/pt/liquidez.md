@@ -1,14 +1,14 @@
 ---
 term: Liquidez
-definition: Liquidez e a facilidade de converter um ativo em dinheiro sem grande perda de valor.
+definition: Liquidez é a facilidade de converter um ativo em dinheiro sem grande perda de valor.
 category: investing-concepts
-example: Conta a ordem tem elevada liquidez; um imovel tem liquidez reduzida.
+example: Conta à ordem tem elevada liquidez; um imóvel tem liquidez reduzida.
 relatedGuide: fundo-de-emergencia
 relatedTerms:
   - fundo-de-emergencia-termo
   - open-banking-pt
-seoTitle: Liquidez em financas
-seoDescription: Aprende o que e liquidez e porque influencia seguranca financeira.
+seoTitle: Liquidez em finanças
+seoDescription: Aprende o que é liquidez e porque influencia segurança financeira.
 ---
 
-Ativos mais liquidos permitem resposta rapida a necessidades de caixa. E um criterio importante na gestao de risco pessoal.
+Ativos mais líquidos permitem resposta rápida a necessidades de caixa. É um critério importante na gestão de risco pessoal.

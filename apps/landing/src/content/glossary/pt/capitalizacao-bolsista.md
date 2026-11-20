@@ -1,14 +1,14 @@
 ---
-term: Capitalizacao Bolsista
-definition: "Capitalizacao bolsista e o valor de mercado de uma empresa cotada: preco da acao vezes numero de acoes."
+term: Capitalização Bolsista
+definition: "Capitalização bolsista é o valor de mercado de uma empresa cotada: preço da ação vezes número de ações."
 category: market-metrics
-example: Se a acao vale 40 e existem 50 milhoes de acoes, a capitalizacao e 2 mil milhoes.
+example: Se a ação vale 40 e existem 50 milhões de ações, a capitalização é 2 mil milhões.
 relatedGuide: diversificacao-da-carteira
 relatedTerms:
   - racio-pl
   - dividend-yield-pt
-seoTitle: Capitalizacao Bolsista
-seoDescription: Entende a capitalizacao bolsista e a sua utilidade na analise de empresas.
+seoTitle: Capitalização Bolsista
+seoDescription: Entende a capitalização bolsista e a sua utilidade na análise de empresas.
 ---
 
-Este indicador ajuda a classificar empresas em large, mid e small cap, cada grupo com perfil proprio de risco e crescimento.
+Este indicador ajuda a classificar empresas em large, mid e small cap, cada grupo com perfil próprio de risco e crescimento.

@@ -1,14 +1,14 @@
 ---
-term: Score de Credito
-definition: Score de credito e uma avaliacao numerica da probabilidade de cumprimento financeiro.
+term: Score de Crédito
+definition: Score de crédito é uma avaliação numérica da probabilidade de cumprimento financeiro.
 category: banking
-example: Um score mais elevado pode facilitar aprovacao e reduzir taxa em novo credito.
+example: Um score mais elevado pode facilitar aprovação e reduzir taxa em novo crédito.
 relatedGuide: open-banking-e-seguranca
 relatedTerms:
   - taxa-de-esforco
   - taxa-de-juro
-seoTitle: Score de Credito
-seoDescription: Percebe o que e score de credito e fatores que afetam esta avaliacao.
+seoTitle: Score de Crédito
+seoDescription: Percebe o que é score de crédito e fatores que afetam esta avaliação.
 ---
 
-Historico de pagamentos, utilizacao de credito e antiguidade podem influenciar score. Melhor score tende a melhorar condicoes de financiamento.
+Histórico de pagamentos, utilização de crédito e antiguidade podem influenciar score. Melhor score tende a melhorar condições de financiamento.

@@ -1,14 +1,14 @@
 ---
 term: Fundo de Reserva
-definition: Fundo de reserva e poupanca destinada a despesas futuras previsiveis.
+definition: Fundo de reserva é poupança destinada a despesas futuras previsíveis.
 category: budgeting
-example: Guardar 40 por mes para manutencao automovel e criar um fundo de reserva.
+example: Guardar 40 por mês para manutenção automóvel é criar um fundo de reserva.
 relatedGuide: como-criar-orcamento-mensal
 relatedTerms:
   - despesa-fixa
   - despesa-variavel
 seoTitle: Fundo de Reserva
-seoDescription: Entende como um fundo de reserva ajuda a suavizar despesas previsiveis.
+seoDescription: Entende como um fundo de reserva ajuda a suavizar despesas previsíveis.
 ---
 
-Permite antecipar gastos anuais sem pressionar o orcamento mensal. Evita transformar custos esperados em emergencia.
+Permite antecipar gastos anuais sem pressionar o orçamento mensal. Evita transformar custos esperados em emergência.
