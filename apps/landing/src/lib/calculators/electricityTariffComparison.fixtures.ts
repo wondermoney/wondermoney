@@ -14,7 +14,8 @@
 // (taxes and VAT), "PrecoOutrosServicos" (mandatory services before VAT), "PrecoDescontoCondicionado"
 // (refunds and new-client discounts before VAT) and "PrecoTotal", each rounded to the cent;
 // `total` is "PrecoTotal". It lists one offer per supplier, the cheapest across the simple and the
-// chosen option.
+// chosen option. ERSE_FORM is the form as the page sends it after its scripts run, not the HTML's
+// hidden defaults (see filtro_Fidelizacao).
 
 import type { ElectricityOffer } from "./electricityOfferTypes";
 
@@ -28,7 +29,10 @@ export const ERSE_FORM = {
   filtro_SemPrecosIndexados: "1",
   filtro_SemReembolsos: "1", // 1: refunds included
   filtro_energia100Renovavel: "0",
-  filtro_Fidelizacao: "0",
+  // 1: offers with a loyalty period included ("Ofertas com fidelização", ticked by default). The
+  // page's HTML says 0, but a script on the page sets 1 when it loads and again after "Limpar
+  // filtros"; with 0 the simulator leaves out every loyalty offer (#558).
+  filtro_Fidelizacao: "1",
   filtro_FamiliasNumerosas: "0", // 1: large family
   filtro_NovosClientes: "1", // 1: new-client discounts included
   pageStartIndex: "0",
@@ -579,6 +583,90 @@ export const FIXTURE_OFFERS: ElectricityOffer[] =
       3.45: {simple: {powerPerDay: 0.2891, energy: 0.1671}, biHourly: {powerPerDay: 0.4253, offValley: 0.1935, valley: 0.1119}, triHourly: {powerPerDay: 0.4253, peak: 0.2856, shoulder: 0.1394, valley: 0.1119}},
     },
   },
+  {
+    id: "NABALIAENERGIA_08",
+    supplier: "NABALIAENERGIA",
+    name: "FIXO",
+    regulated: false,
+    dual: false,
+    segment: "domestic",
+    indexed: false,
+    renewable: false,
+    conditioned: false,
+    loyalty: true,
+    socialTariff: true,
+    durationMonths: 12,
+    validFrom: "2026-08-10",
+    validTo: "2026-12-31",
+    mandatoryServicesPerYear: 0,
+    refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    requirements: {directDebit: false, eInvoice: false},
+    conditions: "",
+    notes: "",
+    links: {offer: "https://nabaliaenergia.pt/tarifarios/luz/tarifa-fixa/", standardSheet: "https://assets.nabaliaenergia.com/pt/FICHA-PADRONIZADA-FIXO-NAO-RENOVAVEL.pdf", terms: "https://assets.nabaliaenergia.com/pt/CONDICOES-GERAIS-DE-CONTRATACAO-NABALIA-PT-1.pdf", supplier: "https://nabaliaenergia.pt/"},
+    prices: {
+      3.45: {simple: {powerPerDay: 0.1718, energy: 0.2052656}, biHourly: {powerPerDay: 0.1718, offValley: 0.2218206, valley: 0.1726006}, triHourly: {powerPerDay: 0.1718, peak: 0.3997866, shoulder: 0.1739076, valley: 0.1711186}},
+      6.9: {simple: {powerPerDay: 0.3436, energy: 0.2052656}, biHourly: {powerPerDay: 0.3436, offValley: 0.2218206, valley: 0.1726006}, triHourly: {powerPerDay: 0.3436, peak: 0.3997866, shoulder: 0.1739076, valley: 0.1711186}},
+      13.8: {simple: {powerPerDay: 0.6872, energy: 0.2052656}, biHourly: {powerPerDay: 0.6872, offValley: 0.2218206, valley: 0.1726006}, triHourly: {powerPerDay: 0.6872, peak: 0.3997866, shoulder: 0.1739076, valley: 0.1711186}},
+    },
+  },
+  {
+    id: "AUDAX_04",
+    supplier: "AUDAX",
+    name: "TOP T3 - Fixo de 12 meses",
+    regulated: false,
+    dual: false,
+    segment: "all",
+    indexed: false,
+    renewable: false,
+    conditioned: false,
+    loyalty: true,
+    socialTariff: true,
+    durationMonths: 12,
+    validFrom: "2026-11-16",
+    validTo: null,
+    mandatoryServicesPerYear: 0,
+    refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    requirements: {directDebit: false, eInvoice: false},
+    conditions: "",
+    notes: "",
+    links: {offer: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/AUDAX_SUCURSAL_TOP-T3__V268400.pdf", standardSheet: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/AUDAX_SUCURSAL-Ficha_Padronizada-TOP_T3-v2684_Luz.pdf", terms: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/CG_AUDAX_SUCURSAL_V2616_comprimido-1.pdf", supplier: "https://www.audaxenergy.pt"},
+    prices: {
+      3.45: {simple: {powerPerDay: 0.4348, energy: 0.263}, biHourly: {powerPerDay: 0.4348, offValley: 0.2771, valley: 0.2357}, triHourly: {powerPerDay: 0.4348, peak: 0.4645, shoulder: 0.2231, valley: 0.2356}},
+      6.9: {simple: {powerPerDay: 0.6066, energy: 0.263}, biHourly: {powerPerDay: 0.6066, offValley: 0.2771, valley: 0.2357}, triHourly: {powerPerDay: 0.6066, peak: 0.4645, shoulder: 0.2231, valley: 0.2356}},
+      13.8: {simple: {powerPerDay: 0.9502, energy: 0.263}, biHourly: {powerPerDay: 0.9502, offValley: 0.2771, valley: 0.2357}, triHourly: {powerPerDay: 0.9502, peak: 0.4645, shoulder: 0.2231, valley: 0.2356}},
+    },
+  },
+  {
+    id: "AUDAX_05",
+    supplier: "AUDAX",
+    name: "TOP T4 - Fixo de 12 meses",
+    regulated: false,
+    dual: false,
+    segment: "all",
+    indexed: false,
+    renewable: false,
+    conditioned: false,
+    loyalty: true,
+    socialTariff: true,
+    durationMonths: 12,
+    validFrom: "2026-11-16",
+    validTo: null,
+    mandatoryServicesPerYear: 0,
+    refunds: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    newClient: {fixedPerYear: 0, powerPercent: 0, energyPercent: 0, energyPerKwh: 0},
+    requirements: {directDebit: false, eInvoice: false},
+    conditions: "",
+    notes: "",
+    links: {offer: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/AUDAX_SUCURSAL_TOP-T4__V268400.pdf", standardSheet: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/AUDAX_SUCURSAL-Ficha_Padronizada-TOP_T4-v2684_Luz.pdf", terms: "https://www.audaxenergy.pt/wp-content/uploads/2026/11/CG_AUDAX_SUCURSAL_V2616_comprimido-1.pdf", supplier: "https://www.audaxenergy.pt"},
+    prices: {
+      3.45: {simple: {powerPerDay: 1.8156, energy: 0.163}, biHourly: {powerPerDay: 1.8156, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 1.8156, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
+      6.9: {simple: {powerPerDay: 1.9874, energy: 0.163}, biHourly: {powerPerDay: 1.9874, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 1.9874, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
+      13.8: {simple: {powerPerDay: 2.331, energy: 0.163}, biHourly: {powerPerDay: 2.331, offValley: 0.1771, valley: 0.1357}, triHourly: {powerPerDay: 2.331, peak: 0.3645, shoulder: 0.1231, valley: 0.1356}},
+    },
+  },
 ];
 
 export interface ErseReading {
@@ -595,6 +683,8 @@ export interface ErseReading {
 const consumer2 = { electSupply: "5", electPonta: "3000", electCheias: "2000" };
 const consumer3 = { electSupply: "7", electPonta: "6540", electCheias: "4360" };
 const plain = { filtro_SemReembolsos: "0", filtro_NovosClientes: "0" };
+/** Loyalty offers left out (the page's HTML value, before its script sets 1): read so on 2026-11-20. */
+const noLoyalty = { filtro_Fidelizacao: "0" };
 const turSimple = (kwh: number, form: ErseReading["form"] = {}) => ({
   filtro_comercializadores: "TUR",
   cycle: "1",
@@ -616,16 +706,25 @@ export const ERSE_READINGS: ErseReading[] = [
   { name: "type 1, Repsol refunds, no new-client filter", form: { filtro_comercializadores: "REPSOL", filtro_NovosClientes: "0" }, offer: "REPSOL_125", option: "biHourly", erse: [169.91, 229.12, 71.44, 0, -8.57, 461.9] },
   { name: "type 1, Repsol, no refunds or new-client discounts", form: plain, offer: "REPSOL_125", option: "biHourly", erse: [169.91, 229.12, 72.46, 0, 0, 471.49] },
   { name: "type 1, Endesa conditioned, refunds and new client", form: {}, offer: "END_69", option: "simple", erse: [178.04, 243.72, 64.43, 0, -73.4, 412.79] },
+  // Loyalty offers (#558), listed once filtro_Fidelizacao is 1, as on ERSE's page. Audax's cheapest
+  // offer for this consumer stays the indexed one: asked for Audax without conditioned offers, ERSE
+  // lists TOP T3, and without indexed offers too, each of Audax's fixed offers (TOP T4 among them).
+  { name: "type 1, Nabalia fixed with loyalty", form: {}, offer: "NABALIAENERGIA_08", option: "biHourly", erse: [169.91, 276.85, 65.39, 0, 0, 512.15] },
+  { name: "type 1, Audax TOP T3 with loyalty", form: { filtro_comercializadores: "AUDAX", filtro_SemRestricoesAdicionais: "0" }, offer: "AUDAX_04", option: "biHourly", erse: [169.91, 483.82, 94.13, 0, 0, 747.86] },
+  { name: "type 1, Audax TOP T4 with loyalty", form: { filtro_comercializadores: "AUDAX", filtro_SemRestricoesAdicionais: "0", filtro_SemPrecosIndexados: "0" }, offer: "AUDAX_05", option: "biHourly", erse: [169.91, 797.81, 198.65, 0, 0, 1166.37] },
   // Consumer type 2: 6,9 kVA, bi-hourly 3 000 + 2 000 kWh a year.
   { name: "type 2, regulated tariff", form: consumer2, offer: "TUR", option: "biHourly", erse: [407.51, 568.14, 197.14, 0, 0, 1172.79] },
   { name: "type 2, MEO", form: consumer2, offer: "MEOENERGIA_02", option: "biHourly", erse: [407.51, 532.74, 197.48, 0, 0, 1137.73] },
   { name: "type 2, EDP digital, simple", form: consumer2, offer: "EDPC_13", option: "simple", erse: [428.91, 408.37, 179.68, 0, 0, 1016.96] },
   { name: "type 2, Iberdrola fixed refund, simple", form: consumer2, offer: "IBD_52", option: "simple", erse: [428.91, 544.72, 198.34, 0, -28.46, 1143.51] },
   { name: "type 2, GoldEnergy new client, simple", form: consumer2, offer: "GOLD_32", option: "simple", erse: [428.91, 546.59, 194.95, 0, -24.39, 1146.06] },
-  { name: "type 2, Audax indexed", form: consumer2, offer: "AUDAX_09", option: "biHourly", erse: [407.51, 1168.51, 284.89, 0, 0, 1860.91] },
+  // With loyalty offers left out; otherwise Audax's cheapest is TOP T3, the reading below.
+  { name: "type 2, Audax indexed", form: { ...consumer2, ...noLoyalty }, offer: "AUDAX_09", option: "biHourly", erse: [407.51, 1168.51, 284.89, 0, 0, 1860.91] },
   { name: "type 2, Repsol refunds", form: consumer2, offer: "REPSOL_125", option: "biHourly", erse: [407.51, 551.47, 199.12, 0, -19.94, 1138.16] },
   { name: "type 2, Repsol, no refunds or new-client discounts", form: { ...consumer2, ...plain }, offer: "REPSOL_125", option: "biHourly", erse: [407.51, 551.47, 202.46, 0, 0, 1161.44] },
   { name: "type 2, Endesa conditioned, refunds and new client", form: consumer2, offer: "END_69", option: "simple", erse: [428.91, 636.32, 201.49, 0, -133.22, 1133.5] },
+  { name: "type 2, Nabalia fixed with loyalty", form: consumer2, offer: "NABALIAENERGIA_08", option: "biHourly", erse: [407.51, 728.57, 220.09, 0, 0, 1356.17] },
+  { name: "type 2, Audax TOP T3 with loyalty", form: consumer2, offer: "AUDAX_04", option: "biHourly", erse: [407.51, 1116.6, 285.18, 0, 0, 1809.29] },
   // Consumer type 3: 13,8 kVA, bi-hourly 6 540 + 4 360 kWh a year.
   { name: "type 3, regulated tariff", form: consumer3, offer: "TUR", option: "biHourly", erse: [865.81, 1230.43, 531.79, 0, 0, 2628.03] },
   { name: "type 3, MEO", form: consumer3, offer: "MEOENERGIA_02", option: "biHourly", erse: [865.81, 1038.3, 487.6, 0, 0, 2391.71] },
@@ -633,8 +732,11 @@ export const ERSE_READINGS: ErseReading[] = [
   { name: "type 3, EDP digital, simple", form: consumer3, offer: "EDPC_13", option: "simple", erse: [912.46, 867.66, 459.09, 0, 0, 2239.21] },
   { name: "type 3, Iberdrola fixed refund, simple", form: consumer3, offer: "IBD_52", option: "simple", erse: [912.46, 1146.19, 516.6, 0, -28.46, 2546.79] },
   { name: "type 3, GoldEnergy new client, simple", form: consumer3, offer: "GOLD_08", option: "simple", erse: [912.46, 1101.6, 507.28, 0, -24.39, 2496.95] },
-  { name: "type 3, Audax indexed", form: consumer3, offer: "AUDAX_09", option: "biHourly", erse: [865.81, 2547.33, 834.68, 0, 0, 4247.82] },
+  // With loyalty offers left out; otherwise Audax's cheapest is TOP T4, the reading below.
+  { name: "type 3, Audax indexed", form: { ...consumer3, ...noLoyalty }, offer: "AUDAX_09", option: "biHourly", erse: [865.81, 2547.33, 834.68, 0, 0, 4247.82] },
   { name: "type 3, Repsol services and refunds", form: consumer3, offer: "REPSOL_127", option: "biHourly", erse: [865.81, 1061.02, 499.47, 68.2, -39.53, 2454.97] },
+  { name: "type 3, Nabalia fixed with loyalty", form: consumer3, offer: "NABALIAENERGIA_08", option: "biHourly", erse: [865.81, 1588.26, 614.1, 0, 0, 3068.17] },
+  { name: "type 3, Audax TOP T4 with loyalty", form: consumer3, offer: "AUDAX_05", option: "biHourly", erse: [865.81, 1734.89, 647.82, 0, 0, 3248.52] },
   { name: "type 3, Repsol services, no refunds or new-client discounts", form: { ...consumer3, ...plain }, offer: "REPSOL_127", option: "biHourly", erse: [865.81, 1061.02, 508.52, 68.2, 0, 2503.55] },
   // Mandatory services (filter "Só com serviços adicionais"), 3,45 kVA, simple 1 900 kWh.
   { name: "services, EDP", form: { cycle: "1", electPonta: "1900", electCheias: "", filtro_ServicosAdicionais: "1" }, offer: "EDPC_135", option: "simple", erse: [178.04, 228.01, 64.05, 57.56, -81.3, 446.36] },

@@ -97,6 +97,24 @@ describe("compareElectricityOffers against ERSE's simulator (read on 2026-11-20)
     }
   });
 
+  it("ranks loyalty offers as ERSE's page does, which includes them by default (#558)", () => {
+    // ERSE's cheapest Audax offer for consumers 2 and 3 is a fixed offer with loyalty; with loyalty
+    // offers left out (filtro_Fidelizacao 0) it was the indexed AUDAX_09.
+    expect(ERSE_FORM.filtro_Fidelizacao).toBe("1");
+    const audax = FIXTURE_OFFERS.filter((candidate) => candidate.supplier === "AUDAX");
+    for (const [name, expected] of [
+      ["type 2, Audax TOP T3 with loyalty", "AUDAX_04"],
+      ["type 3, Audax TOP T4 with loyalty", "AUDAX_05"],
+    ] as const) {
+      const reading = ERSE_READINGS.find((candidate) => candidate.name === name) as ErseReading;
+      const input = { ...inputFor(reading), options: ["simple", "biHourly"] as const, cheapestPerSupplier: true };
+      const best = only(run(audax, input).results);
+      expect([best.offer.id, best.option], name).toEqual([expected, "biHourly"]);
+      expect(best.offer.loyalty).toBe(true);
+      expect(best.firstYear.total).toBeCloseTo(reading.erse[5], 2);
+    }
+  });
+
   it("stops at zero where ERSE shows a negative bill", () => {
     const priced = only(run([offer(ERSE_NEGATIVE_BILL.offer)], inputFor(ERSE_NEGATIVE_BILL)).results);
     expect(ERSE_NEGATIVE_BILL.erse[5]).toBeLessThan(0);

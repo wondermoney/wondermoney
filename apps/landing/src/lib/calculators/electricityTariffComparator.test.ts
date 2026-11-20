@@ -156,6 +156,7 @@ describe("filters the engine leaves to the page", () => {
       "Iberdrola",
       "LuziGás",
       "MEO Energia",
+      "Nabalia Energia",
       "Repsol",
     ]);
   });
