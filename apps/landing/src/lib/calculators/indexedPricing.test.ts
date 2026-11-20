@@ -9,7 +9,6 @@ import { legalMidnight, QUARTER_HOUR_MS, type PeriodKwh } from "./electricityPer
 import {
   diagramBasis,
   formulaEnergyPrices,
-  formulaFor,
   profileBasis,
   tarEnergyPrices,
   type IndexedFormula,
