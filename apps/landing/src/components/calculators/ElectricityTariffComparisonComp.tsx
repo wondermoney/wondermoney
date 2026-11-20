@@ -200,12 +200,20 @@ type Diagram =
 
 type Async<T> = { state: "idle" } | { state: "loading" } | { state: "error" } | { state: "ready"; value: T };
 
+/** A diagram's dates must cover this many of the 12 months to price indexed offers on them. */
+export const MIN_DIAGRAM_MONTHS = 6;
+
 /** The market basis the page priced on, for the results' notes. */
 export interface MarketView {
   basis: MarketBasis;
   source: MarketSource;
-  /** A diagram was uploaded but none of its days has quarter-hour prices: the last 12 months were used. */
-  diagramOutOfRange: boolean;
+  /**
+   * Why a diagram's dates were not used, and the last 12 months were instead: none of its days
+   * has prices ("outOfRange"), or they cover fewer than MIN_DIAGRAM_MONTHS months ("short").
+   */
+  diagramFallback: "outOfRange" | "short" | null;
+  /** With "short": the months the diagram covers. */
+  diagramMonths?: number;
 }
 
 const summaryClass =
@@ -266,21 +274,6 @@ function ElectricityTariffComparison({
       .then((value) => setQuarterHours({ state: "ready", value }))
       .catch(() => setQuarterHours({ state: "error" }));
   }, [wantsMarket, usesDiagram, market, quarterHours.state, loadQuarterHours]);
-
-  // The market basis: the diagram's own dates when it has priced days, else the last 12 months.
-  const marketView = useMemo((): MarketView | null => {
-    if (!wantsMarket || market.state !== "ready") return null;
-    const { OMIE_MONTHS, OMIE_PRICES_SOURCE } = market.value;
-    if (usesDiagram && diagram.state === "ready") {
-      if (quarterHours.state === "loading" || quarterHours.state === "idle") return null;
-      const basis = quarterHours.state === "ready" ? diagramBasis(diagram.readings, quarterHours.value) : null;
-      if (basis) return { basis, source: OMIE_PRICES_SOURCE, diagramOutOfRange: false };
-      return { basis: profileBasis(OMIE_MONTHS), source: OMIE_PRICES_SOURCE, diagramOutOfRange: quarterHours.state === "ready" };
-    }
-    return { basis: profileBasis(OMIE_MONTHS), source: OMIE_PRICES_SOURCE, diagramOutOfRange: false };
-  }, [wantsMarket, market, usesDiagram, diagram, quarterHours]);
-  const indexedPricing: IndexedPricing | undefined =
-    marketView && market.state === "ready" ? { basis: marketView.basis, formulas: market.value.INDEXED_FORMULAS } : undefined;
 
   useEffect(() => {
     if (!edited || usageSent.current) return;
@@ -383,6 +376,26 @@ function ElectricityTariffComparison({
     },
     loadSolar,
   );
+
+  // The market basis: the diagram's own dates when they cover at least half of the 12 months,
+  // else the last 12 months. With solar, the readings netted against the production: what the
+  // household draws from the grid.
+  const marketView = useMemo((): MarketView | null => {
+    if (!wantsMarket || market.state !== "ready") return null;
+    const { OMIE_MONTHS, OMIE_PRICES_SOURCE } = market.value;
+    const lastYear = profileBasis(OMIE_MONTHS);
+    if (usesDiagram && diagram.state === "ready") {
+      if (quarterHours.state === "loading" || quarterHours.state === "idle") return null;
+      const readings = solar.result?.readings ?? diagram.readings;
+      const basis = quarterHours.state === "ready" ? diagramBasis(readings, quarterHours.value) : null;
+      if (basis && basis.months.length >= MIN_DIAGRAM_MONTHS) return { basis, source: OMIE_PRICES_SOURCE, diagramFallback: null };
+      const fallback = quarterHours.state === "error" ? null : basis ? "short" : "outOfRange";
+      return { basis: lastYear, source: OMIE_PRICES_SOURCE, diagramFallback: fallback, diagramMonths: basis?.months.length ?? 0 };
+    }
+    return { basis: lastYear, source: OMIE_PRICES_SOURCE, diagramFallback: null };
+  }, [wantsMarket, market, usesDiagram, diagram, quarterHours, solar.result]);
+  const indexedPricing: IndexedPricing | undefined =
+    marketView && market.state === "ready" ? { basis: marketView.basis, formulas: market.value.INDEXED_FORMULAS } : undefined;
 
   // Ranked on the grid consumption when solar is on; the saving prices the best offer without it.
   const comparison = useMemo(() => {
@@ -851,7 +864,14 @@ function IndexedChoiceField({
           {t(k(market === "error" ? "indexed.loadError" : "indexed.diagramLoadError"))}
         </p>
       )}
-      {value === "market" && view?.diagramOutOfRange && <p className="pl-6 text-xs text-muted-foreground">{t(k("indexed.diagramOutOfRange"))}</p>}
+      {value === "market" && view?.diagramFallback === "outOfRange" && (
+        <p className="pl-6 text-xs text-muted-foreground">{t(k("indexed.diagramOutOfRange"))}</p>
+      )}
+      {value === "market" && view?.diagramFallback === "short" && (
+        <p className="pl-6 text-xs text-muted-foreground">
+          {t(k("indexed.diagramShort"), { months: String(view.diagramMonths ?? 0), minimum: String(MIN_DIAGRAM_MONTHS) })}
+        </p>
+      )}
       {value === "market" && view && coverage !== undefined && coverage < 0.995 && (
         <p className="pl-6 text-xs text-muted-foreground">
           {t(k("indexed.coverage"), {

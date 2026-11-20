@@ -388,6 +388,8 @@ export interface CsvLabels {
   laterYears: string;
   period: string;
   estimated: string;
+  /** The price-basis column's header. */
+  priceBasis: string;
   saving: string;
   link: string;
   options: Record<TariffOption, string>;
@@ -395,6 +397,8 @@ export interface CsvLabels {
   no: string;
   /** The supplier's display name for a result (the regulated tariff has its own label). */
   supplierOf: (offer: ElectricityOffer) => string;
+  /** How a result was priced, in words: fixed, ERSE's estimate, or OMIE's real cost with its months. */
+  basisOf: (result: RankedOffer) => string;
 }
 
 /** Comma and decimal point in English; semicolon and decimal comma where the comma is decimal. */
@@ -421,6 +425,7 @@ export function comparisonCsv(results: readonly RankedOffer[], lang: string, lab
     labels.laterYears,
     labels.period,
     labels.estimated,
+    labels.priceBasis,
     ...(withSaving ? [labels.saving] : []),
     labels.link,
   ];
@@ -433,6 +438,7 @@ export function comparisonCsv(results: readonly RankedOffer[], lang: string, lab
     amount(result.laterYears.total),
     amount(result.period.total),
     result.estimated ? labels.yes : labels.no,
+    labels.basisOf(result),
     ...(withSaving ? [result.saving === null ? "" : amount(result.saving)] : []),
     result.offer.links.offer ?? result.offer.links.supplier ?? "",
   ]);

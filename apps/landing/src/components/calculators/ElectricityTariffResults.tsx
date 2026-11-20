@@ -88,11 +88,15 @@ export default function ElectricityTariffResults({ outcome, error, source, optio
   const download = () => {
     if (!outcome) return;
     const labels: CsvLabels = {
-      ...(t<Record<string, string>>(k("export.columns"), { returnObjects: true }) as unknown as Omit<CsvLabels, "options" | "yes" | "no" | "supplierOf">),
+      ...(t<Record<string, string>>(k("export.columns"), { returnObjects: true }) as unknown as Omit<CsvLabels, "options" | "yes" | "no" | "supplierOf" | "basisOf">),
       options: { simple: optionLabel("simple"), biHourly: optionLabel("biHourly"), triHourly: optionLabel("triHourly") },
       yes: t(k("export.yes")),
       no: t(k("export.no")),
       supplierOf,
+      basisOf: (result) =>
+        result.market
+          ? t(k("export.basis.market"), { period: monthRange(t, locale, result.market.from, result.market.to) })
+          : t(k(`export.basis.${result.priceBasis}`)),
     };
     const csv = comparisonCsv(outcome.results, locale, labels);
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -144,6 +148,13 @@ export default function ElectricityTariffResults({ outcome, error, source, optio
                 </button>
               )}
             </div>
+            {market && estimatedCount(outcome) > 0 && (
+              <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">
+                {estimatedCount(outcome) === 1
+                  ? t(k("results.estimatedLeftOne"))
+                  : t(k("results.estimatedLeft"), { count: formatNumber(locale, estimatedCount(outcome), 0) })}
+              </p>
+            )}
             {outcome.results.length === 0 ? (
               <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">{t(k("results.none"))}</p>
             ) : (
@@ -170,6 +181,11 @@ export default function ElectricityTariffResults({ outcome, error, source, optio
       <SourceNote source={source} date={date} market={market} />
     </div>
   );
+}
+
+/** The indexed offers in the list still on ERSE's estimate: no published formula to price them by. */
+function estimatedCount(outcome: ComparatorView): number {
+  return new Set(outcome.results.filter((result) => result.priceBasis === "erseEstimate").map((result) => result.offer.id)).size;
 }
 
 function OptionComparison({ outcome, option, sortBy }: { outcome: ComparatorView; option: TariffOption; sortBy: ComparisonSort }) {
