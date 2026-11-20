@@ -110,9 +110,11 @@ monthly item's commentary.
 Dated data modules live in `src/lib/calculators/data/` (plus a few tables inside the calculator
 modules). Each carries its own "as of" date, which the page shows. The open-API snapshots refresh
 themselves: `.github/workflows/landing-data-refresh.yml` runs the market-data scripts on the 6th of
-every month and the ERSE offers script every Monday (and either set by hand: Actions > Landing
-data refresh), and opens or updates one pull request per set into `develop` when the figures
-changed, from `bot/landing-data-refresh` (market data) or `bot/landing-offers-refresh` (offers).
+every month, the ERSE offers script every Monday and the OMIE prices script on the 8th (and any
+set by hand: Actions > Landing data refresh), and opens or updates one pull request per set into
+`develop` when the figures changed, from `bot/landing-data-refresh` (market data),
+`bot/landing-offers-refresh` (offers) or `bot/landing-omie-refresh` (OMIE). The offers run also
+checks the indexed-offer formulas against the new export (`indexedPricing.test.ts`).
 Those pull requests get no CI run (they are opened with `GITHUB_TOKEN`): close and reopen them
 before merging. A script that fails fails the job and leaves the data as it was. Everything else
 is refreshed by hand, on the calendar below. Run the commands from `apps/landing`.
@@ -126,7 +128,7 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/electricityOffers.ts` | ERSE price simulator export (`csvPath` in its `Settings.json`): every supplier's household electricity offer. Types in `calculators/electricityOfferTypes.ts`; loaded only with a dynamic `import()` | weekly, automated (Mondays) | `node scripts/build-electricity-offers.mjs` (`--from-file <zip>` for a saved export) |
 | `data/fuelStations/` (`index.ts` and a JSON file per district) | DGEG station prices, the cheapest per district and municipality | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
 | `data/goldPrice.ts` | NBP gold price per gram, converted with the ECB euro reference rate | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-gold-price.mjs` |
-| `data/omiePrices.ts` and `public/data/omie-pt-quarter-hours.json` | OMIE's Portuguese day-ahead prices (daily `marginalpdbcpt` files), weighted by the E-REDES BTN C profile, with the E-REDES and REN loss profiles: monthly averages by period for 13 months, and the last 12 months' quarter-hours for the load-diagram mode | monthly, automated | `node scripts/build-omie-prices.mjs` (`--to YYYY-MM`, `--cache <dir>`) |
+| `data/omiePrices.ts` and `public/data/omie-pt-quarter-hours.json` | OMIE's Portuguese day-ahead prices (daily `marginalpdbcpt` files), weighted by the E-REDES BTN C profile, with the E-REDES and REN loss profiles: monthly averages by period for the last 12 months, and their quarter-hours (with the profile) for the load-diagram mode | monthly (the 8th), automated, its own set | `node scripts/build-omie-prices.mjs` (`--to YYYY-MM`, `--cache <dir>`) |
 | `data/indexedFormulas.ts` | Each indexed offer's energy formula, from the supplier's own ficha, terms or tariff page (URL and date read per formula; never third-party simulators) | quarterly, and when the offers refresh shows an indexed supplier's documents or prices changed | Edit by hand, update each `readOn` and `INDEXED_FORMULAS_REVIEWED`, run `indexedPricing.test.ts` |
 | `data/sp500History.ts` | Damodaran `histretSP.xls` and Shiller `ie_data.xls`, downloaded by hand | each January, after the year-end data is out | `node scripts/build-sp500-history.mjs <histretSP.xls> <date> <ie_data.xls> <date>` |
 | `calculators/portugalCpi.ts` | BPstat series 12704686 (INE annual CPI); no script yet | each year once INE publishes the full year (February to March) | Edit by hand: the URL and steps are in the file's header comment |
