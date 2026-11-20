@@ -124,6 +124,10 @@ const CONTENT_TOOL_LINKS: ReadonlyArray<{
     destination: "toolElectricityIndex",
   },
   {
+    sources: ["toolElectricityIndex", "toolHouseholdBudget"],
+    destination: "toolElectricityTariffComparison",
+  },
+  {
     sources: ["toolCarLoan", "toolVehicleTax", "toolHouseholdBudget"],
     destination: "toolFuelPrices",
   },

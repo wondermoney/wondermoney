@@ -4213,6 +4213,316 @@
         }
       }
     },
+    "electricityTariffComparison": {
+      "title": "Stromtarifvergleich für Portugal",
+      "shortName": "Stromtarife",
+      "subtitle": "Vergleiche das Haushaltsstromangebot jedes Versorgers mit deinem eigenen Verbrauch, mit allen Entgelten und Steuern, auf Basis der offiziellen Daten der ERSE.",
+      "description": "Ordne alle Haushaltsstromangebote auf dem portugiesischen Festland danach, was sie dich in einem Jahr kosten würden, auf Basis der offiziellen Angebotsdaten der ERSE.",
+      "pageTitle": "Stromtarifvergleich Portugal: alle Angebote, ERSE-Daten",
+      "pageDescription": "Vergleiche alle Haushaltsstromangebote auf dem portugiesischen Festland nach Rechnung, kWh oder E-REDES-Verbrauchsdatei. Mit Steuern, ERSE-Daten, ohne Upload.",
+      "nextStepHeadline": "Nimm die neue Stromrechnung in dein Budget auf",
+      "nextStepDescription": "Sobald du weißt, was dein Strom kosten sollte, verfolge ihn neben deinen anderen Haushaltsrechnungen und sieh die Ersparnis Monat für Monat.",
+      "nextStepCta": "Haushaltsbudget planen",
+      "formLabel": "Dein Verbrauch und Vertrag",
+      "loading": "Angebote der ERSE werden geladen…",
+      "loadError": "Die Angebote konnten nicht geladen werden. Prüfe deine Verbindung und lade die Seite neu.",
+      "regulatedSupplier": "Regulierter Tarif",
+      "mode": {
+        "legend": "Wie möchtest du vergleichen?",
+        "quick": "Schnell",
+        "full": "Vollständig",
+        "quickHelp": "Anhand deiner Monatsrechnung oder deiner kWh. Die Aufteilung auf die Zeiträume folgt dem Standardprofil für Haushalte.",
+        "fullHelp": "Anhand deiner kWh je Zeitraum, einer Summe für beliebig viele Tage oder deiner E-REDES-Verbrauchsdatei."
+      },
+      "fields": {
+        "power": "Vertraglich vereinbarte Leistung",
+        "option": "Tarifoption",
+        "cycle": "Zeitzyklus",
+        "quickUnit": "Ich kenne",
+        "unitBill": "Meine Monatsrechnung in Euro",
+        "unitKwh": "Meinen Monatsverbrauch in kWh",
+        "bill": "Monatsrechnung",
+        "monthlyKwh": "Monatsverbrauch",
+        "source": "Verbrauch",
+        "period": "Der Verbrauch umfasst",
+        "days": "Anzahl der Tage",
+        "total": "Gesamtverbrauch",
+        "periodsLegend": "Verbrauch je Zeitraum"
+      },
+      "options": {
+        "simple": "Einfach",
+        "biHourly": "Zweizeitig",
+        "triHourly": "Dreizeitig"
+      },
+      "cycles": {
+        "daily": "Täglicher Zyklus",
+        "weekly": "Wöchentlicher Zyklus"
+      },
+      "sources": {
+        "periods": "kWh je Zeitraum",
+        "total": "Eine Summe, nach Standardprofil aufgeteilt",
+        "diagram": "E-REDES-Verbrauchsdatei"
+      },
+      "periodChoices": {
+        "month": "Ein Monat",
+        "year": "Ein Jahr",
+        "days": "Eine Anzahl von Tagen"
+      },
+      "periods": {
+        "simple": "Energie",
+        "offValley": "Außerhalb der Schwachlastzeit (fora de vazio)",
+        "valley": "Schwachlastzeit (vazio)",
+        "peak": "Spitzenlastzeit (ponta)",
+        "shoulder": "Normallastzeit (cheias)"
+      },
+      "help": {
+        "power": "Auf deiner Rechnung, in kVA. Die meisten Haushalte haben 3,45, 4,6 oder 6,9 kVA.",
+        "option": "Einfach hat einen einzigen Energiepreis; zweizeitig und dreizeitig berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
+        "cycle": "Der Zyklus deines Zählers, auf der Rechnung. Der wöchentliche Zyklus verschiebt die Schwachlastzeiten am Wochenende.",
+        "bill": "Was du im Monat zahlst, inklusive Mehrwertsteuer. Der Betrag wird in kWh umgerechnet, als hättest du den regulierten Tarif, wie bei der Schnellsimulation der ERSE.",
+        "billKwh": "Im regulierten Tarif entspricht diese Rechnung etwa {{kwh}} im Monat.",
+        "monthlyKwh": "Auf der Rechnung, oder der Jahresverbrauch geteilt durch 12.",
+        "days": "Die Tage, die deine kWh abdecken, von 1 bis 731, wie auf einer Rechnung oder in einem Zählerdownload.",
+        "total": "Alle kWh im obigen Zeitraum. Die Aufteilung auf die Zeiträume folgt dem E-REDES-Profil für deine Leistung und deinen Verbrauch.",
+        "periods": "Wie auf deiner Rechnung oder Zählerablesung. Andere Optionen werden mit denselben kWh berechnet, bei Bedarf nach dem Standardprofil aufgeteilt."
+      },
+      "household": {
+        "legend": "Dein Haushalt",
+        "socialTariff": "Ich habe den Sozialtarif",
+        "socialTariffHelp": "Ein Nachlass auf Leistung und Energie, bis 6,9 kVA. Angebote, die keine Kunden mit Sozialtarif annehmen, werden ausgeblendet.",
+        "largeFamily": "Haushalt mit fünf oder mehr Personen",
+        "largeFamilyHelp": "Ermäßigte Mehrwertsteuer auf bis zu 300 kWh alle 30 Tage statt 200.",
+        "newClient": "Ich wäre Neukunde",
+        "newClientHelp": "Berücksichtigt die Rabatte, die Versorger Neukunden im ersten Jahr geben."
+      },
+      "filters": {
+        "title": "Filter",
+        "summary": "(Preisart, Versorger, Bedingungen)",
+        "pricing": "Preisart",
+        "pricingChoices": {
+          "all": "Fest und indexiert",
+          "fixed": "Nur Festpreis",
+          "indexed": "Nur indexierter Preis"
+        },
+        "supplier": "Versorger",
+        "supplierAll": "Alle Versorger",
+        "sortBy": "Sortieren nach",
+        "sortChoices": {
+          "firstYear": "Erstes Jahr",
+          "laterYears": "Folgejahre (ohne Neukundenrabatt)"
+        },
+        "includeConditioned": "Angebote mit Teilnahmebedingungen einbeziehen",
+        "includeConditionedHelp": "Angebote, die nur manche Personen abschließen können, etwa Mitglieder eines Vereins oder Inhaber einer Karte.",
+        "includeRefunds": "Erstattungen und Rabatte für alle Kunden einrechnen",
+        "includeRefundsHelp": "Beträge, die der Versorger auf jeder Rechnung gutschreibt, so wie die ERSE sie zählt.",
+        "mandatoryServices": "Angebote mit kostenpflichtigen Pflichtleistungen einbeziehen",
+        "mandatoryServicesHelp": "Manche Angebote setzen eine kostenpflichtige Leistung voraus, etwa eine Assistenzleistung. Ihre Kosten sind in der Summe enthalten.",
+        "directDebit": "Angebote mit Lastschriftpflicht einbeziehen",
+        "eInvoice": "Angebote mit Pflicht zur elektronischen Rechnung einbeziehen",
+        "renewableOnly": "Nur 100 % erneuerbare Energie",
+        "noLoyalty": "Nur Angebote ohne Mindestvertragslaufzeit",
+        "includeDual": "Kombiangebote (Strom und Gas) einbeziehen",
+        "includeDualHelp": "Sie setzen einen Gasvertrag beim selben Versorger voraus, und ihre Fixbeträge können auch Gas abdecken.",
+        "cheapestPerSupplier": "Nur das günstigste Angebot je Versorger"
+      },
+      "myTariff": {
+        "title": "Mit meinem Tarif vergleichen",
+        "intro": "Gib deine aktuellen Preise ein, und jedes Angebot zeigt, was du damit gegenüber diesen Preisen sparst, bei gleichem Verbrauch und gleichen Steuern.",
+        "toggle": "Meine Preise verwenden",
+        "legend": "Meine Preise für die Option {{option}}",
+        "power": "Leistungspreis",
+        "powerUnit": "€/Tag",
+        "energy": "Energiepreis, {{period}}",
+        "energySimple": "Energiepreis",
+        "help": "Ohne MwSt., wie auf deiner Rechnung, für die oben gewählte Option {{option}}.",
+        "errors": {
+          "outOfRange": "Gib einen Preis von 0 bis 5 Euro ein."
+        },
+        "incomplete": "Gib alle deine Preise ein, um die Ersparnis jedes Angebots zu sehen.",
+        "resultTitle": "Dein Tarif bei diesem Verbrauch",
+        "yearly": "Im ersten Jahr, inklusive Steuern.",
+        "yearlyLater": "In einem Jahr, inklusive Steuern.",
+        "cheaper": "{{count}} Angebote kosten weniger. Mit dem günstigsten sparst du {{saving}} im Jahr.",
+        "noneCheaper": "Kein Angebot in der Liste kostet weniger als dein Tarif."
+      },
+      "diagram": {
+        "label": "E-REDES-Verbrauchsdatei",
+        "help": "Öffne im Balcão Digital der E-REDES den Verbrauch deiner Anlage, wähle den Zeitraum und lade ihn als Tabelle (xlsx) herunter. Die 15-Minuten-Werte ergeben deine tatsächlichen kWh in jedem Zeitraum.",
+        "privacy": "Die Datei wird in deinem Browser gelesen und verlässt ihn nie: Es wird nichts hochgeladen.",
+        "reading": "Datei wird gelesen…",
+        "loaded": "{{first}} bis {{last}}: {{days}} Tage, {{kwh}}.",
+        "missing": "{{count}} Viertelstunden haben keinen Messwert und zählen als null.",
+        "clear": "Datei entfernen",
+        "errors": {
+          "unreadable": "Diese Datei konnte nicht als Tabelle gelesen werden. Lade sie erneut als xlsx bei E-REDES herunter.",
+          "notERedesExport": "Das sieht nicht nach einer E-REDES-Verbrauchsdatei aus: Es gibt keine Datumsspalte neben einer Verbrauchsspalte in kW.",
+          "noReadings": "Die Datei enthält keine Verbrauchswerte. Wähle einen Zeitraum mit Messwerten und lade sie erneut herunter.",
+          "invalidRow": "Zeile {{row}} hat kein gültiges Datum, keine gültige Viertelstunde oder keinen gültigen Verbrauch.",
+          "duplicateReading": "Zeile {{row}} wiederholt eine Viertelstunde, die bereits in der Datei steht."
+        }
+      },
+      "errors": {
+        "required": "Gib eine gültige Zahl ein.",
+        "negative": "Der Wert darf nicht negativ sein.",
+        "tooLarge": "Gib {{max}} oder weniger ein.",
+        "outOfRange": "Gib eine Anzahl von Tagen von 1 bis {{max}} ein.",
+        "notAllowed": "Wähle eine vertraglich vereinbarte Leistung aus der Liste.",
+        "days": "Gib eine ganze Zahl von Tagen von 1 bis {{max}} ein.",
+        "belowFixed": "Ein Monat im regulierten Tarif kostet bei dieser Leistung mindestens {{minimum}}, noch vor jedem Verbrauch. Prüfe die Rechnung oder die Leistung.",
+        "billTooLarge": "Gib eine Rechnung von höchstens {{maximum}} ein.",
+        "noRegulatedPrice": "Der regulierte Tarif hat für diese Leistung und Option keinen Preis, daher lässt sich eine Rechnung nicht in kWh umrechnen. Gib stattdessen die kWh ein.",
+        "noDiagram": "Wähle deine E-REDES-Verbrauchsdatei.",
+        "summary": "Prüfe die markierten Felder, um die Angebote zu sehen."
+      },
+      "compare": {
+        "title": "Einfach, zweizeitig oder dreizeitig?",
+        "intro": "Das günstigste Angebot jeder Option bei gleichem Verbrauch, aufgeteilt nach deinem Zeitzyklus.",
+        "yours": "(deine Option)",
+        "perFirstYear": "im ersten Jahr",
+        "perLaterYear": "pro Jahr ab dem zweiten Jahr",
+        "cheapest": "Günstigste Option",
+        "more": "{{amount}} mehr im Jahr",
+        "unavailable": "Kein Angebot bei dieser Leistung."
+      },
+      "results": {
+        "title": "Angebote mit der Option {{option}}",
+        "count": "{{count}} Angebote, berechnet für {{kwh}} im Jahr.",
+        "none": "Kein Angebot passt. Lockere die Filter oder ändere die Option.",
+        "listLabel": "Angebote, günstigstes zuerst",
+        "showMore": "{{count}} weitere anzeigen",
+        "firstYear": "Erstes Jahr",
+        "laterYears": "Folgejahre",
+        "period": "Deine {{days}} Tage",
+        "periodMonth": "Ein Monat",
+        "periodYear": "Ein Jahr",
+        "saving": "Du sparst {{amount}} im Jahr",
+        "dearer": "Kostet {{amount}} mehr im Jahr",
+        "same": "Kostet so viel wie dein Tarif",
+        "details": "Aufschlüsselung und Links",
+        "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was du zahlst, folgt dem Markt.",
+        "conditionsLabel": "Bedingungen, in den Worten der ERSE",
+        "links": {
+          "offer": "Angebotsseite",
+          "standardSheet": "Standardisiertes Datenblatt",
+          "terms": "Vertragsbedingungen"
+        },
+        "breakdownCaption": "Aufschlüsselung von {{offer}}",
+        "socialNotApplied": "Der Sozialtarif gilt nur bis {{kva}} kVA und wird bei dieser Leistung daher nicht berücksichtigt."
+      },
+      "badges": {
+        "label": "Merkmale des Angebots",
+        "estimated": "Geschätzter Preis",
+        "regulated": "Reguliert",
+        "conditioned": "Mit Bedingungen",
+        "dual": "Mit Gas",
+        "loyalty": "Mindestlaufzeit",
+        "renewable": "100 % erneuerbar",
+        "directDebit": "Lastschrift",
+        "eInvoice": "E-Rechnung",
+        "services": "Kostenpflichtige Leistungen"
+      },
+      "lines": {
+        "item": "Posten",
+        "power": "Leistung",
+        "energy": "Energie",
+        "socialDiscount": "davon Nachlass Sozialtarif",
+        "cav": "Rundfunkbeitrag (CAV)",
+        "iec": "Stromverbrauchsteuer (IEC)",
+        "services": "Pflichtleistungen",
+        "refunds": "Erstattungen und Rabatte",
+        "newClientDiscount": "Neukundenrabatt",
+        "subtotal": "Ohne MwSt.",
+        "vatReduced": "MwSt. 6 %",
+        "vatStandard": "MwSt. 23 %",
+        "total": "Summe"
+      },
+      "export": {
+        "button": "CSV herunterladen",
+        "filename": "stromangebote",
+        "columns": {
+          "rank": "Rang",
+          "supplier": "Versorger",
+          "offer": "Angebot",
+          "option": "Option",
+          "firstYear": "Erstes Jahr (EUR)",
+          "laterYears": "Folgejahre (EUR)",
+          "period": "Dein Zeitraum (EUR)",
+          "estimated": "Geschätzter Preis",
+          "saving": "Ersparnis pro Jahr (EUR)",
+          "link": "Link"
+        },
+        "yes": "ja",
+        "no": "nein"
+      },
+      "source": {
+        "asOf": "Angebote: ERSE, Export vom {{date}} ({{offers}} Angebote von {{suppliers}} Versorgern und der regulierte Tarif).",
+        "negotiation": "Die Preise sind die veröffentlichten, vor jeder persönlichen Verhandlung. Bestätige das Angebot beim Versorger, bevor du unterschreibst.",
+        "indexed": "Indexierte Preise sind Schätzungen der ERSE für die kommenden Monate, kein Festpreis.",
+        "taxes": "Die Summen enthalten Leistung, Energie, den Rundfunkbeitrag, die Stromverbrauchsteuer und die Mehrwertsteuer.",
+        "dgeg": "Die DGEG-Gebühr (einige Cent im Monat) ist nicht enthalten.",
+        "educational": "Schätzung zu Bildungszwecken, keine Beratung. WonderMoney hat keine Geschäftsbeziehung zu einem Versorger.",
+        "simulatorLink": "Offizieller Preissimulator der ERSE"
+      },
+      "guide": {
+        "use": {
+          "title": "So nutzt du den Vergleich",
+          "quick": "Der Schnellmodus braucht nur deine vertraglich vereinbarte Leistung und deine Monatsrechnung oder deine kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
+          "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von deiner Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für deine Leistung und deinen Verbrauch auf die Zeiträume verteilt wird.",
+          "diagram": "Du kannst auch deine E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Ihre 15-Minuten-Werte ergeben deine tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in deinem Browser gelesen und nirgendwohin gesendet.",
+          "mine": "Unter „Mit meinem Tarif vergleichen“ gibst du die Preise von deiner Rechnung ein. Dein Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
+          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für einfach, zweizeitig und dreizeitig bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
+        },
+        "example": {
+          "title": "Rechenbeispiel",
+          "setup": "Ein Haushalt mit 3,45 kVA in der einfachen Option verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
+          "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
+          "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
+        },
+        "method": {
+          "title": "So wird gerechnet",
+          "intro": "Jedes Angebot wird so berechnet wie im Simulator der ERSE (Manual do Simulador de Preços de Energia, Juni 2026):",
+          "steps": {
+            "a": "Leistung: der Tagespreis mal die Anzahl der Tage.",
+            "b": "Energie: die kWh jedes Zeitraums mal dessen Preis.",
+            "c": "Sozialtarif: der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA.",
+            "d": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe.",
+            "e": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet.",
+            "f": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben.",
+            "g": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+          },
+          "vat": "Die Mehrwertsteuer beträgt {{reduced}} auf den Rundfunkbeitrag, auf den Netzzugangsanteil des Leistungspreises bis 3,45 kVA und auf die ersten {{allowance}} kWh alle 30 Tage bis 6,9 kVA ({{allowanceLarge}} kWh für einen Haushalt mit fünf oder mehr Personen). Für alles andere gilt {{standard}}.",
+          "month": "Ein Monat ist ein Zwölftel eines Jahres, {{days}} Tage, wie im Simulator der ERSE, sodass ein Jahr genau zwölf Monate hat.",
+          "split": "Wenn nur eine Summe bekannt ist, wird sie nach dem E-REDES-Verbrauchsprofil der Haushaltsklasse auf die Zeiträume verteilt: A über 13,8 kVA, sonst B über 7.140 kWh im Jahr und C darunter."
+        },
+        "data": {
+          "title": "Daten und Quellen",
+          "erse": "Angebote: Preissimulator der ERSE, Export vom {{date}}, mit {{offers}} Angeboten von {{suppliers}} Versorgern und dem regulierten Tarif. Versorger müssen ihre Haushaltsangebote der ERSE melden. Die Preise verstehen sich ohne Mehrwertsteuer und Steuern; die Seite rechnet sie hinzu.",
+          "refresh": "Die Seite übernimmt jede Woche einen neuen Export der ERSE. Angebote, die bis dahin ausgelaufen sind, werden ausgeblendet.",
+          "names": "Die ERSE führt jeden Versorger unter einem Code; die Seite zeigt den Markennamen, den jeder Versorger auf seiner eigenen Website verwendet.",
+          "simulatorLink": "Preissimulator der ERSE",
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (Juni 2026)"
+        },
+        "limits": {
+          "title": "Was die Summen nicht enthalten",
+          "items": {
+            "a": "Die DGEG-Gebühr von einigen Cent im Monat sowie etwaige Zähler- oder sonstige Entgelte.",
+            "b": "Persönliche Verhandlungen: Die Preise sind die veröffentlichten.",
+            "c": "Indexierte Angebote werden mit der Schätzung der ERSE für die kommenden Monate berechnet; was du zahlst, folgt dem Markt.",
+            "d": "Kombiangebote können Gas in ihren Fixbeträgen enthalten; sie werden ausgeblendet, außer du beziehst sie ein.",
+            "e": "Mit einer Rechnung oder einer Summe folgt die Aufteilung auf die Zeiträume dem Standardprofil, nicht deinem eigenen. Die E-REDES-Datei liefert deine tatsächliche Aufteilung.",
+            "f": "Dies ist eine Schätzung zu Bildungszwecken, keine Beratung. Lies das standardisierte Datenblatt und die Bedingungen des Angebots, bevor du unterschreibst."
+          },
+          "simulatorLink": "Prüfe ein Ergebnis im offiziellen Simulator der ERSE"
+        },
+        "related": {
+          "title": "Weiter geht's",
+          "electricityIndexLink": "Strompreisindex",
+          "electricityIndexBody": "Wie der Haushaltsstrompreis in Portugal im Vergleich zur EU liegt und woraus sich die Rechnung im regulierten Tarif zusammensetzt.",
+          "householdBudgetLink": "Haushaltsbudget",
+          "householdBudgetBody": "Stell die Stromrechnung neben deine übrigen monatlichen Kosten."
+        }
+      }
+    },
     "fuelPrices": {
       "title": "Spritpreise in Portugal und monatliche Tankkosten",
       "shortName": "Spritpreise",

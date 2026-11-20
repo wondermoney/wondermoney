@@ -148,6 +148,7 @@ const TOOL_FIGURES: Readonly<Record<string, FigureName>> = {
   toolEuribor: "easelchart",
   toolDepositRateIndex: "easelchart",
   toolElectricityIndex: "meter",
+  toolElectricityTariffComparison: "meter",
   toolFuelPrices: "pump",
   toolFreeBankAccounts: "wallet",
   toolRemuneratedAccounts: "wallet",

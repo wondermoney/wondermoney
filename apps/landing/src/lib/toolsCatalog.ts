@@ -121,6 +121,12 @@ export const TOOLS_CATALOG = [
 		related: ["toolHouseholdBudget", "toolEmergencyFund", "toolInflation"],
 	},
 	{
+		key: "electricityTariffComparison",
+		routeId: "toolElectricityTariffComparison",
+		group: "budgetAndSave",
+		related: ["toolElectricityIndex", "toolHouseholdBudget", "toolEmergencyFund"],
+	},
+	{
 		key: "fuelPrices",
 		routeId: "toolFuelPrices",
 		group: "budgetAndSave",
