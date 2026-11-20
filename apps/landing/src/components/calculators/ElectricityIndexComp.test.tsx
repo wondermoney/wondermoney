@@ -31,6 +31,13 @@ it("shows the worked example, the index with its date, edge cases and one metada
   expect(screen.getByRole("link", { name: /official price simulator/ }).getAttribute("href")).toMatch(/^https:\/\/.*erse\.pt/);
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
+  // At 3.45 kVA only the network-access part of the power term pays 6% VAT (Lista I, verba 2.33).
+  const exampleTable = screen.getByRole("table", { name: /Bill breakdown/ });
+  const networkRow = within(exampleTable).getByText(/network-access part \(3\.45 kVA/).closest("tr") as HTMLElement;
+  expect(networkRow.textContent).toContain("6%");
+  const restRow = within(exampleTable).getByText(/rest of the price \(3\.45 kVA/).closest("tr") as HTMLElement;
+  expect(restRow.textContent).toContain("23%");
+
   // Bi-hourly asks for the off-peak share and compares with the simple tariff.
   fireEvent.change(screen.getByLabelText("Tariff option"), { target: { value: "biHourly" } });
   const share = screen.getByLabelText("Share of consumption in off-peak hours");

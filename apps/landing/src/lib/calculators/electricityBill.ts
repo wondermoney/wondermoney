@@ -3,6 +3,7 @@ import {
   ERSE_TARIFFS,
   type ContractedPower,
 } from "./data/erseTariffs";
+import { energyVatSplit, iecNet, powerTermVatSplit, reducedVatKwhByPeriod } from "./electricityTaxes";
 import {
   ELECTRICITY_PRICES,
   ELECTRICITY_PRICES_SOURCE,
@@ -55,7 +56,12 @@ export interface BillLine {
 }
 
 export interface BillBreakdown {
-  /** Contracted power, 30 days at the daily price. */
+  /**
+   * The network-access tariff's fixed term within the power price, at the reduced VAT rate (contracted
+   * power up to 3.45 kVA, Código do IVA Lista I verba 2.33). Zero above 3.45 kVA.
+   */
+  powerNetwork: BillLine;
+  /** The rest of the contracted power price for 30 days (all of it above 3.45 kVA), at 23%. */
   power: BillLine;
   /** Energy within the reduced-VAT allowance. */
   energyReduced: BillLine;
@@ -114,10 +120,10 @@ export function breakEvenOffPeakPercent() {
   return ((biPeak - simple) / (biPeak - biOffPeak)) * 100;
 }
 
-function energyNet(option: TariffOption, kwh: number, offPeakShare: number) {
+function energyPeriods(option: TariffOption, kwh: number, offPeakShare: number) {
   const { simple, biPeak, biOffPeak } = ERSE_TARIFFS.energyPerKwh;
-  if (option === "simple") return kwh * simple;
-  return kwh * (1 - offPeakShare) * biPeak + kwh * offPeakShare * biOffPeak;
+  if (option === "simple") return { kwh: [kwh], prices: [simple] };
+  return { kwh: [kwh * (1 - offPeakShare), kwh * offPeakShare], prices: [biPeak, biOffPeak] };
 }
 
 function bill(
@@ -127,25 +133,32 @@ function bill(
   offPeakShare: number,
   largeFamily: boolean,
 ) {
-  const { vat, powerPerDay, cavPerMonth, iecPerKwh } = ERSE_TARIFFS;
+  const { vat, powerPerDay, cavPerMonth } = ERSE_TARIFFS;
   const powerKey = power as ContractedPower;
-  const allowance = largeFamily ? vat.reducedKwhPer30DaysLargeFamily : vat.reducedKwhPer30Days;
   // Energy up to the allowance gets 6% VAT (contracted power up to 6.9 kVA, all four options).
-  // With two prices the allowance is shared in proportion to the kWh in each period, which gives
-  // the same VAT as splitting the total energy cost in the same proportion.
-  const reducedKwh = power <= vat.energyReducedUpToKva ? Math.min(monthlyKwh, allowance) : 0;
-  const energy = energyNet(option, monthlyKwh, offPeakShare);
-  const energyReducedNet = monthlyKwh > 0 ? (energy * reducedKwh) / monthlyKwh : 0;
+  // With two prices the allowance is shared in proportion to the kWh in each period.
+  const periods = energyPeriods(option, monthlyKwh, offPeakShare);
+  const reducedByPeriod = reducedVatKwhByPeriod(periods.kwh, {
+    contractedPower: power,
+    days: BILL_DAYS,
+    largeFamily,
+    roundToKwh: false,
+  });
+  const reducedKwh = reducedByPeriod.reduce((sum, kwh) => sum + kwh, 0);
+  const energy = energyVatSplit(periods.kwh, periods.prices, reducedByPeriod);
+  const powerTerm = powerTermVatSplit(powerPerDay[powerKey] * BILL_DAYS, {
+    contractedPower: power,
+    days: BILL_DAYS,
+    socialTariff: false,
+  });
 
   const breakdown: BillBreakdown = {
-    power: {
-      net: powerPerDay[powerKey] * BILL_DAYS,
-      vatRate: power <= vat.powerTermReducedUpToKva ? vat.reduced : vat.standard,
-    },
-    energyReduced: { net: energyReducedNet, vatRate: vat.reduced },
-    energyStandard: { net: energy - energyReducedNet, vatRate: vat.standard },
+    powerNetwork: { net: powerTerm.reduced, vatRate: vat.reduced },
+    power: { net: powerTerm.standard, vatRate: vat.standard },
+    energyReduced: { net: energy.reduced, vatRate: vat.reduced },
+    energyStandard: { net: energy.standard, vatRate: vat.standard },
     cav: { net: cavPerMonth, vatRate: vat.reduced },
-    iec: { net: monthlyKwh * iecPerKwh, vatRate: vat.standard },
+    iec: { net: iecNet(monthlyKwh), vatRate: vat.standard },
   };
   const lines = Object.values(breakdown);
   const subtotal = lines.reduce((sum, line) => sum + line.net, 0);

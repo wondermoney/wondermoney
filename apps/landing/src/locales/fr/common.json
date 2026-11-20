@@ -4116,6 +4116,8 @@
         "beforeVat": "Hors TVA",
         "vatRate": "TVA",
         "power": "Puissance souscrite ({{kva}} kVA, {{days}} jours)",
+        "powerNetwork": "Puissance souscrite, part du tarif d'accès aux réseaux ({{kva}} kVA, {{days}} jours)",
+        "powerRest": "Puissance souscrite, reste du prix ({{kva}} kVA, {{days}} jours)",
         "energyReduced": "Énergie à TVA réduite ({{kwh}})",
         "energyStandard": "Énergie au-delà du plafond de TVA réduite ({{kwh}})",
         "cav": "Contribution audiovisuelle (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Taxe spéciale sur la consommation d'électricité (IEC) : un montant fixe par kWh, avec la TVA au taux normal.",
             "e": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
           },
-          "vat": "Règles de TVA, telles que l'ERSE les explique : le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, au terme de puissance pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
+          "vat": "Règles de TVA, telles que l'ERSE les explique : le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, à la part du terme de puissance qui correspond au tarif d'accès aux réseaux fixé par l'ERSE, pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
           "bi": "Bi-horaire contre simple : le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
           "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours."
         },
