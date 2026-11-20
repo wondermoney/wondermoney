@@ -58,7 +58,7 @@
       "heading": { "en": "Vercel", "pt": "Vercel", "es": "Vercel" },
       "purpose": "Hosting for the web application, the marketing site and the documentation site.",
       "evidence": "web is a Next.js app deployed to Vercel; lp depends on @astrojs/vercel.",
-      "personalData": "Request metadata and IP addresses at the edge.",
+      "personalData": "Request metadata and IP addresses at the edge. For the website's solar production tool, the location a visitor enters, rounded to 0.05° (about 5 km), passes through its server function; our code does not log it.",
       "location": "United States (company), European Union (primary regions)"
     },
     {
@@ -77,6 +77,14 @@
       "personalData": "None — ticker symbols only.",
       "location": "European Union",
       "notes": "Replaced Financial Modeling Prep on 2026-08-05."
+    },
+    {
+      "id": "pvgis",
+      "heading": { "en": "PVGIS", "pt": "PVGIS", "es": "PVGIS" },
+      "purpose": "Solar production estimates for the electricity tariff comparator on the marketing site.",
+      "evidence": "landing src/pages/api/solar-production.ts calls the PVGIS API (re.jrc.ec.europa.eu, tmy and seriescalc) from the server, only when a visitor chooses exact coordinates or a tilt or orientation other than the district default.",
+      "personalData": "Location rounded to 0.05° (about 5 km), panel tilt, orientation and system losses. Sent from our server, so PVGIS does not receive the visitor's IP address.",
+      "location": "European Union (European Commission, Joint Research Centre)"
     },
     {
       "id": "llm-providers",

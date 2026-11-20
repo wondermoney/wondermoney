@@ -6,9 +6,12 @@
 // Centre, version 5.3: https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis_en
 // API documentation: https://joint-research-centre.ec.europa.eu/photovoltaic-geographical-information-system-pvgis/getting-started-pvgis/api-non-interactive-service_en
 //
-// Why a committed table and not a call from the page: the API sends no Access-Control-Allow-Origin
-// header and answers OPTIONS with "Method Not Allowed" (checked on 2026-11-20), so a browser cannot
-// call it. The build script calls three endpoints per location:
+// Why a committed table and a server route, not a call from the page: the API sends no
+// Access-Control-Allow-Origin header and answers OPTIONS with "Method Not Allowed" (checked on
+// 2026-11-20), so a browser cannot call it. The committed tables (one per district capital, facing
+// south at the optimal tilt) come from scripts/build-solar-production.mjs; any other tilt,
+// orientation or location comes through src/pages/api/solar-production.ts. Both use
+// fetchPvgisTypicalYear below. The build script calls three endpoints per location:
 //   - PVcalc with optimalinclination=1 and aspect=0: the optimal tilt facing south, and PVGIS's own
 //     average yearly production over every year of the database, kept as a cross-check.
 //   - tmy: the typical meteorological year, of which only `months_selected` is used: for each
@@ -234,3 +237,91 @@ export function decodeTypicalYear(days: readonly (readonly number[])[]): Float64
 
 /** Days in each month of the typical year, January first. */
 export const TYPICAL_MONTH_DAYS: readonly number[] = MONTH_DAYS;
+
+// ---------------------------------------------------------------------------------------------
+// Fetching a typical year: shared by scripts/build-solar-production.mjs (one per district
+// capital, at its optimal tilt) and the landing site's /api/solar-production route (any tilt,
+// orientation and location).
+
+/** A fixed, free-standing system of 1 kWp of crystalline silicon at a location. */
+export interface PvgisSite {
+  lat: number;
+  lon: number;
+  /** Tilt from the horizontal, in degrees. */
+  angle: number;
+  /** Azimuth: 0 is south, 90 west, -90 east (PVGIS's `aspect`). */
+  aspect: number;
+  lossPercent: number;
+}
+
+/** Returns the parsed JSON of one PVGIS call; throws when the call fails. */
+export type PvgisGet = (url: string) => Promise<unknown>;
+
+const coordinates = (site: Pick<PvgisSite, "lat" | "lon">, decimals: number) => ({
+  lat: site.lat.toFixed(decimals),
+  lon: site.lon.toFixed(decimals),
+  outputformat: "json",
+});
+
+/** The typical meteorological year at a location; `decimals` is how the coordinates are written. */
+export function pvgisTmyUrl(site: Pick<PvgisSite, "lat" | "lon">, decimals = 4): string {
+  return `${PVGIS_API}/tmy?${new URLSearchParams(coordinates(site, decimals))}`;
+}
+
+/** One calendar year of the system's hourly PV power. */
+export function pvgisSeriesUrl(site: PvgisSite, year: number, decimals = 4): string {
+  const query = new URLSearchParams({
+    ...coordinates(site, decimals),
+    peakpower: "1",
+    loss: String(site.lossPercent),
+    angle: String(site.angle),
+    aspect: String(site.aspect),
+    pvcalculation: "1",
+    startyear: String(year),
+    endyear: String(year),
+  });
+  return `${PVGIS_API}/seriescalc?${query}`;
+}
+
+export interface PvgisTypicalYear {
+  /** 8760 hourly values in Wh for 1 kWp (typicalYear). */
+  year: number[];
+  /** The year each month comes from, January first. */
+  months: PvgisMonthSelected[];
+  /** The TMY's database and the span of years it chose from. */
+  meteo: PvgisMeteo;
+}
+
+/**
+ * A site's typical year: the TMY's selected months (one `tmy` call), then the hourly series of each
+ * selected year (one `seriescalc` call per distinct year, up to `concurrency` at a time), each
+ * checked to be for the system asked for and from the TMY's radiation database. PVGIS slows every
+ * call down when one client sends many at once: on 2026-11-20 nine in parallel took 7 to 8 s each,
+ * two at a time about 2 s each (the whole set in 14 s), one at a time about 19 s in all.
+ */
+export async function fetchPvgisTypicalYear(
+  site: PvgisSite,
+  get: PvgisGet,
+  { decimals = 4, concurrency = 1 }: { decimals?: number; concurrency?: number } = {},
+): Promise<PvgisTypicalYear> {
+  const tmy = parsePvgisTmyMonths(await get(pvgisTmyUrl(site, decimals)));
+  const years = [...new Set(tmy.months.map((month) => month.year))].sort();
+  const parsed: PvgisSeries[] = new Array(years.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < years.length) {
+      const i = next++;
+      parsed[i] = parsePvgisSeries(await get(pvgisSeriesUrl(site, years[i], decimals)));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(concurrency, years.length)) }, worker));
+  const series = new Map<number, PvgisSeries>();
+  parsed.forEach((each, i) => {
+    if (each.slope !== site.angle || each.azimuth !== site.aspect || each.peakPowerKw !== 1 || each.lossPercent !== site.lossPercent) {
+      throw new PvgisResponseError(`The ${years[i]} series is for another system`);
+    }
+    if (each.radiationDb !== tmy.meteo.radiationDb) throw new PvgisResponseError(`The ${years[i]} series uses radiation database ${each.radiationDb}`);
+    series.set(years[i], each);
+  });
+  return { year: typicalYear(series, tmy.months), months: tmy.months, meteo: tmy.meteo };
+}

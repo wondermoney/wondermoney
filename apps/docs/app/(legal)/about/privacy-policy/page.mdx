@@ -191,7 +191,7 @@ For more information about Sentry, please visit their Privacy Policy: [https://s
 
 ### Vercel
 
-Vercel hosts the WonderMoney web application. Hosting and edge processing are performed in Vercel's infrastructure, with primary regions in the European Union.
+Vercel hosts the WonderMoney web application, the wonder.money website and this documentation site. Hosting and edge processing are performed in Vercel's infrastructure, with primary regions in the European Union. When you use the solar panel section of the electricity tariff comparator with exact coordinates or your own tilt and orientation, your location, rounded in your browser to about 5 km, is processed by a server function hosted on Vercel to request the estimate from PVGIS. Our code does not log it.
 
 For more information about Vercel, please visit their Privacy Policy: [https://vercel.com/legal/privacy-policy](https://vercel.com/legal/privacy-policy)
 
@@ -206,6 +206,12 @@ For more information about Resend, please visit their Privacy Policy: [https://r
 EODHD is used to look up market prices for investment holdings. Only publicly available ticker symbols and aggregate price data are sent to EODHD — no personal data, account data, or transaction data.
 
 For more information about EODHD, please visit their Privacy Policy: [https://eodhd.com/financial-apis/privacy-policy](https://eodhd.com/financial-apis/privacy-policy)
+
+### PVGIS
+
+PVGIS (Photovoltaic Geographical Information System) is a service of the European Commission's Joint Research Centre. The electricity tariff comparator on the wonder.money website uses it to estimate solar panel production. Only when you choose exact coordinates or your own tilt and orientation, our server sends PVGIS your location rounded to about 5 km, with the panel tilt, orientation and system losses. The request comes from our server, so PVGIS does not receive your IP address. No account data is sent. The district defaults use stored PVGIS data and send nothing.
+
+For more information about PVGIS, please visit the European Commission's data protection page: [https://commission.europa.eu/privacy-policy-websites-managed-european-commission_en](https://commission.europa.eu/privacy-policy-websites-managed-european-commission_en)
 
 ### netcup
 

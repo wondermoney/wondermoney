@@ -10,7 +10,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import ElectricityInvoiceUpload from "./ElectricityInvoiceUpload";
 import ElectricityTariffResults, { k, monthRange, PERIOD_KEYS } from "./ElectricityTariffResults";
-import { ElectricitySolarPanel, ElectricitySolarSummary, INITIAL_SOLAR, useSolar, type SolarLoader, type SolarSettings } from "./ElectricitySolarPanel";
+import {
+  ElectricitySolarPanel,
+  ElectricitySolarSummary,
+  INITIAL_SOLAR,
+  useSolar,
+  type SolarLoader,
+  type SolarProductionLoader,
+  type SolarSettings,
+} from "./ElectricitySolarPanel";
 import type { ContractedPowerKva, ElectricityOffer } from "@/lib/calculators/electricityOfferTypes";
 import {
   CONTRACTED_POWER_OPTIONS_KVA,
@@ -103,12 +111,14 @@ export default function ElectricityTariffComparisonComp({
   locale,
   loadOffers,
   loadSolar,
+  loadSolarProduction,
   loadMarket,
   loadQuarterHours,
 }: {
   locale: Lang;
   loadOffers?: OffersLoader;
   loadSolar?: SolarLoader;
+  loadSolarProduction?: SolarProductionLoader;
   loadMarket?: MarketLoader;
   loadQuarterHours?: QuarterHoursLoader;
 }) {
@@ -117,6 +127,7 @@ export default function ElectricityTariffComparisonComp({
       <ElectricityTariffComparison
         loadOffers={loadOffers ?? loadErseOffers}
         loadSolar={loadSolar}
+        loadSolarProduction={loadSolarProduction}
         loadMarket={loadMarket ?? loadIndexedMarket}
         loadQuarterHours={loadQuarterHours ?? fetchQuarterHours}
       />
@@ -226,11 +237,13 @@ const selectClass =
 function ElectricityTariffComparison({
   loadOffers,
   loadSolar,
+  loadSolarProduction,
   loadMarket,
   loadQuarterHours,
 }: {
   loadOffers: OffersLoader;
   loadSolar?: SolarLoader;
+  loadSolarProduction?: SolarProductionLoader;
   loadMarket: MarketLoader;
   loadQuarterHours: QuarterHoursLoader;
 }) {
@@ -375,6 +388,7 @@ function ElectricityTariffComparison({
       cycle: form.cycle,
     },
     loadSolar,
+    loadSolarProduction,
   );
 
   // The market basis: the diagram's own dates when they cover at least half of the 12 months,
@@ -690,6 +704,7 @@ function ElectricityTariffComparison({
             setSolarSettings(settings);
           }}
           production={solar.production}
+          onRetry={solar.retry}
         />
 
         <details className="group rounded-card border border-border bg-background">
@@ -788,9 +803,15 @@ function ElectricityTariffComparison({
             {t(k("loadError"))}
           </p>
         )}
-        {load.state === "ready" && solar.result && outcome?.ok && (
+        {load.state === "ready" && solar.result && solar.source && outcome?.ok && (
           <div className="mb-8">
-            <ElectricitySolarSummary result={solar.result} saving={comparison?.solarSaving ?? null} settings={solarSettings} sortBy={form.sortBy} />
+            <ElectricitySolarSummary
+              result={solar.result}
+              saving={comparison?.solarSaving ?? null}
+              settings={solarSettings}
+              source={solar.source}
+              sortBy={form.sortBy}
+            />
           </div>
         )}
         {load.state === "ready" && (

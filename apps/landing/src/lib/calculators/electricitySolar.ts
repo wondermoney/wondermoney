@@ -2,10 +2,13 @@
 // by hour, less what its panels produce in that hour, so the offers can be ranked on what is still
 // taken from the grid. Pure apart from loadSolarDistrict, which loads one district's table.
 //
-// - Production: a typical year of hourly PV output per kWp for the district capital nearest the
-//   visitor (data/solarProduction/, from PVGIS; see solarPvgis.ts), scaled by the kWp and by the
-//   system losses (PVGIS applies the losses as a factor: output × (100 − loss) / 86 for the
-//   tables' 14 %). Panels face south at PVGIS's optimal tilt for the district.
+// - Production: a typical year of hourly PV output per kWp, scaled by the kWp and by the system
+//   losses (PVGIS applies the losses as a factor: output × (100 − loss) / 86 for 14 %, checked
+//   against PVGIS on 2026-11-20). Facing south at PVGIS's optimal tilt at a district capital, it is
+//   that district's committed table (data/solarProduction/, from PVGIS; see solarPvgis.ts). Any
+//   other tilt, orientation or point comes from the site's /api/solar-production route
+//   (solarProductionQuery.ts), always asked at 14 % losses; when the route fails, the nearest
+//   district's table stands in and the page says so.
 // - Consumption: the E-REDES load diagram when one is uploaded, its quarter-hours added up per
 //   hour. Otherwise a year of quarter-hours is rebuilt from the BTN profile (see profileShape),
 //   scaled to the entered kWh and to the entered split across the visitor's periods.
@@ -36,6 +39,16 @@ import {
 } from "./electricityPeriods";
 import { decodeTypicalYear, PVGIS_DEFAULT_LOSS_PERCENT, typicalHourIndex } from "./solarPvgis";
 import { SOLAR_DISTRICTS, type SolarDistrict } from "./data/solarProduction/index";
+import {
+  inSolarCoverage,
+  roundSolarQuery,
+  SOLAR_PRODUCTION_PATH,
+  SOLAR_QUERY_LIMITS,
+  solarQueryString,
+  type SolarProductionErrorCode,
+  type SolarProductionQuery,
+  type SolarProductionResponse,
+} from "./solarProductionQuery";
 import { DAYS_PER_YEAR } from "./electricityTaxes";
 import { runComparator, type ComparatorRequest, type ComparatorView } from "./electricityTariffComparator";
 import type { OfferComparison } from "./electricityTariffComparison";
@@ -380,6 +393,120 @@ export function nearestDistrict(lat: number, lon: number, districts: readonly So
     return Math.asin(Math.min(1, Math.sqrt(a)));
   };
   return districts.reduce((best, district) => (distance(district) < distance(best) ? district : best));
+}
+
+// ---------------------------------------------------------------------------------------------
+// Where the panels are, and which table their production comes from
+
+/** The named orientations and their azimuth (PVGIS's: 0 south, 90 west, -90 east). */
+export const SOLAR_ORIENTATIONS = { S: 0, SE: -45, SW: 45, E: -90, W: 90 } as const;
+export type SolarOrientation = keyof typeof SOLAR_ORIENTATIONS;
+
+export interface SolarSiteInput {
+  location: "district" | "coordinates";
+  district: string;
+  /** Decimal degrees; NaN when not entered. Read in "coordinates" only. */
+  lat: number;
+  lon: number;
+  /** Degrees from the horizontal; NaN for PVGIS's optimal tilt at the (nearest) district capital. */
+  tilt: number;
+  /** Azimuth in degrees; NaN when not entered. */
+  aspect: number;
+}
+
+export type SolarSiteField = "lat" | "lon" | "tilt" | "aspect";
+export type SolarSiteError = "required" | "outOfRange" | "outsideCoverage";
+
+/** Fields out of range: coordinates inside the route's coverage, tilt 0 to 90°, azimuth -180 to 180°. */
+export function solarSiteErrors(input: SolarSiteInput) {
+  const errors: Partial<Record<SolarSiteField, SolarSiteError>> = {};
+  if (input.location === "coordinates") {
+    if (!Number.isFinite(input.lat)) errors.lat = "required";
+    if (!Number.isFinite(input.lon)) errors.lon = "required";
+    if (!errors.lat && !errors.lon && !inSolarCoverage(input.lat, input.lon)) errors.lat = "outsideCoverage";
+  }
+  if (Number.isFinite(input.tilt) && (input.tilt < SOLAR_QUERY_LIMITS.angle.min || input.tilt > SOLAR_QUERY_LIMITS.angle.max)) errors.tilt = "outOfRange";
+  if (!Number.isFinite(input.aspect)) errors.aspect = "required";
+  else if (input.aspect < SOLAR_QUERY_LIMITS.aspect.min || input.aspect > SOLAR_QUERY_LIMITS.aspect.max) errors.aspect = "outOfRange";
+  return errors;
+}
+
+/**
+ * Where the production comes from: the district's committed table when the panels face south at
+ * its optimal tilt, else a query to the route. `fallback` is the district whose table stands in
+ * when the route fails: the chosen one, or the capital nearest the coordinates. Null when a field
+ * is invalid.
+ */
+export type SolarSite =
+  | { kind: "table"; district: SolarDistrict }
+  | { kind: "pvgis"; query: SolarProductionQuery; district: SolarDistrict | null; fallback: SolarDistrict };
+
+export function solarSite(input: SolarSiteInput): SolarSite | null {
+  if (Object.keys(solarSiteErrors(input)).length > 0) return null;
+  const chosen = SOLAR_DISTRICTS.find((each) => each.slug === input.district) ?? SOLAR_DISTRICTS[0];
+  const byDistrict = input.location === "district";
+  const district = byDistrict ? chosen : nearestDistrict(input.lat, input.lon);
+  const angle = Number.isFinite(input.tilt) ? input.tilt : district.slope;
+  const query = roundSolarQuery({
+    lat: byDistrict ? district.lat : input.lat,
+    lon: byDistrict ? district.lon : input.lon,
+    angle,
+    aspect: input.aspect,
+    loss: PVGIS_DEFAULT_LOSS_PERCENT,
+  });
+  if (byDistrict && query.angle === district.slope && query.aspect === 0) return { kind: "table", district };
+  return { kind: "pvgis", query, district: byDistrict ? district : null, fallback: district };
+}
+
+/** The route's error, with its code when it sent one. */
+export class SolarProductionError extends Error {
+  constructor(readonly code: SolarProductionErrorCode | "timeout" | "bad_response") {
+    super(`Solar production: ${code}`);
+    this.name = "SolarProductionError";
+  }
+}
+
+/** Longer than the route's own 45 s deadline. */
+const ROUTE_TIMEOUT_MS = 55_000;
+
+/** Loads a typical year from the route; the query is sent in its canonical, rounded form. */
+export async function fetchSolarProduction(
+  query: SolarProductionQuery,
+  { signal }: { signal?: AbortSignal } = {},
+): Promise<{ typicalYear: Float64Array; response: SolarProductionResponse }> {
+  // One controller for the caller's signal and the timeout (AbortSignal.any is too recent for some
+  // browsers the site supports).
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, ROUTE_TIMEOUT_MS);
+  const forward = () => controller.abort();
+  signal?.addEventListener("abort", forward);
+  let response: Response;
+  let body: (Partial<SolarProductionResponse> & { error?: SolarProductionErrorCode }) | null;
+  try {
+    response = await fetch(`${SOLAR_PRODUCTION_PATH}?${solarQueryString(query)}`, { headers: { Accept: "application/json" }, signal: controller.signal });
+    body = (await response.json().catch(() => null)) as typeof body;
+  } catch (error) {
+    throw signal?.aborted ? error : new SolarProductionError(timedOut ? "timeout" : "upstream_error");
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", forward);
+  }
+  if (timedOut) throw new SolarProductionError("timeout");
+  if (!response.ok) throw new SolarProductionError(body?.error ?? "upstream_error");
+  const rounded = roundSolarQuery(query);
+  const params = body?.params;
+  if (!body?.days || !body.source || !params || (Object.keys(rounded) as (keyof SolarProductionQuery)[]).some((key) => params[key] !== rounded[key])) {
+    throw new SolarProductionError("bad_response");
+  }
+  try {
+    return { typicalYear: decodeTypicalYear(body.days), response: body as SolarProductionResponse };
+  } catch {
+    throw new SolarProductionError("bad_response");
+  }
 }
 
 const districtFiles = import.meta.glob<{ days: number[][] }>("./data/solarProduction/*.json", { import: "default" });

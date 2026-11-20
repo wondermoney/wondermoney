@@ -4442,7 +4442,7 @@
         "alreadyHave": "Se já tens painéis, as tuas faturas e o ficheiro da E-REDES já mostram só o que compras à rede: deixa isto desligado.",
         "legend": "Os teus painéis solares",
         "district": "Distrito",
-        "districtHelp": "A produção na capital de distrito, com os painéis virados a sul e a inclinação ótima do PVGIS nesse local ({{slope}}°).",
+        "districtHelp": "A produção na capital de distrito. A inclinação ótima do PVGIS nesse local é {{slope}}°.",
         "locate": "Usar a minha localização",
         "locating": "A obter a tua localização…",
         "located": "Capital de distrito mais próxima: {{district}}.",
@@ -4460,7 +4460,10 @@
         "errors": {
           "kwp": "Introduz uma potência acima de 0 e até 50 kWp.",
           "lossPercent": "Introduz perdas entre 0 e 50 %.",
-          "surplusPrice": "Introduz um preço entre 0 e 1 euro por kWh."
+          "surplusPrice": "Introduz um preço entre 0 e 1 euro por kWh.",
+          "coordinates": "Introduz um ponto em Portugal continental, na Madeira ou nos Açores.",
+          "tilt": "Introduz uma inclinação de 0 a 90°.",
+          "azimuth": "Introduz um azimute de -180 a 180°."
         },
         "summary": {
           "title": "Com os teus painéis solares",
@@ -4476,7 +4479,47 @@
           "fromProfile": "Sem ficheiro da E-REDES, as tuas horas são reconstruídas a partir do perfil BTN da E-REDES, por isso a parte consumida em casa é uma estimativa. Carrega o teu ficheiro para usares as tuas horas reais.",
           "ranking": "As ofertas abaixo estão ordenadas pelo que ainda compras à rede.",
           "source": "Produção: PVGIS {{version}} (Comissão Europeia, Centro Comum de Investigação), dados de radiação {{database}} de {{from}} a {{to}}, um ano típico de 1 kWp de silício cristalino em estrutura livre, à escala do teu sistema. Descarregado a {{date}}.",
-          "sourceLink": "Sobre o PVGIS"
+          "sourceLink": "Sobre o PVGIS",
+          "systemFacing": "{{kwp}} kWp {{place}}, com {{angle}}° de inclinação e virados a {{direction}}. Valores para um ano.",
+          "systemAzimuth": "{{kwp}} kWp {{place}}, com {{angle}}° de inclinação e azimute de {{aspect}}° (0° é sul). Valores para um ano.",
+          "placeDistrict": "em {{district}}",
+          "placeCoordinates": "em {{lat}}° N, {{lon}}° O",
+          "sourceLive": "Produção: PVGIS {{version}} (Comissão Europeia, Centro Comum de Investigação), dados de radiação {{database}} de {{from}} a {{to}}, um ano típico de 1 kWp de silício cristalino em estrutura livre, calculado pelo PVGIS para esta inclinação, orientação e local, à escala do teu sistema."
+        },
+        "location": "Localização",
+        "locationDistrict": "Capital de distrito",
+        "locationCoordinates": "Coordenadas exatas",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "coordinatesHelp": "Em graus decimais, como numa aplicação de mapas: 38,7223 e -9,1393 para Lisboa. Portugal continental, Madeira ou Açores.",
+        "locateExact": "Usar a minha localização exata",
+        "locatedExact": "Coordenadas preenchidas a partir da tua localização.",
+        "locateExactFailed": "A tua localização não está disponível. Introduz as coordenadas à mão.",
+        "coordinatesPrivacy": "Para calcular a produção, estas coordenadas, arredondadas a cerca de 5 km no teu navegador, são enviadas para o servidor do WonderMoney e daí para o PVGIS, do Centro Comum de Investigação da Comissão Europeia. Se escolheres uma capital de distrito, a tua localização fica no teu navegador.",
+        "tilt": "Inclinação",
+        "tiltHelp": "0° é na horizontal, 90° na vertical. Deixa vazio para usares a inclinação ótima do PVGIS em {{district}} ({{slope}}°).",
+        "orientation": "Orientação",
+        "orientations": {
+          "S": "Sul",
+          "SE": "Sudeste",
+          "SW": "Sudoeste",
+          "E": "Este",
+          "W": "Oeste",
+          "custom": "Outra (azimute em graus)"
+        },
+        "azimuth": "Azimute",
+        "azimuthHelp": "Graus a partir do sul: 0° sul, -90° este, 90° oeste, 180° norte.",
+        "liveHelp": "Com os painéis virados a sul e a inclinação ótima de uma capital de distrito, a página usa a tabela que já tem. Outra inclinação, outra orientação ou coordenadas exatas são calculadas pelo PVGIS, o que pode demorar até meio minuto.",
+        "loadingLive": "A pedir ao PVGIS a produção para a tua inclinação, orientação e localização…",
+        "fallbackFailed": "Não foi possível contactar o PVGIS, por isso a estimativa usa a tabela de {{district}}: painéis virados a sul a {{slope}}°.",
+        "fallbackUnavailable": "O PVGIS não tem dados para esse ponto (pode ficar no mar), por isso a estimativa usa a tabela de {{district}}: painéis virados a sul a {{slope}}°.",
+        "retry": "Tentar de novo",
+        "directions": {
+          "S": "sul",
+          "SE": "sudeste",
+          "SW": "sudoeste",
+          "E": "este",
+          "W": "oeste"
         }
       },
       "diagram": {
@@ -4621,7 +4664,7 @@
           "full": "O modo completo usa os kWh de cada período da tua fatura, ou um total para qualquer número de dias repartido pelos períodos com o perfil padrão da E-REDES para a tua potência e consumo.",
           "diagram": "Também podes usar o ficheiro de consumos da E-REDES, descarregado do Balcão Digital. As leituras de cada quarto de hora dão os teus kWh reais em cada período e ciclo. O ficheiro é lido no teu navegador e nunca é enviado.",
           "mine": "Em \"Comparar com o meu tarifário\" introduzes os preços da tua fatura. O teu tarifário passa pelo mesmo cálculo que todas as ofertas, por isso a poupança de cada uma compara igual com igual.",
-          "solar": "Em \"Painéis solares\" juntas um sistema pelo distrito, a potência de pico e as perdas. A produção é subtraída ao teu consumo hora a hora, e as ofertas são ordenadas pelo que ainda compras à rede. O resumo mostra a parte consumida em casa, o excedente e o que os painéis te poupam na oferta mais barata. Um preço de venda do excedente, se o introduzires, aparece à parte da ordenação.",
+          "solar": "Em \"Painéis solares\" juntas um sistema pela capital de distrito ou por coordenadas, com a inclinação, a orientação, a potência de pico e as perdas. A produção é subtraída ao teu consumo hora a hora, e as ofertas são ordenadas pelo que ainda compras à rede. O resumo mostra a parte consumida em casa, o excedente e o que os painéis te poupam na oferta mais barata. Um preço de venda do excedente, se o introduzires, aparece à parte da ordenação.",
           "options": "No topo dos resultados, as ofertas simples, bi-horária e tri-horária mais baratas com o mesmo consumo mostram se outra opção compensa. Os filtros reduzem a lista e o botão CSV descarrega-a."
         },
         "example": {
@@ -4651,7 +4694,7 @@
           "erse": "Ofertas: simulador de preços da ERSE, exportação de {{date}}, com {{offers}} ofertas de {{suppliers}} comercializadores e a tarifa regulada. Os comercializadores são obrigados a comunicar as ofertas domésticas à ERSE. Os preços são sem IVA nem impostos; a página acrescenta-os.",
           "refresh": "A página usa uma nova exportação da ERSE todas as semanas. As ofertas que já terminaram ficam de fora.",
           "names": "A ERSE identifica cada comercializador por um código; a página mostra o nome comercial que cada um usa no próprio site.",
-          "solar": "Produção solar: PVGIS {{pvgisVersion}}, do Centro Comum de Investigação da Comissão Europeia, com a base de dados de radiação {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Para cada capital de distrito, a página guarda o ano típico do PVGIS, hora a hora, para 1 kWp virado a sul com a inclinação ótima e 14 % de perdas, descarregado a {{pvgisDate}}. Sem ficheiro da E-REDES, as horas do teu consumo são reconstruídas a partir da repartição do perfil padrão pelos períodos de cada mês.",
+          "solar": "Produção solar: PVGIS {{pvgisVersion}}, do Centro Comum de Investigação da Comissão Europeia, com a base de dados de radiação {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Para cada capital de distrito, a página guarda o ano típico do PVGIS, hora a hora, para 1 kWp virado a sul com a inclinação ótima e 14 % de perdas, descarregado a {{pvgisDate}}. Outra inclinação, outra orientação ou coordenadas exatas são enviadas, através do servidor do WonderMoney, para o PVGIS, que calcula o mesmo ano típico para elas; se não responder, a página usa a tabela da capital de distrito mais próxima e avisa-te. Sem ficheiro da E-REDES, as horas do teu consumo são reconstruídas a partir da repartição do perfil padrão pelos períodos de cada mês.",
           "simulatorLink": "Simulador de preços da ERSE",
           "manualLink": "ERSE, Manual do Simulador de Preços de Energia (junho de 2026)",
           "pvgisLink": "PVGIS, Comissão Europeia"
@@ -4664,7 +4707,7 @@
             "c": "As ofertas indexadas são calculadas com a estimativa da ERSE para os próximos meses. Se escolheres os preços OMIE, as que têm a fórmula publicada pelo comercializador mostram o que teriam custado nos últimos 12 meses (ou nas datas do teu ficheiro), não o que vão custar: o que pagas acompanha o mercado.",
             "d": "As ofertas duais podem incluir o gás nos valores fixos; ficam de fora, a não ser que as incluas.",
             "e": "Com uma fatura ou um total, a repartição pelos períodos é o perfil padrão, não o teu. O ficheiro da E-REDES dá a tua repartição real.",
-            "solar": "A produção solar é um ano típico da capital de distrito, virada a sul com a inclinação ótima: sombras, outra orientação e o tempo de um ano concreto alteram-na.",
+            "solar": "A produção solar é um ano típico, na capital de distrito ou nas tuas coordenadas arredondadas a cerca de 5 km: sombras e o tempo de um ano concreto alteram-na.",
             "f": "É uma estimativa educativa, não aconselhamento. Lê a ficha padronizada e as condições da oferta antes de assinares."
           },
           "simulatorLink": "Confirma um resultado no simulador oficial da ERSE"
