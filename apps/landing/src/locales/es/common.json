@@ -4116,6 +4116,8 @@
         "beforeVat": "Sin IVA",
         "vatRate": "IVA",
         "power": "Potencia contratada ({{kva}} kVA, {{days}} días)",
+        "powerNetwork": "Potencia contratada, parte de la tarifa de acceso a las redes ({{kva}} kVA, {{days}} días)",
+        "powerRest": "Potencia contratada, resto del precio ({{kva}} kVA, {{days}} días)",
         "energyReduced": "Energía con IVA reducido ({{kwh}})",
         "energyStandard": "Energía por encima del límite de IVA reducido ({{kwh}})",
         "cav": "Contribución audiovisual (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Impuesto especial sobre el consumo de electricidad (IEC): un importe fijo por kWh, con IVA al tipo normal.",
             "e": "IVA en cada concepto y, al final, la suma. El resultado se redondea al céntimo al final."
           },
-          "vat": "Reglas del IVA, tal como las explica la ERSE: el tipo reducido ({{reduced}}) se aplica a los primeros {{allowance}} kWh de energía en 30 días ({{allowanceLarge}} kWh para hogares de cinco o más personas) con potencia contratada de hasta 6,9 kVA, al término de potencia con potencia contratada de hasta 3,45 kVA y a la contribución audiovisual. Todo lo demás paga {{standard}}. La regla del tipo reducido se aplica igual en el mercado regulado y en el libre.",
+          "vat": "Reglas del IVA, tal como las explica la ERSE: el tipo reducido ({{reduced}}) se aplica a los primeros {{allowance}} kWh de energía en 30 días ({{allowanceLarge}} kWh para hogares de cinco o más personas) con potencia contratada de hasta 6,9 kVA, a la parte del término de potencia que corresponde a la tarifa de acceso a las redes que fija la ERSE, con potencia contratada de hasta 3,45 kVA y a la contribución audiovisual. Todo lo demás paga {{standard}}. La regla del tipo reducido se aplica igual en el mercado regulado y en el libre.",
           "bi": "Bihoraria frente a simple: el precio simple es {{energySimple}}, frente a {{energyPeak}} fuera de vacío y {{energyValley}} en vacío. Solo por la energía, las dos cuestan lo mismo cuando el {{breakEven}}% del consumo es en horas de vacío. Con una parte menor, la simple es más barata; con una mayor, la bihoraria.",
           "days": "El límite del IVA reducido es por 30 días, el periodo usado aquí. En una factura real de un periodo mayor o menor, el límite se ajusta al número de días."
         },

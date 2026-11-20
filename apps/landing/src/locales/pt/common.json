@@ -4116,6 +4116,8 @@
         "beforeVat": "Sem IVA",
         "vatRate": "IVA",
         "power": "Potência contratada ({{kva}} kVA, {{days}} dias)",
+        "powerNetwork": "Potência contratada, parte da tarifa de acesso às redes ({{kva}} kVA, {{days}} dias)",
+        "powerRest": "Potência contratada, resto do preço ({{kva}} kVA, {{days}} dias)",
         "energyReduced": "Energia com IVA reduzido ({{kwh}})",
         "energyStandard": "Energia acima do limite de IVA reduzido ({{kwh}})",
         "cav": "Contribuição para o audiovisual (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Imposto especial de consumo de eletricidade (IEC): um valor fixo por kWh, com IVA à taxa normal.",
             "e": "IVA em cada parcela e, no fim, a soma. O resultado é arredondado ao cêntimo no fim."
           },
-          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, ao termo de potência com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
+          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, à parte do termo de potência que corresponde à tarifa de acesso às redes fixada pela ERSE, com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
           "bi": "Bi-horário contra simples: o preço simples é {{energySimple}}, contra {{energyPeak}} fora de vazio e {{energyValley}} em vazio. Só pela energia, os dois custam o mesmo quando {{breakEven}}% do consumo é em horas de vazio. Com uma parte menor, o simples é mais barato; com uma maior, o bi-horário.",
           "days": "O limite do IVA reduzido é por 30 dias, o período usado aqui. Numa fatura real de um período maior ou menor, o limite ajusta-se ao número de dias."
         },

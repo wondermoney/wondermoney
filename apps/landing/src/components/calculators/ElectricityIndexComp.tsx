@@ -209,12 +209,17 @@ function Bill({ result, input, euro }: { result: ElectricityBillResult; input: E
   const kwh = (value: number) => `${formatNumber(locale, value, 0)} kWh`;
   const rate = (value: number) => formatPercent(locale, value * 100, { decimals: 0 });
   const { breakdown } = result;
+  const powerValues = { kva: formatNumber(locale, input.contractedPower, 2), days: String(BILL_DAYS) };
+  // Up to 3.45 kVA the power term pays two VAT rates: 6% on its network-access part, 23% on the rest.
+  const powerRows =
+    breakdown.powerNetwork.net > 0
+      ? [
+          { key: "powerNetwork", label: t(k("result.powerNetwork"), powerValues), line: breakdown.powerNetwork },
+          { key: "power", label: t(k("result.powerRest"), powerValues), line: breakdown.power },
+        ]
+      : [{ key: "power", label: t(k("result.power"), powerValues), line: breakdown.power }];
   const rows = [
-    {
-      key: "power",
-      label: t(k("result.power"), { kva: formatNumber(locale, input.contractedPower, 2), days: String(BILL_DAYS) }),
-      line: breakdown.power,
-    },
+    ...powerRows,
     ...(breakdown.energyReduced.net > 0
       ? [{ key: "energyReduced", label: t(k("result.energyReduced"), { kwh: kwh(result.reducedKwh) }), line: breakdown.energyReduced }]
       : []),

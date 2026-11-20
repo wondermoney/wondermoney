@@ -4116,6 +4116,8 @@
         "beforeVat": "Before VAT",
         "vatRate": "VAT",
         "power": "Contracted power ({{kva}} kVA, {{days}} days)",
+        "powerNetwork": "Contracted power, network-access part ({{kva}} kVA, {{days}} days)",
+        "powerRest": "Contracted power, rest of the price ({{kva}} kVA, {{days}} days)",
         "energyReduced": "Energy at the reduced VAT rate ({{kwh}})",
         "energyStandard": "Energy above the reduced allowance ({{kwh}})",
         "cav": "Audiovisual contribution (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
             "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
           },
-          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the power term for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
           "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
           "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
         },

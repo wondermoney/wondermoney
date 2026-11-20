@@ -31,17 +31,21 @@ describe("computeElectricityBill", () => {
   it("works out the worked example line by line (3.45 kVA, 158 kWh, simple)", () => {
     const r = run();
     expect(BILL_DAYS).toBe(30);
-    expect(r.breakdown.power.net).toBeCloseTo(5.751, 6);
-    expect(r.breakdown.power.vatRate).toBe(0.06);
+    // Código do IVA, Lista I verba 2.33 (Decreto-Lei n.º 60/2019): 6% only on the network-access
+    // tariff's fixed term (0.1718 EUR/day at 3.45 kVA), 23% on the rest of the 0.1917 EUR/day.
+    expect(r.breakdown.powerNetwork.net).toBeCloseTo(0.1718 * 30, 6);
+    expect(r.breakdown.powerNetwork.vatRate).toBe(0.06);
+    expect(r.breakdown.power.net).toBeCloseTo((0.1917 - 0.1718) * 30, 6);
+    expect(r.breakdown.power.vatRate).toBe(0.23);
     expect(r.breakdown.energyReduced.net).toBeCloseTo(27.0338, 6);
     expect(r.breakdown.energyStandard.net).toBeCloseTo(0, 6);
     expect(r.breakdown.cav.net).toBe(2.85);
     expect(r.breakdown.iec.net).toBeCloseTo(0.158, 6);
     expect(r.subtotal).toBe(35.79);
-    expect(r.vat).toBe(2.17);
-    expect(r.total).toBe(37.97);
-    expect(r.yearly).toBe(455.61);
-    expect(r.effectivePerKwh).toBeCloseTo(0.2403, 4);
+    expect(r.vat).toBe(2.28);
+    expect(r.total).toBe(38.07);
+    expect(r.yearly).toBe(456.82);
+    expect(r.effectivePerKwh).toBeCloseTo(0.2409, 4);
   });
 
   it("lands close to ERSE's own published example for the same case", () => {
@@ -53,6 +57,8 @@ describe("computeElectricityBill", () => {
 
   it("taxes the power term at 23% above 3.45 kVA, and keeps 6% on the first 200 kWh up to 6.9 kVA", () => {
     const r = run({ contractedPower: 4.6, consumption: 250 });
+    expect(r.breakdown.powerNetwork.net).toBe(0);
+    expect(r.breakdown.power.net).toBeCloseTo(0.2499 * 30, 6);
     expect(r.breakdown.power.vatRate).toBe(0.23);
     expect(r.reducedKwh).toBe(200);
     expect(r.breakdown.energyReduced.net).toBeCloseTo(200 * 0.1711, 6);
@@ -98,10 +104,19 @@ describe("computeElectricityBill", () => {
   });
 
   it("handles zero consumption: only the power term and the audiovisual contribution", () => {
+    // 0.1718 * 30 * 1.06 + (0.1917 - 0.1718) * 30 * 1.23 + 2.85 * 1.06
     const r = run({ consumption: 0 });
-    expect(r.total).toBe(9.12);
+    expect(r.total).toBe(9.22);
     expect(r.effectivePerKwh).toBeNull();
     expect(r.breakdown.energyReduced.net).toBe(0);
+  });
+
+  it("rounds an exact half cent up", () => {
+    // 6.9 kVA, 1 000 kWh, bi-hourly with 1% off-peak, large family: the subtotal is 218.425 EUR
+    // exactly (power 10.977, energy 300 x 0.2045 x 0.99 + 300 x 0.1143 x 0.01 at 6% and the rest at
+    // 23%, CAV 2.85, IEC 1), which floating point can land a hair below.
+    const r = run({ contractedPower: 6.9, consumption: 1000, option: "biHourly", offPeakPercent: 1, largeFamily: true });
+    expect(r.subtotal).toBe(218.43);
   });
 
   it("explains every invalid input instead of guessing", () => {

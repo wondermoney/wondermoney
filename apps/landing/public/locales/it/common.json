@@ -4116,6 +4116,8 @@
         "beforeVat": "Senza IVA",
         "vatRate": "IVA",
         "power": "Potenza contrattuale ({{kva}} kVA, {{days}} giorni)",
+        "powerNetwork": "Potenza contrattuale, quota della tariffa di accesso alle reti ({{kva}} kVA, {{days}} giorni)",
+        "powerRest": "Potenza contrattuale, resto del prezzo ({{kva}} kVA, {{days}} giorni)",
         "energyReduced": "Energia con IVA ridotta ({{kwh}})",
         "energyStandard": "Energia oltre il limite dell'IVA ridotta ({{kwh}})",
         "cav": "Contributo audiovisivo (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
             "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
           },
-          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, al termine di potenza con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
+          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
           "bi": "Bioraria contro semplice: il prezzo semplice è {{energySimple}}, contro {{energyPeak}} fuori dalle ore vuote e {{energyValley}} nelle ore vuote. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore vuote. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
           "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni."
         },

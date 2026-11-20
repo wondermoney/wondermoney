@@ -4116,6 +4116,8 @@
         "beforeVat": "Ohne MwSt.",
         "vatRate": "MwSt.",
         "power": "Vertraglich vereinbarte Leistung ({{kva}} kVA, {{days}} Tage)",
+        "powerNetwork": "Vertraglich vereinbarte Leistung, Anteil des Netzzugangstarifs ({{kva}} kVA, {{days}} Tage)",
+        "powerRest": "Vertraglich vereinbarte Leistung, übriger Preis ({{kva}} kVA, {{days}} Tage)",
         "energyReduced": "Energie mit ermäßigter Mehrwertsteuer ({{kwh}})",
         "energyStandard": "Energie über der Grenze für den ermäßigten Satz ({{kwh}})",
         "cav": "Rundfunkbeitrag (CAV)",
@@ -4174,7 +4176,7 @@
             "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
             "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
           },
-          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Leistungsanteil bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
           "bi": "Zweizeitig gegen einfach: Der einfache Preis liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist einfach günstiger, bei einem größeren zweizeitig.",
           "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
         },
