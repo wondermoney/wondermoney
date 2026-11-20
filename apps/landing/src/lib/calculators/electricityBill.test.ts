@@ -103,12 +103,33 @@ describe("computeElectricityBill", () => {
     expect(run({ consumption: 1896, period: "year" })).toEqual(run({ consumption: 158 }));
   });
 
-  it("handles zero consumption: only the power term and the audiovisual contribution", () => {
-    // 0.1718 * 30 * 1.06 + (0.1917 - 0.1718) * 30 * 1.23 + 2.85 * 1.06
+  it("handles zero consumption: only the power term, with no audiovisual contribution", () => {
+    // 0.1718 * 30 * 1.06 + (0.1917 - 0.1718) * 30 * 1.23
     const r = run({ consumption: 0 });
-    expect(r.total).toBe(9.22);
+    expect(r.total).toBe(6.2);
     expect(r.effectivePerKwh).toBeNull();
     expect(r.breakdown.energyReduced.net).toBe(0);
+    expect(r.breakdown.cav.net).toBe(0);
+  });
+
+  it("charges no audiovisual contribution below 400 kWh a year (Lei n.º 30/2003, artigo 4.º, n.º 1)", () => {
+    // 33 kWh a month is 396 kWh a year: exempt. 34 kWh a month is 408 kWh a year: the full 2.85 EUR.
+    const below = run({ consumption: 33 });
+    expect(below.breakdown.cav.net).toBe(0);
+    expect(below.breakdown.cav.vatRate).toBe(0.06);
+    const above = run({ consumption: 34 });
+    expect(above.breakdown.cav.net).toBe(2.85);
+    // Nothing else moves: the two months differ by the CAV with its 6% VAT and the extra kWh, to
+    // within the cent each total is rounded to.
+    const extraKwh = 0.1711 * 1.06 + 0.001 * 1.23;
+    expect(Math.abs(above.total - below.total - (2.85 * 1.06 + extraKwh))).toBeLessThan(0.011);
+    // An annual figure is taken as entered, so the exemption follows ERSE's simulator: 399 kWh a
+    // year carries no CAV, 400 kWh does.
+    expect(run({ consumption: 399, period: "year" }).breakdown.cav.net).toBe(0);
+    expect(run({ consumption: 400, period: "year" }).breakdown.cav.net).toBe(2.85);
+    // The comparison with the other tariff option gets the same exemption.
+    const bi = run({ consumption: 33, option: "biHourly", offPeakPercent: 0 });
+    expect(bi.alternative?.total).toBe(below.total);
   });
 
   it("rounds an exact half cent up", () => {

@@ -4121,6 +4121,7 @@
         "energyReduced": "Energy at the reduced VAT rate ({{kwh}})",
         "energyStandard": "Energy above the reduced allowance ({{kwh}})",
         "cav": "Audiovisual contribution (CAV)",
+        "cavExempt": "Audiovisual contribution (CAV), exempt below 400 kWh a year",
         "iec": "Electricity consumption tax (IEC)",
         "subtotal": "Total before VAT",
         "vat": "VAT",
@@ -4172,7 +4173,7 @@
           "steps": {
             "a": "Power: the daily price for your contracted power, times 30 days.",
             "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
-            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT.",
+            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt.",
             "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
             "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
           },
