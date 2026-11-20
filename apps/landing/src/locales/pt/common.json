@@ -5930,12 +5930,13 @@
       "house": "Desenho de linhas de uma pequena casa no seu terreno, com chaminé, porta, janelas e um caminho de pedras, cujas telhas vão sendo assentes à medida que o empréstimo é pago.",
       "deed": "Desenho de linhas de uma escritura de imóvel com um selo de lacre e uma fita, com a chave de uma casa pousada em cima.",
       "car": "Desenho de linhas de um pequeno carro compacto numa estrada, com as rodas a girar enquanto avança.",
-      "payslip": "Desenho de linhas de um recibo de vencimento com linhas de valores, ao lado de um envelope onde a parte líquida de uma linha está guardada como uma nota.",
+      "payslip": "Desenho de linhas de um recibo de vencimento a sair do envelope, com o bruto em cima, o imposto e a segurança social descontados por baixo e o líquido em destaque no fim.",
       "easelchart": "Desenho de linhas de um cavalete de bloco de papel com três pernas, com um gráfico de linhas dos anos a subir entre quedas e um cursor a marcar um ano.",
       "meter": "Desenho de linhas de um contador de eletricidade antigo, com uma fila de mostradores e um disco que gira por trás do vidro, mais depressa quando a carga sobe.",
       "pump": "Desenho de linhas de uma bomba de combustível na sua ilha, com a pistola a sair do suporte presa à mangueira enquanto o indicador de enchimento sobe.",
       "wallet": "Desenho de linhas de uma carteira aberta com três cartões em ranhuras escalonadas, um deles a deslizar para fora.",
-      "safe": "Desenho de linhas de um pequeno cofre com um disco de combinação e um puxador de raios, com a porta a abrir-se sobre pilhas de moedas."
+      "safe": "Desenho de linhas de um pequeno cofre com um disco de combinação e um puxador de raios, com a porta a abrir-se sobre pilhas de moedas.",
+      "deckchair": "Desenho de linhas de uma cadeira de praia ao lado de uma pilha de moedas que sobe até uma moeda tracejada, a quantia que paga as despesas para sempre, e a cadeira reclina quando lá chega."
     }
   }
 }

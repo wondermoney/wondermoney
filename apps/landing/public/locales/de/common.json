@@ -5930,12 +5930,13 @@
       "house": "Strichzeichnung eines kleinen Hauses auf seinem Grundstück, mit Schornstein, Tür, Fenstern und einem Weg aus Trittsteinen, dessen Dachziegel verlegt werden, während der Kredit abbezahlt wird.",
       "deed": "Strichzeichnung einer Eigentumsurkunde mit Wachssiegel und Band, auf der ein Hausschlüssel liegt.",
       "car": "Strichzeichnung eines kleinen Kompaktwagens auf einem Straßenstück, dessen Räder sich beim Rollen drehen.",
-      "payslip": "Strichzeichnung einer Gehaltsabrechnung mit Zeilen von Beträgen neben einer Lohntüte, in der der Nettoanteil einer Zeile als Geldschein steckt.",
+      "payslip": "Strichzeichnung einer Gehaltsabrechnung, die aus ihrem Umschlag ragt, oben das Brutto, darunter Steuer und Sozialabgaben abgezogen und unten fett das Netto.",
       "easelchart": "Strichzeichnung eines Flipchart-Ständers auf drei Beinen, auf dem Block ein Liniendiagramm über die Jahre, das trotz Einbrüchen steigt, und ein Cursor, der ein Jahr markiert.",
       "meter": "Strichzeichnung eines alten Stromzählers mit einer Reihe von Zählwerk-Zifferblättern und einer Drehscheibe hinter Glas, die sich bei steigender Last schneller dreht.",
       "pump": "Strichzeichnung einer Zapfsäule auf ihrer Insel, deren Zapfpistole am Schlauch aus der Halterung gehoben wird, während die Füllanzeige steigt.",
       "wallet": "Strichzeichnung einer aufgeklappten Geldbörse mit drei Karten in gestuften Fächern, von denen eine herausgleitet.",
-      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt."
+      "safe": "Strichzeichnung eines kleinen Tresors mit Kombinationsscheibe und Speichengriff, dessen Tür aufschwingt und gestapelte Münzen zeigt.",
+      "deckchair": "Strichzeichnung eines Liegestuhls neben einem Münzstapel, der zu einer gestrichelten Münze aufsteigt, der Summe, die deine Ausgaben auf Dauer trägt; erreicht der Stapel sie, lehnt sich der Stuhl zurück."
     }
   }
 }
