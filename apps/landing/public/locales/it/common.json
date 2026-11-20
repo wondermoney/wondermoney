@@ -4346,6 +4346,50 @@
         "cheaper": "{{count}} offerte costano meno. La più economica ti fa risparmiare {{saving}} all'anno.",
         "noneCheaper": "Nessuna offerta dell'elenco costa meno della tua tariffa."
       },
+      "solar": {
+        "title": "Pannelli solari",
+        "intro": "Stima quanto producono dei pannelli nella tua zona e confronta le offerte su ciò che compri ancora dalla rete.",
+        "toggle": "Includi i pannelli solari",
+        "alreadyHave": "Se hai già i pannelli, le tue bollette e il file di E-REDES mostrano già solo ciò che compri dalla rete: lascia questa opzione disattivata.",
+        "legend": "I tuoi pannelli solari",
+        "district": "Distretto",
+        "districtHelp": "La produzione nel capoluogo del distretto, con i pannelli rivolti a sud e l'inclinazione ottimale di PVGIS in quel luogo ({{slope}}°).",
+        "locate": "Usa la mia posizione",
+        "locating": "Ricerca della tua posizione…",
+        "located": "Capoluogo di distretto più vicino: {{district}}.",
+        "locateFailed": "La tua posizione non è disponibile. Scegli il distretto dall'elenco.",
+        "locatePrivacy": "La tua posizione serve solo a scegliere il capoluogo di distretto più vicino, nel tuo browser. Non viene inviata da nessuna parte.",
+        "kwp": "Potenza di picco",
+        "kwpUnit": "kWp",
+        "kwpHelp": "La potenza di picco totale dei pannelli, come nel preventivo dell'installatore.",
+        "losses": "Perdite del sistema",
+        "lossesHelp": "Cavi, inverter, sporcizia e calore. 14 % è il valore predefinito di PVGIS.",
+        "surplusPrice": "Prezzo di vendita dell'eccedenza (facoltativo)",
+        "surplusPriceHelp": "Quanto ti paga un acquirente per ogni kWh immesso in rete. Mostrato a parte, fuori dalla classifica.",
+        "loading": "Caricamento della stima di produzione…",
+        "loadError": "Non è stato possibile caricare la stima di produzione, quindi le offerte sono ordinate senza pannelli. Ricarica la pagina per riprovare.",
+        "errors": {
+          "kwp": "Inserisci una potenza superiore a 0 e fino a 50 kWp.",
+          "lossPercent": "Inserisci perdite tra 0 e 50 %.",
+          "surplusPrice": "Inserisci un prezzo tra 0 e 1 euro per kWh."
+        },
+        "summary": {
+          "title": "Con i tuoi pannelli solari",
+          "system": "{{kwp}} kWp a {{district}}, rivolti a sud con {{slope}}° di inclinazione. Valori per un anno.",
+          "production": "Produzione",
+          "selfConsumed": "Consumata in casa",
+          "coverage": "Dei tuoi consumi",
+          "surplus": "Eccedenza in rete",
+          "savingFirstYear": "Sull'offerta più economica, {{supplier}} ({{offer}}), i pannelli ti fanno risparmiare {{amount}} nel primo anno: {{without}} senza, {{with}} con i pannelli.",
+          "savingLaterYears": "Sull'offerta più economica, {{supplier}} ({{offer}}), i pannelli ti fanno risparmiare {{amount}} all'anno dal secondo anno: {{without}} senza, {{with}} con i pannelli.",
+          "surplusIncome": "Vendere l'eccedenza a {{price}} €/kWh renderebbe circa {{amount}} all'anno. Non rientra nei totali né nella classifica.",
+          "fromDiagram": "Ora per ora rispetto al tuo file di E-REDES, con la produzione di un anno tipo nelle stesse date.",
+          "fromProfile": "Senza file di E-REDES, le tue ore sono ricostruite dal profilo BTN di E-REDES, quindi la quota consumata in casa è una stima. Carica il tuo file per usare le tue ore reali.",
+          "ranking": "Le offerte qui sotto sono ordinate su ciò che compri ancora dalla rete.",
+          "source": "Produzione: PVGIS {{version}} (Commissione europea, Centro comune di ricerca), dati di irraggiamento {{database}} dal {{from}} al {{to}}, un anno tipo di 1 kWp di silicio cristallino su struttura libera, in scala con il tuo impianto. Scaricato il {{date}}.",
+          "sourceLink": "Informazioni su PVGIS"
+        }
+      },
       "diagram": {
         "label": "File dei consumi di E-REDES",
         "help": "Nel Balcão Digital di E-REDES, apri i consumi della tua utenza, scegli il periodo e scaricali come foglio di calcolo (xlsx). Le letture di ogni quarto d'ora danno i tuoi kWh reali in ogni fascia.",
@@ -4471,6 +4515,7 @@
           "full": "La modalità completa usa i kWh di ogni fascia indicati in bolletta, oppure un totale per un numero qualsiasi di giorni ripartito tra le fasce con il profilo standard di E-REDES per la tua potenza e i tuoi consumi.",
           "diagram": "Puoi anche usare il file dei consumi di E-REDES, scaricato dal Balcão Digital. Le sue letture di ogni quarto d'ora danno i tuoi kWh reali in ogni fascia e ciclo. Il file viene letto nel tuo browser e non viene mai inviato da nessuna parte.",
           "mine": "In «Confronta con la mia tariffa» inserisci i prezzi della tua bolletta. La tua tariffa passa poi per lo stesso calcolo di ogni offerta, quindi il risparmio indicato per ciascuna è un confronto alla pari.",
+          "solar": "In \"Pannelli solari\" aggiungi un impianto per distretto, potenza di picco e perdite. La sua produzione viene sottratta dai tuoi consumi ora per ora, e le offerte sono ordinate su ciò che compri ancora dalla rete. Il riepilogo mostra la quota consumata in casa, l'eccedenza e quanto ti fanno risparmiare i pannelli sull'offerta più economica. Un prezzo di vendita dell'eccedenza, se lo inserisci, è mostrato a parte rispetto alla classifica.",
           "options": "In cima ai risultati, le offerte più economiche in monoraria, bioraria e trioraria, con gli stessi consumi, mostrano se un'altra opzione ti conviene. I filtri restringono l'elenco e il pulsante CSV lo scarica."
         },
         "example": {
@@ -4500,8 +4545,10 @@
           "erse": "Offerte: simulatore dei prezzi dell'ERSE, esportazione del {{date}}, con {{offers}} offerte di {{suppliers}} fornitori e la tariffa regolata. I fornitori sono tenuti a comunicare all'ERSE le loro offerte per le famiglie. I prezzi sono al netto di IVA e imposte; la pagina li aggiunge.",
           "refresh": "La pagina usa una nuova esportazione dell'ERSE ogni settimana. Le offerte già terminate a quella data vengono escluse.",
           "names": "L'ERSE identifica ogni fornitore con un codice; la pagina mostra il nome commerciale che ogni fornitore usa sul proprio sito.",
+          "solar": "Produzione solare: PVGIS {{pvgisVersion}}, del Centro comune di ricerca della Commissione europea, con la banca dati di irraggiamento {{pvgisDatabase}} ({{pvgisFrom}}–{{pvgisTo}}). Per ogni capoluogo di distretto la pagina contiene l'anno tipo di PVGIS, ora per ora, per 1 kWp rivolto a sud con l'inclinazione ottimale e il 14 % di perdite, scaricato il {{pvgisDate}}. Senza file di E-REDES, le ore dei tuoi consumi sono ricostruite dalla ripartizione del profilo standard tra le fasce di ogni mese.",
           "simulatorLink": "Simulatore dei prezzi dell'ERSE",
-          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (giugno 2026)"
+          "manualLink": "ERSE, Manual do Simulador de Preços de Energia (giugno 2026)",
+          "pvgisLink": "PVGIS, Commissione europea"
         },
         "limits": {
           "title": "Cosa escludono i totali",
@@ -4511,6 +4558,7 @@
             "c": "Le offerte indicizzate sono calcolate con la stima dell'ERSE per i prossimi mesi; quello che paghi segue il mercato.",
             "d": "Le offerte dual possono includere il gas nei loro importi fissi; sono escluse a meno che tu non le includa.",
             "e": "Con una bolletta o un totale, la ripartizione tra le fasce è quella del profilo standard, non la tua. Il file di E-REDES dà la tua ripartizione reale.",
+            "solar": "La produzione solare è un anno tipo del capoluogo di distretto, rivolta a sud con l'inclinazione ottimale: ombre, un altro orientamento e il meteo di un anno specifico la cambiano.",
             "f": "È una stima a scopo informativo, non una consulenza. Controlla la scheda standard e le condizioni dell'offerta prima di firmare."
           },
           "simulatorLink": "Verifica un risultato nel simulatore ufficiale dell'ERSE"

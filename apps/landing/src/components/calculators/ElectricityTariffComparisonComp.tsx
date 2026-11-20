@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import ElectricityTariffResults, { k, PERIOD_KEYS } from "./ElectricityTariffResults";
+import { ElectricitySolarPanel, ElectricitySolarSummary, INITIAL_SOLAR, useSolar, type SolarLoader, type SolarSettings } from "./ElectricitySolarPanel";
 import type { ContractedPowerKva, ElectricityOffer } from "@/lib/calculators/electricityOfferTypes";
 import {
   CONTRACTED_POWER_OPTIONS_KVA,
@@ -19,6 +20,7 @@ import {
   summarizeLoadDiagram,
   type HourlyCycle,
   type LoadDiagramSummary,
+  type LoadReading,
   type PeriodKwh,
 } from "@/lib/calculators/electricityPeriods";
 import {
@@ -32,10 +34,12 @@ import {
   runComparator,
   splitTotal,
   supplierChoices,
+  type ComparatorRequest,
   type MyTariffPrices,
   type OfferFilters,
   type PricingFilter,
 } from "@/lib/calculators/electricityTariffComparator";
+import { solarBillSaving } from "@/lib/calculators/electricitySolar";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
@@ -57,10 +61,18 @@ export type OffersLoader = () => Promise<{
 
 const loadErseOffers: OffersLoader = () => import("@/lib/calculators/data/electricityOffers");
 
-export default function ElectricityTariffComparisonComp({ locale, loadOffers }: { locale: Lang; loadOffers?: OffersLoader }) {
+export default function ElectricityTariffComparisonComp({
+  locale,
+  loadOffers,
+  loadSolar,
+}: {
+  locale: Lang;
+  loadOffers?: OffersLoader;
+  loadSolar?: SolarLoader;
+}) {
   return (
     <ReactTranslationsProvider locale={locale}>
-      <ElectricityTariffComparison loadOffers={loadOffers ?? loadErseOffers} />
+      <ElectricityTariffComparison loadOffers={loadOffers ?? loadErseOffers} loadSolar={loadSolar} />
     </ReactTranslationsProvider>
   );
 }
@@ -133,7 +145,7 @@ type Diagram =
   | { state: "none" }
   | { state: "reading"; name: string }
   | { state: "error"; message: string }
-  | { state: "ready"; name: string; summary: LoadDiagramSummary };
+  | { state: "ready"; name: string; summary: LoadDiagramSummary; readings: readonly LoadReading[] };
 
 const summaryClass =
   "flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden";
@@ -142,12 +154,13 @@ const chevronClass = "size-4 shrink-0 text-muted-foreground transition-transform
 const selectClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader }) {
+function ElectricityTariffComparison({ loadOffers, loadSolar }: { loadOffers: OffersLoader; loadSolar?: SolarLoader }) {
   const { t, locale } = useTranslations();
   const [form, setForm] = useState<FormState>(INITIAL);
   const [load, setLoad] = useState<Load>({ state: "loading" });
   const [diagram, setDiagram] = useState<Diagram>({ state: "none" });
   const [edited, setEdited] = useState(false);
+  const [solarSettings, setSolarSettings] = useState<SolarSettings>(INITIAL_SOLAR);
   const usageSent = useRef(false);
 
   useEffect(() => {
@@ -254,11 +267,24 @@ function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader 
     : null;
   const myErrors = myTariff ? myTariffErrors(form.option, myTariff) : {};
 
-  const outcome = useMemo(() => {
-    if (!offers || !consumption || !("kwh" in consumption)) return null;
-    return runComparator({
+  const grossKwh = consumption && "kwh" in consumption ? consumption.kwh : null;
+  const solar = useSolar(
+    solarSettings,
+    {
+      consumption: grossKwh,
+      readings: form.mode === "full" && form.source === "diagram" && diagram.state === "ready" ? diagram.readings : null,
+      contractedPower: form.contractedPower,
+      cycle: form.cycle,
+    },
+    loadSolar,
+  );
+
+  // Ranked on the grid consumption when solar is on; the saving prices the best offer without it.
+  const comparison = useMemo(() => {
+    if (!offers || !grossKwh) return null;
+    const request: ComparatorRequest = {
       offers,
-      consumption: consumption.kwh,
+      consumption: solar.result?.kwh ?? grossKwh,
       contractedPower: form.contractedPower,
       cycle: form.cycle,
       option: form.option,
@@ -272,9 +298,13 @@ function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader 
       sortBy: form.sortBy,
       filters: form.filters,
       myTariff,
-    });
+    };
+    const outcome = runComparator(request);
+    const solarSaving = solar.result && outcome.ok ? solarBillSaving(request, outcome.view, grossKwh) : null;
+    return { outcome, solarSaving };
     // myTariff is rebuilt from form on every render; form covers it.
-  }, [offers, consumption, form]);
+  }, [offers, grossKwh, solar.result, form]);
+  const outcome = comparison?.outcome ?? null;
 
   const suppliers = useMemo(() => (offers ? supplierChoices(offers, t(k("regulatedSupplier"))) : []), [offers, t]);
   const errorOf = (field: string) => (consumption && "error" in consumption && consumption.field === field ? consumption.error : undefined);
@@ -287,7 +317,7 @@ function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader 
     setDiagram({ state: "reading", name: file.name });
     try {
       const readings = await parseERedesExport(new Uint8Array(await file.arrayBuffer()));
-      setDiagram({ state: "ready", name: file.name, summary: summarizeLoadDiagram(readings) });
+      setDiagram({ state: "ready", name: file.name, summary: summarizeLoadDiagram(readings), readings });
     } catch (error) {
       const code = error instanceof ERedesExportError ? error.code : "unreadable";
       const row = error instanceof ERedesExportError && error.row !== undefined ? String(error.row) : "";
@@ -519,6 +549,15 @@ function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader 
           </fieldset>
         </div>
 
+        <ElectricitySolarPanel
+          settings={solarSettings}
+          onChange={(settings) => {
+            setEdited(true);
+            setSolarSettings(settings);
+          }}
+          production={solar.production}
+        />
+
         <details className="group rounded-card border border-border bg-background">
           <summary className={summaryClass}>
             <span>
@@ -614,6 +653,11 @@ function ElectricityTariffComparison({ loadOffers }: { loadOffers: OffersLoader 
           <p role="alert" className="rounded-lg border border-destructive-text/30 px-4 py-3 text-sm text-foreground">
             {t(k("loadError"))}
           </p>
+        )}
+        {load.state === "ready" && solar.result && outcome?.ok && (
+          <div className="mb-8">
+            <ElectricitySolarSummary result={solar.result} saving={comparison?.solarSaving ?? null} settings={solarSettings} sortBy={form.sortBy} />
+          </div>
         )}
         {load.state === "ready" && (
           <ElectricityTariffResults
