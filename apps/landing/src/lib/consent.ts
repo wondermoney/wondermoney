@@ -94,8 +94,9 @@ export function subscribeToConsent(
 ): () => void {
   const handler = (event: Event) => {
     if (!(event instanceof CustomEvent)) return;
+    // The detail also carries `previous` (publishConsentDecision); only `current` is read.
     const detail = z
-      .strictObject({ current: ConsentDecisionSchema })
+      .object({ current: ConsentDecisionSchema })
       .safeParse(event.detail);
     if (detail.success) listener(detail.data.current);
   };

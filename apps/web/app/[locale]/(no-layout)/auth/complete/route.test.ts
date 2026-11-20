@@ -139,3 +139,18 @@ test("Google sign-in completes through the API's CSRF origin check", async () =>
   assert.equal(location.origin, APP_ORIGIN);
   assert.equal(location.pathname, "/en");
 });
+
+test("a Google signup hands its landing source to the API", async () => {
+  stubSession(true);
+  const bodies: unknown[] = [];
+  apiPost.mockImplementation(async (_url: string, body: unknown) => {
+    bodies.push(body);
+    return { data: { outcome: "signup", method: "google" } };
+  });
+
+  await completeWith("?landing_source=toolMortgage");
+
+  assert.deepEqual(bodies, [
+    { inviteToken: undefined, landingSource: "toolMortgage", locale: "en" },
+  ]);
+});

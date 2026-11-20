@@ -115,6 +115,7 @@ export async function authCallback(req: Request, res: Response) {
       email,
       externalUserId,
       firstName: firstName ?? email.split('@')[0],
+      landingSource: body.landingSource,
       language: mapRouteLocaleToEmailLanguage(body.locale),
       lastName,
       method,

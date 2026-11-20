@@ -23,4 +23,23 @@ describe('auth callback request boundary', () => {
   ] as const)('maps route locale %s to supported email language %s', (locale, language) => {
     expect(mapRouteLocaleToEmailLanguage(locale)).toBe(language);
   });
+
+  it('keeps a landing page route id', () => {
+    const parsed = authCallbackRequestSchema.parse({ body: { landingSource: 'curatedPodcasts' } });
+
+    expect(parsed.body.landingSource).toBe('curatedPodcasts');
+  });
+
+  // Analytics must never fail a signup: a malformed source is dropped, not a 400.
+  it.each([
+    'https://example.com',
+    'tool-mortgage',
+    'person@example.com',
+    'x'.repeat(65),
+    42,
+  ])('drops a malformed landing source: %s', (landingSource) => {
+    const parsed = authCallbackRequestSchema.parse({ body: { landingSource, locale: 'pt' } });
+
+    expect(parsed.body).toEqual({ locale: 'pt' });
+  });
 });

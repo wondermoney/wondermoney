@@ -6,9 +6,19 @@ import { SupportedLanguages } from '@entity/Appuser';
 export const SIGNUP_ROUTE_LOCALES = ['en', 'pt', 'es'] as const;
 export type SignupRouteLocale = (typeof SIGNUP_ROUTE_LOCALES)[number];
 
+/**
+ * The wonder.money page a signup came from: the route id of a landing tool or curated list
+ * (`toolMortgage`, `curatedPodcasts`). The web app sends it only when the visitor allowed
+ * analytics on both the website and the app. A value of any other shape is dropped rather than
+ * failing the signup over analytics.
+ */
+export const LANDING_SOURCE_PATTERN = /^[a-z][A-Za-z0-9]{1,63}$/u;
+const landingSourceSchema = z.string().regex(LANDING_SOURCE_PATTERN).optional().catch(undefined);
+
 export const authCallbackRequestSchema = z.object({
   body: z.object({
     inviteToken: z.string().max(200).optional(),
+    landingSource: landingSourceSchema,
     locale: z.enum(SIGNUP_ROUTE_LOCALES).default('en'),
   }),
 });

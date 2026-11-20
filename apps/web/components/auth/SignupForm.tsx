@@ -24,7 +24,9 @@ import {
 } from "@/lib/auth/signup-error";
 import {
   captureSignupFunnelEvent,
+  getConsentedLandingSource,
   getSignupFailureCategory,
+  LANDING_SOURCE_PARAM,
   SIGNUP_FUNNEL_EVENTS,
 } from "@/lib/utils/analytics";
 import { SENTRY_CLIENT_ENABLED } from "@/lib/utils/sentry-enabled";
@@ -174,7 +176,11 @@ export default function SignupForm({
 
     const completed = await completeAuthAndRedirect(
       locale,
-      { inviteToken: values.inviteToken || undefined, locale },
+      {
+        inviteToken: values.inviteToken || undefined,
+        landingSource: getConsentedLandingSource(searchParams),
+        locale,
+      },
       "signup_form",
     );
 
@@ -195,9 +201,15 @@ export default function SignupForm({
   };
 
   const signUpWithGoogle = async () => {
+    // `/auth/complete` hands the landing source to the API with the signup.
+    const callbackURL = new URL(getCallbackURL(locale));
+    const landingSource = getConsentedLandingSource(searchParams);
+    if (landingSource) {
+      callbackURL.searchParams.set(LANDING_SOURCE_PARAM, landingSource);
+    }
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: getCallbackURL(locale),
+      callbackURL: callbackURL.toString(),
     });
     if (error) {
       toast.error(t("toast-signup-error"));

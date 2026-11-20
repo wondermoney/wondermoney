@@ -13,6 +13,7 @@ import { Category } from '@entity/Category';
 import type { Currency } from '@entity/Currency';
 import { authedContext } from '@middleware/authed-context';
 import { visibleAccountWhere } from '@service/account/account-access';
+import { recordFirstActivation } from '@service/analytics/first-activation.service';
 import { getBudgetForecast as forecastBudget } from '@service/budget/budget-forecast.service';
 import { budgetMonthOf, budgetPeriodDays, budgetPeriodRange, shiftBudgetMonth } from '@service/budget/budget-period';
 import { getMonthRollover, rolloverRowsOf, withRollover } from '@service/budget/budget-rollover.service';
@@ -182,6 +183,7 @@ export async function createBudget(req: Request, res: Response, next: NextFuncti
   await DI.em.persist(budgetTemplateCategories).flush();
   budget.budgetTemplatesCategory.add(budgetTemplateCategories);
   await DI.em.persist(budget).flush();
+  await recordFirstActivation(DI.em, user, 'budget');
 
   return res.status(StatusCodes.CREATED).json({ budgetKey: budget.budgetKey });
 }
