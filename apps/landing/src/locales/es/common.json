@@ -4121,6 +4121,7 @@
         "energyReduced": "Energía con IVA reducido ({{kwh}})",
         "energyStandard": "Energía por encima del límite de IVA reducido ({{kwh}})",
         "cav": "Contribución audiovisual (CAV)",
+        "cavExempt": "Contribución audiovisual (CAV), exenta por debajo de 400 kWh al año",
         "iec": "Impuesto especial sobre el consumo de electricidad (IEC)",
         "subtotal": "Total sin IVA",
         "vat": "IVA",
@@ -4172,7 +4173,7 @@
           "steps": {
             "a": "Potencia: el precio diario de tu potencia contratada, por 30 días.",
             "b": "Energía: tus kWh al precio simple, o repartidos entre los dos precios de la bihoraria según el porcentaje que indiques.",
-            "c": "Contribución audiovisual (CAV): un importe mensual fijo, con IVA reducido.",
+            "c": "Contribución audiovisual (CAV): un importe mensual fijo, con IVA reducido. Quien consume menos de 400 kWh al año está exento.",
             "d": "Impuesto especial sobre el consumo de electricidad (IEC): un importe fijo por kWh, con IVA al tipo normal.",
             "e": "IVA en cada concepto y, al final, la suma. El resultado se redondea al céntimo al final."
           },

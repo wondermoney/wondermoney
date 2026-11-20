@@ -3,7 +3,14 @@ import {
   ERSE_TARIFFS,
   type ContractedPower,
 } from "./data/erseTariffs";
-import { energyVatSplit, iecNet, powerTermVatSplit, reducedVatKwhByPeriod } from "./electricityTaxes";
+import {
+  DAYS_PER_YEAR,
+  cavNet,
+  energyVatSplit,
+  iecNet,
+  powerTermVatSplit,
+  reducedVatKwhByPeriod,
+} from "./electricityTaxes";
 import {
   ELECTRICITY_PRICES,
   ELECTRICITY_PRICES_SOURCE,
@@ -67,6 +74,7 @@ export interface BillBreakdown {
   energyReduced: BillLine;
   /** Energy above it. */
   energyStandard: BillLine;
+  /** Zero when the annual consumption is below 400 kWh (Lei n.º 30/2003, artigo 4.º, n.º 1). */
   cav: BillLine;
   iec: BillLine;
 }
@@ -131,10 +139,11 @@ function bill(
   power: number,
   option: TariffOption,
   monthlyKwh: number,
+  annualKwh: number,
   offPeakShare: number,
   largeFamily: boolean,
 ) {
-  const { vat, powerPerDay, cavPerMonth } = ERSE_TARIFFS;
+  const { vat, powerPerDay } = ERSE_TARIFFS;
   const powerKey = power as ContractedPower;
   // Energy up to the allowance gets 6% VAT (contracted power up to 6.9 kVA, all four options).
   // With two prices the allowance is shared in proportion to the kWh in each period.
@@ -158,7 +167,8 @@ function bill(
     power: { net: powerTerm.standard, vatRate: vat.standard },
     energyReduced: { net: energy.reduced, vatRate: vat.reduced },
     energyStandard: { net: energy.standard, vatRate: vat.standard },
-    cav: { net: cavPerMonth, vatRate: vat.reduced },
+    // A twelfth of the year's CAV is the monthly amount; none below the annual exemption threshold.
+    cav: { net: cavNet({ days: DAYS_PER_YEAR, annualKwh, reduced: false }) / 12, vatRate: vat.reduced },
     iec: { net: iecNet(monthlyKwh), vatRate: vat.standard },
   };
   const lines = Object.values(breakdown);
@@ -172,13 +182,15 @@ export function computeElectricityBill(input: ElectricityBillInput): Electricity
   if (Object.keys(errors).length > 0) return { ok: false, errors };
 
   const monthlyKwh = input.period === "year" ? input.consumption / 12 : input.consumption;
+  // Taken from the figure as entered, so 400 kWh a year is not lost to rounding in /12 and x12.
+  const annualKwh = input.period === "year" ? input.consumption : input.consumption * 12;
   const share = input.option === "biHourly" ? input.offPeakPercent / 100 : 0;
-  const main = bill(input.contractedPower, input.option, monthlyKwh, share, input.largeFamily);
+  const main = bill(input.contractedPower, input.option, monthlyKwh, annualKwh, share, input.largeFamily);
 
   const otherOption: TariffOption = input.option === "simple" ? "biHourly" : "simple";
   // The comparison keeps the entered off-peak share (the field keeps its value while hidden).
   const otherShare = otherOption === "biHourly" ? input.offPeakPercent / 100 : 0;
-  const other = bill(input.contractedPower, otherOption, monthlyKwh, otherShare, input.largeFamily);
+  const other = bill(input.contractedPower, otherOption, monthlyKwh, annualKwh, otherShare, input.largeFamily);
   const offPeakKnown = Number.isFinite(input.offPeakPercent) && input.offPeakPercent >= 0 && input.offPeakPercent <= 100;
 
   const total = cents(main.total);

@@ -232,7 +232,8 @@ function Bill({ result, input, euro }: { result: ElectricityBillResult; input: E
           },
         ]
       : []),
-    { key: "cav", label: t(k("result.cav")), line: breakdown.cav },
+    // No CAV below 400 kWh a year: the row stays, at zero, and says why.
+    { key: "cav", label: t(k(breakdown.cav.net > 0 ? "result.cav" : "result.cavExempt")), line: breakdown.cav },
     { key: "iec", label: t(k("result.iec")), line: breakdown.iec },
   ];
   const alternative = result.alternative;

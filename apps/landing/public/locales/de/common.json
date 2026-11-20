@@ -4121,6 +4121,7 @@
         "energyReduced": "Energie mit ermäßigter Mehrwertsteuer ({{kwh}})",
         "energyStandard": "Energie über der Grenze für den ermäßigten Satz ({{kwh}})",
         "cav": "Rundfunkbeitrag (CAV)",
+        "cavExempt": "Rundfunkbeitrag (CAV), befreit unter 400 kWh im Jahr",
         "iec": "Stromverbrauchsteuer (IEC)",
         "subtotal": "Summe ohne Mehrwertsteuer",
         "vat": "Mehrwertsteuer",
@@ -4172,7 +4173,7 @@
           "steps": {
             "a": "Leistung: der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage.",
             "b": "Energie: Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt.",
-            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer.",
+            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit.",
             "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
             "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
           },

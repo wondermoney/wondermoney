@@ -50,9 +50,15 @@ it("shows the worked example, the index with its date, edge cases and one metada
   expect(screen.queryByRole("table", { name: /Bill breakdown/ })).toBeNull();
   fireEvent.change(share, { target: { value: "40" } });
 
-  // Zero consumption: only the fixed charges.
+  // The example month pays the audiovisual contribution.
+  expect(within(exampleTable).getByText("Audiovisual contribution (CAV)")).toBeTruthy();
+
+  // Zero consumption: only the fixed charges, and no CAV below 400 kWh a year.
   fireEvent.change(screen.getByLabelText("Electricity consumption"), { target: { value: "0" } });
   expect(screen.getByText("With no consumption the bill is only the fixed charges.")).toBeTruthy();
+  const zeroTable = screen.getByRole("table", { name: /Bill breakdown/ });
+  const cavRow = within(zeroTable).getByText("Audiovisual contribution (CAV), exempt below 400 kWh a year").closest("tr") as HTMLElement;
+  expect(cavRow.textContent).toContain(eur(0));
 
   // Too much consumption.
   fireEvent.change(screen.getByLabelText("Electricity consumption"), { target: { value: "99999" } });

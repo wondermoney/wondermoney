@@ -4121,6 +4121,7 @@
         "energyReduced": "Energia con IVA ridotta ({{kwh}})",
         "energyStandard": "Energia oltre il limite dell'IVA ridotta ({{kwh}})",
         "cav": "Contributo audiovisivo (CAV)",
+        "cavExempt": "Contributo audiovisivo (CAV), esente sotto i 400 kWh l'anno",
         "iec": "Imposta speciale sul consumo di elettricità (IEC)",
         "subtotal": "Totale senza IVA",
         "vat": "IVA",
@@ -4172,7 +4173,7 @@
           "steps": {
             "a": "Potenza: il prezzo giornaliero della tua potenza contrattuale, per 30 giorni.",
             "b": "Energia: i tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi.",
-            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta.",
+            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente.",
             "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
             "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
           },

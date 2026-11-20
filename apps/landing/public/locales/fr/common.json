@@ -4121,6 +4121,7 @@
         "energyReduced": "Énergie à TVA réduite ({{kwh}})",
         "energyStandard": "Énergie au-delà du plafond de TVA réduite ({{kwh}})",
         "cav": "Contribution audiovisuelle (CAV)",
+        "cavExempt": "Contribution audiovisuelle (CAV), exonérée sous 400 kWh par an",
         "iec": "Taxe spéciale sur la consommation d'électricité (IEC)",
         "subtotal": "Total hors TVA",
         "vat": "TVA",
@@ -4172,7 +4173,7 @@
           "steps": {
             "a": "Puissance : le prix journalier de votre puissance souscrite, multiplié par 30 jours.",
             "b": "Énergie : vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez.",
-            "c": "Contribution audiovisuelle (CAV) : un montant mensuel fixe, avec TVA réduite.",
+            "c": "Contribution audiovisuelle (CAV) : un montant mensuel fixe, avec TVA réduite. Les foyers qui consomment moins de 400 kWh par an en sont exonérés.",
             "d": "Taxe spéciale sur la consommation d'électricité (IEC) : un montant fixe par kWh, avec la TVA au taux normal.",
             "e": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
           },
