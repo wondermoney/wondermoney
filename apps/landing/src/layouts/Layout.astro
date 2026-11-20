@@ -99,11 +99,10 @@ const enableReactDevTools =
     <ConsentBanner locale={locale} client:load />
     <StickyMobileCta locale={locale} client:idle />
     <StructuredData data={organizationSchema} />
-    {landingSource && (
-      <script>
-        import { installLandingSourceLinks } from "@/lib/landingSource";
-        installLandingSourceLinks();
-      </script>
-    )}
+    <script>
+      // Does nothing on a page without `data-landing-source`.
+      import { installLandingSourceLinks } from "@/lib/landingSource";
+      installLandingSourceLinks();
+    </script>
   </body>
 </html>
