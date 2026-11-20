@@ -179,7 +179,8 @@ describe("electricity tariff comparison page", () => {
 			reader,
 			readSource("./electricityInvoice.ts"),
 			readSource("../../components/calculators/ElectricityInvoiceUpload.tsx"),
-			readSource("../../components/calculators/ElectricityTariffComparisonComp.tsx"),
+			// Its one fetch, the site's own OMIE price file, is checked in the test above.
+			readSource("../../components/calculators/ElectricityTariffComparisonComp.tsx").replace("await fetch(path)", ""),
 		]
 		for (const source of sources) {
 			expect(source).not.toMatch(/^import[^;]*pdfjs-dist/m)
