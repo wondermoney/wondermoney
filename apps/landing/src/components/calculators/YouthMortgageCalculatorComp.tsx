@@ -79,6 +79,13 @@ function YouthMortgageCalculator() {
       <section aria-labelledby="youthMortgage-check-title" className="rounded-card border border-border bg-background p-6">
         <h2 id="youthMortgage-check-title" className="text-lg font-semibold">{t(k("checkTitle"))}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t(k("checkIntro"))}</p>
+        <p
+          id="youthMortgage-deadline"
+          role="note"
+          className="mt-4 rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground"
+        >
+          {t(k("deadlineNotice"))}
+        </p>
         <div className="mt-4 grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             <CalculatorInput
