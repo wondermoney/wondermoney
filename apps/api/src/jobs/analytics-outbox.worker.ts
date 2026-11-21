@@ -3,6 +3,7 @@ import {
   LockMode,
   QueryOrder,
 } from '@mikro-orm/core';
+import { ANALYTICS_EVENTS, analyticsEventProblems } from '@wondermoney/shared';
 import type { Logger } from 'pino';
 import { PostHog } from 'posthog-node';
 import type { EventMessage } from 'posthog-node';
@@ -114,6 +115,16 @@ export async function deliverAnalyticsOutboxBatch(
         row.deletedAt = now();
         dirty = true;
         log.error({ analyticsOutboxKey: row.analyticsOutboxKey, reason: 'sensitive_properties' }, 'Analytics outbox row blocked');
+        continue;
+      }
+
+      // A row written before the catalogue check (an older API during a deploy) is held to it too.
+      const { $insert_id: _insertId, ...catalogued } = row.properties;
+      if (analyticsEventProblems(ANALYTICS_EVENTS, 'server', row.eventName, catalogued).length > 0) {
+        blocked += 1;
+        row.deletedAt = now();
+        dirty = true;
+        log.error({ analyticsOutboxKey: row.analyticsOutboxKey, eventName: row.eventName, reason: 'not_catalogued' }, 'Analytics outbox row blocked');
         continue;
       }
 

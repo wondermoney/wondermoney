@@ -6,6 +6,8 @@ import { zParse } from '@app/validators/parser';
 import { BankConnection } from '@entity/BankConnection';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import accountInitialSyncEnqueueService, { AccountInitialSyncQueueError } from '@service/account/account-initial-sync-enqueue.service';
+import { type BankConnectionFailureReason, bankConnectionFailureReason, bankConnectionOutcomeEventId, enableBankingPlatform } from '@service/analytics/bank-connection-events';
+import { recordServiceEvent } from '@service/analytics/service-events.service';
 import { ENABLE_BANKING_PROVIDER_ID, requireBankProvider } from '@service/bank-providers/registry';
 import { ENABLE_BANKING_CALLBACK_REDIRECT_URL } from '@utils/constants';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
@@ -37,15 +39,28 @@ export async function enableBankingCallback(req: Request, res: Response) {
   // still send the user back to the surface that started the flow.
   const known = await DI.em.getRepository(EnableBankingConnection).findByState(state).catch(() => null);
   const returnTo = (known?.returnTo ?? null);
+  // One outcome per connection attempt: a reloaded callback (whose spent code then fails) repeats
+  // the first outcome's event id, so the outbox keeps only the first.
+  const outcomeEventId = bankConnectionOutcomeEventId(state);
+  const recordFailure = async (reason: BankConnectionFailureReason) => {
+    if (!known) return;
+    await recordServiceEvent(DI.em, known.appuserKey, 'bank_connection_failed', {
+      platform: enableBankingPlatform(returnTo),
+      provider: 'enable_banking',
+      reason,
+    }, { eventId: outcomeEventId });
+  };
 
   if (error) {
     logger.warn({ error }, 'Enable Banking callback returned a provider error');
+    await recordFailure('authorization_denied');
     res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo, status: 'error' }));
     return;
   }
 
   if (!code) {
     logger.warn({}, 'Enable Banking callback missing both code and error');
+    await recordFailure('invalid_callback');
     res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo, status: 'error' }));
     return;
   }
@@ -56,8 +71,20 @@ export async function enableBankingCallback(req: Request, res: Response) {
   } catch (exchangeError) {
     const providerResponse = sanitizeProviderResponse(exchangeError);
     logger.warn({ providerResponse }, 'Enable Banking session exchange failed');
+    await recordFailure(bankConnectionFailureReason(exchangeError));
     res.redirect(ENABLE_BANKING_CALLBACK_REDIRECT_URL({ returnTo, status: 'error' }));
     return;
+  }
+
+  if (known) {
+    if (completed.postLinkError) {
+      await recordFailure('account_setup_failed');
+    } else {
+      await recordServiceEvent(DI.em, known.appuserKey, 'bank_connection_completed', {
+        platform: enableBankingPlatform(returnTo),
+        provider: 'enable_banking',
+      }, { eventId: outcomeEventId });
+    }
   }
 
   // The bank connection itself has already succeeded above (status is `linked` and committed) —

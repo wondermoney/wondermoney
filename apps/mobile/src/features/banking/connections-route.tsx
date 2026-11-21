@@ -1,17 +1,11 @@
 import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
-import {
-  isFirstBankConnection,
-  resolveConnectionOutcomes,
-  tallyConnections,
-  type ConnectionTally,
-} from './connection-outcome-policy'
 import { ConnectionsScreen, type ConnectionDisconnectFailureState, type ConnectionReconnectFailureState } from './connections-screen'
 import { mapBankConnections } from './connection-status-view-model'
 import { classifyBankConnectionDisconnectFailure, useBankConnectionDisconnectMutation } from './use-bank-connection-disconnect-mutation'
@@ -47,24 +41,6 @@ export function ConnectionsRoute() {
   // Off by default on a server: offered only once the instance says the operator enabled it.
   const offersSimplefin = useConfirmedFeature((features) => features.bankSyncProviders?.includes('simplefin'))
 
-  // This screen's polling is the app's only view of a consent flow
-  // settling, so the terminal funnel steps are captured from the transition
-  // between two of its own observations. See connection-outcome-policy.ts.
-  const observedTally = useRef<ConnectionTally | null>(null)
-  const rows = state.status === 'loaded' ? state.rows : null
-  useEffect(() => {
-    if (rows === null) return
-    const next = tallyConnections(rows)
-    const previous = observedTally.current
-    observedTally.current = next
-    if (isFirstBankConnection(previous, next)) {
-      captureAnalyticsEvent('first_account_created', { method: 'bank_connection' })
-    }
-    for (const outcome of resolveConnectionOutcomes(previous, next)) {
-      if (outcome === 'completed') captureAnalyticsEvent('bank_connection_completed')
-      else captureAnalyticsEvent('bank_connection_failed')
-    }
-  }, [rows])
 
   return (
     <ConnectionsScreen
@@ -124,7 +100,6 @@ export function ConnectionsRoute() {
             )
           },
           onError: (error) => {
-            captureAnalyticsEvent('bank_connection_failed')
             setReconnectFailure({ bankId, failure: classifyStartBankConnectionFailure(error) })
           },
         })

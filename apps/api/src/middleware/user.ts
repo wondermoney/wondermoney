@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 import { DI } from '@app/app';
 import { Appuser } from '@entity/Appuser';
+import { recordUserActive, requestPlatform } from '@service/analytics/service-events.service';
 import { BadRequestError } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -23,6 +24,7 @@ async function getUser(req: Request, _res: Response, next: NextFunction): Promis
   req.user = appUser;
   // Id only: no email, name or IP may reach Sentry.
   Sentry.setUser({ id: req.user.appuserKey.toString() });
+  await recordUserActive(DI.em, appUser, requestPlatform(req));
   next();
 }
 

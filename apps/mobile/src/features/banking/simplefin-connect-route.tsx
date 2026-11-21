@@ -42,7 +42,6 @@ export function SimplefinConnectRoute() {
             router.replace(bankConnectionsHref('success') as Href)
           },
           onError: (error) => {
-            captureAnalyticsEvent('bank_connection_failed')
             setFailure(classifySimplefinConnectFailure(error))
           },
           onSettled: () => {

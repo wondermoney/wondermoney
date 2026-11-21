@@ -32,6 +32,12 @@ catalogue holds today, and adding or changing a mobile event is a pull request t
 catalogue rather than this document. The `screen` list moved with it, to
 `packages/shared/lib/analytics/feature-screens.ts`. This document keeps the reasoning.
 
+**Record (2026-11-21, #624):** `first_account_created`, `bank_connection_completed` and
+`bank_connection_failed` are now service events the API records, wherever the change happens, so
+the app no longer sends them and they left its allowlist; the catalogue keeps the other six.
+Builds already in the stores still send the three until they update; PostHog tells the two apart
+by `$lib` (`posthog-node` for the server, `posthog-react-native` for the app).
+
 ## Why this exists
 
 Earlier mobile tickets, and this document's own companion Sentry work, all cite the same

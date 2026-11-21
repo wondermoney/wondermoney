@@ -9,6 +9,8 @@ import { Appuser } from '@entity/Appuser';
 import { BankConnection } from '@entity/BankConnection';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { Tenant } from '@entity/Tenant';
+import { enableBankingPlatform } from '@service/analytics/bank-connection-events';
+import { recordAccountCreated } from '@service/analytics/service-events.service';
 import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
 import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import { createInitialEnableBankingAccounts } from '@service/enable-banking/enable-banking-initial-accounts.service';
@@ -71,6 +73,9 @@ class EnableBankingProvider implements BankProvider {
       accountResult = await createInitialEnableBankingAccounts(DI.em, connection, session.accounts);
     } catch (error) {
       return { accountsCreated: 0, bankConnectionKey: bankConnectionKeyOf(connection), postLinkError: error, returnTo: connection.returnTo ?? null };
+    }
+    for (let added = 0; added < accountResult.accountsAdded; added += 1) {
+      await recordAccountCreated(DI.em, connection.appuserKey, { method: 'bank_connection', platform: enableBankingPlatform(connection.returnTo) });
     }
 
     return {

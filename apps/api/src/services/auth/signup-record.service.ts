@@ -3,8 +3,10 @@ import { z } from 'zod';
 import { DI } from '@app/database/di';
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 import { Appuser, AppuserAccountType, SupportedLanguages } from '@entity/Appuser';
-import { isAnalyticsOutboxEnabled } from '@service/analytics/analytics-outbox.service';
+import { assertAnalyticsOutboxEvent, isAnalyticsOutboxEnabled } from '@service/analytics/analytics-outbox.service';
+import { analyticsSignInMethod } from '@service/analytics/service-events.service';
 import { ERROR } from '@utils/constants';
+import logger from '@utils/logger';
 
 const SIGNUP_EVENT_ID_PREFIX = 'signup.v1:';
 const externalUserIdSchema = z.guid().brand<'ExternalUserId'>();
@@ -56,19 +58,18 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
         lastName: input.lastName,
         receiveUpdates: false,
       });
-      if (isAnalyticsOutboxEnabled()) {
-        const eventId = `${SIGNUP_EVENT_ID_PREFIX}${externalUserId}`;
+      const eventId = `${SIGNUP_EVENT_ID_PREFIX}${externalUserId}`;
+      const properties = {
+        ...(input.landingSource ? { landing_source: input.landingSource } : {}),
+        locale: appuser.language,
+        method: analyticsSignInMethod(input.method),
+      };
+      if (isAnalyticsOutboxEnabled() && isValidSignupEvent(externalUserId, eventId, properties)) {
         const outbox = new AnalyticsOutbox();
         outbox.distinctId = externalUserId;
         outbox.eventId = eventId;
         outbox.eventName = 'signup';
-        outbox.properties = {
-          $insert_id: eventId,
-          appuser_key: appuser.appuserKey.toString(),
-          ...(input.landingSource ? { landing_source: input.landingSource } : {}),
-          locale: appuser.language,
-          method: input.method,
-        };
+        outbox.properties = { ...properties, $insert_id: eventId };
         em.persist(outbox);
       }
       await em.flush();
@@ -82,5 +83,16 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
     const winner = await DI.em.transactional((em) => em.getRepository(Appuser).getUserByExternalId(externalUserId));
     if (!winner) throw error;
     return { appuser: winner, created: false };
+  }
+}
+
+/** A signup event the catalogue would refuse is dropped, never the signup. */
+function isValidSignupEvent(distinctId: string, eventId: string, properties: Record<string, unknown>): boolean {
+  try {
+    assertAnalyticsOutboxEvent({ distinctId, eventId, eventName: 'signup', properties });
+    return true;
+  } catch (error) { // no-excuse-ok: catch -- analytics must never fail the signup
+    logger.warn({ error }, 'Signup analytics event not recorded');
+    return false;
   }
 }

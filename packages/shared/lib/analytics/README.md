@@ -24,7 +24,9 @@ pnpm --filter @wondermoney/shared analytics-events
 - **Properties are a fixed list of values, a boolean or a count.** Never a database
   identifier, an email, a name, an amount or a balance, free text, a path or an object. A
   property name ending in `id`, `key` or `ids`, or naming an email, name, amount or balance,
-  fails the tests.
+  fails the tests. The one exception is a `code`: a short value matching a pattern, for a closed
+  list kept outside this package (`landing_source`, the website's page ids). The tests list the
+  properties allowed one.
 - **Facts on the server, intent in the client.** Anything the API commits (an account, a
   budget, a goal, an import, a bank connection) is a `service` event sent from `server`. A
   client sends only what the server can't see: a screen viewed, a flow started, abandoned or
@@ -40,4 +42,4 @@ pnpm --filter @wondermoney/shared analytics-events
 | ------- | ---------------------------------------------------------------------------------- |
 | Web     | `apps/web/lib/analytics/track.ts`; a lint rule bans `posthog.capture` elsewhere    |
 | Mobile  | `apps/mobile/src/lib/telemetry/analytics.ts` (`apps/mobile/docs/telemetry-adr.md`) |
-| API     | the analytics outbox (#624)                                                        |
+| API     | `services/analytics/service-events.service.ts`; the outbox refuses anything else   |

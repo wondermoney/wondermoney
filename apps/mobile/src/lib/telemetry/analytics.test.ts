@@ -25,10 +25,7 @@ describe('analytics allowlist boundary', () => {
     analytics.capture('sign_up_completed', { provider: 'email' })
     analytics.capture('sign_in_completed', { provider: 'apple' })
     analytics.capture('onboarding_completed')
-    analytics.capture('first_account_created', { method: 'bank_connection' })
     analytics.capture('bank_connection_started')
-    analytics.capture('bank_connection_completed')
-    analytics.capture('bank_connection_failed')
     analytics.capture('feedback_submitted', { category: 'bug' })
     analytics.capture('feature_screen_viewed', { screen: 'portfolio_detail' })
 
@@ -36,10 +33,7 @@ describe('analytics allowlist boundary', () => {
       ['sign_up_completed', { provider: 'email' }],
       ['sign_in_completed', { provider: 'apple' }],
       ['onboarding_completed', undefined],
-      ['first_account_created', { method: 'bank_connection' }],
       ['bank_connection_started', undefined],
-      ['bank_connection_completed', undefined],
-      ['bank_connection_failed', undefined],
       ['feedback_submitted', { category: 'bug' }],
       ['feature_screen_viewed', { screen: 'portfolio_detail' }],
     ])
@@ -57,12 +51,12 @@ describe('analytics allowlist boundary', () => {
     analytics.capture('sign_in_completed', { provider: 'facebook' })
     // @ts-expect-error no extra property may ride along on an approved event
     analytics.capture('sign_in_completed', { provider: 'email', userId: 'user_1' })
-    // @ts-expect-error an approved property may not be swapped for another
-    analytics.capture('first_account_created', { accountId: 42 })
+    // @ts-expect-error the server records accounts; the app never sends them
+    analytics.capture('first_account_created', { method: 'manual' })
     // @ts-expect-error events approved with no properties take none
     analytics.capture('onboarding_completed', { userId: 'user_1' })
     // @ts-expect-error bank connection steps deliberately carry no institution
-    analytics.capture('bank_connection_completed', { institution: 'Revolut' })
+    analytics.capture('bank_connection_started', { institution: 'Revolut' })
     // @ts-expect-error screens are identifiers, never raw paths with IDs in them
     analytics.capture('feature_screen_viewed', { screen: '/portfolio/abc123' })
     // @ts-expect-error the feedback message never leaves the mail channel

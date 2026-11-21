@@ -20,7 +20,10 @@ import logger from '@utils/logger';
  */
 export interface CreateInitialEnableBankingAccountsResult {
   accounts: Account[];
+  /** Every account linked to this connection, including revived and reconnected ones. */
   accountsCreated: number;
+  /** The accounts that did not exist before: new rows, not revived or reconnected ones. */
+  accountsAdded: number;
   accountsSkipped: number;
   /** Earlier connections to the bank whose every account moved to this one, now soft-deleted. */
   connectionsRetired: number;
@@ -102,6 +105,7 @@ export async function createInitialEnableBankingAccounts(
   const skippedReasons: string[] = [];
   const claimedAccountKeys = new Set<number>();
   const previousConnectionKeys = new Set<number>();
+  let accountsAdded = 0;
 
   for (const raw of sessionAccounts) {
     const sessionAccount = raw as EnableBankingSessionAccount;
@@ -164,12 +168,13 @@ export async function createInitialEnableBankingAccounts(
       accounts.push(reloaded);
       continue;
     }
+    if (!existingActive) accountsAdded += 1;
     accounts.push(account);
   }
 
   const connectionsRetired = await retireEmptiedConnections(em, connection, previousConnectionKeys);
 
-  return { accounts, accountsCreated: accounts.length, accountsSkipped: skippedReasons.length, connectionsRetired, skippedReasons };
+  return { accounts, accountsAdded, accountsCreated: accounts.length, accountsSkipped: skippedReasons.length, connectionsRetired, skippedReasons };
 }
 
 /**
