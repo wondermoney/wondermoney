@@ -5,8 +5,9 @@ import { fileURLToPath } from "node:url";
 export const locales = ["en", "pt", "es", "fr", "de", "it"];
 export const root = fileURLToPath(new URL("../", import.meta.url));
 
+// "em/en segundo plano" is "in the background" in Portuguese and Spanish, not a timing claim.
 const prohibitedPatterns = [
-  ["setup/import timing", /90\s*(?:seconds?|segundos?|secondes?|Sekunden?|secondi)|\b(?:in|within|under|em|en|dans|unter|weniger als|menos de|moins de|meno di)\s+(?:(?:\d+|a few|few|poucos|poucas|quelques|wenigen|pochi|poche)\s+)?(?:minutes?|minutos?|minuten|minuti|seconds?|segundos?|secondes?|sekunden?|secondi)\b|\b\d+\s*(?:minutes?|minutos?|minuten|minuti)\b/gimu],
+  ["setup/import timing", /90\s*(?:seconds?|segundos?|secondes?|Sekunden?|secondi)|\b(?:in|within|under|em|en|dans|unter|weniger als|menos de|moins de|meno di)\s+(?:(?:\d+|a few|few|poucos|poucas|quelques|wenigen|pochi|poche)\s+)?(?:minutes?|minutos?|minuten|minuti|seconds?|segundos?(?!\s+plano)|secondes?|sekunden?|secondi)\b|\b\d+\s*(?:minutes?|minutos?|minuten|minuti)\b/gimu],
   ["immediate processing", /\b(?:immediately|imediatamente|inmediatamente|immédiatement|immediatamente|sofort|umgehend|subito|de inmediato)\b/gimu],
   ["instant/live freshness", /real[- ]time|tempo real|tiempo real|temps réel|\bechtzeit\b|tempo reale/gimu],
   ["crypto positioning", /\b(?:crypto(?:currenc(?:y|ies))?|cripto(?:moedas?|monedas?|valute)?|crypto-monnaies?|krypto(?:währungen?)?|cryptomonnaies?)\b/gimu],
