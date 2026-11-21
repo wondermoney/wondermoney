@@ -17,7 +17,7 @@ import {
 } from "@/lib/calculators/vehicleTax";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
-import { formatMoney } from "@/lib/numberFormat";
+import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 
 const k = (key: string) => `tools.vehicleTax.${key}`;
@@ -158,26 +158,18 @@ function VehicleTaxCalculator() {
         </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {summary ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {t(k(multiple ? "result.annualTaxAll" : "result.annualTax"))}
-              </p>
-              <p id="vehicleTax-annualTax" className="font-mono text-3xl font-bold text-primary">
-                {money(summary.annualTax)}
-              </p>
-              {single?.exempt && <p className="mt-2 text-sm text-muted-foreground">{t(k("result.exempt"))}</p>}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!summary && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {summary && single && (
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.monthlyProvision")), value: money(single.monthlyProvision), highlight: true },
+                {
+                  label: t(k(multiple ? "result.annualTaxAll" : "result.annualTax")),
+                  value: money(summary.annualTax),
+                  highlight: true,
+                  id: "vehicleTax-annualTax",
+                },
+                { label: t(k("result.monthlyProvision")), value: money(single.monthlyProvision) },
                 { label: t(k("result.category")), value: single.category },
                 ...(!single.exempt && single.category === "B"
                   ? [
@@ -185,7 +177,7 @@ function VehicleTaxCalculator() {
                       ...(single.additionalTax > 0
                         ? [{ label: t(k("result.additionalTax")), value: money(single.additionalTax) }]
                         : []),
-                      { label: t(k("result.coefficient")), value: `×${single.coefficient.toFixed(2)}` },
+                      { label: t(k("result.coefficient")), value: `×${formatNumber(locale, single.coefficient, 2)}` },
                     ]
                   : []),
                 ...(single.dieselSurcharge > 0
@@ -196,6 +188,7 @@ function VehicleTaxCalculator() {
                   : []),
               ]}
             />
+            {single.exempt && <p className="text-sm text-muted-foreground">{t(k("result.exempt"))}</p>}
             {!single.exempt && (
               <div className="space-y-3 text-sm">
                 <p>
@@ -222,7 +215,13 @@ function VehicleTaxCalculator() {
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.monthlyProvision")), value: money(summary.monthlyProvision), highlight: true },
+                {
+                  label: t(k(multiple ? "result.annualTaxAll" : "result.annualTax")),
+                  value: money(summary.annualTax),
+                  highlight: true,
+                  id: "vehicleTax-annualTax",
+                },
+                { label: t(k("result.monthlyProvision")), value: money(summary.monthlyProvision) },
                 ...(otherIucEuros > 0
                   ? [{ label: t(k("result.totalAnnualTax")), value: money(summary.totalAnnualTax) }]
                   : []),
@@ -274,6 +273,9 @@ function VehicleTaxCalculator() {
             )}
           </>
         )}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {summary ? `${t(k(multiple ? "result.annualTaxAll" : "result.annualTax"))}: ${money(summary.annualTax)}` : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );

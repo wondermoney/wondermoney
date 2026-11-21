@@ -377,7 +377,7 @@ function DebtToIncomeCalculatorContent() {
 
         <div aria-live="polite" className="space-y-4">
           {current.status !== "ok" ? (
-            <p className="rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
+            <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">
               {t(k(current.status))}
             </p>
           ) : (
@@ -476,7 +476,7 @@ function ScenarioFigure({
   bandLabel: (band: DebtToIncomeBand) => string;
 }) {
   return (
-    <div className="rounded-lg border border-border px-4 py-3">
+    <div className="rounded-lg bg-paper-2 px-4 py-3">
       <dt className="text-sm text-muted-foreground">{label}</dt>
       <dd className="mt-1 font-mono text-xl font-semibold text-foreground">{value}</dd>
       {band && <dd className={cn("text-sm font-medium", BAND_TEXT[band])}>{bandLabel(band)}</dd>}

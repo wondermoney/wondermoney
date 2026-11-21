@@ -2,6 +2,8 @@ interface ResultItem {
   label: string;
   value: string;
   highlight?: boolean;
+  /** An id for the value, so a test or an aria attribute can point at it. */
+  id?: string;
 }
 
 interface Props {
@@ -24,7 +26,10 @@ export default function CalculatorResult({ items }: Props) {
             className={index === 0 ? "pb-3" : "mt-1 border-t border-foreground/20 pt-4 pb-1"}
           >
             <dt className="text-sm font-medium text-foreground">{item.label}</dt>
-            <dd className="mt-1 font-mono text-2xl font-semibold leading-tight tracking-tight text-primary sm:text-3xl">
+            <dd
+              id={item.id}
+              className="mt-1 font-mono text-2xl font-semibold leading-tight tracking-tight text-primary sm:text-3xl"
+            >
               {item.value}
             </dd>
           </div>
@@ -36,7 +41,7 @@ export default function CalculatorResult({ items }: Props) {
             }`}
           >
             <dt className="text-sm text-ink-2 sm:text-base">{item.label}</dt>
-            <dd className="ml-auto text-right font-mono text-base font-medium text-foreground sm:text-lg">
+            <dd id={item.id} className="ml-auto text-right font-mono text-base font-medium text-foreground sm:text-lg">
               {item.value}
             </dd>
           </div>

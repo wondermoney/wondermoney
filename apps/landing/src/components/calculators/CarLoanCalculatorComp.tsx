@@ -92,29 +92,26 @@ function CarLoanCalculator() {
             </>
           )}
         </fieldset>
-        <fieldset className="space-y-4 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("runningTitle"))}</legend>
-          <p className="text-sm text-muted-foreground">{t(k("runningNote"))}</p>
-          {runningFields.map(field)}
-        </fieldset>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-4">
+            <legend className="mb-3 text-lg font-semibold">{t(k("runningTitle"))}</legend>
+            <p className="text-sm text-muted-foreground">{t(k("runningNote"))}</p>
+            {runningFields.map(field)}
+          </fieldset>
+        </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k(cash ? "result.monthlyRunning" : "result.monthlyBudget"))}</p>
-              <p id="carLoan-monthlyBudget" className="font-mono text-3xl font-bold text-primary">
-                {money(result.monthlyBudget)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!result && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {result && (
           <>
             <CalculatorResult
               items={[
+                {
+                  label: t(k(cash ? "result.monthlyRunning" : "result.monthlyBudget")),
+                  value: money(result.monthlyBudget),
+                  highlight: true,
+                  id: "carLoan-monthlyBudget",
+                },
                 ...(cash ? [] : [
                   { label: t(k("result.monthlyPayment")), value: money(result.monthlyPayment) },
                   { label: t(k("result.monthlyRunning")), value: money(result.monthlyRunning) },
@@ -138,6 +135,12 @@ function CarLoanCalculator() {
             />
           </>
         )}
+        {/* The answer is the ledger's headline; this line only announces it to screen readers. */}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {result
+            ? `${t(k(cash ? "result.monthlyRunning" : "result.monthlyBudget"))}: ${money(result.monthlyBudget)}`
+            : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );

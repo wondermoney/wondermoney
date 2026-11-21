@@ -508,7 +508,7 @@ describe("rate revision calculator", () => {
     expect(screen.getByText(/of your net income/)).toBeTruthy();
     await user.clear(screen.getByRole("spinbutton", { name: "Net monthly income (optional)" }));
     expect(screen.queryByText(/of your net income/)).toBeNull();
-    expect(screen.getByText("New monthly payment")).toBeTruthy();
+    expect(screen.getByText(/^Payment after the revision/)).toBeTruthy();
     expect(figures().length).toBeGreaterThan(0);
   });
 

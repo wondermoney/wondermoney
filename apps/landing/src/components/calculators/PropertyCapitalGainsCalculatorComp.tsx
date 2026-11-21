@@ -12,7 +12,7 @@ import {
 } from "@/lib/calculators/propertyCapitalGains";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
-import { formatMoney } from "@/lib/numberFormat";
+import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 
 const k = (key: string) => `tools.propertyCapitalGains.${key}`;
@@ -98,7 +98,7 @@ function PropertyCapitalGainsCalculator() {
     <CalculatorLayout>
       <div className="space-y-5 rounded-card border border-border bg-background p-6">
         <fieldset className="space-y-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("sections.property"))}</legend>
+          <legend className="mb-3 text-lg font-semibold">{t(k("sections.property"))}</legend>
           {amountField("saleValue")}
           {amountField("taxValue", true)}
           {amountField("purchaseValue", true)}
@@ -117,69 +117,61 @@ function PropertyCapitalGainsCalculator() {
           {monthSelect("saleMonth")}
           <p className="text-xs text-muted-foreground">{t(k("help.dates"), { saleYear: String(CAPITAL_GAINS_TABLES.saleYear) })}</p>
         </fieldset>
-        <fieldset className="space-y-4 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("sections.expenses"))}</legend>
-          {amountField("purchaseExpenses", true)}
-          {amountField("worksExpenses", true)}
-          {amountField("saleExpenses", true)}
-        </fieldset>
-        <fieldset className="space-y-4 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("sections.income"))}</legend>
-          {amountField("otherIncome", true)}
-          <label className="flex items-start gap-3 text-sm font-medium text-foreground">
-            <input
-              type="checkbox"
-              id="capitalGains-joint"
-              checked={input.joint}
-              onChange={(event) => setInput((current) => ({ ...current, joint: event.target.checked }))}
-              className="mt-1 h-4 w-4"
-            />
-            <span>{t(k("fields.joint"))}</span>
-          </label>
-          <p className="text-xs text-muted-foreground">{t(k("help.joint"))}</p>
-        </fieldset>
-        <fieldset className="space-y-4 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("sections.reinvestment"))}</legend>
-          <label className="flex items-start gap-3 text-sm font-medium text-foreground">
-            <input
-              type="checkbox"
-              id="capitalGains-ownHome"
-              checked={input.ownPermanentHome}
-              onChange={(event) => setInput((current) => ({ ...current, ownPermanentHome: event.target.checked }))}
-              className="mt-1 h-4 w-4"
-            />
-            <span>{t(k("fields.ownHome"))}</span>
-          </label>
-          {input.ownPermanentHome && (
-            <>
-              {amountField("reinvested", true)}
-              {amountField("loanRepaid", true)}
-            </>
-          )}
-        </fieldset>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-4">
+            <legend className="mb-3 text-lg font-semibold">{t(k("sections.expenses"))}</legend>
+            {amountField("purchaseExpenses", true)}
+            {amountField("worksExpenses", true)}
+            {amountField("saleExpenses", true)}
+          </fieldset>
+        </div>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-4">
+            <legend className="mb-3 text-lg font-semibold">{t(k("sections.income"))}</legend>
+            {amountField("otherIncome", true)}
+            <label className="flex items-start gap-3 text-sm font-medium text-foreground">
+              <input
+                type="checkbox"
+                id="capitalGains-joint"
+                checked={input.joint}
+                onChange={(event) => setInput((current) => ({ ...current, joint: event.target.checked }))}
+                className="mt-1 h-4 w-4"
+              />
+              <span>{t(k("fields.joint"))}</span>
+            </label>
+            <p className="text-xs text-muted-foreground">{t(k("help.joint"))}</p>
+          </fieldset>
+        </div>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-4">
+            <legend className="mb-3 text-lg font-semibold">{t(k("sections.reinvestment"))}</legend>
+            <label className="flex items-start gap-3 text-sm font-medium text-foreground">
+              <input
+                type="checkbox"
+                id="capitalGains-ownHome"
+                checked={input.ownPermanentHome}
+                onChange={(event) => setInput((current) => ({ ...current, ownPermanentHome: event.target.checked }))}
+                className="mt-1 h-4 w-4"
+              />
+              <span>{t(k("fields.ownHome"))}</span>
+            </label>
+            {input.ownPermanentHome && (
+              <>
+                {amountField("reinvested", true)}
+                {amountField("loanRepaid", true)}
+              </>
+            )}
+          </fieldset>
+        </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.extraTax"))}</p>
-              <p id="capitalGains-extraTax" className="font-mono text-3xl font-bold text-primary">
-                {money(result.extraTax)}
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">{t(k("result.estimateNote"))}</p>
-              {result.isLoss && <p className="mt-2 text-sm text-foreground">{t(k("result.loss"))}</p>}
-              {!result.isLoss && result.gain === 0 && <p className="mt-2 text-sm text-foreground">{t(k("result.zero"))}</p>}
-              {result.taxValueApplied && <p className="mt-2 text-sm text-foreground">{t(k("result.taxValueApplied"))}</p>}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!result && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {result && (
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.cashAfter")), value: money(result.cashAfter), highlight: true },
+                { label: t(k("result.extraTax")), value: money(result.extraTax), highlight: true, id: "capitalGains-extraTax" },
+                { label: t(k("result.cashAfter")), value: money(result.cashAfter) },
                 ...(result.taxValueApplied
                   ? [{ label: t(k("result.realizationValue")), value: money(result.realizationValue) }]
                   : []),
@@ -191,17 +183,23 @@ function PropertyCapitalGainsCalculator() {
                 {
                   label: t(k("result.coefficient")),
                   value: result.coefficientApplied
-                    ? `×${result.coefficient.toFixed(2)}`
+                    ? `×${formatNumber(locale, result.coefficient, 2)}`
                     : t(k("result.coefficientNone"), { months: String(result.monthsHeld) }),
                 },
                 { label: t(k("result.expenses")), value: money(result.expenses) },
                 ...(input.ownPermanentHome
-                  ? [{ label: t(k("result.exemptPercent")), value: `${result.exemptPercent.toFixed(2)}%` }]
+                  ? [{ label: t(k("result.exemptPercent")), value: formatPercent(locale, result.exemptPercent, { decimals: 2 }) }]
                   : []),
                 { label: t(k("result.taxableGain")), value: money(result.taxableGain) },
                 { label: t(k("result.includedIncome")), value: money(result.includedIncome) },
               ]}
             />
+            <div className="space-y-2 text-sm">
+              <p className="text-muted-foreground">{t(k("result.estimateNote"))}</p>
+              {result.isLoss && <p className="text-foreground">{t(k("result.loss"))}</p>}
+              {!result.isLoss && result.gain === 0 && <p className="text-foreground">{t(k("result.zero"))}</p>}
+              {result.taxValueApplied && <p className="text-foreground">{t(k("result.taxValueApplied"))}</p>}
+            </div>
             {input.ownPermanentHome && (
               <div className="space-y-2 text-sm">
                 <p className="font-medium text-foreground">{t(k("checklist.title"))}</p>
@@ -215,6 +213,9 @@ function PropertyCapitalGainsCalculator() {
             )}
           </>
         )}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {result ? `${t(k("result.extraTax"))}: ${money(result.extraTax)}` : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );

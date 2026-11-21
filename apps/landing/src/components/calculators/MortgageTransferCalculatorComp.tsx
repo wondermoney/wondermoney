@@ -412,7 +412,7 @@ function Results({ result, money }: { result: MortgageTransferResult; money: Mon
       </div>
 
       {longerTerm && (
-        <p className="rounded-lg border border-warning-text/30 px-4 py-3 text-sm text-foreground" role="note">
+        <p className="rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground" role="note">
           {longerTerm.extraInterest > 0
             ? t(k("results.longerTerm"), {
                 extra: duration(longerTerm.extraMonths),
@@ -600,6 +600,7 @@ function SavingsChart({ result, money }: { result: MortgageTransferResult; money
           )}
           <ReferenceLine y={0} stroke="oklch(var(--input))" />
           <Line
+            isAnimationActive={false}
             type="linear"
             dataKey="saved"
             name={t(k("chart.saved"))}
@@ -610,6 +611,7 @@ function SavingsChart({ result, money }: { result: MortgageTransferResult; money
           {result.costs.total > 0 && (
             // An empty series so the legend names the dashed costs line.
             <Line
+              isAnimationActive={false}
               dataKey="costs"
               name={t(k("chart.costs"))}
               stroke="oklch(var(--chart-2))"

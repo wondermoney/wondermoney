@@ -395,13 +395,13 @@ function ScenarioCard({
   const hasDate = payoffMonth(scenario.months) !== "—";
 
   return (
-    <section className="min-w-0 rounded-lg border border-border p-4" aria-label={t(k(`${kind}.title`))}>
+    <section className="min-w-0 rounded-lg bg-paper-2 p-4" aria-label={t(k(`${kind}.title`))}>
       <h3 className="text-sm font-semibold text-foreground">{t(k(`${kind}.title`))}</h3>
       <p className="mt-3 text-sm text-muted-foreground">{t(k(`${kind}.headline`))}</p>
       {/* Geist Mono is for money only: the duration is set in the body face. */}
       <p
         className={cn(
-          "break-words text-2xl font-bold text-primary",
+          "break-words text-2xl font-semibold tracking-tight text-foreground",
           kind === "lowerPayment" && "font-mono",
         )}
       >
@@ -601,6 +601,7 @@ function BalanceChart({
           <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           {series.map(({ key, color, dash }) => (
             <Line
+              isAnimationActive={false}
               key={key}
               type="monotone"
               dataKey={key}
@@ -629,7 +630,7 @@ function OriginalReference({
 }) {
   const { t } = useTranslations();
   return (
-    <div className="rounded-lg border border-border p-4 text-sm">
+    <div className="rounded-lg bg-paper-2 p-4 text-sm">
       <h3 className="font-semibold text-foreground">{t(k("table.original"))}</h3>
       <dl className="mt-2 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-3">
         <SummaryItem label={t(k("table.monthlyPayment"))} value={money(original.monthlyPayment)} />

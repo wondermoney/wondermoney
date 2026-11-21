@@ -311,8 +311,19 @@ function ResultPanel({ result, formats }: { result: RateRevisionResult; formats:
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-sm text-muted-foreground">{t(k("result.newPayment"))}</p>
-        <p className="font-mono text-3xl font-bold text-primary">{exact(revised.monthlyPayment)}</p>
+        <CalculatorResult
+          items={[
+            {
+              label: t(k("result.currentPayment"), { rate: rate(current.rate) }),
+              value: exact(current.monthlyPayment),
+            },
+            {
+              label: t(k("result.revisedPayment"), { rate: rate(revised.rate) }),
+              value: exact(revised.monthlyPayment),
+              highlight: true,
+            },
+          ]}
+        />
         <p className={cn("mt-1 text-sm font-medium", changeTone)} aria-live="polite">
           {direction === "same"
             ? t(k("result.same"))
@@ -322,19 +333,6 @@ function ResultPanel({ result, formats }: { result: RateRevisionResult; formats:
               })}
         </p>
       </div>
-
-      <CalculatorResult
-        items={[
-          {
-            label: t(k("result.currentPayment"), { rate: rate(current.rate) }),
-            value: exact(current.monthlyPayment),
-          },
-          {
-            label: t(k("result.revisedPayment"), { rate: rate(revised.rate) }),
-            value: exact(revised.monthlyPayment),
-          },
-        ]}
-      />
 
       <dl className="grid grid-cols-1 gap-4 border-t border-border pt-4 text-sm sm:grid-cols-3">
         <div className="min-w-0">
