@@ -252,7 +252,7 @@ export const TOOLS_CATALOG = [
 		routeId: "toolFuelPrices",
 		group: "budgetAndSave",
 		icon: Fuel,
-		subgroup: "pricesAndInflation",
+		comparator: true,
 		related: ["toolHouseholdBudget", "toolCarLoan", "toolVehicleTax"],
 	},
 	{

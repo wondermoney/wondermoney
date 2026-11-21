@@ -120,6 +120,7 @@ const COMPARATOR_ROUTE_IDS = [
 	"toolRemuneratedAccounts",
 	"toolBrokerFees",
 	"toolPprComparison",
+	"toolFuelPrices",
 ]
 
 describe("header tool menus", () => {

@@ -392,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Offers from banks, brokers, insurers and energy suppliers in Portugal, side by side.",
+      "description": "Offers from banks, brokers, insurers, energy suppliers and fuel stations in Portugal, side by side.",
       "items": {
         "electricityTariffComparison": "Every household offer, ranked by what it would cost you a year",
         "freeBankAccounts": "Free current accounts and the conditions of each",
         "termDepositOffers": "Term deposit offers by term and amount, with interest after tax",
         "remuneratedAccounts": "Remunerated and savings accounts, with net interest after IRS",
         "brokerFees": "Custody, trading and currency fees at brokers available in Portugal",
-        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns"
+        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns",
+        "fuelPrices": "Official average prices and the cheapest stations in your district and municipality"
       }
     },
     "learn": "Learn",
