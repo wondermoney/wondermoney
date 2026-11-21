@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Before you repay",
           "items": {
-            "fee": "Check the fee. A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving.",
-            "rate": "Variable and mixed rates are out of scope: the figures assume the rate you enter stays fixed for the rest of the loan.",
-            "reserves": "Keep a cash cushion. Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment.",
-            "otherDebts": "Repay the most expensive debt first. If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage.",
-            "lender": "Ask your lender how it applies the repayment. Some lower the payment by default, others shorten the term, and many let you choose."
+            "fee": {
+              "term": "Check the fee",
+              "body": "A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving."
+            },
+            "rate": {
+              "term": "Variable and mixed rates are out of scope",
+              "body": "The figures assume the rate you enter stays fixed for the rest of the loan."
+            },
+            "reserves": {
+              "term": "Keep a cash cushion",
+              "body": "Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment."
+            },
+            "otherDebts": {
+              "term": "Repay the most expensive debt first",
+              "body": "If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage."
+            },
+            "lender": {
+              "term": "Ask your lender how it applies the repayment",
+              "body": "Some lower the payment by default, others shorten the term, and many let you choose."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator first works out the loan as it stands, with the same fixed-rate engine as the mortgage calculator. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments left. At 0% there is no interest, so the payment is simply P divided by n.",
-          "lowerPayment": "Keep the term: the balance left after the repayment goes back into the formula with the same n, which gives the new, lower payment.",
-          "shorterTerm": "Keep the payment: you go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
           "fee": "The fee is the percentage you enter, applied to the amount repaid. Interest saved is the interest left on the loan as it is minus the interest in each outcome, and the net saving is that minus the fee. A repayment larger than the balance clears the loan, and only the balance counts towards the fee.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly.",
             "lenderFigures": "Your lender's figures can differ slightly because of how it counts days and rounds. Ask for its own simulation before you repay."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid.",
+          "lowerPaymentTerm": "Keep the term",
+          "lowerPaymentBody": "The balance left after the repayment goes back into the formula with the same number of payments, which gives the new, lower payment.",
+          "shorterTermTerm": "Keep the payment",
+          "shorterTermBody": "You go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "timing": "Timing",
+            "oneOff": "One repayment",
+            "costs": "Costs",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits",
+            "feeNote": "Fee and net saving"
+          },
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1684,10 +1712,22 @@
           "title": "What to compare before you switch",
           "intro": "Moving your mortgage to another lender, or onto new terms with your own, can lower what you pay. A lower rate is only part of the picture, so compare the whole offer:",
           "items": {
-            "rate": "The rate. A lower fixed rate cuts the interest charged on what you owe every month.",
-            "monthlyCosts": "The monthly extras. Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer.",
-            "term": "The term. A new loan over more years lowers the payment, but you pay interest for longer.",
-            "oneOff": "The one-off costs. Leaving one loan and taking out another has fees, and they come out of your savings."
+            "rate": {
+              "term": "The rate",
+              "body": "A lower fixed rate cuts the interest charged on what you owe every month."
+            },
+            "monthlyCosts": {
+              "term": "The monthly extras",
+              "body": "Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer."
+            },
+            "term": {
+              "term": "The term",
+              "body": "A new loan over more years lowers the payment, but you pay interest for longer."
+            },
+            "oneOff": {
+              "term": "The one-off costs",
+              "body": "Leaving one loan and taking out another has fees, and they come out of your savings."
+            }
           },
           "outro": "The calculator puts these together: the payment with its extras, the total each loan still costs and the month the switching costs are paid back."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator works out both loans with the same fixed-rate engine as the mortgage calculator, on the balance you still owe. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments. At 0% there is no interest, so the payment is simply P divided by n. Each month's insurance and fees are added on top.",
           "saving": "A month's saving is what the current loan would cost that month minus what the new one costs. Once a loan is paid off it costs nothing, so with a longer new term the months after your current loan would have ended count as a cost. The total cost of each option is its payments, insurance and fees, plus the switching costs for the new loan. The net saving is the difference.",
           "breakEven": "The break-even month is the first month in which the savings so far are at least the switching costs. If that never happens before both loans end, the switch does not pay for itself.",
           "longerTerm": "When the new term is longer than the time left, the calculator also works out the offer over the time left, so you can see how much of the lower payment comes from the rate and how much from paying for longer.",
@@ -1726,7 +1765,22 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly. The payment shown is the first one; later ones stay within a cent of it.",
             "lenderFigures": "Lenders count days and round in their own ways, so their figures can differ slightly. Ask each one for its official offer before you decide."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance.",
+          "terms": {
+            "saving": "Saving and total cost",
+            "breakEven": "Break-even month",
+            "longerTerm": "A longer term",
+            "fixedRate": "Fixed rates",
+            "sameBalance": "The same balance",
+            "timing": "Timing",
+            "fees": "Insurance and fees",
+            "noDiscounting": "No discounting",
+            "rounding": "Rounding",
+            "lenderFigures": "Lenders' figures",
+            "limits": "Limits"
+          },
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "What a lump sum would save on your current loan instead of switching it.",
           "debtToIncomeLink": "Debt-to-income ratio calculator",
           "debtToIncomeBody": "The share of your income that goes on debt payments, now and with the new payment."
+        },
+        "labels": {
+          "monthlySaving": "Monthly saving",
+          "currentMonthTotal": "Current loan's cost that month",
+          "offerMonthTotal": "New loan's cost that month",
+          "currentTotalCost": "Total cost of the current loan",
+          "offerTotalCost": "Total cost of the new loan"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "shows what share of your income your current payments take, with the same bands this tool uses.",
         "exampleTitle": "Worked example",
         "exampleIntro": "A couple brings home {{income}} a month and pays {{existing}} a month on a car loan. They have {{savings}} saved for a home, expect a fixed rate of {{rate}} over {{years}} years and plan for purchase costs of {{costsRate}} of the price. Their lender lends up to {{ltv}} of the price, and they allow {{share}} of their income for credit.",
-        "exampleStep1": "Monthly room: {{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
-        "exampleStep2": "Largest loan: a payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
-        "exampleStep3": "Cash: each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
         "exampleStep4": "The lower of the two is {{monthlyPrice}}, so the monthly budget sets the limit.",
         "exampleResult": "At {{price}} they would borrow {{loan}}, pay {{downPayment}} down and {{purchaseCosts}} in costs, using all of their {{savings}}. The mortgage calculator puts the payment at {{payment}} a month.",
         "exampleLift": "About {{extraIncome}} more net income a month would take them to {{liftPrice}}, where the savings limit takes over.",
         "exampleSavings": "With only {{lowSavings}} saved, the picture flips: the savings cover a price of {{lowSavingsPrice}}, with a loan of {{lowSavingsLoan}}, well within what their income could carry. Saving more, not earning more, is what would raise their limit. The calculator above starts from the first couple, so you can swap in your own figures.",
         "methodTitle": "Method",
         "methodIntro": "The calculation works out each limit on its own, then takes the lower price.",
-        "methodLegend": "I is net monthly income, d the share of it allowed for credit, E the existing payments and M the room for the new payment. r is the annual rate divided by 12, n the number of monthly payments and L the largest loan. S is the savings, c the purchase costs and v the loan-to-value, both as a share of the price. P₁ is the price the monthly budget allows and P₂ the one the savings allow.",
         "methodShare": "The starting share of {{share}} sits in the caution band of the debt-to-income calculator ({{caution}}% to {{high}}%). It is a rule of thumb, not a legal limit.",
         "methodCosts": "At the highest price every euro of savings goes into the purchase: the costs first, the rest as the down payment. The loan covers what is left, and never more than the loan-to-value allows.",
         "methodRounding": "Amounts are worked in cents. The loan is rounded down to the cent, so its first payment, worked out by the mortgage calculator, fits your room; later ones can differ by a cent. The price is exactly the loan plus the down payment, and the extra income or savings is rounded up to the euro.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "Purchase costs are a flat share of the price. In practice taxes are often tiered and some fees are fixed amounts.",
         "lendersTitle": "What lenders check that this tool doesn't",
         "lendersIntro": "A lender's answer can be lower than this estimate, sometimes by a lot. Rules differ by lender and by country, and this calculator builds none of them in.",
-        "lenderStress": "Stress-tested rates: many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
-        "lenderIncome": "Income definitions: some count only part of bonuses, self-employed or rental income, or average it over several years.",
-        "lenderCountry": "Country limits: regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
-        "lenderProfile": "Your profile: your age at the end of the term, job security, credit history and the home itself all count.",
-        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you."
+        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you.",
+        "exampleStep1Term": "Monthly room",
+        "exampleStep1Body": "{{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
+        "exampleStep2Term": "Largest loan",
+        "exampleStep2Body": "A payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
+        "exampleStep3Term": "Cash",
+        "exampleStep3Body": "Each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
+        "lenderStressTerm": "Stress-tested rates",
+        "lenderStressBody": "Many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
+        "lenderIncomeTerm": "Income definitions",
+        "lenderIncomeBody": "Some count only part of bonuses, self-employed or rental income, or average it over several years.",
+        "lenderCountryTerm": "Country limits",
+        "lenderCountryBody": "Regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
+        "lenderProfileTerm": "Your profile",
+        "lenderProfileBody": "Your age at the end of the term, job security, credit history and the home itself all count.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas",
+        "labels": {
+          "maxLoan": "Largest loan"
+        },
+        "methodShareTerm": "Share for credit",
+        "methodCostsTerm": "Where the savings go",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionSavingsTerm": "All of the savings",
+        "assumptionPaymentTerm": "What the payment leaves out",
+        "assumptionCostsShareTerm": "Purchase costs"
       }
     },
     "termDeposit": {

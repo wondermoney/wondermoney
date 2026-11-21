@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Prima di rimborsare",
           "items": {
-            "fee": "Controlla la penale. La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto.",
-            "rate": "I tassi variabili e misti non sono coperti: i calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito.",
-            "reserves": "Tieni una riserva. Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso.",
-            "otherDebts": "Rimborsa prima il debito più caro. Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico.",
-            "lender": "Chiedi alla banca come applica il rimborso. Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            "fee": {
+              "term": "Controlla la penale",
+              "body": "La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto."
+            },
+            "rate": {
+              "term": "I tassi variabili e misti non sono coperti",
+              "body": "I calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito."
+            },
+            "reserves": {
+              "term": "Tieni una riserva",
+              "body": "Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso."
+            },
+            "otherDebts": {
+              "term": "Rimborsa prima il debito più caro",
+              "body": "Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico."
+            },
+            "lender": {
+              "term": "Chiedi alla banca come applica il rimborso",
+              "body": "Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce prima il prestito così com'è, con lo stesso motore a tasso fisso del calcolatore del mutuo. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate che restano. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n.",
-          "lowerPayment": "Mantenere la durata: il debito che resta dopo il rimborso torna nella formula con lo stesso n, che dà la nuova rata, più bassa.",
-          "shorterTerm": "Mantenere la rata: continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
           "fee": "La penale è la percentuale che inserisci, applicata alla somma rimborsata. Gli interessi risparmiati sono gli interessi residui del prestito così com'è meno quelli di ciascuno scenario, e il risparmio netto è questa cifra meno la penale. Una somma superiore al debito residuo estingue il prestito, e solo il debito residuo conta per la penale.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano esattamente.",
             "lenderFigures": "I numeri della tua banca possono differire leggermente per come conta i giorni e arrotonda. Chiedile una simulazione prima di rimborsare."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata.",
+          "lowerPaymentTerm": "Mantenere la durata",
+          "lowerPaymentBody": "Il debito che resta dopo il rimborso torna nella formula con lo stesso numero di rate, che dà la nuova rata, più bassa.",
+          "shorterTermTerm": "Mantenere la rata",
+          "shorterTermBody": "Continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "timing": "Momento del rimborso",
+            "oneOff": "Un solo rimborso",
+            "costs": "Costi",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti",
+            "feeNote": "Penale e risparmio netto"
+          },
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1684,10 +1712,22 @@
           "title": "Cosa confrontare prima di cambiare",
           "intro": "Portare il mutuo in un'altra banca, o rinegoziare le condizioni con la tua, può abbassare quello che paghi. Un tasso più basso è solo una parte del conto, quindi confronta l'offerta per intero:",
           "items": {
-            "rate": "Il tasso. Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi.",
-            "monthlyCosts": "Gli extra mensili. Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più.",
-            "term": "La durata. Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo.",
-            "oneOff": "I costi una tantum. Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            "rate": {
+              "term": "Il tasso",
+              "body": "Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi."
+            },
+            "monthlyCosts": {
+              "term": "Gli extra mensili",
+              "body": "Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più."
+            },
+            "term": {
+              "term": "La durata",
+              "body": "Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo."
+            },
+            "oneOff": {
+              "term": "I costi una tantum",
+              "body": "Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            }
           },
           "outro": "Il calcolatore mette tutto insieme: la rata con gli extra, quanto costa ancora ogni mutuo in totale e il mese in cui recuperi i costi del passaggio."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce i due mutui con lo stesso motore a tasso fisso del calcolatore del mutuo, sul debito che hai ancora. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n. Le assicurazioni e le spese di ogni mese si sommano sopra.",
           "saving": "Il risparmio di un mese è quanto costerebbe quel mese il mutuo attuale meno quanto costa il nuovo. Un mutuo estinto non costa più nulla, quindi con una nuova durata più lunga i mesi dopo la fine del mutuo attuale contano come un costo. Il costo totale di ogni opzione sono le rate, le assicurazioni e le spese, più i costi del passaggio per il nuovo mutuo. Il risparmio netto è la differenza.",
           "breakEven": "Il mese in cui il passaggio si ripaga è il primo in cui il risparmio accumulato arriva almeno ai costi del passaggio. Se non succede prima della fine dei due mutui, il passaggio non si ripaga.",
           "longerTerm": "Quando la nuova durata è più lunga della durata residua, il calcolatore calcola anche l'offerta sulla durata residua, così vedi quanto del calo della rata viene dal tasso e quanto dal pagare più a lungo.",
@@ -1726,7 +1765,22 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano. La rata indicata è la prima; le successive differiscono al massimo di un centesimo.",
             "lenderFigures": "Ogni banca conta i giorni e arrotonda a modo suo, quindi i suoi importi possono differire di poco. Chiedi a ciascuna l'offerta ufficiale prima di decidere."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito.",
+          "terms": {
+            "saving": "Risparmio e costo totale",
+            "breakEven": "Mese in cui il cambio si ripaga",
+            "longerTerm": "Una durata più lunga",
+            "fixedRate": "Tassi fissi",
+            "sameBalance": "Lo stesso debito",
+            "timing": "Momento del cambio",
+            "fees": "Assicurazioni e spese",
+            "noDiscounting": "Nessuno sconto nel tempo",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre delle banche",
+            "limits": "Limiti"
+          },
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "Quanto risparmieresti con un rimborso parziale sul mutuo attuale, invece di surrogarlo.",
           "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
           "debtToIncomeBody": "La parte del tuo reddito che va in rate, oggi e con la nuova rata."
+        },
+        "labels": {
+          "monthlySaving": "Risparmio al mese",
+          "currentMonthTotal": "Costo del mutuo attuale in quel mese",
+          "offerMonthTotal": "Costo del nuovo mutuo in quel mese",
+          "currentTotalCost": "Costo totale del mutuo attuale",
+          "offerTotalCost": "Costo totale del nuovo mutuo"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "mostra quale parte del tuo reddito occupano le rate attuali, con le stesse fasce che usa questo strumento.",
         "exampleTitle": "Esempio pratico",
         "exampleIntro": "Una coppia guadagna {{income}} netti al mese e paga {{existing}} al mese per un prestito auto. Ha {{savings}} da parte per la casa, conta su un tasso fisso del {{rate}} per {{years}} anni e prevede costi d'acquisto del {{costsRate}} del prezzo. La banca finanzia fino al {{ltv}} del prezzo, e la coppia destina al credito il {{share}} del reddito.",
-        "exampleStep1": "Margine mensile: il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
-        "exampleStep2": "Mutuo massimo: una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
-        "exampleStep3": "Soldi in anticipo: ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
         "exampleStep4": "Il più basso dei due è {{monthlyPrice}}, quindi è il budget mensile a fissare il limite.",
         "exampleResult": "A {{price}} la coppia chiederebbe {{loan}}, verserebbe {{downPayment}} di anticipo e pagherebbe {{purchaseCosts}} di costi, usando tutti i {{savings}} risparmiati. Il calcolatore del mutuo dà una rata di {{payment}} al mese.",
         "exampleLift": "Con circa {{extraIncome}} di reddito netto in più al mese arriverebbe a {{liftPrice}}, dove subentra il limite dei risparmi.",
         "exampleSavings": "Con solo {{lowSavings}} da parte il quadro si ribalta: i risparmi coprono un prezzo di {{lowSavingsPrice}}, con un mutuo di {{lowSavingsLoan}}, ben dentro ciò che il reddito potrebbe sostenere. Per alzare il limite conta risparmiare di più, non guadagnare di più. Il calcolatore qui sopra parte dalla prima coppia, così puoi inserire le tue cifre.",
         "methodTitle": "Metodo",
         "methodIntro": "Il calcolo considera ogni limite separatamente e poi prende il prezzo più basso.",
-        "methodLegend": "I è il reddito netto mensile, d la quota consentita per il credito, E le rate attuali e M il margine per la nuova rata. r è il tasso annuo diviso 12, n il numero di rate mensili e L il mutuo massimo. S sono i risparmi, c i costi d'acquisto e v il finanziamento, entrambi in percentuale del prezzo. P₁ è il prezzo che permette il budget mensile e P₂ quello che permettono i risparmi.",
         "methodShare": "La quota iniziale del {{share}} rientra nella fascia di attenzione del calcolatore del rapporto rata/reddito (dal {{caution}}% al {{high}}%). È una regola pratica, non un limite di legge.",
         "methodCosts": "Al prezzo massimo ogni euro di risparmio va nell'acquisto: prima i costi, il resto come anticipo. Il mutuo copre ciò che manca, e mai più di quanto consente il finanziamento massimo.",
         "methodRounding": "Gli importi sono calcolati in centesimi. Il mutuo è arrotondato per difetto al centesimo, così la prima rata, calcolata dal calcolatore del mutuo, rientra nel tuo margine; le successive possono variare di un centesimo. Il prezzo è esattamente mutuo più anticipo, e il reddito o il risparmio in più è arrotondato per eccesso all'euro.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "I costi d'acquisto sono una percentuale fissa del prezzo. In pratica le imposte vanno spesso a scaglioni e alcune spese sono importi fissi.",
         "lendersTitle": "Cosa controllano le banche e questo strumento no",
         "lendersIntro": "La risposta di una banca può essere più bassa di questa stima, a volte di molto. Le regole cambiano da banca a banca e da paese a paese, e questo calcolatore non ne include nessuna.",
-        "lenderStress": "Stress test sul tasso: molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
-        "lenderIncome": "Definizione del reddito: alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
-        "lenderCountry": "Limiti del paese: in molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
-        "lenderProfile": "Il tuo profilo: l'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
-        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te."
+        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te.",
+        "exampleStep1Term": "Margine mensile",
+        "exampleStep1Body": "Il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
+        "exampleStep2Term": "Mutuo massimo",
+        "exampleStep2Body": "Una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
+        "exampleStep3Term": "Soldi in anticipo",
+        "exampleStep3Body": "Ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
+        "lenderStressTerm": "Stress test sul tasso",
+        "lenderStressBody": "Molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
+        "lenderIncomeTerm": "Definizione del reddito",
+        "lenderIncomeBody": "Alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
+        "lenderCountryTerm": "Limiti del paese",
+        "lenderCountryBody": "In molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
+        "lenderProfileTerm": "Il tuo profilo",
+        "lenderProfileBody": "L'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule",
+        "labels": {
+          "maxLoan": "Mutuo massimo"
+        },
+        "methodShareTerm": "Quota per il credito",
+        "methodCostsTerm": "Dove vanno i risparmi",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionSavingsTerm": "Tutti i risparmi",
+        "assumptionPaymentTerm": "Cosa resta fuori dalla rata",
+        "assumptionCostsShareTerm": "Costi di acquisto"
       }
     },
     "termDeposit": {

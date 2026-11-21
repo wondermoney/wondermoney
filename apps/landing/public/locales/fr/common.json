@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Avant de rembourser",
           "items": {
-            "fee": "Vérifiez les indemnités. La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette.",
-            "rate": "Les taux variables et mixtes ne sont pas couverts : les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt.",
-            "reserves": "Gardez une réserve. L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement.",
-            "otherDebts": "Remboursez d'abord la dette la plus chère. Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher.",
-            "lender": "Demandez à votre banque comment elle applique le remboursement. Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            "fee": {
+              "term": "Vérifiez les indemnités",
+              "body": "La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette."
+            },
+            "rate": {
+              "term": "Les taux variables et mixtes ne sont pas couverts",
+              "body": "Les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt."
+            },
+            "reserves": {
+              "term": "Gardez une réserve",
+              "body": "L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement."
+            },
+            "otherDebts": {
+              "term": "Remboursez d'abord la dette la plus chère",
+              "body": "Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher."
+            },
+            "lender": {
+              "term": "Demandez à votre banque comment elle applique le remboursement",
+              "body": "Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule d'abord le prêt tel quel, avec le même moteur à taux fixe que le simulateur de prêt immobilier. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités restantes. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n.",
-          "lowerPayment": "Garder la durée : le capital restant après le remboursement repasse dans la formule avec le même n, ce qui donne la nouvelle mensualité, plus basse.",
-          "shorterTerm": "Garder la mensualité : vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
           "fee": "Les indemnités sont le pourcentage indiqué, appliqué à la somme remboursée. Les intérêts économisés sont les intérêts restants du prêt tel quel moins ceux de chaque scénario, et l'économie nette est ce montant moins les indemnités. Une somme supérieure au capital restant dû solde le prêt, et seul ce capital compte pour les indemnités.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page concordent.",
             "lenderFigures": "Les chiffres de votre banque peuvent légèrement différer selon sa façon de compter les jours et d'arrondir. Demandez-lui sa propre simulation avant de rembourser."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée.",
+          "lowerPaymentTerm": "Garder la durée",
+          "lowerPaymentBody": "Le capital restant après le remboursement repasse dans la formule avec le même nombre de mensualités, ce qui donne la nouvelle mensualité, plus basse.",
+          "shorterTermTerm": "Garder la mensualité",
+          "shorterTermBody": "Vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "timing": "Moment du remboursement",
+            "oneOff": "Un seul remboursement",
+            "costs": "Frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites",
+            "feeNote": "Indemnités et économie nette"
+          },
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1684,10 +1712,22 @@
           "title": "Ce qu'il faut comparer avant de faire racheter son prêt",
           "intro": "Faire racheter votre prêt immobilier par une autre banque, ou renégocier avec la vôtre, peut faire baisser ce que vous payez. Un taux plus bas n'est qu'une partie du calcul : comparez l'offre dans son ensemble.",
           "items": {
-            "rate": "Le taux. Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez.",
-            "monthlyCosts": "Les frais mensuels. La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher.",
-            "term": "La durée. Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps.",
-            "oneOff": "Les frais ponctuels. Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            "rate": {
+              "term": "Le taux",
+              "body": "Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez."
+            },
+            "monthlyCosts": {
+              "term": "Les frais mensuels",
+              "body": "La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher."
+            },
+            "term": {
+              "term": "La durée",
+              "body": "Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps."
+            },
+            "oneOff": {
+              "term": "Les frais ponctuels",
+              "body": "Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            }
           },
           "outro": "Le simulateur réunit tout cela : la mensualité avec ses frais, le total que chaque prêt coûte encore et le mois où les frais du rachat sont récupérés."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule les deux prêts avec le même moteur à taux fixe que le simulateur de prêt immobilier, sur le capital restant dû. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n. Les assurances et frais de chaque mois s'ajoutent par-dessus.",
           "saving": "L'économie d'un mois est ce que coûterait ce mois-là le prêt actuel, moins ce que coûte le nouveau. Un prêt soldé ne coûte plus rien : avec une nouvelle durée plus longue, les mois qui suivent la fin de votre prêt actuel comptent donc comme un coût. Le coût total de chaque option correspond aux mensualités, assurances et frais, plus les frais du rachat pour le nouveau prêt. L'économie nette est la différence.",
           "breakEven": "Le mois où le rachat est amorti est le premier mois où les économies cumulées atteignent au moins les frais du rachat. Si cela n'arrive pas avant la fin des deux prêts, le rachat n'est pas amorti.",
           "longerTerm": "Quand la nouvelle durée dépasse la durée restante, le simulateur calcule aussi l'offre sur la durée restante, pour montrer quelle part de la baisse de mensualité vient du taux et quelle part vient d'un remboursement plus long.",
@@ -1726,7 +1765,22 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page tombent juste. La mensualité affichée est la première ; les suivantes restent à moins d'un centime d'elle.",
             "lenderFigures": "Chaque banque compte les jours et arrondit à sa façon, ses chiffres peuvent donc différer légèrement. Demandez à chacune son offre officielle avant de décider."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital.",
+          "terms": {
+            "saving": "Économie et coût total",
+            "breakEven": "Mois de rentabilité",
+            "longerTerm": "Une durée plus longue",
+            "fixedRate": "Taux fixes",
+            "sameBalance": "Le même capital",
+            "timing": "Moment du changement",
+            "fees": "Assurances et frais",
+            "noDiscounting": "Sans actualisation",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres des banques",
+            "limits": "Limites"
+          },
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "Ce que ferait économiser un remboursement partiel sur votre prêt actuel, plutôt qu'un rachat.",
           "debtToIncomeLink": "Calculateur de taux d'endettement",
           "debtToIncomeBody": "La part de vos revenus consacrée aux remboursements, aujourd'hui et avec la nouvelle mensualité."
+        },
+        "labels": {
+          "monthlySaving": "Économie par mois",
+          "currentMonthTotal": "Coût du prêt actuel ce mois-là",
+          "offerMonthTotal": "Coût du nouveau prêt ce mois-là",
+          "currentTotalCost": "Coût total du prêt actuel",
+          "offerTotalCost": "Coût total du nouveau prêt"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités actuelles prennent, avec les mêmes tranches que cet outil.",
         "exampleTitle": "Exemple chiffré",
         "exampleIntro": "Un couple gagne {{income}} nets par mois et paie {{existing}} par mois pour un crédit auto. Il a {{savings}} d'épargne pour le logement, compte sur un taux fixe de {{rate}} sur {{years}} ans et prévoit des frais d'achat de {{costsRate}} du prix. Sa banque finance jusqu'à {{ltv}} du prix, et le couple réserve {{share}} de ses revenus au crédit.",
-        "exampleStep1": "Marge mensuelle : {{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
-        "exampleStep2": "Prêt maximal : une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
-        "exampleStep3": "Argent au départ : chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
         "exampleStep4": "Le plus bas des deux est {{monthlyPrice}} : c'est donc le budget mensuel qui fixe la limite.",
         "exampleResult": "À {{price}}, le couple emprunterait {{loan}}, verserait {{downPayment}} d'apport et paierait {{purchaseCosts}} de frais, en utilisant la totalité de ses {{savings}} d'épargne. Le simulateur de prêt immobilier place la mensualité à {{payment}}.",
         "exampleLift": "Environ {{extraIncome}} de revenus nets en plus par mois le mèneraient à {{liftPrice}}, où la limite de l'épargne prend le relais.",
         "exampleSavings": "Avec seulement {{lowSavings}} d'épargne, tout s'inverse : l'épargne couvre un prix de {{lowSavingsPrice}}, avec un prêt de {{lowSavingsLoan}}, bien en deçà de ce que ses revenus pourraient porter. Pour relever la limite, c'est épargner davantage qui compte, pas gagner davantage. Le calculateur ci-dessus part du premier couple, pour que vous y mettiez vos propres chiffres.",
         "methodTitle": "Méthode",
         "methodIntro": "Le calcul traite chaque limite séparément, puis retient le prix le plus bas.",
-        "methodLegend": "I désigne les revenus nets mensuels, d la part permise pour le crédit, E les mensualités actuelles et M la marge pour la nouvelle mensualité. r est le taux annuel divisé par 12, n le nombre de mensualités et L le prêt maximal. S désigne l'épargne, c les frais d'achat et v le financement, tous deux en pourcentage du prix. P₁ est le prix que permet le budget mensuel et P₂ celui que permet l'épargne.",
         "methodShare": "La part de départ de {{share}} se situe dans la tranche de vigilance du calculateur de taux d'endettement ({{caution}} % à {{high}} %). C'est un repère, pas une limite légale.",
         "methodCosts": "Au prix maximal, chaque euro d'épargne va dans l'achat : d'abord les frais, le reste en apport. Le prêt couvre ce qui manque, et jamais plus que le financement maximal ne le permet.",
         "methodRounding": "Les montants sont calculés en centimes. Le prêt est arrondi au centime inférieur, si bien que la première mensualité, calculée par le simulateur de prêt immobilier, tient dans votre marge ; les suivantes peuvent varier d'un centime. Le prix vaut exactement le prêt plus l'apport, et les revenus ou l'épargne en plus sont arrondis à l'euro supérieur.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "Les frais d'achat sont un pourcentage fixe du prix. En pratique, les taxes suivent souvent des tranches et certains frais sont des montants fixes.",
         "lendersTitle": "Ce que les banques vérifient et que cet outil ne fait pas",
         "lendersIntro": "La réponse d'une banque peut être inférieure à cette estimation, parfois nettement. Les règles changent d'une banque et d'un pays à l'autre, et ce calculateur n'en intègre aucune.",
-        "lenderStress": "Taux de stress : beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
-        "lenderIncome": "Définition des revenus : certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
-        "lenderCountry": "Limites nationales : dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
-        "lenderProfile": "Votre profil : l'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
-        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous."
+        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous.",
+        "exampleStep1Term": "Marge mensuelle",
+        "exampleStep1Body": "{{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
+        "exampleStep2Term": "Prêt maximal",
+        "exampleStep2Body": "Une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
+        "exampleStep3Term": "Argent au départ",
+        "exampleStep3Body": "Chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
+        "lenderStressTerm": "Taux de stress",
+        "lenderStressBody": "Beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
+        "lenderIncomeTerm": "Définition des revenus",
+        "lenderIncomeBody": "Certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
+        "lenderCountryTerm": "Limites nationales",
+        "lenderCountryBody": "Dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
+        "lenderProfileTerm": "Votre profil",
+        "lenderProfileBody": "L'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules",
+        "labels": {
+          "maxLoan": "Prêt maximal"
+        },
+        "methodShareTerm": "Part pour le crédit",
+        "methodCostsTerm": "Où va l'épargne",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionSavingsTerm": "Toute l'épargne",
+        "assumptionPaymentTerm": "Ce que la mensualité laisse de côté",
+        "assumptionCostsShareTerm": "Frais d'achat"
       }
     },
     "termDeposit": {

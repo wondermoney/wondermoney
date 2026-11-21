@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Antes de amortizar",
           "items": {
-            "fee": "Revisa la comisión. El banco puede cobrar un porcentaje de lo que amortizas, y las normas y los límites legales cambian según el país y el tipo de préstamo. Introdúcela en la calculadora para ver el ahorro neto.",
-            "rate": "Los tipos variables y mixtos quedan fuera de esta calculadora: las cuentas suponen que el tipo que introduces se mantiene fijo hasta el final del préstamo.",
-            "reserves": "Guarda un colchón. El dinero que entregas al banco es difícil de recuperar, así que asegúrate de que tu fondo de emergencia sigue ahí después de amortizar.",
-            "otherDebts": "Paga primero la deuda más cara. Si tienes una tarjeta de crédito o un préstamo personal con un tipo más alto, amortizarlo suele ahorrar más que amortizar una hipoteca más barata.",
-            "lender": "Pregunta al banco cómo aplica la amortización. Unos bajan la cuota por defecto, otros acortan el plazo y muchos te dejan elegir."
+            "fee": {
+              "term": "Revisa la comisión",
+              "body": "El banco puede cobrar un porcentaje de lo que amortizas, y las normas y los límites legales cambian según el país y el tipo de préstamo. Introdúcela en la calculadora para ver el ahorro neto."
+            },
+            "rate": {
+              "term": "Los tipos variables y mixtos quedan fuera de esta calculadora",
+              "body": "Las cuentas suponen que el tipo que introduces se mantiene fijo hasta el final del préstamo."
+            },
+            "reserves": {
+              "term": "Guarda un colchón",
+              "body": "El dinero que entregas al banco es difícil de recuperar, así que asegúrate de que tu fondo de emergencia sigue ahí después de amortizar."
+            },
+            "otherDebts": {
+              "term": "Paga primero la deuda más cara",
+              "body": "Si tienes una tarjeta de crédito o un préstamo personal con un tipo más alto, amortizarlo suele ahorrar más que amortizar una hipoteca más barata."
+            },
+            "lender": {
+              "term": "Pregunta al banco cómo aplica la amortización",
+              "body": "Unos bajan la cuota por defecto, otros acortan el plazo y muchos te dejan elegir."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "Cómo se calcula",
           "intro": "La calculadora primero calcula el préstamo tal como está, con el mismo motor de tipo fijo que la calculadora de hipoteca. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
-          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas que quedan. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n.",
-          "lowerPayment": "Mantener el plazo: el capital que queda tras la amortización vuelve a la fórmula con el mismo n, lo que da la nueva cuota, más baja.",
-          "shorterTerm": "Mantener la cuota: sigues pagando lo que el cuadro original prevé cada mes hasta que el capital menor se acaba. La última cuota solo cubre lo que falta, así que suele ser menor.",
           "fee": "La comisión es el porcentaje que introduces, aplicado a la cantidad amortizada. Los intereses ahorrados son los intereses que quedan en el préstamo tal como está menos los de cada escenario, y el ahorro neto es eso menos la comisión. Una cantidad mayor que el capital pendiente cancela el préstamo, y solo el capital cuenta para la comisión.",
           "assumptionsTitle": "Supuestos",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran.",
             "lenderFigures": "Las cifras de tu banco pueden variar un poco por cómo cuenta los días y redondea. Pídele su propia simulación antes de amortizar."
           },
-          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años pendientes, tipos de hasta {{maxRate}} y comisiones de hasta el {{maxFee}} de lo amortizado."
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años pendientes, tipos de hasta {{maxRate}} y comisiones de hasta el {{maxFee}} de lo amortizado.",
+          "lowerPaymentTerm": "Mantener el plazo",
+          "lowerPaymentBody": "El capital que queda tras la amortización vuelve a la fórmula con el mismo número de cuotas, lo que da la nueva cuota, más baja.",
+          "shorterTermTerm": "Mantener la cuota",
+          "shorterTermBody": "Sigues pagando lo que el cuadro original prevé cada mes hasta que el capital menor se acaba. La última cuota solo cubre lo que falta, así que suele ser menor.",
+          "zeroRate": "Al 0% no hay intereses, así que la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+          "terms": {
+            "fixedRate": "Tipo fijo",
+            "timing": "Momento de la amortización",
+            "oneOff": "Una sola amortización",
+            "costs": "Costes",
+            "rounding": "Redondeo",
+            "lenderFigures": "Las cifras de tu banco",
+            "limits": "Límites",
+            "feeNote": "Comisión y ahorro neto"
+          },
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Otras calculadoras",
@@ -1684,10 +1712,22 @@
           "title": "Qué comparar antes de cambiar",
           "intro": "Llevar tu hipoteca a otra entidad, o renegociar las condiciones con la tuya, puede bajar lo que pagas. Un tipo más bajo es solo una parte de la cuenta, así que compara la oferta completa:",
           "items": {
-            "rate": "El tipo. Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes.",
-            "monthlyCosts": "Los extras mensuales. Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro.",
-            "term": "El plazo. Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo.",
-            "oneOff": "Los gastos únicos. Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+            "rate": {
+              "term": "El tipo",
+              "body": "Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes."
+            },
+            "monthlyCosts": {
+              "term": "Los extras mensuales",
+              "body": "Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro."
+            },
+            "term": {
+              "term": "El plazo",
+              "body": "Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo."
+            },
+            "oneOff": {
+              "term": "Los gastos únicos",
+              "body": "Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+            }
           },
           "outro": "La calculadora junta todo esto: la cuota con los extras, el total que cada préstamo aún cuesta y el mes en que recuperas los gastos del cambio."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "Cómo se calcula",
           "intro": "La calculadora calcula los dos préstamos con el mismo motor de tipo fijo que la calculadora de hipoteca, sobre el capital que aún debes. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
-          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n. Los seguros y comisiones de cada mes se suman encima.",
           "saving": "El ahorro de un mes es lo que costaría ese mes la hipoteca actual menos lo que cuesta la nueva. Un préstamo ya pagado no cuesta nada, así que, con un nuevo plazo más largo, los meses posteriores al final de tu hipoteca actual cuentan como coste. El coste total de cada opción son sus cuotas, seguros y comisiones, más los gastos del cambio en el nuevo préstamo. El ahorro neto es la diferencia.",
           "breakEven": "El mes en que el cambio se paga solo es el primero en que el ahorro acumulado llega al menos a los gastos del cambio. Si eso no ocurre antes de que terminen los dos préstamos, el cambio no se paga solo.",
           "longerTerm": "Cuando el nuevo plazo es más largo que el plazo que queda, la calculadora calcula también la oferta en el plazo que queda, para que veas cuánto de la bajada de la cuota viene del tipo y cuánto de pagar durante más tiempo.",
@@ -1726,7 +1765,22 @@
             "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran. La cuota mostrada es la primera; las siguientes quedan a menos de un céntimo de ella.",
             "lenderFigures": "Cada entidad cuenta los días y redondea a su manera, así que sus cifras pueden variar un poco. Pide a cada una su oferta vinculante antes de decidir."
           },
-          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital."
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital.",
+          "terms": {
+            "saving": "Ahorro y coste total",
+            "breakEven": "Mes en que el cambio se paga",
+            "longerTerm": "Un plazo más largo",
+            "fixedRate": "Tipos fijos",
+            "sameBalance": "El mismo capital",
+            "timing": "Momento del cambio",
+            "fees": "Seguros y comisiones",
+            "noDiscounting": "Sin descontar en el tiempo",
+            "rounding": "Redondeo",
+            "lenderFigures": "Las cifras de los bancos",
+            "limits": "Límites"
+          },
+          "zeroRate": "Al 0% no hay intereses, así que la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Otras calculadoras",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "Lo que ahorrarías con una amortización en tu hipoteca actual, en lugar de cambiarla.",
           "debtToIncomeLink": "Calculadora de ratio de endeudamiento",
           "debtToIncomeBody": "La parte de tus ingresos que se va en cuotas, hoy y con la nueva cuota."
+        },
+        "labels": {
+          "monthlySaving": "Ahorro al mes",
+          "currentMonthTotal": "Coste del préstamo actual ese mes",
+          "offerMonthTotal": "Coste del préstamo nuevo ese mes",
+          "currentTotalCost": "Coste total del préstamo actual",
+          "offerTotalCost": "Coste total del préstamo nuevo"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "muestra qué parte de tus ingresos ocupan tus cuotas actuales, con los mismos tramos que usa esta herramienta.",
         "exampleTitle": "Ejemplo práctico",
         "exampleIntro": "Una pareja ingresa {{income}} netos al mes y paga {{existing}} al mes por un préstamo de coche. Tiene {{savings}} ahorrados para la vivienda, cuenta con un tipo fijo del {{rate}} a {{years}} años y prevé gastos de compra del {{costsRate}} del precio. Su banco financia hasta el {{ltv}} del precio, y la pareja permite un {{share}} de sus ingresos para crédito.",
-        "exampleStep1": "Margen mensual: el {{share}} de {{income}} son {{allowed}}. Restando los {{existing}} del coche, quedan {{room}} al mes para el nuevo préstamo.",
-        "exampleStep2": "Préstamo máximo: una cuota de {{room}} al {{rate}} durante {{years}} años devuelve {{maxLoan}}. Sumando todos los ahorros y pagando los gastos de compra con el total, el límite mensual permite un precio de {{monthlyPrice}}.",
-        "exampleStep3": "Dinero por adelantado: cada euro del precio pide un {{deposit}} para la entrada y un {{costsRate}} para los gastos, un {{cashShare}} en total. {{savings}} ÷ {{cashShare}} da un precio de {{cashPrice}}.",
         "exampleStep4": "El más bajo de los dos es {{monthlyPrice}}, así que es el presupuesto mensual el que marca el límite.",
         "exampleResult": "A {{price}}, la pareja pediría {{loan}}, pondría {{downPayment}} de entrada y pagaría {{purchaseCosts}} en gastos, usando todos sus {{savings}}. La calculadora de hipoteca sitúa la cuota en {{payment}} al mes.",
         "exampleLift": "Con unos {{extraIncome}} más de ingresos netos al mes llegarían a {{liftPrice}}, donde el límite de los ahorros toma el relevo.",
         "exampleSavings": "Con solo {{lowSavings}} ahorrados, todo cambia: los ahorros cubren un precio de {{lowSavingsPrice}}, con un préstamo de {{lowSavingsLoan}}, muy por debajo de lo que sus ingresos podrían asumir. Para subir el límite, lo que cuenta es ahorrar más, no ganar más. La calculadora de arriba parte de la primera pareja, para que pongas tus propias cifras.",
         "methodTitle": "Método",
         "methodIntro": "El cálculo trata cada límite por separado y luego se queda con el precio más bajo.",
-        "methodLegend": "I son los ingresos netos mensuales, d la parte permitida para crédito, E las cuotas actuales y M el margen para la nueva cuota. r es el tipo anual dividido entre 12, n el número de cuotas mensuales y L el préstamo máximo. S son los ahorros, c los gastos de compra y v la financiación, ambos como porcentaje del precio. P₁ es el precio que permite el presupuesto mensual y P₂ el que permiten los ahorros.",
         "methodShare": "La parte inicial del {{share}} está en el tramo de precaución de la calculadora de ratio de endeudamiento ({{caution}}% a {{high}}%). Es una regla orientativa, no un límite legal.",
         "methodCosts": "En el precio máximo, cada euro de ahorro va a la compra: primero los gastos y el resto como entrada. El préstamo cubre lo que falta, y nunca más de lo que permite la financiación máxima.",
         "methodRounding": "Los importes se calculan en céntimos. El préstamo se redondea a la baja al céntimo, así que la primera cuota, calculada por la calculadora de hipoteca, cabe en tu margen; las siguientes pueden variar un céntimo. El precio es exactamente el préstamo más la entrada, y los ingresos o ahorros adicionales se redondean al alza al euro.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "Los gastos de compra son un porcentaje fijo del precio. En la práctica, los impuestos suelen ir por tramos y algunas comisiones son importes fijos.",
         "lendersTitle": "Lo que miran los bancos y esta herramienta no",
         "lendersIntro": "La respuesta de un banco puede quedar por debajo de esta estimación, a veces bastante. Las reglas cambian de un banco a otro y de un país a otro, y esta calculadora no incluye ninguna.",
-        "lenderStress": "Tipos de estrés: muchos bancos comprueban que podrías seguir pagando si el tipo subiera unos puntos, sobre todo en préstamos a tipo variable.",
-        "lenderIncome": "Definición de ingresos: algunos solo cuentan parte de las primas, de los ingresos como autónomo o de alquileres, o hacen la media de varios años.",
-        "lenderCountry": "Límites del país: en muchos países el regulador limita la financiación, la parte de los ingresos que va a cuotas, el préstamo frente a los ingresos o el plazo.",
-        "lenderProfile": "Tu perfil: la edad al final del plazo, la estabilidad laboral, el historial de crédito y la propia vivienda también cuentan.",
-        "lendersOutro": "Usa el resultado para saber más o menos dónde estás antes de hablar con un banco, y luego pregunta qué límites se aplican en tu caso."
+        "lendersOutro": "Usa el resultado para saber más o menos dónde estás antes de hablar con un banco, y luego pregunta qué límites se aplican en tu caso.",
+        "exampleStep1Term": "Margen mensual",
+        "exampleStep1Body": "El {{share}} de {{income}} son {{allowed}}. Restando los {{existing}} del coche, quedan {{room}} al mes para el nuevo préstamo.",
+        "exampleStep2Term": "Préstamo máximo",
+        "exampleStep2Body": "Una cuota de {{room}} al {{rate}} durante {{years}} años devuelve {{maxLoan}}. Sumando todos los ahorros y pagando los gastos de compra con el total, el límite mensual permite un precio de {{monthlyPrice}}.",
+        "exampleStep3Term": "Dinero por adelantado",
+        "exampleStep3Body": "Cada euro del precio pide un {{deposit}} para la entrada y un {{costsRate}} para los gastos, un {{cashShare}} en total. {{savings}} ÷ {{cashShare}} da un precio de {{cashPrice}}.",
+        "lenderStressTerm": "Tipos de estrés",
+        "lenderStressBody": "Muchos bancos comprueban que podrías seguir pagando si el tipo subiera unos puntos, sobre todo en préstamos a tipo variable.",
+        "lenderIncomeTerm": "Definición de ingresos",
+        "lenderIncomeBody": "Algunos solo cuentan parte de las primas, de los ingresos como autónomo o de alquileres, o hacen la media de varios años.",
+        "lenderCountryTerm": "Límites del país",
+        "lenderCountryBody": "En muchos países el regulador limita la financiación, la parte de los ingresos que va a cuotas, el préstamo frente a los ingresos o el plazo.",
+        "lenderProfileTerm": "Tu perfil",
+        "lenderProfileBody": "La edad al final del plazo, la estabilidad laboral, el historial de crédito y la propia vivienda también cuentan.",
+        "methodRoundingTerm": "Redondeo",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas",
+        "labels": {
+          "maxLoan": "Préstamo máximo"
+        },
+        "methodShareTerm": "Parte para crédito",
+        "methodCostsTerm": "A dónde van los ahorros",
+        "assumptionFixedRateTerm": "Tipo fijo",
+        "assumptionSavingsTerm": "Todos los ahorros",
+        "assumptionPaymentTerm": "Lo que la cuota deja fuera",
+        "assumptionCostsShareTerm": "Gastos de compra"
       }
     },
     "termDeposit": {

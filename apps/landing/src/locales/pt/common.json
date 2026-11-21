@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Antes de amortizar",
           "items": {
-            "fee": "Confirma a comissão. O banco pode cobrar uma percentagem do valor que amortizas, e as regras e os limites legais mudam de país para país e com o tipo de crédito. Indica-a no simulador para veres a poupança líquida.",
-            "rate": "Taxas variáveis e mistas ficam fora deste simulador: as contas assumem que a taxa que indicas se mantém fixa até ao fim do crédito.",
-            "reserves": "Mantém uma reserva. O dinheiro entregue ao banco é difícil de recuperar, por isso garante que o teu fundo de emergência continua lá depois de amortizares.",
-            "otherDebts": "Paga primeiro a dívida mais cara. Se tens um cartão de crédito ou um crédito pessoal com uma taxa mais alta, amortizá-lo costuma poupar mais do que amortizar um crédito habitação mais barato.",
-            "lender": "Pergunta ao banco como aplica a amortização. Uns baixam a prestação por defeito, outros reduzem o prazo, e muitos deixam-te escolher."
+            "fee": {
+              "term": "Confirma a comissão",
+              "body": "O banco pode cobrar uma percentagem do valor que amortizas, e as regras e os limites legais mudam de país para país e com o tipo de crédito. Indica-a no simulador para veres a poupança líquida."
+            },
+            "rate": {
+              "term": "Taxas variáveis e mistas ficam fora deste simulador",
+              "body": "As contas assumem que a taxa que indicas se mantém fixa até ao fim do crédito."
+            },
+            "reserves": {
+              "term": "Mantém uma reserva",
+              "body": "O dinheiro entregue ao banco é difícil de recuperar, por isso garante que o teu fundo de emergência continua lá depois de amortizares."
+            },
+            "otherDebts": {
+              "term": "Paga primeiro a dívida mais cara",
+              "body": "Se tens um cartão de crédito ou um crédito pessoal com uma taxa mais alta, amortizá-lo costuma poupar mais do que amortizar um crédito habitação mais barato."
+            },
+            "lender": {
+              "term": "Pergunta ao banco como aplica a amortização",
+              "body": "Uns baixam a prestação por defeito, outros reduzem o prazo, e muitos deixam-te escolher."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "Como é calculado",
           "intro": "O simulador calcula primeiro o crédito tal como está, com o mesmo motor de taxa fixa do simulador de crédito habitação. Em cada mês, os juros incidem sobre o capital em dívida e o resto da prestação amortiza o crédito. A prestação constante vem da fórmula das anuidades:",
-          "legend": "M é a prestação mensal, P o capital em dívida, r a taxa anual a dividir por 12 e n o número de prestações que faltam. A 0% não há juros, por isso a prestação é simplesmente P a dividir por n.",
-          "lowerPayment": "Manter o prazo: o capital que fica depois da amortização volta à fórmula com o mesmo n, o que dá a nova prestação, mais baixa.",
-          "shorterTerm": "Manter a prestação: continuas a pagar o que o plano original prevê para cada mês até o capital mais pequeno acabar. A última prestação só cobre o que falta, por isso costuma ser mais baixa.",
           "fee": "A comissão é a percentagem que indicas, aplicada ao valor amortizado. Os juros poupados são os juros que faltam no crédito tal como está menos os juros de cada cenário, e a poupança líquida é esse valor menos a comissão. Um valor maior do que o capital em dívida liquida o crédito, e só o capital conta para a comissão.",
           "assumptionsTitle": "Pressupostos",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Os valores estão em euros. Os juros e a prestação de cada mês são arredondados ao cêntimo, por isso todos os totais da página batem certo.",
             "lenderFigures": "Os valores do teu banco podem diferir ligeiramente, pela forma como conta os dias e arredonda. Pede-lhe uma simulação antes de amortizares."
           },
-          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, até {{maxYears}} anos por pagar, taxas até {{maxRate}} e comissões até {{maxFee}} do valor amortizado."
+          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, até {{maxYears}} anos por pagar, taxas até {{maxRate}} e comissões até {{maxFee}} do valor amortizado.",
+          "lowerPaymentTerm": "Manter o prazo",
+          "lowerPaymentBody": "O capital que fica depois da amortização volta à fórmula com o mesmo número de prestações, o que dá a nova prestação, mais baixa.",
+          "shorterTermTerm": "Manter a prestação",
+          "shorterTermBody": "Continuas a pagar o que o plano original prevê para cada mês até o capital mais pequeno acabar. A última prestação só cobre o que falta, por isso costuma ser mais baixa.",
+          "zeroRate": "A 0% não há juros, por isso a prestação é simplesmente o capital em dívida a dividir pelo número de prestações.",
+          "terms": {
+            "fixedRate": "Taxa fixa",
+            "timing": "Momento da amortização",
+            "oneOff": "Uma só amortização",
+            "costs": "Custos",
+            "rounding": "Arredondamento",
+            "lenderFigures": "Os valores do teu banco",
+            "limits": "Limites",
+            "feeNote": "Comissão e poupança líquida"
+          },
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Outros simuladores",
@@ -1684,10 +1712,22 @@
           "title": "O que comparar antes de mudar",
           "intro": "Levar o crédito habitação para outro banco, ou renegociar as condições com o teu, pode baixar o que pagas. Uma taxa mais baixa é só uma parte da conta, por isso compara a proposta inteira:",
           "items": {
-            "rate": "A taxa. Uma taxa fixa mais baixa reduz os juros cobrados todos os meses sobre o que deves.",
-            "monthlyCosts": "Os extras mensais. É comum o banco pedir que subscrevas com ele os seguros de vida e multirriscos, ou que abras uma conta com comissões. Soma-os à prestação, senão uma taxa mais barata pode sair mais cara.",
-            "term": "O prazo. Um crédito novo a mais anos baixa a prestação, mas pagas juros durante mais tempo.",
-            "oneOff": "Os custos únicos. Sair de um crédito e fazer outro tem encargos, e saem das tuas poupanças."
+            "rate": {
+              "term": "A taxa",
+              "body": "Uma taxa fixa mais baixa reduz os juros cobrados todos os meses sobre o que deves."
+            },
+            "monthlyCosts": {
+              "term": "Os extras mensais",
+              "body": "É comum o banco pedir que subscrevas com ele os seguros de vida e multirriscos, ou que abras uma conta com comissões. Soma-os à prestação, senão uma taxa mais barata pode sair mais cara."
+            },
+            "term": {
+              "term": "O prazo",
+              "body": "Um crédito novo a mais anos baixa a prestação, mas pagas juros durante mais tempo."
+            },
+            "oneOff": {
+              "term": "Os custos únicos",
+              "body": "Sair de um crédito e fazer outro tem encargos, e saem das tuas poupanças."
+            }
           },
           "outro": "O simulador junta tudo isto: a prestação com os extras, o total que cada crédito ainda custa e o mês em que recuperas os custos da mudança."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "Como é calculado",
           "intro": "O simulador calcula os dois créditos com o mesmo motor de taxa fixa do simulador de crédito habitação, sobre o capital que ainda deves. Em cada mês, os juros incidem sobre o capital em dívida e o resto da prestação amortiza o crédito. A prestação constante vem da fórmula das anuidades:",
-          "legend": "M é a prestação mensal, P o capital em dívida, r a taxa anual a dividir por 12 e n o número de prestações. A 0% não há juros, por isso a prestação é simplesmente P a dividir por n. Os seguros e comissões de cada mês somam-se por cima.",
           "saving": "A poupança de um mês é o que o crédito atual custaria nesse mês menos o que custa o novo. Depois de liquidado, um crédito não custa nada, por isso, com um novo prazo mais longo, os meses depois do fim do crédito atual contam como custo. O custo total de cada opção são as prestações, os seguros e as comissões, mais os custos da mudança no novo crédito. A poupança líquida é a diferença.",
           "breakEven": "O mês em que a mudança se paga é o primeiro em que a poupança acumulada chega pelo menos aos custos da mudança. Se isso nunca acontecer antes do fim dos dois créditos, a mudança não se paga.",
           "longerTerm": "Quando o novo prazo é mais longo do que o prazo que falta, o simulador calcula também a proposta no prazo que falta, para veres quanto da descida da prestação vem da taxa e quanto vem de pagares durante mais tempo.",
@@ -1726,7 +1765,22 @@
             "rounding": "Os valores estão em euros. Os juros e a prestação de cada mês são arredondados ao cêntimo, por isso todos os totais da página batem certo. A prestação indicada é a primeira; as seguintes ficam a menos de um cêntimo dela.",
             "lenderFigures": "Cada banco conta os dias e arredonda de forma diferente, por isso os valores podem diferir ligeiramente. Pede a cada um a proposta oficial antes de decidires."
           },
-          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, prazos até {{maxYears}} anos, taxas até {{maxRate}} e comissões de saída até {{maxExitFee}} do capital."
+          "limits": "O simulador aceita capitais de {{minBalance}} a {{maxBalance}}, prazos até {{maxYears}} anos, taxas até {{maxRate}} e comissões de saída até {{maxExitFee}} do capital.",
+          "terms": {
+            "saving": "Poupança e custo total",
+            "breakEven": "Mês em que a mudança se paga",
+            "longerTerm": "Um prazo mais longo",
+            "fixedRate": "Taxas fixas",
+            "sameBalance": "O mesmo capital",
+            "timing": "Momento da mudança",
+            "fees": "Seguros e comissões",
+            "noDiscounting": "Sem desconto no tempo",
+            "rounding": "Arredondamento",
+            "lenderFigures": "Os valores dos bancos",
+            "limits": "Limites"
+          },
+          "zeroRate": "A 0% não há juros, por isso a prestação é simplesmente o capital em dívida a dividir pelo número de prestações.",
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Outros simuladores",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "Quanto pouparias com uma amortização no crédito atual, em vez de o transferires.",
           "debtToIncomeLink": "Calculadora de taxa de esforço",
           "debtToIncomeBody": "A parte do teu rendimento que vai para prestações, hoje e com a nova prestação."
+        },
+        "labels": {
+          "monthlySaving": "Poupança por mês",
+          "currentMonthTotal": "Custo do crédito atual nesse mês",
+          "offerMonthTotal": "Custo do novo crédito nesse mês",
+          "currentTotalCost": "Custo total do crédito atual",
+          "offerTotalCost": "Custo total do novo crédito"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "mostra que parte do teu rendimento as prestações atuais ocupam, com os mesmos escalões que esta ferramenta usa.",
         "exampleTitle": "Exemplo prático",
         "exampleIntro": "Um casal recebe {{income}} líquidos por mês e paga {{existing}} por mês num crédito automóvel. Tem {{savings}} poupados para a casa, conta com uma taxa fixa de {{rate}} a {{years}} anos e prevê custos da compra de {{costsRate}} do preço. O banco financia até {{ltv}} do preço, e o casal permite {{share}} do rendimento para crédito.",
-        "exampleStep1": "Margem mensal: {{share}} de {{income}} são {{allowed}}. Tirando os {{existing}} do crédito automóvel, sobram {{room}} por mês para o novo crédito.",
-        "exampleStep2": "Maior crédito: uma prestação de {{room}} a {{rate}} durante {{years}} anos paga {{maxLoan}}. Somando todas as poupanças e pagando os custos da compra com o total, o limite mensal permite um preço de {{monthlyPrice}}.",
-        "exampleStep3": "Dinheiro à cabeça: cada euro do preço pede {{deposit}} para a entrada e {{costsRate}} para os custos, {{cashShare}} no total. {{savings}} ÷ {{cashShare}} dá um preço de {{cashPrice}}.",
         "exampleStep4": "O mais baixo dos dois é {{monthlyPrice}}, por isso é o orçamento mensal que define o limite.",
         "exampleResult": "A {{price}}, o casal pediria {{loan}}, daria {{downPayment}} de entrada e pagaria {{purchaseCosts}} em custos, usando todos os {{savings}}. O simulador de crédito habitação põe a prestação em {{payment}} por mês.",
         "exampleLift": "Com cerca de {{extraIncome}} a mais de rendimento líquido por mês chegariam a {{liftPrice}}, onde o limite das poupanças passa à frente.",
         "exampleSavings": "Com apenas {{lowSavings}} poupados, tudo se inverte: as poupanças cobrem um preço de {{lowSavingsPrice}}, com um crédito de {{lowSavingsLoan}}, bem dentro do que o rendimento aguentaria. Para subir o limite, o que conta é poupar mais, não ganhar mais. O simulador acima começa no primeiro casal, para poderes trocar pelos teus valores.",
         "methodTitle": "Método",
         "methodIntro": "O cálculo trata cada limite à parte e depois fica com o preço mais baixo.",
-        "methodLegend": "I é o rendimento líquido mensal, d a parte dele permitida para crédito, E as prestações atuais e M a margem para a nova prestação. r é a taxa anual a dividir por 12, n o número de prestações mensais e L o maior crédito. S são as poupanças, c os custos da compra e v o financiamento, ambos em percentagem do preço. P₁ é o preço que o orçamento mensal permite e P₂ o que as poupanças permitem.",
         "methodShare": "A parte inicial de {{share}} fica no escalão de atenção da calculadora de taxa de esforço ({{caution}}% a {{high}}%). É uma regra prática, não um limite legal.",
         "methodCosts": "No preço máximo, cada euro das poupanças vai para a compra: primeiro os custos, o resto como entrada. O crédito cobre o que falta, e nunca mais do que o financiamento máximo permite.",
         "methodRounding": "Os montantes são calculados em cêntimos. O crédito é arredondado para baixo ao cêntimo, por isso a primeira prestação, calculada pelo simulador de crédito habitação, cabe na tua margem; as seguintes podem variar um cêntimo. O preço é exatamente o crédito mais a entrada, e o rendimento ou a poupança a mais é arredondado para cima ao euro.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "Os custos da compra são uma percentagem fixa do preço. Na prática, os impostos têm muitas vezes escalões e algumas comissões são valores fixos.",
         "lendersTitle": "O que os bancos verificam e esta ferramenta não",
         "lendersIntro": "A resposta de um banco pode ficar abaixo desta estimativa, por vezes bastante. As regras mudam de banco para banco e de país para país, e este simulador não inclui nenhuma.",
-        "lenderStress": "Taxas de stress: muitos bancos verificam se ainda conseguias pagar com a taxa alguns pontos acima, sobretudo em créditos de taxa variável.",
-        "lenderIncome": "Definição de rendimento: alguns só contam parte dos prémios, do rendimento de trabalho independente ou de rendas, ou fazem a média de vários anos.",
-        "lenderCountry": "Limites do país: em muitos países, o regulador limita o financiamento, a parte do rendimento que vai para prestações, o crédito face ao rendimento ou o prazo.",
-        "lenderProfile": "O teu perfil: a idade no fim do prazo, a estabilidade do emprego, o historial de crédito e a própria casa também contam.",
-        "lendersOutro": "Usa o resultado para saberes mais ou menos onde estás antes de falares com um banco, e depois pergunta que limites se aplicam a ti."
+        "lendersOutro": "Usa o resultado para saberes mais ou menos onde estás antes de falares com um banco, e depois pergunta que limites se aplicam a ti.",
+        "exampleStep1Term": "Margem mensal",
+        "exampleStep1Body": "{{share}} de {{income}} são {{allowed}}. Tirando os {{existing}} do crédito automóvel, sobram {{room}} por mês para o novo crédito.",
+        "exampleStep2Term": "Maior crédito",
+        "exampleStep2Body": "Uma prestação de {{room}} a {{rate}} durante {{years}} anos paga {{maxLoan}}. Somando todas as poupanças e pagando os custos da compra com o total, o limite mensal permite um preço de {{monthlyPrice}}.",
+        "exampleStep3Term": "Dinheiro à cabeça",
+        "exampleStep3Body": "Cada euro do preço pede {{deposit}} para a entrada e {{costsRate}} para os custos, {{cashShare}} no total. {{savings}} ÷ {{cashShare}} dá um preço de {{cashPrice}}.",
+        "lenderStressTerm": "Taxas de stress",
+        "lenderStressBody": "Muitos bancos verificam se ainda conseguias pagar com a taxa alguns pontos acima, sobretudo em créditos de taxa variável.",
+        "lenderIncomeTerm": "Definição de rendimento",
+        "lenderIncomeBody": "Alguns só contam parte dos prémios, do rendimento de trabalho independente ou de rendas, ou fazem a média de vários anos.",
+        "lenderCountryTerm": "Limites do país",
+        "lenderCountryBody": "Em muitos países, o regulador limita o financiamento, a parte do rendimento que vai para prestações, o crédito face ao rendimento ou o prazo.",
+        "lenderProfileTerm": "O teu perfil",
+        "lenderProfileBody": "A idade no fim do prazo, a estabilidade do emprego, o historial de crédito e a própria casa também contam.",
+        "methodRoundingTerm": "Arredondamento",
+        "methodPrivacyTerm": "Privacidade",
+        "methodFormulasLabel": "Fórmulas",
+        "labels": {
+          "maxLoan": "Maior crédito"
+        },
+        "methodShareTerm": "Parte para crédito",
+        "methodCostsTerm": "Para onde vão as poupanças",
+        "assumptionFixedRateTerm": "Taxa fixa",
+        "assumptionSavingsTerm": "Todas as poupanças",
+        "assumptionPaymentTerm": "O que a prestação deixa de fora",
+        "assumptionCostsShareTerm": "Custos da compra"
       }
     },
     "termDeposit": {

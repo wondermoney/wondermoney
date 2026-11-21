@@ -1348,7 +1348,7 @@
             "nominalRate": "Nominalzins, nicht der Effektivzins",
             "flatFees": "Versicherungen und Gebühren",
             "rounding": "Rundung",
-            "lenderFigures": "Die Zahlen deiner Bank",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
             "limits": "Grenzen"
           }
         },
@@ -1479,11 +1479,26 @@
         "before": {
           "title": "Vor der Sondertilgung",
           "items": {
-            "fee": "Prüfen Sie die Gebühr. Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen.",
-            "rate": "Variable Zinsen und Mischformen sind nicht abgedeckt: Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt.",
-            "reserves": "Behalten Sie eine Reserve. Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt.",
-            "otherDebts": "Tilgen Sie zuerst die teuerste Schuld. Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung.",
-            "lender": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet. Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            "fee": {
+              "term": "Prüfen Sie die Gebühr",
+              "body": "Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen."
+            },
+            "rate": {
+              "term": "Variable Zinsen und Mischformen sind nicht abgedeckt",
+              "body": "Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt."
+            },
+            "reserves": {
+              "term": "Behalten Sie eine Reserve",
+              "body": "Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt."
+            },
+            "otherDebts": {
+              "term": "Tilgen Sie zuerst die teuerste Schuld",
+              "body": "Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung."
+            },
+            "lender": {
+              "term": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet",
+              "body": "Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            }
           }
         },
         "example": {
@@ -1496,9 +1511,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt zuerst das Darlehen wie bisher, mit demselben Festzins-Rechenkern wie der Hypothekenrechner. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der verbleibenden Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n.",
-          "lowerPayment": "Laufzeit behalten: Die Restschuld nach der Sondertilgung geht mit demselben n zurück in die Formel, das ergibt die neue, niedrigere Rate.",
-          "shorterTerm": "Rate behalten: Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
           "fee": "Die Gebühr ist der eingegebene Prozentsatz, angewendet auf den getilgten Betrag. Die gesparten Zinsen sind die restlichen Zinsen des Darlehens wie bisher abzüglich der Zinsen im jeweiligen Szenario, und die Nettoersparnis ist dieser Betrag abzüglich der Gebühr. Ein Betrag über der Restschuld tilgt das Darlehen vollständig, und nur die Restschuld zählt für die Gebühr.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1509,7 +1521,23 @@
             "rounding": "Beträge sind in Euro. Zinsen und Rate werden jeden Monat auf den Cent gerundet, daher gehen alle Summen auf der Seite exakt auf.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt und rundet. Lassen Sie sich vor der Sondertilgung ihre eigene Berechnung geben."
           },
-          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags."
+          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags.",
+          "lowerPaymentTerm": "Laufzeit behalten",
+          "lowerPaymentBody": "Die Restschuld nach der Sondertilgung geht mit derselben Zahl von Raten zurück in die Formel, das ergibt die neue, niedrigere Rate.",
+          "shorterTermTerm": "Rate behalten",
+          "shorterTermBody": "Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "timing": "Zeitpunkt",
+            "oneOff": "Eine Sondertilgung",
+            "costs": "Kosten",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
+            "limits": "Grenzen",
+            "feeNote": "Gebühr und Nettoersparnis"
+          },
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1684,10 +1712,22 @@
           "title": "Was Sie vor dem Wechsel vergleichen sollten",
           "intro": "Ihre Baufinanzierung zu einer anderen Bank umzuschulden, oder mit Ihrer Bank neue Konditionen auszuhandeln, kann Ihre Kosten senken. Ein niedrigerer Zins ist nur ein Teil der Rechnung, vergleichen Sie also das ganze Angebot:",
           "items": {
-            "rate": "Den Zins. Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen.",
-            "monthlyCosts": "Die monatlichen Zusatzkosten. Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer.",
-            "term": "Die Laufzeit. Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen.",
-            "oneOff": "Die einmaligen Kosten. Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            "rate": {
+              "term": "Den Zins",
+              "body": "Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen."
+            },
+            "monthlyCosts": {
+              "term": "Die monatlichen Zusatzkosten",
+              "body": "Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer."
+            },
+            "term": {
+              "term": "Die Laufzeit",
+              "body": "Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen."
+            },
+            "oneOff": {
+              "term": "Die einmaligen Kosten",
+              "body": "Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            }
           },
           "outro": "Der Rechner bringt das zusammen: die Rate mit ihren Zusatzkosten, was jedes Darlehen insgesamt noch kostet, und den Monat, in dem die Wechselkosten wieder hereingeholt sind."
         },
@@ -1712,7 +1752,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt beide Darlehen mit demselben Festzins-Rechenkern wie der Hypothekenrechner, auf Basis Ihrer Restschuld. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n. Die Versicherungen und Gebühren jedes Monats kommen hinzu.",
           "saving": "Die Ersparnis eines Monats ist, was das aktuelle Darlehen in diesem Monat kosten würde, abzüglich dessen, was das neue kostet. Ein getilgtes Darlehen kostet nichts mehr. Bei einer längeren neuen Laufzeit zählen die Monate nach dem Ende Ihres aktuellen Darlehens deshalb als Kosten. Die Gesamtkosten jeder Option sind ihre Raten, Versicherungen und Gebühren, beim neuen Darlehen zuzüglich der Wechselkosten. Die Nettoersparnis ist die Differenz.",
           "breakEven": "Der Monat, in dem sich der Wechsel rechnet, ist der erste Monat, in dem die bisherige Ersparnis mindestens die Wechselkosten erreicht. Geschieht das nicht, bevor beide Darlehen enden, rechnet sich der Wechsel nicht.",
           "longerTerm": "Ist die neue Laufzeit länger als die Restlaufzeit, rechnet der Rechner das Angebot zusätzlich über die Restlaufzeit. So sehen Sie, wie viel der niedrigeren Rate vom Zins kommt und wie viel davon, dass Sie länger zahlen.",
@@ -1726,7 +1765,22 @@
             "rounding": "Die Beträge sind in Euro. Zinsen und Rate jedes Monats werden auf den Cent gerundet, deshalb gehen alle Summen auf der Seite genau auf. Die angezeigte Rate ist die erste; die folgenden weichen höchstens um einen Cent davon ab.",
             "lenderFigures": "Jede Bank zählt Tage und rundet auf ihre Weise, daher können ihre Zahlen leicht abweichen. Lassen Sie sich von jeder Bank ein verbindliches Angebot geben, bevor Sie entscheiden."
           },
-          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld."
+          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld.",
+          "terms": {
+            "saving": "Ersparnis und Gesamtkosten",
+            "breakEven": "Monat der Amortisation",
+            "longerTerm": "Eine längere Laufzeit",
+            "fixedRate": "Feste Zinsen",
+            "sameBalance": "Dieselbe Restschuld",
+            "timing": "Zeitpunkt",
+            "fees": "Versicherungen und Gebühren",
+            "noDiscounting": "Keine Abzinsung",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen der Banken",
+            "limits": "Grenzen"
+          },
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1736,6 +1790,13 @@
           "earlyRepaymentBody": "Was eine Sondertilgung beim aktuellen Darlehen sparen würde, statt umzuschulden.",
           "debtToIncomeLink": "Schuldendienstquoten-Rechner",
           "debtToIncomeBody": "Der Anteil Ihres Einkommens, der in Kreditraten fließt, heute und mit der neuen Rate."
+        },
+        "labels": {
+          "monthlySaving": "Ersparnis pro Monat",
+          "currentMonthTotal": "Kosten des jetzigen Darlehens in dem Monat",
+          "offerMonthTotal": "Kosten des neuen Darlehens in dem Monat",
+          "currentTotalCost": "Gesamtkosten des jetzigen Darlehens",
+          "offerTotalCost": "Gesamtkosten des neuen Darlehens"
         }
       },
       "cta": {
@@ -2005,16 +2066,12 @@
         "relatedDebtToIncome": "zeigt, welchen Anteil Ihres Einkommens Ihre laufenden Raten einnehmen, mit denselben Stufen wie dieses Werkzeug.",
         "exampleTitle": "Rechenbeispiel",
         "exampleIntro": "Ein Paar verdient zusammen {{income}} netto im Monat und zahlt {{existing}} im Monat für einen Autokredit. Es hat {{savings}} für eine Immobilie gespart, rechnet mit einem festen Zins von {{rate}} über {{years}} Jahre und plant Kaufnebenkosten von {{costsRate}} des Preises ein. Die Bank finanziert bis zu {{ltv}} des Preises, und das Paar erlaubt {{share}} seines Einkommens für Kredite.",
-        "exampleStep1": "Monatlicher Spielraum: {{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
-        "exampleStep2": "Größtes Darlehen: Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
-        "exampleStep3": "Geld vorab: Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
         "exampleStep4": "Der niedrigere der beiden ist {{monthlyPrice}}, also setzt das Monatsbudget die Grenze.",
         "exampleResult": "Bei {{price}} würde das Paar {{loan}} leihen, {{downPayment}} Eigenkapital einbringen und {{purchaseCosts}} Nebenkosten zahlen, mit seinem ganzen Ersparten von {{savings}}. Der Hypothekenrechner kommt auf eine Rate von {{payment}} im Monat.",
         "exampleLift": "Mit etwa {{extraIncome}} mehr Nettoeinkommen im Monat käme das Paar auf {{liftPrice}}; dort übernimmt die Grenze des Ersparten.",
         "exampleSavings": "Mit nur {{lowSavings}} Erspartem kehrt sich das Bild um: Das Ersparte deckt einen Preis von {{lowSavingsPrice}} mit einem Darlehen von {{lowSavingsLoan}}, weit unter dem, was das Einkommen tragen könnte. Mehr sparen, nicht mehr verdienen, würde die Grenze anheben. Der Rechner oben beginnt mit dem ersten Paar, damit Sie Ihre eigenen Zahlen eintragen können.",
         "methodTitle": "Methode",
         "methodIntro": "Die Rechnung bestimmt jede Grenze für sich und nimmt dann den niedrigeren Preis.",
-        "methodLegend": "I ist das monatliche Nettoeinkommen, d der für Kredite erlaubte Anteil davon, E die laufenden Raten und M der Spielraum für die neue Rate. r ist der Jahreszins geteilt durch 12, n die Zahl der Monatsraten und L das größte Darlehen. S ist das Ersparte, c die Kaufnebenkosten und v der Beleihungsauslauf, beide als Anteil am Preis. P₁ ist der Preis, den das Monatsbudget erlaubt, P₂ der, den das Ersparte erlaubt.",
         "methodShare": "Der Startwert von {{share}} liegt in der Vorsicht-Stufe des Schuldendienstquoten-Rechners ({{caution}} % bis {{high}} %). Das ist eine Faustregel, keine gesetzliche Grenze.",
         "methodCosts": "Beim höchsten Preis fließt jeder Euro des Ersparten in den Kauf: zuerst die Nebenkosten, der Rest als Eigenkapital. Das Darlehen deckt, was fehlt, und nie mehr, als der Beleihungsauslauf erlaubt.",
         "methodRounding": "Beträge werden in Cent gerechnet. Das Darlehen wird auf den Cent abgerundet, damit die erste Rate, berechnet vom Hypothekenrechner, in Ihren Spielraum passt; spätere Raten können um einen Cent abweichen. Der Preis ist genau Darlehen plus Eigenkapital, und das zusätzliche Einkommen oder Ersparte wird auf den Euro aufgerundet.",
@@ -2026,11 +2083,33 @@
         "assumptionCostsShare": "Die Kaufnebenkosten sind ein fester Anteil am Preis. In der Praxis sind Steuern oft gestaffelt und manche Gebühren feste Beträge.",
         "lendersTitle": "Was Banken prüfen und dieses Werkzeug nicht",
         "lendersIntro": "Die Antwort einer Bank kann unter dieser Schätzung liegen, manchmal deutlich. Die Regeln unterscheiden sich je nach Bank und Land, und dieser Rechner enthält keine davon.",
-        "lenderStress": "Stresszins: Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
-        "lenderIncome": "Was als Einkommen zählt: Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
-        "lenderCountry": "Grenzen je Land: In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
-        "lenderProfile": "Ihr Profil: Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
-        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten."
+        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten.",
+        "exampleStep1Term": "Monatlicher Spielraum",
+        "exampleStep1Body": "{{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
+        "exampleStep2Term": "Größtes Darlehen",
+        "exampleStep2Body": "Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
+        "exampleStep3Term": "Geld vorab",
+        "exampleStep3Body": "Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
+        "lenderStressTerm": "Stresszins",
+        "lenderStressBody": "Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
+        "lenderIncomeTerm": "Was als Einkommen zählt",
+        "lenderIncomeBody": "Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
+        "lenderCountryTerm": "Grenzen je Land",
+        "lenderCountryBody": "In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
+        "lenderProfileTerm": "Ihr Profil",
+        "lenderProfileBody": "Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln",
+        "labels": {
+          "maxLoan": "Größtes Darlehen"
+        },
+        "methodShareTerm": "Anteil für Kredite",
+        "methodCostsTerm": "Wohin die Ersparnisse gehen",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionSavingsTerm": "Alle Ersparnisse",
+        "assumptionPaymentTerm": "Was die Rate nicht enthält",
+        "assumptionCostsShareTerm": "Kaufnebenkosten"
       }
     },
     "termDeposit": {
