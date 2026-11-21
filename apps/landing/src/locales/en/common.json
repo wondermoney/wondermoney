@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Search...",
+      "label": "Search",
       "noResults": "No results found. Try a different search term."
     },
     "relatedContent": {
@@ -6642,6 +6643,7 @@
       "title": "Personal Finance Guides",
       "description": "In-depth articles and guides to help you make better financial decisions.",
       "searchPlaceholder": "Search guides...",
+      "searchLabel": "Search guides",
       "comingSoon": "Guides coming soon.",
       "defaultCategory": "General",
       "readGuide": "Read guide"
@@ -6687,6 +6689,7 @@
       "schemaDescription": "A comprehensive glossary of financial and investing terms.",
       "description": "Every financial and investing term explained in plain language. Browse by letter or search for a specific concept.",
       "searchPlaceholder": "Search terms...",
+      "searchLabel": "Search glossary terms",
       "comingSoon": "Glossary terms coming soon.",
       "letterNav": "Terms by letter"
     },

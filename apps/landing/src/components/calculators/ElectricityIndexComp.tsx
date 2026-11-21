@@ -21,6 +21,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.electricityIndex.${key}`;
 const SERIES = electricityIndexSeries();
@@ -85,13 +86,13 @@ function ElectricityIndex() {
                 </option>
               ))}
             </Select>
-            <p id="electricity-power-help" className="text-xs text-muted-foreground">
+            <FieldMessage id="electricity-power-help">
               {t(k("help.power"))}
-            </p>
+            </FieldMessage>
             {powerError && (
-              <p role="alert" className="text-sm text-destructive-text">
+              <FieldMessage tone="error" role="alert">
                 {powerError}
-              </p>
+              </FieldMessage>
             )}
           </div>
 
@@ -160,9 +161,9 @@ function ElectricityIndex() {
               />
               {t(k("fields.largeFamily"))}
             </label>
-            <p id="electricity-family-help" className="pl-6 text-xs text-muted-foreground">
+            <FieldMessage id="electricity-family-help" className="pl-6">
               {t(k("help.largeFamily"))}
-            </p>
+            </FieldMessage>
           </div>
         </div>
 

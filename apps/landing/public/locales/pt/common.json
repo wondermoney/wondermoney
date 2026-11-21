@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Pesquisar...",
+      "label": "Pesquisar",
       "noResults": "Nenhum resultado encontrado. Tenta outro termo de pesquisa."
     },
     "relatedContent": {
@@ -6642,6 +6643,7 @@
       "title": "Guias de finanças pessoais",
       "description": "Artigos e guias aprofundados para te ajudar a tomar melhores decisões financeiras.",
       "searchPlaceholder": "Pesquisar guias...",
+      "searchLabel": "Pesquisar guias",
       "comingSoon": "Guias em breve disponíveis.",
       "defaultCategory": "Geral",
       "readGuide": "Ler guia"
@@ -6687,6 +6689,7 @@
       "schemaDescription": "Glossário completo de termos financeiros e de investimento.",
       "description": "Todos os termos financeiros e de investimento explicados de forma simples.",
       "searchPlaceholder": "Pesquisar termos...",
+      "searchLabel": "Pesquisar termos do glossário",
       "comingSoon": "Glossário em breve disponível.",
       "letterNav": "Termos por letra"
     },
