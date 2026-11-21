@@ -675,13 +675,30 @@
         "exampleTarget": "At a {{rate}} withdrawal rate, your FIRE number is {{spending}} ÷ {{rate}} = {{target}}, so today's {{assets}} is {{progress}} of the way there.",
         "exampleTime": "Growing month by month with the contributions added, the investments pass {{target}} after {{time}}. Spend {{cut}} less, {{cutSpending}} a year, and the target falls to {{cutTarget}}, reached after {{cutTime}}. The calculator above starts from these figures, so you can replace them with yours.",
         "methodHeading": "Method",
-        "methodFormula": "FIRE number = annual spending ÷ withdrawal rate",
-        "methodMultiple": "At 4% the target is 25 times your annual spending; at 3% it is about 33 times. A lower rate gives a larger target and more room for bad years.",
-        "methodGrowth": "Each month your investments grow at the monthly rate that compounds to the annual return you enter, then that month's contribution is added. The time shown is the first month the total reaches your FIRE number.",
-        "methodRealMoney": "The return is real, after inflation, so every figure is in today's money. Your spending and contributions are assumed to rise with prices, which is why they stay the same in the calculation.",
-        "methodHorizon": "The projection stops after {{years}} years. If contributions and growth cannot reach the target, for example with no contribution and no return, the calculator says so instead of giving a date.",
-        "methodLeftOut": "Not included: taxes on gains and withdrawals, fund and platform fees, and sequence risk, the danger of poor returns in the first years you live off your investments. A withdrawal rate is a rule of thumb drawn from past market returns, not a guarantee.",
-        "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved."
+        "methodMultipleBody": "At 4% the target is 25 times your annual spending; at 3% it is about 33 times. A lower rate gives a larger target and more room for bad years.",
+        "methodGrowthBody": "Each month your investments grow at the monthly rate that compounds to the annual return you enter, then that month's contribution is added. The time shown is the first month the total reaches your FIRE number.",
+        "methodRealMoneyBody": "The return is real, after inflation, so every figure is in today's money. Your spending and contributions are assumed to rise with prices, which is why they stay the same in the calculation.",
+        "methodHorizonBody": "The projection stops after {{years}} years. If contributions and growth cannot reach the target, for example with no contribution and no return, the calculator says so instead of giving a date.",
+        "methodLeftOutBody": "Taxes on gains and withdrawals, fund and platform fees, and sequence risk, the danger of poor returns in the first years you live off your investments. A withdrawal rate is a rule of thumb drawn from past market returns, not a guarantee.",
+        "methodPrivacyBody": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
+        "methodMultipleTerm": "Withdrawal rate",
+        "methodGrowthTerm": "Monthly growth",
+        "methodRealMoneyTerm": "Today's money",
+        "methodHorizonTerm": "Horizon",
+        "methodLeftOutTerm": "Not included",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "fireNumber": "FIRE number",
+          "annualSpending": "annual spending",
+          "withdrawalRate": "withdrawal rate",
+          "monthlyRate": "Monthly rate",
+          "monthlyRateLower": "monthly rate",
+          "realReturn": "real annual return",
+          "assetsEnd": "Investments at the end of the month",
+          "assetsStart": "investments at the start of the month",
+          "contribution": "monthly contribution"
+        }
       }
     },
     "compoundInterest": {
@@ -756,13 +773,11 @@
         "exampleStep3": "In today's money the final value is {{realFinal}}: what you paid in is worth {{realContributed}} and the growth after inflation is {{realGrowth}}.",
         "exampleComparison": "Raising the contribution to {{comparisonMonthly}} a month adds {{extraContributed}} paid in over the period and {{extraFinal}} to the final value, which reaches {{comparisonFinal}}. In today's money the difference is {{extraReal}}.",
         "methodHeading": "How the calculator works",
-        "methodFormula": "Each month: balance = balance × (1 + annual return ÷ 12) + monthly contribution",
-        "methodRealFormula": "Value in today's money = value ÷ (1 + annual inflation) ^ years",
-        "methodMonthly": "The annual return is split into 12 equal monthly rates. Each month the balance grows by that rate, then the contribution is added at the end of the month. A {{rate}} return compounded monthly gives {{effectiveRate}} over a full year.",
-        "methodInflation": "Inflation is converted to an equivalent monthly rate that compounds to the annual rate. The final value is divided by the inflation built up over the whole period, and each contribution by the inflation built up until the month it is paid, so the amount paid in is shown in today's money too.",
-        "methodRounding": "Growth is rounded to the cent every month. Totals are shown in whole euros, and growth is always the final value minus what was paid in, so the figures add up.",
-        "methodRanges": "Amounts go from 0 to {{maxAmount}}, return and inflation from 0% to {{maxRate}}%, and the period from 0 to {{maxYears}} whole years. Values outside these ranges are adjusted, and the calculator tells you when that happens.",
-        "methodPrivacy": "The calculation runs in your browser. The amounts you enter are not sent anywhere.",
+        "methodMonthlyBody": "The annual return is split into 12 equal monthly rates. Each month the balance grows by that rate, then the contribution is added at the end of the month. A {{rate}} return compounded monthly gives {{effectiveRate}} over a full year.",
+        "methodInflationBody": "Inflation is converted to an equivalent monthly rate that compounds to the annual rate. The final value is divided by the inflation built up over the whole period, and each contribution by the inflation built up until the month it is paid, so the amount paid in is shown in today's money too.",
+        "methodRoundingBody": "Growth is rounded to the cent every month. Totals are shown in whole euros, and growth is always the final value minus what was paid in, so the figures add up.",
+        "methodRangesBody": "Amounts go from 0 to {{maxAmount}}, return and inflation from 0% to {{maxRate}}%, and the period from 0 to {{maxYears}} whole years. Values outside these ranges are adjusted, and the calculator tells you when that happens.",
+        "methodPrivacyBody": "The calculation runs in your browser. The amounts you enter are not sent anywhere.",
         "assumptionsHeading": "Assumptions",
         "assumption1": "The return is the same every year.",
         "assumption2": "Contributions go in at the end of each month and stay the same throughout.",
@@ -771,7 +786,21 @@
         "assumptionsNote": "Real investments move up and down, and taxes and fees lower what you keep. Treat the result as a projection to compare options, not a forecast.",
         "rateHeading": "Which return to use",
         "rateBody1": "Use the return you expect after costs and before inflation. A savings account or government bonds return less than a diversified stock fund, which can grow more over long periods but also loses value in some years.",
-        "rateBody2": "If you are unsure, try a cautious rate and a more optimistic one and compare the results. The gap between them shows how much of the outcome depends on the rate, which you do not control, and how much on the contribution and the period, which you do."
+        "rateBody2": "If you are unsure, try a cautious rate and a more optimistic one and compare the results. The gap between them shows how much of the outcome depends on the rate, which you do not control, and how much on the contribution and the period, which you do.",
+        "methodFormulasLabel": "Formulas",
+        "formulaBalanceEnd": "Balance at the end of the month",
+        "formulaBalanceStart": "balance at the start of the month",
+        "formulaAnnualReturn": "annual return",
+        "formulaContribution": "monthly contribution",
+        "formulaRealValue": "Value in today's money",
+        "formulaValue": "value",
+        "formulaInflation": "annual inflation",
+        "formulaYears": "years",
+        "methodMonthlyTerm": "Monthly compounding",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Rounding",
+        "methodRangesTerm": "Ranges",
+        "methodPrivacyTerm": "Privacy"
       }
     },
     "netWorth": {
@@ -942,7 +971,21 @@
         "assumptions": "This model assumes a constant return and fee, reinvested distributions and month-end contributions. It excludes taxes, brokerage fees, currency movements and inflation. Rates are illustrative assumptions for an index such as the S&P 500. Actual returns vary and can be negative. The fee impact includes the growth those fees could have earned.",
         "ctaHeadline": "Track your actual investment performance",
         "ctaDescription": "Use WonderMoney to follow your holdings and compare their actual performance with the scenario you modelled.",
-        "ctaText": "Track actual investments against the scenario"
+        "ctaText": "Track actual investments against the scenario",
+        "methodTerm": "Growth and fees",
+        "assumptionsTerm": "Assumptions",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "netFactor": "Net annual growth factor",
+          "annualReturn": "annual return",
+          "annualFee": "annual fund fee",
+          "monthlyFactor": "Monthly factor",
+          "monthlyFactorLower": "monthly factor",
+          "netFactorLower": "net annual growth factor",
+          "balanceEnd": "Balance at the end of the month",
+          "balanceStart": "balance at the start of the month",
+          "contribution": "monthly contribution"
+        }
       }
     },
     "emergencyFund": {
@@ -2055,11 +2098,16 @@
         "whatBody": "A term deposit locks an amount away with a bank for a set number of months at a fixed rate. What you earn depends on three things besides the rate: how long the money stays, whether the interest comes at the end or along the way, and how much tax is withheld from it. This calculator works through all three with the rate you enter, so you can compare offers on the same basis.",
         "readHeading": "How to read the result",
         "read": {
-          "gross": "Gross interest: everything the deposit earns before tax.",
-          "tax": "Tax withheld: the part of each interest payment kept back for tax at the rate you enter.",
-          "net": "Net interest: what reaches you, gross interest minus tax.",
-          "final": "Balance at maturity, or total received when interest is paid out: the amount deposited plus all the net interest.",
-          "yield": "Net annual yield: the net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
+          "grossTerm": "Gross interest",
+          "grossBody": "Everything the deposit earns before tax.",
+          "taxTerm": "Tax withheld",
+          "taxBody": "The part of each interest payment kept back for tax at the rate you enter.",
+          "netTerm": "Net interest",
+          "netBody": "What reaches you, gross interest minus tax.",
+          "finalTerm": "Balance at maturity, or total received when interest is paid out",
+          "finalBody": "The amount deposited plus all the net interest.",
+          "yieldTerm": "Net annual yield",
+          "yieldBody": "The net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
         },
         "exampleHeading": "Worked example",
         "exampleSetup": "Say you deposit {{amount}} for {{months}} months at a gross rate of {{rate}} a year, with the interest paid at maturity. The interest is simple: the amount times the rate times the share of a year the money stays.",
@@ -2067,15 +2115,21 @@
         "exampleTax": "Now suppose {{taxRate}} is withheld from the interest paid at maturity, a rate chosen only as an illustration, not taken from any country's rules: the calculator starts at 0% so you can enter your own. The bank keeps {{tax}}, you receive {{net}} and you end with {{taxedFinal}}, a net yield of {{taxedYield}} a year.",
         "methodHeading": "Method and assumptions",
         "methodIntro": "Interest is counted in whole months, without a day count. The rate you enter is a nominal annual rate: each period earns the rate times its months divided by 12.",
-        "methodFormula": "Interest for a period = balance × annual rate × months in the period ÷ 12. Net interest = interest − tax. Net annual yield = the yearly rate that turns the amount deposited into the net payments and the amount returned, each counted when it arrives. With all the interest at maturity, that is (balance at maturity ÷ amount deposited)^(12 ÷ term in months) − 1.",
         "method": {
-          "maturity": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
-          "periodic": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
-          "reinvest": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out leaves the deposit, so later interest is worked out on the amount deposited.",
-          "tax": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
-          "yield": "The net annual yield is the internal rate of return of the deposit: the yearly rate at which the amount you put in grows into everything you get back, counting each net payment in the month it is paid. Interest paid along the way therefore counts for more than the same interest at maturity. A deposit shorter than a year is assumed to be renewed on the same terms.",
-          "excluded": "Not included: early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
-          "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere."
+          "maturityBody": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
+          "periodicBody": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
+          "reinvestBody": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out leaves the deposit, so later interest is worked out on the amount deposited.",
+          "taxBody": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
+          "yieldBody": "The net annual yield is the internal rate of return of the deposit: the yearly rate at which the amount you put in grows into everything you get back, counting each net payment in the month it is paid. Interest paid along the way therefore counts for more than the same interest at maturity. A deposit shorter than a year is assumed to be renewed on the same terms.",
+          "excludedTerm": "Not included",
+          "excludedBody": "Early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
+          "privacyBody": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere.",
+          "maturityTerm": "Paid at maturity",
+          "periodicTerm": "Periodic payments",
+          "reinvestTerm": "Interest added or paid out",
+          "taxTerm": "Tax",
+          "yieldTerm": "Net annual yield",
+          "privacyTerm": "Privacy"
         },
         "methodLimits": "Terms run from 1 to {{maxMonths}} months.",
         "nextHeading": "Related calculators",
@@ -2084,7 +2138,23 @@
         "nextEmergency": "A term deposit can hold savings you won't need soon, while your emergency fund stays within reach.",
         "nextEmergencyLink": "Work out your emergency fund",
         "nextSavingsGoal": "Saving up for the amount you will deposit, or planning what to do when it matures? The savings goal calculator works out the monthly amount or the time it takes.",
-        "nextSavingsGoalLink": "Open the savings goal calculator"
+        "nextSavingsGoalLink": "Open the savings goal calculator",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "interest": "Interest for a period",
+          "balance": "balance",
+          "annualRate": "annual rate",
+          "periodMonths": "months in the period",
+          "tax": "Tax",
+          "taxLower": "tax",
+          "taxRate": "tax rate",
+          "interestLower": "interest",
+          "netInterest": "Net interest",
+          "yield": "Net annual yield, with the interest at maturity",
+          "finalBalance": "balance at maturity",
+          "amount": "amount deposited",
+          "termMonths": "term in months"
+        }
       }
     },
     "buyVsRent": {
@@ -2782,14 +2852,31 @@
         "exampleTitle": "Worked example",
         "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
         "methodTitle": "How the estimate works",
-        "methodQuarter": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
-        "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
-        "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
+        "methodQuarterBody": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
+        "methodTaxBody": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
+        "methodYieldBody": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
         "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRateNote}}), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
         "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings.",
-        "referenceRateAtCeiling": "{{rate}}, the ceiling"
+        "referenceRateAtCeiling": "{{rate}}, the ceiling",
+        "methodQuarterTerm": "Quarterly interest",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Net annual yield",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "quarterInterest": "Interest for the quarter",
+          "balance": "balance",
+          "baseRate": "base rate",
+          "bonus": "permanence bonus",
+          "irs": "IRS",
+          "interestLower": "interest",
+          "newBalance": "Balance at the end of the quarter",
+          "yield": "Net annual yield",
+          "finalValue": "final balance",
+          "amount": "amount subscribed",
+          "years": "years"
+        }
       },
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
@@ -2908,12 +2995,25 @@
           "title": "How it is calculated",
           "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
           "steps": {
-            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
-            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
-            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
-            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+            "aTerm": "Yearly rate",
+            "aBody": "The plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "bTerm": "Inflation",
+            "bBody": "The change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "cTerm": "Real rate",
+            "cBody": "(1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "dTerm": "Calculator",
+            "dBody": "Simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
           },
-          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages.",
+          "formulasLabel": "Formulas",
+          "formula": {
+            "realRate": "Real rate",
+            "realRateAfterTax": "Real rate after tax",
+            "rate": "rate",
+            "inflation": "inflation",
+            "amount": "amount",
+            "months": "months"
+          }
         },
         "data": {
           "title": "Data and sources",
@@ -3042,10 +3142,14 @@
           "title": "How it is calculated",
           "intro": "Each figure comes from the same engine as the term deposit calculator:",
           "steps": {
-            "a": "Gross interest: amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
-            "b": "Tax: {{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
-            "c": "Net annual yield: the net interest annualised over the term.",
-            "d": "Filters: an offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
+            "aTerm": "Gross interest",
+            "aBody": "Amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
+            "bTerm": "Tax",
+            "bBody": "{{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
+            "cTerm": "Net annual yield",
+            "cBody": "The net interest annualised over the term.",
+            "dTerm": "Filters",
+            "dBody": "An offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
           }
         },
         "data": {
@@ -3928,14 +4032,14 @@
         "exampleTitle": "Worked example",
         "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month gross, or {{replacement}} of the salary. After IRS the pension is {{netPension}} a month. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
         "methodTitle": "How the estimate works",
-        "methodReference": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
-        "methodRate": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
-        "methodAges": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
-        "methodEarly": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
-        "methodLate": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
-        "methodMinimum": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
-        "methodGap": "The gap compares the net pension with your net pay today, both per payment over 14 payments. Net pay is the gross salary minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. The net pension is the estimated gross pension minus IRS withheld under the 2026 pension table VIII (Despacho n.º 233-A/2026, unmarried holder or married with two earners, without disability); pensions pay no Social Security and pensions up to 920 euros a month have no withholding. The final IRS depends on your whole income and deductions.",
-        "methodBudget": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
+        "methodReferenceBody": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
+        "methodRateBody": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
+        "methodAgesBody": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
+        "methodEarlyBody": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
+        "methodLateBody": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
+        "methodMinimumBody": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
+        "methodGapBody": "The gap compares the net pension with your net pay today, both per payment over 14 payments. Net pay is the gross salary minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. The net pension is the estimated gross pension minus IRS withheld under the 2026 pension table VIII (Despacho n.º 233-A/2026, unmarried holder or married with two earners, without disability); pensions pay no Social Security and pensions up to 920 euros a month have no withholding. The final IRS depends on your whole income and deductions.",
+        "methodBudgetBody": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
         "unsupportedTitle": "Not supported",
         "unsupportedMixed": "Careers that began before 2002 (mixed formula, with the older rules for the years up to 2001). This calculator only covers the whole-career formula for people who started contributing in 2002 or later.",
         "unsupportedSpecial": "Pay that varies a lot over the career, gaps in contributions and careers longer than 40 years.",
@@ -3948,7 +4052,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
         "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked row by row on 20 November 2026 against the annex of Despacho n.º 233-A/2026 as published in the Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII",
+        "methodReferenceTerm": "Reference remuneration",
+        "methodRateTerm": "Global formation rate",
+        "methodAgesTerm": "Normal age",
+        "methodEarlyTerm": "Early retirement",
+        "methodLateTerm": "Retiring after the normal age",
+        "methodMinimumTerm": "Minimum pension",
+        "methodGapTerm": "Gap",
+        "methodBudgetTerm": "Reading the gap",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "globalRate": "Global formation rate",
+          "globalRateLower": "global formation rate",
+          "annualRate": "annual rate",
+          "years": "years of contributions",
+          "statutory": "Statutory pension",
+          "statutoryLower": "statutory pension",
+          "reference": "reference remuneration",
+          "earlyPension": "Pension when retiring early",
+          "monthsEarly": "months early",
+          "factor": "sustainability factor",
+          "gap": "Gap",
+          "netPay": "net pay",
+          "netPension": "net pension"
+        }
       }
     },
     "sp500History": {
@@ -4056,10 +4184,14 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "fx": "Currency: returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
-            "fees": "Costs: fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
-            "taxes": "Taxes: tax on dividends and gains is not included, and it depends on where you live.",
-            "sequence": "Hindsight: this is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
+            "fxTerm": "Currency",
+            "fxBody": "Returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
+            "feesTerm": "Costs",
+            "feesBody": "Fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
+            "taxesTerm": "Taxes",
+            "taxesBody": "Tax on dividends and gains is not included, and it depends on where you live.",
+            "sequenceTerm": "Hindsight",
+            "sequenceBody": "This is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
             "past": "Past performance does not predict future returns. This tool is educational and is not investment advice."
           }
         },
@@ -5036,22 +5168,47 @@
           "title": "Karats and fineness",
           "intro": "The purity of gold is given in karats, out of 24, or in thousandths, the number stamped in the hallmark. These are the six legal finenesses of gold in Portugal:",
           "items": {
-            "k24": "24k, 999 thousandths: pure gold, as in investment bars and coins.",
-            "k22": "22k, 916: gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
-            "k19_2": "19.2k, 800: Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
-            "k18": "18k, 750: the most common fineness of jewellery in Europe.",
-            "k14": "14k, 585: harder, cheaper jewellery.",
-            "k9": "9k, 375: the lowest legal fineness."
+            "k24Term": "24k, 999 thousandths",
+            "k24Body": "Pure gold, as in investment bars and coins.",
+            "k22Term": "22k, 916",
+            "k22Body": "Gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
+            "k19_2Term": "19.2k, 800",
+            "k19_2Body": "Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
+            "k18Term": "18k, 750",
+            "k18Body": "The most common fineness of jewellery in Europe.",
+            "k14Term": "14k, 585",
+            "k14Body": "Harder, cheaper jewellery.",
+            "k9Term": "9k, 375",
+            "k9Body": "The lowest legal fineness."
           }
         },
         "method": {
           "title": "How it is calculated",
           "intro": "The page does four things:",
           "steps": {
-            "a": "Price: NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
-            "b": "Pure gold: the weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
-            "c": "Value: the grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
-            "d": "Offer: when you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+            "aTerm": "Price",
+            "aBody": "NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
+            "bTerm": "Pure gold",
+            "bBody": "The weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
+            "cTerm": "Value",
+            "cBody": "The grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
+            "dTerm": "Offer",
+            "dBody": "When you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+          },
+          "formulasLabel": "Formulas",
+          "formula": {
+            "pureGold": "Pure gold",
+            "pureGoldLower": "pure gold",
+            "weight": "weight",
+            "fineness": "fineness",
+            "value": "Value",
+            "valueLower": "value",
+            "price": "Price per gram",
+            "priceLower": "price per gram",
+            "nbpPrice": "NBP price in zloty",
+            "zlotyPerEuro": "zloty per euro",
+            "offerShare": "Offer against the value",
+            "offer": "offer"
           }
         },
         "buyers": {
@@ -5072,10 +5229,14 @@
         "limits": {
           "title": "What this value leaves out",
           "items": {
-            "metal": "Metal only: the value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
-            "buyers": "Not a selling price: buyers pay less, and a shop selling gold charges more.",
-            "purity": "Purity: the calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
-            "reference": "Reference price: NBP's daily price, not a live quote. The market moves during the day.",
+            "metalTerm": "Metal only",
+            "metalBody": "The value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
+            "buyersTerm": "Not a selling price",
+            "buyersBody": "Buyers pay less, and a shop selling gold charges more.",
+            "purityTerm": "Purity",
+            "purityBody": "The calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
+            "referenceTerm": "Reference price",
+            "referenceBody": "NBP's daily price, not a live quote. The market moves during the day.",
             "education": "Educational use only, not advice."
           }
         },
@@ -5279,7 +5440,12 @@
           "title": "Worked example",
           "setup": "Say you keep {{amount}} for 12 months in {{product}} at {{bank}}, at {{rate}} a year. It earns {{gross}}; the 28% IRS takes {{tax}}, leaving {{net}}.",
           "capped": "The maximum matters. {{product2}} at {{bank2}} pays {{rate2}}, but only up to {{cap}}. With {{amount2}}, interest is {{gross2}} before tax and {{net2}} after, as if you had saved {{cap}}.",
-          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}."
+          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}.",
+          "figures": {
+            "gross": "Gross interest",
+            "tax": "IRS ({{tax}}%)",
+            "net": "Net interest"
+          }
         },
         "method": {
           "title": "Method",
@@ -5479,17 +5645,25 @@
           "setup": "Take the occasional stock buyer: {{count}} buys of {{amount}} of US shares in a year, {{portfolio}} held.",
           "bank": "At {{bank}}, each order costs {{bankFormula}}, so the {{count}} orders cost {{bankTrading}} with stamp duty. Converting {{converted}} to dollars at {{bankFx}} adds {{bankFxTotal}}, and custody ({{bankCustodyFormula}}) adds {{bankCustody}} with VAT. The year costs {{bankTotal}}, of which {{bankStampDuty}} is stamp duty and {{bankVat}} is VAT.",
           "online": "At {{online}}, each order costs {{onlineFormula}}: {{onlineTrading}} for the year. Currency conversion at {{onlineFx}} adds {{onlineFxTotal}} and custody {{onlineCustody}}, for {{onlineTotal}} in total.",
-          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes."
+          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes.",
+          "figures": {
+            "total": "Total for the year"
+          }
         },
         "method": {
           "title": "Method",
           "intro": "Every fee was read from the broker's own published price list on the date shown in its row; the whole table was reviewed on {{date}} and is re-checked every quarter. Fees that a price list does not state are marked as not published and left out of the totals, which are then shown as incomplete.",
           "steps": {
-            "a": "Orders: each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
-            "b": "Savings plan: for ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
-            "c": "Currency: US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
-            "d": "Custody: the published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
-            "e": "Taxes on fees: where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
+            "aTerm": "Orders",
+            "aBody": "Each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
+            "bTerm": "Savings plan",
+            "bBody": "For ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
+            "cTerm": "Currency",
+            "cBody": "US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
+            "dTerm": "Custody",
+            "dBody": "The published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
+            "eTerm": "Taxes on fees",
+            "eBody": "Where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
             "f": "The total adds the year's orders, currency conversion and custody, and the brokers are listed from cheapest to dearest. Brokers missing a fee the profile needs go last."
           }
         },
@@ -5677,7 +5851,8 @@
             "insuranceLinked": "insurance linked to funds",
             "insuranceGuaranteed": "insurance not linked to funds",
             "pensionFund": "pension fund"
-          }
+          },
+          "gapLabel": "Yearly cost gap on {{invested}}"
         },
         "tax": {
           "title": "The IRS deduction (EBF, article 21)",
@@ -5689,7 +5864,8 @@
           },
           "example": "The age that counts is the one on 1 January of the year of the contribution (n.º 9). At {{age}}, {{exampleContribution}} contributed in the year gives {{exampleDeduction}}, the full deduction.",
           "conditions": "The deduction is part of the overall cap on deductions in article 78, n.º 7 of the IRS code: no cap for the lowest taxable incomes, then from {{capMax}} down to {{capMin}} for the household. It lowers tax due and is not paid out, and contributions made after retirement are not deductible (n.º 10).",
-          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions."
+          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions.",
+          "deductionLabel": "Deduction from IRS tax"
         },
         "redemption": {
           "title": "When you can redeem, and what an early redemption costs",

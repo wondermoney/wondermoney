@@ -675,13 +675,30 @@
         "exampleTarget": "Bei einer Entnahmerate von {{rate}} ist Ihre FIRE-Zahl {{spending}} ÷ {{rate}} = {{target}}. Mit den heutigen {{assets}} haben Sie also {{progress}} des Wegs geschafft.",
         "exampleTime": "Bis die Anlagen mit monatlichem Wachstum und den Sparraten die Marke von {{target}} überschreiten, dauert es {{time}}. Wenn Sie {{cut}} weniger ausgeben, also {{cutSpending}} pro Jahr, sinkt das Ziel auf {{cutTarget}}; bis dahin dauert es {{cutTime}}. Der Rechner oben startet mit diesen Zahlen, damit Sie Ihre eigenen einsetzen können.",
         "methodHeading": "Methode",
-        "methodFormula": "FIRE-Zahl = jährliche Ausgaben ÷ Entnahmerate",
-        "methodMultiple": "Bei 4 % ist das Ziel das 25-Fache Ihrer jährlichen Ausgaben, bei 3 % etwa das 33-Fache. Eine niedrigere Rate ergibt ein höheres Ziel und mehr Puffer für schlechte Jahre.",
-        "methodGrowth": "Jeden Monat wachsen die Anlagen mit dem Monatszins, der aufs Jahr gerechnet Ihre angegebene Rendite ergibt; danach kommt die Sparrate des Monats dazu. Die angezeigte Zeit ist der erste Monat, in dem die Summe Ihre FIRE-Zahl erreicht.",
-        "methodRealMoney": "Die Rendite ist real, also nach Inflation; deshalb sind alle Beträge in heutigen Euro. Ausgaben und Sparraten steigen annahmegemäß mit den Preisen und bleiben darum in der Rechnung gleich.",
-        "methodHorizon": "Die Projektion endet nach {{years}} Jahren. Können Sparraten und Wachstum das Ziel nicht erreichen, etwa ohne Sparrate und ohne Rendite, sagt der Rechner das, statt ein Datum zu nennen.",
-        "methodLeftOut": "Nicht berücksichtigt sind Steuern auf Erträge und Entnahmen, Fonds- und Plattformgebühren sowie das Sequenzrisiko, also schwache Renditen in den ersten Jahren, in denen Sie von Ihren Anlagen leben. Eine Entnahmerate ist eine Faustregel aus vergangenen Renditen, keine Garantie.",
-        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert."
+        "methodMultipleBody": "Bei 4 % ist das Ziel das 25-Fache Ihrer jährlichen Ausgaben, bei 3 % etwa das 33-Fache. Eine niedrigere Rate ergibt ein höheres Ziel und mehr Puffer für schlechte Jahre.",
+        "methodGrowthBody": "Jeden Monat wachsen die Anlagen mit dem Monatszins, der aufs Jahr gerechnet Ihre angegebene Rendite ergibt; danach kommt die Sparrate des Monats dazu. Die angezeigte Zeit ist der erste Monat, in dem die Summe Ihre FIRE-Zahl erreicht.",
+        "methodRealMoneyBody": "Die Rendite ist real, also nach Inflation; deshalb sind alle Beträge in heutigen Euro. Ausgaben und Sparraten steigen annahmegemäß mit den Preisen und bleiben darum in der Rechnung gleich.",
+        "methodHorizonBody": "Die Projektion endet nach {{years}} Jahren. Können Sparraten und Wachstum das Ziel nicht erreichen, etwa ohne Sparrate und ohne Rendite, sagt der Rechner das, statt ein Datum zu nennen.",
+        "methodLeftOutBody": "Nicht berücksichtigt sind Steuern auf Erträge und Entnahmen, Fonds- und Plattformgebühren sowie das Sequenzrisiko, also schwache Renditen in den ersten Jahren, in denen Sie von Ihren Anlagen leben. Eine Entnahmerate ist eine Faustregel aus vergangenen Renditen, keine Garantie.",
+        "methodPrivacyBody": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
+        "methodMultipleTerm": "Entnahmerate",
+        "methodGrowthTerm": "Monatliches Wachstum",
+        "methodRealMoneyTerm": "Heutige Kaufkraft",
+        "methodHorizonTerm": "Zeithorizont",
+        "methodLeftOutTerm": "Nicht berücksichtigt",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "fireNumber": "FIRE-Zahl",
+          "annualSpending": "jährliche Ausgaben",
+          "withdrawalRate": "Entnahmerate",
+          "monthlyRate": "Monatlicher Satz",
+          "monthlyRateLower": "monatlicher Satz",
+          "realReturn": "reale Jahresrendite",
+          "assetsEnd": "Anlagen am Monatsende",
+          "assetsStart": "Anlagen am Monatsanfang",
+          "contribution": "monatliche Sparrate"
+        }
       }
     },
     "compoundInterest": {
@@ -756,13 +773,11 @@
         "exampleStep3": "In heutiger Kaufkraft beträgt der Endwert {{realFinal}}: Ihre Einzahlungen sind {{realContributed}} wert, das Wachstum nach Inflation beträgt {{realGrowth}}.",
         "exampleComparison": "Wenn Sie die Sparrate auf {{comparisonMonthly}} pro Monat erhöhen, zahlen Sie über die Laufzeit {{extraContributed}} mehr ein, und der Endwert steigt um {{extraFinal}} auf {{comparisonFinal}}. In heutiger Kaufkraft beträgt der Unterschied {{extraReal}}.",
         "methodHeading": "So funktioniert der Rechner",
-        "methodFormula": "Jeden Monat: Kontostand = Kontostand × (1 + Jahresrendite ÷ 12) + monatliche Sparrate",
-        "methodRealFormula": "Wert in heutiger Kaufkraft = Wert ÷ (1 + jährliche Inflation) ^ Jahre",
-        "methodMonthly": "Die Jahresrendite wird in 12 gleiche Monatssätze aufgeteilt. Jeden Monat wächst der Kontostand um diesen Satz, danach kommt die Sparrate am Monatsende hinzu. {{rate}} Rendite mit monatlicher Verzinsung ergeben über ein volles Jahr {{effectiveRate}}.",
-        "methodInflation": "Die Inflation wird in einen gleichwertigen Monatssatz umgerechnet, der über das Jahr aufgezinst den Jahressatz ergibt. Der Endwert wird durch die Inflation über die gesamte Laufzeit geteilt, jede Einzahlung durch die Inflation bis zum Monat der Zahlung, sodass auch der eingezahlte Betrag in heutiger Kaufkraft erscheint.",
-        "methodRounding": "Das Wachstum wird jeden Monat auf den Cent gerundet. Summen werden in ganzen Euro angezeigt, und das Wachstum ist immer der Endwert minus die Einzahlungen, sodass die Zahlen zusammenpassen.",
-        "methodRanges": "Beträge reichen von 0 bis {{maxAmount}}, Rendite und Inflation von 0 % bis {{maxRate}} % und die Laufzeit von 0 bis {{maxYears}} ganzen Jahren. Werte außerhalb dieser Bereiche werden angepasst, und der Rechner weist Sie darauf hin.",
-        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Die eingegebenen Beträge werden nirgendwohin gesendet.",
+        "methodMonthlyBody": "Die Jahresrendite wird in 12 gleiche Monatssätze aufgeteilt. Jeden Monat wächst der Kontostand um diesen Satz, danach kommt die Sparrate am Monatsende hinzu. {{rate}} Rendite mit monatlicher Verzinsung ergeben über ein volles Jahr {{effectiveRate}}.",
+        "methodInflationBody": "Die Inflation wird in einen gleichwertigen Monatssatz umgerechnet, der über das Jahr aufgezinst den Jahressatz ergibt. Der Endwert wird durch die Inflation über die gesamte Laufzeit geteilt, jede Einzahlung durch die Inflation bis zum Monat der Zahlung, sodass auch der eingezahlte Betrag in heutiger Kaufkraft erscheint.",
+        "methodRoundingBody": "Das Wachstum wird jeden Monat auf den Cent gerundet. Summen werden in ganzen Euro angezeigt, und das Wachstum ist immer der Endwert minus die Einzahlungen, sodass die Zahlen zusammenpassen.",
+        "methodRangesBody": "Beträge reichen von 0 bis {{maxAmount}}, Rendite und Inflation von 0 % bis {{maxRate}} % und die Laufzeit von 0 bis {{maxYears}} ganzen Jahren. Werte außerhalb dieser Bereiche werden angepasst, und der Rechner weist Sie darauf hin.",
+        "methodPrivacyBody": "Die Berechnung läuft in Ihrem Browser. Die eingegebenen Beträge werden nirgendwohin gesendet.",
         "assumptionsHeading": "Annahmen",
         "assumption1": "Die Rendite ist jedes Jahr gleich.",
         "assumption2": "Einzahlungen erfolgen am Ende jedes Monats und bleiben über die ganze Laufzeit gleich.",
@@ -771,7 +786,21 @@
         "assumptionsNote": "Echte Geldanlagen schwanken, und Steuern und Gebühren schmälern, was Ihnen bleibt. Verstehen Sie das Ergebnis als Hochrechnung zum Vergleichen von Optionen, nicht als Vorhersage.",
         "rateHeading": "Welche Rendite Sie ansetzen sollten",
         "rateBody1": "Setzen Sie die Rendite an, die Sie nach Kosten und vor Inflation erwarten. Ein Tagesgeldkonto oder Staatsanleihen bringen weniger als ein breit gestreuter Aktienfonds, der über lange Zeiträume stärker wachsen kann, in manchen Jahren aber auch an Wert verliert.",
-        "rateBody2": "Wenn Sie unsicher sind, probieren Sie einen vorsichtigen und einen optimistischeren Satz aus und vergleichen Sie die Ergebnisse. Der Abstand zeigt, wie viel vom Ergebnis vom Zinssatz abhängt, den Sie nicht beeinflussen können, und wie viel von Sparrate und Laufzeit, die Sie selbst bestimmen."
+        "rateBody2": "Wenn Sie unsicher sind, probieren Sie einen vorsichtigen und einen optimistischeren Satz aus und vergleichen Sie die Ergebnisse. Der Abstand zeigt, wie viel vom Ergebnis vom Zinssatz abhängt, den Sie nicht beeinflussen können, und wie viel von Sparrate und Laufzeit, die Sie selbst bestimmen.",
+        "methodFormulasLabel": "Formeln",
+        "formulaBalanceEnd": "Kontostand am Monatsende",
+        "formulaBalanceStart": "Kontostand am Monatsanfang",
+        "formulaAnnualReturn": "Jahresrendite",
+        "formulaContribution": "monatliche Sparrate",
+        "formulaRealValue": "Wert in heutiger Kaufkraft",
+        "formulaValue": "Wert",
+        "formulaInflation": "jährliche Inflation",
+        "formulaYears": "Jahre",
+        "methodMonthlyTerm": "Monatliche Verzinsung",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Rundung",
+        "methodRangesTerm": "Wertebereiche",
+        "methodPrivacyTerm": "Datenschutz"
       }
     },
     "netWorth": {
@@ -942,7 +971,21 @@
         "assumptions": "Das Modell unterstellt eine konstante Rendite und konstante Kosten, wiederangelegte Ausschüttungen und Einzahlungen am Monatsende. Steuern, Ordergebühren, Wechselkursänderungen und Inflation bleiben unberücksichtigt. Die Renditen sind beispielhafte Annahmen für einen Index wie den S&P 500. Tatsächliche Renditen schwanken und können negativ sein. Der Kosteneffekt umfasst auch die entgangene Rendite auf die abgezogenen Beträge.",
         "ctaHeadline": "Die tatsächliche Wertentwicklung Ihrer Anlagen verfolgen",
         "ctaDescription": "Verfolgen Sie Ihr Portfolio mit WonderMoney und vergleichen Sie die tatsächliche Wertentwicklung mit dem simulierten Szenario.",
-        "ctaText": "Anlagen mit der Prognose vergleichen"
+        "ctaText": "Anlagen mit der Prognose vergleichen",
+        "methodTerm": "Wachstum und Kosten",
+        "assumptionsTerm": "Annahmen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "netFactor": "Jährlicher Nettowachstumsfaktor",
+          "annualReturn": "Jahresrendite",
+          "annualFee": "jährlicher Kostensatz",
+          "monthlyFactor": "Monatsfaktor",
+          "monthlyFactorLower": "Monatsfaktor",
+          "netFactorLower": "jährlicher Nettowachstumsfaktor",
+          "balanceEnd": "Saldo am Monatsende",
+          "balanceStart": "Saldo am Monatsanfang",
+          "contribution": "monatliche Einzahlung"
+        }
       }
     },
     "emergencyFund": {
@@ -2055,11 +2098,16 @@
         "whatBody": "Beim Festgeld legen Sie einen Betrag für eine feste Zahl von Monaten zu einem festen Zinssatz bei der Bank an. Neben dem Zinssatz hängt der Ertrag von drei Dingen ab: wie lange das Geld angelegt bleibt, ob die Zinsen am Ende oder während der Laufzeit gezahlt werden und wie viel Steuer davon einbehalten wird. Dieser Rechner berücksichtigt alle drei mit dem Zinssatz, den Sie eingeben, damit Sie Angebote auf derselben Grundlage vergleichen können.",
         "readHeading": "So lesen Sie das Ergebnis",
         "read": {
-          "gross": "Bruttozinsen: alles, was die Anlage vor Steuern bringt.",
-          "tax": "Einbehaltene Steuer: der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
-          "net": "Nettozinsen: was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
-          "final": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten: der Anlagebetrag plus alle Nettozinsen.",
-          "yield": "Nettorendite pro Jahr: der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
+          "grossTerm": "Bruttozinsen",
+          "grossBody": "Alles, was die Anlage vor Steuern bringt.",
+          "taxTerm": "Einbehaltene Steuer",
+          "taxBody": "Der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
+          "netTerm": "Nettozinsen",
+          "netBody": "Was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
+          "finalTerm": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten",
+          "finalBody": "Der Anlagebetrag plus alle Nettozinsen.",
+          "yieldTerm": "Nettorendite pro Jahr",
+          "yieldBody": "Der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
         },
         "exampleHeading": "Rechenbeispiel",
         "exampleSetup": "Angenommen, Sie legen {{amount}} für {{months}} Monate zu einem Bruttozins von {{rate}} pro Jahr an, mit Zinszahlung am Laufzeitende. Der Zins ist ein einfacher Zins: Betrag mal Zinssatz mal Anteil des Jahres, den das Geld angelegt bleibt.",
@@ -2067,15 +2115,21 @@
         "exampleTax": "Nehmen wir nun an, dass von den Zinsen am Laufzeitende {{taxRate}} einbehalten werden, ein Satz, der nur zur Veranschaulichung gewählt und keinen Regeln eines Landes entnommen ist: Der Rechner beginnt bei 0 %, damit Sie Ihren eigenen eingeben. Die Bank behält {{tax}} ein, Sie erhalten {{net}} und haben am Ende {{taxedFinal}}, eine Nettorendite von {{taxedYield}} pro Jahr.",
         "methodHeading": "Methode und Annahmen",
         "methodIntro": "Zinsen werden in ganzen Monaten gerechnet, ohne Tageszählung. Der eingegebene Zinssatz ist ein nominaler Jahreszins: Jede Periode bringt den Zinssatz mal ihre Monate geteilt durch 12.",
-        "methodFormula": "Zinsen einer Periode = Guthaben × Jahreszins × Monate der Periode ÷ 12. Nettozinsen = Zinsen − Steuer. Nettorendite pro Jahr = der jährliche Zinssatz, bei dem der Anlagebetrag den Nettozahlungen und dem zurückgezahlten Betrag entspricht, jeweils zum Zeitpunkt ihres Eingangs gezählt. Kommen alle Zinsen am Laufzeitende, ist das (Guthaben am Laufzeitende ÷ Anlagebetrag)^(12 ÷ Laufzeit in Monaten) − 1.",
         "method": {
-          "maturity": "Bei Zahlung am Laufzeitende fallen einfache Zinsen an: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
-          "periodic": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
-          "reinvest": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
-          "tax": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
-          "yield": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der jährliche Zinssatz, zu dem Ihr Anlagebetrag auf alles anwächst, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
-          "excluded": "Nicht enthalten: Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
-          "privacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen."
+          "maturityBody": "Bei Zahlung am Laufzeitende fallen einfache Zinsen an: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
+          "periodicBody": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
+          "reinvestBody": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
+          "taxBody": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
+          "yieldBody": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der jährliche Zinssatz, zu dem Ihr Anlagebetrag auf alles anwächst, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
+          "excludedTerm": "Nicht enthalten",
+          "excludedBody": "Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
+          "privacyBody": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen.",
+          "maturityTerm": "Auszahlung am Laufzeitende",
+          "periodicTerm": "Regelmäßige Auszahlungen",
+          "reinvestTerm": "Zinsen angelegt oder ausgezahlt",
+          "taxTerm": "Steuer",
+          "yieldTerm": "Nettorendite pro Jahr",
+          "privacyTerm": "Datenschutz"
         },
         "methodLimits": "Laufzeiten reichen von 1 bis {{maxMonths}} Monaten.",
         "nextHeading": "Verwandte Rechner",
@@ -2084,7 +2138,23 @@
         "nextEmergency": "Festgeld eignet sich für Ersparnisse, die Sie so bald nicht brauchen, während Ihr Notgroschen griffbereit bleibt.",
         "nextEmergencyLink": "Notgroschen berechnen",
         "nextSavingsGoal": "Sie sparen den Betrag für das Festgeld erst an oder planen, was nach der Fälligkeit kommt? Der Sparzielrechner ermittelt die monatliche Sparrate oder die nötige Zeit.",
-        "nextSavingsGoalLink": "Sparzielrechner öffnen"
+        "nextSavingsGoalLink": "Sparzielrechner öffnen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "interest": "Zinsen einer Periode",
+          "balance": "Guthaben",
+          "annualRate": "Jahreszins",
+          "periodMonths": "Monate der Periode",
+          "tax": "Steuer",
+          "taxLower": "Steuer",
+          "taxRate": "Steuersatz",
+          "interestLower": "Zinsen",
+          "netInterest": "Nettozinsen",
+          "yield": "Nettorendite pro Jahr, mit den Zinsen am Laufzeitende",
+          "finalBalance": "Guthaben am Laufzeitende",
+          "amount": "Anlagebetrag",
+          "termMonths": "Laufzeit in Monaten"
+        }
       }
     },
     "buyVsRent": {
@@ -2782,14 +2852,31 @@
         "exampleTitle": "Rechenbeispiel",
         "exampleText": "Sie zeichnen {{amount}} und halten die Zertifikate {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodQuarter": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
-        "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
-        "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
+        "methodQuarterBody": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
+        "methodTaxBody": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
+        "methodYieldBody": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
         "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRateNote}}), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Kapitalerträgen. Ihre persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
         "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen.",
-        "referenceRateAtCeiling": "{{rate}}, die Obergrenze"
+        "referenceRateAtCeiling": "{{rate}}, die Obergrenze",
+        "methodQuarterTerm": "Vierteljährliche Zinsen",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Nettorendite pro Jahr",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "quarterInterest": "Zinsen des Quartals",
+          "balance": "Guthaben",
+          "baseRate": "Basiszins",
+          "bonus": "Treueprämie",
+          "irs": "IRS",
+          "interestLower": "Zinsen",
+          "newBalance": "Guthaben am Quartalsende",
+          "yield": "Nettorendite pro Jahr",
+          "finalValue": "Endguthaben",
+          "amount": "gezeichneter Betrag",
+          "years": "Jahre"
+        }
       },
       "nextStepHeadline": "Sehen Sie Ihre Zertifikate neben Ihren übrigen Ersparnissen",
       "nextStepDescription": "Fügen Sie sie in WonderMoney hinzu, um alles, was Sie gespart haben, an einem Ort zu verfolgen.",
@@ -2908,12 +2995,25 @@
           "title": "So wird gerechnet",
           "intro": "Die Zinssätze sind veröffentlichte Statistiken. WonderMoney fügt nur diese Berechnungen hinzu:",
           "steps": {
-            "a": "Jahreszins: der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
-            "b": "Inflation: die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum betreffenden Jahr.",
-            "c": "Realzins: (1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
-            "d": "Rechner: einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, abzüglich 28 % Quellensteuer, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
+            "aTerm": "Jahreszins",
+            "aBody": "Der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
+            "bTerm": "Inflation",
+            "bBody": "Die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum betreffenden Jahr.",
+            "cTerm": "Realzins",
+            "cBody": "(1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
+            "dTerm": "Rechner",
+            "dBody": "Einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, abzüglich 28 % Quellensteuer, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
           },
-          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte."
+          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte.",
+          "formulasLabel": "Formeln",
+          "formula": {
+            "realRate": "Realzins",
+            "realRateAfterTax": "Realzins nach Steuer",
+            "rate": "Zins",
+            "inflation": "Inflation",
+            "amount": "Betrag",
+            "months": "Monate"
+          }
         },
         "data": {
           "title": "Daten und Quellen",
@@ -3042,10 +3142,14 @@
           "title": "So wird gerechnet",
           "intro": "Jede Zahl stammt aus derselben Rechenlogik wie der Festgeld-Rechner:",
           "steps": {
-            "a": "Bruttozinsen: Betrag × TANB × Laufzeit in Monaten ÷ 12, in einer Zahlung bei Fälligkeit.",
-            "b": "Steuer: {{taxRate}} % der Zinsen. Ausländische Banken behalten sie in Portugal nicht ein, daher geht die Zahl davon aus, dass Sie die Zinsen selbst in der Steuererklärung angeben und denselben Satz zahlen.",
-            "c": "Nettorendite pro Jahr: die Nettozinsen, auf ein Jahr hochgerechnet.",
-            "d": "Filter: Ein Angebot wird ausgeblendet, wenn sein Mindestbetrag über Ihrem Betrag oder sein Höchstbetrag darunter liegt. Ein Angebot ohne angegebene Grenze bleibt sichtbar."
+            "aTerm": "Bruttozinsen",
+            "aBody": "Betrag × TANB × Laufzeit in Monaten ÷ 12, in einer Zahlung bei Fälligkeit.",
+            "bTerm": "Steuer",
+            "bBody": "{{taxRate}} % der Zinsen. Ausländische Banken behalten sie in Portugal nicht ein, daher geht die Zahl davon aus, dass Sie die Zinsen selbst in der Steuererklärung angeben und denselben Satz zahlen.",
+            "cTerm": "Nettorendite pro Jahr",
+            "cBody": "Die Nettozinsen, auf ein Jahr hochgerechnet.",
+            "dTerm": "Filter",
+            "dBody": "Ein Angebot wird ausgeblendet, wenn sein Mindestbetrag über Ihrem Betrag oder sein Höchstbetrag darunter liegt. Ein Angebot ohne angegebene Grenze bleibt sichtbar."
           }
         },
         "data": {
@@ -3928,14 +4032,14 @@
         "exampleTitle": "Rechenbeispiel",
         "example": "Jemand mit durchschnittlich {{gross}} im Monat (Euro von heute, 14 Zahlungen) und {{years}} Beitragsjahren geht in Rente (Rentenalter: {{age}}). Die gesetzliche Rente beträgt {{statutory}} im Monat, bei einem Gesamtsteigerungssatz von {{rate}}. Bei Rentenbeginn {{months}} Monate vor dem Regelalter werden {{penalty}} abgezogen und der Nachhaltigkeitsfaktor wird angewendet; es bleiben {{monthly}} brutto im Monat, also {{replacement}} des Gehalts. Nach IRS beträgt die Rente {{netPension}} im Monat. Gegenüber einem geschätzten Nettogehalt von {{net}} beträgt die Lücke {{gap}} im Monat.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodReference": "Das Referenzentgelt ist der Durchschnitt der Jahresentgelte der gesamten Laufbahn, aufgewertet mit Verbraucherpreis-Koeffizienten und durch 14 geteilt. Der Rechner arbeitet in Euro von heute: Sie geben ein reales durchschnittliches Monatsgehalt ein, und das Ergebnis ist ebenfalls in Euro von heute.",
-        "methodRate": "Der jährliche Steigerungssatz hängt von Abschnitten des Referenzentgelts in Vielfachen des IAS ab ({{ias}} im Jahr 2026): {{rates}} für die Abschnitte bis 1,1, bis 2, bis 4, bis 8 und über dem 8-Fachen des IAS. Laufbahnen bis 20 Jahre nutzen pauschal 2 %. Der Satz wird mit den Beitragsjahren, höchstens 40, multipliziert und ergibt den Gesamtsteigerungssatz.",
-        "methodAges": "Das Regelalter für die Altersrente beträgt 2026 {{normal2026}} und wurde für 2027 auf {{normal2027}} festgelegt. Der Rechner nutzt den Wert von 2026.",
-        "methodEarly": "Vor dem Regelalter, ab 60 mit mindestens 15 Beitragsjahren, zieht jeder Monat des früheren Beginns {{penalty}} ab, und zusätzlich gilt der Nachhaltigkeitsfaktor 2026 ({{factor}}, eine Kürzung um 17,63 %). Beide werden multipliziert. Ausnahmen, etwa für sehr lange Laufbahnen, sind nicht abgebildet.",
-        "methodLate": "Nach dem Regelalter, bis 70, bringt jeder Monat einen Zuschlag je nach Beitragsjahren: 0,33 % ab 15 Jahren, 0,50 % ab 25, 0,65 % ab 35 und 1 % ab 40. Die Rente mit Zuschlag darf 92 % des Referenzentgelts nicht übersteigen.",
-        "methodMinimum": "Ergibt die Formel weniger als die Mindestrente 2026 für Ihre Laufbahn, wird das Minimum gezeigt: {{min15}} für 15 bis 20 Jahre, {{min21}} für 21 bis 30 und {{min31}} ab 31 Jahren. Die Mindestrente gilt nicht beim vorzeitigen Rentenbeginn.",
-        "methodGap": "Die Lücke vergleicht die Nettorente mit Ihrem heutigen Nettogehalt, beide pro Zahlung über 14 Zahlungen. Das Nettogehalt ist das Brutto minus 11 % Sozialversicherung und die IRS-Quellensteuer 2026 für eine alleinstehende Person ohne Unterhaltsberechtigte auf dem Festland. Die Nettorente ist die geschätzte Bruttorente minus die IRS-Quellensteuer nach der Rentenquellensteuertabelle VIII 2026 (Despacho n.º 233-A/2026, nicht verheiratet oder verheiratet mit zwei Verdienern, ohne Behinderung); auf Renten fällt keine Sozialversicherung an, und auf Renten bis 920 Euro im Monat wird keine Quellensteuer einbehalten. Die endgültige IRS hängt von Ihrem Gesamteinkommen und den Abzügen ab.",
-        "methodBudget": "Lesen Sie die Lücke als den Monatsbetrag, den Ihre Ersparnisse und Investitionen decken müssten. Sie ändert sich mit jeder Annahme oben.",
+        "methodReferenceBody": "Das Referenzentgelt ist der Durchschnitt der Jahresentgelte der gesamten Laufbahn, aufgewertet mit Verbraucherpreis-Koeffizienten und durch 14 geteilt. Der Rechner arbeitet in Euro von heute: Sie geben ein reales durchschnittliches Monatsgehalt ein, und das Ergebnis ist ebenfalls in Euro von heute.",
+        "methodRateBody": "Der jährliche Steigerungssatz hängt von Abschnitten des Referenzentgelts in Vielfachen des IAS ab ({{ias}} im Jahr 2026): {{rates}} für die Abschnitte bis 1,1, bis 2, bis 4, bis 8 und über dem 8-Fachen des IAS. Laufbahnen bis 20 Jahre nutzen pauschal 2 %. Der Satz wird mit den Beitragsjahren, höchstens 40, multipliziert und ergibt den Gesamtsteigerungssatz.",
+        "methodAgesBody": "Das Regelalter für die Altersrente beträgt 2026 {{normal2026}} und wurde für 2027 auf {{normal2027}} festgelegt. Der Rechner nutzt den Wert von 2026.",
+        "methodEarlyBody": "Vor dem Regelalter, ab 60 mit mindestens 15 Beitragsjahren, zieht jeder Monat des früheren Beginns {{penalty}} ab, und zusätzlich gilt der Nachhaltigkeitsfaktor 2026 ({{factor}}, eine Kürzung um 17,63 %). Beide werden multipliziert. Ausnahmen, etwa für sehr lange Laufbahnen, sind nicht abgebildet.",
+        "methodLateBody": "Nach dem Regelalter, bis 70, bringt jeder Monat einen Zuschlag je nach Beitragsjahren: 0,33 % ab 15 Jahren, 0,50 % ab 25, 0,65 % ab 35 und 1 % ab 40. Die Rente mit Zuschlag darf 92 % des Referenzentgelts nicht übersteigen.",
+        "methodMinimumBody": "Ergibt die Formel weniger als die Mindestrente 2026 für Ihre Laufbahn, wird das Minimum gezeigt: {{min15}} für 15 bis 20 Jahre, {{min21}} für 21 bis 30 und {{min31}} ab 31 Jahren. Die Mindestrente gilt nicht beim vorzeitigen Rentenbeginn.",
+        "methodGapBody": "Die Lücke vergleicht die Nettorente mit Ihrem heutigen Nettogehalt, beide pro Zahlung über 14 Zahlungen. Das Nettogehalt ist das Brutto minus 11 % Sozialversicherung und die IRS-Quellensteuer 2026 für eine alleinstehende Person ohne Unterhaltsberechtigte auf dem Festland. Die Nettorente ist die geschätzte Bruttorente minus die IRS-Quellensteuer nach der Rentenquellensteuertabelle VIII 2026 (Despacho n.º 233-A/2026, nicht verheiratet oder verheiratet mit zwei Verdienern, ohne Behinderung); auf Renten fällt keine Sozialversicherung an, und auf Renten bis 920 Euro im Monat wird keine Quellensteuer einbehalten. Die endgültige IRS hängt von Ihrem Gesamteinkommen und den Abzügen ab.",
+        "methodBudgetBody": "Lesen Sie die Lücke als den Monatsbetrag, den Ihre Ersparnisse und Investitionen decken müssten. Sie ändert sich mit jeder Annahme oben.",
         "unsupportedTitle": "Nicht unterstützt",
         "unsupportedMixed": "Laufbahnen, die vor 2002 begannen (Mischformel mit den alten Regeln für die Jahre bis 2001). Dieser Rechner deckt nur die Formel der gesamten Laufbahn für alle ab, die 2002 oder später mit den Beiträgen begonnen haben.",
         "unsupportedSpecial": "Stark schwankende Gehälter, Beitragslücken und Laufbahnen über 40 Jahre.",
@@ -3948,7 +4052,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: Rentenanpassung 2026 und Mindestrenten",
         "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
         "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die jährlichen Steigerungssätze, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde am 20. November 2026 Zeile für Zeile anhand des im Diário da República veröffentlichten Anhangs des Despacho n.º 233-A/2026 geprüft.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodRateTerm": "Gesamtsteigerungssatz",
+        "methodAgesTerm": "Regelaltersgrenze",
+        "methodEarlyTerm": "Vorzeitiger Rentenbeginn",
+        "methodLateTerm": "Rentenbeginn nach dem Regelalter",
+        "methodMinimumTerm": "Mindestrente",
+        "methodGapTerm": "Lücke",
+        "methodBudgetTerm": "Die Lücke lesen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "globalRate": "Gesamtsteigerungssatz",
+          "globalRateLower": "Gesamtsteigerungssatz",
+          "annualRate": "jährlicher Steigerungssatz",
+          "years": "Beitragsjahre",
+          "statutory": "Gesetzliche Rente",
+          "statutoryLower": "gesetzliche Rente",
+          "reference": "Referenzentgelt",
+          "earlyPension": "Rente bei vorzeitigem Rentenbeginn",
+          "monthsEarly": "Monate vor dem Regelalter",
+          "factor": "Nachhaltigkeitsfaktor",
+          "gap": "Lücke",
+          "netPay": "Nettogehalt",
+          "netPension": "Nettorente"
+        }
       }
     },
     "sp500History": {
@@ -4056,10 +4184,14 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "fx": "Währung: Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
-            "fees": "Kosten: Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
-            "taxes": "Steuern: Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
-            "sequence": "Rückblick: Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
+            "fxTerm": "Währung",
+            "fxBody": "Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
+            "feesTerm": "Kosten",
+            "feesBody": "Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
+            "taxesTerm": "Steuern",
+            "taxesBody": "Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
+            "sequenceTerm": "Rückblick",
+            "sequenceBody": "Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
             "past": "Die Wertentwicklung der Vergangenheit ist kein verlässlicher Indikator für die Zukunft. Dieses Werkzeug dient der Bildung und ist keine Anlageberatung."
           }
         },
@@ -5135,7 +5267,12 @@
           "title": "Rechenbeispiel",
           "setup": "Angenommen, Sie legen {{amount}} für 12 Monate bei {{bank}} auf {{product}} an, zu {{rate}} pro Jahr. Das bringt {{gross}}; die 28 % IRS nehmen {{tax}}, es bleiben {{net}}.",
           "capped": "Die Höchstgrenze zählt. {{product2}} bei {{bank2}} zahlt {{rate2}}, aber nur bis {{cap}}. Bei {{amount2}} betragen die Zinsen {{gross2}} vor Steuern und {{net2}} danach, als hätten Sie {{cap}} gespart.",
-          "plans": "Auch Gebühren zählen. {{product3}} bei {{bank3}} reicht je nach Tarif von {{low}} bis {{high}}. Bei {{amount}} bringt der Tarif Standard {{standardNet}} netto, der Tarif Ultra nach {{ultraFees}} Gebühren pro Jahr dagegen {{ultraNet}}."
+          "plans": "Auch Gebühren zählen. {{product3}} bei {{bank3}} reicht je nach Tarif von {{low}} bis {{high}}. Bei {{amount}} bringt der Tarif Standard {{standardNet}} netto, der Tarif Ultra nach {{ultraFees}} Gebühren pro Jahr dagegen {{ultraNet}}.",
+          "figures": {
+            "gross": "Bruttozinsen",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Nettozinsen"
+          }
         },
         "method": {
           "title": "Methode",
@@ -5335,17 +5472,25 @@
           "setup": "Nehmen wir den gelegentlichen Aktienkäufer: {{count}} Käufe zu {{amount}} in US-Aktien im Jahr, {{portfolio}} investiert.",
           "bank": "Bei {{bank}} kostet jede Order {{bankFormula}}, die {{count}} Orders kosten also {{bankTrading}} mit Stempelsteuer. Der Tausch von {{converted}} in Dollar zu {{bankFx}} kostet {{bankFxTotal}}, die Depotgebühr ({{bankCustodyFormula}}) {{bankCustody}} mit Mehrwertsteuer. Das Jahr kostet {{bankTotal}}, davon {{bankStampDuty}} Stempelsteuer und {{bankVat}} Mehrwertsteuer.",
           "online": "Bei {{online}} kostet jede Order {{onlineFormula}}: {{onlineTrading}} im Jahr. Der Währungstausch zu {{onlineFx}} kostet {{onlineFxTotal}} und das Depot {{onlineCustody}}, zusammen {{onlineTotal}}.",
-          "takeaway": "Bei kleinen, seltenen Orders wiegen Mindestgebühren und feste Depotgebühren am schwersten; bei großen Orders oder einem großen Depot wiegen prozentuale Gebühren mehr. Wechseln Sie oben das Profil, um zu sehen, wie sich die Reihenfolge ändert."
+          "takeaway": "Bei kleinen, seltenen Orders wiegen Mindestgebühren und feste Depotgebühren am schwersten; bei großen Orders oder einem großen Depot wiegen prozentuale Gebühren mehr. Wechseln Sie oben das Profil, um zu sehen, wie sich die Reihenfolge ändert.",
+          "figures": {
+            "total": "Summe für das Jahr"
+          }
         },
         "method": {
           "title": "Methode",
           "intro": "Jede Gebühr stammt aus dem vom Broker selbst veröffentlichten Preisverzeichnis, an dem in ihrer Zeile genannten Datum; die ganze Tabelle wurde am {{date}} geprüft und wird jedes Quartal erneut geprüft. Gebühren, die ein Preisverzeichnis nicht nennt, sind als nicht veröffentlicht markiert und fehlen in den Summen, die dann als unvollständig erscheinen.",
           "steps": {
-            "a": "Orders: Die Provision jeder Order ist der feste Teil plus der Prozentsatz der Order, begrenzt durch Mindest- und Höchstbetrag je Order. Gebühren je Aktie zählen ganze Aktien zum angenommenen Kurs. Ein gebührenfreies Monatsvolumen gilt Monat für Monat.",
-            "b": "Sparplan: Bei ETF-Käufen ersetzt die Sparplangebühr die Ordergebühr, wenn die Option aktiv ist und der Broker einen Sparplan veröffentlicht.",
-            "c": "Währung: US-Orders zahlen die Währungsgebühr des Brokers auf den umgetauschten Betrag; Gebühren in Dollar werden zu {{rate}} Dollar je Euro umgerechnet.",
-            "d": "Depot: Die veröffentlichte Formel, je Periode mit Mindest- und Höchstbetrag, wird auf den Bestand so oft berechnet, wie das Jahr Perioden hat.",
-            "e": "Steuern auf Gebühren: Wenn das Preisverzeichnis angibt, dass seine Gebühren die portugiesische Stempelsteuer (4 % auf die Provision) oder die Mehrwertsteuer (23 % auf die Depotgebühr) nicht enthalten, werden sie auf die betreffenden Gebühren aufgeschlagen.",
+            "aTerm": "Orders",
+            "aBody": "Die Provision jeder Order ist der feste Teil plus der Prozentsatz der Order, begrenzt durch Mindest- und Höchstbetrag je Order. Gebühren je Aktie zählen ganze Aktien zum angenommenen Kurs. Ein gebührenfreies Monatsvolumen gilt Monat für Monat.",
+            "bTerm": "Sparplan",
+            "bBody": "Bei ETF-Käufen ersetzt die Sparplangebühr die Ordergebühr, wenn die Option aktiv ist und der Broker einen Sparplan veröffentlicht.",
+            "cTerm": "Währung",
+            "cBody": "US-Orders zahlen die Währungsgebühr des Brokers auf den umgetauschten Betrag; Gebühren in Dollar werden zu {{rate}} Dollar je Euro umgerechnet.",
+            "dTerm": "Depot",
+            "dBody": "Die veröffentlichte Formel, je Periode mit Mindest- und Höchstbetrag, wird auf den Bestand so oft berechnet, wie das Jahr Perioden hat.",
+            "eTerm": "Steuern auf Gebühren",
+            "eBody": "Wenn das Preisverzeichnis angibt, dass seine Gebühren die portugiesische Stempelsteuer (4 % auf die Provision) oder die Mehrwertsteuer (23 % auf die Depotgebühr) nicht enthalten, werden sie auf die betreffenden Gebühren aufgeschlagen.",
             "f": "Die Summe addiert die Orders des Jahres, den Währungstausch und das Depot; die Broker erscheinen vom günstigsten zum teuersten. Broker, denen eine für das Profil nötige Gebühr fehlt, stehen am Ende."
           }
         },
@@ -5533,7 +5678,8 @@
             "insuranceLinked": "fondsgebundene Versicherung",
             "insuranceGuaranteed": "nicht fondsgebundene Versicherung",
             "pensionFund": "Pensionsfonds"
-          }
+          },
+          "gapLabel": "Kostenunterschied auf {{invested}} pro Jahr"
         },
         "tax": {
           "title": "Der IRS-Abzug (EBF, Artikel 21)",
@@ -5545,7 +5691,8 @@
           },
           "example": "Maßgeblich ist das Alter am 1. Januar des Einzahlungsjahres (n.º 9). Mit {{age}} Jahren ergeben {{exampleContribution}} Einzahlung im Jahr {{exampleDeduction}}, den vollen Abzug.",
           "conditions": "Der Abzug fällt unter die Gesamtgrenze der Abzüge in Artikel 78, n.º 7, des IRS-Gesetzbuchs: keine Grenze für die niedrigsten steuerpflichtigen Einkommen, dann von {{capMax}} bis {{capMin}} je Haushalt. Er senkt die geschuldete Steuer und wird nicht ausgezahlt, und Einzahlungen nach dem Renteneintritt sind nicht abziehbar (n.º 10).",
-          "payout": "Zahlt der Plan in einem gesetzlich vorgesehenen Fall aus, wird eine Einmalzahlung auf den Gewinn mit {{legalRate}} auf zwei Fünftel davon besteuert, effektiv {{legalEffective}} des Gewinns (n.º 3); regelmäßige Zahlungen werden wie Renten besteuert."
+          "payout": "Zahlt der Plan in einem gesetzlich vorgesehenen Fall aus, wird eine Einmalzahlung auf den Gewinn mit {{legalRate}} auf zwei Fünftel davon besteuert, effektiv {{legalEffective}} des Gewinns (n.º 3); regelmäßige Zahlungen werden wie Renten besteuert.",
+          "deductionLabel": "Abzug von der IRS-Steuer"
         },
         "redemption": {
           "title": "Wann Sie auszahlen lassen können und was eine vorzeitige Auszahlung kostet",
@@ -5697,22 +5844,47 @@
           "title": "Karat und Feingehalt",
           "intro": "Die Reinheit von Gold wird in Karat angegeben, von 24, oder in Tausendsteln, der Zahl im Stempel. Das sind die sechs gesetzlichen Feingehalte für Gold in Portugal:",
           "items": {
-            "k24": "24 Karat, 999 Tausendstel: reines Gold, wie in Anlagebarren und -münzen.",
-            "k22": "22 Karat, 916: Goldmünzen wie der Sovereign und der Krugerrand und viel Schmuck aus Indien.",
-            "k19_2": "19,2 Karat, 800: portugiesisches Gold („ouro português“), der traditionelle Feingehalt portugiesischer Goldschmiedekunst.",
-            "k18": "18 Karat, 750: der häufigste Feingehalt bei Schmuck in Europa.",
-            "k14": "14 Karat, 585: härterer, günstigerer Schmuck.",
-            "k9": "9 Karat, 375: der niedrigste gesetzliche Feingehalt."
+            "k24Term": "24 Karat, 999 Tausendstel",
+            "k24Body": "Reines Gold, wie in Anlagebarren und -münzen.",
+            "k22Term": "22 Karat, 916",
+            "k22Body": "Goldmünzen wie der Sovereign und der Krugerrand und viel Schmuck aus Indien.",
+            "k19_2Term": "19,2 Karat, 800",
+            "k19_2Body": "Portugiesisches Gold („ouro português“), der traditionelle Feingehalt portugiesischer Goldschmiedekunst.",
+            "k18Term": "18 Karat, 750",
+            "k18Body": "Der häufigste Feingehalt bei Schmuck in Europa.",
+            "k14Term": "14 Karat, 585",
+            "k14Body": "Härterer, günstigerer Schmuck.",
+            "k9Term": "9 Karat, 375",
+            "k9Body": "Der niedrigste gesetzliche Feingehalt."
           }
         },
         "method": {
           "title": "So wird gerechnet",
           "intro": "Die Seite macht vier Dinge:",
           "steps": {
-            "a": "Preis: der NBP-Preis für ein Gramm reines Gold in Zloty, geteilt durch die Zloty pro Euro der EZB am selben Tag.",
-            "b": "Reines Gold: das Gewicht mal den Feingehalt geteilt durch 1.000. Ein 24-karätiges Stück zählt mit 999 Tausendsteln.",
-            "c": "Wert: die Gramm reines Gold mal den Preis für ein Gramm reines Gold, auf den Cent gerundet.",
-            "d": "Angebot: wenn Sie eines eingeben, das Angebot geteilt durch den Wert, in Prozent, und die Differenz in Euro."
+            "aTerm": "Preis",
+            "aBody": "Der NBP-Preis für ein Gramm reines Gold in Zloty, geteilt durch die Zloty pro Euro der EZB am selben Tag.",
+            "bTerm": "Reines Gold",
+            "bBody": "Das Gewicht mal den Feingehalt geteilt durch 1.000. Ein 24-karätiges Stück zählt mit 999 Tausendsteln.",
+            "cTerm": "Wert",
+            "cBody": "Die Gramm reines Gold mal den Preis für ein Gramm reines Gold, auf den Cent gerundet.",
+            "dTerm": "Angebot",
+            "dBody": "Wenn Sie eines eingeben, das Angebot geteilt durch den Wert, in Prozent, und die Differenz in Euro."
+          },
+          "formulasLabel": "Formeln",
+          "formula": {
+            "pureGold": "Reines Gold",
+            "pureGoldLower": "reines Gold",
+            "weight": "Gewicht",
+            "fineness": "Feingehalt",
+            "value": "Wert",
+            "valueLower": "Wert",
+            "price": "Preis pro Gramm",
+            "priceLower": "Preis pro Gramm",
+            "nbpPrice": "NBP-Preis in Zloty",
+            "zlotyPerEuro": "Zloty pro Euro",
+            "offerShare": "Angebot im Verhältnis zum Wert",
+            "offer": "Angebot"
           }
         },
         "buyers": {
@@ -5733,10 +5905,14 @@
         "limits": {
           "title": "Was dieser Wert nicht enthält",
           "items": {
-            "metal": "Nur das Metall: Der Wert ist der Goldgehalt zu einem Referenzpreis. Steine, andere Metalle, Verarbeitung und Marke zählen nicht.",
-            "buyers": "Kein Verkaufspreis: Ankäufer zahlen weniger, und ein Geschäft, das Gold verkauft, verlangt mehr.",
-            "purity": "Feingehalt: Der Rechner verlässt sich auf den Feingehalt, den Sie wählen. Ein ungestempeltes oder vergoldetes Stück kann viel weniger Gold enthalten oder gar keines.",
-            "reference": "Referenzpreis: der Tagespreis der NBP, kein Live-Kurs. Der Markt bewegt sich im Lauf des Tages.",
+            "metalTerm": "Nur das Metall",
+            "metalBody": "Der Wert ist der Goldgehalt zu einem Referenzpreis. Steine, andere Metalle, Verarbeitung und Marke zählen nicht.",
+            "buyersTerm": "Kein Verkaufspreis",
+            "buyersBody": "Ankäufer zahlen weniger, und ein Geschäft, das Gold verkauft, verlangt mehr.",
+            "purityTerm": "Feingehalt",
+            "purityBody": "Der Rechner verlässt sich auf den Feingehalt, den Sie wählen. Ein ungestempeltes oder vergoldetes Stück kann viel weniger Gold enthalten oder gar keines.",
+            "referenceTerm": "Referenzpreis",
+            "referenceBody": "Der Tagespreis der NBP, kein Live-Kurs. Der Markt bewegt sich im Lauf des Tages.",
             "education": "Nur zu Informationszwecken, keine Beratung."
           }
         },

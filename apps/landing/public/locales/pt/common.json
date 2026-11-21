@@ -675,13 +675,30 @@
         "exampleTarget": "Com uma taxa de levantamento de {{rate}}, o teu número FIRE é {{spending}} ÷ {{rate}} = {{target}}, por isso os {{assets}} de hoje são {{progress}} do caminho.",
         "exampleTime": "A crescer mês a mês, com as contribuições somadas, os investimentos passam {{target}} ao fim de {{time}}. Se gastares menos {{cut}}, {{cutSpending}} por ano, o objetivo desce para {{cutTarget}} e chegas lá ao fim de {{cutTime}}. A calculadora acima começa com estes valores, para os trocares pelos teus.",
         "methodHeading": "Método",
-        "methodFormula": "Número FIRE = despesa anual ÷ taxa de levantamento",
-        "methodMultiple": "A 4%, o objetivo é 25 vezes a tua despesa anual; a 3%, cerca de 33 vezes. Uma taxa mais baixa dá um objetivo maior e mais margem para anos maus.",
-        "methodGrowth": "Todos os meses, os investimentos crescem à taxa mensal que, composta, dá o retorno anual que indicas, e depois soma-se a contribuição desse mês. O tempo mostrado é o primeiro mês em que o total chega ao teu número FIRE.",
-        "methodRealMoney": "O retorno é real, depois da inflação, por isso todos os valores estão em euros de hoje. Assume-se que a despesa e as contribuições sobem com os preços, e é por isso que ficam iguais no cálculo.",
-        "methodHorizon": "A projeção para ao fim de {{years}} anos. Se as contribuições e o crescimento não chegarem ao objetivo, por exemplo sem contribuição e sem retorno, a calculadora diz-to em vez de dar uma data.",
-        "methodLeftOut": "Não inclui impostos sobre ganhos e levantamentos, comissões de fundos e plataformas, nem o risco de sequência: o perigo de maus retornos nos primeiros anos em que vives dos investimentos. A taxa de levantamento é uma regra prática tirada de retornos passados, não uma garantia.",
-        "methodPrivacy": "O cálculo é feito no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados."
+        "methodMultipleBody": "A 4%, o objetivo é 25 vezes a tua despesa anual; a 3%, cerca de 33 vezes. Uma taxa mais baixa dá um objetivo maior e mais margem para anos maus.",
+        "methodGrowthBody": "Todos os meses, os investimentos crescem à taxa mensal que, composta, dá o retorno anual que indicas, e depois soma-se a contribuição desse mês. O tempo mostrado é o primeiro mês em que o total chega ao teu número FIRE.",
+        "methodRealMoneyBody": "O retorno é real, depois da inflação, por isso todos os valores estão em euros de hoje. Assume-se que a despesa e as contribuições sobem com os preços, e é por isso que ficam iguais no cálculo.",
+        "methodHorizonBody": "A projeção para ao fim de {{years}} anos. Se as contribuições e o crescimento não chegarem ao objetivo, por exemplo sem contribuição e sem retorno, a calculadora diz-to em vez de dar uma data.",
+        "methodLeftOutBody": "Não inclui impostos sobre ganhos e levantamentos, comissões de fundos e plataformas, nem o risco de sequência: o perigo de maus retornos nos primeiros anos em que vives dos investimentos. A taxa de levantamento é uma regra prática tirada de retornos passados, não uma garantia.",
+        "methodPrivacyBody": "O cálculo é feito no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados.",
+        "methodMultipleTerm": "Taxa de levantamento",
+        "methodGrowthTerm": "Crescimento mensal",
+        "methodRealMoneyTerm": "Dinheiro de hoje",
+        "methodHorizonTerm": "Horizonte",
+        "methodLeftOutTerm": "Não inclui",
+        "methodPrivacyTerm": "Privacidade",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "fireNumber": "Número FIRE",
+          "annualSpending": "despesa anual",
+          "withdrawalRate": "taxa de levantamento",
+          "monthlyRate": "Taxa mensal",
+          "monthlyRateLower": "taxa mensal",
+          "realReturn": "retorno real anual",
+          "assetsEnd": "Investimentos no fim do mês",
+          "assetsStart": "investimentos no início do mês",
+          "contribution": "contribuição mensal"
+        }
       }
     },
     "compoundInterest": {
@@ -756,13 +773,11 @@
         "exampleStep3": "Em dinheiro de hoje, o valor final é {{realFinal}}: o que investiste vale {{realContributed}} e o crescimento depois da inflação é {{realGrowth}}.",
         "exampleComparison": "Subir a contribuição para {{comparisonMonthly}} por mês acrescenta {{extraContributed}} investidos ao longo do período e {{extraFinal}} ao valor final, que chega a {{comparisonFinal}}. Em dinheiro de hoje, a diferença é {{extraReal}}.",
         "methodHeading": "Como funciona a calculadora",
-        "methodFormula": "Todos os meses: saldo = saldo × (1 + retorno anual ÷ 12) + contribuição mensal",
-        "methodRealFormula": "Valor em dinheiro de hoje = valor ÷ (1 + inflação anual) ^ anos",
-        "methodMonthly": "O retorno anual é dividido em 12 taxas mensais iguais. Todos os meses o saldo cresce a essa taxa e depois a contribuição entra, no fim do mês. Um retorno de {{rate}} capitalizado mensalmente dá {{effectiveRate}} num ano completo.",
-        "methodInflation": "A inflação é convertida numa taxa mensal equivalente que, capitalizada ao longo do ano, dá a taxa anual. O valor final é dividido pela inflação acumulada em todo o período, e cada contribuição pela inflação acumulada até ao mês em que entra, por isso o montante investido também aparece em dinheiro de hoje.",
-        "methodRounding": "O crescimento é arredondado ao cêntimo todos os meses. Os totais aparecem em euros inteiros e o crescimento é sempre o valor final menos o que foi investido, por isso os números batem certo.",
-        "methodRanges": "Os montantes vão de 0 a {{maxAmount}}, o retorno e a inflação de 0% a {{maxRate}}% e o período de 0 a {{maxYears}} anos completos. Os valores fora destes limites são ajustados, e a calculadora avisa-te quando isso acontece.",
-        "methodPrivacy": "O cálculo é feito no teu navegador. Os montantes que introduzes não são enviados para lado nenhum.",
+        "methodMonthlyBody": "O retorno anual é dividido em 12 taxas mensais iguais. Todos os meses o saldo cresce a essa taxa e depois a contribuição entra, no fim do mês. Um retorno de {{rate}} capitalizado mensalmente dá {{effectiveRate}} num ano completo.",
+        "methodInflationBody": "A inflação é convertida numa taxa mensal equivalente que, capitalizada ao longo do ano, dá a taxa anual. O valor final é dividido pela inflação acumulada em todo o período, e cada contribuição pela inflação acumulada até ao mês em que entra, por isso o montante investido também aparece em dinheiro de hoje.",
+        "methodRoundingBody": "O crescimento é arredondado ao cêntimo todos os meses. Os totais aparecem em euros inteiros e o crescimento é sempre o valor final menos o que foi investido, por isso os números batem certo.",
+        "methodRangesBody": "Os montantes vão de 0 a {{maxAmount}}, o retorno e a inflação de 0% a {{maxRate}}% e o período de 0 a {{maxYears}} anos completos. Os valores fora destes limites são ajustados, e a calculadora avisa-te quando isso acontece.",
+        "methodPrivacyBody": "O cálculo é feito no teu navegador. Os montantes que introduzes não são enviados para lado nenhum.",
         "assumptionsHeading": "Pressupostos",
         "assumption1": "O retorno é igual todos os anos.",
         "assumption2": "As contribuições entram no fim de cada mês e mantêm-se iguais do princípio ao fim.",
@@ -771,7 +786,21 @@
         "assumptionsNote": "Os investimentos reais sobem e descem, e os impostos e comissões reduzem o que te fica. Usa o resultado como projeção para comparar opções, não como previsão.",
         "rateHeading": "Que retorno usar",
         "rateBody1": "Usa o retorno que esperas depois de custos e antes da inflação. Uma conta poupança ou obrigações do Estado rendem menos do que um fundo de ações diversificado, que pode crescer mais em períodos longos mas também perde valor em alguns anos.",
-        "rateBody2": "Se não tens a certeza, experimenta uma taxa prudente e outra mais otimista e compara os resultados. A distância entre elas mostra quanto do resultado depende da taxa, que não controlas, e quanto depende da contribuição e do período, que controlas."
+        "rateBody2": "Se não tens a certeza, experimenta uma taxa prudente e outra mais otimista e compara os resultados. A distância entre elas mostra quanto do resultado depende da taxa, que não controlas, e quanto depende da contribuição e do período, que controlas.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaBalanceEnd": "Saldo no fim do mês",
+        "formulaBalanceStart": "saldo no início do mês",
+        "formulaAnnualReturn": "retorno anual",
+        "formulaContribution": "contribuição mensal",
+        "formulaRealValue": "Valor em dinheiro de hoje",
+        "formulaValue": "valor",
+        "formulaInflation": "inflação anual",
+        "formulaYears": "anos",
+        "methodMonthlyTerm": "Capitalização mensal",
+        "methodInflationTerm": "Inflação",
+        "methodRoundingTerm": "Arredondamentos",
+        "methodRangesTerm": "Limites",
+        "methodPrivacyTerm": "Privacidade"
       }
     },
     "netWorth": {
@@ -942,7 +971,21 @@
         "assumptions": "A simulação assume uma taxa de rendimento e uma comissão constantes, o reinvestimento das distribuições e reforços no fim de cada mês. Exclui impostos, comissões de corretagem, variações cambiais e inflação. As taxas são hipóteses ilustrativas para um índice como o S&P 500. O retorno real varia e pode ser negativo. O impacto das comissões inclui o rendimento que esses montantes poderiam ter gerado.",
         "ctaHeadline": "Acompanha o desempenho real dos teus investimentos",
         "ctaDescription": "Usa o WonderMoney para acompanhares a tua carteira e comparares o desempenho real com o cenário que simulaste.",
-        "ctaText": "Compara os teus investimentos com a projeção"
+        "ctaText": "Compara os teus investimentos com a projeção",
+        "methodTerm": "Crescimento e comissões",
+        "assumptionsTerm": "Pressupostos",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "netFactor": "Fator de crescimento anual líquido",
+          "annualReturn": "rendimento anual",
+          "annualFee": "comissão anual do fundo",
+          "monthlyFactor": "Fator mensal",
+          "monthlyFactorLower": "fator mensal",
+          "netFactorLower": "fator anual líquido",
+          "balanceEnd": "Saldo no fim do mês",
+          "balanceStart": "saldo no início do mês",
+          "contribution": "reforço mensal"
+        }
       }
     },
     "emergencyFund": {
@@ -2055,11 +2098,16 @@
         "whatBody": "Num depósito a prazo, deixas um montante no banco durante um número fixo de meses a uma taxa fixa. Além da taxa, o que ganhas depende de três coisas: quanto tempo o dinheiro fica parado, se os juros chegam no fim ou ao longo do prazo e quanto imposto é retido. Esta calculadora trata das três com a taxa que indicares, para comparares propostas da mesma forma.",
         "readHeading": "Como ler o resultado",
         "read": {
-          "gross": "Juros brutos: tudo o que o depósito rende antes de impostos.",
-          "tax": "Imposto retido: a parte de cada pagamento de juros que fica retida, à taxa que indicares.",
-          "net": "Juros líquidos: o que chega até ti, os juros brutos menos o imposto.",
-          "final": "Saldo no vencimento, ou total recebido quando os juros são pagos a ti: o montante depositado mais todos os juros líquidos.",
-          "yield": "Rentabilidade líquida anual: o ganho líquido expresso como uma taxa por ano, para comparares depósitos com prazos e pagamentos diferentes."
+          "grossTerm": "Juros brutos",
+          "grossBody": "Tudo o que o depósito rende antes de impostos.",
+          "taxTerm": "Imposto retido",
+          "taxBody": "A parte de cada pagamento de juros que fica retida, à taxa que indicares.",
+          "netTerm": "Juros líquidos",
+          "netBody": "O que chega até ti, os juros brutos menos o imposto.",
+          "finalTerm": "Saldo no vencimento, ou total recebido quando os juros são pagos a ti",
+          "finalBody": "O montante depositado mais todos os juros líquidos.",
+          "yieldTerm": "Rentabilidade líquida anual",
+          "yieldBody": "O ganho líquido expresso como uma taxa por ano, para comparares depósitos com prazos e pagamentos diferentes."
         },
         "exampleHeading": "Exemplo prático",
         "exampleSetup": "Imagina que depositas {{amount}} durante {{months}} meses a uma TANB de {{rate}}, com os juros pagos no vencimento. Os juros são simples: o montante vezes a taxa vezes a fração do ano em que o dinheiro fica no banco.",
@@ -2067,15 +2115,21 @@
         "exampleTax": "Agora imagina que são retidos {{taxRate}} dos juros pagos no vencimento, uma taxa escolhida só como ilustração, sem vir das regras de nenhum país: a calculadora começa em 0% para indicares a tua. O banco retém {{tax}}, recebes {{net}} e ficas com {{taxedFinal}}, uma rentabilidade líquida de {{taxedYield}} por ano.",
         "methodHeading": "Método e pressupostos",
         "methodIntro": "Os juros contam-se em meses completos, sem contagem de dias. A taxa que indicas é uma taxa anual nominal: cada período rende a taxa vezes o número de meses do período a dividir por 12.",
-        "methodFormula": "Juros de um período = saldo × taxa anual × meses do período ÷ 12. Juros líquidos = juros − imposto. Rentabilidade líquida anual = a taxa por ano que transforma o montante depositado nos pagamentos líquidos e no montante devolvido, cada um contado quando chega. Com todos os juros no vencimento, é (saldo no vencimento ÷ montante depositado)^(12 ÷ prazo em meses) − 1.",
         "method": {
-          "maturity": "Pagos no vencimento, os juros são simples: um único pagamento de montante × taxa × prazo em meses ÷ 12.",
-          "periodic": "Pagos mensal, trimestral ou anualmente, cada pagamento chega no fim do respetivo período. Quando o prazo não é um número inteiro de períodos, o último é mais curto e os juros desse período são pagos proporcionalmente no vencimento. Um prazo mais curto do que um período tem um único pagamento no vencimento.",
-          "reinvest": "Os juros somados ao depósito entram depois de impostos, por isso o depósito capitaliza à frequência dos pagamentos. Os juros pagos a ti saem do depósito, por isso os juros seguintes são calculados sobre o montante depositado.",
-          "tax": "O imposto é retirado de cada pagamento em separado e arredondado ao cêntimo, como faz o banco. Todos os valores são calculados em cêntimos, por isso as linhas dos pagamentos somam os totais.",
-          "yield": "A rentabilidade líquida anual é a taxa interna de rentabilidade do depósito: a taxa por ano a que o montante que pões cresce até tudo o que recebes de volta, contando cada pagamento líquido no mês em que é pago. Por isso, juros pagos ao longo do prazo valem mais do que os mesmos juros no vencimento. Um depósito com menos de um ano assume-se renovado nas mesmas condições.",
-          "excluded": "Não inclui: penalizações por mobilização antecipada, comissões, alterações da taxa durante o prazo, limites do fundo de garantia de depósitos nem o efeito da inflação.",
-          "privacy": "O cálculo é feito no teu navegador. Os valores que indicas ficam no teu dispositivo e não são guardados nem enviados para lado nenhum."
+          "maturityBody": "Pagos no vencimento, os juros são simples: um único pagamento de montante × taxa × prazo em meses ÷ 12.",
+          "periodicBody": "Pagos mensal, trimestral ou anualmente, cada pagamento chega no fim do respetivo período. Quando o prazo não é um número inteiro de períodos, o último é mais curto e os juros desse período são pagos proporcionalmente no vencimento. Um prazo mais curto do que um período tem um único pagamento no vencimento.",
+          "reinvestBody": "Os juros somados ao depósito entram depois de impostos, por isso o depósito capitaliza à frequência dos pagamentos. Os juros pagos a ti saem do depósito, por isso os juros seguintes são calculados sobre o montante depositado.",
+          "taxBody": "O imposto é retirado de cada pagamento em separado e arredondado ao cêntimo, como faz o banco. Todos os valores são calculados em cêntimos, por isso as linhas dos pagamentos somam os totais.",
+          "yieldBody": "A rentabilidade líquida anual é a taxa interna de rentabilidade do depósito: a taxa por ano a que o montante que pões cresce até tudo o que recebes de volta, contando cada pagamento líquido no mês em que é pago. Por isso, juros pagos ao longo do prazo valem mais do que os mesmos juros no vencimento. Um depósito com menos de um ano assume-se renovado nas mesmas condições.",
+          "excludedTerm": "Não inclui",
+          "excludedBody": "Penalizações por mobilização antecipada, comissões, alterações da taxa durante o prazo, limites do fundo de garantia de depósitos nem o efeito da inflação.",
+          "privacyBody": "O cálculo é feito no teu navegador. Os valores que indicas ficam no teu dispositivo e não são guardados nem enviados para lado nenhum.",
+          "maturityTerm": "Juros no vencimento",
+          "periodicTerm": "Pagamentos periódicos",
+          "reinvestTerm": "Juros capitalizados ou pagos",
+          "taxTerm": "Imposto",
+          "yieldTerm": "Rentabilidade líquida anual",
+          "privacyTerm": "Privacidade"
         },
         "methodLimits": "Os prazos vão de 1 a {{maxMonths}} meses.",
         "nextHeading": "Calculadoras relacionadas",
@@ -2084,7 +2138,23 @@
         "nextEmergency": "Um depósito a prazo pode guardar poupanças de que não vais precisar tão cedo, enquanto o teu fundo de emergência fica à mão.",
         "nextEmergencyLink": "Calcular o teu fundo de emergência",
         "nextSavingsGoal": "Estás a juntar o montante que vais depositar ou a planear o que fazer quando o depósito vencer? O simulador de poupança calcula quanto pôr de lado por mês ou quanto tempo demora.",
-        "nextSavingsGoalLink": "Abrir o simulador de poupança"
+        "nextSavingsGoalLink": "Abrir o simulador de poupança",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "interest": "Juros de um período",
+          "balance": "saldo",
+          "annualRate": "taxa anual",
+          "periodMonths": "meses do período",
+          "tax": "Imposto",
+          "taxLower": "imposto",
+          "taxRate": "taxa de imposto",
+          "interestLower": "juros",
+          "netInterest": "Juros líquidos",
+          "yield": "Rentabilidade líquida anual, com os juros no vencimento",
+          "finalBalance": "saldo no vencimento",
+          "amount": "montante depositado",
+          "termMonths": "prazo em meses"
+        }
       }
     },
     "buyVsRent": {
@@ -2782,14 +2852,31 @@
         "exampleTitle": "Exemplo prático",
         "exampleText": "Subscreves {{amount}} e manténs durante {{years}} anos, com uma taxa base de {{baseRate}}. Os certificados rendem {{grossInterest}} de juros brutos, dos quais {{irs}} vão para IRS, ficando {{netInterest}} líquidos. O saldo chega a {{finalValue}}, um rendimento líquido de {{netYield}} ao ano.",
         "methodTitle": "Como funciona a estimativa",
-        "methodQuarter": "Cada trimestre rende um quarto da taxa anual (taxa base mais prémio) sobre o saldo atual. Os valores são arredondados ao cêntimo em cada trimestre.",
-        "methodTax": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
-        "methodYield": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
+        "methodQuarterBody": "Cada trimestre rende um quarto da taxa anual (taxa base mais prémio) sobre o saldo atual. Os valores são arredondados ao cêntimo em cada trimestre.",
+        "methodTaxBody": "Retêm-se {{irsRate}} dos juros de cada trimestre e os juros líquidos somam-se ao saldo, pelo que os trimestres seguintes rendem juros sobre eles.",
+        "methodYieldBody": "O rendimento líquido anual é o crescimento composto anual do montante subscrito até ao saldo final. Os valores brutos mostram os juros antes de IRS.",
         "assumptionsTitle": "Pressupostos",
         "assumptionBase": "A taxa base é a que indicas e fica fixa durante toda a permanência. Começa na taxa que o IGCP fixou para {{referenceMonth}} ({{referenceRateNote}}) e que volta a fixar todos os meses, por isso os juros efetivos serão diferentes. Confirma a taxa atual no sítio do IGCP.",
         "assumptionRules": "A taxa de IRS é a taxa geral para este tipo de rendimento. A tua situação fiscal e alterações às regras depois de {{rulesDate}} não são consideradas.",
         "assumptionScope": "Informação geral, não é uma recomendação para subscrever ou evitar qualquer produto, nem compara os certificados com outras poupanças.",
-        "referenceRateAtCeiling": "{{rate}}, o máximo"
+        "referenceRateAtCeiling": "{{rate}}, o máximo",
+        "methodQuarterTerm": "Juros trimestrais",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Rendimento líquido anual",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "quarterInterest": "Juros do trimestre",
+          "balance": "saldo",
+          "baseRate": "taxa base",
+          "bonus": "prémio de permanência",
+          "irs": "IRS",
+          "interestLower": "juros",
+          "newBalance": "Saldo no fim do trimestre",
+          "yield": "Rendimento líquido anual",
+          "finalValue": "valor final",
+          "amount": "montante subscrito",
+          "years": "anos"
+        }
       },
       "nextStepHeadline": "Vê os teus certificados junto do resto da poupança",
       "nextStepDescription": "Regista-os no WonderMoney para acompanhares tudo o que poupaste num só lugar.",
@@ -2908,12 +2995,25 @@
           "title": "Como é calculado",
           "intro": "As taxas são estatísticas publicadas. A WonderMoney acrescenta apenas estes cálculos:",
           "steps": {
-            "a": "Taxa anual: a média simples das doze médias mensais do ano. Não pondera os meses pelo montante depositado.",
-            "b": "Inflação: a variação do índice de preços no consumidor português, em média anual, do ano anterior para o ano.",
-            "c": "Taxa real: (1 + taxa) ÷ (1 + inflação) − 1. Para o valor depois de imposto, desconta-se primeiro 28% de IRS à taxa.",
-            "d": "Simulador: juro simples durante o prazo em meses inteiros, pago no vencimento, com 28% retidos, à taxa média do grupo de prazos. O que a inflação leva é o montante × ((1 + inflação)^(meses ÷ 12) − 1)."
+            "aTerm": "Taxa anual",
+            "aBody": "A média simples das doze médias mensais do ano. Não pondera os meses pelo montante depositado.",
+            "bTerm": "Inflação",
+            "bBody": "A variação do índice de preços no consumidor português, em média anual, do ano anterior para o ano.",
+            "cTerm": "Taxa real",
+            "cBody": "(1 + taxa) ÷ (1 + inflação) − 1. Para o valor depois de imposto, desconta-se primeiro 28% de IRS à taxa.",
+            "dTerm": "Simulador",
+            "dBody": "Juro simples durante o prazo em meses inteiros, pago no vencimento, com 28% retidos, à taxa média do grupo de prazos. O que a inflação leva é o montante × ((1 + inflação)^(meses ÷ 12) − 1)."
           },
-          "realRate": "Dividir em vez de subtrair importa quando as taxas são altas: mede quanto mais o dinheiro pode comprar, e não apenas a diferença entre duas percentagens."
+          "realRate": "Dividir em vez de subtrair importa quando as taxas são altas: mede quanto mais o dinheiro pode comprar, e não apenas a diferença entre duas percentagens.",
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "realRate": "Taxa real",
+            "realRateAfterTax": "Taxa real depois de imposto",
+            "rate": "taxa",
+            "inflation": "inflação",
+            "amount": "montante",
+            "months": "meses"
+          }
         },
         "data": {
           "title": "Dados e fontes",
@@ -3042,10 +3142,14 @@
           "title": "Como é calculado",
           "intro": "Cada valor vem do mesmo motor da calculadora de depósitos a prazo:",
           "steps": {
-            "a": "Juros brutos: montante × TANB × prazo em meses ÷ 12, pagos de uma só vez no vencimento.",
-            "b": "Imposto: {{taxRate}}% dos juros. Os bancos estrangeiros não o retêm em Portugal, por isso o valor assume que declaras os juros e pagas a mesma taxa.",
-            "c": "Rendimento líquido anual: os juros líquidos anualizados ao longo do prazo.",
-            "d": "Filtros: uma oferta fica oculta se o mínimo for superior ao teu montante ou o máximo for inferior. Uma oferta sem limite indicado mantém-se."
+            "aTerm": "Juros brutos",
+            "aBody": "Montante × TANB × prazo em meses ÷ 12, pagos de uma só vez no vencimento.",
+            "bTerm": "Imposto",
+            "bBody": "{{taxRate}}% dos juros. Os bancos estrangeiros não o retêm em Portugal, por isso o valor assume que declaras os juros e pagas a mesma taxa.",
+            "cTerm": "Rendimento líquido anual",
+            "cBody": "Os juros líquidos anualizados ao longo do prazo.",
+            "dTerm": "Filtros",
+            "dBody": "Uma oferta fica oculta se o mínimo for superior ao teu montante ou o máximo for inferior. Uma oferta sem limite indicado mantém-se."
           }
         },
         "data": {
@@ -3874,8 +3978,8 @@
     "statePension": {
       "title": "Simulador da pensão de reforma 2026",
       "shortName": "Pensão de reforma",
-      "subtitle": "Estime a sua pensão de velhice mensal, a taxa de substituição e a diferença face ao salário líquido de hoje.",
-      "description": "Estime a pensão de reforma em Portugal: valor mensal, taxa de substituição e diferença face ao salário.",
+      "subtitle": "Estima a tua pensão de velhice mensal, a taxa de substituição e a diferença face ao salário líquido de hoje.",
+      "description": "Estima a pensão de reforma em Portugal: valor mensal, taxa de substituição e diferença face ao salário.",
       "pageTitle": "Simulador de Pensão de Reforma 2026: Estimativa da Pensão de Velhice",
       "pageDescription": "Estimativa aproximada da pensão de velhice em Portugal para carreiras iniciadas em 2002 ou depois: fórmula de 2026, idade de reforma, penalização da reforma antecipada, pensões mínimas e a diferença face ao salário.",
       "ageValue": "{{years}} anos e {{months}} meses",
@@ -3886,25 +3990,25 @@
         "ageMonths": "Idade de reforma: meses a mais"
       },
       "help": {
-        "gross": "O seu salário bruto médio ao longo da carreira, em euros de hoje, pago 14 vezes por ano (subsídios de férias e de Natal à parte). Indique uma média real, não o salário nominal de cada ano.",
+        "gross": "O teu salário bruto médio ao longo da carreira, em euros de hoje, pago 14 vezes por ano (subsídios de férias e de Natal à parte). Indica uma média real, não o salário nominal de cada ano.",
         "years": "Anos com remunerações registadas. Só contam 40 anos para a pensão; são precisos pelo menos 15 para ter pensão de velhice.",
-        "age": "A idade normal em 2026 é {{normal}}. A partir dos 60 anos pode reformar-se mais cedo com penalização e, até aos 70, mais tarde com bonificação."
+        "age": "A idade normal em 2026 é {{normal}}. A partir dos 60 anos podes reformar-te mais cedo com penalização e, até aos 70, mais tarde com bonificação."
       },
       "errors": {
-        "required": "Indique um número válido.",
-        "tooSmall": "Indique um valor de pelo menos {{min}}.",
-        "tooLarge": "Indique um valor até {{max}}.",
-        "whole": "Indique um número inteiro.",
+        "required": "Indica um número válido.",
+        "tooSmall": "Indica um valor de pelo menos {{min}}.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "whole": "Indica um número inteiro.",
         "belowMinimum": "A pensão de velhice exige pelo menos {{min}} anos de descontos. Com menos, esta estimativa não se aplica.",
         "tooLongForAge": "Os descontos começam aos 16 anos, no mínimo, por isso com esta idade o máximo é {{max}} anos.",
-        "summary": "Verifique os campos assinalados para ver a estimativa."
+        "summary": "Verifica os campos assinalados para veres a estimativa."
       },
       "result": {
         "monthly": "Pensão bruta mensal estimada (14 pagamentos)",
         "replacement": "Taxa de substituição (pensão / salário bruto médio)",
         "statutory": "Pensão antes do ajuste por antecipação ou adiamento",
         "rate": "Taxa global de formação",
-        "netPay": "O seu salário líquido hoje (por pagamento)",
+        "netPay": "O teu salário líquido hoje (por pagamento)",
         "gap": "Diferença mensal face ao salário líquido",
         "adjustment": {
           "none": "Reforma na idade normal de 2026 ({{normal}}): sem penalização nem bonificação.",
@@ -3912,30 +4016,30 @@
           "late": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação de {{bonus}}.",
           "lateCapped": "Reformar-se {{months}} meses depois da idade normal ({{normal}}) acrescenta uma bonificação, que fica em {{bonus}} porque a pensão não pode passar 92% da remuneração de referência."
         },
-        "floorApplied": "A pensão foi elevada para o mínimo de 2026 correspondente à sua carreira.",
-        "gapSome": "Para manter o nível de vida precisaria de cerca de {{gap}} por mês líquidos vindos de poupanças e investimentos.",
-        "gapNone": "Com esta idade, a pensão estimada cobre o seu salário líquido de hoje.",
-        "estimate": "Estimativa aproximada para planeamento, não é uma decisão nem aconselhamento. A referência é o simulador oficial da Segurança Social Direta, que usa o seu registo de remunerações real.",
+        "floorApplied": "A pensão foi elevada para o mínimo de 2026 correspondente à tua carreira.",
+        "gapSome": "Para manteres o nível de vida precisarias de cerca de {{gap}} por mês líquidos vindos de poupanças e investimentos.",
+        "gapNone": "Com esta idade, a pensão estimada cobre o teu salário líquido de hoje.",
+        "estimate": "Estimativa aproximada para planeamento, não é uma decisão nem aconselhamento. A referência é o simulador oficial da Segurança Social Direta, que usa o teu registo de remunerações real.",
         "limits": "Não abrange: carreiras iniciadas antes de 2002 (fórmula mista), funcionários públicos (CGA), regimes especiais e salários muito variáveis.",
         "simulatorLink": "Abrir o simulador oficial",
-        "fireLink": "Calcule a poupança necessária com o simulador FIRE",
+        "fireLink": "Calcula a poupança necessária com o simulador FIRE",
         "netPension": "Pensão líquida estimada (por pagamento, depois de IRS)"
       },
-      "nextStepHeadline": "Cubra a diferença com os seus investimentos",
-      "nextStepDescription": "A WonderMoney junta a sua carteira e o seu património num só lugar, para ver até onde os investimentos chegam para cobrir a diferença.",
-      "nextStepCta": "Acompanhe os investimentos necessários para cobrir a diferença",
+      "nextStepHeadline": "Cobre a diferença com os teus investimentos",
+      "nextStepDescription": "A WonderMoney junta a tua carteira e o teu património num só lugar, para veres até onde os investimentos chegam para cobrir a diferença.",
+      "nextStepCta": "Acompanha os investimentos necessários para cobrir a diferença",
       "guide": {
         "exampleTitle": "Exemplo prático",
         "example": "Alguém com um salário médio de {{gross}} por mês (euros de hoje, 14 pagamentos), com {{years}} anos de descontos, reforma-se com {{age}}. A pensão estatutária é de {{statutory}} por mês, uma taxa global de formação de {{rate}}. Reformar-se {{months}} meses antes da idade normal retira {{penalty}} e aplica o fator de sustentabilidade, ficando em {{monthly}} brutos por mês, ou {{replacement}} do salário. Depois de IRS, a pensão é de {{netPension}} por mês. Face a um salário líquido estimado de {{net}}, a diferença é de {{gap}} por mês.",
         "methodTitle": "Como funciona a estimativa",
-        "methodReference": "A remuneração de referência é a média das remunerações anuais de toda a carreira, revalorizadas com coeficientes ligados aos preços no consumidor e divididas por 14. O simulador trabalha em euros de hoje: indica um salário mensal médio real e o resultado também vem em euros de hoje.",
-        "methodRate": "A taxa anual depende dos escalões da remuneração de referência, em múltiplos do IAS ({{ias}} em 2026): {{rates}} para as parcelas até 1,1, até 2, até 4, até 8 e acima de 8 vezes o IAS. Carreiras até 20 anos usam 2% fixos. A taxa é multiplicada pelos anos de descontos, no máximo 40, e dá a taxa global de formação.",
-        "methodAges": "A idade normal de acesso à pensão de velhice é {{normal2026}} em 2026 e foi fixada em {{normal2027}} para 2027. O simulador usa o valor de 2026.",
-        "methodEarly": "Antes da idade normal, a partir dos 60 anos e com pelo menos 15 anos de descontos, cada mês de antecipação retira {{penalty}}, e aplica-se ainda o fator de sustentabilidade de 2026 ({{factor}}, um corte de 17,63%). Os dois multiplicam. Não estão modeladas exceções, como as carreiras muito longas.",
-        "methodLate": "Depois da idade normal, até aos 70 anos, cada mês acrescenta uma bonificação que depende dos anos de descontos: 0,33% desde 15 anos, 0,50% desde 25, 0,65% desde 35 e 1% desde 40. A pensão com bonificação não pode passar 92% da remuneração de referência.",
-        "methodMinimum": "Se a fórmula der menos do que a pensão mínima de 2026 para a sua carreira, mostra-se o mínimo: {{min15}} para 15 a 20 anos, {{min21}} para 21 a 30 e {{min31}} para 31 ou mais. O mínimo não se aplica à reforma antecipada.",
-        "methodGap": "A diferença compara a pensão líquida com o teu salário líquido de hoje, ambos por pagamento, em 14 pagamentos. O salário líquido é o salário bruto menos 11% de Segurança Social e a retenção de IRS de 2026 para uma pessoa solteira sem dependentes no continente. A pensão líquida é a pensão bruta estimada menos o IRS retido pela tabela de retenção de pensões VIII de 2026 (Despacho n.º 233-A/2026, titular não casado ou casado dois titulares, sem deficiência); as pensões não pagam Segurança Social e as pensões até 920 euros por mês não têm retenção. O IRS final depende do teu rendimento total e das deduções.",
-        "methodBudget": "Leia a diferença como o valor mensal que as suas poupanças e investimentos teriam de cobrir. Muda com cada pressuposto acima.",
+        "methodReferenceBody": "A remuneração de referência é a média das remunerações anuais de toda a carreira, revalorizadas com coeficientes ligados aos preços no consumidor e divididas por 14. O simulador trabalha em euros de hoje: indica um salário mensal médio real e o resultado também vem em euros de hoje.",
+        "methodRateBody": "A taxa anual depende dos escalões da remuneração de referência, em múltiplos do IAS ({{ias}} em 2026): {{rates}} para as parcelas até 1,1, até 2, até 4, até 8 e acima de 8 vezes o IAS. Carreiras até 20 anos usam 2% fixos. A taxa é multiplicada pelos anos de descontos, no máximo 40, e dá a taxa global de formação.",
+        "methodAgesBody": "A idade normal de acesso à pensão de velhice é {{normal2026}} em 2026 e foi fixada em {{normal2027}} para 2027. O simulador usa o valor de 2026.",
+        "methodEarlyBody": "Antes da idade normal, a partir dos 60 anos e com pelo menos 15 anos de descontos, cada mês de antecipação retira {{penalty}}, e aplica-se ainda o fator de sustentabilidade de 2026 ({{factor}}, um corte de 17,63%). Os dois multiplicam. Não estão modeladas exceções, como as carreiras muito longas.",
+        "methodLateBody": "Depois da idade normal, até aos 70 anos, cada mês acrescenta uma bonificação que depende dos anos de descontos: 0,33% desde 15 anos, 0,50% desde 25, 0,65% desde 35 e 1% desde 40. A pensão com bonificação não pode passar 92% da remuneração de referência.",
+        "methodMinimumBody": "Se a fórmula der menos do que a pensão mínima de 2026 para a tua carreira, mostra-se o mínimo: {{min15}} para 15 a 20 anos, {{min21}} para 21 a 30 e {{min31}} para 31 ou mais. O mínimo não se aplica à reforma antecipada.",
+        "methodGapBody": "A diferença compara a pensão líquida com o teu salário líquido de hoje, ambos por pagamento, em 14 pagamentos. O salário líquido é o salário bruto menos 11% de Segurança Social e a retenção de IRS de 2026 para uma pessoa solteira sem dependentes no continente. A pensão líquida é a pensão bruta estimada menos o IRS retido pela tabela de retenção de pensões VIII de 2026 (Despacho n.º 233-A/2026, titular não casado ou casado dois titulares, sem deficiência); as pensões não pagam Segurança Social e as pensões até 920 euros por mês não têm retenção. O IRS final depende do teu rendimento total e das deduções.",
+        "methodBudgetBody": "Lê a diferença como o valor mensal que as tuas poupanças e investimentos teriam de cobrir. Muda com cada pressuposto acima.",
         "unsupportedTitle": "Não suportado",
         "unsupportedMixed": "Carreiras iniciadas antes de 2002 (fórmula mista, com as regras antigas para os anos até 2001). Este simulador só cobre a fórmula de toda a carreira para quem começou a descontar em 2002 ou depois.",
         "unsupportedSpecial": "Salários muito variáveis ao longo da carreira, lacunas nos descontos e carreiras com mais de 40 anos.",
@@ -3948,7 +4052,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: atualização das pensões de 2026 e pensões mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensões",
         "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao Decreto-Lei n.º 187/2007 e às portarias de 2026. As taxas anuais, a bonificação e as pensões mínimas foram confirmadas em fontes secundárias e nas páginas da Segurança Social, sem leitura na lei consolidada, e as simplificações acima são nossas. A tabela de retenção de pensões VIII foi verificada a 20 de novembro de 2026, linha a linha, face ao anexo do Despacho n.º 233-A/2026 publicado no Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelas de retenção na fonte de 2026, incluindo a tabela VIII de pensões"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelas de retenção na fonte de 2026, incluindo a tabela VIII de pensões",
+        "methodReferenceTerm": "Remuneração de referência",
+        "methodRateTerm": "Taxa global de formação",
+        "methodAgesTerm": "Idade normal de acesso",
+        "methodEarlyTerm": "Reforma antecipada",
+        "methodLateTerm": "Reforma depois da idade normal",
+        "methodMinimumTerm": "Pensão mínima",
+        "methodGapTerm": "Diferença",
+        "methodBudgetTerm": "Como ler a diferença",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "globalRate": "Taxa global de formação",
+          "globalRateLower": "taxa global de formação",
+          "annualRate": "taxa anual",
+          "years": "anos de descontos",
+          "statutory": "Pensão estatutária",
+          "statutoryLower": "pensão estatutária",
+          "reference": "remuneração de referência",
+          "earlyPension": "Pensão com reforma antecipada",
+          "monthsEarly": "meses de antecipação",
+          "factor": "fator de sustentabilidade",
+          "gap": "Diferença",
+          "netPay": "salário líquido",
+          "netPension": "pensão líquida"
+        }
       }
     },
     "sp500History": {
@@ -4056,10 +4184,14 @@
         "limits": {
           "title": "O que estes valores deixam de fora",
           "items": {
-            "fx": "Moeda: as rentabilidades são em dólares norte-americanos. Se investes a partir da zona euro, a taxa de câmbio euro-dólar soma ou subtrai a estes valores, por vezes vários pontos por ano. O risco cambial é separado do risco de mercado.",
-            "fees": "Custos: comissões de fundos, corretagem e spreads não são deduzidos. Um fundo que replica o índice rende o índice menos os custos do próprio fundo.",
-            "taxes": "Impostos: o imposto sobre dividendos e mais-valias não está incluído e depende do país onde vives.",
-            "sequence": "Retrospetiva: é um grande índice dos EUA na história de um só país. Outros mercados e períodos correram bem pior, e mover o início ou o fim alguns anos pode mudar muito o resultado.",
+            "fxTerm": "Moeda",
+            "fxBody": "As rentabilidades são em dólares norte-americanos. Se investes a partir da zona euro, a taxa de câmbio euro-dólar soma ou subtrai a estes valores, por vezes vários pontos por ano. O risco cambial é separado do risco de mercado.",
+            "feesTerm": "Custos",
+            "feesBody": "Comissões de fundos, corretagem e spreads não são deduzidos. Um fundo que replica o índice rende o índice menos os custos do próprio fundo.",
+            "taxesTerm": "Impostos",
+            "taxesBody": "O imposto sobre dividendos e mais-valias não está incluído e depende do país onde vives.",
+            "sequenceTerm": "Retrospetiva",
+            "sequenceBody": "É um grande índice dos EUA na história de um só país. Outros mercados e períodos correram bem pior, e mover o início ou o fim alguns anos pode mudar muito o resultado.",
             "past": "A rentabilidade passada não garante rentabilidades futuras. Esta ferramenta é educativa e não é aconselhamento de investimento."
           }
         },
@@ -5036,22 +5168,47 @@
           "title": "Quilates e toque",
           "intro": "A pureza do ouro indica-se em quilates, em 24, ou em milésimas, o número gravado na marca (o toque). Estes são os seis toques legais do ouro em Portugal:",
           "items": {
-            "k24": "24 quilates, 999 milésimas: ouro puro, como nas barras e moedas de investimento.",
-            "k22": "22 quilates, 916: moedas de ouro como a libra (sovereign) e o Krugerrand, e muitas joias da Índia.",
-            "k19_2": "19,2 quilates, 800: o ouro português, o toque tradicional da ourivesaria portuguesa.",
-            "k18": "18 quilates, 750: o toque mais comum na joalharia europeia.",
-            "k14": "14 quilates, 585: joias mais duras e mais baratas.",
-            "k9": "9 quilates, 375: o toque legal mais baixo."
+            "k24Term": "24 quilates, 999 milésimas",
+            "k24Body": "Ouro puro, como nas barras e moedas de investimento.",
+            "k22Term": "22 quilates, 916",
+            "k22Body": "Moedas de ouro como a libra (sovereign) e o Krugerrand, e muitas joias da Índia.",
+            "k19_2Term": "19,2 quilates, 800",
+            "k19_2Body": "O ouro português, o toque tradicional da ourivesaria portuguesa.",
+            "k18Term": "18 quilates, 750",
+            "k18Body": "O toque mais comum na joalharia europeia.",
+            "k14Term": "14 quilates, 585",
+            "k14Body": "Joias mais duras e mais baratas.",
+            "k9Term": "9 quilates, 375",
+            "k9Body": "O toque legal mais baixo."
           }
         },
         "method": {
           "title": "Como é calculado",
           "intro": "A página faz quatro coisas:",
           "steps": {
-            "a": "Preço: o preço de um grama de ouro puro do NBP em zlótis, a dividir pelos zlótis por euro do BCE no mesmo dia.",
-            "b": "Ouro puro: o peso vezes o toque a dividir por 1000. Uma peça de 24 quilates conta com 999 milésimas.",
-            "c": "Valor: os gramas de ouro puro vezes o preço de um grama de ouro puro, arredondado ao cêntimo.",
-            "d": "Oferta: se a introduzires, a oferta a dividir pelo valor, em percentagem, e a diferença em euros."
+            "aTerm": "Preço",
+            "aBody": "O preço de um grama de ouro puro do NBP em zlótis, a dividir pelos zlótis por euro do BCE no mesmo dia.",
+            "bTerm": "Ouro puro",
+            "bBody": "O peso vezes o toque a dividir por 1000. Uma peça de 24 quilates conta com 999 milésimas.",
+            "cTerm": "Valor",
+            "cBody": "Os gramas de ouro puro vezes o preço de um grama de ouro puro, arredondado ao cêntimo.",
+            "dTerm": "Oferta",
+            "dBody": "Se a introduzires, a oferta a dividir pelo valor, em percentagem, e a diferença em euros."
+          },
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "pureGold": "Ouro puro",
+            "pureGoldLower": "ouro puro",
+            "weight": "peso",
+            "fineness": "toque",
+            "value": "Valor",
+            "valueLower": "valor",
+            "price": "Preço por grama",
+            "priceLower": "preço por grama",
+            "nbpPrice": "preço do NBP em zlótis",
+            "zlotyPerEuro": "zlótis por euro",
+            "offerShare": "Oferta face ao valor",
+            "offer": "oferta"
           }
         },
         "buyers": {
@@ -5072,10 +5229,14 @@
         "limits": {
           "title": "O que este valor deixa de fora",
           "items": {
-            "metal": "Só o metal: o valor é o ouro contido na peça a um preço de referência. Pedras, outros metais, o feitio e a marca não contam.",
-            "buyers": "Não é um preço de venda: quem compra paga menos, e uma loja que vende ouro cobra mais.",
-            "purity": "Toque: a calculadora confia no toque que escolhes. Uma peça sem marca ou banhada a ouro pode ter muito menos ouro, ou nenhum.",
-            "reference": "Preço de referência: o preço diário do NBP, não uma cotação ao minuto. O mercado mexe ao longo do dia.",
+            "metalTerm": "Só o metal",
+            "metalBody": "O valor é o ouro contido na peça a um preço de referência. Pedras, outros metais, o feitio e a marca não contam.",
+            "buyersTerm": "Não é um preço de venda",
+            "buyersBody": "Quem compra paga menos, e uma loja que vende ouro cobra mais.",
+            "purityTerm": "Toque",
+            "purityBody": "A calculadora confia no toque que escolhes. Uma peça sem marca ou banhada a ouro pode ter muito menos ouro, ou nenhum.",
+            "referenceTerm": "Preço de referência",
+            "referenceBody": "O preço diário do NBP, não uma cotação ao minuto. O mercado mexe ao longo do dia.",
             "education": "Apenas para fins educativos, não é aconselhamento."
           }
         },
@@ -5279,7 +5440,12 @@
           "title": "Exemplo",
           "setup": "Imagina que guardas {{amount}} durante 12 meses em {{product}} no {{bank}}, a {{rate}} ao ano. Rende {{gross}}; o IRS de 28% leva {{tax}} e ficam {{net}}.",
           "capped": "O máximo conta. {{product2}} no {{bank2}} paga {{rate2}}, mas só até {{cap}}. Com {{amount2}}, os juros são {{gross2}} antes de impostos e {{net2}} depois, como se tivesses poupado {{cap}}.",
-          "plans": "As comissões também contam. {{product3}} no {{bank3}} vai de {{low}} a {{high}} consoante o plano. Com {{amount}}, o plano Standard rende {{standardNet}} líquidos, enquanto o plano Ultra, depois de {{ultraFees}} por ano de custos, rende {{ultraNet}}."
+          "plans": "As comissões também contam. {{product3}} no {{bank3}} vai de {{low}} a {{high}} consoante o plano. Com {{amount}}, o plano Standard rende {{standardNet}} líquidos, enquanto o plano Ultra, depois de {{ultraFees}} por ano de custos, rende {{ultraNet}}.",
+          "figures": {
+            "gross": "Juros brutos",
+            "tax": "IRS ({{tax}}%)",
+            "net": "Juros líquidos"
+          }
         },
         "method": {
           "title": "Método",
@@ -5479,17 +5645,25 @@
           "setup": "Pensa no comprador ocasional de ações: {{count}} compras de {{amount}} em ações americanas num ano, com {{portfolio}} investidos.",
           "bank": "No {{bank}}, cada ordem custa {{bankFormula}}, por isso as {{count}} ordens custam {{bankTrading}} com Imposto do Selo. Converter {{converted}} em dólares a {{bankFx}} soma {{bankFxTotal}}, e a custódia ({{bankCustodyFormula}}) soma {{bankCustody}} com IVA. O ano custa {{bankTotal}}, dos quais {{bankStampDuty}} são Imposto do Selo e {{bankVat}} são IVA.",
           "online": "Na {{online}}, cada ordem custa {{onlineFormula}}: {{onlineTrading}} no ano. O câmbio a {{onlineFx}} soma {{onlineFxTotal}} e a custódia {{onlineCustody}}, num total de {{onlineTotal}}.",
-          "takeaway": "Com ordens pequenas e pouco frequentes, pesam mais as comissões mínimas e as custódias de valor fixo; com ordens grandes ou uma carteira grande, pesam mais as comissões em percentagem. Muda o perfil acima para veres como a ordem muda."
+          "takeaway": "Com ordens pequenas e pouco frequentes, pesam mais as comissões mínimas e as custódias de valor fixo; com ordens grandes ou uma carteira grande, pesam mais as comissões em percentagem. Muda o perfil acima para veres como a ordem muda.",
+          "figures": {
+            "total": "Total do ano"
+          }
         },
         "method": {
           "title": "Método",
           "intro": "Cada comissão foi lida no preçário publicado pela própria corretora, na data indicada na respetiva linha; a tabela inteira foi revista a {{date}} e é verificada de novo a cada trimestre. As comissões que um preçário não indica aparecem como não publicadas e ficam fora dos totais, que surgem então como incompletos.",
           "steps": {
-            "a": "Ordens: a comissão de cada ordem é a parte fixa mais a percentagem da ordem, com o mínimo e o máximo por ordem. As comissões por ação contam ações inteiras ao preço assumido. Um valor mensal sem comissão aplica-se mês a mês.",
-            "b": "Plano de investimento: nas compras de ETF, com a opção ativa e quando a corretora publica um plano periódico, a comissão do plano substitui a da ordem.",
-            "c": "Câmbio: as ordens nos EUA pagam a comissão de câmbio da corretora sobre o valor convertido; as comissões em dólares são convertidas a {{rate}} dólares por euro.",
-            "d": "Custódia: a fórmula publicada, por período e com o respetivo mínimo e máximo, é cobrada sobre o valor investido tantas vezes quantos os períodos de um ano.",
-            "e": "Impostos sobre as comissões: quando o preçário diz que as comissões não incluem o Imposto do Selo (4% sobre a corretagem) ou o IVA (23% sobre a custódia), estes somam-se às comissões a que se aplicam.",
+            "aTerm": "Ordens",
+            "aBody": "A comissão de cada ordem é a parte fixa mais a percentagem da ordem, com o mínimo e o máximo por ordem. As comissões por ação contam ações inteiras ao preço assumido. Um valor mensal sem comissão aplica-se mês a mês.",
+            "bTerm": "Plano de investimento",
+            "bBody": "Nas compras de ETF, com a opção ativa e quando a corretora publica um plano periódico, a comissão do plano substitui a da ordem.",
+            "cTerm": "Câmbio",
+            "cBody": "As ordens nos EUA pagam a comissão de câmbio da corretora sobre o valor convertido; as comissões em dólares são convertidas a {{rate}} dólares por euro.",
+            "dTerm": "Custódia",
+            "dBody": "A fórmula publicada, por período e com o respetivo mínimo e máximo, é cobrada sobre o valor investido tantas vezes quantos os períodos de um ano.",
+            "eTerm": "Impostos sobre as comissões",
+            "eBody": "Quando o preçário diz que as comissões não incluem o Imposto do Selo (4% sobre a corretagem) ou o IVA (23% sobre a custódia), estes somam-se às comissões a que se aplicam.",
             "f": "O total soma as ordens do ano, o câmbio e a custódia, e as corretoras aparecem da mais barata para a mais cara. As que não publicam uma comissão de que o perfil precisa ficam no fim."
           }
         },
@@ -5677,7 +5851,8 @@
             "insuranceLinked": "seguro ligado a fundos",
             "insuranceGuaranteed": "seguro não ligado a fundos",
             "pensionFund": "fundo de pensões"
-          }
+          },
+          "gapLabel": "Diferença de custos sobre {{invested}}, por ano"
         },
         "tax": {
           "title": "A dedução no IRS (EBF, artigo 21.º)",
@@ -5689,7 +5864,8 @@
           },
           "example": "A idade que conta é a de 1 de janeiro do ano da entrega (n.º 9). Aos {{age}} anos, {{exampleContribution}} aplicados no ano dão {{exampleDeduction}}, a dedução máxima.",
           "conditions": "A dedução entra no limite global das deduções do artigo 78.º, n.º 7, do Código do IRS: sem limite para os rendimentos coletáveis mais baixos, depois de {{capMax}} a {{capMin}} por agregado. Reduz o imposto devido e não é paga em dinheiro, e as entregas feitas depois da passagem à reforma não são dedutíveis (n.º 10).",
-          "payout": "Quando o plano é reembolsado num caso previsto na lei, um reembolso de uma só vez é tributado sobre o rendimento à taxa de {{legalRate}} sobre dois quintos dele, o que dá {{legalEffective}} do rendimento (n.º 3); as prestações regulares são tributadas como pensões."
+          "payout": "Quando o plano é reembolsado num caso previsto na lei, um reembolso de uma só vez é tributado sobre o rendimento à taxa de {{legalRate}} sobre dois quintos dele, o que dá {{legalEffective}} do rendimento (n.º 3); as prestações regulares são tributadas como pensões.",
+          "deductionLabel": "Dedução à coleta do IRS"
         },
         "redemption": {
           "title": "Quando podes pedir o reembolso e quanto custa um reembolso antecipado",

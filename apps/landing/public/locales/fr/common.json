@@ -675,13 +675,30 @@
         "exampleTarget": "Avec un taux de retrait de {{rate}}, votre chiffre FIRE est {{spending}} ÷ {{rate}} = {{target}} : vos {{assets}} actuels représentent {{progress}} du chemin.",
         "exampleTime": "En croissant mois après mois, versements compris, les placements dépassent {{target}} au bout de {{time}}. En dépensant {{cut}} de moins, soit {{cutSpending}} par an, l'objectif tombe à {{cutTarget}}, atteint au bout de {{cutTime}}. Le calculateur ci-dessus part de ces chiffres : remplacez-les par les vôtres.",
         "methodHeading": "Méthode",
-        "methodFormula": "Chiffre FIRE = dépenses annuelles ÷ taux de retrait",
-        "methodMultiple": "À 4 %, l'objectif vaut 25 fois vos dépenses annuelles ; à 3 %, environ 33 fois. Un taux plus bas donne un objectif plus élevé et plus de marge pour les mauvaises années.",
-        "methodGrowth": "Chaque mois, les placements croissent au taux mensuel qui, composé, donne le rendement annuel saisi, puis le versement du mois s'y ajoute. La durée affichée correspond au premier mois où le total atteint votre chiffre FIRE.",
-        "methodRealMoney": "Le rendement est réel, après inflation : tous les montants sont donc en euros d'aujourd'hui. On suppose que les dépenses et les versements suivent les prix, c'est pourquoi ils restent constants dans le calcul.",
-        "methodHorizon": "La projection s'arrête après {{years}} ans. Si les versements et la croissance ne peuvent pas atteindre l'objectif, par exemple sans versement ni rendement, le calculateur l'indique au lieu de donner une date.",
-        "methodLeftOut": "Ne sont pas pris en compte les impôts sur les gains et les retraits, les frais des fonds et des plateformes, ni le risque de séquence, c'est-à-dire de mauvais rendements dans les premières années où vous vivez de vos placements. Un taux de retrait est une règle empirique tirée des rendements passés, pas une garantie.",
-        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés."
+        "methodMultipleBody": "À 4 %, l'objectif vaut 25 fois vos dépenses annuelles ; à 3 %, environ 33 fois. Un taux plus bas donne un objectif plus élevé et plus de marge pour les mauvaises années.",
+        "methodGrowthBody": "Chaque mois, les placements croissent au taux mensuel qui, composé, donne le rendement annuel saisi, puis le versement du mois s'y ajoute. La durée affichée correspond au premier mois où le total atteint votre chiffre FIRE.",
+        "methodRealMoneyBody": "Le rendement est réel, après inflation : tous les montants sont donc en euros d'aujourd'hui. On suppose que les dépenses et les versements suivent les prix, c'est pourquoi ils restent constants dans le calcul.",
+        "methodHorizonBody": "La projection s'arrête après {{years}} ans. Si les versements et la croissance ne peuvent pas atteindre l'objectif, par exemple sans versement ni rendement, le calculateur l'indique au lieu de donner une date.",
+        "methodLeftOutBody": "Ne sont pas pris en compte les impôts sur les gains et les retraits, les frais des fonds et des plateformes, ni le risque de séquence, c'est-à-dire de mauvais rendements dans les premières années où vous vivez de vos placements. Un taux de retrait est une règle empirique tirée des rendements passés, pas une garantie.",
+        "methodPrivacyBody": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
+        "methodMultipleTerm": "Taux de retrait",
+        "methodGrowthTerm": "Croissance mensuelle",
+        "methodRealMoneyTerm": "Euros d'aujourd'hui",
+        "methodHorizonTerm": "Horizon",
+        "methodLeftOutTerm": "Non pris en compte",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "fireNumber": "Chiffre FIRE",
+          "annualSpending": "dépenses annuelles",
+          "withdrawalRate": "taux de retrait",
+          "monthlyRate": "Taux mensuel",
+          "monthlyRateLower": "taux mensuel",
+          "realReturn": "rendement réel annuel",
+          "assetsEnd": "Placements en fin de mois",
+          "assetsStart": "placements en début de mois",
+          "contribution": "versement mensuel"
+        }
       }
     },
     "compoundInterest": {
@@ -756,13 +773,11 @@
         "exampleStep3": "En euros d'aujourd'hui, la valeur finale est de {{realFinal}} : ce que vous avez versé vaut {{realContributed}} et la croissance après inflation est de {{realGrowth}}.",
         "exampleComparison": "Porter le versement à {{comparisonMonthly}} par mois ajoute {{extraContributed}} versés sur la période et {{extraFinal}} à la valeur finale, qui atteint {{comparisonFinal}}. En euros d'aujourd'hui, l'écart est de {{extraReal}}.",
         "methodHeading": "Comment fonctionne le calculateur",
-        "methodFormula": "Chaque mois : solde = solde × (1 + rendement annuel ÷ 12) + versement mensuel",
-        "methodRealFormula": "Valeur en euros d'aujourd'hui = valeur ÷ (1 + inflation annuelle) ^ années",
-        "methodMonthly": "Le rendement annuel est divisé en 12 taux mensuels égaux. Chaque mois, le solde croît à ce taux, puis le versement s'ajoute en fin de mois. Un rendement de {{rate}} capitalisé chaque mois donne {{effectiveRate}} sur une année complète.",
-        "methodInflation": "L'inflation est convertie en un taux mensuel équivalent qui, composé sur l'année, redonne le taux annuel. La valeur finale est divisée par l'inflation cumulée sur toute la période, et chaque versement par l'inflation cumulée jusqu'au mois où il est effectué : le montant versé apparaît donc lui aussi en euros d'aujourd'hui.",
-        "methodRounding": "La croissance est arrondie au centime chaque mois. Les totaux s'affichent en euros entiers et la croissance est toujours la valeur finale moins ce qui a été versé : les chiffres concordent.",
-        "methodRanges": "Les montants vont de 0 à {{maxAmount}}, le rendement et l'inflation de 0 % à {{maxRate}} % et la durée de 0 à {{maxYears}} années entières. Les valeurs hors de ces limites sont ajustées, et le calculateur vous le signale.",
-        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les montants que vous saisissez ne sont envoyés nulle part.",
+        "methodMonthlyBody": "Le rendement annuel est divisé en 12 taux mensuels égaux. Chaque mois, le solde croît à ce taux, puis le versement s'ajoute en fin de mois. Un rendement de {{rate}} capitalisé chaque mois donne {{effectiveRate}} sur une année complète.",
+        "methodInflationBody": "L'inflation est convertie en un taux mensuel équivalent qui, composé sur l'année, redonne le taux annuel. La valeur finale est divisée par l'inflation cumulée sur toute la période, et chaque versement par l'inflation cumulée jusqu'au mois où il est effectué : le montant versé apparaît donc lui aussi en euros d'aujourd'hui.",
+        "methodRoundingBody": "La croissance est arrondie au centime chaque mois. Les totaux s'affichent en euros entiers et la croissance est toujours la valeur finale moins ce qui a été versé : les chiffres concordent.",
+        "methodRangesBody": "Les montants vont de 0 à {{maxAmount}}, le rendement et l'inflation de 0 % à {{maxRate}} % et la durée de 0 à {{maxYears}} années entières. Les valeurs hors de ces limites sont ajustées, et le calculateur vous le signale.",
+        "methodPrivacyBody": "Le calcul se fait dans votre navigateur. Les montants que vous saisissez ne sont envoyés nulle part.",
         "assumptionsHeading": "Hypothèses",
         "assumption1": "Le rendement est le même chaque année.",
         "assumption2": "Les versements ont lieu en fin de mois et restent identiques sur toute la période.",
@@ -771,7 +786,21 @@
         "assumptionsNote": "Les placements réels montent et baissent, et les impôts et frais réduisent ce qui vous reste. Considérez le résultat comme une projection pour comparer des options, pas comme une prévision.",
         "rateHeading": "Quel rendement retenir",
         "rateBody1": "Retenez le rendement que vous attendez après frais et avant inflation. Un livret d'épargne ou des obligations d'État rapportent moins qu'un fonds actions diversifié, qui peut croître davantage sur de longues durées mais perd aussi de la valeur certaines années.",
-        "rateBody2": "En cas de doute, essayez un taux prudent et un taux plus optimiste, puis comparez. L'écart entre les deux montre la part du résultat qui dépend du taux, que vous ne maîtrisez pas, et celle qui dépend du versement et de la durée, que vous maîtrisez."
+        "rateBody2": "En cas de doute, essayez un taux prudent et un taux plus optimiste, puis comparez. L'écart entre les deux montre la part du résultat qui dépend du taux, que vous ne maîtrisez pas, et celle qui dépend du versement et de la durée, que vous maîtrisez.",
+        "methodFormulasLabel": "Formules",
+        "formulaBalanceEnd": "Solde en fin de mois",
+        "formulaBalanceStart": "solde en début de mois",
+        "formulaAnnualReturn": "rendement annuel",
+        "formulaContribution": "versement mensuel",
+        "formulaRealValue": "Valeur en euros d'aujourd'hui",
+        "formulaValue": "valeur",
+        "formulaInflation": "inflation annuelle",
+        "formulaYears": "années",
+        "methodMonthlyTerm": "Capitalisation mensuelle",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Arrondis",
+        "methodRangesTerm": "Plages de valeurs",
+        "methodPrivacyTerm": "Confidentialité"
       }
     },
     "netWorth": {
@@ -942,7 +971,21 @@
         "assumptions": "Le modèle suppose un rendement et des frais constants, le réinvestissement des distributions et des versements en fin de mois. Il exclut les impôts, les frais de courtage, les variations de change et l'inflation. Les taux sont des hypothèses illustratives pour un indice comme le S&P 500. Les rendements réels varient et peuvent être négatifs. L'effet des frais inclut le rendement que les sommes prélevées auraient pu générer.",
         "ctaHeadline": "Suivez la performance réelle de vos placements",
         "ctaDescription": "Utilisez WonderMoney pour suivre votre portefeuille et comparer son rendement réel au scénario simulé.",
-        "ctaText": "Comparez vos placements à la projection"
+        "ctaText": "Comparez vos placements à la projection",
+        "methodTerm": "Croissance et frais",
+        "assumptionsTerm": "Hypothèses",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "netFactor": "Facteur de croissance annuel net",
+          "annualReturn": "rendement annuel",
+          "annualFee": "frais annuels du fonds",
+          "monthlyFactor": "Facteur mensuel",
+          "monthlyFactorLower": "facteur mensuel",
+          "netFactorLower": "facteur annuel net",
+          "balanceEnd": "Solde en fin de mois",
+          "balanceStart": "solde en début de mois",
+          "contribution": "versement mensuel"
+        }
       }
     },
     "emergencyFund": {
@@ -2055,11 +2098,16 @@
         "whatBody": "Un dépôt à terme immobilise une somme à la banque pendant un nombre de mois fixé, à un taux fixe. Au-delà du taux, ce que vous gagnez dépend de trois choses : la durée pendant laquelle l'argent reste placé, le moment où les intérêts sont versés, à la fin ou en cours de route, et la part prélevée par l'impôt. Ce calculateur tient compte des trois avec le taux que vous saisissez, pour comparer les offres sur la même base.",
         "readHeading": "Lire le résultat",
         "read": {
-          "gross": "Intérêts bruts : tout ce que rapporte le dépôt avant impôt.",
-          "tax": "Impôt prélevé : la part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
-          "net": "Intérêts nets : ce qui vous revient, les intérêts bruts moins l'impôt.",
-          "final": "Solde à l'échéance, ou total perçu lorsque les intérêts sont versés sur votre compte : le montant déposé plus tous les intérêts nets.",
-          "yield": "Rendement net annuel : le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
+          "grossTerm": "Intérêts bruts",
+          "grossBody": "Tout ce que rapporte le dépôt avant impôt.",
+          "taxTerm": "Impôt prélevé",
+          "taxBody": "La part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
+          "netTerm": "Intérêts nets",
+          "netBody": "Ce qui vous revient, les intérêts bruts moins l'impôt.",
+          "finalTerm": "Solde à l'échéance, ou total perçu lorsque les intérêts sont versés sur votre compte",
+          "finalBody": "Le montant déposé plus tous les intérêts nets.",
+          "yieldTerm": "Rendement net annuel",
+          "yieldBody": "Le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
         },
         "exampleHeading": "Exemple chiffré",
         "exampleSetup": "Supposons que vous déposiez {{amount}} pendant {{months}} mois à un taux brut de {{rate}} par an, avec des intérêts versés à l'échéance. Les intérêts sont simples : le montant multiplié par le taux et par la part de l'année pendant laquelle l'argent reste placé.",
@@ -2067,15 +2115,21 @@
         "exampleTax": "Supposons maintenant que {{taxRate}} soient prélevés sur les intérêts versés à l'échéance, un taux choisi uniquement à titre d'illustration et non tiré des règles d'un pays : le calculateur démarre à 0 % pour que vous saisissiez le vôtre. La banque prélève {{tax}}, vous recevez {{net}} et terminez avec {{taxedFinal}}, soit un rendement net de {{taxedYield}} par an.",
         "methodHeading": "Méthode et hypothèses",
         "methodIntro": "Les intérêts se comptent en mois entiers, sans décompte des jours. Le taux saisi est un taux nominal annuel : chaque période rapporte le taux multiplié par son nombre de mois, divisé par 12.",
-        "methodFormula": "Intérêts d'une période = solde × taux annuel × mois de la période ÷ 12. Intérêts nets = intérêts − impôt. Rendement net annuel = le taux annuel qui transforme le montant déposé en versements nets et en montant restitué, chacun compté à sa date. Avec tous les intérêts à l'échéance, il vaut (solde à l'échéance ÷ montant déposé)^(12 ÷ durée en mois) − 1.",
         "method": {
-          "maturity": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
-          "periodic": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
-          "reinvest": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte quittent le dépôt, et les suivants sont calculés sur le montant déposé.",
-          "tax": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
-          "yield": "Le rendement net annuel est le taux de rendement interne du dépôt : le taux annuel auquel la somme placée devient tout ce que vous récupérez, chaque versement net étant compté le mois où il est payé. Des intérêts versés en cours de route valent donc davantage que les mêmes intérêts à l'échéance. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions.",
-          "excluded": "Non compris : pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
-          "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés."
+          "maturityBody": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
+          "periodicBody": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
+          "reinvestBody": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte quittent le dépôt, et les suivants sont calculés sur le montant déposé.",
+          "taxBody": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
+          "yieldBody": "Le rendement net annuel est le taux de rendement interne du dépôt : le taux annuel auquel la somme placée devient tout ce que vous récupérez, chaque versement net étant compté le mois où il est payé. Des intérêts versés en cours de route valent donc davantage que les mêmes intérêts à l'échéance. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions.",
+          "excludedTerm": "Non compris",
+          "excludedBody": "Pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
+          "privacyBody": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés.",
+          "maturityTerm": "Versement à l'échéance",
+          "periodicTerm": "Versements périodiques",
+          "reinvestTerm": "Intérêts capitalisés ou versés",
+          "taxTerm": "Impôt",
+          "yieldTerm": "Rendement net annuel",
+          "privacyTerm": "Confidentialité"
         },
         "methodLimits": "Les durées vont de 1 à {{maxMonths}} mois.",
         "nextHeading": "Calculateurs associés",
@@ -2084,7 +2138,23 @@
         "nextEmergency": "Un dépôt à terme peut accueillir l'épargne dont vous n'aurez pas besoin de sitôt, tandis que votre épargne de précaution reste disponible.",
         "nextEmergencyLink": "Calculer votre épargne de précaution",
         "nextSavingsGoal": "Vous mettez de côté la somme à déposer, ou vous préparez la suite après l'échéance ? Le simulateur d'épargne calcule l'effort mensuel ou le temps nécessaire.",
-        "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne"
+        "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "interest": "Intérêts d'une période",
+          "balance": "solde",
+          "annualRate": "taux annuel",
+          "periodMonths": "mois de la période",
+          "tax": "Impôt",
+          "taxLower": "impôt",
+          "taxRate": "taux d'imposition",
+          "interestLower": "intérêts",
+          "netInterest": "Intérêts nets",
+          "yield": "Rendement net annuel, avec les intérêts à l'échéance",
+          "finalBalance": "solde à l'échéance",
+          "amount": "montant déposé",
+          "termMonths": "durée en mois"
+        }
       }
     },
     "buyVsRent": {
@@ -2782,14 +2852,31 @@
         "exampleTitle": "Exemple chiffré",
         "exampleText": "Vous souscrivez {{amount}} et les conservez {{years}} ans avec un taux de base de {{baseRate}}. Les certificats rapportent {{grossInterest}} d'intérêts bruts, dont {{irs}} d'IRS, soit {{netInterest}} nets. Le solde atteint {{finalValue}}, un rendement net de {{netYield}} par an.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodQuarter": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
-        "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s'ajoutent au solde : ils produisent à leur tour des intérêts les trimestres suivants.",
-        "methodYield": "Le rendement net annuel est le taux de croissance annuel composé entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
+        "methodQuarterBody": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
+        "methodTaxBody": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s'ajoutent au solde : ils produisent à leur tour des intérêts les trimestres suivants.",
+        "methodYieldBody": "Le rendement net annuel est le taux de croissance annuel composé entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
         "assumptionsTitle": "Hypothèses",
         "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Par défaut, il correspond au taux fixé par l'IGCP pour {{referenceMonth}} ({{referenceRateNote}}) ; l'IGCP le révise chaque mois, donc les intérêts effectifs seront différents. Vérifiez le taux actuel sur le site de l'IGCP.",
         "assumptionRules": "Le taux d'IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
         "assumptionScope": "Information générale, pas une recommandation de souscrire ou d'éviter un produit, et aucune comparaison avec d'autres produits d'épargne.",
-        "referenceRateAtCeiling": "{{rate}}, le plafond"
+        "referenceRateAtCeiling": "{{rate}}, le plafond",
+        "methodQuarterTerm": "Intérêts trimestriels",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Rendement net annuel",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "quarterInterest": "Intérêts du trimestre",
+          "balance": "solde",
+          "baseRate": "taux de base",
+          "bonus": "prime de permanence",
+          "irs": "IRS",
+          "interestLower": "intérêts",
+          "newBalance": "Solde en fin de trimestre",
+          "yield": "Rendement net annuel",
+          "finalValue": "valeur finale",
+          "amount": "montant souscrit",
+          "years": "années"
+        }
       },
       "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
@@ -2908,12 +2995,25 @@
           "title": "Comment c'est calculé",
           "intro": "Les taux sont des statistiques publiées. WonderMoney ajoute seulement ces calculs :",
           "steps": {
-            "a": "Taux annuel : la moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
-            "b": "Inflation : la variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
-            "c": "Taux réel : (1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
-            "d": "Simulateur : intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
+            "aTerm": "Taux annuel",
+            "aBody": "La moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
+            "bTerm": "Inflation",
+            "bBody": "La variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
+            "cTerm": "Taux réel",
+            "cBody": "(1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
+            "dTerm": "Simulateur",
+            "dBody": "Intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
           },
-          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages."
+          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages.",
+          "formulasLabel": "Formules",
+          "formula": {
+            "realRate": "Taux réel",
+            "realRateAfterTax": "Taux réel après impôt",
+            "rate": "taux",
+            "inflation": "inflation",
+            "amount": "montant",
+            "months": "mois"
+          }
         },
         "data": {
           "title": "Données et sources",
@@ -3042,10 +3142,14 @@
           "title": "Comment c'est calculé",
           "intro": "Chaque chiffre vient du même moteur que le calculateur de dépôt à terme :",
           "steps": {
-            "a": "Intérêts bruts : montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
-            "b": "Impôt : {{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
-            "c": "Rendement net annuel : les intérêts nets annualisés sur la durée.",
-            "d": "Filtres : une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
+            "aTerm": "Intérêts bruts",
+            "aBody": "Montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
+            "bTerm": "Impôt",
+            "bBody": "{{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
+            "cTerm": "Rendement net annuel",
+            "cBody": "Les intérêts nets annualisés sur la durée.",
+            "dTerm": "Filtres",
+            "dBody": "Une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
           }
         },
         "data": {
@@ -3928,14 +4032,14 @@
         "exampleTitle": "Exemple chiffré",
         "example": "Une personne gagnant {{gross}} par mois en moyenne (euros d'aujourd'hui, 14 versements), avec {{years}} années de cotisation, part à {{age}}. La pension de base est de {{statutory}} par mois, soit un taux global de formation de {{rate}}. Partir {{months}} mois avant l'âge normal entraîne une décote de {{penalty}} et l'application du facteur de durabilité, ce qui laisse {{monthly}} bruts par mois, soit {{replacement}} du salaire. Après l'IRS, la pension est de {{netPension}} par mois. Face à un salaire net estimé de {{net}}, l'écart est de {{gap}} par mois.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodReference": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
-        "methodRate": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
-        "methodAges": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
-        "methodEarly": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation entraîne une décote de {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
-        "methodLate": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
-        "methodMinimum": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
-        "methodGap": "L'écart compare la pension nette à votre salaire net d'aujourd'hui, tous deux par versement, sur 14 versements. Le salaire net est le salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. La pension nette est la pension brute estimée moins l'IRS retenu selon la table de retenue des pensions VIII de 2026 (Despacho n.º 233-A/2026, titulaire non marié ou marié avec deux revenus, sans handicap) ; les pensions ne paient pas de sécurité sociale et celles jusqu'à 920 euros par mois ne sont pas soumises à retenue. L'IRS définitif dépend de l'ensemble de vos revenus et déductions.",
-        "methodBudget": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il varie avec chacune des hypothèses ci-dessus.",
+        "methodReferenceBody": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
+        "methodRateBody": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
+        "methodAgesBody": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
+        "methodEarlyBody": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation entraîne une décote de {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
+        "methodLateBody": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
+        "methodMinimumBody": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
+        "methodGapBody": "L'écart compare la pension nette à votre salaire net d'aujourd'hui, tous deux par versement, sur 14 versements. Le salaire net est le salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. La pension nette est la pension brute estimée moins l'IRS retenu selon la table de retenue des pensions VIII de 2026 (Despacho n.º 233-A/2026, titulaire non marié ou marié avec deux revenus, sans handicap) ; les pensions ne paient pas de sécurité sociale et celles jusqu'à 920 euros par mois ne sont pas soumises à retenue. L'IRS définitif dépend de l'ensemble de vos revenus et déductions.",
+        "methodBudgetBody": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il varie avec chacune des hypothèses ci-dessus.",
         "unsupportedTitle": "Non pris en charge",
         "unsupportedMixed": "Les carrières commencées avant 2002 (formule mixte, avec les anciennes règles pour les années jusqu'en 2001). Ce simulateur ne couvre que la formule de toute la carrière pour ceux qui ont commencé à cotiser en 2002 ou après.",
         "unsupportedSpecial": "Les salaires très variables sur la carrière, les trous de cotisation et les carrières de plus de 40 ans.",
@@ -3948,7 +4052,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
         "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
         "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée ligne par ligne le 20 novembre 2026 d'après l'annexe du Despacho n.º 233-A/2026 publiée au Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions",
+        "methodReferenceTerm": "Rémunération de référence",
+        "methodRateTerm": "Taux global de formation",
+        "methodAgesTerm": "Âge normal d'accès",
+        "methodEarlyTerm": "Retraite anticipée",
+        "methodLateTerm": "Départ après l'âge normal",
+        "methodMinimumTerm": "Pension minimale",
+        "methodGapTerm": "Écart",
+        "methodBudgetTerm": "Lire l'écart",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "globalRate": "Taux global de formation",
+          "globalRateLower": "taux global de formation",
+          "annualRate": "taux annuel",
+          "years": "années de cotisation",
+          "statutory": "Pension de base",
+          "statutoryLower": "pension de base",
+          "reference": "rémunération de référence",
+          "earlyPension": "Pension en cas de départ anticipé",
+          "monthsEarly": "mois d'anticipation",
+          "factor": "facteur de durabilité",
+          "gap": "Écart",
+          "netPay": "salaire net",
+          "netPension": "pension nette"
+        }
       }
     },
     "sp500History": {
@@ -4056,10 +4184,14 @@
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
-            "fx": "Devise : les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
-            "fees": "Coûts : les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
-            "taxes": "Impôts : l'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
-            "sequence": "Biais rétrospectif : il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
+            "fxTerm": "Devise",
+            "fxBody": "Les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
+            "feesTerm": "Coûts",
+            "feesBody": "Les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
+            "taxesTerm": "Impôts",
+            "taxesBody": "L'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
+            "sequenceTerm": "Biais rétrospectif",
+            "sequenceBody": "Il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
             "past": "Les performances passées ne préjugent pas des performances futures. Cet outil est éducatif et ne constitue pas un conseil en investissement."
           }
         },
@@ -5135,7 +5267,12 @@
           "title": "Exemple chiffré",
           "setup": "Supposons que vous gardiez {{amount}} pendant 12 mois sur {{product}} chez {{bank}}, à {{rate}} par an. Il rapporte {{gross}} ; l'IRS de 28 % prélève {{tax}}, il reste {{net}}.",
           "capped": "Le plafond compte. {{product2}} chez {{bank2}} paie {{rate2}}, mais seulement jusqu'à {{cap}}. Avec {{amount2}}, les intérêts sont de {{gross2}} avant impôt et de {{net2}} après, comme si vous aviez épargné {{cap}}.",
-          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}."
+          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}.",
+          "figures": {
+            "gross": "Intérêts bruts",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Intérêts nets"
+          }
         },
         "method": {
           "title": "Méthode",
@@ -5335,17 +5472,25 @@
           "setup": "Prenons l'acheteur occasionnel d'actions : {{count}} achats de {{amount}} d'actions américaines dans l'année, {{portfolio}} investis.",
           "bank": "Chez {{bank}}, chaque ordre coûte {{bankFormula}}, donc les {{count}} ordres coûtent {{bankTrading}} droit de timbre compris. Convertir {{converted}} en dollars à {{bankFx}} ajoute {{bankFxTotal}}, et la garde ({{bankCustodyFormula}}) ajoute {{bankCustody}} TVA comprise. L'année coûte {{bankTotal}}, dont {{bankStampDuty}} de droit de timbre et {{bankVat}} de TVA.",
           "online": "Chez {{online}}, chaque ordre coûte {{onlineFormula}} : {{onlineTrading}} sur l'année. Le change à {{onlineFx}} ajoute {{onlineFxTotal}} et la garde {{onlineCustody}}, soit {{onlineTotal}} au total.",
-          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer."
+          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer.",
+          "figures": {
+            "total": "Total de l'année"
+          }
         },
         "method": {
           "title": "Méthode",
           "intro": "Tous les frais ont été relevés dans la grille tarifaire publiée par le courtier lui-même, à la date indiquée sur sa ligne ; tout le tableau a été revu le {{date}} et est revérifié chaque trimestre. Les frais qu'une grille n'indique pas apparaissent comme non publiés et sont exclus des totaux, alors signalés comme incomplets.",
           "steps": {
-            "a": "Ordres : la commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
-            "b": "Plan d'investissement : pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
-            "c": "Change : les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
-            "d": "Garde : la formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
-            "e": "Taxes sur les frais : quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
+            "aTerm": "Ordres",
+            "aBody": "La commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
+            "bTerm": "Plan d'investissement",
+            "bBody": "Pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
+            "cTerm": "Change",
+            "cBody": "Les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
+            "dTerm": "Garde",
+            "dBody": "La formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
+            "eTerm": "Taxes sur les frais",
+            "eBody": "Quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
             "f": "Le total additionne les ordres de l'année, le change et la garde, et les courtiers sont listés du moins cher au plus cher. Ceux qui ne publient pas des frais nécessaires au profil viennent en dernier."
           }
         },
@@ -5533,7 +5678,8 @@
             "insuranceLinked": "assurance liée à des fonds",
             "insuranceGuaranteed": "assurance non liée à des fonds",
             "pensionFund": "fonds de pension"
-          }
+          },
+          "gapLabel": "Écart de frais sur {{invested}}, par an"
         },
         "tax": {
           "title": "La déduction d'IRS (EBF, article 21)",
@@ -5545,7 +5691,8 @@
           },
           "example": "L'âge retenu est celui au 1er janvier de l'année du versement (n.º 9). À {{age}} ans, {{exampleContribution}} versés dans l'année donnent {{exampleDeduction}}, la déduction maximale.",
           "conditions": "La déduction entre dans le plafond global des déductions de l'article 78, n.º 7, du Code de l'IRS : aucun plafond pour les revenus imposables les plus bas, puis de {{capMax}} à {{capMin}} par foyer. Elle réduit l'impôt dû et n'est pas versée en argent, et les versements faits après le départ à la retraite ne sont pas déductibles (n.º 10).",
-          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions."
+          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions.",
+          "deductionLabel": "Déduction de l'IRS"
         },
         "redemption": {
           "title": "Quand racheter, et ce que coûte un rachat anticipé",
@@ -5697,22 +5844,47 @@
           "title": "Carats et titre",
           "intro": "La pureté de l'or s'exprime en carats, sur 24, ou en millièmes, le nombre gravé dans le poinçon. Voici les six titres légaux de l'or au Portugal :",
           "items": {
-            "k24": "24 carats, 999 millièmes : or pur, comme dans les lingots et pièces d'investissement.",
-            "k22": "22 carats, 916 : pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
-            "k19_2": "19,2 carats, 800 : l'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
-            "k18": "18 carats, 750 : le titre le plus courant de la bijouterie européenne.",
-            "k14": "14 carats, 585 : des bijoux plus durs et moins chers.",
-            "k9": "9 carats, 375 : le titre légal le plus bas."
+            "k24Term": "24 carats, 999 millièmes",
+            "k24Body": "Or pur, comme dans les lingots et pièces d'investissement.",
+            "k22Term": "22 carats, 916",
+            "k22Body": "Pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
+            "k19_2Term": "19,2 carats, 800",
+            "k19_2Body": "L'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
+            "k18Term": "18 carats, 750",
+            "k18Body": "Le titre le plus courant de la bijouterie européenne.",
+            "k14Term": "14 carats, 585",
+            "k14Body": "Des bijoux plus durs et moins chers.",
+            "k9Term": "9 carats, 375",
+            "k9Body": "Le titre légal le plus bas."
           }
         },
         "method": {
           "title": "Mode de calcul",
           "intro": "La page fait quatre choses :",
           "steps": {
-            "a": "Prix : le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
-            "b": "Or pur : le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
-            "c": "Valeur : les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
-            "d": "Offre : si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+            "aTerm": "Prix",
+            "aBody": "Le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
+            "bTerm": "Or pur",
+            "bBody": "Le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
+            "cTerm": "Valeur",
+            "cBody": "Les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
+            "dTerm": "Offre",
+            "dBody": "Si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+          },
+          "formulasLabel": "Formules",
+          "formula": {
+            "pureGold": "Or pur",
+            "pureGoldLower": "or pur",
+            "weight": "poids",
+            "fineness": "titre",
+            "value": "Valeur",
+            "valueLower": "valeur",
+            "price": "Prix au gramme",
+            "priceLower": "prix au gramme",
+            "nbpPrice": "prix de la NBP en zlotys",
+            "zlotyPerEuro": "zlotys par euro",
+            "offerShare": "Offre par rapport à la valeur",
+            "offer": "offre"
           }
         },
         "buyers": {
@@ -5733,10 +5905,14 @@
         "limits": {
           "title": "Ce que cette valeur laisse de côté",
           "items": {
-            "metal": "Le métal seul : la valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
-            "buyers": "Pas un prix de vente : les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
-            "purity": "Titre : le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
-            "reference": "Prix de référence : le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
+            "metalTerm": "Le métal seul",
+            "metalBody": "La valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
+            "buyersTerm": "Pas un prix de vente",
+            "buyersBody": "Les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
+            "purityTerm": "Titre",
+            "purityBody": "Le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
+            "referenceTerm": "Prix de référence",
+            "referenceBody": "Le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
             "education": "À usage éducatif uniquement, ce n'est pas un conseil."
           }
         },

@@ -1,6 +1,7 @@
 ---
-// The parts of one side of a formula (GuideFormula.astro); draws fractions by calling
-// itself for the numerator and the denominator.
+// The parts of one side of a formula (GuideFormula.astro); draws fractions and groups by
+// calling itself for their parts. A group is drawn in parentheses, its exponent raised after
+// them; screen readers hear "(a + b) ^ n".
 import type { GuideFormulaPart } from "./guideBlocks";
 
 interface Props {
@@ -23,6 +24,25 @@ const { parts } = Astro.props;
     }
     if (part.kind === "number") return <span class="font-mono text-foreground">{part.value}</span>;
     if (part.kind === "operator") return <span class="guide-formula__operator">{part.symbol}</span>;
+    if (part.kind === "group") {
+      // Parentheses around a fraction grow to its height.
+      const paren = part.parts.some((inner) => inner.kind === "fraction") ? "text-[2.25em]" : "text-[1.25em]";
+      return (
+        <span class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <span class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            <span class:list={["-mr-1.5 font-extralight leading-none text-muted-foreground", paren]}>(</span>
+            <Astro.self parts={part.parts} />
+            <span class:list={["-ml-1.5 font-extralight leading-none text-muted-foreground", paren]}>)</span>
+          </span>
+          {part.exponent && (
+            <span class="-ml-1.5 inline-flex flex-wrap items-center gap-x-1.5 self-start text-[0.8em] leading-tight">
+              <span class="sr-only"> ^ </span>
+              <Astro.self parts={part.exponent} />
+            </span>
+          )}
+        </span>
+      );
+    }
     return (
       <span class="guide-formula__fraction">
         <span class="guide-formula__numerator">

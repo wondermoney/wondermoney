@@ -1,15 +1,12 @@
 ---
-// Prerendered explanation, worked example and method for the term deposit calculator. The
-// figures come from the same calculation the calculator runs.
+// Prerendered explanation, worked example and method for the term deposit calculator, on
+// the guide building blocks (guideBlocks.ts). The figures come from the same calculation the
+// calculator runs (termDepositGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  TERM_DEPOSIT_EXAMPLE,
-  TERM_DEPOSIT_LIMITS,
-  computeTermDeposit,
-  type TermDepositInput,
-  type TermDepositResult,
-} from "@/lib/calculators/termDeposit";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildTermDepositGuide } from "./termDepositGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -21,118 +18,55 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.termDeposit.guide.${key}`;
 
-function calculate(overrides: Partial<TermDepositInput> = {}): TermDepositResult {
-  const calculation = computeTermDeposit({ ...TERM_DEPOSIT_EXAMPLE, ...overrides });
-  if (!calculation.ok) throw new Error("The term deposit worked example has invalid inputs");
-  return calculation.result;
-}
-
-const example = TERM_DEPOSIT_EXAMPLE;
-const atMaturity = calculate();
-const compounded = calculate({ payout: example.comparePayout, reinvest: true });
-const taxed = calculate({ taxRate: example.exampleTaxRate });
-
-const money = (value: number) =>
-  formatMoney(locale, value, { decimals: Number.isInteger(value) ? 0 : 2 });
-const percent = (value: number, decimals = 2) => formatPercent(locale, value, { decimals });
-
-const values = {
-  amount: money(example.amount),
-  rate: percent(example.annualRate, Number.isInteger(example.annualRate) ? 0 : 2),
-  months: formatNumber(locale, example.termMonths),
-  gross: money(atMaturity.grossInterest),
-  final: money(atMaturity.finalBalance),
-  yield: percent(atMaturity.effectiveAnnualNetYield),
-  compoundedPayments: formatNumber(locale, compounded.payments.length),
-  compoundedGross: money(compounded.grossInterest),
-  compoundedFinal: money(compounded.finalBalance),
-  compoundedYield: percent(compounded.effectiveAnnualNetYield),
-  compoundedExtra: money(
-    Math.round((compounded.grossInterest - atMaturity.grossInterest) * 100) / 100,
-  ),
-  taxRate: percent(example.exampleTaxRate, 0),
-  tax: money(taxed.tax),
-  net: money(taxed.netInterest),
-  taxedFinal: money(taxed.finalBalance),
-  taxedYield: percent(taxed.effectiveAnnualNetYield),
-  maxMonths: formatNumber(locale, TERM_DEPOSIT_LIMITS.maxTermMonths),
-};
-
-const list = (key: string) =>
-  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
-const readItems = list("read");
-const methodItems = list("method");
+const guide = buildTermDepositGuide(locale);
+const { values } = guide;
 
 const compoundInterestHref = toLocalizedPath("toolCompoundInterest", locale);
 const emergencyFundHref = toLocalizedPath("toolEmergencyFund", locale);
 const savingsGoalHref = toLocalizedPath("toolSavingsGoal", locale);
-const linkClass =
-  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
 <ToolGuide>
-  <section aria-labelledby="term-deposit-what">
-    <h2 id="term-deposit-what" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("whatHeading"))}
-    </h2>
-    <p class="mt-3">{t(k("whatBody"))}</p>
+  <section>
+    <h2>{t(k("whatHeading"))}</h2>
+    <p>{t(k("whatBody"))}</p>
   </section>
 
-  <section aria-labelledby="term-deposit-read">
-    <h2 id="term-deposit-read" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("readHeading"))}
-    </h2>
-    <ul class="mt-3 list-disc space-y-2 pl-5">
-      {readItems.map((item) => <li>{item}</li>)}
-    </ul>
+  <section>
+    <h2>{t(k("readHeading"))}</h2>
+    <GuideTermList items={guide.readTerms} />
   </section>
 
-  <section aria-labelledby="term-deposit-example">
-    <h2 id="term-deposit-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleHeading"))}
-    </h2>
-    <p class="mt-3">{t(k("exampleSetup"), values)}</p>
-    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      {values.amount} × {values.rate} × {values.months} ÷ 12 = {values.gross}
-    </p>
-    <p class="mt-3">{t(k("exampleCompounded"), values)}</p>
-    <p class="mt-3">{t(k("exampleTax"), values)}</p>
-    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      {values.gross} × {values.taxRate} = {values.tax}
-      <br />
-      {values.gross} − {values.tax} = {values.net}
-    </p>
+  <section>
+    <h2>{t(k("exampleHeading"))}</h2>
+    <p>{t(k("exampleSetup"), values)}</p>
+    <GuideFigures items={guide.maturityFlow} operators={guide.maturityOperators} />
+    <p>{t(k("exampleCompounded"), values)}</p>
+    <p>{t(k("exampleTax"), values)}</p>
+    <GuideFigures items={guide.taxFlow} operators={guide.taxOperators} />
   </section>
 
-  <section aria-labelledby="term-deposit-method">
-    <h2 id="term-deposit-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodHeading"))}
-    </h2>
-    <p class="mt-3">{t(k("methodIntro"))}</p>
-    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
-      {t(k("methodFormula"))}
-    </p>
-    <ul class="mt-4 list-disc space-y-2 pl-5">
-      {methodItems.map((item) => <li>{item}</li>)}
-      <li>{t(k("methodLimits"), values)}</li>
-    </ul>
+  <section>
+    <h2>{t(k("methodHeading"))}</h2>
+    <p>{t(k("methodIntro"))}</p>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+    <p>{t(k("methodLimits"), values)}</p>
   </section>
 
-  <section aria-labelledby="term-deposit-next">
-    <h2 id="term-deposit-next" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("nextHeading"))}
-    </h2>
-    <p class="mt-3">
+  <section>
+    <h2>{t(k("nextHeading"))}</h2>
+    <p>
       {t(k("nextCompound"))}{" "}
-      <a href={compoundInterestHref} class={linkClass}>{t(k("nextCompoundLink"))}</a>
+      <a href={compoundInterestHref}>{t(k("nextCompoundLink"))}</a>
     </p>
-    <p class="mt-3">
+    <p>
       {t(k("nextEmergency"))}{" "}
-      <a href={emergencyFundHref} class={linkClass}>{t(k("nextEmergencyLink"))}</a>
+      <a href={emergencyFundHref}>{t(k("nextEmergencyLink"))}</a>
     </p>
-    <p class="mt-3">
+    <p>
       {t(k("nextSavingsGoal"))}{" "}
-      <a href={savingsGoalHref} class={linkClass}>{t(k("nextSavingsGoalLink"))}</a>
+      <a href={savingsGoalHref}>{t(k("nextSavingsGoalLink"))}</a>
     </p>
   </section>
 </ToolGuide>

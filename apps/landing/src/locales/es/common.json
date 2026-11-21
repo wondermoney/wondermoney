@@ -675,13 +675,30 @@
         "exampleTarget": "Con una tasa de retirada del {{rate}}, tu número FIRE es {{spending}} ÷ {{rate}} = {{target}}, así que los {{assets}} de hoy son el {{progress}} del camino.",
         "exampleTime": "Creciendo mes a mes y sumando las aportaciones, las inversiones superan {{target}} al cabo de {{time}}. Si gastas un {{cut}} menos, {{cutSpending}} al año, el objetivo baja a {{cutTarget}} y lo alcanzas al cabo de {{cutTime}}. La calculadora de arriba empieza con estas cifras para que las cambies por las tuyas.",
         "methodHeading": "Método",
-        "methodFormula": "Número FIRE = gasto anual ÷ tasa de retirada",
-        "methodMultiple": "Al 4 %, el objetivo es 25 veces tu gasto anual; al 3 %, unas 33 veces. Una tasa más baja da un objetivo mayor y más margen para los años malos.",
-        "methodGrowth": "Cada mes, las inversiones crecen al tipo mensual que, compuesto, da la rentabilidad anual que indicas, y después se suma la aportación de ese mes. El tiempo que se muestra es el primer mes en que el total alcanza tu número FIRE.",
-        "methodRealMoney": "La rentabilidad es real, descontada la inflación, así que todas las cifras están en euros de hoy. Se supone que el gasto y las aportaciones suben con los precios; por eso no cambian en el cálculo.",
-        "methodHorizon": "La proyección se detiene a los {{years}} años. Si las aportaciones y el crecimiento no pueden alcanzar el objetivo, por ejemplo sin aportación y sin rentabilidad, la calculadora lo indica en lugar de dar una fecha.",
-        "methodLeftOut": "No incluye impuestos sobre ganancias y retiradas, comisiones de fondos y plataformas, ni el riesgo de secuencia: el peligro de malas rentabilidades en los primeros años en que vives de tus inversiones. La tasa de retirada es una regla orientativa basada en rentabilidades pasadas, no una garantía.",
-        "methodPrivacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan."
+        "methodMultipleBody": "Al 4 %, el objetivo es 25 veces tu gasto anual; al 3 %, unas 33 veces. Una tasa más baja da un objetivo mayor y más margen para los años malos.",
+        "methodGrowthBody": "Cada mes, las inversiones crecen al tipo mensual que, compuesto, da la rentabilidad anual que indicas, y después se suma la aportación de ese mes. El tiempo que se muestra es el primer mes en que el total alcanza tu número FIRE.",
+        "methodRealMoneyBody": "La rentabilidad es real, descontada la inflación, así que todas las cifras están en euros de hoy. Se supone que el gasto y las aportaciones suben con los precios; por eso no cambian en el cálculo.",
+        "methodHorizonBody": "La proyección se detiene a los {{years}} años. Si las aportaciones y el crecimiento no pueden alcanzar el objetivo, por ejemplo sin aportación y sin rentabilidad, la calculadora lo indica en lugar de dar una fecha.",
+        "methodLeftOutBody": "No incluye impuestos sobre ganancias y retiradas, comisiones de fondos y plataformas, ni el riesgo de secuencia: el peligro de malas rentabilidades en los primeros años en que vives de tus inversiones. La tasa de retirada es una regla orientativa basada en rentabilidades pasadas, no una garantía.",
+        "methodPrivacyBody": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan.",
+        "methodMultipleTerm": "Tasa de retirada",
+        "methodGrowthTerm": "Crecimiento mensual",
+        "methodRealMoneyTerm": "Dinero de hoy",
+        "methodHorizonTerm": "Horizonte",
+        "methodLeftOutTerm": "No incluye",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "fireNumber": "Número FIRE",
+          "annualSpending": "gasto anual",
+          "withdrawalRate": "tasa de retirada",
+          "monthlyRate": "Tasa mensual",
+          "monthlyRateLower": "tasa mensual",
+          "realReturn": "rentabilidad real anual",
+          "assetsEnd": "Inversiones al final del mes",
+          "assetsStart": "inversiones al inicio del mes",
+          "contribution": "aportación mensual"
+        }
       }
     },
     "compoundInterest": {
@@ -756,13 +773,11 @@
         "exampleStep3": "En dinero de hoy, el valor final es {{realFinal}}: lo que has aportado vale {{realContributed}} y el crecimiento después de la inflación es {{realGrowth}}.",
         "exampleComparison": "Subir la aportación a {{comparisonMonthly}} al mes añade {{extraContributed}} aportados a lo largo del período y {{extraFinal}} al valor final, que llega a {{comparisonFinal}}. En dinero de hoy, la diferencia es {{extraReal}}.",
         "methodHeading": "Cómo funciona la calculadora",
-        "methodFormula": "Cada mes: saldo = saldo × (1 + rentabilidad anual ÷ 12) + aportación mensual",
-        "methodRealFormula": "Valor en dinero de hoy = valor ÷ (1 + inflación anual) ^ años",
-        "methodMonthly": "La rentabilidad anual se divide en 12 tasas mensuales iguales. Cada mes el saldo crece a esa tasa y después entra la aportación, al final del mes. Una rentabilidad del {{rate}} capitalizada mensualmente da un {{effectiveRate}} en un año completo.",
-        "methodInflation": "La inflación se convierte en una tasa mensual equivalente que, compuesta a lo largo del año, da la tasa anual. El valor final se divide por la inflación acumulada en todo el período, y cada aportación por la inflación acumulada hasta el mes en que entra, así que el importe aportado también aparece en dinero de hoy.",
-        "methodRounding": "El crecimiento se redondea al céntimo cada mes. Los totales se muestran en euros enteros y el crecimiento es siempre el valor final menos lo aportado, así que las cifras cuadran.",
-        "methodRanges": "Los importes van de 0 a {{maxAmount}}, la rentabilidad y la inflación del 0% al {{maxRate}}% y el período de 0 a {{maxYears}} años completos. Los valores fuera de estos límites se ajustan, y la calculadora te avisa cuando ocurre.",
-        "methodPrivacy": "El cálculo se hace en tu navegador. Los importes que introduces no se envían a ningún sitio.",
+        "methodMonthlyBody": "La rentabilidad anual se divide en 12 tasas mensuales iguales. Cada mes el saldo crece a esa tasa y después entra la aportación, al final del mes. Una rentabilidad del {{rate}} capitalizada mensualmente da un {{effectiveRate}} en un año completo.",
+        "methodInflationBody": "La inflación se convierte en una tasa mensual equivalente que, compuesta a lo largo del año, da la tasa anual. El valor final se divide por la inflación acumulada en todo el período, y cada aportación por la inflación acumulada hasta el mes en que entra, así que el importe aportado también aparece en dinero de hoy.",
+        "methodRoundingBody": "El crecimiento se redondea al céntimo cada mes. Los totales se muestran en euros enteros y el crecimiento es siempre el valor final menos lo aportado, así que las cifras cuadran.",
+        "methodRangesBody": "Los importes van de 0 a {{maxAmount}}, la rentabilidad y la inflación del 0% al {{maxRate}}% y el período de 0 a {{maxYears}} años completos. Los valores fuera de estos límites se ajustan, y la calculadora te avisa cuando ocurre.",
+        "methodPrivacyBody": "El cálculo se hace en tu navegador. Los importes que introduces no se envían a ningún sitio.",
         "assumptionsHeading": "Supuestos",
         "assumption1": "La rentabilidad es la misma todos los años.",
         "assumption2": "Las aportaciones entran al final de cada mes y no cambian en todo el período.",
@@ -771,7 +786,21 @@
         "assumptionsNote": "Las inversiones reales suben y bajan, y los impuestos y comisiones reducen lo que te queda. Usa el resultado como una proyección para comparar opciones, no como una previsión.",
         "rateHeading": "Qué rentabilidad usar",
         "rateBody1": "Usa la rentabilidad que esperas después de costes y antes de la inflación. Una cuenta de ahorro o la deuda pública rinden menos que un fondo de acciones diversificado, que puede crecer más en períodos largos pero también pierde valor algunos años.",
-        "rateBody2": "Si no estás seguro, prueba una tasa prudente y otra más optimista y compara los resultados. La distancia entre ellas muestra cuánto del resultado depende de la tasa, que no controlas, y cuánto de la aportación y el período, que sí controlas."
+        "rateBody2": "Si no estás seguro, prueba una tasa prudente y otra más optimista y compara los resultados. La distancia entre ellas muestra cuánto del resultado depende de la tasa, que no controlas, y cuánto de la aportación y el período, que sí controlas.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaBalanceEnd": "Saldo al final del mes",
+        "formulaBalanceStart": "saldo al inicio del mes",
+        "formulaAnnualReturn": "rentabilidad anual",
+        "formulaContribution": "aportación mensual",
+        "formulaRealValue": "Valor en dinero de hoy",
+        "formulaValue": "valor",
+        "formulaInflation": "inflación anual",
+        "formulaYears": "años",
+        "methodMonthlyTerm": "Capitalización mensual",
+        "methodInflationTerm": "Inflación",
+        "methodRoundingTerm": "Redondeo",
+        "methodRangesTerm": "Límites",
+        "methodPrivacyTerm": "Privacidad"
       }
     },
     "netWorth": {
@@ -942,7 +971,21 @@
         "assumptions": "El modelo supone una rentabilidad y una comisión constantes, el reintegro de las distribuciones en el fondo y aportaciones a final de mes. Excluye impuestos, gastos de intermediación, variaciones de divisa e inflación. Las tasas son hipótesis ilustrativas para un índice como el S&P 500. La rentabilidad real varía y puede ser negativa. El impacto de las comisiones incluye la rentabilidad que esos importes podrían haber generado.",
         "ctaHeadline": "Sigue la rentabilidad real de tus inversiones",
         "ctaDescription": "Usa WonderMoney para seguir tu cartera y comparar su rentabilidad real con el escenario que has simulado.",
-        "ctaText": "Compara tus inversiones con la proyección"
+        "ctaText": "Compara tus inversiones con la proyección",
+        "methodTerm": "Crecimiento y comisiones",
+        "assumptionsTerm": "Supuestos",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "netFactor": "Factor de crecimiento anual neto",
+          "annualReturn": "rentabilidad anual",
+          "annualFee": "comisión anual del fondo",
+          "monthlyFactor": "Factor mensual",
+          "monthlyFactorLower": "factor mensual",
+          "netFactorLower": "factor anual neto",
+          "balanceEnd": "Saldo al final del mes",
+          "balanceStart": "saldo al inicio del mes",
+          "contribution": "aportación mensual"
+        }
       }
     },
     "emergencyFund": {
@@ -2055,11 +2098,16 @@
         "whatBody": "En un depósito a plazo dejas un importe en el banco durante un número fijo de meses a un tipo fijo. Además del tipo, lo que ganas depende de tres cosas: cuánto tiempo se queda el dinero, si los intereses llegan al final o durante el plazo y cuánto se retiene en impuestos. Esta calculadora tiene en cuenta las tres con el tipo que introduzcas, para que compares ofertas en igualdad de condiciones.",
         "readHeading": "Cómo leer el resultado",
         "read": {
-          "gross": "Intereses brutos: todo lo que rinde el depósito antes de impuestos.",
-          "tax": "Retención: la parte de cada pago de intereses que se queda para impuestos, al tipo que introduzcas.",
-          "net": "Intereses netos: lo que te llega, los intereses brutos menos la retención.",
-          "final": "Saldo al vencimiento, o total recibido cuando los intereses se ingresan en tu cuenta: el importe depositado más todos los intereses netos.",
-          "yield": "Rentabilidad neta anual: la ganancia neta expresada como un tipo anual, para comparar depósitos con plazos y pagos distintos."
+          "grossTerm": "Intereses brutos",
+          "grossBody": "Todo lo que rinde el depósito antes de impuestos.",
+          "taxTerm": "Retención",
+          "taxBody": "La parte de cada pago de intereses que se queda para impuestos, al tipo que introduzcas.",
+          "netTerm": "Intereses netos",
+          "netBody": "Lo que te llega, los intereses brutos menos la retención.",
+          "finalTerm": "Saldo al vencimiento, o total recibido cuando los intereses se ingresan en tu cuenta",
+          "finalBody": "El importe depositado más todos los intereses netos.",
+          "yieldTerm": "Rentabilidad neta anual",
+          "yieldBody": "La ganancia neta expresada como un tipo anual, para comparar depósitos con plazos y pagos distintos."
         },
         "exampleHeading": "Ejemplo práctico",
         "exampleSetup": "Supón que depositas {{amount}} durante {{months}} meses a un TIN bruto del {{rate}}, con los intereses al vencimiento. El interés es simple: el importe por el tipo por la parte del año que el dinero se queda en el banco.",
@@ -2067,15 +2115,21 @@
         "exampleTax": "Ahora supón que se retiene un {{taxRate}} de los intereses al vencimiento, un tipo elegido solo como ilustración y no tomado de las normas de ningún país: la calculadora empieza en 0% para que introduzcas el tuyo. El banco retiene {{tax}}, recibes {{net}} y terminas con {{taxedFinal}}, una rentabilidad neta del {{taxedYield}} anual.",
         "methodHeading": "Método y supuestos",
         "methodIntro": "Los intereses se cuentan en meses completos, sin contar días. El tipo que introduces es un tipo nominal anual: cada periodo rinde el tipo por sus meses dividido entre 12.",
-        "methodFormula": "Intereses de un periodo = saldo × tipo anual × meses del periodo ÷ 12. Intereses netos = intereses − retención. Rentabilidad neta anual = el tipo anual que convierte el importe depositado en los pagos netos y el importe devuelto, cada uno contado cuando llega. Con todos los intereses al vencimiento, es (saldo al vencimiento ÷ importe depositado)^(12 ÷ plazo en meses) − 1.",
         "method": {
-          "maturity": "Al vencimiento, el interés es simple: un único pago de importe × tipo × plazo en meses ÷ 12.",
-          "periodic": "Con pagos mensuales, trimestrales o anuales, cada pago llega al final de su periodo. Si el plazo no es un número entero de periodos, el último es más corto y sus intereses se pagan en proporción al vencimiento. Un plazo más corto que un periodo tiene un único pago al vencimiento.",
-          "reinvest": "Los intereses que se suman al depósito lo hacen después de impuestos, así que el depósito capitaliza con la frecuencia de los pagos. Los intereses que se ingresan en tu cuenta salen del depósito, así que los siguientes se calculan sobre el importe depositado.",
-          "tax": "La retención se aplica a cada pago por separado y se redondea al céntimo, como hace el banco. Todos los importes se calculan en céntimos, así que las filas de pagos suman los totales.",
-          "yield": "La rentabilidad neta anual es la tasa interna de rentabilidad del depósito: el tipo anual al que el importe que pones crece hasta todo lo que recibes, contando cada pago neto en el mes en que se cobra. Por eso, los intereses cobrados durante el plazo valen más que los mismos intereses al vencimiento. Un depósito de menos de un año se supone renovado en las mismas condiciones.",
-          "excluded": "No incluye: penalizaciones por cancelación anticipada, comisiones, cambios del tipo durante el plazo, límites del fondo de garantía de depósitos ni el efecto de la inflación.",
-          "privacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan ni se envían a ninguna parte."
+          "maturityBody": "Al vencimiento, el interés es simple: un único pago de importe × tipo × plazo en meses ÷ 12.",
+          "periodicBody": "Con pagos mensuales, trimestrales o anuales, cada pago llega al final de su periodo. Si el plazo no es un número entero de periodos, el último es más corto y sus intereses se pagan en proporción al vencimiento. Un plazo más corto que un periodo tiene un único pago al vencimiento.",
+          "reinvestBody": "Los intereses que se suman al depósito lo hacen después de impuestos, así que el depósito capitaliza con la frecuencia de los pagos. Los intereses que se ingresan en tu cuenta salen del depósito, así que los siguientes se calculan sobre el importe depositado.",
+          "taxBody": "La retención se aplica a cada pago por separado y se redondea al céntimo, como hace el banco. Todos los importes se calculan en céntimos, así que las filas de pagos suman los totales.",
+          "yieldBody": "La rentabilidad neta anual es la tasa interna de rentabilidad del depósito: el tipo anual al que el importe que pones crece hasta todo lo que recibes, contando cada pago neto en el mes en que se cobra. Por eso, los intereses cobrados durante el plazo valen más que los mismos intereses al vencimiento. Un depósito de menos de un año se supone renovado en las mismas condiciones.",
+          "excludedTerm": "No incluye",
+          "excludedBody": "Penalizaciones por cancelación anticipada, comisiones, cambios del tipo durante el plazo, límites del fondo de garantía de depósitos ni el efecto de la inflación.",
+          "privacyBody": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan ni se envían a ninguna parte.",
+          "maturityTerm": "Pago al vencimiento",
+          "periodicTerm": "Pagos periódicos",
+          "reinvestTerm": "Intereses capitalizados o abonados",
+          "taxTerm": "Retención",
+          "yieldTerm": "Rentabilidad neta anual",
+          "privacyTerm": "Privacidad"
         },
         "methodLimits": "Los plazos van de 1 a {{maxMonths}} meses.",
         "nextHeading": "Calculadoras relacionadas",
@@ -2084,7 +2138,23 @@
         "nextEmergency": "Un depósito a plazo puede guardar ahorros que no vas a necesitar pronto, mientras tu fondo de emergencia sigue a mano.",
         "nextEmergencyLink": "Calcular tu fondo de emergencia",
         "nextSavingsGoal": "¿Estás reuniendo el importe que vas a depositar o planeando qué hacer cuando venza? El simulador de ahorro calcula cuánto apartar cada mes o cuánto tiempo lleva.",
-        "nextSavingsGoalLink": "Abrir el simulador de ahorro"
+        "nextSavingsGoalLink": "Abrir el simulador de ahorro",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "interest": "Intereses de un periodo",
+          "balance": "saldo",
+          "annualRate": "tipo anual",
+          "periodMonths": "meses del periodo",
+          "tax": "Retención",
+          "taxLower": "retención",
+          "taxRate": "tipo de retención",
+          "interestLower": "intereses",
+          "netInterest": "Intereses netos",
+          "yield": "Rentabilidad neta anual, con los intereses al vencimiento",
+          "finalBalance": "saldo al vencimiento",
+          "amount": "importe depositado",
+          "termMonths": "plazo en meses"
+        }
       }
     },
     "buyVsRent": {
@@ -2782,14 +2852,31 @@
         "exampleTitle": "Ejemplo práctico",
         "exampleText": "Suscribes {{amount}} y los mantienes {{years}} años con un tipo base de {{baseRate}}. Los certificados generan {{grossInterest}} de intereses brutos, de los que {{irs}} van a IRS, y quedan {{netInterest}} netos. El saldo llega a {{finalValue}}, una rentabilidad neta de {{netYield}} al año.",
         "methodTitle": "Cómo funciona la estimación",
-        "methodQuarter": "Cada trimestre rinde un cuarto del tipo anual (tipo base más prima) sobre el saldo actual. Los importes se redondean al céntimo cada trimestre.",
-        "methodTax": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
-        "methodYield": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
+        "methodQuarterBody": "Cada trimestre rinde un cuarto del tipo anual (tipo base más prima) sobre el saldo actual. Los importes se redondean al céntimo cada trimestre.",
+        "methodTaxBody": "Se retiene el {{irsRate}} de los intereses de cada trimestre y los intereses netos se suman al saldo, de modo que los trimestres siguientes generan intereses sobre ellos.",
+        "methodYieldBody": "La rentabilidad neta anual es el crecimiento compuesto anual desde el importe suscrito hasta el saldo final. Las cifras brutas muestran los intereses antes de IRS.",
         "assumptionsTitle": "Supuestos",
         "assumptionBase": "El tipo base es el que introduces y se mantiene fijo toda la permanencia. Parte del tipo que el IGCP fijó para {{referenceMonth}} ({{referenceRateNote}}) y que vuelve a fijar cada mes, por lo que los intereses efectivos serán distintos. Consulta el tipo actual en el sitio del IGCP.",
         "assumptionRules": "El tipo de IRS es el general para este tipo de rendimiento. Tu situación fiscal y los cambios de normas posteriores a {{rulesDate}} no se tienen en cuenta.",
         "assumptionScope": "Información general, no una recomendación de contratar o evitar ningún producto, ni compara los certificados con otros ahorros.",
-        "referenceRateAtCeiling": "{{rate}}, el máximo"
+        "referenceRateAtCeiling": "{{rate}}, el máximo",
+        "methodQuarterTerm": "Intereses trimestrales",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Rentabilidad neta anual",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "quarterInterest": "Intereses del trimestre",
+          "balance": "saldo",
+          "baseRate": "tipo base",
+          "bonus": "prima de permanencia",
+          "irs": "IRS",
+          "interestLower": "intereses",
+          "newBalance": "Saldo al final del trimestre",
+          "yield": "Rentabilidad neta anual",
+          "finalValue": "valor final",
+          "amount": "importe suscrito",
+          "years": "años"
+        }
       },
       "nextStepHeadline": "Ve tus certificados junto al resto de tu ahorro",
       "nextStepDescription": "Añádelos en WonderMoney para seguir todo lo que has ahorrado en un solo lugar.",
@@ -2908,12 +2995,25 @@
           "title": "Cómo se calcula",
           "intro": "Los tipos son estadísticas publicadas. WonderMoney añade solo estos cálculos:",
           "steps": {
-            "a": "Tipo anual: la media simple de las doce medias mensuales del año. No pondera los meses por lo depositado.",
-            "b": "Inflación: la variación del índice de precios de consumo portugués, en media anual, del año anterior al año.",
-            "c": "Tipo real: (1 + tipo) ÷ (1 + inflación) − 1. Para la cifra tras impuestos, primero se descuenta el 28 % de IRS al tipo.",
-            "d": "Calculadora: interés simple durante el plazo en meses completos, pagado al vencimiento, con el 28 % retenido, al tipo medio del grupo de plazos. Lo que se lleva la inflación es el importe × ((1 + inflación)^(meses ÷ 12) − 1)."
+            "aTerm": "Tipo anual",
+            "aBody": "La media simple de las doce medias mensuales del año. No pondera los meses por lo depositado.",
+            "bTerm": "Inflación",
+            "bBody": "La variación del índice de precios de consumo portugués, en media anual, del año anterior al año.",
+            "cTerm": "Tipo real",
+            "cBody": "(1 + tipo) ÷ (1 + inflación) − 1. Para la cifra tras impuestos, primero se descuenta el 28 % de IRS al tipo.",
+            "dTerm": "Calculadora",
+            "dBody": "Interés simple durante el plazo en meses completos, pagado al vencimiento, con el 28 % retenido, al tipo medio del grupo de plazos. Lo que se lleva la inflación es el importe × ((1 + inflación)^(meses ÷ 12) − 1)."
           },
-          "realRate": "Dividir en lugar de restar importa cuando los tipos son altos: mide cuánto más puede comprar el dinero, no solo la diferencia entre dos porcentajes."
+          "realRate": "Dividir en lugar de restar importa cuando los tipos son altos: mide cuánto más puede comprar el dinero, no solo la diferencia entre dos porcentajes.",
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "realRate": "Tipo real",
+            "realRateAfterTax": "Tipo real tras impuestos",
+            "rate": "tipo",
+            "inflation": "inflación",
+            "amount": "importe",
+            "months": "meses"
+          }
         },
         "data": {
           "title": "Datos y fuentes",
@@ -3042,10 +3142,14 @@
           "title": "Cómo se calcula",
           "intro": "Cada cifra sale del mismo motor que la calculadora de depósitos a plazo:",
           "steps": {
-            "a": "Intereses brutos: importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
-            "b": "Impuesto: el {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
-            "c": "Rentabilidad neta anual: los intereses netos anualizados a lo largo del plazo.",
-            "d": "Filtros: una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
+            "aTerm": "Intereses brutos",
+            "aBody": "Importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
+            "bTerm": "Impuesto",
+            "bBody": "El {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
+            "cTerm": "Rentabilidad neta anual",
+            "cBody": "Los intereses netos anualizados a lo largo del plazo.",
+            "dTerm": "Filtros",
+            "dBody": "Una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
           }
         },
         "data": {
@@ -3928,14 +4032,14 @@
         "exampleTitle": "Ejemplo práctico",
         "example": "Alguien con un sueldo medio de {{gross}} al mes (euros de hoy, 14 pagas), con {{years}} años de cotización, que se jubila a los {{age}}. La pensión estatutaria es de {{statutory}} al mes, una tasa global de formación del {{rate}}. Jubilarse {{months}} meses antes de la edad normal resta {{penalty}} y aplica el factor de sostenibilidad, y queda en {{monthly}} brutos al mes, es decir, el {{replacement}} del sueldo. Tras el IRS, la pensión es de {{netPension}} al mes. Frente a un sueldo neto estimado de {{net}}, la diferencia es de {{gap}} al mes.",
         "methodTitle": "Cómo funciona la estimación",
-        "methodReference": "La remuneración de referencia es la media de las remuneraciones anuales de toda la carrera, revalorizadas con coeficientes ligados a los precios de consumo y divididas entre 14. La calculadora trabaja en euros de hoy: introduces un sueldo mensual medio real y el resultado también sale en euros de hoy.",
-        "methodRate": "La tasa anual depende de los tramos de la remuneración de referencia, en múltiplos del IAS ({{ias}} en 2026): {{rates}} para los tramos hasta 1,1, hasta 2, hasta 4, hasta 8 y por encima de 8 veces el IAS. Las carreras de hasta 20 años usan un 2 % fijo. La tasa se multiplica por los años de cotización, 40 como máximo, y da la tasa global de formación.",
-        "methodAges": "La edad normal de acceso a la pensión de jubilación es {{normal2026}} en 2026 y se ha fijado en {{normal2027}} para 2027. La calculadora usa el valor de 2026.",
-        "methodEarly": "Antes de la edad normal, desde los 60 años y con al menos 15 años de cotización, cada mes de anticipo resta {{penalty}}, y se aplica además el factor de sostenibilidad de 2026 ({{factor}}, un recorte del 17,63 %). Ambos se multiplican. No se modelan excepciones, como las carreras muy largas.",
-        "methodLate": "Después de la edad normal, hasta los 70 años, cada mes añade una bonificación que depende de los años de cotización: 0,33 % desde 15 años, 0,50 % desde 25, 0,65 % desde 35 y 1 % desde 40. La pensión con bonificación no puede superar el 92 % de la remuneración de referencia.",
-        "methodMinimum": "Si la fórmula da menos que la pensión mínima de 2026 para tu carrera, se muestra el mínimo: {{min15}} para 15 a 20 años, {{min21}} para 21 a 30 y {{min31}} para 31 o más. El mínimo no se aplica a la jubilación anticipada.",
-        "methodGap": "La diferencia compara la pensión neta con tu sueldo neto de hoy, ambos por paga, en 14 pagas. El sueldo neto es el sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión neta es la pensión bruta estimada menos el IRS retenido según la tabla de retención de pensiones VIII de 2026 (Despacho n.º 233-A/2026, titular no casado o casado con dos titulares, sin discapacidad); las pensiones no pagan Seguridad Social y las pensiones de hasta 920 euros al mes no tienen retención. El IRS final depende de tus ingresos totales y deducciones.",
-        "methodBudget": "Lee la diferencia como el importe mensual que tus ahorros e inversiones tendrían que cubrir. Cambia con cada supuesto anterior.",
+        "methodReferenceBody": "La remuneración de referencia es la media de las remuneraciones anuales de toda la carrera, revalorizadas con coeficientes ligados a los precios de consumo y divididas entre 14. La calculadora trabaja en euros de hoy: introduces un sueldo mensual medio real y el resultado también sale en euros de hoy.",
+        "methodRateBody": "La tasa anual depende de los tramos de la remuneración de referencia, en múltiplos del IAS ({{ias}} en 2026): {{rates}} para los tramos hasta 1,1, hasta 2, hasta 4, hasta 8 y por encima de 8 veces el IAS. Las carreras de hasta 20 años usan un 2 % fijo. La tasa se multiplica por los años de cotización, 40 como máximo, y da la tasa global de formación.",
+        "methodAgesBody": "La edad normal de acceso a la pensión de jubilación es {{normal2026}} en 2026 y se ha fijado en {{normal2027}} para 2027. La calculadora usa el valor de 2026.",
+        "methodEarlyBody": "Antes de la edad normal, desde los 60 años y con al menos 15 años de cotización, cada mes de anticipo resta {{penalty}}, y se aplica además el factor de sostenibilidad de 2026 ({{factor}}, un recorte del 17,63 %). Ambos se multiplican. No se modelan excepciones, como las carreras muy largas.",
+        "methodLateBody": "Después de la edad normal, hasta los 70 años, cada mes añade una bonificación que depende de los años de cotización: 0,33 % desde 15 años, 0,50 % desde 25, 0,65 % desde 35 y 1 % desde 40. La pensión con bonificación no puede superar el 92 % de la remuneración de referencia.",
+        "methodMinimumBody": "Si la fórmula da menos que la pensión mínima de 2026 para tu carrera, se muestra el mínimo: {{min15}} para 15 a 20 años, {{min21}} para 21 a 30 y {{min31}} para 31 o más. El mínimo no se aplica a la jubilación anticipada.",
+        "methodGapBody": "La diferencia compara la pensión neta con tu sueldo neto de hoy, ambos por paga, en 14 pagas. El sueldo neto es el sueldo bruto menos el 11 % de Seguridad Social y la retención de IRS de 2026 para una persona soltera sin dependientes en la Portugal continental. La pensión neta es la pensión bruta estimada menos el IRS retenido según la tabla de retención de pensiones VIII de 2026 (Despacho n.º 233-A/2026, titular no casado o casado con dos titulares, sin discapacidad); las pensiones no pagan Seguridad Social y las pensiones de hasta 920 euros al mes no tienen retención. El IRS final depende de tus ingresos totales y deducciones.",
+        "methodBudgetBody": "Lee la diferencia como el importe mensual que tus ahorros e inversiones tendrían que cubrir. Cambia con cada supuesto anterior.",
         "unsupportedTitle": "No admitido",
         "unsupportedMixed": "Carreras iniciadas antes de 2002 (fórmula mixta, con las reglas antiguas para los años hasta 2001). Esta calculadora solo cubre la fórmula de toda la carrera para quien empezó a cotizar en 2002 o después.",
         "unsupportedSpecial": "Sueldos muy variables a lo largo de la carrera, lagunas de cotización y carreras de más de 40 años.",
@@ -3948,7 +4052,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: actualización de pensiones de 2026 y pensiones mínimas",
         "sourceSimulator": "Segurança Social Direta: simulador oficial de pensiones",
         "reviewed": "Reglas y valores de 2026 revisados el 19 de noviembre de 2026 frente al Decreto-Ley n.º 187/2007 y las portarias de 2026. Las tasas anuales, la bonificación y las pensiones mínimas se contrastaron en fuentes secundarias y en las páginas de la Segurança Social, sin leerlas en la ley consolidada, y las simplificaciones anteriores son nuestras. La tabla de retención de pensiones VIII se comprobó fila por fila el 20 de noviembre de 2026 con el anexo del Despacho n.º 233-A/2026 publicado en el Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tablas de retención del IRS de 2026, incluida la tabla VIII de pensiones"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tablas de retención del IRS de 2026, incluida la tabla VIII de pensiones",
+        "methodReferenceTerm": "Remuneración de referencia",
+        "methodRateTerm": "Tasa global de formación",
+        "methodAgesTerm": "Edad normal de acceso",
+        "methodEarlyTerm": "Jubilación anticipada",
+        "methodLateTerm": "Jubilación después de la edad normal",
+        "methodMinimumTerm": "Pensión mínima",
+        "methodGapTerm": "Diferencia",
+        "methodBudgetTerm": "Cómo leer la diferencia",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "globalRate": "Tasa global de formación",
+          "globalRateLower": "tasa global de formación",
+          "annualRate": "tasa anual",
+          "years": "años de cotización",
+          "statutory": "Pensión estatutaria",
+          "statutoryLower": "pensión estatutaria",
+          "reference": "remuneración de referencia",
+          "earlyPension": "Pensión con jubilación anticipada",
+          "monthsEarly": "meses de anticipación",
+          "factor": "factor de sostenibilidad",
+          "gap": "Diferencia",
+          "netPay": "sueldo neto",
+          "netPension": "pensión neta"
+        }
       }
     },
     "sp500History": {
@@ -4056,10 +4184,14 @@
         "limits": {
           "title": "Lo que estas cifras no incluyen",
           "items": {
-            "fx": "Divisa: las rentabilidades están en dólares estadounidenses. Si inviertes desde la zona euro, el tipo de cambio euro-dólar suma o resta a estas cifras, a veces varios puntos al año. El riesgo de divisa es independiente del del mercado.",
-            "fees": "Costes: no se deducen comisiones de fondos, de intermediarios ni diferenciales. Un fondo que replica el índice rinde el índice menos sus costes.",
-            "taxes": "Impuestos: no se incluye el impuesto sobre dividendos y ganancias, que depende de dónde vivas.",
-            "sequence": "Visión retrospectiva: es un gran índice de EE. UU. en la historia de un solo país. Otros mercados y periodos lo hicieron mucho peor, y mover el inicio o el final unos años puede cambiar mucho el resultado.",
+            "fxTerm": "Divisa",
+            "fxBody": "Las rentabilidades están en dólares estadounidenses. Si inviertes desde la zona euro, el tipo de cambio euro-dólar suma o resta a estas cifras, a veces varios puntos al año. El riesgo de divisa es independiente del del mercado.",
+            "feesTerm": "Costes",
+            "feesBody": "No se deducen comisiones de fondos, de intermediarios ni diferenciales. Un fondo que replica el índice rinde el índice menos sus costes.",
+            "taxesTerm": "Impuestos",
+            "taxesBody": "No se incluye el impuesto sobre dividendos y ganancias, que depende de dónde vivas.",
+            "sequenceTerm": "Visión retrospectiva",
+            "sequenceBody": "Es un gran índice de EE. UU. en la historia de un solo país. Otros mercados y periodos lo hicieron mucho peor, y mover el inicio o el final unos años puede cambiar mucho el resultado.",
             "past": "La rentabilidad pasada no garantiza rentabilidades futuras. Esta herramienta es educativa y no es asesoramiento de inversión."
           }
         },
@@ -5036,22 +5168,47 @@
           "title": "Quilates y ley",
           "intro": "La pureza del oro se indica en quilates, sobre 24, o en milésimas, el número grabado en el contraste. Estas son las seis leyes legales del oro en Portugal:",
           "items": {
-            "k24": "24 quilates, 999 milésimas: oro puro, como en los lingotes y monedas de inversión.",
-            "k22": "22 quilates, 916: monedas de oro como el soberano y el Krugerrand, y muchas joyas de la India.",
-            "k19_2": "19,2 quilates, 800: el oro portugués, la ley tradicional de la orfebrería portuguesa.",
-            "k18": "18 quilates, 750: la ley más habitual en la joyería europea.",
-            "k14": "14 quilates, 585: joyas más duras y más baratas.",
-            "k9": "9 quilates, 375: la ley legal más baja."
+            "k24Term": "24 quilates, 999 milésimas",
+            "k24Body": "Oro puro, como en los lingotes y monedas de inversión.",
+            "k22Term": "22 quilates, 916",
+            "k22Body": "Monedas de oro como el soberano y el Krugerrand, y muchas joyas de la India.",
+            "k19_2Term": "19,2 quilates, 800",
+            "k19_2Body": "El oro portugués, la ley tradicional de la orfebrería portuguesa.",
+            "k18Term": "18 quilates, 750",
+            "k18Body": "La ley más habitual en la joyería europea.",
+            "k14Term": "14 quilates, 585",
+            "k14Body": "Joyas más duras y más baratas.",
+            "k9Term": "9 quilates, 375",
+            "k9Body": "La ley legal más baja."
           }
         },
         "method": {
           "title": "Cómo se calcula",
           "intro": "La página hace cuatro cosas:",
           "steps": {
-            "a": "Precio: el precio de un gramo de oro puro del NBP en eslotis, dividido por los eslotis por euro del BCE del mismo día.",
-            "b": "Oro puro: el peso por la ley dividido entre 1000. Una pieza de 24 quilates cuenta con 999 milésimas.",
-            "c": "Valor: los gramos de oro puro por el precio de un gramo de oro puro, redondeado al céntimo.",
-            "d": "Oferta: si la introduces, la oferta dividida por el valor, en porcentaje, y la diferencia en euros."
+            "aTerm": "Precio",
+            "aBody": "El precio de un gramo de oro puro del NBP en eslotis, dividido por los eslotis por euro del BCE del mismo día.",
+            "bTerm": "Oro puro",
+            "bBody": "El peso por la ley dividido entre 1000. Una pieza de 24 quilates cuenta con 999 milésimas.",
+            "cTerm": "Valor",
+            "cBody": "Los gramos de oro puro por el precio de un gramo de oro puro, redondeado al céntimo.",
+            "dTerm": "Oferta",
+            "dBody": "Si la introduces, la oferta dividida por el valor, en porcentaje, y la diferencia en euros."
+          },
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "pureGold": "Oro puro",
+            "pureGoldLower": "oro puro",
+            "weight": "peso",
+            "fineness": "ley",
+            "value": "Valor",
+            "valueLower": "valor",
+            "price": "Precio por gramo",
+            "priceLower": "precio por gramo",
+            "nbpPrice": "precio del NBP en eslotis",
+            "zlotyPerEuro": "eslotis por euro",
+            "offerShare": "Oferta frente al valor",
+            "offer": "oferta"
           }
         },
         "buyers": {
@@ -5072,10 +5229,14 @@
         "limits": {
           "title": "Lo que este valor deja fuera",
           "items": {
-            "metal": "Solo el metal: el valor es el oro que contiene la pieza a un precio de referencia. Las piedras, otros metales, la hechura y la marca no cuentan.",
-            "buyers": "No es un precio de venta: quien compra paga menos, y una tienda que vende oro cobra más.",
-            "purity": "Ley: la calculadora se fía de la ley que eliges. Una pieza sin contraste o chapada en oro puede tener mucho menos oro, o ninguno.",
-            "reference": "Precio de referencia: el precio diario del NBP, no una cotización al minuto. El mercado se mueve a lo largo del día.",
+            "metalTerm": "Solo el metal",
+            "metalBody": "El valor es el oro que contiene la pieza a un precio de referencia. Las piedras, otros metales, la hechura y la marca no cuentan.",
+            "buyersTerm": "No es un precio de venta",
+            "buyersBody": "Quien compra paga menos, y una tienda que vende oro cobra más.",
+            "purityTerm": "Ley",
+            "purityBody": "La calculadora se fía de la ley que eliges. Una pieza sin contraste o chapada en oro puede tener mucho menos oro, o ninguno.",
+            "referenceTerm": "Precio de referencia",
+            "referenceBody": "El precio diario del NBP, no una cotización al minuto. El mercado se mueve a lo largo del día.",
             "education": "Solo con fines educativos, no es asesoramiento."
           }
         },
@@ -5279,7 +5440,12 @@
           "title": "Ejemplo",
           "setup": "Supón que guardas {{amount}} durante 12 meses en {{product}} de {{bank}}, al {{rate}} anual. Genera {{gross}}; el 28% de IRS se lleva {{tax}} y quedan {{net}}.",
           "capped": "El máximo importa. {{product2}} de {{bank2}} paga {{rate2}}, pero solo hasta {{cap}}. Con {{amount2}}, los intereses son {{gross2}} antes de impuestos y {{net2}} después, como si hubieras ahorrado {{cap}}.",
-          "plans": "Las comisiones también importan. {{product3}} de {{bank3}} va de {{low}} a {{high}} según el plan. Con {{amount}}, el plan Standard deja {{standardNet}} netos, mientras que el plan Ultra, tras {{ultraFees}} al año en costes, deja {{ultraNet}}."
+          "plans": "Las comisiones también importan. {{product3}} de {{bank3}} va de {{low}} a {{high}} según el plan. Con {{amount}}, el plan Standard deja {{standardNet}} netos, mientras que el plan Ultra, tras {{ultraFees}} al año en costes, deja {{ultraNet}}.",
+          "figures": {
+            "gross": "Intereses brutos",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Intereses netos"
+          }
         },
         "method": {
           "title": "Método",
@@ -5479,17 +5645,25 @@
           "setup": "Piensa en el comprador ocasional de acciones: {{count}} compras de {{amount}} en acciones de EE. UU. en un año, con {{portfolio}} invertidos.",
           "bank": "En {{bank}}, cada orden cuesta {{bankFormula}}, así que las {{count}} órdenes cuestan {{bankTrading}} con el impuesto de sello. Convertir {{converted}} en dólares al {{bankFx}} suma {{bankFxTotal}}, y la custodia ({{bankCustodyFormula}}) suma {{bankCustody}} con IVA. El año cuesta {{bankTotal}}, de los que {{bankStampDuty}} son impuesto de sello y {{bankVat}} son IVA.",
           "online": "En {{online}}, cada orden cuesta {{onlineFormula}}: {{onlineTrading}} en el año. El cambio de divisa al {{onlineFx}} suma {{onlineFxTotal}} y la custodia {{onlineCustody}}, en total {{onlineTotal}}.",
-          "takeaway": "Con órdenes pequeñas y poco frecuentes pesan más las comisiones mínimas y las custodias de importe fijo; con órdenes grandes o una cartera grande, pesan más las comisiones porcentuales. Cambia el perfil de arriba para ver cómo cambia el orden."
+          "takeaway": "Con órdenes pequeñas y poco frecuentes pesan más las comisiones mínimas y las custodias de importe fijo; con órdenes grandes o una cartera grande, pesan más las comisiones porcentuales. Cambia el perfil de arriba para ver cómo cambia el orden.",
+          "figures": {
+            "total": "Total del año"
+          }
         },
         "method": {
           "title": "Método",
           "intro": "Cada comisión se ha leído en la tarifa publicada por el propio bróker, en la fecha indicada en su fila; toda la tabla se revisó el {{date}} y se comprueba de nuevo cada trimestre. Las comisiones que una tarifa no indica aparecen como no publicadas y quedan fuera de los totales, que se muestran entonces como incompletos.",
           "steps": {
-            "a": "Órdenes: la comisión de cada orden es la parte fija más el porcentaje de la orden, con el mínimo y el máximo por orden. Las comisiones por acción cuentan acciones enteras al precio supuesto. Un importe mensual sin comisión se aplica mes a mes.",
-            "b": "Plan de inversión: en las compras de ETF, con la opción activada y cuando el bróker publica un plan periódico, su comisión sustituye a la de la orden.",
-            "c": "Divisa: las órdenes en EE. UU. pagan la comisión de cambio del bróker sobre el importe convertido; las comisiones en dólares se convierten a {{rate}} dólares por euro.",
-            "d": "Custodia: la fórmula publicada, por periodo y con su mínimo y máximo, se cobra sobre el valor invertido tantas veces como periodos tiene un año.",
-            "e": "Impuestos sobre las comisiones: cuando la tarifa dice que sus comisiones no incluyen el impuesto de sello portugués (4% sobre el corretaje) o el IVA (23% sobre la custodia), se suman a las comisiones a las que se aplican.",
+            "aTerm": "Órdenes",
+            "aBody": "La comisión de cada orden es la parte fija más el porcentaje de la orden, con el mínimo y el máximo por orden. Las comisiones por acción cuentan acciones enteras al precio supuesto. Un importe mensual sin comisión se aplica mes a mes.",
+            "bTerm": "Plan de inversión",
+            "bBody": "En las compras de ETF, con la opción activada y cuando el bróker publica un plan periódico, su comisión sustituye a la de la orden.",
+            "cTerm": "Divisa",
+            "cBody": "Las órdenes en EE. UU. pagan la comisión de cambio del bróker sobre el importe convertido; las comisiones en dólares se convierten a {{rate}} dólares por euro.",
+            "dTerm": "Custodia",
+            "dBody": "La fórmula publicada, por periodo y con su mínimo y máximo, se cobra sobre el valor invertido tantas veces como periodos tiene un año.",
+            "eTerm": "Impuestos sobre las comisiones",
+            "eBody": "Cuando la tarifa dice que sus comisiones no incluyen el impuesto de sello portugués (4% sobre el corretaje) o el IVA (23% sobre la custodia), se suman a las comisiones a las que se aplican.",
             "f": "El total suma las órdenes del año, el cambio de divisa y la custodia, y los brókers aparecen del más barato al más caro. Los que no publican una comisión que el perfil necesita van al final."
           }
         },
@@ -5677,7 +5851,8 @@
             "insuranceLinked": "seguro vinculado a fondos",
             "insuranceGuaranteed": "seguro no vinculado a fondos",
             "pensionFund": "fondo de pensiones"
-          }
+          },
+          "gapLabel": "Diferencia de costes sobre {{invested}}, al año"
         },
         "tax": {
           "title": "La deducción en el IRS (EBF, artículo 21)",
@@ -5689,7 +5864,8 @@
           },
           "example": "La edad que cuenta es la del 1 de enero del año de la aportación (n.º 9). A los {{age}} años, {{exampleContribution}} aportados en el año dan {{exampleDeduction}}, la deducción máxima.",
           "conditions": "La deducción entra en el límite global de deducciones del artículo 78, n.º 7, del Código del IRS: sin límite para las bases liquidables más bajas, después de {{capMax}} a {{capMin}} por hogar. Reduce el impuesto debido y no se paga en efectivo, y las aportaciones hechas después de la jubilación no son deducibles (n.º 10).",
-          "payout": "Cuando el plan se rescata en un caso que prevé la ley, un rescate de una sola vez tributa sobre la ganancia al {{legalRate}} sobre dos quintos de ella, un {{legalEffective}} efectivo de la ganancia (n.º 3); los pagos periódicos tributan como pensiones."
+          "payout": "Cuando el plan se rescata en un caso que prevé la ley, un rescate de una sola vez tributa sobre la ganancia al {{legalRate}} sobre dos quintos de ella, un {{legalEffective}} efectivo de la ganancia (n.º 3); los pagos periódicos tributan como pensiones.",
+          "deductionLabel": "Deducción de la cuota del IRS"
         },
         "redemption": {
           "title": "Cuándo puedes rescatar y cuánto cuesta un rescate anticipado",

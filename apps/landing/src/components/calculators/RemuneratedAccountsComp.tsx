@@ -186,9 +186,9 @@ function RemuneratedAccounts() {
       </p>
       <p className="mt-1 text-xs text-muted-foreground">{t(k("assumptions"), { tax: String(BANK_INTEREST_TAX_RATE) })}</p>
       {rows.length === 0 && <p className="mt-6 text-sm text-muted-foreground">{t(k("empty"))}</p>}
-      <ul className="mt-4 space-y-3 lg:hidden">
+      <ul className="mt-4 divide-y divide-border rounded-card border border-border bg-background lg:hidden">
         {rows.map((row) => (
-          <li key={row.account.id} className="rounded-card border border-border bg-background p-4 shadow-sm">
+          <li key={row.account.id} className={`p-4 ${row.account.highlighted ? "bg-paper-2" : ""}`}>
             <RowCard row={row} showNet={!amountError} />
           </li>
         ))}
@@ -351,7 +351,7 @@ function RowCard({ row, showNet }: { row: RowProjection; showNet: boolean }) {
           <p className="break-words text-base font-semibold text-foreground">{account.entity}</p>
           <p className="break-words text-sm text-muted-foreground">{account.product}</p>
         </div>
-        <p className="shrink-0 text-right font-mono text-xl font-bold text-primary">{rate(account)}</p>
+        <p className="shrink-0 text-right font-mono text-xl font-semibold text-foreground">{rate(account)}</p>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
         {t(k(`types.${account.type}`))}
@@ -397,8 +397,8 @@ function RowTable({ row, showNet }: { row: RowProjection; showNet: boolean }) {
   const termLabel = term(account);
   return (
     <tr className={`border-t border-border-2 align-top ${account.highlighted ? "bg-paper-2" : ""}`}>
-      <td className="whitespace-nowrap px-3 py-3 text-right font-mono font-bold text-primary">{rate(account)}</td>
-      <th scope="row" className="px-3 py-3 text-left font-normal">
+      <td className="whitespace-nowrap px-3 py-3 text-right font-mono font-semibold text-foreground">{rate(account)}</td>
+      <th scope="row" className="min-w-[10rem] px-3 py-3 text-left font-normal">
         <span className="font-semibold text-foreground">{account.entity}</span>
         <span className="block text-muted-foreground">{account.product}</span>
         <span className="block text-xs text-muted-foreground">
@@ -408,8 +408,9 @@ function RowTable({ row, showNet }: { row: RowProjection; showNet: boolean }) {
         <ProductLink account={account} />
       </th>
       <td className="whitespace-nowrap px-3 py-3 font-mono text-xs">
-        <span className="block">{t(k("columns.minimum"))}: {min}</span>
-        <span className="block">{t(k("columns.maximum"))}: {max}</span>
+        {/* The labels in the body face; only the amounts are figures. */}
+        <span className="block"><span className="font-sans text-muted-foreground">{t(k("columns.minimum"))}:</span> {min}</span>
+        <span className="block"><span className="font-sans text-muted-foreground">{t(k("columns.maximum"))}:</span> {max}</span>
       </td>
       <td className="px-3 py-3 text-center"><YesMark value={account.instantTransfer} /></td>
       <td className="px-3 py-3 text-center"><HoldersCell account={account} /></td>
