@@ -27,6 +27,7 @@ import { createPprFormat } from "@/lib/calculators/pprFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.pprComparison.${key}`;
@@ -56,8 +57,6 @@ function useUsageEvent() {
   };
 }
 
-const searchClass =
-  "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 
 function PprComparison() {
@@ -142,7 +141,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-kind"
-            className="h-11"
             value={filters.kind}
             onChange={(event) => update({ kind: event.currentTarget.value as PprFilters["kind"] })}
           >
@@ -160,7 +158,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-risk"
-            className="h-11"
             value={String(filters.riskClass)}
             onChange={(event) => {
               const value = event.currentTarget.value;
@@ -182,7 +179,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-sort"
-            className="h-11"
             value={sort}
             onChange={(event) => {
               onUse();
@@ -201,10 +197,9 @@ function Comparison({ onUse }: { onUse: () => void }) {
           <label htmlFor="ppr-search" className="block text-sm font-medium text-foreground">
             {t(k("compare.search"))}
           </label>
-          <input
+          <Input
             id="ppr-search"
             type="search"
-            className={searchClass}
             value={filters.query}
             placeholder={t(k("compare.searchPlaceholder"))}
             onChange={(event) => update({ query: event.currentTarget.value })}

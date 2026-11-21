@@ -1,4 +1,6 @@
-import { useState, type InputHTMLAttributes, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent } from "react";
+import { Input, type InputProps } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   formatNumericInput,
   isNumericDraft,
@@ -9,7 +11,7 @@ import {
 } from "@/lib/calculators/numericInput";
 
 type Props = Omit<
-  InputHTMLAttributes<HTMLInputElement>,
+  InputProps,
   "type" | "value" | "defaultValue" | "onChange" | "min" | "max" | "step" | "inputMode"
 > & {
   /** NaN while the field is empty or holds a partial entry such as "-" or "3,". */
@@ -29,6 +31,9 @@ type Props = Omit<
  * no browser rewrites a partial entry; the arrow keys still step by `step` within min and max.
  * With a whole-number `step` the field reads "1,500" and "1.500" as 1500; with a fractional
  * one (a rate) they stay decimals (`parseNumericInput`).
+ *
+ * It draws the shared `Input`, so `prefix`, `suffix` and `wrapperClassName` work as there, and
+ * sets the figure in Geist Mono.
  */
 /** Whether `after` is `before` with one stretch of characters removed (Backspace, Delete, cut). */
 function isDeletion(before: string, after: string): boolean {
@@ -46,6 +51,7 @@ export default function NumericInput({
   step = 1,
   onBlur,
   onKeyDown,
+  className,
   ...rest
 }: Props) {
   const parseOptions = { grouping: Number.isInteger(step) };
@@ -76,8 +82,9 @@ export default function NumericInput({
   };
 
   return (
-    <input
+    <Input
       {...rest}
+      className={cn("font-mono", className)}
       type="text"
       // A minus sign is missing from some decimal keypads (iOS), so a field that takes
       // negative numbers gets the full keyboard.

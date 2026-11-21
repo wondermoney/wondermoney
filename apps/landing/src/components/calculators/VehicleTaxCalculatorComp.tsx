@@ -19,11 +19,10 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.vehicleTax.${key}`;
-const textInputClass =
-  "w-full rounded-lg border border-input px-3 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring";
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const NAME_MAX_LENGTH = 30;
 
@@ -351,7 +350,7 @@ function VehicleFieldset({
             <label htmlFor={id("name")} className="block text-sm font-medium text-foreground">
               {t(k("vehicles.name"))}
             </label>
-            <input
+            <Input
               id={id("name")}
               type="text"
               value={vehicle.name}
@@ -359,7 +358,6 @@ function VehicleFieldset({
               placeholder={t(k("vehicles.label"), { n: String(vehicle.number) })}
               autoComplete="off"
               onChange={(event) => onName(event.currentTarget.value)}
-              className={textInputClass}
             />
           </div>
         )}

@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import NumericInput from "./NumericInput";
 
 interface Props {
@@ -40,36 +39,18 @@ export default function CalculatorInput({
       <label htmlFor={id} className="block text-sm font-medium text-foreground">
         {label}
       </label>
-      <div className="relative">
-        {prefix && (
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-            {prefix}
-          </span>
-        )}
-        <NumericInput
-          id={id}
-          value={value}
-          onChange={onChange}
-          min={min}
-          max={max}
-          step={step}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy}
-          className={cn(
-            "w-full rounded-lg border border-input px-3 py-2.5 font-mono text-sm",
-            "focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring",
-            "transition-colors",
-            prefix && "pl-8",
-            suffix && "pr-12",
-            error && "border-destructive-text"
-          )}
-        />
-        {suffix && (
-          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-            {suffix}
-          </span>
-        )}
-      </div>
+      <NumericInput
+        id={id}
+        value={value}
+        onChange={onChange}
+        min={min}
+        max={max}
+        step={step}
+        prefix={prefix}
+        suffix={suffix}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
+      />
       {error && (
         <p id={errorId} className="text-xs text-destructive-text">
           {error}

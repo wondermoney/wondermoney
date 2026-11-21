@@ -19,6 +19,7 @@ import { formatPercent, toIntlLocale } from "@/lib/numberFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { cn } from "@/lib/utils";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 type PaymentRow = {
@@ -46,12 +47,6 @@ const BAND_KEY: Record<DebtToIncomeBand, string> = {
   caution: "Caution",
   high: "High",
 };
-
-const INPUT_CLASS = cn(
-  "w-full rounded-lg border border-input px-3 py-2.5 text-sm",
-  "focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring",
-  "transition-colors",
-);
 
 /**
  * Amounts are never negative: a negative entry stores (and shows) 0. An empty field stays
@@ -205,26 +200,22 @@ function DebtToIncomeCalculatorContent() {
                 const name = row.label.trim() || t(k("newRowLabel"));
                 return (
                   <li key={row.id} className="flex items-center gap-2">
-                    <input
+                    <Input
                       type="text"
                       value={row.label}
                       onChange={(e) => updateRow(row.id, { label: e.target.value })}
                       aria-label={t(k("rowNameLabel"))}
-                      className={cn(INPUT_CLASS, "min-w-0 flex-1")}
+                      className="min-w-0 flex-1"
                     />
-                    <div className="relative w-32 shrink-0 sm:w-36">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-                        {"€"}
-                      </span>
-                      <NumericInput
-                        min={0}
-                        step={10}
-                        value={row.amount}
-                        onChange={(value) => updateRow(row.id, { amount: toAmount(value) })}
-                        aria-label={t(k("rowAmountLabel"), { name })}
-                        className={cn(INPUT_CLASS, "pl-8 font-mono")}
-                      />
-                    </div>
+                    <NumericInput
+                      min={0}
+                      step={10}
+                      value={row.amount}
+                      onChange={(value) => updateRow(row.id, { amount: toAmount(value) })}
+                      aria-label={t(k("rowAmountLabel"), { name })}
+                      prefix="€"
+                      wrapperClassName="w-32 shrink-0 sm:w-36"
+                    />
                     <button
                       type="button"
                       onClick={() => removeRow(row.id)}
