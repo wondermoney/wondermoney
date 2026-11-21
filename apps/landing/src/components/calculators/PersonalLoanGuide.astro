@@ -1,14 +1,12 @@
 ---
-// Prerendered explanation, worked example and method for the personal loan calculator. The
-// figures come from the same function the calculator runs, starting from its first state.
+// Prerendered explanation, worked example and method for the personal loan calculator, on the
+// guide building blocks. The figures come from the same function the calculator runs,
+// starting from its first state (personalLoanGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  PERSONAL_LOAN_EXAMPLE,
-  PERSONAL_LOAN_LIMITS,
-  computePersonalLoan,
-  type PersonalLoanInput,
-} from "@/lib/calculators/personalLoan";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildPersonalLoanGuide } from "./personalLoanGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -19,125 +17,58 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.personalLoan.guide.${key}`;
-
-function calculate(overrides: Partial<PersonalLoanInput> = {}) {
-  const calculation = computePersonalLoan({ ...PERSONAL_LOAN_EXAMPLE, ...overrides });
-  if (!calculation.ok) throw new Error("The personal loan worked example has invalid inputs");
-  return calculation.result;
-}
-
-const example = calculate();
-const withFees = calculate({
-  upfrontFees: PERSONAL_LOAN_EXAMPLE.exampleUpfrontFees,
-  monthlyFees: PERSONAL_LOAN_EXAMPLE.exampleMonthlyFees,
-});
-
-const exact = (value: number) => formatMoney(locale, value, { decimals: 2 });
-const euros = (value: number) => formatMoney(locale, value, { decimals: 0 });
-const pct = (value: number, decimals = 2) => formatPercent(locale, value, { decimals });
-
-const values = {
-  amount: euros(PERSONAL_LOAN_EXAMPLE.amount),
-  months: formatNumber(locale, PERSONAL_LOAN_EXAMPLE.termMonths),
-  rate: pct(PERSONAL_LOAN_EXAMPLE.annualRate, Number.isInteger(PERSONAL_LOAN_EXAMPLE.annualRate) ? 0 : 1),
-  payment: exact(example.monthlyPayment),
-  interest: exact(example.totalInterest),
-  totalRepaid: exact(example.totalRepaid),
-  apr: pct(example.apr),
-  upfront: euros(PERSONAL_LOAN_EXAMPLE.exampleUpfrontFees),
-  monthlyFee: euros(PERSONAL_LOAN_EXAMPLE.exampleMonthlyFees),
-  received: exact(withFees.amountReceived),
-  paymentWithFees: exact(withFees.monthlyPayment),
-  fees: exact(withFees.totalFees),
-  cost: exact(withFees.totalCostOfCredit),
-  totalRepaidFees: exact(withFees.totalRepaid),
-  aprFees: pct(withFees.apr),
-  minAmount: euros(PERSONAL_LOAN_LIMITS.minAmount),
-  maxAmount: euros(PERSONAL_LOAN_LIMITS.maxAmount),
-  minMonths: formatNumber(locale, PERSONAL_LOAN_LIMITS.minTermMonths),
-  maxMonths: formatNumber(locale, PERSONAL_LOAN_LIMITS.maxTermMonths),
-  maxRate: pct(PERSONAL_LOAN_LIMITS.maxAnnualRate, 0),
-};
-
-const methodItems = ["methodApr", "methodRounding", "methodPrivacy"].map((key) => t(k(key)));
-const assumptions = [
-  "assumptionFixedRate",
-  "assumptionFees",
-  "assumptionOtherCosts",
-  "assumptionLimits",
-].map((key) => t(k(key), values));
+const guide = buildPersonalLoanGuide(locale);
+const { values } = guide;
 
 // Before borrowing: does the payment fit next to other credit, and inside the budget.
 const related = [
   { routeId: "toolDebtToIncome", key: "relatedDebtToIncome", title: t("tools.debtToIncome.title") },
-  {
-    routeId: "toolHouseholdBudget",
-    key: "relatedHouseholdBudget",
-    title: t("tools.householdBudget.title"),
-  },
+  { routeId: "toolHouseholdBudget", key: "relatedHouseholdBudget", title: t("tools.householdBudget.title") },
 ] as const;
 ---
 
 <ToolGuide>
-  <section aria-labelledby="personal-loan-what">
-    <h2 id="personal-loan-what" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("whatTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("whatBody1"))}</p>
-    <p class="mt-4">{t(k("whatBody2"))}</p>
-    <p class="mt-4">{t(k("whatBody3"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
+  <section>
+    <h2>{t(k("whatTitle"))}</h2>
+    <p>{t(k("whatBody1"))}</p>
+    <p>{t(k("whatBody2"))}</p>
+    <p>{t(k("whatBody3"))}</p>
+    <ul class="list-disc space-y-2 pl-6">
       {
         related.map((item) => (
           <li>
-            <a
-              href={toLocalizedPath(item.routeId, locale)}
-              class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
-            >
-              {item.title}
-            </a>{": "}{t(k(item.key))}
+            <a href={toLocalizedPath(item.routeId, locale)}>{item.title}</a>{": "}{t(k(item.key))}
           </li>
         ))
       }
     </ul>
   </section>
 
-  <section aria-labelledby="personal-loan-apr">
-    <h2 id="personal-loan-apr" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("aprTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("aprBody1"))}</p>
-    <p class="mt-4">{t(k("aprBody2"))}</p>
-    <p class="mt-4">{t(k("aprBody3"))}</p>
+  <section>
+    <h2>{t(k("aprTitle"))}</h2>
+    <p>{t(k("aprBody1"))}</p>
+    <p>{t(k("aprBody2"))}</p>
+    <p>{t(k("aprBody3"))}</p>
   </section>
 
-  <section aria-labelledby="personal-loan-example">
-    <h2 id="personal-loan-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("exampleIntro"), values)}</p>
-    <p class="mt-4">{t(k("exampleNoFees"), values)}</p>
-    <p class="mt-4">{t(k("exampleFees"), values)}</p>
-    <p class="mt-4">{t(k("exampleApr"), values)}</p>
-    <p class="mt-4">{t(k("exampleOutro"))}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("exampleIntro"), values)}</p>
+    <p>{t(k("exampleNoFees"), values)}</p>
+    <GuideFigures items={guide.noFees} operators={["+", "="]} />
+    <p>{t(k("exampleFees"), values)}</p>
+    <GuideFigures variant="grid" items={guide.fees} />
+    <p>{t(k("exampleApr"), values)}</p>
+    <GuideFigures variant="grid" items={guide.rates} />
+    <p>{t(k("exampleOutro"))}</p>
   </section>
 
-  <section aria-labelledby="personal-loan-method">
-    <h2 id="personal-loan-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("methodIntro"))}</p>
-    <div class="mt-4 space-y-1 overflow-x-auto rounded-lg bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      <p>M = P × r ÷ (1 − (1 + r)<sup>−n</sup>)</p>
-      <p>P − F = Σ<sub>k=1…n</sub> (M<sub>k</sub> + f) × (1 + A)<sup>−k/12</sup></p>
-    </div>
-    <p class="mt-4">{t(k("methodLegend"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {methodItems.map((item) => <li>{item}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {assumptions.map((item) => <li>{item}</li>)}
-    </ul>
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <p>{t(k("methodIntro"))}</p>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <GuideTermList items={guide.assumptions} />
   </section>
 </ToolGuide>

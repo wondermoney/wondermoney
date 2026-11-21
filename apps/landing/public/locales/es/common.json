@@ -2360,10 +2360,22 @@
         "whatHeading": "Qué muestra la comparación",
         "whatBody": "Comprar cambia el alquiler por la cuota de la hipoteca, pero también inmoviliza dinero en la entrada y los gastos de compra y añade los gastos de ser propietario. Alquilar deja ese dinero libre para invertir. La calculadora sigue los dos caminos con el mismo dinero inicial y compara con cuánto te deja cada uno.",
         "read": {
-          "netWorth": "El patrimonio de cada camino: si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones.",
-          "difference": "La diferencia: cuánto va por delante un camino al final del periodo que has elegido.",
-          "breakEven": "El año de equilibrio: el primer año que termina con comprar por delante. Comprar empieza por detrás siempre que haya gastos de compra o de venta: los gastos de compra se pagan el primer día y vender enseguida costaría además los gastos de venta. Comprar también puede ponerse por delante y volver a quedarse atrás, por ejemplo cuando el valor de la vivienda crece más despacio que las inversiones de quien alquila.",
-          "chart": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
+          "netWorth": {
+            "term": "El patrimonio de cada camino",
+            "body": "Si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones."
+          },
+          "difference": {
+            "term": "La diferencia",
+            "body": "Cuánto va por delante un camino al final del periodo que has elegido."
+          },
+          "breakEven": {
+            "term": "El año de equilibrio",
+            "body": "El primer año que termina con comprar por delante. Comprar empieza por detrás siempre que haya gastos de compra o de venta: los gastos de compra se pagan el primer día y vender enseguida costaría además los gastos de venta. Comprar también puede ponerse por delante y volver a quedarse atrás, por ejemplo cuando el valor de la vivienda crece más despacio que las inversiones de quien alquila."
+          },
+          "chart": {
+            "term": "Gráfico y tabla",
+            "body": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
+          }
         },
         "exampleHeading": "Ejemplo práctico",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Las inversiones crecen cada mes al tipo mensual que, compuesto durante un año, da la rentabilidad anual.",
           "netWorth": "Al final de cada año, el patrimonio de quien compra es el valor de la vivienda menos los gastos de venta y la hipoteca pendiente, más sus inversiones. El de quien alquila son sus inversiones. El año de equilibrio es el primero que termina con quien compra por delante."
         },
-        "formulaOwner": "Comprar = valor de la vivienda − gastos de venta − hipoteca pendiente + inversiones",
-        "formulaRenter": "Alquilar = inversiones",
         "formulaReturn": "Rentabilidad mensual",
-        "formulaLegend": "Aquí R es la rentabilidad anual de la inversión: un {{investmentReturn}} al año equivale a un {{monthlyReturn}} al mes, aproximadamente.",
         "leftOutHeading": "Lo que no incluye",
         "leftOut": {
           "gainsTax": "Impuestos sobre las ganancias de las inversiones o sobre la plusvalía de la venta de la vivienda.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "Para ver el préstamo por sí solo, con su cuadro de amortización año a año, usa la",
         "relatedMortgageLink": "calculadora de hipoteca",
         "relatedNetWorth": "Para sumar la vivienda, la hipoteca y tus ahorros tal como están hoy, usa la",
-        "relatedNetWorthLink": "calculadora de patrimonio neto"
+        "relatedNetWorthLink": "calculadora de patrimonio neto",
+        "formulaExample": "Una rentabilidad del {{investmentReturn}} al año equivale a un {{monthlyReturn}} al mes, aproximadamente.",
+        "labels": {
+          "investments": "Inversiones"
+        },
+        "formulasLabel": "Fórmulas",
+        "methodTerms": {
+          "start": "Dinero de partida",
+          "loan": "La hipoteca",
+          "monthly": "Cada mes",
+          "growth": "Revalorización y alquiler",
+          "returns": "Rentabilidad de la inversión",
+          "netWorth": "Patrimonio y año de equilibrio"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Supuestos",
         "assumptionLoan": "Se supone un préstamo a tipo fijo, con cuotas mensuales, sin cuota final extraordinaria ni arrendamiento. Introduce el precio y las condiciones de la oferta para el coche nuevo o usado. Para calcular los gastos de un coche que ya tienes, escribe cero en el precio y en la entrada.",
         "assumptionFees": "Los gastos iniciales se pagan en el momento de la compra junto a la entrada. Introduce una sola vez cada seguro o gasto asociado al préstamo. El simulador solo incluye los impuestos y gastos que introduzcas.",
-        "assumptionRunning": "El presupuesto mensual incluye los gastos indicados. Quedan fuera la depreciación, el valor de reventa, el aparcamiento, los peajes y las reparaciones que superen la reserva de mantenimiento. Las facturas anuales pueden vencer en un solo mes aunque el simulador las reparta durante el año."
+        "assumptionRunning": "El presupuesto mensual incluye los gastos indicados. Quedan fuera la depreciación, el valor de reventa, el aparcamiento, los peajes y las reparaciones que superen la reserva de mantenimiento. Las facturas anuales pueden vencer en un solo mes aunque el simulador las reparta durante el año.",
+        "terms": {
+          "loan": "La cuota",
+          "budget": "El presupuesto mensual",
+          "apr": "La TAE estimada",
+          "assumptionLoan": "Préstamo a tipo fijo",
+          "assumptionFees": "Gastos de financiación",
+          "assumptionRunning": "Lo que cubre el presupuesto"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Incluye el coste mensual total del coche en tu presupuesto",
       "nextStepDescription": "Reserva dinero en WonderMoney para la cuota, el combustible y las facturas que lleguen a lo largo del año.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "El simulador de arriba empieza en este préstamo, sin las comisiones, para que puedas introducir tu oferta.",
         "methodTitle": "Cómo hace las cuentas el simulador",
         "methodIntro": "La cuota es la cuota constante que devuelve el importe a lo largo del plazo, al tipo mensual, y la TAE es el tipo que equilibra lo que recibes con lo que pagas:",
-        "methodLegend": "M es la cuota de capital e intereses, P el importe del préstamo, r el tipo nominal anual dividido entre 12 y n el número de meses. Las comisiones mensuales f se suman a cada cuota.",
-        "methodApr": "La TAE es el tipo A que resuelve la segunda línea: lo que recibes al principio, el importe P menos las comisiones iniciales F, iguala la cuota de cada mes Mₖ más las comisiones f, descontada por (1 + A) elevado a k ÷ 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
+        "methodApr": "La TAE es el tipo que resuelve la última línea: lo que recibes al principio, el importe del préstamo menos las comisiones iniciales, iguala la cuota de cada mes más las comisiones mensuales, descontada por uno más la TAE elevado al número del mes dividido entre 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
         "methodRounding": "Todas las cuentas se hacen en céntimos. Cada cuota se vuelve a calcular a partir del capital pendiente, así que las cuotas no se alejan más de un céntimo entre sí, la última salda la deuda exactamente y el cuadro coincide con los totales.",
         "methodPrivacy": "Las cuentas se hacen en tu navegador. Nada de lo que escribes se envía ni se guarda.",
         "assumptionsTitle": "Supuestos",
         "assumptionFixedRate": "El tipo es fijo durante todo el plazo y todas las cuotas se pagan a tiempo.",
         "assumptionFees": "Las comisiones iniciales se pagan, o se descuentan del importe, al empezar el préstamo; las comisiones mensuales son iguales todos los meses.",
         "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
-        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
+        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Importe recibido",
+          "month": "Mes",
+          "apr": "TAE",
+          "aprNoFees": "TAE sin comisiones",
+          "aprFees": "TAE con comisiones"
+        },
+        "methodAprTerm": "TAE",
+        "assumptionFixedRateTerm": "Tipo fijo",
+        "assumptionFeesTerm": "Comisiones",
+        "assumptionOtherCostsTerm": "Otros costes",
+        "assumptionLimitsTerm": "Límites",
+        "methodRoundingTerm": "Redondeo",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "savingsCertificates": {

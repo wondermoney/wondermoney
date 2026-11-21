@@ -195,7 +195,7 @@ export function buildRateRevisionGuide(locale: Lang) {
     {
       result: variable(guide("terms.incomeShare"), ids.income),
       expression: [
-        fraction([payment()], [variable(tool("monthlyIncome"), ids.income)]),
+        fraction([payment()], [variable(t("tools.debtToIncome.income"), ids.income)]),
         operator("×"),
         number(formatNumber(locale, 100)),
       ],

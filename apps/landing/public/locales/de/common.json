@@ -2360,10 +2360,22 @@
         "whatHeading": "Was der Vergleich zeigt",
         "whatBody": "Kaufen ersetzt die Miete durch Kreditraten, bindet aber auch Geld im Eigenkapital und in den Kaufnebenkosten und bringt laufende Eigentümerkosten mit sich. Mieten lässt dieses Geld frei für eine Anlage. Der Rechner verfolgt beide Wege mit demselben Startkapital und vergleicht, was Ihnen jeweils bleibt.",
         "read": {
-          "netWorth": "Das Vermögen beider Wege: beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen.",
-          "difference": "Die Differenz: wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt.",
-          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters.",
-          "chart": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          "netWorth": {
+            "term": "Das Vermögen beider Wege",
+            "body": "Beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen."
+          },
+          "difference": {
+            "term": "Die Differenz",
+            "body": "Wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt."
+          },
+          "breakEven": {
+            "term": "Das Jahr des Gleichstands",
+            "body": "Das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters."
+          },
+          "chart": {
+            "term": "Diagramm und Tabelle",
+            "body": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          }
         },
         "exampleHeading": "Rechenbeispiel",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Die Anlagen wachsen jeden Monat mit dem Monatszins, der über zwölf Monate die Jahresrendite ergibt.",
           "netWorth": "Am Ende jedes Jahres ist das Vermögen des Käufers der Immobilienwert abzüglich Verkaufskosten und Restschuld, plus seine Anlagen. Das des Mieters sind seine Anlagen. Das Jahr des Gleichstands ist das erste, das mit dem Käufer vorne endet."
         },
-        "formulaOwner": "Kaufen = Immobilienwert − Verkaufskosten − Restschuld + Anlagen",
-        "formulaRenter": "Mieten = Anlagen",
         "formulaReturn": "Monatsrendite",
-        "formulaLegend": "Dabei ist R die jährliche Anlagerendite: {{investmentReturn}} pro Jahr ergeben etwa {{monthlyReturn}} im Monat.",
         "leftOutHeading": "Was nicht berücksichtigt wird",
         "leftOut": {
           "gainsTax": "Steuern auf Anlageerträge oder auf den Gewinn aus dem Verkauf der Immobilie.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "Den Kredit allein, mit seinem Tilgungsplan Jahr für Jahr, zeigt der",
         "relatedMortgageLink": "Hypothekenrechner",
         "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
-        "relatedNetWorthLink": "Nettovermögensrechner"
+        "relatedNetWorthLink": "Nettovermögensrechner",
+        "formulaExample": "Eine Rendite von {{investmentReturn}} pro Jahr ergibt etwa {{monthlyReturn}} im Monat.",
+        "labels": {
+          "investments": "Anlagen"
+        },
+        "formulasLabel": "Formeln",
+        "methodTerms": {
+          "start": "Startkapital",
+          "loan": "Das Darlehen",
+          "monthly": "Jeden Monat",
+          "growth": "Wertentwicklung und Miete",
+          "returns": "Anlagerendite",
+          "netWorth": "Vermögen und Gleichstand"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Annahmen",
         "assumptionLoan": "Die Schätzung geht von einem Kredit mit Festzins und monatlichen Raten ohne erhöhte Schlussrate aus. Leasing ist ausgeschlossen. Geben Sie den Preis und die angebotenen Kreditkonditionen für den Neu- oder Gebrauchtwagen ein. Für ein Auto, das Sie bereits besitzen, geben Sie bei Preis und Anzahlung jeweils null ein, um die laufenden Kosten zu schätzen.",
         "assumptionFees": "Einmalige Finanzierungsgebühren fallen beim Kauf zusammen mit der Anzahlung an. Geben Sie jede kreditbezogene Versicherung oder Gebühr nur einmal ein. Der Rechner leitet keine Steuern oder Gebühren aus Ihrem Angebot ab, er berücksichtigt nur, was Sie eingeben.",
-        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt."
+        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt.",
+        "terms": {
+          "loan": "Die Kreditrate",
+          "budget": "Das Monatsbudget",
+          "apr": "Der geschätzte effektive Jahreszins",
+          "assumptionLoan": "Kredit mit festem Zins",
+          "assumptionFees": "Finanzierungsgebühren",
+          "assumptionRunning": "Was das Budget abdeckt"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Planen Sie die gesamten monatlichen Autokosten in Ihrem Budget ein",
       "nextStepDescription": "Legen Sie in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "Der Rechner oben beginnt mit diesem Kredit ohne die Gebühren, damit Sie Ihr eigenes Angebot eingeben können.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Die Monatsrate ist die gleichbleibende Rate, die den Betrag über die Laufzeit zum Monatszins zurückzahlt, und der effektive Jahreszins ist der Zins, bei dem sich Erhaltenes und Gezahltes ausgleichen:",
-        "methodLegend": "M ist die Rate aus Tilgung und Zinsen, P der Kreditbetrag, r der nominale Jahreszins geteilt durch 12 und n die Zahl der Monate. Die monatlichen Gebühren f kommen zu jeder Rate hinzu.",
-        "methodApr": "Der effektive Jahreszins ist der Zins A, der die zweite Zeile löst: Was Sie zu Beginn erhalten, der Betrag P abzüglich der einmaligen Gebühren F, entspricht der Rate jedes Monats Mₖ plus den Gebühren f, abgezinst mit (1 + A) hoch k ÷ 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
+        "methodApr": "Der effektive Jahreszins ist der Zins, der die letzte Zeile löst: Was Sie zu Beginn erhalten, der Kreditbetrag abzüglich der einmaligen Gebühren, entspricht der Rate jedes Monats plus den monatlichen Gebühren, abgezinst mit eins plus dem effektiven Jahreszins hoch der Nummer des Monats geteilt durch 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
         "methodRounding": "Jede Zahl wird in ganzen Cent gerechnet. Jede Rate wird aus der jeweiligen Restschuld neu berechnet, so bleiben die Raten innerhalb eines Cents beieinander, die letzte tilgt den Rest genau, und der Plan ergibt die Summen.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Nichts, was Sie eingeben, wird gesendet oder gespeichert.",
         "assumptionsTitle": "Annahmen",
         "assumptionFixedRate": "Der Zinssatz ist über die ganze Laufzeit fest, und jede Rate wird pünktlich gezahlt.",
         "assumptionFees": "Die einmaligen Gebühren werden zu Beginn gezahlt oder vom Betrag abgezogen; die monatlichen Gebühren sind jeden Monat gleich.",
         "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
-        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
+        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Ausgezahlter Betrag",
+          "month": "Monat",
+          "apr": "Effektiver Jahreszins",
+          "aprNoFees": "Effektiver Jahreszins ohne Gebühren",
+          "aprFees": "Effektiver Jahreszins mit Gebühren"
+        },
+        "methodAprTerm": "Effektiver Jahreszins",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionFeesTerm": "Gebühren",
+        "assumptionOtherCostsTerm": "Andere Kosten",
+        "assumptionLimitsTerm": "Grenzen",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "savingsCertificates": {

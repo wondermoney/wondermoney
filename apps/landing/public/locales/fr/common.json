@@ -2360,10 +2360,22 @@
         "whatHeading": "Ce que montre la comparaison",
         "whatBody": "Acheter remplace le loyer par des mensualités, mais immobilise aussi de l'argent dans l'apport et les frais d'achat et ajoute les frais de propriété. Louer laisse cet argent libre d'être placé. Le calculateur suit les deux options avec la même somme de départ et compare ce que chacune vous laisse.",
         "read": {
-          "netWorth": "Le patrimoine de chaque option : pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements.",
-          "difference": "L'écart : de combien une option devance l'autre à la fin de la période choisie.",
-          "breakEven": "L'année d'équilibre : la première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire.",
-          "chart": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          "netWorth": {
+            "term": "Le patrimoine de chaque option",
+            "body": "Pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements."
+          },
+          "difference": {
+            "term": "L'écart",
+            "body": "De combien une option devance l'autre à la fin de la période choisie."
+          },
+          "breakEven": {
+            "term": "L'année d'équilibre",
+            "body": "La première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire."
+          },
+          "chart": {
+            "term": "Graphique et tableau",
+            "body": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          }
         },
         "exampleHeading": "Exemple chiffré",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Les placements progressent chaque mois au taux mensuel qui, composé sur douze mois, donne le rendement annuel.",
           "netWorth": "À la fin de chaque année, le patrimoine du propriétaire est la valeur du logement moins les frais de vente et le capital restant dû, plus ses placements. Celui du locataire correspond à ses placements. L'année d'équilibre est la première qui se termine avec le propriétaire devant."
         },
-        "formulaOwner": "Acheter = valeur du logement − frais de vente − capital restant dû + placements",
-        "formulaRenter": "Louer = placements",
         "formulaReturn": "Rendement mensuel",
-        "formulaLegend": "Ici, R est le rendement annuel des placements : {{investmentReturn}} par an donnent environ {{monthlyReturn}} par mois.",
         "leftOutHeading": "Ce qui n'est pas pris en compte",
         "leftOut": {
           "gainsTax": "L'impôt sur les gains des placements ou sur la plus-value de la vente du logement.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "Pour voir le prêt seul, avec son tableau d'amortissement année par année, utilisez le",
         "relatedMortgageLink": "simulateur de prêt immobilier",
         "relatedNetWorth": "Pour additionner le logement, le prêt et votre épargne tels qu'ils sont aujourd'hui, utilisez le",
-        "relatedNetWorthLink": "calculateur de patrimoine net"
+        "relatedNetWorthLink": "calculateur de patrimoine net",
+        "formulaExample": "Un rendement de {{investmentReturn}} par an donne environ {{monthlyReturn}} par mois.",
+        "labels": {
+          "investments": "Placements"
+        },
+        "formulasLabel": "Formules",
+        "methodTerms": {
+          "start": "Mise de départ",
+          "loan": "Le prêt",
+          "monthly": "Chaque mois",
+          "growth": "Valorisation et loyer",
+          "returns": "Rendement des placements",
+          "netWorth": "Patrimoine et année d'équilibre"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Hypothèses",
         "assumptionLoan": "L'estimation suppose un prêt à taux fixe, remboursé chaque mois, sans versement final majoré ni location. Saisissez le prix et les conditions proposés pour la voiture neuve ou d'occasion. Pour une voiture que vous possédez déjà, indiquez zéro comme prix et apport pour estimer les frais d'utilisation.",
         "assumptionFees": "Les frais de financement initiaux sont payés à l'achat avec l'apport. Saisissez une seule fois les assurances et frais liés au crédit. Le simulateur ne prend en compte que les taxes et les frais que vous saisissez.",
-        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année."
+        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année.",
+        "terms": {
+          "loan": "La mensualité",
+          "budget": "Le budget mensuel",
+          "apr": "Le TAEG estimé",
+          "assumptionLoan": "Prêt à taux fixe",
+          "assumptionFees": "Frais de financement",
+          "assumptionRunning": "Ce que couvre le budget"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Prévoyez le coût mensuel total de la voiture dans votre budget",
       "nextStepDescription": "Mettez de l'argent de côté dans WonderMoney pour la mensualité, le carburant et les factures à payer dans l'année.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "Le simulateur ci-dessus part de ce prêt, sans les frais, pour que vous puissiez saisir votre propre offre.",
         "methodTitle": "Comment le simulateur fait le calcul",
         "methodIntro": "La mensualité est le versement constant qui rembourse le montant sur la durée au taux mensuel, et le TAEG est le taux qui équilibre ce que vous recevez et ce que vous payez :",
-        "methodLegend": "M est la mensualité de capital et d'intérêts, P le montant emprunté, r le taux annuel nominal divisé par 12 et n le nombre de mois. Les frais mensuels f s'ajoutent à chaque mensualité.",
-        "methodApr": "Le TAEG est le taux A qui résout la deuxième ligne : ce que vous recevez au départ, le montant P moins les frais initiaux F, égale la mensualité de chaque mois Mₖ plus les frais f, actualisée par (1 + A) à la puissance k ÷ 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
+        "methodApr": "Le TAEG est le taux qui résout la dernière ligne : ce que vous recevez au départ, le montant emprunté moins les frais initiaux, égale la mensualité de chaque mois plus les frais mensuels, actualisée par un plus le TAEG à la puissance du numéro du mois divisé par 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
         "methodRounding": "Chaque chiffre est calculé en centimes entiers. Chaque mensualité est recalculée à partir du capital restant dû : les mensualités restent à un centime l'une de l'autre, la dernière solde exactement le capital et le tableau correspond aux totaux.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Rien de ce que vous saisissez n'est envoyé ni enregistré.",
         "assumptionsTitle": "Hypothèses",
         "assumptionFixedRate": "Le taux est fixe sur toute la durée et chaque mensualité est payée à temps.",
         "assumptionFees": "Les frais initiaux sont payés, ou retirés du montant, au départ du prêt ; les frais mensuels sont les mêmes chaque mois.",
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
-        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
+        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Montant reçu",
+          "month": "Mois",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG sans frais",
+          "aprFees": "TAEG avec frais"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionFeesTerm": "Frais",
+        "assumptionOtherCostsTerm": "Autres coûts",
+        "assumptionLimitsTerm": "Limites",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "savingsCertificates": {

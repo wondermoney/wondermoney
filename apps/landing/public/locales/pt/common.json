@@ -2360,10 +2360,22 @@
         "whatHeading": "O que mostra a comparação",
         "whatBody": "Comprar troca a renda pela prestação do crédito, mas também prende dinheiro na entrada e nos custos de compra e acrescenta os custos de ter casa. Arrendar deixa esse dinheiro livre para investir. A calculadora segue os dois caminhos com o mesmo dinheiro inicial e compara com quanto cada um te deixa.",
         "read": {
-          "netWorth": "O património de cada caminho: para quem compra, o que ficaria depois de vender a casa, pagar os custos de venda e liquidar o crédito, mais o que tiver investido; para quem arrenda, os investimentos.",
-          "difference": "A diferença: quanto um caminho está à frente do outro no fim do período que escolheste.",
-          "breakEven": "O ano de equilíbrio: o primeiro ano que acaba com comprar à frente. Comprar começa atrás sempre que há custos de compra ou de venda: os custos de compra são pagos no primeiro dia e vender logo a seguir ainda custaria os custos de venda. Comprar também pode passar à frente e voltar a ficar atrás, por exemplo quando o valor da casa cresce mais devagar do que os investimentos de quem arrenda.",
-          "chart": "O gráfico e a tabela mostram os dois caminhos em cada ano, para veres se a distância está a diminuir ou a aumentar."
+          "netWorth": {
+            "term": "O património de cada caminho",
+            "body": "Para quem compra, o que ficaria depois de vender a casa, pagar os custos de venda e liquidar o crédito, mais o que tiver investido; para quem arrenda, os investimentos."
+          },
+          "difference": {
+            "term": "A diferença",
+            "body": "Quanto um caminho está à frente do outro no fim do período que escolheste."
+          },
+          "breakEven": {
+            "term": "O ano de equilíbrio",
+            "body": "O primeiro ano que acaba com comprar à frente. Comprar começa atrás sempre que há custos de compra ou de venda: os custos de compra são pagos no primeiro dia e vender logo a seguir ainda custaria os custos de venda. Comprar também pode passar à frente e voltar a ficar atrás, por exemplo quando o valor da casa cresce mais devagar do que os investimentos de quem arrenda."
+          },
+          "chart": {
+            "term": "Gráfico e tabela",
+            "body": "O gráfico e a tabela mostram os dois caminhos em cada ano, para veres se a distância está a diminuir ou a aumentar."
+          }
         },
         "exampleHeading": "Exemplo prático",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Os investimentos crescem todos os meses à taxa mensal que, composta ao longo de um ano, dá o rendimento anual.",
           "netWorth": "No fim de cada ano, o património de quem compra é o valor da casa menos os custos de venda e o crédito em dívida, mais os investimentos. O de quem arrenda são os investimentos. O ano de equilíbrio é o primeiro que acaba com quem compra à frente."
         },
-        "formulaOwner": "Comprar = valor da casa − custos de venda − crédito em dívida + investimentos",
-        "formulaRenter": "Arrendar = investimentos",
         "formulaReturn": "Rendimento mensal",
-        "formulaLegend": "Aqui, R é o rendimento anual dos investimentos: {{investmentReturn}} por ano dá cerca de {{monthlyReturn}} por mês.",
         "leftOutHeading": "O que fica de fora",
         "leftOut": {
           "gainsTax": "Impostos sobre os ganhos dos investimentos ou sobre a mais-valia da venda da casa.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "Para ver o empréstimo sozinho, com o plano de pagamentos ano a ano, usa o",
         "relatedMortgageLink": "simulador de crédito habitação",
         "relatedNetWorth": "Para somar a casa, o crédito e as tuas poupanças tal como estão hoje, usa a",
-        "relatedNetWorthLink": "calculadora de património líquido"
+        "relatedNetWorthLink": "calculadora de património líquido",
+        "formulaExample": "Um rendimento de {{investmentReturn}} por ano dá cerca de {{monthlyReturn}} por mês.",
+        "labels": {
+          "investments": "Investimentos"
+        },
+        "formulasLabel": "Fórmulas",
+        "methodTerms": {
+          "start": "Dinheiro de partida",
+          "loan": "O crédito",
+          "monthly": "Cada mês",
+          "growth": "Valorização e renda",
+          "returns": "Rendimento dos investimentos",
+          "netWorth": "Património e ano de equilíbrio"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Pressupostos",
         "assumptionLoan": "A estimativa assume um crédito a taxa fixa, com prestações mensais, sem valor residual a pagar no fim e sem locação. Introduz o preço e as condições propostas para o carro novo ou usado. Para um carro que já tens, usa zero no preço e na entrada para estimar as despesas de utilização.",
         "assumptionFees": "Pagas os encargos iniciais na compra, juntamente com a entrada. Introduz os seguros e encargos do crédito uma única vez. O simulador só inclui os impostos e encargos que introduzires.",
-        "assumptionRunning": "O orçamento mensal inclui as despesas apresentadas. Ficam de fora a desvalorização, o valor de revenda, o estacionamento, as portagens e as reparações que excedam a reserva para manutenção. As contas anuais podem vencer num único mês, embora o simulador as distribua pelo ano."
+        "assumptionRunning": "O orçamento mensal inclui as despesas apresentadas. Ficam de fora a desvalorização, o valor de revenda, o estacionamento, as portagens e as reparações que excedam a reserva para manutenção. As contas anuais podem vencer num único mês, embora o simulador as distribua pelo ano.",
+        "terms": {
+          "loan": "A prestação",
+          "budget": "O orçamento mensal",
+          "apr": "A TAEG estimada",
+          "assumptionLoan": "Crédito a taxa fixa",
+          "assumptionFees": "Encargos do crédito",
+          "assumptionRunning": "O que o orçamento cobre"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Inclui o custo mensal total do carro no teu orçamento",
       "nextStepDescription": "Reserva dinheiro no WonderMoney para a prestação, o combustível e as contas que vencem durante o ano.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "O simulador acima começa neste crédito, sem as comissões, para poderes pôr a tua proposta.",
         "methodTitle": "Como o simulador faz as contas",
         "methodIntro": "A prestação é a prestação constante que paga o montante ao longo do prazo, à taxa mensal, e a TAEG é a taxa que equilibra o que recebes com o que pagas:",
-        "methodLegend": "M é a prestação de capital e juros, P o montante do crédito, r a taxa anual nominal a dividir por 12 e n o número de meses. As comissões mensais f somam-se a cada prestação.",
-        "methodApr": "A TAEG é a taxa A que resolve a segunda linha: o que recebes no início, o montante P menos as comissões iniciais F, iguala a prestação de cada mês Mₖ mais as comissões f, descontada por (1 + A) elevado a k ÷ 12, contando cada mês como um doze avos do ano. O simulador encontra-a por bissecção.",
+        "methodApr": "A TAEG é a taxa que resolve a última linha: o que recebes no início, o montante do crédito menos as comissões iniciais, iguala a prestação de cada mês mais as comissões mensais, descontada por um mais a TAEG elevado ao número do mês a dividir por 12, contando cada mês como um doze avos do ano. O simulador encontra-a por bissecção.",
         "methodRounding": "Todas as contas são feitas em cêntimos. Cada prestação é calculada de novo a partir do capital em dívida, por isso as prestações ficam a um cêntimo umas das outras, a última liquida o capital exatamente e o plano bate certo com os totais.",
         "methodPrivacy": "As contas são feitas no teu navegador. Nada do que escreves é enviado nem guardado.",
         "assumptionsTitle": "Pressupostos",
         "assumptionFixedRate": "A taxa é fixa durante todo o prazo e todas as prestações são pagas a tempo.",
         "assumptionFees": "As comissões iniciais pagam-se, ou descontam-se do montante, no início do crédito; as comissões mensais são iguais todos os meses.",
         "assumptionOtherCosts": "Ficam de fora custos que o simulador não pergunta, como seguros opcionais, encargos por atraso ou uma comissão de reembolso antecipado.",
-        "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}."
+        "assumptionLimits": "Montantes de {{minAmount}} a {{maxAmount}}, prazos de {{minMonths}} a {{maxMonths}} meses e taxas até {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Montante recebido",
+          "month": "Mês",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG sem comissões",
+          "aprFees": "TAEG com comissões"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Taxa fixa",
+        "assumptionFeesTerm": "Comissões",
+        "assumptionOtherCostsTerm": "Outros custos",
+        "assumptionLimitsTerm": "Limites",
+        "methodRoundingTerm": "Arredondamento",
+        "methodPrivacyTerm": "Privacidade",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "savingsCertificates": {

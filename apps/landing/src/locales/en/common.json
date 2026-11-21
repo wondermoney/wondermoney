@@ -2360,10 +2360,22 @@
         "whatHeading": "What the comparison shows",
         "whatBody": "Buying swaps rent for mortgage payments, but it also ties up cash in the down payment and purchase costs and adds the costs of owning. Renting leaves that cash free to invest. The calculator follows both paths from the same starting cash and compares what each one leaves you with.",
         "read": {
-          "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
-          "difference": "The difference: how far ahead one path is at the end of the period you chose.",
-          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
-          "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          "netWorth": {
+            "term": "Net worth on each path",
+            "body": "For buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments."
+          },
+          "difference": {
+            "term": "The difference",
+            "body": "How far ahead one path is at the end of the period you chose."
+          },
+          "breakEven": {
+            "term": "The break-even year",
+            "body": "The first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments."
+          },
+          "chart": {
+            "term": "Chart and table",
+            "body": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          }
         },
         "exampleHeading": "Worked example",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
           "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
         },
-        "formulaOwner": "Buying = home value − selling costs − loan owed + investments",
-        "formulaRenter": "Renting = investments",
         "formulaReturn": "Monthly return",
-        "formulaLegend": "Here R is the annual investment return, so {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
         "leftOutHeading": "What it leaves out",
         "leftOut": {
           "gainsTax": "Tax on investment gains or on the profit from selling the home.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "To see the loan on its own, with its schedule year by year, use the",
         "relatedMortgageLink": "mortgage calculator",
         "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
-        "relatedNetWorthLink": "net worth calculator"
+        "relatedNetWorthLink": "net worth calculator",
+        "formulaExample": "A return of {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
+        "labels": {
+          "investments": "Investments"
+        },
+        "formulasLabel": "Formulas",
+        "methodTerms": {
+          "start": "Starting cash",
+          "loan": "The mortgage",
+          "monthly": "Each month",
+          "growth": "Growth and rent",
+          "returns": "Investment returns",
+          "netWorth": "Net worth and break-even"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Assumptions",
         "assumptionLoan": "The estimate assumes a fixed-rate loan with monthly payments, no balloon payment and no lease. Enter the actual price and financing terms you were quoted for the new or used car. Enter zero for both price and deposit to estimate running costs for a car you already own.",
         "assumptionFees": "Upfront financing fees are paid at purchase with the deposit. Enter any financing-related insurance or fees only once. The calculator does not infer taxes or charges from your quote.",
-        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year."
+        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year.",
+        "terms": {
+          "loan": "The loan payment",
+          "budget": "The monthly budget",
+          "apr": "The estimated APR",
+          "assumptionLoan": "Fixed-rate loan",
+          "assumptionFees": "Financing fees",
+          "assumptionRunning": "What the budget covers"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Budget for the full monthly cost of the car",
       "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "The calculator above starts from this loan without the fees, so you can enter your own offer.",
         "methodTitle": "How the calculator works it out",
         "methodIntro": "The monthly payment is the level payment that repays the amount over the term at the monthly rate, and the APR is the rate that balances what you receive against what you pay:",
-        "methodLegend": "M is the payment of principal and interest, P the amount borrowed, r the nominal annual rate divided by 12 and n the number of months. The monthly fees f are added to each payment.",
-        "methodApr": "The APR is the rate A that solves the second line: what you receive at the start, the amount P less the upfront fees F, equals each month's payment Mₖ plus the fees f, discounted by (1 + A) to the power of k ÷ 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
+        "methodApr": "The APR is the rate that solves the last line: what you receive at the start, the amount borrowed less the upfront fees, equals each month's payment plus the monthly fees, discounted by one plus the APR to the power of the month's number divided by 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
         "methodRounding": "Every figure is worked in whole cents. Each payment is worked out again from the balance still owed, so the payments stay within a cent of each other, the last one clears the balance exactly, and the schedule adds up to the totals.",
         "methodPrivacy": "The calculation runs in your browser. Nothing you enter is sent or stored.",
         "assumptionsTitle": "Assumptions",
         "assumptionFixedRate": "The rate is fixed for the whole term, and every payment is made on time.",
         "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
-        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
+        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Amount received",
+          "month": "Month",
+          "apr": "APR",
+          "aprNoFees": "APR without fees",
+          "aprFees": "APR with fees"
+        },
+        "methodAprTerm": "APR",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionFeesTerm": "Fees",
+        "assumptionOtherCostsTerm": "Other costs",
+        "assumptionLimitsTerm": "Limits",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "savingsCertificates": {

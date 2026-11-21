@@ -2360,10 +2360,22 @@
         "whatHeading": "Cosa mostra il confronto",
         "whatBody": "Comprare sostituisce l'affitto con la rata del mutuo, ma blocca anche denaro nell'anticipo e nei costi di acquisto e aggiunge i costi della proprietà. Affittare lascia quel denaro libero di essere investito. Il calcolatore segue le due strade con lo stesso capitale iniziale e confronta quanto ti lascia ciascuna.",
         "read": {
-          "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
-          "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
-          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta.",
-          "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          "netWorth": {
+            "term": "Il patrimonio di ogni strada",
+            "body": "Per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti."
+          },
+          "difference": {
+            "term": "La differenza",
+            "body": "Di quanto una strada è avanti alla fine del periodo che hai scelto."
+          },
+          "breakEven": {
+            "term": "L'anno di pareggio",
+            "body": "Il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta."
+          },
+          "chart": {
+            "term": "Grafico e tabella",
+            "body": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          }
         },
         "exampleHeading": "Esempio pratico",
         "example": {
@@ -2383,10 +2395,7 @@
           "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
           "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta è dato dai suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
         },
-        "formulaOwner": "Comprare = valore della casa − costi di vendita − debito residuo + investimenti",
-        "formulaRenter": "Affittare = investimenti",
         "formulaReturn": "Rendimento mensile",
-        "formulaLegend": "Qui R è il rendimento annuo degli investimenti: il {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
         "leftOutHeading": "Cosa resta fuori",
         "leftOut": {
           "gainsTax": "Le imposte sui guadagni degli investimenti o sulla plusvalenza della vendita della casa.",
@@ -2401,7 +2410,20 @@
         "relatedMortgage": "Per vedere il mutuo da solo, con il piano di ammortamento anno per anno, usa il",
         "relatedMortgageLink": "calcolatore del mutuo",
         "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
-        "relatedNetWorthLink": "calcolatore del patrimonio netto"
+        "relatedNetWorthLink": "calcolatore del patrimonio netto",
+        "formulaExample": "Un rendimento del {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
+        "labels": {
+          "investments": "Investimenti"
+        },
+        "formulasLabel": "Formule",
+        "methodTerms": {
+          "start": "Soldi di partenza",
+          "loan": "Il mutuo",
+          "monthly": "Ogni mese",
+          "growth": "Rivalutazione e affitto",
+          "returns": "Rendimento degli investimenti",
+          "netWorth": "Patrimonio e anno di pareggio"
+        }
       }
     },
     "rateRevision": {
@@ -2635,7 +2657,16 @@
         "assumptionsTitle": "Ipotesi",
         "assumptionLoan": "La stima presuppone un prestito a tasso fisso con rate mensili, senza maxi rata finale e senza leasing. Inserisci il prezzo e le condizioni dell'offerta per l'auto nuova o usata. Per un'auto che possiedi già, inserisci zero per prezzo e anticipo per stimare i costi di gestione.",
         "assumptionFees": "Le spese iniziali del finanziamento si pagano all'acquisto insieme all'anticipo. Inserisci una sola volta ogni assicurazione o spesa legata al finanziamento. Il simulatore considera solo le imposte e le spese che inserisci.",
-        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno."
+        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno.",
+        "terms": {
+          "loan": "La rata",
+          "budget": "Il budget mensile",
+          "apr": "Il TAEG stimato",
+          "assumptionLoan": "Prestito a tasso fisso",
+          "assumptionFees": "Spese di finanziamento",
+          "assumptionRunning": "Cosa copre il budget"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Includi il costo mensile totale dell'auto nel tuo budget",
       "nextStepDescription": "Metti da parte in WonderMoney i soldi per la rata, il carburante e le spese in scadenza durante l'anno.",
@@ -2912,15 +2943,29 @@
         "exampleOutro": "Lo strumento qui sopra parte da questo prestito, senza le commissioni, così puoi inserire la tua offerta.",
         "methodTitle": "Come fa i conti lo strumento",
         "methodIntro": "La rata è la rata costante che rimborsa l'importo nell'arco della durata al tasso mensile, e il TAEG è il tasso che pareggia quello che ricevi con quello che paghi:",
-        "methodLegend": "M è la rata di capitale e interessi, P l'importo del prestito, r il tasso annuo nominale diviso per 12 e n il numero di mesi. Le commissioni mensili f si sommano a ogni rata.",
-        "methodApr": "Il TAEG è il tasso A che risolve la seconda riga: quello che ricevi all'inizio, l'importo P meno le commissioni iniziali F, è pari alla rata di ogni mese Mₖ più le commissioni f, scontata per (1 + A) elevato a k ÷ 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
+        "methodApr": "Il TAEG è il tasso che risolve l'ultima riga: quello che ricevi all'inizio, l'importo meno le commissioni iniziali, è pari alla rata di ogni mese più le commissioni mensili, scontata per uno più il TAEG elevato al numero del mese diviso 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
         "methodRounding": "Ogni cifra è calcolata in centesimi interi. Ogni rata viene ricalcolata dal debito residuo, così le rate differiscono al massimo di un centesimo l'una dall'altra, l'ultima estingue esattamente il debito e il piano quadra con i totali.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. Niente di quello che inserisci viene inviato o salvato.",
         "assumptionsTitle": "Ipotesi",
         "assumptionFixedRate": "Il tasso è fisso per tutta la durata e ogni rata è pagata puntualmente.",
         "assumptionFees": "Le commissioni iniziali si pagano, o si tolgono dall'importo, all'inizio del prestito; le commissioni mensili sono uguali ogni mese.",
         "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
-        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
+        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Importo ricevuto",
+          "month": "Mese",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG senza commissioni",
+          "aprFees": "TAEG con commissioni"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionFeesTerm": "Commissioni",
+        "assumptionOtherCostsTerm": "Altri costi",
+        "assumptionLimitsTerm": "Limiti",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "savingsCertificates": {

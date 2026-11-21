@@ -1,7 +1,11 @@
 ---
+// Prerendered worked example and method for the car loan calculator, on the guide building
+// blocks. The figures come from the same function the calculator runs (carLoanGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import { CAR_LOAN_EXAMPLE, computeCarLoan } from "@/lib/calculators/carLoan";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildCarLoanGuide } from "./carLoanGuide";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -12,55 +16,28 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.carLoan.guide.${key}`;
-const example = computeCarLoan(CAR_LOAN_EXAMPLE);
-if (!example.ok) throw new Error("Invalid car loan worked example");
-
-const { price, deposit, termMonths, annualRate, upfrontFees, monthlyFees,
-  monthlyFuel, annualInsurance, annualTax, annualMaintenance } = CAR_LOAN_EXAMPLE;
-const { financedAmount, monthlyPayment, monthlyRunning, monthlyBudget } = example.result;
-const money = (value: number, decimals = 0) => formatMoney(locale, value, { decimals });
-const values = {
-  price: money(price),
-  deposit: money(deposit),
-  financedAmount: money(financedAmount),
-  months: formatNumber(locale, termMonths),
-  rate: formatPercent(locale, annualRate, { decimals: 0 }),
-  upfrontFees: money(upfrontFees),
-  monthlyFees: money(monthlyFees),
-  monthlyFuel: money(monthlyFuel),
-  annualInsurance: money(annualInsurance),
-  annualTax: money(annualTax),
-  annualMaintenance: money(annualMaintenance),
-  payment: money(monthlyPayment, 2),
-  running: money(monthlyRunning, 2),
-  budget: money(monthlyBudget, 2),
-};
+const guide = buildCarLoanGuide(locale);
+const { values } = guide;
 const creditSource = `https://europa.eu/youreurope/citizens/consumers/financial-products-and-services/consumer-credits-and-loans/index_${locale}.htm`;
 ---
 
 <ToolGuide>
-  <section aria-labelledby="car-loan-example">
-    <h2 id="car-loan-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("exampleLoan"), values)}</p>
-    <p class="mt-4">{t(k("exampleRunning"), values)}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("exampleLoan"), values)}</p>
+    <GuideFigures items={guide.financing} operators={["−", "="]} />
+    <p>{t(k("exampleRunning"), values)}</p>
+    <GuideFigures items={guide.budget} operators={["+", "="]} />
   </section>
-  <section aria-labelledby="car-loan-method">
-    <h2 id="car-loan-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodLoan", "methodBudget", "methodApr"].map((key) => <li>{t(k(key))}</li>)}
-    </ul>
-    <p class="mt-4">
-      <a href={creditSource} class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
-        {t(k("source"))}
-      </a>
+
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("formulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+    <p>
+      <a href={creditSource}>{t(k("source"))}</a>
     </p>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {["assumptionLoan", "assumptionFees", "assumptionRunning"].map((key) => <li>{t(k(key))}</li>)}
-    </ul>
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <GuideTermList items={guide.assumptions} />
   </section>
 </ToolGuide>
