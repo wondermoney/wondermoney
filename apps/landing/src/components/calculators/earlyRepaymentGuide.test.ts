@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { EARLY_REPAYMENT_EXAMPLE, computeEarlyRepayment } from "@/lib/calculators/earlyRepayment"
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
-import { formulaHrefs } from "./guideBlocks"
+import { formulaHrefs, guideFigureFaces } from "./guideBlocks"
 import { EARLY_REPAYMENT_GUIDE_IDS, buildEarlyRepaymentGuide } from "./earlyRepaymentGuide"
 import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
@@ -53,6 +53,15 @@ describe("early repayment guide content", () => {
 			money(withFee.lowerPayment.netSaving),
 			money(withFee.shorterTerm.netSaving),
 		])
+	})
+
+	it.each(SUPPORTED_LANGS)("sets the time saved in the body face and the amounts as figures in %s", (lang) => {
+		const guide = buildEarlyRepaymentGuide(lang)
+
+		expect(guide.outcomes.map((figure) => guideFigureFaces(figure).value)).toEqual(["font-mono", "font-sans"])
+		for (const figure of [...guide.repayment, ...guide.interestSaved, ...guide.netSaving]) {
+			expect(guideFigureFaces(figure).value).toBe("font-mono")
+		}
 	})
 
 	it("matches the story: the shorter term saves more interest", () => {

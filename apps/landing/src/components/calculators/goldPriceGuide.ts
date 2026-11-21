@@ -86,6 +86,7 @@ export function buildGoldPriceGuide(locale: Lang): GoldPriceGuideContent {
         karat: formatNumber(locale, purity.karat, purity.karat % 1 ? 1 : 0),
         fineness: purity.fineness,
       }),
+      detailText: true,
     },
     {
       label: tool("result.pureGrams"),

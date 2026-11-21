@@ -149,6 +149,7 @@ export function buildRateRevisionGuide(locale: Lang) {
     detail: payment,
     share: share.ratio,
     shareLabel: bandName(share.band),
+    shareLabelText: true,
     tone: BAND_TONE[share.band],
   }));
 

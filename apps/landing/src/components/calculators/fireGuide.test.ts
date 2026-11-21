@@ -4,6 +4,7 @@ import { FIRE_WORKED_EXAMPLE } from "@/lib/calculators/fire"
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { FIRE_GUIDE_IDS, buildFireGuide, fireExampleResults } from "./fireGuide"
+import { guideFigureFaces } from "./guideBlocks"
 import { expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
 const { result } = fireExampleResults()
@@ -43,6 +44,13 @@ describe("FIRE guide content", () => {
 			formatFireDuration(lang, result.monthsToTarget ?? 0),
 		])
 		expect(guide.outcome[0].share).toBe(result.progress)
+	})
+
+	it.each(SUPPORTED_LANGS)("sets the time to FIRE in the body face and the amounts as figures in %s", (lang) => {
+		const guide = buildFireGuide(lang)
+
+		expect(guide.outcome.map((figure) => guideFigureFaces(figure).value)).toEqual(["font-mono", "font-sans"])
+		for (const figure of guide.flow) expect(guideFigureFaces(figure).value).toBe("font-mono")
 	})
 
 	it("quotes the worked example: 24 000 € a year at 4% is 600 000 €", () => {

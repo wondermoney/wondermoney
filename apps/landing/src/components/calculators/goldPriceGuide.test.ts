@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { formatMoney, formatNumber } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { GOLD_PRICE_GUIDE_IDS, buildGoldPriceGuide, goldPriceExampleResults } from "./goldPriceGuide"
+import { guideFigureFaces } from "./guideBlocks"
 import { expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
 const { example, result } = goldPriceExampleResults()
@@ -39,5 +40,12 @@ describe("gold price guide content", () => {
 			formatMoney(lang, result.value, { decimals: 2 }),
 		])
 		expect(guide.flow[0].detail).not.toMatch(/\{\{/)
+	})
+
+	it.each(SUPPORTED_LANGS)("sets the purity's name in the body face and the arithmetic as figures in %s", (lang) => {
+		const guide = buildGoldPriceGuide(lang)
+
+		expect(guide.flow.map((figure) => guideFigureFaces(figure).detail)).toEqual(["font-sans", "font-mono", "font-mono"])
+		for (const figure of guide.flow) expect(guideFigureFaces(figure).value).toBe("font-mono")
 	})
 })

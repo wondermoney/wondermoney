@@ -106,7 +106,7 @@ export function buildEarlyRepaymentGuide(locale: Lang) {
       icon: CalendarClock,
       detail: `−${values.paymentDrop}`,
     },
-    { label: tool("shorterTerm.headline"), value: values.timeSaved, icon: Scissors },
+    { label: tool("shorterTerm.headline"), value: values.timeSaved, text: true, icon: Scissors },
   ];
   const saved = (lower: string, shorter: string): GuideFigure[] => [
     { label: tool("table.lowerPayment"), value: lower },
