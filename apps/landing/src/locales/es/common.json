@@ -2521,7 +2521,6 @@
         "exampleIncome": "Con unos ingresos netos de {{income}} al mes, la cuota se lleva hoy el {{currentShare}}, el {{newShare}} tras la primera subida y el {{stressShare}} tras la mayor, un valor que los niveles del ratio de endeudamiento califican como «{{stressBand}}».",
         "methodTitle": "Cómo se calcula",
         "methodIntro": "Cada cuota es la cuota constante que devuelve el capital pendiente en los meses que quedan, con el mismo motor de tipo fijo que la calculadora de hipoteca:",
-        "methodLegend": "i es el índice y s el diferencial, ambos como tipos anuales. r es el tipo mensual, M la cuota mensual, P el capital pendiente y n el número de cuotas que quedan. Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente P dividido entre n.",
         "methodItems": {
           "change": "La diferencia al mes es la primera cuota al nuevo tipo menos la primera cuota al tipo actual, ambas sobre el capital de hoy y en el mismo número de meses.",
           "year": "La diferencia anual compara la suma de las 12 primeras cuotas de cada cuadro o de todas las restantes si quedan menos. Cada cuota se redondea por separado, así que el total puede diferir de la diferencia mensual multiplicada por el número de cuotas.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "Lo que decide tu contrato",
         "contractIntro": "Cómo funciona una revisión real depende de tu contrato y de las normas del país donde vives. Nada de esto está incluido en el simulador:",
         "contractItems": {
-          "resetDates": "Fechas de revisión: cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota.",
-          "capsFloors": "Techos y suelos: algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%.",
-          "index": "El índice: el Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación.",
-          "mixed": "Préstamos a tipo mixto: primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+          "resetDates": {
+            "term": "Fechas de revisión",
+            "body": "Cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota."
+          },
+          "capsFloors": {
+            "term": "Techos y suelos",
+            "body": "Algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%."
+          },
+          "index": {
+            "term": "El índice",
+            "body": "El Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación."
+          },
+          "mixed": {
+            "term": "Préstamos a tipo mixto",
+            "body": "Primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+          }
         },
-        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
+        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco.",
+        "terms": {
+          "change": "Diferencia al mes",
+          "year": "Diferencia en un año",
+          "interest": "Diferencia en intereses",
+          "income": "Peso en los ingresos",
+          "privacy": "Privacidad",
+          "fromNextMonth": "Desde la próxima cuota",
+          "sameTerm": "El mismo plazo",
+          "statement": "La cuota de hoy",
+          "noFeed": "Sin datos del índice",
+          "limits": "Límites",
+          "annualRate": "Tipo anual",
+          "incomeShare": "Peso de la cuota en los ingresos"
+        },
+        "zeroRate": "Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "carLoan": {

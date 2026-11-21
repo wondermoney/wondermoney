@@ -2521,7 +2521,6 @@
         "exampleIncome": "Com um rendimento líquido de {{income}} por mês, a prestação leva hoje {{currentShare}} dele, {{newShare}} depois da primeira subida e {{stressShare}} depois da maior, um valor que os níveis da taxa de esforço classificam como “{{stressBand}}”.",
         "methodTitle": "Como é calculado",
         "methodIntro": "Cada prestação é a prestação constante que paga o capital em dívida nos meses que faltam, com o mesmo motor de taxa fixa do simulador de crédito habitação:",
-        "methodLegend": "i é o indexante e s o spread, ambos como taxas anuais. r é a taxa mensal, M a prestação mensal, P o capital em dívida e n o número de prestações que faltam. Quando o indexante mais o spread fica abaixo de 0%, a taxa conta como 0% e a prestação é simplesmente P a dividir por n.",
         "methodItems": {
           "change": "A diferença por mês é a primeira prestação à nova taxa menos a primeira prestação à taxa atual, ambas sobre o capital de hoje e no mesmo número de meses.",
           "year": "A diferença anual compara a soma das primeiras 12 prestações de cada plano ou de todas as prestações restantes se faltarem menos. Cada prestação é arredondada individualmente, por isso o total pode diferir da diferença mensal multiplicada pelo número de prestações.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "O que o teu contrato decide",
         "contractIntro": "Uma revisão real depende do teu contrato e das regras do país onde vives. Nada disto está incluído no simulador:",
         "contractItems": {
-          "resetDates": "Datas de revisão: de quanto em quanto tempo a taxa é revista, de que dia é o valor do indexante que conta e quando começa a nova prestação.",
-          "capsFloors": "Limites máximos e mínimos: alguns contratos limitam quanto a taxa pode subir ou descer, ou impedem que fique abaixo de um certo valor. O simulador só impede que a taxa fique abaixo de 0%.",
-          "index": "O indexante: a Euribor, uma taxa de um banco central ou uma taxa de referência nacional, cada uma com prazos próprios (por exemplo 3, 6 ou 12 meses) e um calendário de publicação próprio.",
-          "mixed": "Créditos a taxa mista: primeiro há um período de taxa fixa e depois a taxa variável. Indica o capital e o prazo tal como vão estar quando começar o período variável."
+          "resetDates": {
+            "term": "Datas de revisão",
+            "body": "De quanto em quanto tempo a taxa é revista, de que dia é o valor do indexante que conta e quando começa a nova prestação."
+          },
+          "capsFloors": {
+            "term": "Limites máximos e mínimos",
+            "body": "Alguns contratos limitam quanto a taxa pode subir ou descer, ou impedem que fique abaixo de um certo valor. O simulador só impede que a taxa fique abaixo de 0%."
+          },
+          "index": {
+            "term": "O indexante",
+            "body": "A Euribor, uma taxa de um banco central ou uma taxa de referência nacional, cada uma com prazos próprios (por exemplo 3, 6 ou 12 meses) e um calendário de publicação próprio."
+          },
+          "mixed": {
+            "term": "Créditos a taxa mista",
+            "body": "Primeiro há um período de taxa fixa e depois a taxa variável. Indica o capital e o prazo tal como vão estar quando começar o período variável."
+          }
         },
-        "contractOutro": "Os valores que contam são os do teu banco. Usa este simulador para te preparares antes de uma revisão e depois compara-o com os valores do banco."
+        "contractOutro": "Os valores que contam são os do teu banco. Usa este simulador para te preparares antes de uma revisão e depois compara-o com os valores do banco.",
+        "terms": {
+          "change": "Diferença por mês",
+          "year": "Diferença num ano",
+          "interest": "Diferença nos juros",
+          "income": "Peso no rendimento",
+          "privacy": "Privacidade",
+          "fromNextMonth": "A partir da próxima prestação",
+          "sameTerm": "O mesmo prazo",
+          "statement": "A prestação de hoje",
+          "noFeed": "Sem dados do indexante",
+          "limits": "Limites",
+          "annualRate": "Taxa anual",
+          "incomeShare": "Peso da prestação no rendimento"
+        },
+        "zeroRate": "Quando o indexante mais o spread fica abaixo de 0%, a taxa conta como 0% e a prestação é simplesmente o capital em dívida a dividir pelo número de prestações.",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "carLoan": {

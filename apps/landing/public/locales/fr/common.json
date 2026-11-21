@@ -2521,7 +2521,6 @@
         "exampleIncome": "Avec un revenu net de {{income}} par mois, la mensualité en prend {{currentShare}} aujourd'hui, {{newShare}} après la première hausse et {{stressShare}} après la plus forte, un niveau que les seuils du taux d'endettement classent en « {{stressBand}} ».",
         "methodTitle": "Comment c'est calculé",
         "methodIntro": "Chaque mensualité est la mensualité constante qui rembourse le capital restant dû sur les mois restants, avec le même moteur à taux fixe que le simulateur de prêt immobilier :",
-        "methodLegend": "i est l'indice et s la marge, tous deux en taux annuels. r est le taux mensuel, M la mensualité, P le capital restant dû et n le nombre de mensualités restantes. Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement P divisé par n.",
         "methodItems": {
           "change": "L'écart par mois est la première mensualité au nouveau taux moins la première mensualité au taux actuel, toutes deux sur le capital d'aujourd'hui et sur le même nombre de mois.",
           "year": "L'écart annuel compare la somme des 12 premières mensualités de chaque tableau, ou de toutes les mensualités restantes s'il en reste moins. Chaque mensualité est arrondie séparément, si bien que le total peut différer de l'écart mensuel multiplié par le nombre de mensualités.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "Ce que décide votre contrat",
         "contractIntro": "Une révision réelle dépend de votre contrat et des règles du pays où vous vivez. Rien de cela n'est intégré au simulateur :",
         "contractItems": {
-          "resetDates": "Les dates de révision : à quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence.",
-          "capsFloors": "Les plafonds et planchers : certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %.",
-          "index": "L'indice : l'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication.",
-          "mixed": "Les prêts à taux mixte : une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          "resetDates": {
+            "term": "Les dates de révision",
+            "body": "À quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence."
+          },
+          "capsFloors": {
+            "term": "Les plafonds et planchers",
+            "body": "Certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication."
+          },
+          "mixed": {
+            "term": "Les prêts à taux mixte",
+            "body": "Une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          }
         },
-        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
+        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque.",
+        "terms": {
+          "change": "Écart par mois",
+          "year": "Écart sur un an",
+          "interest": "Écart d'intérêts",
+          "income": "Part des revenus",
+          "privacy": "Confidentialité",
+          "fromNextMonth": "Dès la prochaine mensualité",
+          "sameTerm": "La même durée",
+          "statement": "La mensualité actuelle",
+          "noFeed": "Pas de données d'indice",
+          "limits": "Limites",
+          "annualRate": "Taux annuel",
+          "incomeShare": "Part de la mensualité dans les revenus"
+        },
+        "zeroRate": "Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement le capital restant dû divisé par le nombre de mensualités.",
+        "methodFormulasLabel": "Formules"
       }
     },
     "carLoan": {

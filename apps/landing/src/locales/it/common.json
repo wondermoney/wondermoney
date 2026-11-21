@@ -2521,7 +2521,6 @@
         "exampleIncome": "Con un reddito netto di {{income}} al mese, la rata ne prende oggi il {{currentShare}}, il {{newShare}} dopo il primo aumento e il {{stressShare}} dopo quello più forte, un valore che i livelli del rapporto rata/reddito classificano come «{{stressBand}}».",
         "methodTitle": "Come si calcola",
         "methodIntro": "Ogni rata è la rata costante che rimborsa il debito residuo nei mesi che restano, con lo stesso motore a tasso fisso del calcolatore del mutuo:",
-        "methodLegend": "i è l'indice e s lo spread, entrambi come tassi annui. r è il tasso mensile, M la rata mensile, P il debito residuo e n il numero di rate che restano. Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente P diviso n.",
         "methodItems": {
           "change": "La differenza al mese è la prima rata al nuovo tasso meno la prima rata al tasso di oggi, entrambe sul debito di oggi e sullo stesso numero di mesi.",
           "year": "La differenza annua confronta la somma delle prime 12 rate di ciascun piano o di tutte le rate residue se ne restano meno. Ogni rata viene arrotondata singolarmente, quindi il totale può differire dalla differenza mensile moltiplicata per il numero di rate.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "Cosa decide il tuo contratto",
         "contractIntro": "Come funziona una revisione reale dipende dal tuo contratto e dalle regole del paese in cui vivi. Niente di tutto questo è incluso nel simulatore:",
         "contractItems": {
-          "resetDates": "Date di revisione: ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata.",
-          "capsFloors": "Tetti e minimi: alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%.",
-          "index": "L'indice: l'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione.",
-          "mixed": "Prestiti a tasso misto: prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          "resetDates": {
+            "term": "Date di revisione",
+            "body": "Ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata."
+          },
+          "capsFloors": {
+            "term": "Tetti e minimi",
+            "body": "Alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione."
+          },
+          "mixed": {
+            "term": "Prestiti a tasso misto",
+            "body": "Prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          }
         },
-        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
+        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca.",
+        "terms": {
+          "change": "Differenza al mese",
+          "year": "Differenza in un anno",
+          "interest": "Differenza negli interessi",
+          "income": "Peso sul reddito",
+          "privacy": "Privacy",
+          "fromNextMonth": "Dalla prossima rata",
+          "sameTerm": "La stessa durata",
+          "statement": "La rata di oggi",
+          "noFeed": "Nessun dato sull'indice",
+          "limits": "Limiti",
+          "annualRate": "Tasso annuo",
+          "incomeShare": "Peso della rata sul reddito"
+        },
+        "zeroRate": "Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente il debito residuo diviso il numero di rate.",
+        "methodFormulasLabel": "Formule"
       }
     },
     "carLoan": {

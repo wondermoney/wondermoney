@@ -2521,7 +2521,6 @@
         "exampleIncome": "Bei einem Nettoeinkommen von {{income}} im Monat beansprucht die Rate heute {{currentShare}} davon, nach dem ersten Anstieg {{newShare}} und nach dem größeren {{stressShare}}, was die Stufen der Schuldendienstquote als „{{stressBand}}“ einordnen.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Jede Rate ist die gleichbleibende Rate, die die Restschuld in den verbleibenden Monaten tilgt, mit derselben Festzins-Rechnung wie im Hypothekenrechner:",
-        "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
         "methodItems": {
           "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
           "year": "Der Unterschied über ein Jahr ergibt sich aus der Summe der ersten 12 Raten jedes Plans. Sind es weniger als 12, zählen alle verbleibenden Raten. Da jede Rate einzeln gerundet wird, kann die Differenz vom monatlichen Unterschied mal der Anzahl der Raten abweichen.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "Was Ihr Vertrag festlegt",
         "contractIntro": "Wie eine echte Zinsanpassung abläuft, hängt von Ihrem Vertrag und den Regeln in Ihrem Land ab. Nichts davon ist im Rechner enthalten:",
         "contractItems": {
-          "resetDates": "Anpassungstermine: wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt.",
-          "capsFloors": "Ober- und Untergrenzen: Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt.",
-          "index": "Der Referenzzins: der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender.",
-          "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          "resetDates": {
+            "term": "Anpassungstermine",
+            "body": "Wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt."
+          },
+          "capsFloors": {
+            "term": "Ober- und Untergrenzen",
+            "body": "Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt."
+          },
+          "index": {
+            "term": "Der Referenzzins",
+            "body": "Der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender."
+          },
+          "mixed": {
+            "term": "Kredite mit Mischzins",
+            "body": "Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          }
         },
-        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
+        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank.",
+        "terms": {
+          "change": "Änderung pro Monat",
+          "year": "Änderung über ein Jahr",
+          "interest": "Änderung der Zinsen",
+          "income": "Anteil am Einkommen",
+          "privacy": "Datenschutz",
+          "fromNextMonth": "Ab der nächsten Rate",
+          "sameTerm": "Dieselbe Laufzeit",
+          "statement": "Die heutige Rate",
+          "noFeed": "Keine Referenzzinsdaten",
+          "limits": "Grenzen",
+          "annualRate": "Jahreszins",
+          "incomeShare": "Anteil der Rate am Einkommen"
+        },
+        "zeroRate": "Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach die Restschuld geteilt durch die Zahl der Raten.",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "carLoan": {

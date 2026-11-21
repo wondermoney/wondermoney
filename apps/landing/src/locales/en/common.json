@@ -2521,7 +2521,6 @@
         "exampleIncome": "On a net income of {{income}} a month, the payment takes {{currentShare}} of it today, {{newShare}} after the first rise and {{stressShare}} after the larger one, which the debt-to-income bands rate as “{{stressBand}}”.",
         "methodTitle": "How it is calculated",
         "methodIntro": "Each payment is the level payment that clears the balance over the months left, from the same fixed-rate engine as the mortgage calculator:",
-        "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
         "methodItems": {
           "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
           "year": "The yearly change compares the sum of the first 12 payments in each schedule, or all remaining payments if fewer are left. Payments are rounded individually, so the total can differ from the monthly change multiplied by the number of payments.",
@@ -2540,12 +2539,40 @@
         "contractTitle": "What your contract decides",
         "contractIntro": "How a real revision works depends on your contract and on the rules where you live. None of this is built into the calculator:",
         "contractItems": {
-          "resetDates": "Reset dates: how often the rate is revised, which day's index value counts and when the new payment starts.",
-          "capsFloors": "Caps and floors: some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%.",
-          "index": "The index: Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule.",
-          "mixed": "Mixed-rate loans: a fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          "resetDates": {
+            "term": "Reset dates",
+            "body": "How often the rate is revised, which day's index value counts and when the new payment starts."
+          },
+          "capsFloors": {
+            "term": "Caps and floors",
+            "body": "Some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%."
+          },
+          "index": {
+            "term": "The index",
+            "body": "Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule."
+          },
+          "mixed": {
+            "term": "Mixed-rate loans",
+            "body": "A fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          }
         },
-        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
+        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's.",
+        "terms": {
+          "change": "Monthly change",
+          "year": "Yearly change",
+          "interest": "Change in interest",
+          "income": "Share of income",
+          "privacy": "Privacy",
+          "fromNextMonth": "From the next payment",
+          "sameTerm": "The same term",
+          "statement": "Today's payment",
+          "noFeed": "No index data",
+          "limits": "Limits",
+          "annualRate": "Annual rate",
+          "incomeShare": "Payment as a share of income"
+        },
+        "zeroRate": "When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply the balance divided by the number of payments.",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "carLoan": {
