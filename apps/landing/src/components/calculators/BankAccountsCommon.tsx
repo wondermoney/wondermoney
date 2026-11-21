@@ -93,7 +93,7 @@ export function OriginalNotes({
 export function YesMark({ value }: { value: boolean }) {
   const { t } = useTranslations();
   return value ? (
-    <span role="img" aria-label={t(s("yes"))} className="text-primary">
+    <span role="img" aria-label={t(s("yes"))} className="text-foreground">
       ✔
     </span>
   ) : (
