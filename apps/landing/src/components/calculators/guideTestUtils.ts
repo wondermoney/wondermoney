@@ -5,7 +5,7 @@
  */
 import { expect } from "vitest"
 import { SUPPORTED_LANGS, type Lang } from "@/lib/routes"
-import { formulaHrefs, type GuideFormulaLine, type GuideTerm } from "./guideBlocks"
+import { formulaHrefs, type GuideFigure, type GuideFormulaLine, type GuideTerm } from "./guideBlocks"
 
 /** Each entry has a term and a body, and the body no longer starts with "Term:". */
 export function expectTerms(entries: ReadonlyArray<GuideTerm>): void {
@@ -15,6 +15,16 @@ export function expectTerms(entries: ReadonlyArray<GuideTerm>): void {
 		expect(entry.body.trim()).not.toBe("")
 		expect(entry.body).not.toMatch(/\{\{/)
 		expect(entry.body.startsWith(`${entry.term}:`)).toBe(false)
+	}
+}
+
+/** Each worked-example figure has a label and a value, with nothing left to interpolate. */
+export function expectFigures(figures: ReadonlyArray<GuideFigure>): void {
+	expect(figures.length).toBeGreaterThan(0)
+	for (const figure of figures) {
+		expect(figure.label.trim()).not.toBe("")
+		expect(figure.value.trim()).not.toBe("")
+		expect(`${figure.label} ${figure.value}`).not.toMatch(/\{\{/)
 	}
 }
 

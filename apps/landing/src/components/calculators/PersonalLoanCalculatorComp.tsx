@@ -155,11 +155,19 @@ function ResultPanel({ result, exact }: { result: PersonalLoanResult; exact: For
 
   return (
     <div className="space-y-5">
-      <div aria-live="polite">
-        <p className="text-sm text-muted-foreground">{t(k("result.monthlyPayment"))}</p>
-        <p className="font-mono text-3xl font-bold text-primary">{exact(result.monthlyPayment)}</p>
+      <div>
+        <CalculatorResult
+          items={[
+            { label: t(k("result.monthlyPayment")), value: exact(result.monthlyPayment), highlight: true },
+            { label: t(k("result.apr")), value: apr },
+            { label: t(k("result.totalInterest")), value: exact(result.totalInterest) },
+            { label: t(k("result.totalFees")), value: exact(result.totalFees) },
+            { label: t(k("result.totalCostOfCredit")), value: exact(result.totalCostOfCredit) },
+            { label: t(k("result.totalRepaid")), value: exact(result.totalRepaid) },
+          ]}
+        />
         {hasMonthlyFees && (
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t(k("result.monthlyPaymentSplit"), {
               loan: exact(result.loanPayment),
               fees: exact(result.schedule[0].fees),
@@ -167,15 +175,6 @@ function ResultPanel({ result, exact }: { result: PersonalLoanResult; exact: For
           </p>
         )}
       </div>
-      <CalculatorResult
-        items={[
-          { label: t(k("result.apr")), value: apr },
-          { label: t(k("result.totalInterest")), value: exact(result.totalInterest) },
-          { label: t(k("result.totalFees")), value: exact(result.totalFees) },
-          { label: t(k("result.totalCostOfCredit")), value: exact(result.totalCostOfCredit) },
-          { label: t(k("result.totalRepaid")), value: exact(result.totalRepaid) },
-        ]}
-      />
       <div className="space-y-2 text-sm leading-6 text-muted-foreground">
         {result.upfrontFees > 0 && (
           <p>{t(k("result.amountReceived"), { amount: exact(result.amountReceived) })}</p>
@@ -188,6 +187,9 @@ function ResultPanel({ result, exact }: { result: PersonalLoanResult; exact: For
         </p>
         <p>{t(k("result.aprNote"))}</p>
       </div>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {`${t(k("result.monthlyPayment"))}: ${exact(result.monthlyPayment)}`}
+      </p>
     </div>
   );
 }

@@ -597,7 +597,18 @@
         "reviewed": "Règles vérifiées le 20 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI (Portal das Finanças).",
         "methodMinimum": "Si l'impôt à percevoir, après toute réduction de l'IMI Familiar, est inférieur à 10 €, aucun IMI n'est liquidé et le calculateur affiche 0 € avec une note (article 113, n.º 6, du Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113 : liquidation, pas d'IMI en dessous de 10 € (consulté le 19 novembre 2026)",
-        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de la résidence principale, dans la rédaction de la Lei n.º 82/2023, identique au texte consolidé du Diário da República (consulté le 20 novembre 2026)"
+        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de la résidence principale, dans la rédaction de la Lei n.º 82/2023, identique au texte consolidé du Diário da República (consulté le 20 novembre 2026)",
+        "terms": {
+          "tax": "IMI annuel",
+          "family": "IMI Familiar",
+          "minimum": "Montant minimum",
+          "payment": "Échéances",
+          "budget": "Provision mensuelle",
+          "rate": "Taux municipal",
+          "scope": "Champ couvert",
+          "educational": "Estimation pédagogique"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
@@ -1111,15 +1122,20 @@
         "exampleBody": "Un couple perçoit {{income}} nets par mois à deux. Il rembourse {{home}} de crédit immobilier, {{car}} de crédit auto et {{cards}} de carte de crédit, soit {{total}} au total. En divisant les mensualités par les revenus et en multipliant par 100, son taux d'endettement est de {{ratio}}, dans la zone de vigilance.",
         "exampleScenario": "Le crédit auto se termine bientôt. Sans lui, les mensualités tombent à {{scenarioTotal}} et le taux à {{scenarioRatio}}, de retour dans la zone saine. Le calculateur ci-dessus part de ce foyer et de ce changement, pour que vous y mettiez vos propres chiffres.",
         "methodHeading": "Méthode",
-        "methodFormula": "Taux d'endettement = total des mensualités de crédit ÷ revenus nets mensuels du foyer × 100",
-        "methodCounts": "Compté comme dette : chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
-        "methodExcludes": "Non compté : le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
-        "methodIncome": "Les revenus sont nets : ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
         "methodRounding": "Le taux est arrondi à une décimale, et la zone suit le chiffre arrondi. Des mensualités supérieures aux revenus donnent un taux de plus de 100 %.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
         "nextHeading": "Un nouveau crédit en vue ?",
         "nextBody": "Un crédit immobilier ou un autre prêt ajoute une mensualité. Calculez ce que coûterait chaque mois un nouveau prêt immobilier, puis saisissez cette mensualité dans le panneau de scénario pour voir le nouveau taux.",
-        "nextLink": "Ouvrir le simulateur de prêt immobilier"
+        "nextLink": "Ouvrir le simulateur de prêt immobilier",
+        "methodCountsTerm": "Compté comme dette",
+        "methodCountsBody": "Chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
+        "methodExcludesTerm": "Non compté",
+        "methodExcludesBody": "Le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
+        "methodIncomeTerm": "Les revenus sont nets",
+        "methodIncomeBody": "Ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "householdBudget": {
@@ -1324,7 +1340,6 @@
         "method": {
           "title": "Comment la mensualité est calculée",
           "intro": "La plupart des prêts immobiliers à taux fixe se remboursent par mensualités constantes : le même montant chaque mois, fixé pour que la dette tombe à zéro avec la dernière. La mensualité découle de la formule de l'annuité :",
-          "legend": "M est la mensualité, P la somme empruntée, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement P divisé par n.",
           "schedule": "Chaque mois, les intérêts sont calculés sur le capital restant dû et le reste de la mensualité rembourse du capital. À mesure que la dette baisse, la part d'intérêts diminue et la part de capital augmente : la dette baisse donc lentement au début et plus vite à la fin. L'assurance et les frais s'ajoutent à la mensualité et ne réduisent jamais la dette.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1335,7 +1350,24 @@
             "rounding": "Les montants sont en euros. Chaque mensualité est calculée à partir du capital restant dû et du nombre de mois restants, puis arrondie au centime : une mensualité peut donc différer des autres d'un centime, et la dernière solde exactement la dette. Sur un prêt très long à taux élevé, les premières mensualités peuvent rembourser moins d'un centime de capital.",
             "lenderFigures": "Les chiffres de votre banque peuvent différer légèrement selon sa façon de compter les jours, d'arrondir ou de fixer la date de paiement. Les informations précontractuelles qu'elle vous remet font référence."
           },
-          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}."
+          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}.",
+          "formulasLabel": "Formules",
+          "zeroRate": "À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement le montant du prêt divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "monthly": "Mensualités",
+            "nominalRate": "Taux nominal, pas le TAEG",
+            "flatFees": "Assurances et frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites"
+          }
+        },
+        "labels": {
+          "firstInterest": "Intérêts de la première mensualité",
+          "firstPrincipal": "Capital de la première mensualité",
+          "monthlyRate": "Taux mensuel",
+          "payments": "Nombre de mensualités"
         }
       },
       "cta": {
@@ -1458,11 +1490,26 @@
         "before": {
           "title": "Avant de rembourser",
           "items": {
-            "fee": "Vérifiez les indemnités. La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette.",
-            "rate": "Les taux variables et mixtes ne sont pas couverts : les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt.",
-            "reserves": "Gardez une réserve. L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement.",
-            "otherDebts": "Remboursez d'abord la dette la plus chère. Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher.",
-            "lender": "Demandez à votre banque comment elle applique le remboursement. Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            "fee": {
+              "term": "Vérifiez les indemnités",
+              "body": "La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette."
+            },
+            "rate": {
+              "term": "Les taux variables et mixtes ne sont pas couverts",
+              "body": "Les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt."
+            },
+            "reserves": {
+              "term": "Gardez une réserve",
+              "body": "L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement."
+            },
+            "otherDebts": {
+              "term": "Remboursez d'abord la dette la plus chère",
+              "body": "Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher."
+            },
+            "lender": {
+              "term": "Demandez à votre banque comment elle applique le remboursement",
+              "body": "Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            }
           }
         },
         "example": {
@@ -1475,9 +1522,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule d'abord le prêt tel quel, avec le même moteur à taux fixe que le simulateur de prêt immobilier. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités restantes. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n.",
-          "lowerPayment": "Garder la durée : le capital restant après le remboursement repasse dans la formule avec le même n, ce qui donne la nouvelle mensualité, plus basse.",
-          "shorterTerm": "Garder la mensualité : vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
           "fee": "Les indemnités sont le pourcentage indiqué, appliqué à la somme remboursée. Les intérêts économisés sont les intérêts restants du prêt tel quel moins ceux de chaque scénario, et l'économie nette est ce montant moins les indemnités. Une somme supérieure au capital restant dû solde le prêt, et seul ce capital compte pour les indemnités.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1488,7 +1532,23 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page concordent.",
             "lenderFigures": "Les chiffres de votre banque peuvent légèrement différer selon sa façon de compter les jours et d'arrondir. Demandez-lui sa propre simulation avant de rembourser."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée.",
+          "lowerPaymentTerm": "Garder la durée",
+          "lowerPaymentBody": "Le capital restant après le remboursement repasse dans la formule avec le même nombre de mensualités, ce qui donne la nouvelle mensualité, plus basse.",
+          "shorterTermTerm": "Garder la mensualité",
+          "shorterTermBody": "Vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "timing": "Moment du remboursement",
+            "oneOff": "Un seul remboursement",
+            "costs": "Frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites",
+            "feeNote": "Indemnités et économie nette"
+          },
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1663,10 +1723,22 @@
           "title": "Ce qu'il faut comparer avant de faire racheter son prêt",
           "intro": "Faire racheter votre prêt immobilier par une autre banque, ou renégocier avec la vôtre, peut faire baisser ce que vous payez. Un taux plus bas n'est qu'une partie du calcul : comparez l'offre dans son ensemble.",
           "items": {
-            "rate": "Le taux. Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez.",
-            "monthlyCosts": "Les frais mensuels. La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher.",
-            "term": "La durée. Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps.",
-            "oneOff": "Les frais ponctuels. Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            "rate": {
+              "term": "Le taux",
+              "body": "Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez."
+            },
+            "monthlyCosts": {
+              "term": "Les frais mensuels",
+              "body": "La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher."
+            },
+            "term": {
+              "term": "La durée",
+              "body": "Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps."
+            },
+            "oneOff": {
+              "term": "Les frais ponctuels",
+              "body": "Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            }
           },
           "outro": "Le simulateur réunit tout cela : la mensualité avec ses frais, le total que chaque prêt coûte encore et le mois où les frais du rachat sont récupérés."
         },
@@ -1691,7 +1763,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule les deux prêts avec le même moteur à taux fixe que le simulateur de prêt immobilier, sur le capital restant dû. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n. Les assurances et frais de chaque mois s'ajoutent par-dessus.",
           "saving": "L'économie d'un mois est ce que coûterait ce mois-là le prêt actuel, moins ce que coûte le nouveau. Un prêt soldé ne coûte plus rien : avec une nouvelle durée plus longue, les mois qui suivent la fin de votre prêt actuel comptent donc comme un coût. Le coût total de chaque option correspond aux mensualités, assurances et frais, plus les frais du rachat pour le nouveau prêt. L'économie nette est la différence.",
           "breakEven": "Le mois où le rachat est amorti est le premier mois où les économies cumulées atteignent au moins les frais du rachat. Si cela n'arrive pas avant la fin des deux prêts, le rachat n'est pas amorti.",
           "longerTerm": "Quand la nouvelle durée dépasse la durée restante, le simulateur calcule aussi l'offre sur la durée restante, pour montrer quelle part de la baisse de mensualité vient du taux et quelle part vient d'un remboursement plus long.",
@@ -1705,7 +1776,22 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page tombent juste. La mensualité affichée est la première ; les suivantes restent à moins d'un centime d'elle.",
             "lenderFigures": "Chaque banque compte les jours et arrondit à sa façon, ses chiffres peuvent donc différer légèrement. Demandez à chacune son offre officielle avant de décider."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital.",
+          "terms": {
+            "saving": "Économie et coût total",
+            "breakEven": "Mois de rentabilité",
+            "longerTerm": "Une durée plus longue",
+            "fixedRate": "Taux fixes",
+            "sameBalance": "Le même capital",
+            "timing": "Moment du changement",
+            "fees": "Assurances et frais",
+            "noDiscounting": "Sans actualisation",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres des banques",
+            "limits": "Limites"
+          },
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1715,6 +1801,13 @@
           "earlyRepaymentBody": "Ce que ferait économiser un remboursement partiel sur votre prêt actuel, plutôt qu'un rachat.",
           "debtToIncomeLink": "Calculateur de taux d'endettement",
           "debtToIncomeBody": "La part de vos revenus consacrée aux remboursements, aujourd'hui et avec la nouvelle mensualité."
+        },
+        "labels": {
+          "monthlySaving": "Économie par mois",
+          "currentMonthTotal": "Coût du prêt actuel ce mois-là",
+          "offerMonthTotal": "Coût du nouveau prêt ce mois-là",
+          "currentTotalCost": "Coût total du prêt actuel",
+          "offerTotalCost": "Coût total du nouveau prêt"
         }
       },
       "cta": {
@@ -1984,16 +2077,12 @@
         "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités actuelles prennent, avec les mêmes tranches que cet outil.",
         "exampleTitle": "Exemple chiffré",
         "exampleIntro": "Un couple gagne {{income}} nets par mois et paie {{existing}} par mois pour un crédit auto. Il a {{savings}} d'épargne pour le logement, compte sur un taux fixe de {{rate}} sur {{years}} ans et prévoit des frais d'achat de {{costsRate}} du prix. Sa banque finance jusqu'à {{ltv}} du prix, et le couple réserve {{share}} de ses revenus au crédit.",
-        "exampleStep1": "Marge mensuelle : {{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
-        "exampleStep2": "Prêt maximal : une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
-        "exampleStep3": "Argent au départ : chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
         "exampleStep4": "Le plus bas des deux est {{monthlyPrice}} : c'est donc le budget mensuel qui fixe la limite.",
         "exampleResult": "À {{price}}, le couple emprunterait {{loan}}, verserait {{downPayment}} d'apport et paierait {{purchaseCosts}} de frais, en utilisant la totalité de ses {{savings}} d'épargne. Le simulateur de prêt immobilier place la mensualité à {{payment}}.",
         "exampleLift": "Environ {{extraIncome}} de revenus nets en plus par mois le mèneraient à {{liftPrice}}, où la limite de l'épargne prend le relais.",
         "exampleSavings": "Avec seulement {{lowSavings}} d'épargne, tout s'inverse : l'épargne couvre un prix de {{lowSavingsPrice}}, avec un prêt de {{lowSavingsLoan}}, bien en deçà de ce que ses revenus pourraient porter. Pour relever la limite, c'est épargner davantage qui compte, pas gagner davantage. Le calculateur ci-dessus part du premier couple, pour que vous y mettiez vos propres chiffres.",
         "methodTitle": "Méthode",
         "methodIntro": "Le calcul traite chaque limite séparément, puis retient le prix le plus bas.",
-        "methodLegend": "I désigne les revenus nets mensuels, d la part permise pour le crédit, E les mensualités actuelles et M la marge pour la nouvelle mensualité. r est le taux annuel divisé par 12, n le nombre de mensualités et L le prêt maximal. S désigne l'épargne, c les frais d'achat et v le financement, tous deux en pourcentage du prix. P₁ est le prix que permet le budget mensuel et P₂ celui que permet l'épargne.",
         "methodShare": "La part de départ de {{share}} se situe dans la tranche de vigilance du calculateur de taux d'endettement ({{caution}} % à {{high}} %). C'est un repère, pas une limite légale.",
         "methodCosts": "Au prix maximal, chaque euro d'épargne va dans l'achat : d'abord les frais, le reste en apport. Le prêt couvre ce qui manque, et jamais plus que le financement maximal ne le permet.",
         "methodRounding": "Les montants sont calculés en centimes. Le prêt est arrondi au centime inférieur, si bien que la première mensualité, calculée par le simulateur de prêt immobilier, tient dans votre marge ; les suivantes peuvent varier d'un centime. Le prix vaut exactement le prêt plus l'apport, et les revenus ou l'épargne en plus sont arrondis à l'euro supérieur.",
@@ -2005,11 +2094,33 @@
         "assumptionCostsShare": "Les frais d'achat sont un pourcentage fixe du prix. En pratique, les taxes suivent souvent des tranches et certains frais sont des montants fixes.",
         "lendersTitle": "Ce que les banques vérifient et que cet outil ne fait pas",
         "lendersIntro": "La réponse d'une banque peut être inférieure à cette estimation, parfois nettement. Les règles changent d'une banque et d'un pays à l'autre, et ce calculateur n'en intègre aucune.",
-        "lenderStress": "Taux de stress : beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
-        "lenderIncome": "Définition des revenus : certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
-        "lenderCountry": "Limites nationales : dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
-        "lenderProfile": "Votre profil : l'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
-        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous."
+        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous.",
+        "exampleStep1Term": "Marge mensuelle",
+        "exampleStep1Body": "{{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
+        "exampleStep2Term": "Prêt maximal",
+        "exampleStep2Body": "Une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
+        "exampleStep3Term": "Argent au départ",
+        "exampleStep3Body": "Chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
+        "lenderStressTerm": "Taux de stress",
+        "lenderStressBody": "Beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
+        "lenderIncomeTerm": "Définition des revenus",
+        "lenderIncomeBody": "Certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
+        "lenderCountryTerm": "Limites nationales",
+        "lenderCountryBody": "Dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
+        "lenderProfileTerm": "Votre profil",
+        "lenderProfileBody": "L'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules",
+        "labels": {
+          "maxLoan": "Prêt maximal"
+        },
+        "methodShareTerm": "Part pour le crédit",
+        "methodCostsTerm": "Où va l'épargne",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionSavingsTerm": "Toute l'épargne",
+        "assumptionPaymentTerm": "Ce que la mensualité laisse de côté",
+        "assumptionCostsShareTerm": "Frais d'achat"
       }
     },
     "termDeposit": {
@@ -2260,10 +2371,22 @@
         "whatHeading": "Ce que montre la comparaison",
         "whatBody": "Acheter remplace le loyer par des mensualités, mais immobilise aussi de l'argent dans l'apport et les frais d'achat et ajoute les frais de propriété. Louer laisse cet argent libre d'être placé. Le calculateur suit les deux options avec la même somme de départ et compare ce que chacune vous laisse.",
         "read": {
-          "netWorth": "Le patrimoine de chaque option : pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements.",
-          "difference": "L'écart : de combien une option devance l'autre à la fin de la période choisie.",
-          "breakEven": "L'année d'équilibre : la première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire.",
-          "chart": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          "netWorth": {
+            "term": "Le patrimoine de chaque option",
+            "body": "Pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements."
+          },
+          "difference": {
+            "term": "L'écart",
+            "body": "De combien une option devance l'autre à la fin de la période choisie."
+          },
+          "breakEven": {
+            "term": "L'année d'équilibre",
+            "body": "La première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire."
+          },
+          "chart": {
+            "term": "Graphique et tableau",
+            "body": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          }
         },
         "exampleHeading": "Exemple chiffré",
         "example": {
@@ -2283,10 +2406,7 @@
           "returns": "Les placements progressent chaque mois au taux mensuel qui, composé sur douze mois, donne le rendement annuel.",
           "netWorth": "À la fin de chaque année, le patrimoine du propriétaire est la valeur du logement moins les frais de vente et le capital restant dû, plus ses placements. Celui du locataire correspond à ses placements. L'année d'équilibre est la première qui se termine avec le propriétaire devant."
         },
-        "formulaOwner": "Acheter = valeur du logement − frais de vente − capital restant dû + placements",
-        "formulaRenter": "Louer = placements",
         "formulaReturn": "Rendement mensuel",
-        "formulaLegend": "Ici, R est le rendement annuel des placements : {{investmentReturn}} par an donnent environ {{monthlyReturn}} par mois.",
         "leftOutHeading": "Ce qui n'est pas pris en compte",
         "leftOut": {
           "gainsTax": "L'impôt sur les gains des placements ou sur la plus-value de la vente du logement.",
@@ -2301,7 +2421,20 @@
         "relatedMortgage": "Pour voir le prêt seul, avec son tableau d'amortissement année par année, utilisez le",
         "relatedMortgageLink": "simulateur de prêt immobilier",
         "relatedNetWorth": "Pour additionner le logement, le prêt et votre épargne tels qu'ils sont aujourd'hui, utilisez le",
-        "relatedNetWorthLink": "calculateur de patrimoine net"
+        "relatedNetWorthLink": "calculateur de patrimoine net",
+        "formulaExample": "Un rendement de {{investmentReturn}} par an donne environ {{monthlyReturn}} par mois.",
+        "labels": {
+          "investments": "Placements"
+        },
+        "formulasLabel": "Formules",
+        "methodTerms": {
+          "start": "Mise de départ",
+          "loan": "Le prêt",
+          "monthly": "Chaque mois",
+          "growth": "Valorisation et loyer",
+          "returns": "Rendement des placements",
+          "netWorth": "Patrimoine et année d'équilibre"
+        }
       }
     },
     "rateRevision": {
@@ -2421,7 +2554,6 @@
         "exampleIncome": "Avec un revenu net de {{income}} par mois, la mensualité en prend {{currentShare}} aujourd'hui, {{newShare}} après la première hausse et {{stressShare}} après la plus forte, un niveau que les seuils du taux d'endettement classent en « {{stressBand}} ».",
         "methodTitle": "Comment c'est calculé",
         "methodIntro": "Chaque mensualité est la mensualité constante qui rembourse le capital restant dû sur les mois restants, avec le même moteur à taux fixe que le simulateur de prêt immobilier :",
-        "methodLegend": "i est l'indice et s la marge, tous deux en taux annuels. r est le taux mensuel, M la mensualité, P le capital restant dû et n le nombre de mensualités restantes. Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement P divisé par n.",
         "methodItems": {
           "change": "L'écart par mois est la première mensualité au nouveau taux moins la première mensualité au taux actuel, toutes deux sur le capital d'aujourd'hui et sur le même nombre de mois.",
           "year": "L'écart annuel compare la somme des 12 premières mensualités de chaque tableau, ou de toutes les mensualités restantes s'il en reste moins. Chaque mensualité est arrondie séparément, si bien que le total peut différer de l'écart mensuel multiplié par le nombre de mensualités.",
@@ -2440,12 +2572,40 @@
         "contractTitle": "Ce que décide votre contrat",
         "contractIntro": "Une révision réelle dépend de votre contrat et des règles du pays où vous vivez. Rien de cela n'est intégré au simulateur :",
         "contractItems": {
-          "resetDates": "Les dates de révision : à quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence.",
-          "capsFloors": "Les plafonds et planchers : certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %.",
-          "index": "L'indice : l'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication.",
-          "mixed": "Les prêts à taux mixte : une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          "resetDates": {
+            "term": "Les dates de révision",
+            "body": "À quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence."
+          },
+          "capsFloors": {
+            "term": "Les plafonds et planchers",
+            "body": "Certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication."
+          },
+          "mixed": {
+            "term": "Les prêts à taux mixte",
+            "body": "Une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          }
         },
-        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
+        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque.",
+        "terms": {
+          "change": "Écart par mois",
+          "year": "Écart sur un an",
+          "interest": "Écart d'intérêts",
+          "income": "Part des revenus",
+          "privacy": "Confidentialité",
+          "fromNextMonth": "Dès la prochaine mensualité",
+          "sameTerm": "La même durée",
+          "statement": "La mensualité actuelle",
+          "noFeed": "Pas de données d'indice",
+          "limits": "Limites",
+          "annualRate": "Taux annuel",
+          "incomeShare": "Part de la mensualité dans les revenus"
+        },
+        "zeroRate": "Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement le capital restant dû divisé par le nombre de mensualités.",
+        "methodFormulasLabel": "Formules"
       }
     },
     "carLoan": {
@@ -2508,7 +2668,16 @@
         "assumptionsTitle": "Hypothèses",
         "assumptionLoan": "L'estimation suppose un prêt à taux fixe, remboursé chaque mois, sans versement final majoré ni location. Saisissez le prix et les conditions proposés pour la voiture neuve ou d'occasion. Pour une voiture que vous possédez déjà, indiquez zéro comme prix et apport pour estimer les frais d'utilisation.",
         "assumptionFees": "Les frais de financement initiaux sont payés à l'achat avec l'apport. Saisissez une seule fois les assurances et frais liés au crédit. Le simulateur ne prend en compte que les taxes et les frais que vous saisissez.",
-        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année."
+        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année.",
+        "terms": {
+          "loan": "La mensualité",
+          "budget": "Le budget mensuel",
+          "apr": "Le TAEG estimé",
+          "assumptionLoan": "Prêt à taux fixe",
+          "assumptionFees": "Frais de financement",
+          "assumptionRunning": "Ce que couvre le budget"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Prévoyez le coût mensuel total de la voiture dans votre budget",
       "nextStepDescription": "Mettez de l'argent de côté dans WonderMoney pour la mensualité, le carburant et les factures à payer dans l'année.",
@@ -2589,9 +2758,26 @@
         "assumptionScope": "Ce simulateur suit la loi fiscale portugaise et ne s'applique qu'aux biens situés au Portugal, quel que soit votre pays de résidence. Il est pédagogique et ne constitue pas un conseil fiscal.",
         "assumptionYoung": "L'exonération des jeunes (35 ans ou moins, premier logement permanent, conditions remplies à la date de l'acte, logement gardé comme résidence permanente) est un choix distinct, pris en compte seulement si vous la cochez. Elle est totale jusqu'à {{youngFull}} et partielle jusqu'à {{youngPartial}}. L'exonération du timbre d'achat est une déduction plafonnée à 0,8 % du plafond d'exonération totale : au-delà, vous payez 0,8 % uniquement sur l'excédent. Le timbre du prêt reste dû.",
         "assumptionLoan": "Le timbre du prêt suppose un crédit de cinq ans ou plus et est toujours dû. Les frais de dossier, l'expertise et les frais de notaire ou de registre ne sont pas inclus.",
-        "assumptionUnsupported": "Non pris en charge : non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT.",
         "assumptionIslands": "Pour les Açores et Madère, le simulateur utilise les plafonds régionaux des tableaux IV à VI de l'Ofício Circulado 40129/2026, avec les mêmes taux que le continent.",
-        "sourceCircular": "Ofício Circulado 40129/2026 : barèmes de l'IMT (Autorité fiscale)"
+        "sourceCircular": "Ofício Circulado 40129/2026 : barèmes de l'IMT (Autorité fiscale)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Droit de timbre sur l'achat",
+          "stampLoan": "Droit de timbre sur le prêt"
+        },
+        "terms": {
+          "base": "Valeur imposable",
+          "imt": "IMT",
+          "stamp": "Droit de timbre",
+          "rounding": "Arrondis",
+          "scope": "Champ couvert",
+          "young": "Exonération pour les jeunes",
+          "loan": "Prêt immobilier",
+          "islands": "Açores et Madère"
+        },
+        "formulasLabel": "Formules",
+        "assumptionUnsupportedTerm": "Non pris en charge",
+        "assumptionUnsupportedBody": "Non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT."
       },
       "nextStepHeadline": "Planifiez la somme dont vous avez besoin pour acheter",
       "nextStepDescription": "Ajoutez l'IMT et le droit de timbre à l'épargne nécessaire avant d'acheter, puis suivez votre progression dans WonderMoney.",
@@ -2685,7 +2871,28 @@
         "assumptionBanks": "Les banques évaluent votre risque de crédit et peuvent refuser le prêt ou proposer d'autres conditions, quelle que soit la liste. Pour un prêt à deux emprunteurs, les deux doivent remplir les conditions.",
         "assumptionRate": "Le taux est celui que vous saisissez. La garantie ne change pas le taux d'intérêt.",
         "assumptionTaxes": "Les taxes concernent une résidence principale au Portugal continental et, dans les montants avec exonération, supposent que vous remplissez les conditions de l'IMT Jovem.",
-        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique."
+        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique.",
+        "labels": {
+          "cash": "Somme à la signature",
+          "taxes": "IMT et droit de timbre"
+        },
+        "terms": {
+          "payment": "Prêt et mensualité",
+          "taxes": "Impôts",
+          "cash": "Somme à la signature",
+          "guarantee": "La garantie",
+          "banks": "La banque décide",
+          "rate": "Taux d'intérêt",
+          "assumptionTaxes": "Impôts pris en compte",
+          "scope": "Champ couvert",
+          "conditionAge": "Âge",
+          "conditionHome": "Résidence principale",
+          "conditionProperty": "Autre logement",
+          "conditionPrice": "Prix",
+          "conditionIncome": "Revenus",
+          "conditionDate": "Date du contrat"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Planifiez l'apport et le coût de votre logement",
       "nextStepDescription": "Fixez un objectif d'apport et budgétez la mensualité, les taxes et les charges du logement dans WonderMoney.",
@@ -2785,15 +2992,29 @@
         "exampleOutro": "Le simulateur ci-dessus part de ce prêt, sans les frais, pour que vous puissiez saisir votre propre offre.",
         "methodTitle": "Comment le simulateur fait le calcul",
         "methodIntro": "La mensualité est le versement constant qui rembourse le montant sur la durée au taux mensuel, et le TAEG est le taux qui équilibre ce que vous recevez et ce que vous payez :",
-        "methodLegend": "M est la mensualité de capital et d'intérêts, P le montant emprunté, r le taux annuel nominal divisé par 12 et n le nombre de mois. Les frais mensuels f s'ajoutent à chaque mensualité.",
-        "methodApr": "Le TAEG est le taux A qui résout la deuxième ligne : ce que vous recevez au départ, le montant P moins les frais initiaux F, égale la mensualité de chaque mois Mₖ plus les frais f, actualisée par (1 + A) à la puissance k ÷ 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
+        "methodApr": "Le TAEG est le taux qui résout la dernière ligne : ce que vous recevez au départ, le montant emprunté moins les frais initiaux, égale la mensualité de chaque mois plus les frais mensuels, actualisée par un plus le TAEG à la puissance du numéro du mois divisé par 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
         "methodRounding": "Chaque chiffre est calculé en centimes entiers. Chaque mensualité est recalculée à partir du capital restant dû : les mensualités restent à un centime l'une de l'autre, la dernière solde exactement le capital et le tableau correspond aux totaux.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Rien de ce que vous saisissez n'est envoyé ni enregistré.",
         "assumptionsTitle": "Hypothèses",
         "assumptionFixedRate": "Le taux est fixe sur toute la durée et chaque mensualité est payée à temps.",
         "assumptionFees": "Les frais initiaux sont payés, ou retirés du montant, au départ du prêt ; les frais mensuels sont les mêmes chaque mois.",
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
-        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
+        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Montant reçu",
+          "month": "Mois",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG sans frais",
+          "aprFees": "TAEG avec frais"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionFeesTerm": "Frais",
+        "assumptionOtherCostsTerm": "Autres coûts",
+        "assumptionLimitsTerm": "Limites",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "savingsCertificates": {
@@ -3603,8 +3824,6 @@
         "exampleTitle": "Exemple chiffré",
         "example": "Une voiture diesel de {{cc}} cm³, avec des émissions officielles WLTP de {{co2}} g/km et immatriculée en {{year}}, doit {{tax}} d'IUC par an. Mettre {{monthly}} de côté chaque mois suffit.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodA": "Catégorie A (voitures immatriculées de 1981 à juin 2007) : l'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
-        "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
         "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
         "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
         "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. Le décret-loi n.º 161/2026 (4 août 2026) instaure une liquidation annuelle par contribuable, couvrant tous ses véhicules. 2027 est une année transitoire : un paiement en octobre jusqu'à 500 €, sinon deux en juillet et octobre (ou tout en juillet). À partir de 2028, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €. Les seuils s'appliquent au total de tous vos véhicules.",
@@ -3612,8 +3831,6 @@
         "exemptionTitle": "Voitures électriques",
         "exemption": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC et le calculateur affiche zéro. Les hybrides rechargeables et autres véhicules sont taxés selon leur cylindrée et leur CO2 figurant sur la carte grise : saisissez ces valeurs.",
         "scopeTitle": "Ce qui est couvert",
-        "scopeSupported": "Voitures particulières légères : catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
-        "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
         "assumptionsTitle": "Hypothèses",
         "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
         "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation, que le préambule du décret-loi n.º 161/2026 confirme comme la règle en vigueur. À partir de 2027, l'impôt est établi par contribuable, sur l'ensemble de ses véhicules : ajoutez chacune de vos voitures et saisissez l'IUC de vos autres véhicules comme autre IUC, pour que les mois des échéances suivent votre total (la loi applique ses seuils à ce total). Les calendriers de 2027 et 2028 montrent le montant de chaque mois pour les voitures ajoutées ; avec une seule voiture, sa part dans chaque échéance. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
@@ -3625,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 20 novembre 2026)",
         "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}.",
         "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)",
-        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)"
+        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)",
+        "methodATerm": "Catégorie A (voitures immatriculées de 1981 à juin 2007)",
+        "methodABody": "L'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
+        "methodBTerm": "Catégorie B (voitures immatriculées à partir de juillet 2007)",
+        "methodBBody": "On additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
+        "scopeSupportedTerm": "Voitures particulières légères",
+        "scopeSupportedBody": "Catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
+        "scopeUnsupportedTerm": "Non pris en charge",
+        "scopeUnsupportedBody": "Véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
+        "labels": {
+          "diesel": "Supplément diesel",
+          "engineRate": "Taux de cylindrée",
+          "co2Rate": "Taux de CO2",
+          "provision": "Provision mensuelle"
+        },
+        "terms": {
+          "additional": "Taux additionnel",
+          "diesel": "Supplément diesel",
+          "payment": "Paiement",
+          "budget": "Provision mensuelle",
+          "year": "Barèmes",
+          "paymentRule": "Échéance",
+          "educational": "Estimation pédagogique"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
@@ -3732,7 +3973,6 @@
         "methodCash": "Le solde retranche du prix de vente les frais de vente, le prêt remboursé et l'IRS estimé. Il ne retranche pas ce que vous dépensez pour le logement suivant.",
         "scopeTitle": "Ce qui est couvert",
         "scopeSupported": "Les personnes physiques résidentes fiscales au Portugal qui vendent en {{saleYear}} un bien de leur patrimoine privé acheté depuis {{firstYear}}.",
-        "scopeUnsupported": "Non couvert : non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, la surtaxe de solidarité et les réductions d'impôt.",
         "assumptionsTitle": "Hypothèses",
         "assumptionBrackets": "L'IRS supplémentaire utilise le barème annuel de l'IRS de {{saleYear}} sur le revenu saisi, comme estimation de l'effet sur la déclaration annuelle. L'imposition commune est modélisée en divisant le revenu par deux.",
         "assumptionNotModelled": "Le calculateur ne vérifie pas les conditions du remploi. Les coefficients ont été vérifiés sur le tableau de la {{portaria}} au Diário da República.",
@@ -3747,7 +3987,29 @@
         "sourceAcquisition": "CIRS, article 46 : valeur d'acquisition d'un bien acheté à titre onéreux (consulté le 20 novembre 2026)",
         "sourceCorrection": "CIRS, article 50 : correction monétaire après 24 mois (consulté le 20 novembre 2026)",
         "sourceExpenses": "CIRS, article 51 : travaux des 12 dernières années et frais d'acquisition et de vente (consulté le 20 novembre 2026)",
-        "sourceImt": "CIMT, article 12 : l'IMT est payé sur le montant le plus élevé entre le prix et la VPT (consulté le 20 novembre 2026)"
+        "sourceImt": "CIMT, article 12 : l'IMT est payé sur le montant le plus élevé entre le prix et la VPT (consulté le 20 novembre 2026)",
+        "scopeUnsupportedTerm": "Non couvert",
+        "scopeUnsupportedBody": "Non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, la surtaxe de solidarité et les réductions d'impôt.",
+        "labels": {
+          "included": "Ajouté au revenu",
+          "irsWith": "IRS avec la plus-value",
+          "irsWithout": "IRS sans la plus-value",
+          "cashAfter": "Solde"
+        },
+        "terms": {
+          "gain": "Plus-value",
+          "taxValue": "Valeur de vente et VPT",
+          "coefficient": "Coefficient",
+          "expenses": "Frais",
+          "half": "La moitié de la plus-value",
+          "exemption": "Réinvestissement",
+          "cash": "Solde",
+          "brackets": "Tranches de l'IRS",
+          "notModelled": "Ce qui n'est pas vérifié",
+          "educational": "Estimation pédagogique",
+          "supported": "Couvert"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Sachez ce que vous pouvez vraiment utiliser de la vente",
       "nextStepDescription": "WonderMoney vous aide à mettre l'impôt de côté et à voir ce qui reste pour votre prochain logement.",

@@ -82,7 +82,7 @@ function YouthMortgageCalculator() {
         <p
           id="youthMortgage-deadline"
           role="note"
-          className="mt-4 rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground"
+          className="mt-4 rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground"
         >
           {t(k("deadlineNotice"))}
         </p>
@@ -148,36 +148,29 @@ function YouthMortgageCalculator() {
           {field("termYears", { suffix: t(k("years")), max: YOUTH_MORTGAGE_LIMITS.maxTermYears })}
         </div>
         <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-          <div aria-live="polite" aria-atomic="true">
-            {result ? (
-              <>
-                <p className="text-sm text-muted-foreground">{t(k("result.monthly"))}</p>
-                <p id="youthMortgage-monthly" className="font-mono text-3xl font-bold text-primary">
-                  {money(result.monthlyPayment)}
-                </p>
-                {result.loan === 0 && <p className="mt-1 text-sm text-muted-foreground">{t(k("result.noLoan"))}</p>}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-            )}
-          </div>
+          {!result && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
           {result && (
             <>
               <CalculatorResult
                 items={[
+                  { label: t(k("result.monthly")), value: money(result.monthlyPayment), highlight: true, id: "youthMortgage-monthly" },
                   { label: t(k("result.loan")), value: money(result.loan) },
                   { label: t(k("result.ltv")), value: formatPercent(locale, result.ltv, { decimals: 1 }) },
                   { label: t(k("result.interest")), value: money(result.totalInterest) },
                   { label: t(k("result.taxesWithout")), value: money(result.taxesWithout) },
                   { label: t(k("result.taxesWith")), value: money(result.taxesWithYoung) },
                   { label: t(k("result.cashWithout")), value: money(result.cashWithout) },
-                  { label: t(k("result.cashWith")), value: money(result.cashWithYoung), highlight: true },
+                  { label: t(k("result.cashWith")), value: money(result.cashWithYoung) },
                 ]}
               />
+              {result.loan === 0 && <p className="text-sm text-muted-foreground">{t(k("result.noLoan"))}</p>}
               <p className="text-xs text-muted-foreground">{t(k("result.exemptionNote"), values)}</p>
               <p className="text-xs text-muted-foreground">{t(k("result.bankNote"))}</p>
             </>
           )}
+          <p className="sr-only" aria-live="polite" aria-atomic="true">
+            {result ? `${t(k("result.monthly"))}: ${money(result.monthlyPayment)}` : ""}
+          </p>
         </div>
       </CalculatorLayout>
     </div>

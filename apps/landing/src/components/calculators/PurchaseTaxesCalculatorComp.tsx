@@ -93,61 +93,57 @@ function PurchaseTaxesCalculator() {
             onChange={(use) => setInput((current) => ({ ...current, use }))}
           />
         </fieldset>
-        <fieldset className="space-y-4 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("financingTitle"))}</legend>
-          {field("loan")}
-        </fieldset>
-        <fieldset className="space-y-3 border-t border-border pt-4">
-          <legend className="pr-3 text-lg font-semibold">{t(k("youngTitle"))}</legend>
-          {own ? (
-            <>
-              <label className="flex items-start gap-3 text-sm font-medium text-foreground">
-                <input
-                  type="checkbox"
-                  id="purchaseTaxes-young"
-                  checked={input.young}
-                  onChange={(event) => setInput((current) => ({ ...current, young: event.target.checked }))}
-                  className="mt-1 h-4 w-4"
-                />
-                <span>{t(k("fields.young"))}</span>
-              </label>
-              <p className="text-xs text-muted-foreground">{t(k("youngNote"), youngValues)}</p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("youngUnavailable"))}</p>
-          )}
-        </fieldset>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-4">
+            <legend className="mb-3 text-lg font-semibold">{t(k("financingTitle"))}</legend>
+            {field("loan")}
+          </fieldset>
+        </div>
+        <div className="border-t border-border pt-5">
+          <fieldset className="space-y-3">
+            <legend className="mb-3 text-lg font-semibold">{t(k("youngTitle"))}</legend>
+            {own ? (
+              <>
+                <label className="flex items-start gap-3 text-sm font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    id="purchaseTaxes-young"
+                    checked={input.young}
+                    onChange={(event) => setInput((current) => ({ ...current, young: event.target.checked }))}
+                    className="mt-1 h-4 w-4"
+                  />
+                  <span>{t(k("fields.young"))}</span>
+                </label>
+                <p className="text-xs text-muted-foreground">{t(k("youngNote"), youngValues)}</p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t(k("youngUnavailable"))}</p>
+            )}
+          </fieldset>
+        </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.total"))}</p>
-              <p id="purchaseTaxes-total" className="font-mono text-3xl font-bold text-primary">
-                {money(result.total)}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t(k("result.effectiveRate"), { rate: formatPercent(locale, result.effectiveRate, { decimals: 2 }) })}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!result && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {result && (
           <>
-            <CalculatorResult
-              items={[
-                { label: t(k("result.reference")), value: money(result.reference) },
-                { label: t(k("result.imt")), value: money(result.imt) },
-                { label: t(k("result.stampPurchase")), value: money(result.stampPurchase) },
-                ...(input.loan > 0
-                  ? [{ label: t(k("result.stampLoan")), value: money(result.stampLoan) }]
-                  : []),
-              ]}
-            />
+            <div>
+              <CalculatorResult
+                items={[
+                  { label: t(k("result.total")), value: money(result.total), highlight: true, id: "purchaseTaxes-total" },
+                  { label: t(k("result.reference")), value: money(result.reference) },
+                  { label: t(k("result.imt")), value: money(result.imt) },
+                  { label: t(k("result.stampPurchase")), value: money(result.stampPurchase) },
+                  ...(input.loan > 0
+                    ? [{ label: t(k("result.stampLoan")), value: money(result.stampLoan) }]
+                    : []),
+                ]}
+              />
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t(k("result.effectiveRate"), { rate: formatPercent(locale, result.effectiveRate, { decimals: 2 }) })}
+              </p>
+            </div>
             {result.exemption !== "none" && (
-              <p className="rounded-md border border-border bg-muted/40 p-3 text-sm text-foreground">
+              <p className="rounded-md bg-paper-2 p-3 text-sm text-foreground">
                 {t(k(result.exemption === "full" ? "result.exemptFull" : "result.exemptPartial"), {
                   saving: money(result.youngSaving),
                 })}
@@ -164,6 +160,9 @@ function PurchaseTaxesCalculator() {
             </p>
           </>
         )}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {result ? `${t(k("result.total"))}: ${money(result.total)}` : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );

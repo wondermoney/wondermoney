@@ -1,20 +1,12 @@
 ---
-// Prerendered explanation, worked example and method for the variable-rate payment calculator.
-// The figures come from the same function the calculator runs, starting from its first state.
+// Prerendered explanation, worked example and method for the variable-rate payment calculator,
+// on the guide building blocks. The figures come from the same function the calculator runs,
+// starting from its first state (rateRevisionGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  RATE_REVISION_EXAMPLE,
-  RATE_REVISION_LIMITS,
-  computeRateRevision,
-  shiftedIndex,
-  type RateRevisionInput,
-} from "@/lib/calculators/rateRevision";
-import {
-  DEBT_TO_INCOME_CAUTION_FROM,
-  DEBT_TO_INCOME_HIGH_ABOVE,
-} from "@/lib/calculators/debtToIncome";
-import { formatFireDuration as formatDuration } from "@/lib/calculators/fireFormat";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildRateRevisionGuide } from "./rateRevisionGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -25,88 +17,8 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.rateRevision.guide.${key}`;
-
-const exampleInput: RateRevisionInput = {
-  balance: RATE_REVISION_EXAMPLE.balance,
-  termYears: RATE_REVISION_EXAMPLE.termYears,
-  termMonths: RATE_REVISION_EXAMPLE.termMonths,
-  indexRate: RATE_REVISION_EXAMPLE.indexRate,
-  spread: RATE_REVISION_EXAMPLE.spread,
-  newIndexRate: RATE_REVISION_EXAMPLE.newIndexRate,
-  monthlyIncome: RATE_REVISION_EXAMPLE.monthlyIncome,
-};
-
-function calculate(overrides: Partial<RateRevisionInput> = {}) {
-  const calculation = computeRateRevision({ ...exampleInput, ...overrides });
-  if (!calculation.ok) throw new Error("The rate revision worked example has invalid inputs");
-  return calculation.result;
-}
-
-const example = calculate();
-const stress = calculate({
-  newIndexRate: shiftedIndex(RATE_REVISION_EXAMPLE.indexRate, RATE_REVISION_EXAMPLE.exampleStressStep),
-});
-const shares = [example.income?.current, example.income?.revised, stress.income?.revised];
-if (example.monthlyChange <= 0 || !shares.every((share) => share?.status === "ok")) {
-  throw new Error("The worked example should raise the payment and show a share of income");
-}
-const [currentShare, newShare, stressShare] = shares as Array<
-  Extract<NonNullable<(typeof shares)[number]>, { status: "ok" }>
->;
-
-const BAND_KEY = {
-  healthy: "tools.debtToIncome.bandHealthy",
-  caution: "tools.debtToIncome.bandCaution",
-  high: "tools.debtToIncome.bandHigh",
-} as const;
-
-const exact = (value: number) => formatMoney(locale, value, { decimals: 2 });
-const euros = (value: number) => formatMoney(locale, value, { decimals: 0 });
-const pct = (value: number, decimals = Number.isInteger(value) ? 0 : 1) =>
-  formatPercent(locale, value, { decimals });
-
-const values = {
-  balance: euros(RATE_REVISION_EXAMPLE.balance),
-  term: formatDuration(locale, example.months),
-  index: pct(RATE_REVISION_EXAMPLE.indexRate),
-  spread: pct(RATE_REVISION_EXAMPLE.spread),
-  rate: pct(example.current.rate),
-  payment: exact(example.current.monthlyPayment),
-  interest: exact(example.current.totalInterest),
-  newIndex: pct(example.revised.indexRate),
-  newRate: pct(example.revised.rate),
-  newPayment: exact(example.revised.monthlyPayment),
-  monthlyChange: exact(example.monthlyChange),
-  percent: pct(example.monthlyChangePercent, 1),
-  yearlyChange: exact(example.nextYear.change),
-  interestChange: exact(example.totalInterestChange),
-  stressStep: formatNumber(locale, RATE_REVISION_EXAMPLE.exampleStressStep),
-  stressRate: pct(stress.revised.rate),
-  stressPayment: exact(stress.revised.monthlyPayment),
-  stressChange: exact(stress.monthlyChange),
-  income: euros(RATE_REVISION_EXAMPLE.monthlyIncome),
-  currentShare: pct(currentShare.ratio, 1),
-  newShare: pct(newShare.ratio, 1),
-  stressShare: pct(stressShare.ratio, 1),
-  stressBand: t(BAND_KEY[stressShare.band]),
-  caution: DEBT_TO_INCOME_CAUTION_FROM,
-  high: DEBT_TO_INCOME_HIGH_ABOVE,
-  minBalance: euros(RATE_REVISION_LIMITS.minBalance),
-  maxBalance: euros(RATE_REVISION_LIMITS.maxBalance),
-  maxYears: formatNumber(locale, RATE_REVISION_LIMITS.maxTermYears),
-  minIndex: pct(RATE_REVISION_LIMITS.minIndexRate),
-  maxIndex: pct(RATE_REVISION_LIMITS.maxIndexRate),
-  maxSpread: pct(RATE_REVISION_LIMITS.maxSpread),
-};
-
-// Lists are objects in the copy, read in order and interpolated item by item.
-const list = (key: string) =>
-  Object.keys(t<Record<string, string>>(k(key), { returnObjects: true })).map((item) =>
-    t(k(`${key}.${item}`), values),
-  );
-const methodItems = list("methodItems");
-const assumptions = list("assumptions");
-const contractItems = list("contractItems");
+const guide = buildRateRevisionGuide(locale);
+const { values } = guide;
 
 // The loan tools a visitor facing a higher payment needs next.
 const related = [
@@ -117,67 +29,46 @@ const related = [
 ---
 
 <ToolGuide>
-  <section aria-labelledby="rate-revision-what">
-    <h2 id="rate-revision-what" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("whatTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("whatBody1"))}</p>
-    <p class="mt-4">{t(k("whatBody2"))}</p>
-    <p class="mt-4">{t(k("whatBody3"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
+  <section>
+    <h2>{t(k("whatTitle"))}</h2>
+    <p>{t(k("whatBody1"))}</p>
+    <p>{t(k("whatBody2"))}</p>
+    <p>{t(k("whatBody3"))}</p>
+    <ul class="list-disc space-y-2 pl-6">
       {
         related.map((item) => (
           <li>
-            <a
-              href={toLocalizedPath(item.routeId, locale)}
-              class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
-            >
-              {item.title}
-            </a>{": "}{t(k(item.key))}
+            <a href={toLocalizedPath(item.routeId, locale)}>{item.title}</a>{": "}{t(k(item.key))}
           </li>
         ))
       }
     </ul>
   </section>
 
-  <section aria-labelledby="rate-revision-example">
-    <h2 id="rate-revision-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("exampleSetup"), values)}</p>
-    <p class="mt-4">{t(k("exampleRise"), values)}</p>
-    <p class="mt-4">{t(k("exampleStress"), values)}</p>
-    <p class="mt-4">{t(k("exampleIncome"), values)}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("exampleSetup"), values)}</p>
+    <p>{t(k("exampleRise"), values)}</p>
+    <GuideFigures items={guide.rise} operators={["+", "="]} />
+    <p>{t(k("exampleStress"), values)}</p>
+    <p>{t(k("exampleIncome"), values)}</p>
+    <GuideFigures variant="grid" items={guide.incomeShares} />
   </section>
 
-  <section aria-labelledby="rate-revision-method">
-    <h2 id="rate-revision-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("methodIntro"))}</p>
-    <div class="mt-4 space-y-1 rounded-lg bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      <p>r = max(0, i + s) ÷ 12</p>
-      <p>M = P × r ÷ (1 − (1 + r)<sup>−n</sup>)</p>
-    </div>
-    <p class="mt-4">{t(k("methodLegend"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {methodItems.map((item) => <li>{item}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {assumptions.map((item) => <li>{item}</li>)}
-    </ul>
-    <p class="mt-4">{t(k("limits"), values)}</p>
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <p>{t(k("methodIntro"))}</p>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <p>{t(k("zeroRate"))}</p>
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <GuideTermList items={guide.assumptions} />
   </section>
 
-  <section aria-labelledby="rate-revision-contract">
-    <h2 id="rate-revision-contract" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("contractTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("contractIntro"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {contractItems.map((item) => <li>{item}</li>)}
-    </ul>
-    <p class="mt-4">{t(k("contractOutro"))}</p>
+  <section>
+    <h2>{t(k("contractTitle"))}</h2>
+    <p>{t(k("contractIntro"))}</p>
+    <GuideTermList items={guide.contract} />
+    <p>{t(k("contractOutro"))}</p>
   </section>
 </ToolGuide>

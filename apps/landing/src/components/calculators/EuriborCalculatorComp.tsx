@@ -110,7 +110,7 @@ function EuriborContent() {
           {LATEST.rates.map((entry) => (
             <div key={entry.tenor} className="rounded-card border border-border bg-background p-5 shadow-sm">
               <p className="text-sm text-muted-foreground">{t(k(`tenor.${entry.tenor}`))}</p>
-              <p className="font-mono text-3xl font-bold text-primary">{rate(entry.rate)}</p>
+              <p className="mt-1 font-mono text-3xl font-semibold tracking-tight text-foreground">{rate(entry.rate)}</p>
               <p className="mt-1 text-sm text-foreground">
                 {t(k("current.change"), {
                   change: points(entry.change),
@@ -294,6 +294,7 @@ function EuriborContent() {
               <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
               {EURIBOR_TENORS.map((tenor, position) => (
                 <Line
+                  isAnimationActive={false}
                   key={tenor}
                   type="monotone"
                   dataKey={TENOR_KEY[tenor]}

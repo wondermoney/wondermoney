@@ -597,7 +597,18 @@
         "reviewed": "Reglas revisadas el 20 de noviembre de 2026 para el IMI que se paga en 2026 y 2027. Los importes del IMI Familiar proceden del artículo 112-A del Código do IMI (Portal das Finanças).",
         "methodMinimum": "Si el impuesto a cobrar, tras cualquier reducción del IMI Familiar, es inferior a 10 €, no se liquida IMI y la calculadora muestra 0 € con una nota (artículo 113.6 del Código do IMI).",
         "sourceMinimum": "Código do IMI, artículo 113: liquidación, sin IMI por debajo de 10 € (consultado el 19 de noviembre de 2026)",
-        "sourceEbf": "Estatuto de los Beneficios Fiscales, artículo 46: exención de la vivienda habitual, en la redacción de la Lei n.º 82/2023, igual a la del texto consolidado del Diário da República (consultado el 20 de noviembre de 2026)"
+        "sourceEbf": "Estatuto de los Beneficios Fiscales, artículo 46: exención de la vivienda habitual, en la redacción de la Lei n.º 82/2023, igual a la del texto consolidado del Diário da República (consultado el 20 de noviembre de 2026)",
+        "terms": {
+          "tax": "IMI anual",
+          "family": "IMI Familiar",
+          "minimum": "Importe mínimo",
+          "payment": "Plazos de pago",
+          "budget": "Reserva mensual",
+          "rate": "Tipo municipal",
+          "scope": "Alcance",
+          "educational": "Estimación educativa"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Que el IMI no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del IMI cada mes, para que los plazos ya estén cubiertos.",
@@ -1111,15 +1122,20 @@
         "exampleBody": "Una pareja ingresa {{income}} netos al mes entre los dos. Paga {{home}} de hipoteca, {{car}} del préstamo del coche y {{cards}} de la tarjeta de crédito: {{total}} en total. Al dividir las cuotas entre los ingresos y multiplicar por 100, su ratio es del {{ratio}}, en el tramo de precaución.",
         "exampleScenario": "El préstamo del coche termina pronto. Sin él, las cuotas bajan a {{scenarioTotal}} y el ratio al {{scenarioRatio}}, de nuevo en el tramo saludable. La calculadora de arriba empieza con este hogar y este cambio, para que pongas tus propias cifras.",
         "methodHeading": "Método",
-        "methodFormula": "Ratio de endeudamiento = total de cuotas mensuales de crédito ÷ ingresos netos mensuales del hogar × 100",
-        "methodCounts": "Cuenta como deuda: cada cuota que vence en el mes de hipotecas, préstamos personales y de coche, tarjetas de crédito, leasing y cualquier otro crédito. En una tarjeta, usa lo que pagas de verdad cada mes.",
-        "methodExcludes": "No cuenta: el alquiler a un casero, los recibos, la compra, los seguros y el ahorro. Pesan en el presupuesto, pero no son devoluciones de dinero prestado.",
-        "methodIncome": "Los ingresos son netos: lo que llega a la cuenta después de impuestos y cotizaciones, de todas las personas del hogar que comparten las cuotas. Si tus ingresos varían, usa la media mensual del último año.",
         "methodRounding": "El ratio se redondea a un decimal, y el tramo sigue la cifra redondeada. Si las cuotas superan los ingresos, el ratio pasa del 100 %.",
         "methodPrivacy": "El cálculo se hace en tu navegador. Las cifras que introduces se quedan en tu dispositivo y no se guardan.",
         "nextHeading": "¿Piensas pedir un préstamo nuevo?",
         "nextBody": "Una hipoteca u otro préstamo añade una cuota. Calcula cuánto costaría al mes una nueva hipoteca e introduce esa cuota en el panel de escenario para ver el nuevo ratio.",
-        "nextLink": "Abrir la calculadora de hipoteca"
+        "nextLink": "Abrir la calculadora de hipoteca",
+        "methodCountsTerm": "Cuenta como deuda",
+        "methodCountsBody": "Cada cuota que vence en el mes de hipotecas, préstamos personales y de coche, tarjetas de crédito, leasing y cualquier otro crédito. En una tarjeta, usa lo que pagas de verdad cada mes.",
+        "methodExcludesTerm": "No cuenta",
+        "methodExcludesBody": "El alquiler a un casero, los recibos, la compra, los seguros y el ahorro. Pesan en el presupuesto, pero no son devoluciones de dinero prestado.",
+        "methodIncomeTerm": "Los ingresos son netos",
+        "methodIncomeBody": "Lo que llega a la cuenta después de impuestos y cotizaciones, de todas las personas del hogar que comparten las cuotas. Si tus ingresos varían, usa la media mensual del último año.",
+        "methodRoundingTerm": "Redondeo",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "householdBudget": {
@@ -1324,7 +1340,6 @@
         "method": {
           "title": "Cómo se calcula la cuota",
           "intro": "La mayoría de las hipotecas a tipo fijo se devuelven con cuotas constantes: el mismo importe cada mes, calculado para que la deuda llegue a cero con la última. La cuota sale de la fórmula de la anualidad:",
-          "legend": "Aquí M es la cuota mensual, P es el importe prestado, r es el tipo anual dividido entre 12 y n es el número de cuotas mensuales. Con un interés del 0 % no hay nada que descontar, y la cuota es simplemente P dividido entre n.",
           "schedule": "Cada mes, los intereses se calculan sobre el capital pendiente y el resto de la cuota amortiza capital. A medida que baja la deuda, la parte de intereses se reduce y la de capital crece; por eso la deuda baja despacio al principio y más deprisa al final. Los seguros y comisiones se suman a la cuota y nunca reducen la deuda.",
           "assumptionsTitle": "Supuestos",
           "assumptions": {
@@ -1335,7 +1350,24 @@
             "rounding": "Los importes están en euros. La cuota de cada mes se calcula a partir del capital pendiente y de los meses que quedan, y se redondea al céntimo; por eso una cuota puede diferir de las demás en un céntimo, y la última liquida la deuda exactamente. En un préstamo muy largo a un tipo alto, las primeras cuotas pueden amortizar menos de un céntimo.",
             "lenderFigures": "Las cifras de tu banco pueden variar ligeramente por cómo cuenta los días, redondea los importes o fija la fecha de pago. La información precontractual que te entregue es la referencia."
           },
-          "limits": "La calculadora acepta préstamos de {{minAmount}} a {{maxAmount}}, plazos de hasta {{maxYears}} años y tipos de hasta {{maxRate}}."
+          "limits": "La calculadora acepta préstamos de {{minAmount}} a {{maxAmount}}, plazos de hasta {{maxYears}} años y tipos de hasta {{maxRate}}.",
+          "formulasLabel": "Fórmulas",
+          "zeroRate": "Con un interés del 0 % no hay nada que descontar, y la cuota es simplemente el importe del préstamo dividido entre el número de cuotas.",
+          "terms": {
+            "fixedRate": "Tipo fijo",
+            "monthly": "Cuotas mensuales",
+            "nominalRate": "Tipo nominal, no la TAE",
+            "flatFees": "Seguros y comisiones",
+            "rounding": "Redondeo",
+            "lenderFigures": "Las cifras de tu banco",
+            "limits": "Límites"
+          }
+        },
+        "labels": {
+          "firstInterest": "Intereses en la primera cuota",
+          "firstPrincipal": "Capital en la primera cuota",
+          "monthlyRate": "Tipo mensual",
+          "payments": "Número de cuotas"
         }
       },
       "cta": {
@@ -1458,11 +1490,26 @@
         "before": {
           "title": "Antes de amortizar",
           "items": {
-            "fee": "Revisa la comisión. El banco puede cobrar un porcentaje de lo que amortizas, y las normas y los límites legales cambian según el país y el tipo de préstamo. Introdúcela en la calculadora para ver el ahorro neto.",
-            "rate": "Los tipos variables y mixtos quedan fuera de esta calculadora: las cuentas suponen que el tipo que introduces se mantiene fijo hasta el final del préstamo.",
-            "reserves": "Guarda un colchón. El dinero que entregas al banco es difícil de recuperar, así que asegúrate de que tu fondo de emergencia sigue ahí después de amortizar.",
-            "otherDebts": "Paga primero la deuda más cara. Si tienes una tarjeta de crédito o un préstamo personal con un tipo más alto, amortizarlo suele ahorrar más que amortizar una hipoteca más barata.",
-            "lender": "Pregunta al banco cómo aplica la amortización. Unos bajan la cuota por defecto, otros acortan el plazo y muchos te dejan elegir."
+            "fee": {
+              "term": "Revisa la comisión",
+              "body": "El banco puede cobrar un porcentaje de lo que amortizas, y las normas y los límites legales cambian según el país y el tipo de préstamo. Introdúcela en la calculadora para ver el ahorro neto."
+            },
+            "rate": {
+              "term": "Los tipos variables y mixtos quedan fuera de esta calculadora",
+              "body": "Las cuentas suponen que el tipo que introduces se mantiene fijo hasta el final del préstamo."
+            },
+            "reserves": {
+              "term": "Guarda un colchón",
+              "body": "El dinero que entregas al banco es difícil de recuperar, así que asegúrate de que tu fondo de emergencia sigue ahí después de amortizar."
+            },
+            "otherDebts": {
+              "term": "Paga primero la deuda más cara",
+              "body": "Si tienes una tarjeta de crédito o un préstamo personal con un tipo más alto, amortizarlo suele ahorrar más que amortizar una hipoteca más barata."
+            },
+            "lender": {
+              "term": "Pregunta al banco cómo aplica la amortización",
+              "body": "Unos bajan la cuota por defecto, otros acortan el plazo y muchos te dejan elegir."
+            }
           }
         },
         "example": {
@@ -1475,9 +1522,6 @@
         "method": {
           "title": "Cómo se calcula",
           "intro": "La calculadora primero calcula el préstamo tal como está, con el mismo motor de tipo fijo que la calculadora de hipoteca. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
-          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas que quedan. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n.",
-          "lowerPayment": "Mantener el plazo: el capital que queda tras la amortización vuelve a la fórmula con el mismo n, lo que da la nueva cuota, más baja.",
-          "shorterTerm": "Mantener la cuota: sigues pagando lo que el cuadro original prevé cada mes hasta que el capital menor se acaba. La última cuota solo cubre lo que falta, así que suele ser menor.",
           "fee": "La comisión es el porcentaje que introduces, aplicado a la cantidad amortizada. Los intereses ahorrados son los intereses que quedan en el préstamo tal como está menos los de cada escenario, y el ahorro neto es eso menos la comisión. Una cantidad mayor que el capital pendiente cancela el préstamo, y solo el capital cuenta para la comisión.",
           "assumptionsTitle": "Supuestos",
           "assumptions": {
@@ -1488,7 +1532,23 @@
             "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran.",
             "lenderFigures": "Las cifras de tu banco pueden variar un poco por cómo cuenta los días y redondea. Pídele su propia simulación antes de amortizar."
           },
-          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años pendientes, tipos de hasta {{maxRate}} y comisiones de hasta el {{maxFee}} de lo amortizado."
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, hasta {{maxYears}} años pendientes, tipos de hasta {{maxRate}} y comisiones de hasta el {{maxFee}} de lo amortizado.",
+          "lowerPaymentTerm": "Mantener el plazo",
+          "lowerPaymentBody": "El capital que queda tras la amortización vuelve a la fórmula con el mismo número de cuotas, lo que da la nueva cuota, más baja.",
+          "shorterTermTerm": "Mantener la cuota",
+          "shorterTermBody": "Sigues pagando lo que el cuadro original prevé cada mes hasta que el capital menor se acaba. La última cuota solo cubre lo que falta, así que suele ser menor.",
+          "zeroRate": "Al 0% no hay intereses, así que la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+          "terms": {
+            "fixedRate": "Tipo fijo",
+            "timing": "Momento de la amortización",
+            "oneOff": "Una sola amortización",
+            "costs": "Costes",
+            "rounding": "Redondeo",
+            "lenderFigures": "Las cifras de tu banco",
+            "limits": "Límites",
+            "feeNote": "Comisión y ahorro neto"
+          },
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Otras calculadoras",
@@ -1663,10 +1723,22 @@
           "title": "Qué comparar antes de cambiar",
           "intro": "Llevar tu hipoteca a otra entidad, o renegociar las condiciones con la tuya, puede bajar lo que pagas. Un tipo más bajo es solo una parte de la cuenta, así que compara la oferta completa:",
           "items": {
-            "rate": "El tipo. Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes.",
-            "monthlyCosts": "Los extras mensuales. Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro.",
-            "term": "El plazo. Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo.",
-            "oneOff": "Los gastos únicos. Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+            "rate": {
+              "term": "El tipo",
+              "body": "Un tipo fijo más bajo reduce los intereses que se cobran cada mes sobre lo que debes."
+            },
+            "monthlyCosts": {
+              "term": "Los extras mensuales",
+              "body": "Es habitual que la entidad te pida contratar con ella los seguros de vida y hogar, o abrir una cuenta con comisiones. Súmalos a la cuota, o un tipo más barato puede salir más caro."
+            },
+            "term": {
+              "term": "El plazo",
+              "body": "Un préstamo nuevo a más años baja la cuota, pero pagas intereses durante más tiempo."
+            },
+            "oneOff": {
+              "term": "Los gastos únicos",
+              "body": "Salir de un préstamo y firmar otro tiene costes, y salen de tus ahorros."
+            }
           },
           "outro": "La calculadora junta todo esto: la cuota con los extras, el total que cada préstamo aún cuesta y el mes en que recuperas los gastos del cambio."
         },
@@ -1691,7 +1763,6 @@
         "method": {
           "title": "Cómo se calcula",
           "intro": "La calculadora calcula los dos préstamos con el mismo motor de tipo fijo que la calculadora de hipoteca, sobre el capital que aún debes. Cada mes, los intereses se cobran sobre el capital pendiente y el resto de la cuota amortiza el préstamo. La cuota constante sale de la fórmula de anualidades:",
-          "legend": "M es la cuota mensual, P el capital pendiente, r el tipo anual dividido entre 12 y n el número de cuotas. Al 0% no hay intereses, así que la cuota es simplemente P dividido entre n. Los seguros y comisiones de cada mes se suman encima.",
           "saving": "El ahorro de un mes es lo que costaría ese mes la hipoteca actual menos lo que cuesta la nueva. Un préstamo ya pagado no cuesta nada, así que, con un nuevo plazo más largo, los meses posteriores al final de tu hipoteca actual cuentan como coste. El coste total de cada opción son sus cuotas, seguros y comisiones, más los gastos del cambio en el nuevo préstamo. El ahorro neto es la diferencia.",
           "breakEven": "El mes en que el cambio se paga solo es el primero en que el ahorro acumulado llega al menos a los gastos del cambio. Si eso no ocurre antes de que terminen los dos préstamos, el cambio no se paga solo.",
           "longerTerm": "Cuando el nuevo plazo es más largo que el plazo que queda, la calculadora calcula también la oferta en el plazo que queda, para que veas cuánto de la bajada de la cuota viene del tipo y cuánto de pagar durante más tiempo.",
@@ -1705,7 +1776,22 @@
             "rounding": "Los importes están en euros. Los intereses y la cuota de cada mes se redondean al céntimo, así que todos los totales de la página cuadran. La cuota mostrada es la primera; las siguientes quedan a menos de un céntimo de ella.",
             "lenderFigures": "Cada entidad cuenta los días y redondea a su manera, así que sus cifras pueden variar un poco. Pide a cada una su oferta vinculante antes de decidir."
           },
-          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital."
+          "limits": "La calculadora acepta capitales de {{minBalance}} a {{maxBalance}}, plazos de hasta {{maxYears}} años, tipos de hasta {{maxRate}} y comisiones de salida de hasta {{maxExitFee}} del capital.",
+          "terms": {
+            "saving": "Ahorro y coste total",
+            "breakEven": "Mes en que el cambio se paga",
+            "longerTerm": "Un plazo más largo",
+            "fixedRate": "Tipos fijos",
+            "sameBalance": "El mismo capital",
+            "timing": "Momento del cambio",
+            "fees": "Seguros y comisiones",
+            "noDiscounting": "Sin descontar en el tiempo",
+            "rounding": "Redondeo",
+            "lenderFigures": "Las cifras de los bancos",
+            "limits": "Límites"
+          },
+          "zeroRate": "Al 0% no hay intereses, así que la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+          "formulasLabel": "Fórmulas"
         },
         "related": {
           "title": "Otras calculadoras",
@@ -1715,6 +1801,13 @@
           "earlyRepaymentBody": "Lo que ahorrarías con una amortización en tu hipoteca actual, en lugar de cambiarla.",
           "debtToIncomeLink": "Calculadora de ratio de endeudamiento",
           "debtToIncomeBody": "La parte de tus ingresos que se va en cuotas, hoy y con la nueva cuota."
+        },
+        "labels": {
+          "monthlySaving": "Ahorro al mes",
+          "currentMonthTotal": "Coste del préstamo actual ese mes",
+          "offerMonthTotal": "Coste del préstamo nuevo ese mes",
+          "currentTotalCost": "Coste total del préstamo actual",
+          "offerTotalCost": "Coste total del préstamo nuevo"
         }
       },
       "cta": {
@@ -1984,16 +2077,12 @@
         "relatedDebtToIncome": "muestra qué parte de tus ingresos ocupan tus cuotas actuales, con los mismos tramos que usa esta herramienta.",
         "exampleTitle": "Ejemplo práctico",
         "exampleIntro": "Una pareja ingresa {{income}} netos al mes y paga {{existing}} al mes por un préstamo de coche. Tiene {{savings}} ahorrados para la vivienda, cuenta con un tipo fijo del {{rate}} a {{years}} años y prevé gastos de compra del {{costsRate}} del precio. Su banco financia hasta el {{ltv}} del precio, y la pareja permite un {{share}} de sus ingresos para crédito.",
-        "exampleStep1": "Margen mensual: el {{share}} de {{income}} son {{allowed}}. Restando los {{existing}} del coche, quedan {{room}} al mes para el nuevo préstamo.",
-        "exampleStep2": "Préstamo máximo: una cuota de {{room}} al {{rate}} durante {{years}} años devuelve {{maxLoan}}. Sumando todos los ahorros y pagando los gastos de compra con el total, el límite mensual permite un precio de {{monthlyPrice}}.",
-        "exampleStep3": "Dinero por adelantado: cada euro del precio pide un {{deposit}} para la entrada y un {{costsRate}} para los gastos, un {{cashShare}} en total. {{savings}} ÷ {{cashShare}} da un precio de {{cashPrice}}.",
         "exampleStep4": "El más bajo de los dos es {{monthlyPrice}}, así que es el presupuesto mensual el que marca el límite.",
         "exampleResult": "A {{price}}, la pareja pediría {{loan}}, pondría {{downPayment}} de entrada y pagaría {{purchaseCosts}} en gastos, usando todos sus {{savings}}. La calculadora de hipoteca sitúa la cuota en {{payment}} al mes.",
         "exampleLift": "Con unos {{extraIncome}} más de ingresos netos al mes llegarían a {{liftPrice}}, donde el límite de los ahorros toma el relevo.",
         "exampleSavings": "Con solo {{lowSavings}} ahorrados, todo cambia: los ahorros cubren un precio de {{lowSavingsPrice}}, con un préstamo de {{lowSavingsLoan}}, muy por debajo de lo que sus ingresos podrían asumir. Para subir el límite, lo que cuenta es ahorrar más, no ganar más. La calculadora de arriba parte de la primera pareja, para que pongas tus propias cifras.",
         "methodTitle": "Método",
         "methodIntro": "El cálculo trata cada límite por separado y luego se queda con el precio más bajo.",
-        "methodLegend": "I son los ingresos netos mensuales, d la parte permitida para crédito, E las cuotas actuales y M el margen para la nueva cuota. r es el tipo anual dividido entre 12, n el número de cuotas mensuales y L el préstamo máximo. S son los ahorros, c los gastos de compra y v la financiación, ambos como porcentaje del precio. P₁ es el precio que permite el presupuesto mensual y P₂ el que permiten los ahorros.",
         "methodShare": "La parte inicial del {{share}} está en el tramo de precaución de la calculadora de ratio de endeudamiento ({{caution}}% a {{high}}%). Es una regla orientativa, no un límite legal.",
         "methodCosts": "En el precio máximo, cada euro de ahorro va a la compra: primero los gastos y el resto como entrada. El préstamo cubre lo que falta, y nunca más de lo que permite la financiación máxima.",
         "methodRounding": "Los importes se calculan en céntimos. El préstamo se redondea a la baja al céntimo, así que la primera cuota, calculada por la calculadora de hipoteca, cabe en tu margen; las siguientes pueden variar un céntimo. El precio es exactamente el préstamo más la entrada, y los ingresos o ahorros adicionales se redondean al alza al euro.",
@@ -2005,11 +2094,33 @@
         "assumptionCostsShare": "Los gastos de compra son un porcentaje fijo del precio. En la práctica, los impuestos suelen ir por tramos y algunas comisiones son importes fijos.",
         "lendersTitle": "Lo que miran los bancos y esta herramienta no",
         "lendersIntro": "La respuesta de un banco puede quedar por debajo de esta estimación, a veces bastante. Las reglas cambian de un banco a otro y de un país a otro, y esta calculadora no incluye ninguna.",
-        "lenderStress": "Tipos de estrés: muchos bancos comprueban que podrías seguir pagando si el tipo subiera unos puntos, sobre todo en préstamos a tipo variable.",
-        "lenderIncome": "Definición de ingresos: algunos solo cuentan parte de las primas, de los ingresos como autónomo o de alquileres, o hacen la media de varios años.",
-        "lenderCountry": "Límites del país: en muchos países el regulador limita la financiación, la parte de los ingresos que va a cuotas, el préstamo frente a los ingresos o el plazo.",
-        "lenderProfile": "Tu perfil: la edad al final del plazo, la estabilidad laboral, el historial de crédito y la propia vivienda también cuentan.",
-        "lendersOutro": "Usa el resultado para saber más o menos dónde estás antes de hablar con un banco, y luego pregunta qué límites se aplican en tu caso."
+        "lendersOutro": "Usa el resultado para saber más o menos dónde estás antes de hablar con un banco, y luego pregunta qué límites se aplican en tu caso.",
+        "exampleStep1Term": "Margen mensual",
+        "exampleStep1Body": "El {{share}} de {{income}} son {{allowed}}. Restando los {{existing}} del coche, quedan {{room}} al mes para el nuevo préstamo.",
+        "exampleStep2Term": "Préstamo máximo",
+        "exampleStep2Body": "Una cuota de {{room}} al {{rate}} durante {{years}} años devuelve {{maxLoan}}. Sumando todos los ahorros y pagando los gastos de compra con el total, el límite mensual permite un precio de {{monthlyPrice}}.",
+        "exampleStep3Term": "Dinero por adelantado",
+        "exampleStep3Body": "Cada euro del precio pide un {{deposit}} para la entrada y un {{costsRate}} para los gastos, un {{cashShare}} en total. {{savings}} ÷ {{cashShare}} da un precio de {{cashPrice}}.",
+        "lenderStressTerm": "Tipos de estrés",
+        "lenderStressBody": "Muchos bancos comprueban que podrías seguir pagando si el tipo subiera unos puntos, sobre todo en préstamos a tipo variable.",
+        "lenderIncomeTerm": "Definición de ingresos",
+        "lenderIncomeBody": "Algunos solo cuentan parte de las primas, de los ingresos como autónomo o de alquileres, o hacen la media de varios años.",
+        "lenderCountryTerm": "Límites del país",
+        "lenderCountryBody": "En muchos países el regulador limita la financiación, la parte de los ingresos que va a cuotas, el préstamo frente a los ingresos o el plazo.",
+        "lenderProfileTerm": "Tu perfil",
+        "lenderProfileBody": "La edad al final del plazo, la estabilidad laboral, el historial de crédito y la propia vivienda también cuentan.",
+        "methodRoundingTerm": "Redondeo",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas",
+        "labels": {
+          "maxLoan": "Préstamo máximo"
+        },
+        "methodShareTerm": "Parte para crédito",
+        "methodCostsTerm": "A dónde van los ahorros",
+        "assumptionFixedRateTerm": "Tipo fijo",
+        "assumptionSavingsTerm": "Todos los ahorros",
+        "assumptionPaymentTerm": "Lo que la cuota deja fuera",
+        "assumptionCostsShareTerm": "Gastos de compra"
       }
     },
     "termDeposit": {
@@ -2260,10 +2371,22 @@
         "whatHeading": "Qué muestra la comparación",
         "whatBody": "Comprar cambia el alquiler por la cuota de la hipoteca, pero también inmoviliza dinero en la entrada y los gastos de compra y añade los gastos de ser propietario. Alquilar deja ese dinero libre para invertir. La calculadora sigue los dos caminos con el mismo dinero inicial y compara con cuánto te deja cada uno.",
         "read": {
-          "netWorth": "El patrimonio de cada camino: si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones.",
-          "difference": "La diferencia: cuánto va por delante un camino al final del periodo que has elegido.",
-          "breakEven": "El año de equilibrio: el primer año que termina con comprar por delante. Comprar empieza por detrás siempre que haya gastos de compra o de venta: los gastos de compra se pagan el primer día y vender enseguida costaría además los gastos de venta. Comprar también puede ponerse por delante y volver a quedarse atrás, por ejemplo cuando el valor de la vivienda crece más despacio que las inversiones de quien alquila.",
-          "chart": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
+          "netWorth": {
+            "term": "El patrimonio de cada camino",
+            "body": "Si compras, lo que quedaría tras vender la vivienda, pagar los gastos de venta y cancelar la hipoteca, más lo invertido; si alquilas, las inversiones."
+          },
+          "difference": {
+            "term": "La diferencia",
+            "body": "Cuánto va por delante un camino al final del periodo que has elegido."
+          },
+          "breakEven": {
+            "term": "El año de equilibrio",
+            "body": "El primer año que termina con comprar por delante. Comprar empieza por detrás siempre que haya gastos de compra o de venta: los gastos de compra se pagan el primer día y vender enseguida costaría además los gastos de venta. Comprar también puede ponerse por delante y volver a quedarse atrás, por ejemplo cuando el valor de la vivienda crece más despacio que las inversiones de quien alquila."
+          },
+          "chart": {
+            "term": "Gráfico y tabla",
+            "body": "El gráfico y la tabla muestran los dos caminos cada año, para que veas si la distancia se acorta o se amplía."
+          }
         },
         "exampleHeading": "Ejemplo práctico",
         "example": {
@@ -2283,10 +2406,7 @@
           "returns": "Las inversiones crecen cada mes al tipo mensual que, compuesto durante un año, da la rentabilidad anual.",
           "netWorth": "Al final de cada año, el patrimonio de quien compra es el valor de la vivienda menos los gastos de venta y la hipoteca pendiente, más sus inversiones. El de quien alquila son sus inversiones. El año de equilibrio es el primero que termina con quien compra por delante."
         },
-        "formulaOwner": "Comprar = valor de la vivienda − gastos de venta − hipoteca pendiente + inversiones",
-        "formulaRenter": "Alquilar = inversiones",
         "formulaReturn": "Rentabilidad mensual",
-        "formulaLegend": "Aquí R es la rentabilidad anual de la inversión: un {{investmentReturn}} al año equivale a un {{monthlyReturn}} al mes, aproximadamente.",
         "leftOutHeading": "Lo que no incluye",
         "leftOut": {
           "gainsTax": "Impuestos sobre las ganancias de las inversiones o sobre la plusvalía de la venta de la vivienda.",
@@ -2301,7 +2421,20 @@
         "relatedMortgage": "Para ver el préstamo por sí solo, con su cuadro de amortización año a año, usa la",
         "relatedMortgageLink": "calculadora de hipoteca",
         "relatedNetWorth": "Para sumar la vivienda, la hipoteca y tus ahorros tal como están hoy, usa la",
-        "relatedNetWorthLink": "calculadora de patrimonio neto"
+        "relatedNetWorthLink": "calculadora de patrimonio neto",
+        "formulaExample": "Una rentabilidad del {{investmentReturn}} al año equivale a un {{monthlyReturn}} al mes, aproximadamente.",
+        "labels": {
+          "investments": "Inversiones"
+        },
+        "formulasLabel": "Fórmulas",
+        "methodTerms": {
+          "start": "Dinero de partida",
+          "loan": "La hipoteca",
+          "monthly": "Cada mes",
+          "growth": "Revalorización y alquiler",
+          "returns": "Rentabilidad de la inversión",
+          "netWorth": "Patrimonio y año de equilibrio"
+        }
       }
     },
     "rateRevision": {
@@ -2421,7 +2554,6 @@
         "exampleIncome": "Con unos ingresos netos de {{income}} al mes, la cuota se lleva hoy el {{currentShare}}, el {{newShare}} tras la primera subida y el {{stressShare}} tras la mayor, un valor que los niveles del ratio de endeudamiento califican como «{{stressBand}}».",
         "methodTitle": "Cómo se calcula",
         "methodIntro": "Cada cuota es la cuota constante que devuelve el capital pendiente en los meses que quedan, con el mismo motor de tipo fijo que la calculadora de hipoteca:",
-        "methodLegend": "i es el índice y s el diferencial, ambos como tipos anuales. r es el tipo mensual, M la cuota mensual, P el capital pendiente y n el número de cuotas que quedan. Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente P dividido entre n.",
         "methodItems": {
           "change": "La diferencia al mes es la primera cuota al nuevo tipo menos la primera cuota al tipo actual, ambas sobre el capital de hoy y en el mismo número de meses.",
           "year": "La diferencia anual compara la suma de las 12 primeras cuotas de cada cuadro o de todas las restantes si quedan menos. Cada cuota se redondea por separado, así que el total puede diferir de la diferencia mensual multiplicada por el número de cuotas.",
@@ -2440,12 +2572,40 @@
         "contractTitle": "Lo que decide tu contrato",
         "contractIntro": "Cómo funciona una revisión real depende de tu contrato y de las normas del país donde vives. Nada de esto está incluido en el simulador:",
         "contractItems": {
-          "resetDates": "Fechas de revisión: cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota.",
-          "capsFloors": "Techos y suelos: algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%.",
-          "index": "El índice: el Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación.",
-          "mixed": "Préstamos a tipo mixto: primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+          "resetDates": {
+            "term": "Fechas de revisión",
+            "body": "Cada cuánto se revisa el tipo, el valor del índice de qué día cuenta y cuándo empieza la nueva cuota."
+          },
+          "capsFloors": {
+            "term": "Techos y suelos",
+            "body": "Algunos contratos limitan cuánto puede subir o bajar el tipo, o impiden que baje de un nivel fijado. El simulador solo impide que el tipo baje del 0%."
+          },
+          "index": {
+            "term": "El índice",
+            "body": "El Euríbor, un tipo de un banco central o un tipo de referencia nacional, cada uno con sus propios plazos (por ejemplo 3, 6 o 12 meses) y su calendario de publicación."
+          },
+          "mixed": {
+            "term": "Préstamos a tipo mixto",
+            "body": "Primero hay un periodo a tipo fijo y después el tipo variable. Introduce el capital y el plazo tal como estarán cuando empiece el periodo variable."
+          }
         },
-        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco."
+        "contractOutro": "Las cifras que cuentan son las de tu banco. Usa este simulador para prepararte antes de una revisión y luego compara sus cifras con las del banco.",
+        "terms": {
+          "change": "Diferencia al mes",
+          "year": "Diferencia en un año",
+          "interest": "Diferencia en intereses",
+          "income": "Peso en los ingresos",
+          "privacy": "Privacidad",
+          "fromNextMonth": "Desde la próxima cuota",
+          "sameTerm": "El mismo plazo",
+          "statement": "La cuota de hoy",
+          "noFeed": "Sin datos del índice",
+          "limits": "Límites",
+          "annualRate": "Tipo anual",
+          "incomeShare": "Peso de la cuota en los ingresos"
+        },
+        "zeroRate": "Cuando el índice más el diferencial queda por debajo del 0%, el tipo se toma como 0% y la cuota es simplemente el capital pendiente dividido entre el número de cuotas.",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "carLoan": {
@@ -2508,7 +2668,16 @@
         "assumptionsTitle": "Supuestos",
         "assumptionLoan": "Se supone un préstamo a tipo fijo, con cuotas mensuales, sin cuota final extraordinaria ni arrendamiento. Introduce el precio y las condiciones de la oferta para el coche nuevo o usado. Para calcular los gastos de un coche que ya tienes, escribe cero en el precio y en la entrada.",
         "assumptionFees": "Los gastos iniciales se pagan en el momento de la compra junto a la entrada. Introduce una sola vez cada seguro o gasto asociado al préstamo. El simulador solo incluye los impuestos y gastos que introduzcas.",
-        "assumptionRunning": "El presupuesto mensual incluye los gastos indicados. Quedan fuera la depreciación, el valor de reventa, el aparcamiento, los peajes y las reparaciones que superen la reserva de mantenimiento. Las facturas anuales pueden vencer en un solo mes aunque el simulador las reparta durante el año."
+        "assumptionRunning": "El presupuesto mensual incluye los gastos indicados. Quedan fuera la depreciación, el valor de reventa, el aparcamiento, los peajes y las reparaciones que superen la reserva de mantenimiento. Las facturas anuales pueden vencer en un solo mes aunque el simulador las reparta durante el año.",
+        "terms": {
+          "loan": "La cuota",
+          "budget": "El presupuesto mensual",
+          "apr": "La TAE estimada",
+          "assumptionLoan": "Préstamo a tipo fijo",
+          "assumptionFees": "Gastos de financiación",
+          "assumptionRunning": "Lo que cubre el presupuesto"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Incluye el coste mensual total del coche en tu presupuesto",
       "nextStepDescription": "Reserva dinero en WonderMoney para la cuota, el combustible y las facturas que lleguen a lo largo del año.",
@@ -2589,9 +2758,26 @@
         "assumptionScope": "Esta calculadora sigue la ley fiscal portuguesa y solo se aplica a inmuebles situados en Portugal, sea cual sea tu país de residencia. Es educativa y no es asesoramiento fiscal.",
         "assumptionYoung": "La exención para jóvenes (hasta 35 años, primera vivienda propia y permanente, condiciones cumplidas en la fecha de la escritura, vivienda mantenida como residencia permanente) es una opción aparte y solo se incluye si la marcas. Es total hasta {{youngFull}} y parcial hasta {{youngPartial}}. La exención del timbre de la compra es una deducción limitada al 0,8 % del límite de la exención total, así que por encima pagas el 0,8 % solo sobre el exceso. El timbre de la hipoteca se sigue cobrando.",
         "assumptionLoan": "El timbre de la hipoteca supone un préstamo de cinco años o más y se cobra siempre. No se incluyen comisiones de la hipoteca, tasación ni gastos de notaría o registro.",
-        "assumptionUnsupported": "No admitido: no residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT.",
         "assumptionIslands": "Para Azores y Madeira, la calculadora usa los límites regionales de las tablas IV a VI del Ofício Circulado 40129/2026, con los mismos tipos que el continente.",
-        "sourceCircular": "Ofício Circulado 40129/2026: tablas del IMT (Autoridad Tributaria)"
+        "sourceCircular": "Ofício Circulado 40129/2026: tablas del IMT (Autoridad Tributaria)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Timbre de la compra",
+          "stampLoan": "Timbre de la hipoteca"
+        },
+        "terms": {
+          "base": "Valor imponible",
+          "imt": "IMT",
+          "stamp": "Impuesto de sellos",
+          "rounding": "Redondeo",
+          "scope": "Alcance",
+          "young": "Exención para jóvenes",
+          "loan": "Hipoteca",
+          "islands": "Azores y Madeira"
+        },
+        "formulasLabel": "Fórmulas",
+        "assumptionUnsupportedTerm": "No admitido",
+        "assumptionUnsupportedBody": "No residentes, compradores residentes en jurisdicciones de baja tributación, empresas, otras exenciones y beneficios del IMT y viviendas del artículo 9 del CIMT."
       },
       "nextStepHeadline": "Planifica el efectivo que necesitas para comprar",
       "nextStepDescription": "Suma el IMT y el timbre al ahorro que necesitas antes de comprar y sigue tu progreso en WonderMoney.",
@@ -2685,7 +2871,28 @@
         "assumptionBanks": "Los bancos evalúan tu riesgo de crédito y pueden rechazar el préstamo u ofrecer otras condiciones, diga lo que diga la lista. En un préstamo con dos titulares, ambos deben cumplir las condiciones.",
         "assumptionRate": "El tipo es el que introduces. La garantía no cambia el tipo de interés.",
         "assumptionTaxes": "Los impuestos son para vivienda propia y permanente en Portugal continental y, en las cifras con exención, suponen que cumples las condiciones del IMT Jovem.",
-        "assumptionScope": "Solo educativo: no es asesoramiento financiero, fiscal ni jurídico."
+        "assumptionScope": "Solo educativo: no es asesoramiento financiero, fiscal ni jurídico.",
+        "labels": {
+          "cash": "Efectivo en la firma",
+          "taxes": "IMT e Impuesto del Sello"
+        },
+        "terms": {
+          "payment": "Préstamo y cuota",
+          "taxes": "Impuestos",
+          "cash": "Efectivo en la firma",
+          "guarantee": "La garantía",
+          "banks": "Decide el banco",
+          "rate": "Tipo de interés",
+          "assumptionTaxes": "Impuestos considerados",
+          "scope": "Alcance",
+          "conditionAge": "Edad",
+          "conditionHome": "Vivienda habitual",
+          "conditionProperty": "Otra vivienda",
+          "conditionPrice": "Precio",
+          "conditionIncome": "Ingresos",
+          "conditionDate": "Fecha del contrato"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Planifica la entrada y el coste de vivir en tu casa",
       "nextStepDescription": "Fija un objetivo para la entrada y presupuesta la cuota, los impuestos y los gastos de la vivienda en WonderMoney.",
@@ -2785,15 +2992,29 @@
         "exampleOutro": "El simulador de arriba empieza en este préstamo, sin las comisiones, para que puedas introducir tu oferta.",
         "methodTitle": "Cómo hace las cuentas el simulador",
         "methodIntro": "La cuota es la cuota constante que devuelve el importe a lo largo del plazo, al tipo mensual, y la TAE es el tipo que equilibra lo que recibes con lo que pagas:",
-        "methodLegend": "M es la cuota de capital e intereses, P el importe del préstamo, r el tipo nominal anual dividido entre 12 y n el número de meses. Las comisiones mensuales f se suman a cada cuota.",
-        "methodApr": "La TAE es el tipo A que resuelve la segunda línea: lo que recibes al principio, el importe P menos las comisiones iniciales F, iguala la cuota de cada mes Mₖ más las comisiones f, descontada por (1 + A) elevado a k ÷ 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
+        "methodApr": "La TAE es el tipo que resuelve la última línea: lo que recibes al principio, el importe del préstamo menos las comisiones iniciales, iguala la cuota de cada mes más las comisiones mensuales, descontada por uno más la TAE elevado al número del mes dividido entre 12, contando cada mes como una doceava parte del año. El simulador la encuentra por bisección.",
         "methodRounding": "Todas las cuentas se hacen en céntimos. Cada cuota se vuelve a calcular a partir del capital pendiente, así que las cuotas no se alejan más de un céntimo entre sí, la última salda la deuda exactamente y el cuadro coincide con los totales.",
         "methodPrivacy": "Las cuentas se hacen en tu navegador. Nada de lo que escribes se envía ni se guarda.",
         "assumptionsTitle": "Supuestos",
         "assumptionFixedRate": "El tipo es fijo durante todo el plazo y todas las cuotas se pagan a tiempo.",
         "assumptionFees": "Las comisiones iniciales se pagan, o se descuentan del importe, al empezar el préstamo; las comisiones mensuales son iguales todos los meses.",
         "assumptionOtherCosts": "Quedan fuera los costes por los que el simulador no pregunta, como seguros opcionales, recargos por impago o una comisión por amortización anticipada.",
-        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}."
+        "assumptionLimits": "Importes de {{minAmount}} a {{maxAmount}}, plazos de {{minMonths}} a {{maxMonths}} meses y tipos de hasta el {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Importe recibido",
+          "month": "Mes",
+          "apr": "TAE",
+          "aprNoFees": "TAE sin comisiones",
+          "aprFees": "TAE con comisiones"
+        },
+        "methodAprTerm": "TAE",
+        "assumptionFixedRateTerm": "Tipo fijo",
+        "assumptionFeesTerm": "Comisiones",
+        "assumptionOtherCostsTerm": "Otros costes",
+        "assumptionLimitsTerm": "Límites",
+        "methodRoundingTerm": "Redondeo",
+        "methodPrivacyTerm": "Privacidad",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "savingsCertificates": {
@@ -3603,8 +3824,6 @@
         "exampleTitle": "Ejemplo práctico",
         "example": "Un coche diésel de {{cc}} cm³, con emisiones oficiales WLTP de {{co2}} g/km y matriculado en {{year}} paga {{tax}} de IUC al año. Apartar {{monthly}} al mes lo cubre.",
         "methodTitle": "Cómo funciona la estimación",
-        "methodA": "Categoría A (coches matriculados de 1981 a junio de 2007): el impuesto sale de una tabla por combustible, cilindrada y período de matriculación (después de 1995, de 1990 a 1995, de 1981 a 1989).",
-        "methodB": "Categoría B (coches matriculados desde julio de 2007): se suman la tasa de cilindrada y la de CO2 y se multiplica por un coeficiente según el año de matriculación (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 desde 2010). El CO2 se lee en la columna WLTP o NEDC según el ciclo de ensayo de tu documento.",
         "methodAdditional": "Los coches de la categoría B matriculados después del 1 de enero de 2017 pagan una tasa adicional si las emisiones son altas: 31,77 € por encima de 205 g/km (WLTP) o 180 g/km (NEDC) y 63,74 € por encima de 260 g/km (WLTP) o 250 g/km (NEDC). La tasa adicional también se multiplica por el coeficiente. El texto legal no la limita por combustible, así que la calculadora la aplica a todos.",
         "methodDiesel": "Los coches diésel pagan además el adicional de IUC (artículo 216 de la Ley n.º 82-B/2014, mantenido en 2026 por los Presupuestos del Estado). Depende de la cilindrada, se aplica a las categorías A y B y se suma después del coeficiente, sin multiplicarse por él.",
         "methodPayment": "Hasta 2026 el IUC se paga en el mes del aniversario de la matriculación. El Decreto-Ley n.º 161/2026 (4 de agosto de 2026) pasa a una liquidación anual por contribuyente, que abarca todos los vehículos. 2027 es un año transitorio: un pago en octubre hasta 500 €, o dos en julio y octubre (o todo en julio). Desde 2028 se liquida hasta abril y se paga en abril hasta 100 €, en abril y octubre de 100 € a 500 €, y en abril, julio y octubre por encima de 500 €. Los umbrales se aplican al total de todos tus vehículos.",
@@ -3612,8 +3831,6 @@
         "exemptionTitle": "Coches eléctricos",
         "exemption": "Los coches totalmente eléctricos de la categoría B están exentos de IUC y la calculadora muestra cero. Los híbridos enchufables y otros vehículos tributan según su cilindrada y CO2 del documento, así que introduce esos valores.",
         "scopeTitle": "Qué cubre",
-        "scopeSupported": "Turismos ligeros: categoría A (matriculados de 1981 a junio de 2007) y categoría B (matriculados desde julio de 2007).",
-        "scopeUnsupported": "No admitido: vehículos de mercancías y más pesados (categorías C y D), motocicletas (E), embarcaciones de recreo (F), aeronaves (G) y coches matriculados antes de 1981.",
         "assumptionsTitle": "Supuestos",
         "assumptionYear": "Las tasas son las tablas de {{taxYear}} del Código do IUC (artículos 9 y 10), en la redacción de la {{law}}. El Portal das Finanças no indica cambios posteriores en estas tasas.",
         "assumptionPayment": "El mes de pago de 2026 sigue la regla del aniversario de la matriculación, que el preámbulo del Decreto-Ley n.º 161/2026 confirma como la regla vigente. Desde 2027 el impuesto se liquida por contribuyente, sobre todos sus vehículos: añade cada uno de tus coches e indica el IUC de los demás vehículos como otro IUC, para que los meses de los plazos sigan tu total (la ley aplica los umbrales a ese total). Los calendarios de 2027 y 2028 muestran el importe de cada mes para los coches que has añadido; con un solo coche, su parte en cada plazo. En el año de matriculación el impuesto se paga en los 30 días siguientes al plazo legal de registro.",
@@ -3625,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: artículo 216 de la Ley n.º 82-B/2014, tablas I y II del recargo diésel (consultado el 20 de noviembre de 2026)",
         "reviewed": "Tasas de {{taxYear}} revisadas el {{reviewed}}.",
         "sourceSchedule": "Decreto-Ley n.º 161/2026, de 4 de agosto: nuevas reglas de pago del IUC, con la transición de 2027 (Portal das Finanças, consultado el 19 de noviembre de 2026)",
-        "sourceBudget": "Diário da República: artículo 94 de la Ley n.º 73-A/2025 (Presupuestos del Estado para 2026), que mantiene el adicional de IUC sin cambiar los importes (consultado el 20 de noviembre de 2026)"
+        "sourceBudget": "Diário da República: artículo 94 de la Ley n.º 73-A/2025 (Presupuestos del Estado para 2026), que mantiene el adicional de IUC sin cambiar los importes (consultado el 20 de noviembre de 2026)",
+        "methodATerm": "Categoría A (coches matriculados de 1981 a junio de 2007)",
+        "methodABody": "El impuesto sale de una tabla por combustible, cilindrada y período de matriculación (después de 1995, de 1990 a 1995, de 1981 a 1989).",
+        "methodBTerm": "Categoría B (coches matriculados desde julio de 2007)",
+        "methodBBody": "Se suman la tasa de cilindrada y la de CO2 y se multiplica por un coeficiente según el año de matriculación (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 desde 2010). El CO2 se lee en la columna WLTP o NEDC según el ciclo de ensayo de tu documento.",
+        "scopeSupportedTerm": "Turismos ligeros",
+        "scopeSupportedBody": "Categoría A (matriculados de 1981 a junio de 2007) y categoría B (matriculados desde julio de 2007).",
+        "scopeUnsupportedTerm": "No admitido",
+        "scopeUnsupportedBody": "Vehículos de mercancías y más pesados (categorías C y D), motocicletas (E), embarcaciones de recreo (F), aeronaves (G) y coches matriculados antes de 1981.",
+        "labels": {
+          "diesel": "Recargo diésel",
+          "engineRate": "Tipo por cilindrada",
+          "co2Rate": "Tipo por CO2",
+          "provision": "Reserva mensual"
+        },
+        "terms": {
+          "additional": "Tasa adicional",
+          "diesel": "Recargo diésel",
+          "payment": "Pago",
+          "budget": "Reserva mensual",
+          "year": "Tablas",
+          "paymentRule": "Cuándo se paga",
+          "educational": "Estimación educativa"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Que el impuesto del coche no te pille por sorpresa",
       "nextStepDescription": "WonderMoney te ayuda a apartar una doceava parte del impuesto del coche cada mes, para que el recibo ya esté cubierto.",
@@ -3732,7 +3973,6 @@
         "methodCash": "El dinero que queda resta del valor de venta los gastos de venta, el préstamo amortizado y el IRS estimado. No resta lo que gastes en la siguiente vivienda.",
         "scopeTitle": "Qué cubre",
         "scopeSupported": "Personas físicas residentes fiscales en Portugal que venden en {{saleYear}} un inmueble de su patrimonio privado comprado desde {{firstYear}}.",
-        "scopeUnsupported": "No cubre: no residentes, inmuebles comprados antes de {{firstYear}}, empresas e inmuebles afectos a una actividad, herencias y donaciones, viviendas con ayuda pública superior al 30% de su valor tributario, el recargo de solidaridad y las deducciones de la cuota.",
         "assumptionsTitle": "Supuestos",
         "assumptionBrackets": "El IRS adicional usa los tramos anuales del IRS de {{saleYear}} sobre los ingresos que introduces, como estimación del efecto en la declaración anual. La tributación conjunta se modela dividiendo los ingresos entre dos.",
         "assumptionNotModelled": "La calculadora no comprueba las condiciones de la reinversión. Los coeficientes se cotejaron con la tabla de la {{portaria}} en el Diário da República.",
@@ -3747,7 +3987,29 @@
         "sourceAcquisition": "CIRS, artículo 46: valor de adquisición de inmuebles comprados a título oneroso (consultado el 20 de noviembre de 2026)",
         "sourceCorrection": "CIRS, artículo 50: corrección monetaria después de 24 meses (consultado el 20 de noviembre de 2026)",
         "sourceExpenses": "CIRS, artículo 51: obras de los últimos 12 años y gastos de adquisición y de venta (consultado el 20 de noviembre de 2026)",
-        "sourceImt": "CIMT, artículo 12: el IMT se paga sobre el mayor entre el precio y el VPT (consultado el 20 de noviembre de 2026)"
+        "sourceImt": "CIMT, artículo 12: el IMT se paga sobre el mayor entre el precio y el VPT (consultado el 20 de noviembre de 2026)",
+        "scopeUnsupportedTerm": "No cubre",
+        "scopeUnsupportedBody": "No residentes, inmuebles comprados antes de {{firstYear}}, empresas e inmuebles afectos a una actividad, herencias y donaciones, viviendas con ayuda pública superior al 30% de su valor tributario, el recargo de solidaridad y las deducciones de la cuota.",
+        "labels": {
+          "included": "Sumado a los ingresos",
+          "irsWith": "IRS con la plusvalía",
+          "irsWithout": "IRS sin la plusvalía",
+          "cashAfter": "Dinero que queda"
+        },
+        "terms": {
+          "gain": "Plusvalía",
+          "taxValue": "Valor de venta y VPT",
+          "coefficient": "Coeficiente",
+          "expenses": "Gastos",
+          "half": "La mitad de la plusvalía",
+          "exemption": "Reinversión",
+          "cash": "Dinero que queda",
+          "brackets": "Tramos del IRS",
+          "notModelled": "Lo que no se comprueba",
+          "educational": "Estimación educativa",
+          "supported": "Cubierto"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Sabe cuánto de la venta puedes usar de verdad",
       "nextStepDescription": "WonderMoney te ayuda a apartar el impuesto y a ver qué queda para tu próxima vivienda.",

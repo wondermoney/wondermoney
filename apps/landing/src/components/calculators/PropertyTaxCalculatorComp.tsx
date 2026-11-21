@@ -127,27 +127,22 @@ function PropertyTaxCalculator() {
         )}
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.annualTax"))}</p>
-              <p id="propertyTax-annualTax" className="font-mono text-3xl font-bold text-primary">
-                {money(result.annualTax)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!result && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {result && (
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.monthlyProvision")), value: money(result.monthlyProvision), highlight: true },
+                {
+                  label: t(k("result.annualTax")),
+                  value: money(result.annualTax),
+                  highlight: true,
+                  id: "propertyTax-annualTax",
+                },
                 ...(result.deduction > 0 ? [
                   { label: t(k("result.grossTax")), value: money(result.grossTax) },
                   { label: t(k("result.deduction")), value: `−${money(result.deduction)}` },
                 ] : []),
+                { label: t(k("result.monthlyProvision")), value: money(result.monthlyProvision) },
               ]}
             />
             <div>
@@ -167,6 +162,9 @@ function PropertyTaxCalculator() {
             </div>
           </>
         )}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {result ? `${t(k("result.annualTax"))}: ${money(result.annualTax)}` : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );

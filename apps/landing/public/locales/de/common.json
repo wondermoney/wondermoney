@@ -597,7 +597,18 @@
         "reviewed": "Regeln geprüft am 20. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
         "methodMinimum": "Liegt die einzuziehende Steuer nach einer etwaigen IMI-Familiar-Ermäßigung unter 10 €, wird keine IMI festgesetzt, und der Rechner zeigt 0 € mit einem Hinweis (Artikel 113 Nr. 6 des Código do IMI).",
         "sourceMinimum": "Código do IMI, Artikel 113: Festsetzung, keine IMI unter 10 € (abgerufen am 19. November 2026)",
-        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung der Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)"
+        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung der Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)",
+        "terms": {
+          "tax": "Jährliche IMI",
+          "family": "IMI Familiar",
+          "minimum": "Mindestbetrag",
+          "payment": "Raten",
+          "budget": "Monatliche Rücklage",
+          "rate": "Kommunaler Satz",
+          "scope": "Umfang",
+          "educational": "Schätzung zur Orientierung"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
@@ -1111,15 +1122,20 @@
         "exampleBody": "Ein Paar hat zusammen {{income}} netto im Monat. Es zahlt {{home}} für die Baufinanzierung, {{car}} für einen Autokredit und {{cards}} auf eine Kreditkarte, zusammen {{total}}. Raten geteilt durch Einkommen, mal 100: Die Quote liegt bei {{ratio}}, im Vorsichtsbereich.",
         "exampleScenario": "Der Autokredit ist bald abbezahlt. Ohne ihn sinken die Raten auf {{scenarioTotal}} und die Quote auf {{scenarioRatio}}, wieder im gesunden Bereich. Der Rechner oben startet mit diesem Haushalt und dieser Änderung, damit Sie Ihre eigenen Zahlen einsetzen können.",
         "methodHeading": "Methode",
-        "methodFormula": "Schuldendienstquote = monatliche Kreditraten gesamt ÷ monatliches Haushaltsnettoeinkommen × 100",
-        "methodCounts": "Als Schulden zählen: alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
-        "methodExcludes": "Nicht gezählt: Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
-        "methodIncome": "Das Einkommen ist netto: was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
         "methodRounding": "Die Quote wird auf eine Nachkommastelle gerundet, und der Bereich richtet sich nach dem gerundeten Wert. Raten über dem Einkommen ergeben eine Quote über 100 %.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
         "nextHeading": "Planen Sie einen neuen Kredit?",
         "nextBody": "Eine Baufinanzierung oder ein anderer Kredit bringt eine weitere Rate. Berechnen Sie, was eine neue Hypothek im Monat kosten würde, und tragen Sie diese Rate im Szenario-Bereich ein, um die neue Quote zu sehen.",
-        "nextLink": "Hypothekenrechner öffnen"
+        "nextLink": "Hypothekenrechner öffnen",
+        "methodCountsTerm": "Als Schulden zählen",
+        "methodCountsBody": "Alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
+        "methodExcludesTerm": "Nicht gezählt",
+        "methodExcludesBody": "Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
+        "methodIncomeTerm": "Das Einkommen ist netto",
+        "methodIncomeBody": "Was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "householdBudget": {
@@ -1324,7 +1340,6 @@
         "method": {
           "title": "So wird die Rate berechnet",
           "intro": "Die meisten Darlehen mit festem Zins werden in gleichbleibenden Raten zurückgezahlt: jeden Monat derselbe Betrag, so bemessen, dass die Schuld mit der letzten Rate auf null fällt. Die Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "Dabei ist M die Monatsrate, P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
           "schedule": "Jeden Monat werden Zinsen auf die verbleibende Schuld berechnet, der Rest der Rate tilgt das Darlehen. Je weiter die Schuld sinkt, desto kleiner wird der Zinsanteil und desto größer der Tilgungsanteil. Deshalb sinkt die Schuld anfangs langsam und gegen Ende schneller. Versicherung und Gebühren kommen zur Rate hinzu und verringern die Schuld nie.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1335,7 +1350,24 @@
             "rounding": "Beträge sind in Euro. Jede Monatsrate wird aus der Restschuld und den verbleibenden Monaten berechnet und auf den Cent gerundet. Eine Rate kann deshalb um einen Cent von den anderen abweichen, und die letzte tilgt die Schuld genau. Bei einem sehr langen Darlehen mit hohem Zins können die ersten Raten weniger als einen Cent tilgen.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt, rundet oder den Zahlungstermin festlegt. Maßgeblich sind die vorvertraglichen Informationen, die Sie von ihr erhalten."
           },
-          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
+          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}.",
+          "formulasLabel": "Formeln",
+          "zeroRate": "Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach der Kreditbetrag geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "monthly": "Monatliche Raten",
+            "nominalRate": "Nominalzins, nicht der Effektivzins",
+            "flatFees": "Versicherungen und Gebühren",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
+            "limits": "Grenzen"
+          }
+        },
+        "labels": {
+          "firstInterest": "Zinsen in der ersten Rate",
+          "firstPrincipal": "Tilgung in der ersten Rate",
+          "monthlyRate": "Monatszins",
+          "payments": "Zahl der Raten"
         }
       },
       "cta": {
@@ -1458,11 +1490,26 @@
         "before": {
           "title": "Vor der Sondertilgung",
           "items": {
-            "fee": "Prüfen Sie die Gebühr. Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen.",
-            "rate": "Variable Zinsen und Mischformen sind nicht abgedeckt: Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt.",
-            "reserves": "Behalten Sie eine Reserve. Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt.",
-            "otherDebts": "Tilgen Sie zuerst die teuerste Schuld. Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung.",
-            "lender": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet. Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            "fee": {
+              "term": "Prüfen Sie die Gebühr",
+              "body": "Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen."
+            },
+            "rate": {
+              "term": "Variable Zinsen und Mischformen sind nicht abgedeckt",
+              "body": "Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt."
+            },
+            "reserves": {
+              "term": "Behalten Sie eine Reserve",
+              "body": "Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt."
+            },
+            "otherDebts": {
+              "term": "Tilgen Sie zuerst die teuerste Schuld",
+              "body": "Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung."
+            },
+            "lender": {
+              "term": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet",
+              "body": "Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            }
           }
         },
         "example": {
@@ -1475,9 +1522,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt zuerst das Darlehen wie bisher, mit demselben Festzins-Rechenkern wie der Hypothekenrechner. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der verbleibenden Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n.",
-          "lowerPayment": "Laufzeit behalten: Die Restschuld nach der Sondertilgung geht mit demselben n zurück in die Formel, das ergibt die neue, niedrigere Rate.",
-          "shorterTerm": "Rate behalten: Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
           "fee": "Die Gebühr ist der eingegebene Prozentsatz, angewendet auf den getilgten Betrag. Die gesparten Zinsen sind die restlichen Zinsen des Darlehens wie bisher abzüglich der Zinsen im jeweiligen Szenario, und die Nettoersparnis ist dieser Betrag abzüglich der Gebühr. Ein Betrag über der Restschuld tilgt das Darlehen vollständig, und nur die Restschuld zählt für die Gebühr.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1488,7 +1532,23 @@
             "rounding": "Beträge sind in Euro. Zinsen und Rate werden jeden Monat auf den Cent gerundet, daher gehen alle Summen auf der Seite exakt auf.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt und rundet. Lassen Sie sich vor der Sondertilgung ihre eigene Berechnung geben."
           },
-          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags."
+          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags.",
+          "lowerPaymentTerm": "Laufzeit behalten",
+          "lowerPaymentBody": "Die Restschuld nach der Sondertilgung geht mit derselben Zahl von Raten zurück in die Formel, das ergibt die neue, niedrigere Rate.",
+          "shorterTermTerm": "Rate behalten",
+          "shorterTermBody": "Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "timing": "Zeitpunkt",
+            "oneOff": "Eine Sondertilgung",
+            "costs": "Kosten",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
+            "limits": "Grenzen",
+            "feeNote": "Gebühr und Nettoersparnis"
+          },
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1663,10 +1723,22 @@
           "title": "Was Sie vor dem Wechsel vergleichen sollten",
           "intro": "Ihre Baufinanzierung zu einer anderen Bank umzuschulden, oder mit Ihrer Bank neue Konditionen auszuhandeln, kann Ihre Kosten senken. Ein niedrigerer Zins ist nur ein Teil der Rechnung, vergleichen Sie also das ganze Angebot:",
           "items": {
-            "rate": "Den Zins. Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen.",
-            "monthlyCosts": "Die monatlichen Zusatzkosten. Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer.",
-            "term": "Die Laufzeit. Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen.",
-            "oneOff": "Die einmaligen Kosten. Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            "rate": {
+              "term": "Den Zins",
+              "body": "Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen."
+            },
+            "monthlyCosts": {
+              "term": "Die monatlichen Zusatzkosten",
+              "body": "Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer."
+            },
+            "term": {
+              "term": "Die Laufzeit",
+              "body": "Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen."
+            },
+            "oneOff": {
+              "term": "Die einmaligen Kosten",
+              "body": "Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            }
           },
           "outro": "Der Rechner bringt das zusammen: die Rate mit ihren Zusatzkosten, was jedes Darlehen insgesamt noch kostet, und den Monat, in dem die Wechselkosten wieder hereingeholt sind."
         },
@@ -1691,7 +1763,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt beide Darlehen mit demselben Festzins-Rechenkern wie der Hypothekenrechner, auf Basis Ihrer Restschuld. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n. Die Versicherungen und Gebühren jedes Monats kommen hinzu.",
           "saving": "Die Ersparnis eines Monats ist, was das aktuelle Darlehen in diesem Monat kosten würde, abzüglich dessen, was das neue kostet. Ein getilgtes Darlehen kostet nichts mehr. Bei einer längeren neuen Laufzeit zählen die Monate nach dem Ende Ihres aktuellen Darlehens deshalb als Kosten. Die Gesamtkosten jeder Option sind ihre Raten, Versicherungen und Gebühren, beim neuen Darlehen zuzüglich der Wechselkosten. Die Nettoersparnis ist die Differenz.",
           "breakEven": "Der Monat, in dem sich der Wechsel rechnet, ist der erste Monat, in dem die bisherige Ersparnis mindestens die Wechselkosten erreicht. Geschieht das nicht, bevor beide Darlehen enden, rechnet sich der Wechsel nicht.",
           "longerTerm": "Ist die neue Laufzeit länger als die Restlaufzeit, rechnet der Rechner das Angebot zusätzlich über die Restlaufzeit. So sehen Sie, wie viel der niedrigeren Rate vom Zins kommt und wie viel davon, dass Sie länger zahlen.",
@@ -1705,7 +1776,22 @@
             "rounding": "Die Beträge sind in Euro. Zinsen und Rate jedes Monats werden auf den Cent gerundet, deshalb gehen alle Summen auf der Seite genau auf. Die angezeigte Rate ist die erste; die folgenden weichen höchstens um einen Cent davon ab.",
             "lenderFigures": "Jede Bank zählt Tage und rundet auf ihre Weise, daher können ihre Zahlen leicht abweichen. Lassen Sie sich von jeder Bank ein verbindliches Angebot geben, bevor Sie entscheiden."
           },
-          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld."
+          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld.",
+          "terms": {
+            "saving": "Ersparnis und Gesamtkosten",
+            "breakEven": "Monat der Amortisation",
+            "longerTerm": "Eine längere Laufzeit",
+            "fixedRate": "Feste Zinsen",
+            "sameBalance": "Dieselbe Restschuld",
+            "timing": "Zeitpunkt",
+            "fees": "Versicherungen und Gebühren",
+            "noDiscounting": "Keine Abzinsung",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen der Banken",
+            "limits": "Grenzen"
+          },
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1715,6 +1801,13 @@
           "earlyRepaymentBody": "Was eine Sondertilgung beim aktuellen Darlehen sparen würde, statt umzuschulden.",
           "debtToIncomeLink": "Schuldendienstquoten-Rechner",
           "debtToIncomeBody": "Der Anteil Ihres Einkommens, der in Kreditraten fließt, heute und mit der neuen Rate."
+        },
+        "labels": {
+          "monthlySaving": "Ersparnis pro Monat",
+          "currentMonthTotal": "Kosten des jetzigen Darlehens in dem Monat",
+          "offerMonthTotal": "Kosten des neuen Darlehens in dem Monat",
+          "currentTotalCost": "Gesamtkosten des jetzigen Darlehens",
+          "offerTotalCost": "Gesamtkosten des neuen Darlehens"
         }
       },
       "cta": {
@@ -1984,16 +2077,12 @@
         "relatedDebtToIncome": "zeigt, welchen Anteil Ihres Einkommens Ihre laufenden Raten einnehmen, mit denselben Stufen wie dieses Werkzeug.",
         "exampleTitle": "Rechenbeispiel",
         "exampleIntro": "Ein Paar verdient zusammen {{income}} netto im Monat und zahlt {{existing}} im Monat für einen Autokredit. Es hat {{savings}} für eine Immobilie gespart, rechnet mit einem festen Zins von {{rate}} über {{years}} Jahre und plant Kaufnebenkosten von {{costsRate}} des Preises ein. Die Bank finanziert bis zu {{ltv}} des Preises, und das Paar erlaubt {{share}} seines Einkommens für Kredite.",
-        "exampleStep1": "Monatlicher Spielraum: {{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
-        "exampleStep2": "Größtes Darlehen: Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
-        "exampleStep3": "Geld vorab: Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
         "exampleStep4": "Der niedrigere der beiden ist {{monthlyPrice}}, also setzt das Monatsbudget die Grenze.",
         "exampleResult": "Bei {{price}} würde das Paar {{loan}} leihen, {{downPayment}} Eigenkapital einbringen und {{purchaseCosts}} Nebenkosten zahlen, mit seinem ganzen Ersparten von {{savings}}. Der Hypothekenrechner kommt auf eine Rate von {{payment}} im Monat.",
         "exampleLift": "Mit etwa {{extraIncome}} mehr Nettoeinkommen im Monat käme das Paar auf {{liftPrice}}; dort übernimmt die Grenze des Ersparten.",
         "exampleSavings": "Mit nur {{lowSavings}} Erspartem kehrt sich das Bild um: Das Ersparte deckt einen Preis von {{lowSavingsPrice}} mit einem Darlehen von {{lowSavingsLoan}}, weit unter dem, was das Einkommen tragen könnte. Mehr sparen, nicht mehr verdienen, würde die Grenze anheben. Der Rechner oben beginnt mit dem ersten Paar, damit Sie Ihre eigenen Zahlen eintragen können.",
         "methodTitle": "Methode",
         "methodIntro": "Die Rechnung bestimmt jede Grenze für sich und nimmt dann den niedrigeren Preis.",
-        "methodLegend": "I ist das monatliche Nettoeinkommen, d der für Kredite erlaubte Anteil davon, E die laufenden Raten und M der Spielraum für die neue Rate. r ist der Jahreszins geteilt durch 12, n die Zahl der Monatsraten und L das größte Darlehen. S ist das Ersparte, c die Kaufnebenkosten und v der Beleihungsauslauf, beide als Anteil am Preis. P₁ ist der Preis, den das Monatsbudget erlaubt, P₂ der, den das Ersparte erlaubt.",
         "methodShare": "Der Startwert von {{share}} liegt in der Vorsicht-Stufe des Schuldendienstquoten-Rechners ({{caution}} % bis {{high}} %). Das ist eine Faustregel, keine gesetzliche Grenze.",
         "methodCosts": "Beim höchsten Preis fließt jeder Euro des Ersparten in den Kauf: zuerst die Nebenkosten, der Rest als Eigenkapital. Das Darlehen deckt, was fehlt, und nie mehr, als der Beleihungsauslauf erlaubt.",
         "methodRounding": "Beträge werden in Cent gerechnet. Das Darlehen wird auf den Cent abgerundet, damit die erste Rate, berechnet vom Hypothekenrechner, in Ihren Spielraum passt; spätere Raten können um einen Cent abweichen. Der Preis ist genau Darlehen plus Eigenkapital, und das zusätzliche Einkommen oder Ersparte wird auf den Euro aufgerundet.",
@@ -2005,11 +2094,33 @@
         "assumptionCostsShare": "Die Kaufnebenkosten sind ein fester Anteil am Preis. In der Praxis sind Steuern oft gestaffelt und manche Gebühren feste Beträge.",
         "lendersTitle": "Was Banken prüfen und dieses Werkzeug nicht",
         "lendersIntro": "Die Antwort einer Bank kann unter dieser Schätzung liegen, manchmal deutlich. Die Regeln unterscheiden sich je nach Bank und Land, und dieser Rechner enthält keine davon.",
-        "lenderStress": "Stresszins: Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
-        "lenderIncome": "Was als Einkommen zählt: Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
-        "lenderCountry": "Grenzen je Land: In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
-        "lenderProfile": "Ihr Profil: Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
-        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten."
+        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten.",
+        "exampleStep1Term": "Monatlicher Spielraum",
+        "exampleStep1Body": "{{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
+        "exampleStep2Term": "Größtes Darlehen",
+        "exampleStep2Body": "Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
+        "exampleStep3Term": "Geld vorab",
+        "exampleStep3Body": "Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
+        "lenderStressTerm": "Stresszins",
+        "lenderStressBody": "Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
+        "lenderIncomeTerm": "Was als Einkommen zählt",
+        "lenderIncomeBody": "Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
+        "lenderCountryTerm": "Grenzen je Land",
+        "lenderCountryBody": "In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
+        "lenderProfileTerm": "Ihr Profil",
+        "lenderProfileBody": "Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln",
+        "labels": {
+          "maxLoan": "Größtes Darlehen"
+        },
+        "methodShareTerm": "Anteil für Kredite",
+        "methodCostsTerm": "Wohin die Ersparnisse gehen",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionSavingsTerm": "Alle Ersparnisse",
+        "assumptionPaymentTerm": "Was die Rate nicht enthält",
+        "assumptionCostsShareTerm": "Kaufnebenkosten"
       }
     },
     "termDeposit": {
@@ -2260,10 +2371,22 @@
         "whatHeading": "Was der Vergleich zeigt",
         "whatBody": "Kaufen ersetzt die Miete durch Kreditraten, bindet aber auch Geld im Eigenkapital und in den Kaufnebenkosten und bringt laufende Eigentümerkosten mit sich. Mieten lässt dieses Geld frei für eine Anlage. Der Rechner verfolgt beide Wege mit demselben Startkapital und vergleicht, was Ihnen jeweils bleibt.",
         "read": {
-          "netWorth": "Das Vermögen beider Wege: beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen.",
-          "difference": "Die Differenz: wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt.",
-          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters.",
-          "chart": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          "netWorth": {
+            "term": "Das Vermögen beider Wege",
+            "body": "Beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen."
+          },
+          "difference": {
+            "term": "Die Differenz",
+            "body": "Wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt."
+          },
+          "breakEven": {
+            "term": "Das Jahr des Gleichstands",
+            "body": "Das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters."
+          },
+          "chart": {
+            "term": "Diagramm und Tabelle",
+            "body": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          }
         },
         "exampleHeading": "Rechenbeispiel",
         "example": {
@@ -2283,10 +2406,7 @@
           "returns": "Die Anlagen wachsen jeden Monat mit dem Monatszins, der über zwölf Monate die Jahresrendite ergibt.",
           "netWorth": "Am Ende jedes Jahres ist das Vermögen des Käufers der Immobilienwert abzüglich Verkaufskosten und Restschuld, plus seine Anlagen. Das des Mieters sind seine Anlagen. Das Jahr des Gleichstands ist das erste, das mit dem Käufer vorne endet."
         },
-        "formulaOwner": "Kaufen = Immobilienwert − Verkaufskosten − Restschuld + Anlagen",
-        "formulaRenter": "Mieten = Anlagen",
         "formulaReturn": "Monatsrendite",
-        "formulaLegend": "Dabei ist R die jährliche Anlagerendite: {{investmentReturn}} pro Jahr ergeben etwa {{monthlyReturn}} im Monat.",
         "leftOutHeading": "Was nicht berücksichtigt wird",
         "leftOut": {
           "gainsTax": "Steuern auf Anlageerträge oder auf den Gewinn aus dem Verkauf der Immobilie.",
@@ -2301,7 +2421,20 @@
         "relatedMortgage": "Den Kredit allein, mit seinem Tilgungsplan Jahr für Jahr, zeigt der",
         "relatedMortgageLink": "Hypothekenrechner",
         "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
-        "relatedNetWorthLink": "Nettovermögensrechner"
+        "relatedNetWorthLink": "Nettovermögensrechner",
+        "formulaExample": "Eine Rendite von {{investmentReturn}} pro Jahr ergibt etwa {{monthlyReturn}} im Monat.",
+        "labels": {
+          "investments": "Anlagen"
+        },
+        "formulasLabel": "Formeln",
+        "methodTerms": {
+          "start": "Startkapital",
+          "loan": "Das Darlehen",
+          "monthly": "Jeden Monat",
+          "growth": "Wertentwicklung und Miete",
+          "returns": "Anlagerendite",
+          "netWorth": "Vermögen und Gleichstand"
+        }
       }
     },
     "rateRevision": {
@@ -2421,7 +2554,6 @@
         "exampleIncome": "Bei einem Nettoeinkommen von {{income}} im Monat beansprucht die Rate heute {{currentShare}} davon, nach dem ersten Anstieg {{newShare}} und nach dem größeren {{stressShare}}, was die Stufen der Schuldendienstquote als „{{stressBand}}“ einordnen.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Jede Rate ist die gleichbleibende Rate, die die Restschuld in den verbleibenden Monaten tilgt, mit derselben Festzins-Rechnung wie im Hypothekenrechner:",
-        "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
         "methodItems": {
           "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
           "year": "Der Unterschied über ein Jahr ergibt sich aus der Summe der ersten 12 Raten jedes Plans. Sind es weniger als 12, zählen alle verbleibenden Raten. Da jede Rate einzeln gerundet wird, kann die Differenz vom monatlichen Unterschied mal der Anzahl der Raten abweichen.",
@@ -2440,12 +2572,40 @@
         "contractTitle": "Was Ihr Vertrag festlegt",
         "contractIntro": "Wie eine echte Zinsanpassung abläuft, hängt von Ihrem Vertrag und den Regeln in Ihrem Land ab. Nichts davon ist im Rechner enthalten:",
         "contractItems": {
-          "resetDates": "Anpassungstermine: wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt.",
-          "capsFloors": "Ober- und Untergrenzen: Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt.",
-          "index": "Der Referenzzins: der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender.",
-          "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          "resetDates": {
+            "term": "Anpassungstermine",
+            "body": "Wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt."
+          },
+          "capsFloors": {
+            "term": "Ober- und Untergrenzen",
+            "body": "Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt."
+          },
+          "index": {
+            "term": "Der Referenzzins",
+            "body": "Der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender."
+          },
+          "mixed": {
+            "term": "Kredite mit Mischzins",
+            "body": "Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          }
         },
-        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
+        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank.",
+        "terms": {
+          "change": "Änderung pro Monat",
+          "year": "Änderung über ein Jahr",
+          "interest": "Änderung der Zinsen",
+          "income": "Anteil am Einkommen",
+          "privacy": "Datenschutz",
+          "fromNextMonth": "Ab der nächsten Rate",
+          "sameTerm": "Dieselbe Laufzeit",
+          "statement": "Die heutige Rate",
+          "noFeed": "Keine Referenzzinsdaten",
+          "limits": "Grenzen",
+          "annualRate": "Jahreszins",
+          "incomeShare": "Anteil der Rate am Einkommen"
+        },
+        "zeroRate": "Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach die Restschuld geteilt durch die Zahl der Raten.",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "carLoan": {
@@ -2508,7 +2668,16 @@
         "assumptionsTitle": "Annahmen",
         "assumptionLoan": "Die Schätzung geht von einem Kredit mit Festzins und monatlichen Raten ohne erhöhte Schlussrate aus. Leasing ist ausgeschlossen. Geben Sie den Preis und die angebotenen Kreditkonditionen für den Neu- oder Gebrauchtwagen ein. Für ein Auto, das Sie bereits besitzen, geben Sie bei Preis und Anzahlung jeweils null ein, um die laufenden Kosten zu schätzen.",
         "assumptionFees": "Einmalige Finanzierungsgebühren fallen beim Kauf zusammen mit der Anzahlung an. Geben Sie jede kreditbezogene Versicherung oder Gebühr nur einmal ein. Der Rechner leitet keine Steuern oder Gebühren aus Ihrem Angebot ab, er berücksichtigt nur, was Sie eingeben.",
-        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt."
+        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt.",
+        "terms": {
+          "loan": "Die Kreditrate",
+          "budget": "Das Monatsbudget",
+          "apr": "Der geschätzte effektive Jahreszins",
+          "assumptionLoan": "Kredit mit festem Zins",
+          "assumptionFees": "Finanzierungsgebühren",
+          "assumptionRunning": "Was das Budget abdeckt"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Planen Sie die gesamten monatlichen Autokosten in Ihrem Budget ein",
       "nextStepDescription": "Legen Sie in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
@@ -2589,9 +2758,26 @@
         "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
         "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
         "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
-        "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
         "assumptionIslands": "Für die Azoren und Madeira verwendet der Rechner die regionalen Grenzen der Tabellen IV bis VI des Ofício Circulado 40129/2026, mit denselben Sätzen wie auf dem Festland.",
-        "sourceCircular": "Ofício Circulado 40129/2026: IMT-Tabellen (Steuerbehörde)"
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT-Tabellen (Steuerbehörde)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Stempelsteuer auf den Kauf",
+          "stampLoan": "Stempelsteuer auf das Darlehen"
+        },
+        "terms": {
+          "base": "Steuerpflichtiger Wert",
+          "imt": "IMT",
+          "stamp": "Stempelsteuer",
+          "rounding": "Rundung",
+          "scope": "Umfang",
+          "young": "Befreiung für junge Käufer",
+          "loan": "Darlehen",
+          "islands": "Azoren und Madeira"
+        },
+        "formulasLabel": "Formeln",
+        "assumptionUnsupportedTerm": "Nicht unterstützt",
+        "assumptionUnsupportedBody": "Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT."
       },
       "nextStepHeadline": "Planen Sie das Geld, das Sie für den Kauf brauchen",
       "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
@@ -2685,7 +2871,28 @@
         "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
         "assumptionRate": "Der Zins ist der, den Sie eingeben. Die Garantie ändert den Zinssatz nicht.",
         "assumptionTaxes": "Die Steuern gelten für den eigenen dauerhaften Wohnsitz auf dem portugiesischen Festland und setzen in den Werten mit Befreiung voraus, dass Sie die Bedingungen des IMT Jovem erfüllen.",
-        "assumptionScope": "Nur zur Information: keine Finanz-, Steuer- oder Rechtsberatung."
+        "assumptionScope": "Nur zur Information: keine Finanz-, Steuer- oder Rechtsberatung.",
+        "labels": {
+          "cash": "Eigenmittel bei Beurkundung",
+          "taxes": "IMT und Stempelsteuer"
+        },
+        "terms": {
+          "payment": "Darlehen und Rate",
+          "taxes": "Steuern",
+          "cash": "Eigenmittel bei Beurkundung",
+          "guarantee": "Die Garantie",
+          "banks": "Die Bank entscheidet",
+          "rate": "Zinssatz",
+          "assumptionTaxes": "Berücksichtigte Steuern",
+          "scope": "Umfang",
+          "conditionAge": "Alter",
+          "conditionHome": "Selbst genutzter Hauptwohnsitz",
+          "conditionProperty": "Andere Immobilie",
+          "conditionPrice": "Preis",
+          "conditionIncome": "Einkommen",
+          "conditionDate": "Vertragsdatum"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Planen Sie Eigenkapital und Wohnkosten",
       "nextStepDescription": "Setzen Sie ein Ziel für das Eigenkapital und budgetieren Sie Rate, Steuern und laufende Wohnkosten in WonderMoney.",
@@ -2785,15 +2992,29 @@
         "exampleOutro": "Der Rechner oben beginnt mit diesem Kredit ohne die Gebühren, damit Sie Ihr eigenes Angebot eingeben können.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Die Monatsrate ist die gleichbleibende Rate, die den Betrag über die Laufzeit zum Monatszins zurückzahlt, und der effektive Jahreszins ist der Zins, bei dem sich Erhaltenes und Gezahltes ausgleichen:",
-        "methodLegend": "M ist die Rate aus Tilgung und Zinsen, P der Kreditbetrag, r der nominale Jahreszins geteilt durch 12 und n die Zahl der Monate. Die monatlichen Gebühren f kommen zu jeder Rate hinzu.",
-        "methodApr": "Der effektive Jahreszins ist der Zins A, der die zweite Zeile löst: Was Sie zu Beginn erhalten, der Betrag P abzüglich der einmaligen Gebühren F, entspricht der Rate jedes Monats Mₖ plus den Gebühren f, abgezinst mit (1 + A) hoch k ÷ 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
+        "methodApr": "Der effektive Jahreszins ist der Zins, der die letzte Zeile löst: Was Sie zu Beginn erhalten, der Kreditbetrag abzüglich der einmaligen Gebühren, entspricht der Rate jedes Monats plus den monatlichen Gebühren, abgezinst mit eins plus dem effektiven Jahreszins hoch der Nummer des Monats geteilt durch 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
         "methodRounding": "Jede Zahl wird in ganzen Cent gerechnet. Jede Rate wird aus der jeweiligen Restschuld neu berechnet, so bleiben die Raten innerhalb eines Cents beieinander, die letzte tilgt den Rest genau, und der Plan ergibt die Summen.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Nichts, was Sie eingeben, wird gesendet oder gespeichert.",
         "assumptionsTitle": "Annahmen",
         "assumptionFixedRate": "Der Zinssatz ist über die ganze Laufzeit fest, und jede Rate wird pünktlich gezahlt.",
         "assumptionFees": "Die einmaligen Gebühren werden zu Beginn gezahlt oder vom Betrag abgezogen; die monatlichen Gebühren sind jeden Monat gleich.",
         "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
-        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
+        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Ausgezahlter Betrag",
+          "month": "Monat",
+          "apr": "Effektiver Jahreszins",
+          "aprNoFees": "Effektiver Jahreszins ohne Gebühren",
+          "aprFees": "Effektiver Jahreszins mit Gebühren"
+        },
+        "methodAprTerm": "Effektiver Jahreszins",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionFeesTerm": "Gebühren",
+        "assumptionOtherCostsTerm": "Andere Kosten",
+        "assumptionLimitsTerm": "Grenzen",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "savingsCertificates": {
@@ -3603,8 +3824,6 @@
         "exampleTitle": "Rechenbeispiel",
         "example": "Ein Diesel mit {{cc}} cm³ Hubraum, offiziellen WLTP-Emissionen von {{co2}} g/km und Erstzulassung {{year}} zahlt {{tax}} IUC im Jahr. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodA": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007): Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
-        "methodB": "Kategorie B (Autos mit Zulassung ab Juli 2007): Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
         "methodAdditional": "Autos der Kategorie B mit Erstzulassung nach dem 1. Januar 2017 zahlen bei hohen Emissionen einen Zusatzsatz: 31,77 € über 205 g/km (WLTP) oder 180 g/km (NEDC) und 63,74 € über 260 g/km (WLTP) oder 250 g/km (NEDC). Auch der Zusatzsatz wird mit dem Koeffizienten multipliziert. Der Gesetzestext beschränkt ihn nicht nach Kraftstoff, daher wendet der Rechner ihn auf alle an.",
         "methodDiesel": "Dieselfahrzeuge zahlen zusätzlich den Dieselzuschlag (adicional de IUC, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 durch den Staatshaushalt weitergeführt). Er hängt vom Hubraum ab, gilt für die Kategorien A und B und wird nach dem Koeffizienten addiert, nicht damit multipliziert.",
         "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Das Decreto-Lei Nr. 161/2026 (4. August 2026) führt eine jährliche Festsetzung je Steuerpflichtigem für alle Fahrzeuge ein. 2027 ist ein Übergangsjahr: eine Zahlung im Oktober bis 500 €, sonst zwei im Juli und Oktober (oder alles im Juli). Ab 2028 wird sie bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt. Die Grenzen gelten für die Summe aller Ihrer Fahrzeuge.",
@@ -3612,8 +3831,6 @@
         "exemptionTitle": "Elektroautos",
         "exemption": "Reine Elektroautos der Kategorie B sind von der IUC befreit, der Rechner zeigt null. Plug-in-Hybride und andere Fahrzeuge werden nach Hubraum und CO2 laut Fahrzeugschein besteuert; geben Sie diese Werte ein.",
         "scopeTitle": "Was abgedeckt ist",
-        "scopeSupported": "Leichte Pkw: Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
-        "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
         "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Ab 2027 wird die Steuer je Steuerpflichtigem über alle seine Fahrzeuge festgesetzt: Fügen Sie jedes Ihrer Autos hinzu und geben Sie die IUC Ihrer übrigen Fahrzeuge als weitere IUC ein, damit die Ratenmonate Ihrer Summe folgen (das Gesetz wendet die Grenzen auf diese Summe an). Die Zahlungspläne für 2027 und 2028 zeigen den Betrag jedes Monats für die hinzugefügten Autos, bei einem Auto dessen Anteil an jeder Rate. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
@@ -3625,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 20. November 2026)",
         "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)",
-        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)"
+        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)",
+        "methodATerm": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007)",
+        "methodABody": "Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
+        "methodBTerm": "Kategorie B (Autos mit Zulassung ab Juli 2007)",
+        "methodBBody": "Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
+        "scopeSupportedTerm": "Leichte Pkw",
+        "scopeSupportedBody": "Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
+        "scopeUnsupportedTerm": "Nicht unterstützt",
+        "scopeUnsupportedBody": "Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
+        "labels": {
+          "diesel": "Dieselzuschlag",
+          "engineRate": "Hubraumsatz",
+          "co2Rate": "CO2-Satz",
+          "provision": "Monatliche Rücklage"
+        },
+        "terms": {
+          "additional": "Zusatzsatz",
+          "diesel": "Dieselzuschlag",
+          "payment": "Zahlung",
+          "budget": "Monatliche Rücklage",
+          "year": "Tabellen",
+          "paymentRule": "Fälligkeit",
+          "educational": "Schätzung zur Orientierung"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Lassen Sie sich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel Ihrer Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
@@ -3732,7 +3973,6 @@
         "methodCash": "Für den verbleibenden Erlös werden vom Verkaufspreis die Verkaufskosten, das getilgte Darlehen und die geschätzte IRS abgezogen. Was Sie in die nächste Wohnung stecken, wird nicht abgezogen.",
         "scopeTitle": "Was abgedeckt ist",
         "scopeSupported": "Natürliche Personen mit steuerlichem Wohnsitz in Portugal, die {{saleYear}} eine seit {{firstYear}} gekaufte Immobilie aus dem Privatvermögen verkaufen.",
-        "scopeUnsupported": "Nicht abgedeckt: Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, der Solidaritätszuschlag und Abzüge von der Steuerschuld.",
         "assumptionsTitle": "Annahmen",
         "assumptionBrackets": "Für die zusätzliche IRS werden die IRS-Jahrestarifstufen {{saleYear}} auf das eingegebene Einkommen angewendet, als Schätzung der Wirkung auf die Jahreserklärung. Die Zusammenveranlagung wird durch Teilung des Einkommens durch zwei abgebildet.",
         "assumptionNotModelled": "Der Rechner prüft die Reinvestitionsvoraussetzungen nicht. Die Koeffizienten wurden mit der Tabelle der {{portaria}} im Diário da República abgeglichen.",
@@ -3747,7 +3987,29 @@
         "sourceAcquisition": "CIRS, Artikel 46: Anschaffungswert entgeltlich erworbener Immobilien (abgerufen am 20. November 2026)",
         "sourceCorrection": "CIRS, Artikel 50: Geldwertkorrektur nach 24 Monaten (abgerufen am 20. November 2026)",
         "sourceExpenses": "CIRS, Artikel 51: Arbeiten der letzten 12 Jahre sowie Anschaffungs- und Verkaufskosten (abgerufen am 20. November 2026)",
-        "sourceImt": "CIMT, Artikel 12: Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (abgerufen am 20. November 2026)"
+        "sourceImt": "CIMT, Artikel 12: Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (abgerufen am 20. November 2026)",
+        "scopeUnsupportedTerm": "Nicht abgedeckt",
+        "scopeUnsupportedBody": "Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, der Solidaritätszuschlag und Abzüge von der Steuerschuld.",
+        "labels": {
+          "included": "Dem Einkommen zugerechnet",
+          "irsWith": "IRS mit dem Gewinn",
+          "irsWithout": "IRS ohne den Gewinn",
+          "cashAfter": "Erlös"
+        },
+        "terms": {
+          "gain": "Gewinn",
+          "taxValue": "Verkaufswert und VPT",
+          "coefficient": "Koeffizient",
+          "expenses": "Ausgaben",
+          "half": "Die Hälfte des Gewinns",
+          "exemption": "Reinvestition",
+          "cash": "Erlös",
+          "brackets": "IRS-Stufen",
+          "notModelled": "Was nicht geprüft wird",
+          "educational": "Schätzung zur Orientierung",
+          "supported": "Abgedeckt"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Sehen Sie, wie viel vom Verkaufserlös Sie wirklich nutzen können",
       "nextStepDescription": "WonderMoney hilft Ihnen, die Steuer zurückzulegen und zu sehen, was für die nächste Wohnung bleibt.",

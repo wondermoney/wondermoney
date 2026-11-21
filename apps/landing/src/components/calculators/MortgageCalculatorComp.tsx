@@ -224,6 +224,7 @@ function MortgageCalculatorContent() {
                       formatter={(value) => <span className="text-foreground">{value}</span>}
                     />
                     <Area
+                      isAnimationActive={false}
                       type="monotone"
                       dataKey="principal"
                       name={t("tools.mortgage.principal")}
@@ -232,6 +233,7 @@ function MortgageCalculatorContent() {
                       fill="oklch(var(--chart-1) / 0.3)"
                     />
                     <Area
+                      isAnimationActive={false}
                       type="monotone"
                       dataKey="interest"
                       name={t("tools.mortgage.interest")}

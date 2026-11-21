@@ -9,7 +9,8 @@
  * - GuideFormula.astro: one formula per line in a readable form (result = a − b, fractions
  *   stacked), each variable linking to the note that explains it. Formulas are built with
  *   `variable`, `number`, `operator`, `fraction` and `group` below; `group` puts parts in
- *   parentheses, with an optional exponent ((1 + rate)^years).
+ *   parentheses, with an optional exponent ((1 + rate)^years). `call` (min, max) and `sum`
+ *   (Σ) cover the few methods that need them.
  *
  * Give every note a formula links to an `id` that does not change with the locale (an
  * English slug prefixed with the guide's name, such as `household-budget-note-income`), so
@@ -50,7 +51,9 @@ export type GuideFormulaPart =
   | { kind: "number"; value: string }
   | { kind: "operator"; symbol: "+" | "−" | "×" | "÷" | "=" }
   | { kind: "fraction"; numerator: GuideFormulaPart[]; denominator: GuideFormulaPart[] }
-  | { kind: "group"; parts: GuideFormulaPart[]; exponent?: GuideFormulaPart[] };
+  | { kind: "group"; parts: GuideFormulaPart[]; exponent?: GuideFormulaPart[] }
+  | { kind: "call"; name: string; args: GuideFormulaPart[][] }
+  | { kind: "sum"; from: GuideFormulaPart[]; to: GuideFormulaPart[]; body: GuideFormulaPart[] };
 
 /** One line of a formula block: `result = expression`. */
 export type GuideFormulaLine = {
@@ -86,6 +89,16 @@ export function group(parts: GuideFormulaPart[], exponent?: GuideFormulaPart[]):
   return exponent ? { kind: "group", parts, exponent } : { kind: "group", parts };
 }
 
+/** A named function of its arguments, such as min(a; b). Pass the name as the reader writes it. */
+export function call(name: string, ...args: GuideFormulaPart[][]): GuideFormulaPart {
+  return { kind: "call", name, args };
+}
+
+/** A sum Σ of `body`, with its bounds under and over the sign (such as month 1 to n). */
+export function sum(from: GuideFormulaPart[], to: GuideFormulaPart[], body: GuideFormulaPart[]): GuideFormulaPart {
+  return { kind: "sum", from, to, body };
+}
+
 /** Every link in a set of formula lines, results first, in reading order. */
 export function formulaHrefs(lines: ReadonlyArray<GuideFormulaLine>): string[] {
   const fromParts = (parts: ReadonlyArray<GuideFormulaPart>): string[] =>
@@ -93,6 +106,8 @@ export function formulaHrefs(lines: ReadonlyArray<GuideFormulaLine>): string[] {
       if (part.kind === "variable") return part.href ? [part.href] : [];
       if (part.kind === "fraction") return [...fromParts(part.numerator), ...fromParts(part.denominator)];
       if (part.kind === "group") return [...fromParts(part.parts), ...fromParts(part.exponent ?? [])];
+      if (part.kind === "call") return part.args.flatMap(fromParts);
+      if (part.kind === "sum") return [...fromParts(part.from), ...fromParts(part.to), ...fromParts(part.body)];
       return [];
     });
   return lines.flatMap((line) => fromParts([line.result, ...line.expression]));

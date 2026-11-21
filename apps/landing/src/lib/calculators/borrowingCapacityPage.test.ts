@@ -117,8 +117,9 @@ describe("borrowing capacity tool page", () => {
 
 	it("works the example with the calculator's own function and adds no FAQ structured data", () => {
 		const guide = readSource("../../components/calculators/BorrowingCapacityGuide.astro")
+		const content = readSource("../../components/calculators/borrowingCapacityGuide.ts")
 
-		expect(guide).toContain("computeBorrowingCapacity(")
+		expect(content).toContain("computeBorrowingCapacity(")
 		expect(guide).not.toMatch(/FAQPage|application\/ld\+json/)
 	})
 
@@ -199,7 +200,7 @@ describe("borrowing capacity tool page", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = copyFor(lang)
 			expect(textAt(copy, "lenderNote").length).toBeGreaterThan(80)
-			for (const path of ["guide.lenderStress", "guide.lenderIncome", "guide.lenderCountry"]) {
+			for (const path of ["guide.lenderStressBody", "guide.lenderIncomeBody", "guide.lenderCountryBody"]) {
 				expect(textAt(copy, path).length).toBeGreaterThan(40)
 			}
 		}

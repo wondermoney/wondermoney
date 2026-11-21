@@ -597,7 +597,18 @@
         "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)",
+        "terms": {
+          "tax": "Annual IMI",
+          "family": "IMI Familiar",
+          "minimum": "Minimum amount",
+          "payment": "Instalments",
+          "budget": "Monthly provision",
+          "rate": "Municipal rate",
+          "scope": "Scope",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
@@ -1111,15 +1122,20 @@
         "exampleBody": "A couple brings home {{income}} a month between them. They pay {{home}} on their mortgage, {{car}} on a car loan and {{cards}} towards a credit card, {{total}} in all. Divide the payments by the income and multiply by 100: their ratio is {{ratio}}, in the caution band.",
         "exampleScenario": "Their car loan ends soon. Without it, payments fall to {{scenarioTotal}} and the ratio to {{scenarioRatio}}, back in the healthy band. The calculator above starts from this household and this change, so you can swap in your own figures.",
         "methodHeading": "Method",
-        "methodFormula": "Debt-to-income ratio = total monthly credit payments ÷ net monthly household income × 100",
-        "methodCounts": "Counted as debt: every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
-        "methodExcludes": "Not counted: rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
-        "methodIncome": "Income is net: what reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
         "methodRounding": "The ratio is rounded to one decimal place, and the band follows the rounded figure. Payments above income give a ratio over 100%.",
         "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
         "nextHeading": "Planning a new loan?",
         "nextBody": "A mortgage or another loan adds a payment. Work out what a new mortgage would cost each month, then enter that payment in the scenario panel to see the new ratio.",
-        "nextLink": "Open the mortgage calculator"
+        "nextLink": "Open the mortgage calculator",
+        "methodCountsTerm": "Counted as debt",
+        "methodCountsBody": "Every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
+        "methodExcludesTerm": "Not counted",
+        "methodExcludesBody": "Rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
+        "methodIncomeTerm": "Income is net",
+        "methodIncomeBody": "What reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "householdBudget": {
@@ -1324,7 +1340,6 @@
         "method": {
           "title": "How the payment is calculated",
           "intro": "Most fixed-rate mortgages are repaid in level payments: the same amount every month, set so the balance reaches zero with the last one. The payment comes from the annuity formula:",
-          "legend": "Here M is the monthly payment, P is the amount borrowed, r is the annual rate divided by 12, and n is the number of monthly payments. At 0% interest there is nothing to discount, so the payment is simply P divided by n.",
           "schedule": "Each month, interest is charged on the balance still owed and the rest of the payment repays principal. As the balance falls, the interest part shrinks and the principal part grows, which is why the balance falls slowly at first and faster towards the end. Insurance and fees are added on top of the payment and never reduce the balance.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1335,7 +1350,24 @@
             "rounding": "Amounts are in euros. Each month's payment is worked out from the balance still owed and the months left, then rounded to the cent, so a payment can differ from the others by a cent and the last one clears the balance exactly. On a very long loan at a high rate, the first payments may repay less than a cent of the loan.",
             "lenderFigures": "Your lender's figures can differ slightly, because of how they count days, round amounts or set the payment date. The pre-contract information they give you is the figure to rely on."
           },
-          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}."
+          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}.",
+          "formulasLabel": "Formulas",
+          "zeroRate": "At 0% interest there is nothing to discount, so the payment is simply the loan amount divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "monthly": "Monthly payments",
+            "nominalRate": "Nominal rate, not the APR",
+            "flatFees": "Insurance and fees",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interest in the first payment",
+          "firstPrincipal": "Principal in the first payment",
+          "monthlyRate": "Monthly rate",
+          "payments": "Number of payments"
         }
       },
       "cta": {
@@ -1458,11 +1490,26 @@
         "before": {
           "title": "Before you repay",
           "items": {
-            "fee": "Check the fee. A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving.",
-            "rate": "Variable and mixed rates are out of scope: the figures assume the rate you enter stays fixed for the rest of the loan.",
-            "reserves": "Keep a cash cushion. Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment.",
-            "otherDebts": "Repay the most expensive debt first. If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage.",
-            "lender": "Ask your lender how it applies the repayment. Some lower the payment by default, others shorten the term, and many let you choose."
+            "fee": {
+              "term": "Check the fee",
+              "body": "A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving."
+            },
+            "rate": {
+              "term": "Variable and mixed rates are out of scope",
+              "body": "The figures assume the rate you enter stays fixed for the rest of the loan."
+            },
+            "reserves": {
+              "term": "Keep a cash cushion",
+              "body": "Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment."
+            },
+            "otherDebts": {
+              "term": "Repay the most expensive debt first",
+              "body": "If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage."
+            },
+            "lender": {
+              "term": "Ask your lender how it applies the repayment",
+              "body": "Some lower the payment by default, others shorten the term, and many let you choose."
+            }
           }
         },
         "example": {
@@ -1475,9 +1522,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator first works out the loan as it stands, with the same fixed-rate engine as the mortgage calculator. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments left. At 0% there is no interest, so the payment is simply P divided by n.",
-          "lowerPayment": "Keep the term: the balance left after the repayment goes back into the formula with the same n, which gives the new, lower payment.",
-          "shorterTerm": "Keep the payment: you go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
           "fee": "The fee is the percentage you enter, applied to the amount repaid. Interest saved is the interest left on the loan as it is minus the interest in each outcome, and the net saving is that minus the fee. A repayment larger than the balance clears the loan, and only the balance counts towards the fee.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1488,7 +1532,23 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly.",
             "lenderFigures": "Your lender's figures can differ slightly because of how it counts days and rounds. Ask for its own simulation before you repay."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid.",
+          "lowerPaymentTerm": "Keep the term",
+          "lowerPaymentBody": "The balance left after the repayment goes back into the formula with the same number of payments, which gives the new, lower payment.",
+          "shorterTermTerm": "Keep the payment",
+          "shorterTermBody": "You go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "timing": "Timing",
+            "oneOff": "One repayment",
+            "costs": "Costs",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits",
+            "feeNote": "Fee and net saving"
+          },
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1663,10 +1723,22 @@
           "title": "What to compare before you switch",
           "intro": "Moving your mortgage to another lender, or onto new terms with your own, can lower what you pay. A lower rate is only part of the picture, so compare the whole offer:",
           "items": {
-            "rate": "The rate. A lower fixed rate cuts the interest charged on what you owe every month.",
-            "monthlyCosts": "The monthly extras. Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer.",
-            "term": "The term. A new loan over more years lowers the payment, but you pay interest for longer.",
-            "oneOff": "The one-off costs. Leaving one loan and taking out another has fees, and they come out of your savings."
+            "rate": {
+              "term": "The rate",
+              "body": "A lower fixed rate cuts the interest charged on what you owe every month."
+            },
+            "monthlyCosts": {
+              "term": "The monthly extras",
+              "body": "Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer."
+            },
+            "term": {
+              "term": "The term",
+              "body": "A new loan over more years lowers the payment, but you pay interest for longer."
+            },
+            "oneOff": {
+              "term": "The one-off costs",
+              "body": "Leaving one loan and taking out another has fees, and they come out of your savings."
+            }
           },
           "outro": "The calculator puts these together: the payment with its extras, the total each loan still costs and the month the switching costs are paid back."
         },
@@ -1691,7 +1763,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator works out both loans with the same fixed-rate engine as the mortgage calculator, on the balance you still owe. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments. At 0% there is no interest, so the payment is simply P divided by n. Each month's insurance and fees are added on top.",
           "saving": "A month's saving is what the current loan would cost that month minus what the new one costs. Once a loan is paid off it costs nothing, so with a longer new term the months after your current loan would have ended count as a cost. The total cost of each option is its payments, insurance and fees, plus the switching costs for the new loan. The net saving is the difference.",
           "breakEven": "The break-even month is the first month in which the savings so far are at least the switching costs. If that never happens before both loans end, the switch does not pay for itself.",
           "longerTerm": "When the new term is longer than the time left, the calculator also works out the offer over the time left, so you can see how much of the lower payment comes from the rate and how much from paying for longer.",
@@ -1705,7 +1776,22 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly. The payment shown is the first one; later ones stay within a cent of it.",
             "lenderFigures": "Lenders count days and round in their own ways, so their figures can differ slightly. Ask each one for its official offer before you decide."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance.",
+          "terms": {
+            "saving": "Saving and total cost",
+            "breakEven": "Break-even month",
+            "longerTerm": "A longer term",
+            "fixedRate": "Fixed rates",
+            "sameBalance": "The same balance",
+            "timing": "Timing",
+            "fees": "Insurance and fees",
+            "noDiscounting": "No discounting",
+            "rounding": "Rounding",
+            "lenderFigures": "Lenders' figures",
+            "limits": "Limits"
+          },
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1715,6 +1801,13 @@
           "earlyRepaymentBody": "What a lump sum would save on your current loan instead of switching it.",
           "debtToIncomeLink": "Debt-to-income ratio calculator",
           "debtToIncomeBody": "The share of your income that goes on debt payments, now and with the new payment."
+        },
+        "labels": {
+          "monthlySaving": "Monthly saving",
+          "currentMonthTotal": "Current loan's cost that month",
+          "offerMonthTotal": "New loan's cost that month",
+          "currentTotalCost": "Total cost of the current loan",
+          "offerTotalCost": "Total cost of the new loan"
         }
       },
       "cta": {
@@ -1984,16 +2077,12 @@
         "relatedDebtToIncome": "shows what share of your income your current payments take, with the same bands this tool uses.",
         "exampleTitle": "Worked example",
         "exampleIntro": "A couple brings home {{income}} a month and pays {{existing}} a month on a car loan. They have {{savings}} saved for a home, expect a fixed rate of {{rate}} over {{years}} years and plan for purchase costs of {{costsRate}} of the price. Their lender lends up to {{ltv}} of the price, and they allow {{share}} of their income for credit.",
-        "exampleStep1": "Monthly room: {{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
-        "exampleStep2": "Largest loan: a payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
-        "exampleStep3": "Cash: each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
         "exampleStep4": "The lower of the two is {{monthlyPrice}}, so the monthly budget sets the limit.",
         "exampleResult": "At {{price}} they would borrow {{loan}}, pay {{downPayment}} down and {{purchaseCosts}} in costs, using all of their {{savings}}. The mortgage calculator puts the payment at {{payment}} a month.",
         "exampleLift": "About {{extraIncome}} more net income a month would take them to {{liftPrice}}, where the savings limit takes over.",
         "exampleSavings": "With only {{lowSavings}} saved, the picture flips: the savings cover a price of {{lowSavingsPrice}}, with a loan of {{lowSavingsLoan}}, well within what their income could carry. Saving more, not earning more, is what would raise their limit. The calculator above starts from the first couple, so you can swap in your own figures.",
         "methodTitle": "Method",
         "methodIntro": "The calculation works out each limit on its own, then takes the lower price.",
-        "methodLegend": "I is net monthly income, d the share of it allowed for credit, E the existing payments and M the room for the new payment. r is the annual rate divided by 12, n the number of monthly payments and L the largest loan. S is the savings, c the purchase costs and v the loan-to-value, both as a share of the price. P₁ is the price the monthly budget allows and P₂ the one the savings allow.",
         "methodShare": "The starting share of {{share}} sits in the caution band of the debt-to-income calculator ({{caution}}% to {{high}}%). It is a rule of thumb, not a legal limit.",
         "methodCosts": "At the highest price every euro of savings goes into the purchase: the costs first, the rest as the down payment. The loan covers what is left, and never more than the loan-to-value allows.",
         "methodRounding": "Amounts are worked in cents. The loan is rounded down to the cent, so its first payment, worked out by the mortgage calculator, fits your room; later ones can differ by a cent. The price is exactly the loan plus the down payment, and the extra income or savings is rounded up to the euro.",
@@ -2005,11 +2094,33 @@
         "assumptionCostsShare": "Purchase costs are a flat share of the price. In practice taxes are often tiered and some fees are fixed amounts.",
         "lendersTitle": "What lenders check that this tool doesn't",
         "lendersIntro": "A lender's answer can be lower than this estimate, sometimes by a lot. Rules differ by lender and by country, and this calculator builds none of them in.",
-        "lenderStress": "Stress-tested rates: many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
-        "lenderIncome": "Income definitions: some count only part of bonuses, self-employed or rental income, or average it over several years.",
-        "lenderCountry": "Country limits: regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
-        "lenderProfile": "Your profile: your age at the end of the term, job security, credit history and the home itself all count.",
-        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you."
+        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you.",
+        "exampleStep1Term": "Monthly room",
+        "exampleStep1Body": "{{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
+        "exampleStep2Term": "Largest loan",
+        "exampleStep2Body": "A payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
+        "exampleStep3Term": "Cash",
+        "exampleStep3Body": "Each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
+        "lenderStressTerm": "Stress-tested rates",
+        "lenderStressBody": "Many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
+        "lenderIncomeTerm": "Income definitions",
+        "lenderIncomeBody": "Some count only part of bonuses, self-employed or rental income, or average it over several years.",
+        "lenderCountryTerm": "Country limits",
+        "lenderCountryBody": "Regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
+        "lenderProfileTerm": "Your profile",
+        "lenderProfileBody": "Your age at the end of the term, job security, credit history and the home itself all count.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas",
+        "labels": {
+          "maxLoan": "Largest loan"
+        },
+        "methodShareTerm": "Share for credit",
+        "methodCostsTerm": "Where the savings go",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionSavingsTerm": "All of the savings",
+        "assumptionPaymentTerm": "What the payment leaves out",
+        "assumptionCostsShareTerm": "Purchase costs"
       }
     },
     "termDeposit": {
@@ -2260,10 +2371,22 @@
         "whatHeading": "What the comparison shows",
         "whatBody": "Buying swaps rent for mortgage payments, but it also ties up cash in the down payment and purchase costs and adds the costs of owning. Renting leaves that cash free to invest. The calculator follows both paths from the same starting cash and compares what each one leaves you with.",
         "read": {
-          "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
-          "difference": "The difference: how far ahead one path is at the end of the period you chose.",
-          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
-          "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          "netWorth": {
+            "term": "Net worth on each path",
+            "body": "For buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments."
+          },
+          "difference": {
+            "term": "The difference",
+            "body": "How far ahead one path is at the end of the period you chose."
+          },
+          "breakEven": {
+            "term": "The break-even year",
+            "body": "The first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments."
+          },
+          "chart": {
+            "term": "Chart and table",
+            "body": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          }
         },
         "exampleHeading": "Worked example",
         "example": {
@@ -2283,10 +2406,7 @@
           "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
           "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
         },
-        "formulaOwner": "Buying = home value − selling costs − loan owed + investments",
-        "formulaRenter": "Renting = investments",
         "formulaReturn": "Monthly return",
-        "formulaLegend": "Here R is the annual investment return, so {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
         "leftOutHeading": "What it leaves out",
         "leftOut": {
           "gainsTax": "Tax on investment gains or on the profit from selling the home.",
@@ -2301,7 +2421,20 @@
         "relatedMortgage": "To see the loan on its own, with its schedule year by year, use the",
         "relatedMortgageLink": "mortgage calculator",
         "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
-        "relatedNetWorthLink": "net worth calculator"
+        "relatedNetWorthLink": "net worth calculator",
+        "formulaExample": "A return of {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
+        "labels": {
+          "investments": "Investments"
+        },
+        "formulasLabel": "Formulas",
+        "methodTerms": {
+          "start": "Starting cash",
+          "loan": "The mortgage",
+          "monthly": "Each month",
+          "growth": "Growth and rent",
+          "returns": "Investment returns",
+          "netWorth": "Net worth and break-even"
+        }
       }
     },
     "rateRevision": {
@@ -2421,7 +2554,6 @@
         "exampleIncome": "On a net income of {{income}} a month, the payment takes {{currentShare}} of it today, {{newShare}} after the first rise and {{stressShare}} after the larger one, which the debt-to-income bands rate as “{{stressBand}}”.",
         "methodTitle": "How it is calculated",
         "methodIntro": "Each payment is the level payment that clears the balance over the months left, from the same fixed-rate engine as the mortgage calculator:",
-        "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
         "methodItems": {
           "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
           "year": "The yearly change compares the sum of the first 12 payments in each schedule, or all remaining payments if fewer are left. Payments are rounded individually, so the total can differ from the monthly change multiplied by the number of payments.",
@@ -2440,12 +2572,40 @@
         "contractTitle": "What your contract decides",
         "contractIntro": "How a real revision works depends on your contract and on the rules where you live. None of this is built into the calculator:",
         "contractItems": {
-          "resetDates": "Reset dates: how often the rate is revised, which day's index value counts and when the new payment starts.",
-          "capsFloors": "Caps and floors: some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%.",
-          "index": "The index: Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule.",
-          "mixed": "Mixed-rate loans: a fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          "resetDates": {
+            "term": "Reset dates",
+            "body": "How often the rate is revised, which day's index value counts and when the new payment starts."
+          },
+          "capsFloors": {
+            "term": "Caps and floors",
+            "body": "Some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%."
+          },
+          "index": {
+            "term": "The index",
+            "body": "Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule."
+          },
+          "mixed": {
+            "term": "Mixed-rate loans",
+            "body": "A fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          }
         },
-        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
+        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's.",
+        "terms": {
+          "change": "Monthly change",
+          "year": "Yearly change",
+          "interest": "Change in interest",
+          "income": "Share of income",
+          "privacy": "Privacy",
+          "fromNextMonth": "From the next payment",
+          "sameTerm": "The same term",
+          "statement": "Today's payment",
+          "noFeed": "No index data",
+          "limits": "Limits",
+          "annualRate": "Annual rate",
+          "incomeShare": "Payment as a share of income"
+        },
+        "zeroRate": "When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply the balance divided by the number of payments.",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "carLoan": {
@@ -2508,7 +2668,16 @@
         "assumptionsTitle": "Assumptions",
         "assumptionLoan": "The estimate assumes a fixed-rate loan with monthly payments, no balloon payment and no lease. Enter the actual price and financing terms you were quoted for the new or used car. Enter zero for both price and deposit to estimate running costs for a car you already own.",
         "assumptionFees": "Upfront financing fees are paid at purchase with the deposit. Enter any financing-related insurance or fees only once. The calculator does not infer taxes or charges from your quote.",
-        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year."
+        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year.",
+        "terms": {
+          "loan": "The loan payment",
+          "budget": "The monthly budget",
+          "apr": "The estimated APR",
+          "assumptionLoan": "Fixed-rate loan",
+          "assumptionFees": "Financing fees",
+          "assumptionRunning": "What the budget covers"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Budget for the full monthly cost of the car",
       "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
@@ -2589,9 +2758,26 @@
         "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
         "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. The purchase stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit, so above it you pay 0.8% only on the excess. Mortgage stamp duty is still charged.",
         "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
-        "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
         "assumptionIslands": "For the Azores and Madeira the calculator uses the regional limits of tables IV to VI of Ofício Circulado 40129/2026, with the same rates as the mainland.",
-        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)"
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Stamp duty on the purchase",
+          "stampLoan": "Stamp duty on the mortgage"
+        },
+        "terms": {
+          "base": "Taxable value",
+          "imt": "IMT",
+          "stamp": "Stamp duty",
+          "rounding": "Rounding",
+          "scope": "Scope",
+          "young": "Young-buyer exemption",
+          "loan": "Mortgage",
+          "islands": "Azores and Madeira"
+        },
+        "formulasLabel": "Formulas",
+        "assumptionUnsupportedTerm": "Not supported",
+        "assumptionUnsupportedBody": "Non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT."
       },
       "nextStepHeadline": "Plan the cash you need to buy",
       "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
@@ -2685,7 +2871,28 @@
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
         "assumptionRate": "The rate is the one you enter. The guarantee does not change the interest rate.",
         "assumptionTaxes": "Taxes are for an own permanent home on mainland Portugal and assume you meet the IMT Jovem conditions in the with-exemption figures.",
-        "assumptionScope": "Educational only: not financial, tax or legal advice."
+        "assumptionScope": "Educational only: not financial, tax or legal advice.",
+        "labels": {
+          "cash": "Cash at signing",
+          "taxes": "IMT and stamp duty"
+        },
+        "terms": {
+          "payment": "Loan and payment",
+          "taxes": "Taxes",
+          "cash": "Cash at signing",
+          "guarantee": "The guarantee",
+          "banks": "The bank decides",
+          "rate": "Interest rate",
+          "assumptionTaxes": "Taxes covered",
+          "scope": "Scope",
+          "conditionAge": "Age",
+          "conditionHome": "Own permanent home",
+          "conditionProperty": "Other property",
+          "conditionPrice": "Price",
+          "conditionIncome": "Income",
+          "conditionDate": "Contract date"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Plan the deposit and the cost of living in your home",
       "nextStepDescription": "Set a deposit goal and budget the mortgage, taxes and running costs in WonderMoney.",
@@ -2785,15 +2992,29 @@
         "exampleOutro": "The calculator above starts from this loan without the fees, so you can enter your own offer.",
         "methodTitle": "How the calculator works it out",
         "methodIntro": "The monthly payment is the level payment that repays the amount over the term at the monthly rate, and the APR is the rate that balances what you receive against what you pay:",
-        "methodLegend": "M is the payment of principal and interest, P the amount borrowed, r the nominal annual rate divided by 12 and n the number of months. The monthly fees f are added to each payment.",
-        "methodApr": "The APR is the rate A that solves the second line: what you receive at the start, the amount P less the upfront fees F, equals each month's payment Mₖ plus the fees f, discounted by (1 + A) to the power of k ÷ 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
+        "methodApr": "The APR is the rate that solves the last line: what you receive at the start, the amount borrowed less the upfront fees, equals each month's payment plus the monthly fees, discounted by one plus the APR to the power of the month's number divided by 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
         "methodRounding": "Every figure is worked in whole cents. Each payment is worked out again from the balance still owed, so the payments stay within a cent of each other, the last one clears the balance exactly, and the schedule adds up to the totals.",
         "methodPrivacy": "The calculation runs in your browser. Nothing you enter is sent or stored.",
         "assumptionsTitle": "Assumptions",
         "assumptionFixedRate": "The rate is fixed for the whole term, and every payment is made on time.",
         "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
-        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
+        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Amount received",
+          "month": "Month",
+          "apr": "APR",
+          "aprNoFees": "APR without fees",
+          "aprFees": "APR with fees"
+        },
+        "methodAprTerm": "APR",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionFeesTerm": "Fees",
+        "assumptionOtherCostsTerm": "Other costs",
+        "assumptionLimitsTerm": "Limits",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "savingsCertificates": {
@@ -3603,8 +3824,6 @@
         "exampleTitle": "Worked example",
         "example": "A diesel car with a {{cc}} cm³ engine, official WLTP emissions of {{co2}} g/km and first registered in {{year}} owes {{tax}} of IUC a year. Setting aside {{monthly}} a month covers it.",
         "methodTitle": "How the estimate works",
-        "methodA": "Category A (cars registered from 1981 up to June 2007): the tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
-        "methodB": "Category B (cars registered from July 2007): the engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
         "methodAdditional": "Category B cars first registered after 1 January 2017 pay an additional rate when emissions are high: €31.77 above 205 g/km (WLTP) or 180 g/km (NEDC), and €63.74 above 260 g/km (WLTP) or 250 g/km (NEDC). The additional rate is also multiplied by the coefficient. The legal text does not limit it by fuel, so the calculator applies it to every fuel.",
         "methodDiesel": "Diesel cars also pay the diesel surcharge (adicional de IUC, article 216 of Lei n.º 82-B/2014, kept in force for 2026 by the State Budget). It depends on engine size, applies to categories A and B, and is added after the coefficient, not multiplied by it.",
         "methodPayment": "Until 2026 the IUC is paid in the month of the registration anniversary. Decreto-Lei n.º 161/2026 (4 August 2026) moves it to one yearly assessment per taxpayer, covering all vehicles. 2027 is a transitional year: one payment in October up to €500, otherwise two in July and October (or all in July). From 2028 it is settled by April and paid in April up to €100, in April and October from €100 up to €500, and in April, July and October above €500. The thresholds apply to the total for all your vehicles.",
@@ -3612,8 +3831,6 @@
         "exemptionTitle": "Electric cars",
         "exemption": "Fully electric cars in category B are exempt from IUC, and the calculator shows zero. Plug-in hybrids and other vehicles are taxed by their engine size and CO2 as shown on the registration document, so enter those values.",
         "scopeTitle": "What is covered",
-        "scopeSupported": "Light passenger cars: category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
-        "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
         "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. From 2027 the tax is assessed per taxpayer across all their vehicles: add each of your cars, and enter the IUC of any other vehicles as other IUC, so the instalment months follow your total (the law applies its thresholds to that total). The schedules for 2027 and 2028 give each month's amount for the cars you added; with one car, its share of each instalment. In the year of registration the tax is paid within 30 days of the registration deadline.",
@@ -3625,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
-        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)",
+        "methodATerm": "Category A (cars registered from 1981 up to June 2007)",
+        "methodABody": "The tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
+        "methodBTerm": "Category B (cars registered from July 2007)",
+        "methodBBody": "The engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
+        "scopeSupportedTerm": "Light passenger cars",
+        "scopeSupportedBody": "Category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
+        "labels": {
+          "diesel": "Diesel surcharge",
+          "engineRate": "Engine size rate",
+          "co2Rate": "CO2 rate",
+          "provision": "Monthly provision"
+        },
+        "terms": {
+          "additional": "Additional rate",
+          "diesel": "Diesel surcharge",
+          "payment": "Payment",
+          "budget": "Monthly provision",
+          "year": "Tables",
+          "paymentRule": "When it is due",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
@@ -3732,7 +3973,6 @@
         "methodCash": "The proceeds left subtract the selling costs, the loan repaid and the estimated IRS from the sale value. It does not subtract what you spend on the next home.",
         "scopeTitle": "What is covered",
         "scopeSupported": "Individuals who are Portuguese tax residents selling a property held as a private asset, bought from {{firstYear}} on, in {{saleYear}}.",
-        "scopeUnsupported": "Not supported: non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
         "assumptionsTitle": "Assumptions",
         "assumptionBrackets": "The extra IRS uses the {{saleYear}} annual IRS brackets on the income you enter, as an estimate of the effect on the annual return. Joint taxation is modelled as splitting the income in two.",
         "assumptionNotModelled": "The calculator does not check the reinvestment conditions. The coefficients were checked against the table of {{portaria}} in the Diário da República.",
@@ -3747,7 +3987,29 @@
         "sourceAcquisition": "CIRS, article 46: acquisition value of a property bought for a price (consulted 20 November 2026)",
         "sourceCorrection": "CIRS, article 50: currency devaluation correction after 24 months (consulted 20 November 2026)",
         "sourceExpenses": "CIRS, article 51: works of the last 12 years and acquisition and sale expenses (consulted 20 November 2026)",
-        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)"
+        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
+        "labels": {
+          "included": "Added to income",
+          "irsWith": "IRS with the gain",
+          "irsWithout": "IRS without the gain",
+          "cashAfter": "Proceeds left"
+        },
+        "terms": {
+          "gain": "Gain",
+          "taxValue": "Sale value and VPT",
+          "coefficient": "Coefficient",
+          "expenses": "Expenses",
+          "half": "Half the gain",
+          "exemption": "Reinvestment",
+          "cash": "Proceeds left",
+          "brackets": "IRS brackets",
+          "notModelled": "What is not checked",
+          "educational": "Educational estimate",
+          "supported": "Covered"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Know how much of the sale you can really use",
       "nextStepDescription": "WonderMoney helps you set aside the tax and see what is left for your next home.",

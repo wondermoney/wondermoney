@@ -597,7 +597,18 @@
         "reviewed": "Regole verificate il 20 novembre 2026 per l'IMI dovuta nel 2026 e nel 2027. Gli importi dell'IMI Familiar provengono dall'articolo 112-A del Código do IMI (Portal das Finanças).",
         "methodMinimum": "Se l'imposta da riscuotere, dopo l'eventuale riduzione dell'IMI Familiar, è inferiore a 10 €, non viene liquidata alcuna IMI e il calcolatore mostra 0 € con una nota (articolo 113, n.º 6, del Código do IMI).",
         "sourceMinimum": "Código do IMI, articolo 113: liquidazione, nessuna IMI sotto i 10 € (consultato il 19 novembre 2026)",
-        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)"
+        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)",
+        "terms": {
+          "tax": "IMI annuale",
+          "family": "IMI Familiar",
+          "minimum": "Importo minimo",
+          "payment": "Rate",
+          "budget": "Accantonamento mensile",
+          "rate": "Aliquota comunale",
+          "scope": "Ambito",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dall'IMI",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo dell'IMI ogni mese, così le rate sono già coperte.",
@@ -1111,15 +1122,20 @@
         "exampleBody": "Una coppia guadagna {{income}} netti al mese in due. Paga {{home}} di mutuo, {{car}} per il finanziamento dell'auto e {{cards}} per la carta di credito: {{total}} in tutto. Dividendo le rate per il reddito e moltiplicando per 100, il rapporto è del {{ratio}}, nella fascia di attenzione.",
         "exampleScenario": "Il finanziamento dell'auto sta per finire. Senza, le rate scendono a {{scenarioTotal}} e il rapporto al {{scenarioRatio}}, di nuovo nella fascia sana. Il calcolatore qui sopra parte da questo nucleo e da questo cambiamento, così puoi inserire i tuoi numeri.",
         "methodHeading": "Metodo",
-        "methodFormula": "Rapporto rata/reddito = totale delle rate mensili ÷ reddito netto mensile del nucleo familiare × 100",
-        "methodCounts": "Conta come debito: ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
-        "methodExcludes": "Non conta: l'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
-        "methodIncome": "Il reddito è netto: quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
         "methodRounding": "Il rapporto è arrotondato a un decimale, e la fascia segue il valore arrotondato. Rate superiori al reddito danno un rapporto oltre il 100%.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati.",
         "nextHeading": "Pensi a un nuovo finanziamento?",
         "nextBody": "Un mutuo o un altro prestito aggiunge una rata. Calcola quanto costerebbe al mese un nuovo mutuo e inserisci quella rata nel pannello dello scenario per vedere il nuovo rapporto.",
-        "nextLink": "Apri il calcolatore del mutuo"
+        "nextLink": "Apri il calcolatore del mutuo",
+        "methodCountsTerm": "Conta come debito",
+        "methodCountsBody": "Ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
+        "methodExcludesTerm": "Non conta",
+        "methodExcludesBody": "L'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
+        "methodIncomeTerm": "Il reddito è netto",
+        "methodIncomeBody": "Quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "householdBudget": {
@@ -1324,7 +1340,6 @@
         "method": {
           "title": "Come si calcola la rata",
           "intro": "La maggior parte dei mutui a tasso fisso si rimborsa con rate costanti: lo stesso importo ogni mese, fissato in modo che il debito arrivi a zero con l'ultima rata. La rata deriva dalla formula della rendita:",
-          "legend": "Qui M è la rata mensile, P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
           "schedule": "Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa capitale. Man mano che il debito scende, la quota interessi si riduce e la quota capitale cresce: per questo il debito scende piano all'inizio e più in fretta verso la fine. Assicurazioni e spese si sommano alla rata e non riducono mai il debito.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1335,7 +1350,24 @@
             "rounding": "Gli importi sono in euro. La rata di ogni mese si calcola dal debito residuo e dai mesi che restano, arrotondata al centesimo: per questo una rata può differire dalle altre di un centesimo, e l'ultima estingue il debito esattamente. In un mutuo molto lungo a un tasso alto, le prime rate possono rimborsare meno di un centesimo di capitale.",
             "lenderFigures": "Le cifre della tua banca possono differire leggermente per come conta i giorni, arrotonda gli importi o fissa la data di pagamento. Il riferimento sono le informazioni precontrattuali che ti consegna."
           },
-          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
+          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}.",
+          "formulasLabel": "Formule",
+          "zeroRate": "Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente l'importo del prestito diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "monthly": "Rate mensili",
+            "nominalRate": "Tasso nominale, non il TAEG",
+            "flatFees": "Assicurazioni e commissioni",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interessi nella prima rata",
+          "firstPrincipal": "Capitale nella prima rata",
+          "monthlyRate": "Tasso mensile",
+          "payments": "Numero di rate"
         }
       },
       "cta": {
@@ -1458,11 +1490,26 @@
         "before": {
           "title": "Prima di rimborsare",
           "items": {
-            "fee": "Controlla la penale. La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto.",
-            "rate": "I tassi variabili e misti non sono coperti: i calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito.",
-            "reserves": "Tieni una riserva. Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso.",
-            "otherDebts": "Rimborsa prima il debito più caro. Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico.",
-            "lender": "Chiedi alla banca come applica il rimborso. Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            "fee": {
+              "term": "Controlla la penale",
+              "body": "La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto."
+            },
+            "rate": {
+              "term": "I tassi variabili e misti non sono coperti",
+              "body": "I calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito."
+            },
+            "reserves": {
+              "term": "Tieni una riserva",
+              "body": "Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso."
+            },
+            "otherDebts": {
+              "term": "Rimborsa prima il debito più caro",
+              "body": "Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico."
+            },
+            "lender": {
+              "term": "Chiedi alla banca come applica il rimborso",
+              "body": "Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            }
           }
         },
         "example": {
@@ -1475,9 +1522,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce prima il prestito così com'è, con lo stesso motore a tasso fisso del calcolatore del mutuo. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate che restano. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n.",
-          "lowerPayment": "Mantenere la durata: il debito che resta dopo il rimborso torna nella formula con lo stesso n, che dà la nuova rata, più bassa.",
-          "shorterTerm": "Mantenere la rata: continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
           "fee": "La penale è la percentuale che inserisci, applicata alla somma rimborsata. Gli interessi risparmiati sono gli interessi residui del prestito così com'è meno quelli di ciascuno scenario, e il risparmio netto è questa cifra meno la penale. Una somma superiore al debito residuo estingue il prestito, e solo il debito residuo conta per la penale.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1488,7 +1532,23 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano esattamente.",
             "lenderFigures": "I numeri della tua banca possono differire leggermente per come conta i giorni e arrotonda. Chiedile una simulazione prima di rimborsare."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata.",
+          "lowerPaymentTerm": "Mantenere la durata",
+          "lowerPaymentBody": "Il debito che resta dopo il rimborso torna nella formula con lo stesso numero di rate, che dà la nuova rata, più bassa.",
+          "shorterTermTerm": "Mantenere la rata",
+          "shorterTermBody": "Continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "timing": "Momento del rimborso",
+            "oneOff": "Un solo rimborso",
+            "costs": "Costi",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti",
+            "feeNote": "Penale e risparmio netto"
+          },
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1663,10 +1723,22 @@
           "title": "Cosa confrontare prima di cambiare",
           "intro": "Portare il mutuo in un'altra banca, o rinegoziare le condizioni con la tua, può abbassare quello che paghi. Un tasso più basso è solo una parte del conto, quindi confronta l'offerta per intero:",
           "items": {
-            "rate": "Il tasso. Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi.",
-            "monthlyCosts": "Gli extra mensili. Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più.",
-            "term": "La durata. Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo.",
-            "oneOff": "I costi una tantum. Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            "rate": {
+              "term": "Il tasso",
+              "body": "Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi."
+            },
+            "monthlyCosts": {
+              "term": "Gli extra mensili",
+              "body": "Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più."
+            },
+            "term": {
+              "term": "La durata",
+              "body": "Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo."
+            },
+            "oneOff": {
+              "term": "I costi una tantum",
+              "body": "Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            }
           },
           "outro": "Il calcolatore mette tutto insieme: la rata con gli extra, quanto costa ancora ogni mutuo in totale e il mese in cui recuperi i costi del passaggio."
         },
@@ -1691,7 +1763,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce i due mutui con lo stesso motore a tasso fisso del calcolatore del mutuo, sul debito che hai ancora. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n. Le assicurazioni e le spese di ogni mese si sommano sopra.",
           "saving": "Il risparmio di un mese è quanto costerebbe quel mese il mutuo attuale meno quanto costa il nuovo. Un mutuo estinto non costa più nulla, quindi con una nuova durata più lunga i mesi dopo la fine del mutuo attuale contano come un costo. Il costo totale di ogni opzione sono le rate, le assicurazioni e le spese, più i costi del passaggio per il nuovo mutuo. Il risparmio netto è la differenza.",
           "breakEven": "Il mese in cui il passaggio si ripaga è il primo in cui il risparmio accumulato arriva almeno ai costi del passaggio. Se non succede prima della fine dei due mutui, il passaggio non si ripaga.",
           "longerTerm": "Quando la nuova durata è più lunga della durata residua, il calcolatore calcola anche l'offerta sulla durata residua, così vedi quanto del calo della rata viene dal tasso e quanto dal pagare più a lungo.",
@@ -1705,7 +1776,22 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano. La rata indicata è la prima; le successive differiscono al massimo di un centesimo.",
             "lenderFigures": "Ogni banca conta i giorni e arrotonda a modo suo, quindi i suoi importi possono differire di poco. Chiedi a ciascuna l'offerta ufficiale prima di decidere."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito.",
+          "terms": {
+            "saving": "Risparmio e costo totale",
+            "breakEven": "Mese in cui il cambio si ripaga",
+            "longerTerm": "Una durata più lunga",
+            "fixedRate": "Tassi fissi",
+            "sameBalance": "Lo stesso debito",
+            "timing": "Momento del cambio",
+            "fees": "Assicurazioni e spese",
+            "noDiscounting": "Nessuno sconto nel tempo",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre delle banche",
+            "limits": "Limiti"
+          },
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1715,6 +1801,13 @@
           "earlyRepaymentBody": "Quanto risparmieresti con un rimborso parziale sul mutuo attuale, invece di surrogarlo.",
           "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
           "debtToIncomeBody": "La parte del tuo reddito che va in rate, oggi e con la nuova rata."
+        },
+        "labels": {
+          "monthlySaving": "Risparmio al mese",
+          "currentMonthTotal": "Costo del mutuo attuale in quel mese",
+          "offerMonthTotal": "Costo del nuovo mutuo in quel mese",
+          "currentTotalCost": "Costo totale del mutuo attuale",
+          "offerTotalCost": "Costo totale del nuovo mutuo"
         }
       },
       "cta": {
@@ -1984,16 +2077,12 @@
         "relatedDebtToIncome": "mostra quale parte del tuo reddito occupano le rate attuali, con le stesse fasce che usa questo strumento.",
         "exampleTitle": "Esempio pratico",
         "exampleIntro": "Una coppia guadagna {{income}} netti al mese e paga {{existing}} al mese per un prestito auto. Ha {{savings}} da parte per la casa, conta su un tasso fisso del {{rate}} per {{years}} anni e prevede costi d'acquisto del {{costsRate}} del prezzo. La banca finanzia fino al {{ltv}} del prezzo, e la coppia destina al credito il {{share}} del reddito.",
-        "exampleStep1": "Margine mensile: il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
-        "exampleStep2": "Mutuo massimo: una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
-        "exampleStep3": "Soldi in anticipo: ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
         "exampleStep4": "Il più basso dei due è {{monthlyPrice}}, quindi è il budget mensile a fissare il limite.",
         "exampleResult": "A {{price}} la coppia chiederebbe {{loan}}, verserebbe {{downPayment}} di anticipo e pagherebbe {{purchaseCosts}} di costi, usando tutti i {{savings}} risparmiati. Il calcolatore del mutuo dà una rata di {{payment}} al mese.",
         "exampleLift": "Con circa {{extraIncome}} di reddito netto in più al mese arriverebbe a {{liftPrice}}, dove subentra il limite dei risparmi.",
         "exampleSavings": "Con solo {{lowSavings}} da parte il quadro si ribalta: i risparmi coprono un prezzo di {{lowSavingsPrice}}, con un mutuo di {{lowSavingsLoan}}, ben dentro ciò che il reddito potrebbe sostenere. Per alzare il limite conta risparmiare di più, non guadagnare di più. Il calcolatore qui sopra parte dalla prima coppia, così puoi inserire le tue cifre.",
         "methodTitle": "Metodo",
         "methodIntro": "Il calcolo considera ogni limite separatamente e poi prende il prezzo più basso.",
-        "methodLegend": "I è il reddito netto mensile, d la quota consentita per il credito, E le rate attuali e M il margine per la nuova rata. r è il tasso annuo diviso 12, n il numero di rate mensili e L il mutuo massimo. S sono i risparmi, c i costi d'acquisto e v il finanziamento, entrambi in percentuale del prezzo. P₁ è il prezzo che permette il budget mensile e P₂ quello che permettono i risparmi.",
         "methodShare": "La quota iniziale del {{share}} rientra nella fascia di attenzione del calcolatore del rapporto rata/reddito (dal {{caution}}% al {{high}}%). È una regola pratica, non un limite di legge.",
         "methodCosts": "Al prezzo massimo ogni euro di risparmio va nell'acquisto: prima i costi, il resto come anticipo. Il mutuo copre ciò che manca, e mai più di quanto consente il finanziamento massimo.",
         "methodRounding": "Gli importi sono calcolati in centesimi. Il mutuo è arrotondato per difetto al centesimo, così la prima rata, calcolata dal calcolatore del mutuo, rientra nel tuo margine; le successive possono variare di un centesimo. Il prezzo è esattamente mutuo più anticipo, e il reddito o il risparmio in più è arrotondato per eccesso all'euro.",
@@ -2005,11 +2094,33 @@
         "assumptionCostsShare": "I costi d'acquisto sono una percentuale fissa del prezzo. In pratica le imposte vanno spesso a scaglioni e alcune spese sono importi fissi.",
         "lendersTitle": "Cosa controllano le banche e questo strumento no",
         "lendersIntro": "La risposta di una banca può essere più bassa di questa stima, a volte di molto. Le regole cambiano da banca a banca e da paese a paese, e questo calcolatore non ne include nessuna.",
-        "lenderStress": "Stress test sul tasso: molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
-        "lenderIncome": "Definizione del reddito: alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
-        "lenderCountry": "Limiti del paese: in molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
-        "lenderProfile": "Il tuo profilo: l'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
-        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te."
+        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te.",
+        "exampleStep1Term": "Margine mensile",
+        "exampleStep1Body": "Il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
+        "exampleStep2Term": "Mutuo massimo",
+        "exampleStep2Body": "Una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
+        "exampleStep3Term": "Soldi in anticipo",
+        "exampleStep3Body": "Ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
+        "lenderStressTerm": "Stress test sul tasso",
+        "lenderStressBody": "Molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
+        "lenderIncomeTerm": "Definizione del reddito",
+        "lenderIncomeBody": "Alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
+        "lenderCountryTerm": "Limiti del paese",
+        "lenderCountryBody": "In molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
+        "lenderProfileTerm": "Il tuo profilo",
+        "lenderProfileBody": "L'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule",
+        "labels": {
+          "maxLoan": "Mutuo massimo"
+        },
+        "methodShareTerm": "Quota per il credito",
+        "methodCostsTerm": "Dove vanno i risparmi",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionSavingsTerm": "Tutti i risparmi",
+        "assumptionPaymentTerm": "Cosa resta fuori dalla rata",
+        "assumptionCostsShareTerm": "Costi di acquisto"
       }
     },
     "termDeposit": {
@@ -2260,10 +2371,22 @@
         "whatHeading": "Cosa mostra il confronto",
         "whatBody": "Comprare sostituisce l'affitto con la rata del mutuo, ma blocca anche denaro nell'anticipo e nei costi di acquisto e aggiunge i costi della proprietà. Affittare lascia quel denaro libero di essere investito. Il calcolatore segue le due strade con lo stesso capitale iniziale e confronta quanto ti lascia ciascuna.",
         "read": {
-          "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
-          "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
-          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta.",
-          "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          "netWorth": {
+            "term": "Il patrimonio di ogni strada",
+            "body": "Per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti."
+          },
+          "difference": {
+            "term": "La differenza",
+            "body": "Di quanto una strada è avanti alla fine del periodo che hai scelto."
+          },
+          "breakEven": {
+            "term": "L'anno di pareggio",
+            "body": "Il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta."
+          },
+          "chart": {
+            "term": "Grafico e tabella",
+            "body": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          }
         },
         "exampleHeading": "Esempio pratico",
         "example": {
@@ -2283,10 +2406,7 @@
           "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
           "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta è dato dai suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
         },
-        "formulaOwner": "Comprare = valore della casa − costi di vendita − debito residuo + investimenti",
-        "formulaRenter": "Affittare = investimenti",
         "formulaReturn": "Rendimento mensile",
-        "formulaLegend": "Qui R è il rendimento annuo degli investimenti: il {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
         "leftOutHeading": "Cosa resta fuori",
         "leftOut": {
           "gainsTax": "Le imposte sui guadagni degli investimenti o sulla plusvalenza della vendita della casa.",
@@ -2301,7 +2421,20 @@
         "relatedMortgage": "Per vedere il mutuo da solo, con il piano di ammortamento anno per anno, usa il",
         "relatedMortgageLink": "calcolatore del mutuo",
         "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
-        "relatedNetWorthLink": "calcolatore del patrimonio netto"
+        "relatedNetWorthLink": "calcolatore del patrimonio netto",
+        "formulaExample": "Un rendimento del {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
+        "labels": {
+          "investments": "Investimenti"
+        },
+        "formulasLabel": "Formule",
+        "methodTerms": {
+          "start": "Soldi di partenza",
+          "loan": "Il mutuo",
+          "monthly": "Ogni mese",
+          "growth": "Rivalutazione e affitto",
+          "returns": "Rendimento degli investimenti",
+          "netWorth": "Patrimonio e anno di pareggio"
+        }
       }
     },
     "rateRevision": {
@@ -2421,7 +2554,6 @@
         "exampleIncome": "Con un reddito netto di {{income}} al mese, la rata ne prende oggi il {{currentShare}}, il {{newShare}} dopo il primo aumento e il {{stressShare}} dopo quello più forte, un valore che i livelli del rapporto rata/reddito classificano come «{{stressBand}}».",
         "methodTitle": "Come si calcola",
         "methodIntro": "Ogni rata è la rata costante che rimborsa il debito residuo nei mesi che restano, con lo stesso motore a tasso fisso del calcolatore del mutuo:",
-        "methodLegend": "i è l'indice e s lo spread, entrambi come tassi annui. r è il tasso mensile, M la rata mensile, P il debito residuo e n il numero di rate che restano. Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente P diviso n.",
         "methodItems": {
           "change": "La differenza al mese è la prima rata al nuovo tasso meno la prima rata al tasso di oggi, entrambe sul debito di oggi e sullo stesso numero di mesi.",
           "year": "La differenza annua confronta la somma delle prime 12 rate di ciascun piano o di tutte le rate residue se ne restano meno. Ogni rata viene arrotondata singolarmente, quindi il totale può differire dalla differenza mensile moltiplicata per il numero di rate.",
@@ -2440,12 +2572,40 @@
         "contractTitle": "Cosa decide il tuo contratto",
         "contractIntro": "Come funziona una revisione reale dipende dal tuo contratto e dalle regole del paese in cui vivi. Niente di tutto questo è incluso nel simulatore:",
         "contractItems": {
-          "resetDates": "Date di revisione: ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata.",
-          "capsFloors": "Tetti e minimi: alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%.",
-          "index": "L'indice: l'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione.",
-          "mixed": "Prestiti a tasso misto: prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          "resetDates": {
+            "term": "Date di revisione",
+            "body": "Ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata."
+          },
+          "capsFloors": {
+            "term": "Tetti e minimi",
+            "body": "Alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione."
+          },
+          "mixed": {
+            "term": "Prestiti a tasso misto",
+            "body": "Prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          }
         },
-        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
+        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca.",
+        "terms": {
+          "change": "Differenza al mese",
+          "year": "Differenza in un anno",
+          "interest": "Differenza negli interessi",
+          "income": "Peso sul reddito",
+          "privacy": "Privacy",
+          "fromNextMonth": "Dalla prossima rata",
+          "sameTerm": "La stessa durata",
+          "statement": "La rata di oggi",
+          "noFeed": "Nessun dato sull'indice",
+          "limits": "Limiti",
+          "annualRate": "Tasso annuo",
+          "incomeShare": "Peso della rata sul reddito"
+        },
+        "zeroRate": "Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente il debito residuo diviso il numero di rate.",
+        "methodFormulasLabel": "Formule"
       }
     },
     "carLoan": {
@@ -2508,7 +2668,16 @@
         "assumptionsTitle": "Ipotesi",
         "assumptionLoan": "La stima presuppone un prestito a tasso fisso con rate mensili, senza maxi rata finale e senza leasing. Inserisci il prezzo e le condizioni dell'offerta per l'auto nuova o usata. Per un'auto che possiedi già, inserisci zero per prezzo e anticipo per stimare i costi di gestione.",
         "assumptionFees": "Le spese iniziali del finanziamento si pagano all'acquisto insieme all'anticipo. Inserisci una sola volta ogni assicurazione o spesa legata al finanziamento. Il simulatore considera solo le imposte e le spese che inserisci.",
-        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno."
+        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno.",
+        "terms": {
+          "loan": "La rata",
+          "budget": "Il budget mensile",
+          "apr": "Il TAEG stimato",
+          "assumptionLoan": "Prestito a tasso fisso",
+          "assumptionFees": "Spese di finanziamento",
+          "assumptionRunning": "Cosa copre il budget"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Includi il costo mensile totale dell'auto nel tuo budget",
       "nextStepDescription": "Metti da parte in WonderMoney i soldi per la rata, il carburante e le spese in scadenza durante l'anno.",
@@ -2589,9 +2758,26 @@
         "assumptionScope": "Questo calcolo segue la legge fiscale portoghese e vale solo per immobili situati in Portogallo, qualunque sia il tuo paese di residenza. È solo a scopo informativo e non è consulenza fiscale.",
         "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. L'esenzione del bollo sull'acquisto è una deduzione limitata allo 0,8% del limite dell'esenzione totale, quindi oltre paghi lo 0,8% solo sulla parte eccedente. Il bollo sul mutuo resta dovuto.",
         "assumptionLoan": "Il bollo sul mutuo presuppone un finanziamento di cinque anni o più e si paga sempre. Commissioni del mutuo, perizia e costi di notaio o registro non sono inclusi.",
-        "assumptionUnsupported": "Non supportati: non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT.",
         "assumptionIslands": "Per le Azzorre e Madeira il calcolatore usa i limiti regionali delle tabelle da IV a VI dell'Ofício Circulado 40129/2026, con le stesse aliquote del continente.",
-        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)"
+        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Imposta di bollo sull'acquisto",
+          "stampLoan": "Imposta di bollo sul mutuo"
+        },
+        "terms": {
+          "base": "Valore imponibile",
+          "imt": "IMT",
+          "stamp": "Imposta di bollo",
+          "rounding": "Arrotondamento",
+          "scope": "Ambito",
+          "young": "Esenzione per i giovani",
+          "loan": "Mutuo",
+          "islands": "Azzorre e Madeira"
+        },
+        "formulasLabel": "Formule",
+        "assumptionUnsupportedTerm": "Non supportati",
+        "assumptionUnsupportedBody": "Non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT."
       },
       "nextStepHeadline": "Pianifica il contante che ti serve per comprare",
       "nextStepDescription": "Aggiungi IMT e bollo al risparmio che ti serve prima di comprare e segui i progressi in WonderMoney.",
@@ -2685,7 +2871,28 @@
         "assumptionBanks": "Le banche valutano il tuo rischio di credito e possono rifiutare il mutuo o proporre condizioni diverse, a prescindere dall'elenco. In un mutuo cointestato entrambi devono rispettare le condizioni.",
         "assumptionRate": "Il tasso è quello che inserisci. La garanzia non cambia il tasso di interesse.",
         "assumptionTaxes": "Le imposte riguardano un'abitazione principale e permanente nel Portogallo continentale e, nei valori con esenzione, presuppongono che tu rispetti le condizioni dell'IMT Jovem.",
-        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale."
+        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale.",
+        "labels": {
+          "cash": "Denaro al rogito",
+          "taxes": "IMT e imposta di bollo"
+        },
+        "terms": {
+          "payment": "Mutuo e rata",
+          "taxes": "Imposte",
+          "cash": "Denaro al rogito",
+          "guarantee": "La garanzia",
+          "banks": "Decide la banca",
+          "rate": "Tasso di interesse",
+          "assumptionTaxes": "Imposte considerate",
+          "scope": "Ambito",
+          "conditionAge": "Età",
+          "conditionHome": "Abitazione principale",
+          "conditionProperty": "Altro immobile",
+          "conditionPrice": "Prezzo",
+          "conditionIncome": "Reddito",
+          "conditionDate": "Data del contratto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Pianifica l'anticipo e quanto costa vivere nella tua casa",
       "nextStepDescription": "Fissa un obiettivo per l'anticipo e preventiva rata, imposte e spese correnti della casa in WonderMoney.",
@@ -2785,15 +2992,29 @@
         "exampleOutro": "Lo strumento qui sopra parte da questo prestito, senza le commissioni, così puoi inserire la tua offerta.",
         "methodTitle": "Come fa i conti lo strumento",
         "methodIntro": "La rata è la rata costante che rimborsa l'importo nell'arco della durata al tasso mensile, e il TAEG è il tasso che pareggia quello che ricevi con quello che paghi:",
-        "methodLegend": "M è la rata di capitale e interessi, P l'importo del prestito, r il tasso annuo nominale diviso per 12 e n il numero di mesi. Le commissioni mensili f si sommano a ogni rata.",
-        "methodApr": "Il TAEG è il tasso A che risolve la seconda riga: quello che ricevi all'inizio, l'importo P meno le commissioni iniziali F, è pari alla rata di ogni mese Mₖ più le commissioni f, scontata per (1 + A) elevato a k ÷ 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
+        "methodApr": "Il TAEG è il tasso che risolve l'ultima riga: quello che ricevi all'inizio, l'importo meno le commissioni iniziali, è pari alla rata di ogni mese più le commissioni mensili, scontata per uno più il TAEG elevato al numero del mese diviso 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
         "methodRounding": "Ogni cifra è calcolata in centesimi interi. Ogni rata viene ricalcolata dal debito residuo, così le rate differiscono al massimo di un centesimo l'una dall'altra, l'ultima estingue esattamente il debito e il piano quadra con i totali.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. Niente di quello che inserisci viene inviato o salvato.",
         "assumptionsTitle": "Ipotesi",
         "assumptionFixedRate": "Il tasso è fisso per tutta la durata e ogni rata è pagata puntualmente.",
         "assumptionFees": "Le commissioni iniziali si pagano, o si tolgono dall'importo, all'inizio del prestito; le commissioni mensili sono uguali ogni mese.",
         "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
-        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
+        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Importo ricevuto",
+          "month": "Mese",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG senza commissioni",
+          "aprFees": "TAEG con commissioni"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionFeesTerm": "Commissioni",
+        "assumptionOtherCostsTerm": "Altri costi",
+        "assumptionLimitsTerm": "Limiti",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "savingsCertificates": {
@@ -3603,8 +3824,6 @@
         "exampleTitle": "Esempio pratico",
         "example": "Un'auto diesel da {{cc}} cm³, con emissioni ufficiali WLTP di {{co2}} g/km e immatricolata nel {{year}}, paga {{tax}} di IUC all'anno. Accantonando {{monthly}} al mese copri la spesa.",
         "methodTitle": "Come funziona la stima",
-        "methodA": "Categoria A (auto immatricolate dal 1981 a giugno 2007): l'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
-        "methodB": "Categoria B (auto immatricolate da luglio 2007): si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
         "methodAdditional": "Le auto di categoria B immatricolate dopo il 1° gennaio 2017 pagano un'aliquota aggiuntiva se le emissioni sono alte: 31,77 € sopra 205 g/km (WLTP) o 180 g/km (NEDC) e 63,74 € sopra 260 g/km (WLTP) o 250 g/km (NEDC). Anche l'aliquota aggiuntiva è moltiplicata per il coefficiente. Il testo di legge non la limita per carburante, quindi il calcolo la applica a tutti.",
         "methodDiesel": "Le auto diesel pagano anche il supplemento diesel (adicional de IUC, articolo 216 della legge n.º 82-B/2014, mantenuto per il 2026 dalla legge di bilancio). Dipende dalla cilindrata, vale per le categorie A e B e si somma dopo il coefficiente, senza essere moltiplicato per esso.",
         "methodPayment": "Fino al 2026 l'IUC si paga nel mese dell'anniversario dell'immatricolazione. Il Decreto-Lei n.º 161/2026 (4 agosto 2026) introduce una liquidazione annuale per contribuente, che comprende tutti i veicoli. Il 2027 è un anno transitorio: un pagamento a ottobre fino a 500 €, altrimenti due a luglio e ottobre (o tutto a luglio). Dal 2028 viene liquidata entro aprile e pagata ad aprile fino a 100 €, ad aprile e ottobre da 100 € a 500 €, e ad aprile, luglio e ottobre oltre 500 €. Le soglie valgono per il totale di tutti i tuoi veicoli.",
@@ -3612,8 +3831,6 @@
         "exemptionTitle": "Auto elettriche",
         "exemption": "Le auto interamente elettriche della categoria B sono esenti dall'IUC e il calcolo mostra zero. Gli ibridi plug-in e gli altri veicoli sono tassati secondo cilindrata e CO2 del libretto: inserisci quei valori.",
         "scopeTitle": "Cosa è coperto",
-        "scopeSupported": "Autovetture leggere: categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
-        "scopeUnsupported": "Non supportati: veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
         "assumptionsTitle": "Ipotesi",
         "assumptionYear": "Le aliquote sono le tabelle {{taxYear}} del Código do IUC (articoli 9 e 10), nella versione della {{law}}. Il Portal das Finanças non indica modifiche successive a queste aliquote.",
         "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. Dal 2027 l'imposta è liquidata per contribuente, su tutti i suoi veicoli: aggiungi ognuna delle tue auto e inserisci l'IUC degli altri veicoli come altra IUC, così i mesi delle rate seguono il tuo totale (la legge applica le soglie a quel totale). I calendari 2027 e 2028 mostrano l'importo di ogni mese per le auto che hai aggiunto; con una sola auto, la sua quota di ogni rata. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
@@ -3625,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: articolo 216 della legge n.º 82-B/2014, tabelle I e II del supplemento diesel (consultato il 20 novembre 2026)",
         "reviewed": "Aliquote {{taxYear}} verificate il {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026 del 4 agosto: nuove regole di pagamento dell'IUC, con la transizione 2027 (Portal das Finanças, consultato il 19 novembre 2026)",
-        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)"
+        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)",
+        "methodATerm": "Categoria A (auto immatricolate dal 1981 a giugno 2007)",
+        "methodABody": "L'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
+        "methodBTerm": "Categoria B (auto immatricolate da luglio 2007)",
+        "methodBBody": "Si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
+        "scopeSupportedTerm": "Autovetture leggere",
+        "scopeSupportedBody": "Categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
+        "scopeUnsupportedTerm": "Non supportati",
+        "scopeUnsupportedBody": "Veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
+        "labels": {
+          "diesel": "Supplemento diesel",
+          "engineRate": "Aliquota per cilindrata",
+          "co2Rate": "Aliquota per CO2",
+          "provision": "Accantonamento mensile"
+        },
+        "terms": {
+          "additional": "Aliquota aggiuntiva",
+          "diesel": "Supplemento diesel",
+          "payment": "Pagamento",
+          "budget": "Accantonamento mensile",
+          "year": "Tabelle",
+          "paymentRule": "Scadenza",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così alla scadenza l'importo è già coperto.",
@@ -3732,7 +3973,6 @@
         "methodCash": "Il ricavato che resta sottrae dal prezzo di vendita le spese di vendita, il mutuo estinto e l'IRS stimato. Non sottrae ciò che spendi per la casa successiva.",
         "scopeTitle": "Cosa è coperto",
         "scopeSupported": "Persone fisiche residenti fiscali in Portogallo che vendono nel {{saleYear}} un immobile del patrimonio privato acquistato dal {{firstYear}}.",
-        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
         "assumptionsTitle": "Ipotesi",
         "assumptionBrackets": "L'IRS aggiuntivo usa gli scaglioni annuali dell'IRS del {{saleYear}} sul reddito indicato, come stima dell'effetto sulla dichiarazione annuale. La tassazione congiunta è modellata dividendo il reddito per due.",
         "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento. I coefficienti sono stati confrontati con la tabella della {{portaria}} nel Diário da República.",
@@ -3747,7 +3987,29 @@
         "sourceAcquisition": "CIRS, articolo 46: valore di acquisto degli immobili acquistati a titolo oneroso (consultato il 20 novembre 2026)",
         "sourceCorrection": "CIRS, articolo 50: correzione monetaria dopo 24 mesi (consultato il 20 novembre 2026)",
         "sourceExpenses": "CIRS, articolo 51: lavori degli ultimi 12 anni e spese di acquisto e di vendita (consultato il 20 novembre 2026)",
-        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)"
+        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)",
+        "scopeUnsupportedTerm": "Non coperto",
+        "scopeUnsupportedBody": "Non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
+        "labels": {
+          "included": "Sommato al reddito",
+          "irsWith": "IRS con la plusvalenza",
+          "irsWithout": "IRS senza la plusvalenza",
+          "cashAfter": "Ricavato che resta"
+        },
+        "terms": {
+          "gain": "Plusvalenza",
+          "taxValue": "Valore di vendita e VPT",
+          "coefficient": "Coefficiente",
+          "expenses": "Spese",
+          "half": "Metà della plusvalenza",
+          "exemption": "Reinvestimento",
+          "cash": "Ricavato che resta",
+          "brackets": "Scaglioni IRS",
+          "notModelled": "Cosa non viene verificato",
+          "educational": "Stima educativa",
+          "supported": "Coperto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Scopri quanto del ricavato puoi davvero usare",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'imposta e a vedere cosa resta per la prossima casa.",
