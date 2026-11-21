@@ -971,7 +971,21 @@
         "assumptions": "Il modello ipotizza un rendimento e un costo costanti, il reinvestimento delle distribuzioni e versamenti a fine mese. Esclude tasse, costi di intermediazione, variazioni dei cambi e inflazione. I tassi sono ipotesi illustrative per un indice come l'S&P 500. I rendimenti effettivi variano e possono essere negativi. L'impatto dei costi comprende anche il rendimento che gli importi dedotti avrebbero potuto generare.",
         "ctaHeadline": "Segui il rendimento effettivo dei tuoi investimenti",
         "ctaDescription": "Usa WonderMoney per tenere sotto controllo il tuo portafoglio e confrontare il rendimento effettivo con lo scenario simulato.",
-        "ctaText": "Confronta gli investimenti con la proiezione"
+        "ctaText": "Confronta gli investimenti con la proiezione",
+        "methodTerm": "Crescita e costi",
+        "assumptionsTerm": "Ipotesi",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "netFactor": "Fattore di crescita annuo netto",
+          "annualReturn": "rendimento annuo",
+          "annualFee": "costo annuo del fondo",
+          "monthlyFactor": "Fattore mensile",
+          "monthlyFactorLower": "fattore mensile",
+          "netFactorLower": "fattore annuo netto",
+          "balanceEnd": "Saldo a fine mese",
+          "balanceStart": "saldo a inizio mese",
+          "contribution": "versamento mensile"
+        }
       }
     },
     "emergencyFund": {
@@ -4153,10 +4167,14 @@
         "limits": {
           "title": "Cosa queste cifre non includono",
           "items": {
-            "fx": "Valuta: i rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
-            "fees": "Costi: commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
-            "taxes": "Tasse: l'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
-            "sequence": "Col senno di poi: è un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
+            "fxTerm": "Valuta",
+            "fxBody": "I rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
+            "feesTerm": "Costi",
+            "feesBody": "Commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
+            "taxesTerm": "Tasse",
+            "taxesBody": "L'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
+            "sequenceTerm": "Col senno di poi",
+            "sequenceBody": "È un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
             "past": "I rendimenti passati non sono indicativi di quelli futuri. Questo strumento ha solo scopo informativo e non è una consulenza finanziaria."
           }
         },

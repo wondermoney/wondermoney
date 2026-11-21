@@ -971,7 +971,21 @@
         "assumptions": "This model assumes a constant return and fee, reinvested distributions and month-end contributions. It excludes taxes, brokerage fees, currency movements and inflation. Rates are illustrative assumptions for an index such as the S&P 500. Actual returns vary and can be negative. The fee impact includes the growth those fees could have earned.",
         "ctaHeadline": "Track your actual investment performance",
         "ctaDescription": "Use WonderMoney to follow your holdings and compare their actual performance with the scenario you modelled.",
-        "ctaText": "Track actual investments against the scenario"
+        "ctaText": "Track actual investments against the scenario",
+        "methodTerm": "Growth and fees",
+        "assumptionsTerm": "Assumptions",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "netFactor": "Net annual growth factor",
+          "annualReturn": "annual return",
+          "annualFee": "annual fund fee",
+          "monthlyFactor": "Monthly factor",
+          "monthlyFactorLower": "monthly factor",
+          "netFactorLower": "net annual growth factor",
+          "balanceEnd": "Balance at the end of the month",
+          "balanceStart": "balance at the start of the month",
+          "contribution": "monthly contribution"
+        }
       }
     },
     "emergencyFund": {
@@ -4153,10 +4167,14 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "fx": "Currency: returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
-            "fees": "Costs: fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
-            "taxes": "Taxes: tax on dividends and gains is not included, and it depends on where you live.",
-            "sequence": "Hindsight: this is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
+            "fxTerm": "Currency",
+            "fxBody": "Returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
+            "feesTerm": "Costs",
+            "feesBody": "Fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
+            "taxesTerm": "Taxes",
+            "taxesBody": "Tax on dividends and gains is not included, and it depends on where you live.",
+            "sequenceTerm": "Hindsight",
+            "sequenceBody": "This is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
             "past": "Past performance does not predict future returns. This tool is educational and is not investment advice."
           }
         },

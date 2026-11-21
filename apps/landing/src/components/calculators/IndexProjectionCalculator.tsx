@@ -75,8 +75,12 @@ function IndexProjectionContent() {
           <CalculatorResult items={[
             { label: t(`${key}.contributed`), value: formatMoney(locale, projection.contributed) },
             { label: t(`${key}.beforeFees`), value: formatMoney(locale, projection.beforeFees) },
+            // The fees' cost before the answer, so the ledger reads as a sum: before − fees = after.
+            {
+              label: t(`${key}.feeImpact`),
+              value: formatMoney(locale, -projection.feeImpact, { sign: projection.feeImpact > 0 ? "always" : "auto" }),
+            },
             { label: t(`${key}.afterFees`), value: formatMoney(locale, projection.afterFees), highlight: true },
-            { label: t(`${key}.feeImpact`), value: formatMoney(locale, projection.feeImpact) },
           ]} />
         ) : (
           <p className="text-sm text-muted-foreground">{t(`${key}.${projection.status}`)}</p>

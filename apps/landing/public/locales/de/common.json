@@ -971,7 +971,21 @@
         "assumptions": "Das Modell unterstellt eine konstante Rendite und konstante Kosten, wiederangelegte Ausschüttungen und Einzahlungen am Monatsende. Steuern, Ordergebühren, Wechselkursänderungen und Inflation bleiben unberücksichtigt. Die Renditen sind beispielhafte Annahmen für einen Index wie den S&P 500. Tatsächliche Renditen schwanken und können negativ sein. Der Kosteneffekt umfasst auch die entgangene Rendite auf die abgezogenen Beträge.",
         "ctaHeadline": "Die tatsächliche Wertentwicklung Ihrer Anlagen verfolgen",
         "ctaDescription": "Verfolgen Sie Ihr Portfolio mit WonderMoney und vergleichen Sie die tatsächliche Wertentwicklung mit dem simulierten Szenario.",
-        "ctaText": "Anlagen mit der Prognose vergleichen"
+        "ctaText": "Anlagen mit der Prognose vergleichen",
+        "methodTerm": "Wachstum und Kosten",
+        "assumptionsTerm": "Annahmen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "netFactor": "Jährlicher Nettowachstumsfaktor",
+          "annualReturn": "Jahresrendite",
+          "annualFee": "jährlicher Kostensatz",
+          "monthlyFactor": "Monatsfaktor",
+          "monthlyFactorLower": "Monatsfaktor",
+          "netFactorLower": "jährlicher Nettowachstumsfaktor",
+          "balanceEnd": "Saldo am Monatsende",
+          "balanceStart": "Saldo am Monatsanfang",
+          "contribution": "monatliche Einzahlung"
+        }
       }
     },
     "emergencyFund": {
@@ -4153,10 +4167,14 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "fx": "Währung: Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
-            "fees": "Kosten: Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
-            "taxes": "Steuern: Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
-            "sequence": "Rückblick: Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
+            "fxTerm": "Währung",
+            "fxBody": "Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
+            "feesTerm": "Kosten",
+            "feesBody": "Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
+            "taxesTerm": "Steuern",
+            "taxesBody": "Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
+            "sequenceTerm": "Rückblick",
+            "sequenceBody": "Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
             "past": "Die Wertentwicklung der Vergangenheit ist kein verlässlicher Indikator für die Zukunft. Dieses Werkzeug dient der Bildung und ist keine Anlageberatung."
           }
         },

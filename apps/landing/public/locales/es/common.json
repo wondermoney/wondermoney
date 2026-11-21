@@ -971,7 +971,21 @@
         "assumptions": "El modelo supone una rentabilidad y una comisión constantes, el reintegro de las distribuciones en el fondo y aportaciones a final de mes. Excluye impuestos, gastos de intermediación, variaciones de divisa e inflación. Las tasas son hipótesis ilustrativas para un índice como el S&P 500. La rentabilidad real varía y puede ser negativa. El impacto de las comisiones incluye la rentabilidad que esos importes podrían haber generado.",
         "ctaHeadline": "Sigue la rentabilidad real de tus inversiones",
         "ctaDescription": "Usa WonderMoney para seguir tu cartera y comparar su rentabilidad real con el escenario que has simulado.",
-        "ctaText": "Compara tus inversiones con la proyección"
+        "ctaText": "Compara tus inversiones con la proyección",
+        "methodTerm": "Crecimiento y comisiones",
+        "assumptionsTerm": "Supuestos",
+        "methodFormulasLabel": "Fórmulas",
+        "formula": {
+          "netFactor": "Factor de crecimiento anual neto",
+          "annualReturn": "rentabilidad anual",
+          "annualFee": "comisión anual del fondo",
+          "monthlyFactor": "Factor mensual",
+          "monthlyFactorLower": "factor mensual",
+          "netFactorLower": "factor anual neto",
+          "balanceEnd": "Saldo al final del mes",
+          "balanceStart": "saldo al inicio del mes",
+          "contribution": "aportación mensual"
+        }
       }
     },
     "emergencyFund": {
@@ -4153,10 +4167,14 @@
         "limits": {
           "title": "Lo que estas cifras no incluyen",
           "items": {
-            "fx": "Divisa: las rentabilidades están en dólares estadounidenses. Si inviertes desde la zona euro, el tipo de cambio euro-dólar suma o resta a estas cifras, a veces varios puntos al año. El riesgo de divisa es independiente del del mercado.",
-            "fees": "Costes: no se deducen comisiones de fondos, de intermediarios ni diferenciales. Un fondo que replica el índice rinde el índice menos sus costes.",
-            "taxes": "Impuestos: no se incluye el impuesto sobre dividendos y ganancias, que depende de dónde vivas.",
-            "sequence": "Visión retrospectiva: es un gran índice de EE. UU. en la historia de un solo país. Otros mercados y periodos lo hicieron mucho peor, y mover el inicio o el final unos años puede cambiar mucho el resultado.",
+            "fxTerm": "Divisa",
+            "fxBody": "Las rentabilidades están en dólares estadounidenses. Si inviertes desde la zona euro, el tipo de cambio euro-dólar suma o resta a estas cifras, a veces varios puntos al año. El riesgo de divisa es independiente del del mercado.",
+            "feesTerm": "Costes",
+            "feesBody": "No se deducen comisiones de fondos, de intermediarios ni diferenciales. Un fondo que replica el índice rinde el índice menos sus costes.",
+            "taxesTerm": "Impuestos",
+            "taxesBody": "No se incluye el impuesto sobre dividendos y ganancias, que depende de dónde vivas.",
+            "sequenceTerm": "Visión retrospectiva",
+            "sequenceBody": "Es un gran índice de EE. UU. en la historia de un solo país. Otros mercados y periodos lo hicieron mucho peor, y mover el inicio o el final unos años puede cambiar mucho el resultado.",
             "past": "La rentabilidad pasada no garantiza rentabilidades futuras. Esta herramienta es educativa y no es asesoramiento de inversión."
           }
         },

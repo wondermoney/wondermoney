@@ -68,7 +68,7 @@ export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
     <section
       id="investor-profile-quiz"
       aria-label={copy("title")}
-      className="ph-no-capture max-w-2xl rounded-lg border border-border bg-card p-4 sm:p-6"
+      className="ph-no-capture max-w-2xl rounded-card border border-border bg-card p-5 sm:p-6"
     >
       {result ? (
         <div className="space-y-4">
@@ -80,15 +80,22 @@ export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
             {copy(`results.${result.band}.title`)}
           </h2>
           <p className="text-muted-foreground">{copy(`results.${result.band}.description`)}</p>
-          <dl className="grid gap-2 rounded-md bg-muted p-3 sm:grid-cols-2">
-            <div>
-              <dt>{copy("capacityLabel")}</dt>
-              <dd className="font-mono tabular-nums">{result.capacity} / 6</dd>
-            </div>
-            <div>
-              <dt>{copy("comfortLabel")}</dt>
-              <dd className="font-mono tabular-nums">{result.comfort} / 6</dd>
-            </div>
+          {/* The two scores, each with a bar out of 6; the lower one sets the result. */}
+          <dl className="grid gap-4 border-y border-border py-4 sm:grid-cols-2 sm:gap-6">
+            {([["capacityLabel", result.capacity], ["comfortLabel", result.comfort]] as const).map(([label, score]) => (
+              <div key={label}>
+                <dt className="text-sm text-ink-2">{copy(label)}</dt>
+                <dd className="mt-1">
+                  <span className="font-mono text-xl font-semibold text-foreground">{score} / 6</span>
+                  <span className="mt-2 block h-1.5 overflow-hidden rounded-full bg-paper-3" aria-hidden="true">
+                    <span
+                      className="block h-full origin-left rounded-full bg-primary"
+                      style={{ transform: `scaleX(${score / 6})` }}
+                    />
+                  </span>
+                </dd>
+              </div>
+            ))}
           </dl>
           <p className="text-sm text-muted-foreground">{copy("limitations")}</p>
           <Button type="button" variant="outline" onClick={() => goToStep(0)}>
@@ -97,6 +104,15 @@ export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
         </div>
       ) : (
         <>
+          {/* Progress through the six questions, one segment each. */}
+          <div className="mb-4 flex gap-1" aria-hidden="true">
+            {Array.from({ length: questionCount }, (_, index) => (
+              <span
+                key={index}
+                className={`h-1 flex-1 rounded-full ${index <= step ? "bg-primary" : "bg-paper-3"}`}
+              />
+            ))}
+          </div>
           <fieldset key={question} aria-describedby={showError ? `${id}-error` : undefined}>
             <legend
               ref={(node) => { heading.current = node; }}
@@ -135,7 +151,7 @@ export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
             </div>
           </fieldset>
           {showError && (
-            <p id={`${id}-error`} role="alert" className="mt-3 text-sm text-destructive">
+            <p id={`${id}-error`} role="alert" className="mt-3 text-sm text-destructive-text">
               {copy("required")}
             </p>
           )}

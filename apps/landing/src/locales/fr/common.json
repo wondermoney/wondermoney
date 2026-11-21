@@ -971,7 +971,21 @@
         "assumptions": "Le modèle suppose un rendement et des frais constants, le réinvestissement des distributions et des versements en fin de mois. Il exclut les impôts, les frais de courtage, les variations de change et l'inflation. Les taux sont des hypothèses illustratives pour un indice comme le S&P 500. Les rendements réels varient et peuvent être négatifs. L'effet des frais inclut le rendement que les sommes prélevées auraient pu générer.",
         "ctaHeadline": "Suivez la performance réelle de vos placements",
         "ctaDescription": "Utilisez WonderMoney pour suivre votre portefeuille et comparer son rendement réel au scénario simulé.",
-        "ctaText": "Comparez vos placements à la projection"
+        "ctaText": "Comparez vos placements à la projection",
+        "methodTerm": "Croissance et frais",
+        "assumptionsTerm": "Hypothèses",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "netFactor": "Facteur de croissance annuel net",
+          "annualReturn": "rendement annuel",
+          "annualFee": "frais annuels du fonds",
+          "monthlyFactor": "Facteur mensuel",
+          "monthlyFactorLower": "facteur mensuel",
+          "netFactorLower": "facteur annuel net",
+          "balanceEnd": "Solde en fin de mois",
+          "balanceStart": "solde en début de mois",
+          "contribution": "versement mensuel"
+        }
       }
     },
     "emergencyFund": {
@@ -4153,10 +4167,14 @@
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
-            "fx": "Devise : les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
-            "fees": "Coûts : les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
-            "taxes": "Impôts : l'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
-            "sequence": "Biais rétrospectif : il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
+            "fxTerm": "Devise",
+            "fxBody": "Les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
+            "feesTerm": "Coûts",
+            "feesBody": "Les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
+            "taxesTerm": "Impôts",
+            "taxesBody": "L'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
+            "sequenceTerm": "Biais rétrospectif",
+            "sequenceBody": "Il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
             "past": "Les performances passées ne préjugent pas des performances futures. Cet outil est éducatif et ne constitue pas un conseil en investissement."
           }
         },
