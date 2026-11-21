@@ -8,7 +8,8 @@
  *   are `GuideFigure`s, built from the calculator's own computation, never typed numbers.
  * - GuideFormula.astro: one formula per line in a readable form (result = a − b, fractions
  *   stacked), each variable linking to the note that explains it. Formulas are built with
- *   `variable`, `number`, `operator` and `fraction` below.
+ *   `variable`, `number`, `operator`, `fraction` and `group` below; `group` puts parts in
+ *   parentheses, with an optional exponent ((1 + rate)^years).
  *
  * Give every note a formula links to an `id` that does not change with the locale (an
  * English slug prefixed with the guide's name, such as `household-budget-note-income`), so
@@ -48,7 +49,8 @@ export type GuideFormulaPart =
   | GuideFormulaVariable
   | { kind: "number"; value: string }
   | { kind: "operator"; symbol: "+" | "−" | "×" | "÷" | "=" }
-  | { kind: "fraction"; numerator: GuideFormulaPart[]; denominator: GuideFormulaPart[] };
+  | { kind: "fraction"; numerator: GuideFormulaPart[]; denominator: GuideFormulaPart[] }
+  | { kind: "group"; parts: GuideFormulaPart[]; exponent?: GuideFormulaPart[] };
 
 /** One line of a formula block: `result = expression`. */
 export type GuideFormulaLine = {
@@ -75,12 +77,22 @@ export function fraction(numerator: GuideFormulaPart[], denominator: GuideFormul
   return { kind: "fraction", numerator, denominator };
 }
 
+/**
+ * Parts in parentheses, raised to `exponent` when given: `group([number("1"), operator("+"),
+ * variable("rate")], [variable("years")])` reads (1 + rate)^years. Keep an exponent short and
+ * inline (a ÷ b rather than a fraction).
+ */
+export function group(parts: GuideFormulaPart[], exponent?: GuideFormulaPart[]): GuideFormulaPart {
+  return exponent ? { kind: "group", parts, exponent } : { kind: "group", parts };
+}
+
 /** Every link in a set of formula lines, results first, in reading order. */
 export function formulaHrefs(lines: ReadonlyArray<GuideFormulaLine>): string[] {
   const fromParts = (parts: ReadonlyArray<GuideFormulaPart>): string[] =>
     parts.flatMap((part) => {
       if (part.kind === "variable") return part.href ? [part.href] : [];
       if (part.kind === "fraction") return [...fromParts(part.numerator), ...fromParts(part.denominator)];
+      if (part.kind === "group") return [...fromParts(part.parts), ...fromParts(part.exponent ?? [])];
       return [];
     });
   return lines.flatMap((line) => fromParts([line.result, ...line.expression]));
