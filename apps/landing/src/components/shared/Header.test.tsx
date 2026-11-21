@@ -241,6 +241,7 @@ describe("Header comparators menu", () => {
 
     expect(comparators.map((tool) => tool.key)).toEqual([
       "electricityTariffComparison",
+      "fuelPrices",
       "freeBankAccounts",
       "termDepositOffers",
       "remuneratedAccounts",

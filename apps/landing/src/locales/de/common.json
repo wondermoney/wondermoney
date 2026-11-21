@@ -392,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Angebote von Banken, Brokern, Versicherern und Energieversorgern in Portugal im direkten Vergleich.",
+      "description": "Angebote von Banken, Brokern, Versicherern, Energieversorgern und Tankstellen in Portugal im direkten Vergleich.",
       "items": {
         "electricityTariffComparison": "Alle Haushaltsangebote, sortiert nach Ihren jährlichen Kosten",
         "freeBankAccounts": "Kostenlose Girokonten und die Bedingungen jedes Kontos",
         "termDepositOffers": "Festgeldangebote nach Laufzeit und Betrag, mit Zinsen nach Steuern",
         "remuneratedAccounts": "Verzinste Konten und Sparkonten, mit Nettozinsen nach IRS",
         "brokerFees": "Depot-, Handels- und Währungsgebühren der Broker in Portugal",
-        "pprComparison": "PPR-Fonds, -Versicherungen und -Pensionsfonds nach Risiko, Kosten und Rendite"
+        "pprComparison": "PPR-Fonds, -Versicherungen und -Pensionsfonds nach Risiko, Kosten und Rendite",
+        "fuelPrices": "Offizielle Durchschnittspreise und die günstigsten Tankstellen in Ihrer Nähe"
       }
     },
     "learn": "Lernen",

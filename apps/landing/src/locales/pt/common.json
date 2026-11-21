@@ -392,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Ofertas de bancos, corretoras, seguradoras e comercializadores de energia em Portugal, lado a lado.",
+      "description": "Ofertas de bancos, corretoras, seguradoras e comercializadores de energia e postos de combustível em Portugal, lado a lado.",
       "items": {
         "electricityTariffComparison": "Todas as ofertas para casa, ordenadas pelo custo anual para ti",
         "freeBankAccounts": "Contas à ordem gratuitas e as condições de cada uma",
         "termDepositOffers": "Ofertas de depósitos por prazo e montante, com juro líquido",
         "remuneratedAccounts": "Contas remuneradas e de poupança, com juro líquido de IRS",
         "brokerFees": "Comissões de custódia, negociação e câmbio das corretoras em Portugal",
-        "pprComparison": "Fundos, seguros e fundos de pensões PPR por risco, custos e rentabilidade"
+        "pprComparison": "Fundos, seguros e fundos de pensões PPR por risco, custos e rentabilidade",
+        "fuelPrices": "Preço médio oficial e os postos mais baratos no teu distrito e concelho"
       }
     },
     "learn": "Aprender",

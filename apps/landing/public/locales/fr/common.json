@@ -392,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Les offres des banques, courtiers, assureurs et fournisseurs d’énergie au Portugal, côte à côte.",
+      "description": "Les offres des banques, courtiers, assureurs, fournisseurs d’énergie et stations-service au Portugal, côte à côte.",
       "items": {
         "electricityTariffComparison": "Toutes les offres pour les ménages, classées selon leur coût annuel pour vous",
         "freeBankAccounts": "Comptes courants gratuits et les conditions de chacun",
         "termDepositOffers": "Offres de dépôts à terme par durée et montant, intérêts nets d’impôt",
         "remuneratedAccounts": "Comptes rémunérés et d’épargne, avec l’intérêt net d’IRS",
         "brokerFees": "Frais de garde, de courtage et de change des courtiers au Portugal",
-        "pprComparison": "Fonds, assurances et fonds de pension PPR par risque, frais et rendement"
+        "pprComparison": "Fonds, assurances et fonds de pension PPR par risque, frais et rendement",
+        "fuelPrices": "Prix moyens officiels et stations les moins chères de votre district et de votre commune"
       }
     },
     "learn": "Apprendre",
