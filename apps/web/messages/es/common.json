@@ -1988,6 +1988,17 @@
     "saveError": "No se pudo guardar. Inténtalo de nuevo.",
     "retry": "Reintentar"
   },
+  "serviceAnalytics": {
+    "title": "Estadísticas del servicio",
+    "description": "Recuentos que nos indican si WonderMoney funciona y qué partes usan las personas.",
+    "toggleLabel": "Compartir estadísticas del servicio",
+    "hint": "El servidor registra una lista corta y fija de eventos sobre tu cuenta, como iniciar sesión, añadir una cuenta, un presupuesto o un objetivo, una importación o una conexión bancaria, asociados a un identificador aleatorio y nunca con importes, nombres u otro contenido. Desactivarlo los detiene en todas las aplicaciones que usas y borra los que aún no se han enviado. No cambia la elección de la analítica del navegador de arriba.",
+    "loadError": "No se pudo cargar tu elección.",
+    "saving": "Guardando…",
+    "saved": "Guardado",
+    "saveError": "No se pudo guardar. Inténtalo de nuevo.",
+    "retry": "Reintentar"
+  },
   "previewFeatures": {
     "title": "Funciones en vista previa",
     "description": "Prueba funciones antes de que estén listas para todos.",

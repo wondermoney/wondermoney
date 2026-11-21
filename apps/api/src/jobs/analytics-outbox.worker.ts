@@ -110,6 +110,15 @@ export async function deliverAnalyticsOutboxBatch(
         continue;
       }
 
+      // The person objected to service analytics after this row was written.
+      if (appuser.analyticsObjectedAt) {
+        blocked += 1;
+        row.deletedAt = now();
+        dirty = true;
+        log.info({ analyticsOutboxKey: row.analyticsOutboxKey, reason: 'objected' }, 'Analytics outbox row blocked');
+        continue;
+      }
+
       if (hasSensitiveAnalyticsProperties(row.properties)) {
         blocked += 1;
         row.deletedAt = now();

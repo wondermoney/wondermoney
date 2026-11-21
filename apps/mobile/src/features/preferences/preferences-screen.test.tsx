@@ -10,6 +10,7 @@ import { PreferencesScreen } from './preferences-screen'
 jest.mock('expo-router', () => ({ useRouter: () => ({ back: jest.fn() }) }))
 jest.mock('./preview-features-section', () => ({ PreviewFeaturesSection: () => null }))
 jest.mock('./ai-hidden-section', () => ({ AiHiddenSection: () => null }))
+jest.mock('./service-analytics-section', () => ({ ServiceAnalyticsSection: () => null }))
 
 const mockWrite = jest.fn(() => Promise.resolve(undefined))
 let mockRuntime: { apiClient: { write: typeof mockWrite }; principalId: string } | null = null

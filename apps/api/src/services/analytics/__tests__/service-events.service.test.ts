@@ -66,12 +66,14 @@ describe('service events', () => {
     }
   });
 
-  it('records nothing while delivery is off, or for an account without a canonical identity', async () => {
+  it('records nothing while delivery is off, for an account without a canonical identity, or for someone who objected', async () => {
     const outbox = fakeOutbox();
 
     await recordBudgetCreated(outbox.em, PERSON, { platform: 'web' }, {});
     await recordBudgetCreated(outbox.em, { externalUserId: 'legacy-id' }, { platform: 'web' }, LIVE);
     await recordBudgetCreated(outbox.em, undefined, { platform: 'web' }, LIVE);
+    await recordBudgetCreated(outbox.em, { ...PERSON, analyticsObjectedAt: new Date() }, { platform: 'web' }, LIVE);
+    await recordUserActive(outbox.em, { ...OTHER, analyticsObjectedAt: new Date() }, 'web', new Date(), LIVE);
 
     expect(outbox.upsert).not.toHaveBeenCalled();
   });
