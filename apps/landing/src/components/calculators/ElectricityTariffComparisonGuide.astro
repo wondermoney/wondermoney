@@ -3,8 +3,11 @@
 // example computed at build time from the same ERSE snapshot and engine the page runs, the method,
 // the sources with the export date (and PVGIS for the solar production), what the totals leave
 // out, and the tools to go on with. The offers module is imported dynamically, as everywhere else,
-// so no client bundle carries it.
+// so no client bundle carries it. The figures and the term lists are built in energyGuides.ts.
 import ToolGuide from "./ToolGuide.astro";
+import GuideFigures from "./GuideFigures.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildTariffComparisonGuide } from "./energyGuides";
 import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
 import { SOLAR_PRODUCTION_SOURCE } from "@/lib/calculators/data/solarProduction/index";
 import {
@@ -88,8 +91,11 @@ const values = {
 };
 
 const list = (key: string) => Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
-const steps = list("method.steps");
 const limits = list("limits.items");
+const guide = buildTariffComparisonGuide(locale, {
+  regulated: regulated.firstYear.total,
+  cheapest: cheapest.firstYear.total,
+});
 
 const related = [
   { key: "electricityIndex", href: toLocalizedPath("toolElectricityIndex", locale) },
@@ -97,78 +103,61 @@ const related = [
 ] as const;
 
 const { charges, simulator } = ERSE_TARIFFS.sources;
-const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
 <ToolGuide>
-  <section aria-labelledby="tariff-guide-use">
-    <h2 id="tariff-guide-use" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("use.title"))}</h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("use.quick"))}</p>
-      <p>{t(k("use.full"))}</p>
-      <p>{t(k("use.diagram"))}</p>
-      <p>{t(k("use.mine"))}</p>
-      <p>{t(k("use.solar"))}</p>
-      <p>{t(k("use.options"))}</p>
-    </div>
+  <section>
+    <h2>{t(k("use.title"))}</h2>
+    <GuideTermList items={guide.useTerms} columns={1} />
   </section>
 
-  <section aria-labelledby="tariff-guide-example">
-    <h2 id="tariff-guide-example" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("example.title"))}</h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("example.setup"), values)}</p>
-      <p>{t(k("example.result"), values)}</p>
-      <p>{t(k("example.bill"), values)}</p>
-    </div>
+  <section>
+    <h2>{t(k("example.title"))}</h2>
+    <p>{t(k("example.setup"), values)}</p>
+    <p>{t(k("example.result"), values)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
+    <p>{t(k("example.bill"), values)}</p>
   </section>
 
-  <section aria-labelledby="tariff-guide-method">
-    <h2 id="tariff-guide-method" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("method.title"))}</h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("method.intro"))}</p>
-      <ol class="list-decimal space-y-2 pl-5">
-        {steps.map((item) => <li>{item}</li>)}
-      </ol>
-      <p>{t(k("method.vat"), values)}</p>
-      <p>{t(k("method.month"), values)}</p>
-      <p>{t(k("method.split"))}</p>
-    </div>
+  <section>
+    <h2>{t(k("method.title"))}</h2>
+    <p>{t(k("method.intro"))}</p>
+    <GuideTermList items={guide.steps} />
+    <p>{t(k("method.vat"), values)}</p>
+    <p>{t(k("method.month"), values)}</p>
+    <p>{t(k("method.split"))}</p>
   </section>
 
-  <section aria-labelledby="tariff-guide-data">
-    <h2 id="tariff-guide-data" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("data.title"))}</h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("data.erse"), values)}</p>
-      <p>{t(k("data.refresh"))}</p>
-      <p>{t(k("data.names"))}</p>
-      <p>{t(k("data.solar"), values)}</p>
-      <ul class="space-y-1">
-        <li><a href={ELECTRICITY_OFFERS_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.simulatorLink"))}</a></li>
-        <li><a href={charges.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.manualLink"))}</a></li>
-        <li><a href={SOLAR_PRODUCTION_SOURCE.url} class={linkClass} rel="noopener" target="_blank">{t(k("data.pvgisLink"))}</a></li>
-      </ul>
-    </div>
+  <section>
+    <h2>{t(k("data.title"))}</h2>
+    <p>{t(k("data.erse"), values)}</p>
+    <p>{t(k("data.refresh"))}</p>
+    <p>{t(k("data.names"))}</p>
+    <p>{t(k("data.solar"), values)}</p>
+    <ul class="space-y-1">
+      <li><a href={ELECTRICITY_OFFERS_SOURCE.url} rel="noopener" target="_blank">{t(k("data.simulatorLink"))}</a></li>
+      <li><a href={charges.url} rel="noopener" target="_blank">{t(k("data.manualLink"))}</a></li>
+      <li><a href={SOLAR_PRODUCTION_SOURCE.url} rel="noopener" target="_blank">{t(k("data.pvgisLink"))}</a></li>
+    </ul>
   </section>
 
-  <section aria-labelledby="tariff-guide-limits">
-    <h2 id="tariff-guide-limits" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("limits.title"))}</h2>
-    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+  <section>
+    <h2>{t(k("limits.title"))}</h2>
+    <ul class="list-disc space-y-2 pl-6">
       {limits.map((item) => <li>{item}</li>)}
     </ul>
-    <p class="mt-4 leading-7">
-      <a href={simulator.url} class={linkClass} rel="noopener" target="_blank">{t(k("limits.simulatorLink"))}</a>
+    <p>
+      <a href={simulator.url} rel="noopener" target="_blank">{t(k("limits.simulatorLink"))}</a>
     </p>
   </section>
 
-  <section aria-labelledby="tariff-guide-related">
-    <h2 id="tariff-guide-related" class="text-2xl font-semibold tracking-tight text-foreground">{t(k("related.title"))}</h2>
-    <ul class="mt-3 space-y-3 leading-7">
+  <section>
+    <h2>{t(k("related.title"))}</h2>
+    <ul class="space-y-3">
       {
         related.map((item) => (
           <li>
-            <a href={item.href} class={linkClass}>
-              {t(k(`related.${item.key}Link`))}
-            </a>
+            <a href={item.href}>{t(k(`related.${item.key}Link`))}</a>
             <p>{t(k(`related.${item.key}Body`))}</p>
           </li>
         ))

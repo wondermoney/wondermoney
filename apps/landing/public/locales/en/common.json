@@ -4729,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "estimatorTerm": "Bill estimator",
+          "indexTerm": "Price index",
+          "marketTerm": "Free market",
           "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
           "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
           "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
@@ -4743,15 +4746,33 @@
           "title": "How it is calculated",
           "intro": "For one 30-day month the estimator does the same five things:",
           "steps": {
-            "a": "Power: the daily price for your contracted power, times 30 days.",
-            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
-            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt.",
-            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
-            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            "a": {
+              "term": "Power",
+              "body": "The daily price for your contracted power, times 30 days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "Your kWh at the simple price, or split between the two bi-hourly prices by the share you enter."
+            },
+            "c": {
+              "term": "Audiovisual contribution (CAV)",
+              "body": "A fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt."
+            },
+            "d": {
+              "term": "Electricity consumption tax (IEC)",
+              "body": "A fixed amount per kWh, with the standard VAT rate."
+            },
+            "e": {
+              "term": "VAT",
+              "body": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            }
           },
-          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
-          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
-          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+          "vat": "The reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "The simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days.",
+          "formulasLabel": "Formula",
+          "vatTerm": "VAT rules, as ERSE explains them",
+          "biTerm": "Bi-hourly versus simple"
         },
         "data": {
           "title": "Data and sources",
@@ -5191,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "How to use the comparison",
+          "quickTerm": "Quick mode",
+          "fullTerm": "Full mode",
+          "diagramTerm": "E-REDES file",
+          "optionsTerm": "Options and filters",
           "quick": "Quick mode needs only your contracted power and your monthly bill or kWh. A bill in euro is turned into kWh by working back the regulated tariff's bill, taxes included, as ERSE's quick simulation does.",
           "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
@@ -5200,6 +5225,9 @@
         },
         "example": {
           "title": "Worked example",
+          "regulatedLabel": "Regulated tariff",
+          "cheapestLabel": "Cheapest offer",
+          "differenceLabel": "Difference",
           "setup": "A home with 3.45 kVA on the simple option uses {{kwh}} a month. On ERSE's export of {{date}} there are {{count}} offers for it, including the regulated tariff.",
           "result": "The regulated tariff comes to {{regulated}} in the first year, taxes included. The cheapest offer comes to {{cheapest}}, {{difference}} less. {{cheaper}} offers cost less than the regulated tariff.",
           "bill": "In quick mode, a monthly bill of {{bill}} gives back the same {{kwh}}: that is the regulated tariff's bill for that consumption."
@@ -5208,13 +5236,34 @@
           "title": "How it is calculated",
           "intro": "Each offer is priced the way ERSE's simulator does it (Manual do Simulador de Preços de Energia, June 2026):",
           "steps": {
-            "a": "Power: the price per day times the days.",
-            "b": "Energy: the kWh of each period times its price.",
-            "c": "Social tariff: ERSE's discount on power and energy, up to 6.9 kVA.",
-            "d": "The audiovisual contribution and the electricity tax, at their legal amounts.",
-            "e": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE.",
-            "f": "VAT at the reduced and standard rates, as set out below.",
-            "g": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            "a": {
+              "term": "Power",
+              "body": "The price per day times the days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "The kWh of each period times its price."
+            },
+            "c": {
+              "term": "Social tariff",
+              "body": "ERSE's discount on power and energy, up to 6.9 kVA."
+            },
+            "d": {
+              "term": "Taxes",
+              "body": "The audiovisual contribution and the electricity tax, at their legal amounts."
+            },
+            "e": {
+              "term": "Services and discounts",
+              "body": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE."
+            },
+            "f": {
+              "term": "VAT",
+              "body": "VAT at the reduced and standard rates, as set out below."
+            },
+            "g": {
+              "term": "Year",
+              "body": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            }
           },
           "vat": "VAT is {{reduced}} on the audiovisual contribution, on the network-access part of the power price up to 3.45 kVA, and on the first {{allowance}} kWh every 30 days up to 6.9 kVA ({{allowanceLarge}} kWh for a household of five or more). Everything else pays {{standard}}.",
           "month": "A month is a twelfth of a year, {{days}} days, as in ERSE's simulator, so a year is exactly twelve months.",
@@ -5324,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "calculatorTerm": "Cost calculator",
+          "noForecastTerm": "No forecast",
           "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
           "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
           "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week.",
@@ -5338,13 +5389,26 @@
           "title": "How it is calculated",
           "intro": "The calculator does four things:",
           "steps": {
-            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
-            "b": "Litres: distance times consumption divided by 100.",
-            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
-            "d": "Year: twelve such months."
+            "a": {
+              "term": "Distance a month",
+              "body": "The distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month."
+            },
+            "b": {
+              "term": "Litres",
+              "body": "Distance times consumption divided by 100."
+            },
+            "c": {
+              "term": "Cost",
+              "body": "Litres times the price per litre you enter, rounded to the cent."
+            },
+            "d": {
+              "term": "Year",
+              "body": "Twelve such months."
+            }
           },
           "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price.",
-          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres."
+          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres.",
+          "formulasLabel": "Formulas"
         },
         "data": {
           "title": "Data and sources",
@@ -5359,13 +5423,28 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
-            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
-            "stations": "Stations: the list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump.",
-            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
-            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
-            "education": "Educational use only, not advice."
-          }
+            "noForecast": {
+              "term": "No forecast",
+              "body": "Nothing here predicts future prices, and past moves do not say where the price goes next."
+            },
+            "average": {
+              "term": "National average",
+              "body": "It blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included."
+            },
+            "stations": {
+              "term": "Stations",
+              "body": "The list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump."
+            },
+            "consumption": {
+              "term": "Consumption",
+              "body": "The same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one."
+            },
+            "scope": {
+              "term": "Only fuel",
+              "body": "Tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown."
+            }
+          },
+          "education": "Educational use only, not advice."
         },
         "related": {
           "title": "Keep going",

@@ -4729,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Comment lire cette page",
+          "estimatorTerm": "Estimation de la facture",
+          "indexTerm": "Indice des prix",
+          "marketTerm": "Marché libre",
           "estimator": "Le simulateur chiffre un mois de 30 jours au tarif réglementé : la puissance souscrite, l'énergie consommée, la contribution audiovisuelle et la taxe sur l'électricité, puis ajoute la TVA poste par poste, au taux qui s'applique à chacun.",
           "index": "L'indice regarde les factures de tous les ménages, pas seulement le tarif réglementé : le prix moyen du kWh d'Eurostat au Portugal et dans l'UE, taxes comprises, pour que les deux soient comparables.",
           "market": "Le tarif réglementé n'est qu'une option. La plupart des ménages sont sur le marché libre, où les fournisseurs fixent leurs propres prix et où les offres peuvent être moins chères ou plus chères que le tarif réglementé. Le simulateur est un repère, pas une recommandation."
@@ -4743,15 +4746,33 @@
           "title": "Comment c'est calculé",
           "intro": "Pour un mois de 30 jours, le simulateur fait toujours les mêmes cinq choses :",
           "steps": {
-            "a": "Puissance : le prix journalier de votre puissance souscrite, multiplié par 30 jours.",
-            "b": "Énergie : vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez.",
-            "c": "Contribution audiovisuelle (CAV) : un montant mensuel fixe, avec TVA réduite. Les foyers qui consomment moins de 400 kWh par an en sont exonérés.",
-            "d": "Taxe spéciale sur la consommation d'électricité (IEC) : un montant fixe par kWh, avec la TVA au taux normal.",
-            "e": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
+            "a": {
+              "term": "Puissance",
+              "body": "Le prix journalier de votre puissance souscrite, multiplié par 30 jours."
+            },
+            "b": {
+              "term": "Énergie",
+              "body": "Vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez."
+            },
+            "c": {
+              "term": "Contribution audiovisuelle (CAV)",
+              "body": "Un montant mensuel fixe, avec TVA réduite. Les foyers qui consomment moins de 400 kWh par an en sont exonérés."
+            },
+            "d": {
+              "term": "Taxe spéciale sur la consommation d'électricité (IEC)",
+              "body": "Un montant fixe par kWh, avec la TVA au taux normal."
+            },
+            "e": {
+              "term": "TVA",
+              "body": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
+            }
           },
-          "vat": "Règles de TVA, telles que l'ERSE les explique : le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, à la part du terme de puissance qui correspond au tarif d'accès aux réseaux fixé par l'ERSE, pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
-          "bi": "Bi-horaire contre simple : le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
-          "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours."
+          "vat": "Le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, à la part du terme de puissance qui correspond au tarif d'accès aux réseaux fixé par l'ERSE, pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
+          "bi": "Le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
+          "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours.",
+          "formulasLabel": "Formule",
+          "vatTerm": "Règles de TVA, telles que l'ERSE les explique",
+          "biTerm": "Bi-horaire contre simple"
         },
         "data": {
           "title": "Données et sources",
@@ -5191,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Comment utiliser le comparateur",
+          "quickTerm": "Mode rapide",
+          "fullTerm": "Mode complet",
+          "diagramTerm": "Fichier E-REDES",
+          "optionsTerm": "Options et filtres",
           "quick": "Le mode rapide ne demande que votre puissance souscrite et votre facture mensuelle ou vos kWh. Une facture en euros est convertie en kWh en remontant la facture du tarif réglementé, taxes comprises, comme le fait la simulation rapide de l'ERSE.",
           "full": "Le mode complet utilise les kWh de chaque période indiqués sur votre facture, ou un total sur un nombre de jours quelconque, réparti entre les périodes selon le profil type E-REDES correspondant à votre puissance et à votre consommation.",
           "diagram": "Vous pouvez aussi lui fournir votre fichier de consommation E-REDES, téléchargé depuis le Balcão Digital. Ses relevés au quart d'heure donnent vos kWh réels dans chaque période et chaque cycle. Le fichier est lu dans votre navigateur et n'est jamais envoyé nulle part.",
@@ -5200,6 +5225,9 @@
         },
         "example": {
           "title": "Exemple chiffré",
+          "regulatedLabel": "Tarif réglementé",
+          "cheapestLabel": "Offre la moins chère",
+          "differenceLabel": "Différence",
           "setup": "Un logement de 3,45 kVA en option simple consomme {{kwh}} par mois. Dans l'export de l'ERSE du {{date}}, il existe {{count}} offres pour lui, tarif réglementé compris.",
           "result": "Le tarif réglementé revient à {{regulated}} la première année, taxes comprises. L'offre la moins chère revient à {{cheapest}}, soit {{difference}} de moins. {{cheaper}} offres coûtent moins cher que le tarif réglementé.",
           "bill": "En mode rapide, une facture mensuelle de {{bill}} redonne les mêmes {{kwh}} : c'est la facture du tarif réglementé pour cette consommation."
@@ -5208,13 +5236,34 @@
           "title": "Comment c'est calculé",
           "intro": "Chaque offre est calculée comme dans le simulateur de l'ERSE (Manual do Simulador de Preços de Energia, juin 2026) :",
           "steps": {
-            "a": "Puissance : le prix par jour multiplié par le nombre de jours.",
-            "b": "Énergie : les kWh de chaque période multipliés par leur prix.",
-            "c": "Tarif social : la réduction de l'ERSE sur la puissance et l'énergie, jusqu'à 6,9 kVA.",
-            "d": "La contribution audiovisuelle et la taxe sur l'électricité, à leurs montants légaux.",
-            "e": "Les services obligatoires, les remboursements et réductions accordés à tout client, et la réduction nouveau client la première année, tels que chaque offre les déclare à l'ERSE.",
-            "f": "La TVA aux taux réduit et normal, comme indiqué ci-dessous.",
-            "g": "Une année correspond à la même consommation sur 365 jours ; « années suivantes » exclut la réduction nouveau client."
+            "a": {
+              "term": "Puissance",
+              "body": "Le prix par jour multiplié par le nombre de jours."
+            },
+            "b": {
+              "term": "Énergie",
+              "body": "Les kWh de chaque période multipliés par leur prix."
+            },
+            "c": {
+              "term": "Tarif social",
+              "body": "La réduction de l'ERSE sur la puissance et l'énergie, jusqu'à 6,9 kVA."
+            },
+            "d": {
+              "term": "Taxes",
+              "body": "La contribution audiovisuelle et la taxe sur l'électricité, à leurs montants légaux."
+            },
+            "e": {
+              "term": "Services et remises",
+              "body": "Les services obligatoires, les remboursements et réductions accordés à tout client, et la réduction nouveau client la première année, tels que chaque offre les déclare à l'ERSE."
+            },
+            "f": {
+              "term": "TVA",
+              "body": "La TVA aux taux réduit et normal, comme indiqué ci-dessous."
+            },
+            "g": {
+              "term": "Année",
+              "body": "Une année correspond à la même consommation sur 365 jours ; « années suivantes » exclut la réduction nouveau client."
+            }
           },
           "vat": "La TVA est de {{reduced}} sur la contribution audiovisuelle, sur la part accès aux réseaux du prix de la puissance jusqu'à 3,45 kVA, et sur les {{allowance}} premiers kWh tous les 30 jours jusqu'à 6,9 kVA ({{allowanceLarge}} kWh pour un foyer de cinq personnes ou plus). Tout le reste est soumis à {{standard}}.",
           "month": "Un mois est un douzième d'année, soit {{days}} jours, comme dans le simulateur de l'ERSE, de sorte qu'une année fait exactement douze mois.",
@@ -5324,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Comment lire cette page",
+          "calculatorTerm": "Calculateur de coût",
+          "noForecastTerm": "Aucune prévision",
           "prices": "Le haut de la page affiche le dernier prix moyen national au litre du gazole, de l'essence 95 et du GPL, tel que la DGEG l'a publié pour le {{asOf}}, et de combien chacun a bougé en une semaine : gazole {{dieselChange}} et essence {{gasolineChange}} par rapport à la semaine précédente.",
           "calculator": "Le calculateur transforme votre conduite en coût mensuel de carburant. Vous indiquez la distance, la consommation en litres aux 100 km et le carburant ; le prix part de la dernière moyenne et vous pouvez le remplacer par celui que vous payez vraiment.",
           "noForecast": "Cette page ne fait aucune prévision. Elle montre ce que la DGEG a mesuré et ce que coûte votre conduite à ce prix ; elle ne dit pas quel sera le prix la semaine prochaine.",
@@ -5338,13 +5389,26 @@
           "title": "Comment c'est calculé",
           "intro": "Le calculateur fait quatre choses :",
           "steps": {
-            "a": "Distance par mois : la distance saisie, une semaine comptée pour 52 divisé par 12 semaines par mois, ou un trajet multiplié par les trajets par mois.",
-            "b": "Litres : distance fois consommation divisé par 100.",
-            "c": "Coût : litres fois le prix au litre saisi, arrondi au centime.",
-            "d": "Année : douze mois comme celui-ci."
+            "a": {
+              "term": "Distance par mois",
+              "body": "La distance saisie, une semaine comptée pour 52 divisé par 12 semaines par mois, ou un trajet multiplié par les trajets par mois."
+            },
+            "b": {
+              "term": "Litres",
+              "body": "Distance fois consommation divisé par 100."
+            },
+            "c": {
+              "term": "Coût",
+              "body": "Litres fois le prix au litre saisi, arrondi au centime."
+            },
+            "d": {
+              "term": "Année",
+              "body": "Douze mois comme celui-ci."
+            }
           },
           "change": "La variation hebdomadaire est la dernière moyenne de la DGEG moins celle d'il y a sept jours, en euros par litre et en pourcentage du prix précédent.",
-          "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres."
+          "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres.",
+          "formulasLabel": "Formules"
         },
         "data": {
           "title": "Données et sources",
@@ -5359,13 +5423,28 @@
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
-            "noForecast": "Aucune prévision : rien ici ne prédit les prix futurs, et les variations passées n'indiquent pas où ira le prix.",
-            "average": "Moyenne nationale : elle regroupe toutes les stations du Portugal continental et est pondérée par les ventes. Le prix de votre station peut être plus haut ou plus bas, et les Açores et Madère ne sont pas inclus.",
-            "stations": "Stations : la liste ne montre que les quelques stations les moins chères de chaque zone, telles que la DGEG les publie, et ne juge ni le service ni la qualité. Un prix peut changer après le relevé : vérifiez-le à la pompe.",
-            "consumption": "Consommation : la même valeur à chaque trajet. La consommation réelle varie avec la vitesse, la charge, la circulation et la saison, et dépasse souvent la valeur officielle.",
-            "scope": "Carburant seulement : péages, assurance, taxe de circulation, entretien et stationnement ne sont pas inclus. La recharge électrique n'est pas couverte et les autres carburants ne sont pas affichés.",
-            "education": "À usage éducatif uniquement, ce n'est pas un conseil."
-          }
+            "noForecast": {
+              "term": "Aucune prévision",
+              "body": "Rien ici ne prédit les prix futurs, et les variations passées n'indiquent pas où ira le prix."
+            },
+            "average": {
+              "term": "Moyenne nationale",
+              "body": "Elle regroupe toutes les stations du Portugal continental et est pondérée par les ventes. Le prix de votre station peut être plus haut ou plus bas, et les Açores et Madère ne sont pas inclus."
+            },
+            "stations": {
+              "term": "Stations",
+              "body": "La liste ne montre que les quelques stations les moins chères de chaque zone, telles que la DGEG les publie, et ne juge ni le service ni la qualité. Un prix peut changer après le relevé : vérifiez-le à la pompe."
+            },
+            "consumption": {
+              "term": "Consommation",
+              "body": "La même valeur à chaque trajet. La consommation réelle varie avec la vitesse, la charge, la circulation et la saison, et dépasse souvent la valeur officielle."
+            },
+            "scope": {
+              "term": "Carburant seulement",
+              "body": "Péages, assurance, taxe de circulation, entretien et stationnement ne sont pas inclus. La recharge électrique n'est pas couverte et les autres carburants ne sont pas affichés."
+            }
+          },
+          "education": "À usage éducatif uniquement, ce n'est pas un conseil."
         },
         "related": {
           "title": "Pour aller plus loin",

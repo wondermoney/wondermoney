@@ -4729,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "estimatorTerm": "Rechnungsschätzung",
+          "indexTerm": "Preisindex",
+          "marketTerm": "Freier Markt",
           "estimator": "Der Schätzer rechnet einen Monat mit 30 Tagen im regulierten Tarif: die vertraglich vereinbarte Leistung, die verbrauchte Energie, den Rundfunkbeitrag und die Stromsteuer, und addiert die Mehrwertsteuer Posten für Posten mit dem jeweils geltenden Satz.",
           "index": "Der Index betrachtet die Rechnungen aller Haushalte, nicht nur den regulierten Tarif: den durchschnittlichen Preis je kWh laut Eurostat in Portugal und in der EU, inklusive Steuern, damit beide vergleichbar sind.",
           "market": "Der regulierte Tarif ist nur eine Möglichkeit. Die meisten Haushalte sind im freien Markt, wo die Anbieter ihre Preise selbst festlegen und die Angebote günstiger oder teurer als der regulierte Tarif sein können. Der Schätzer ist ein Richtwert, keine Empfehlung."
@@ -4743,15 +4746,33 @@
           "title": "So wird gerechnet",
           "intro": "Für einen Monat mit 30 Tagen macht der Schätzer immer dieselben fünf Dinge:",
           "steps": {
-            "a": "Leistung: der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage.",
-            "b": "Energie: Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt.",
-            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit.",
-            "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
-            "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt."
+            },
+            "c": {
+              "term": "Rundfunkbeitrag (CAV)",
+              "body": "Ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit."
+            },
+            "d": {
+              "term": "Stromverbrauchsteuer (IEC)",
+              "body": "Ein fester Betrag je kWh mit normalem Mehrwertsteuersatz."
+            },
+            "e": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            }
           },
-          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
-          "bi": "Zweitarif gegen Eintarif: Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
-          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
+          "vat": "Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "bi": "Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
+          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst.",
+          "formulasLabel": "Formel",
+          "vatTerm": "Mehrwertsteuerregeln, wie die ERSE sie erklärt",
+          "biTerm": "Zweitarif gegen Eintarif"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -5191,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "So nutzen Sie den Vergleich",
+          "quickTerm": "Schnellmodus",
+          "fullTerm": "Ausführlicher Modus",
+          "diagramTerm": "E-REDES-Datei",
+          "optionsTerm": "Optionen und Filter",
           "quick": "Der Schnellmodus braucht nur Ihre vertraglich vereinbarte Leistung und Ihre Monatsrechnung oder Ihre kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
           "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von Ihrer Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für Ihre Leistung und Ihren Verbrauch auf die Zeiträume verteilt wird.",
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
@@ -5200,6 +5225,9 @@
         },
         "example": {
           "title": "Rechenbeispiel",
+          "regulatedLabel": "Regulierter Tarif",
+          "cheapestLabel": "Günstigstes Angebot",
+          "differenceLabel": "Differenz",
           "setup": "Ein Haushalt mit 3,45 kVA im Eintarif verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
           "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
           "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
@@ -5208,13 +5236,34 @@
           "title": "So wird gerechnet",
           "intro": "Jedes Angebot wird so berechnet wie im Simulator der ERSE (Manual do Simulador de Preços de Energia, Juni 2026):",
           "steps": {
-            "a": "Leistung: der Tagespreis mal die Anzahl der Tage.",
-            "b": "Energie: die kWh jedes Zeitraums mal dessen Preis.",
-            "c": "Sozialtarif: der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA.",
-            "d": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe.",
-            "e": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet.",
-            "f": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben.",
-            "g": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis mal die Anzahl der Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Die kWh jedes Zeitraums mal dessen Preis."
+            },
+            "c": {
+              "term": "Sozialtarif",
+              "body": "Der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA."
+            },
+            "d": {
+              "term": "Abgaben",
+              "body": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe."
+            },
+            "e": {
+              "term": "Dienste und Rabatte",
+              "body": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet."
+            },
+            "f": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben."
+            },
+            "g": {
+              "term": "Jahr",
+              "body": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            }
           },
           "vat": "Die Mehrwertsteuer beträgt {{reduced}} auf den Rundfunkbeitrag, auf den Netzzugangsanteil des Leistungspreises bis 3,45 kVA und auf die ersten {{allowance}} kWh alle 30 Tage bis 6,9 kVA ({{allowanceLarge}} kWh für einen Haushalt mit fünf oder mehr Personen). Für alles andere gilt {{standard}}.",
           "month": "Ein Monat ist ein Zwölftel eines Jahres, {{days}} Tage, wie im Simulator der ERSE, sodass ein Jahr genau zwölf Monate hat.",
@@ -5324,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "calculatorTerm": "Kostenrechner",
+          "noForecastTerm": "Keine Prognose",
           "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
           "calculator": "Der Rechner macht aus Ihrem Fahren monatliche Tankkosten. Sie geben Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und Sie können ihn auf den Preis ändern, den Sie wirklich zahlen.",
           "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird.",
@@ -5338,13 +5389,26 @@
           "title": "So wird gerechnet",
           "intro": "Der Rechner macht vier Dinge:",
           "steps": {
-            "a": "Strecke pro Monat: die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat.",
-            "b": "Liter: Strecke mal Verbrauch geteilt durch 100.",
-            "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
-            "d": "Jahr: zwölf solche Monate."
+            "a": {
+              "term": "Strecke pro Monat",
+              "body": "Die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat."
+            },
+            "b": {
+              "term": "Liter",
+              "body": "Strecke mal Verbrauch geteilt durch 100."
+            },
+            "c": {
+              "term": "Kosten",
+              "body": "Liter mal der eingegebene Literpreis, auf den Cent gerundet."
+            },
+            "d": {
+              "term": "Jahr",
+              "body": "Zwölf solche Monate."
+            }
           },
           "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises.",
-          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter."
+          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter.",
+          "formulasLabel": "Formeln"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -5359,13 +5423,28 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
-            "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
-            "stations": "Tankstellen: Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule.",
-            "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
-            "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
-            "education": "Nur zu Informationszwecken, keine Beratung."
-          }
+            "noForecast": {
+              "term": "Keine Prognose",
+              "body": "Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht."
+            },
+            "average": {
+              "term": "Nationaler Durchschnitt",
+              "body": "Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten."
+            },
+            "stations": {
+              "term": "Tankstellen",
+              "body": "Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule."
+            },
+            "consumption": {
+              "term": "Verbrauch",
+              "body": "Derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen."
+            },
+            "scope": {
+              "term": "Nur Kraftstoff",
+              "body": "Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt."
+            }
+          },
+          "education": "Nur zu Informationszwecken, keine Beratung."
         },
         "related": {
           "title": "Weiter geht's",

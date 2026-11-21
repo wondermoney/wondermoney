@@ -4729,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "estimatorTerm": "Stima della bolletta",
+          "indexTerm": "Indice dei prezzi",
+          "marketTerm": "Mercato libero",
           "estimator": "La stima calcola un mese di 30 giorni con la tariffa regolata: la potenza contrattuale, l'energia che consumi, il contributo audiovisivo e l'imposta sull'elettricità, poi aggiunge l'IVA voce per voce, con l'aliquota che spetta a ciascuna.",
           "index": "L'indice guarda le bollette di tutte le famiglie, non solo la tariffa regolata: il prezzo medio al kWh di Eurostat in Portogallo e nell'UE, imposte incluse, così che i due siano confrontabili.",
           "market": "La tariffa regolata è solo un'opzione. La maggior parte delle famiglie è sul mercato libero, dove i fornitori fissano i propri prezzi e le offerte possono costare meno o più della tariffa regolata. Le regole dell'IVA sono le stesse in entrambi. La stima è un punto di riferimento, non un consiglio."
@@ -4743,15 +4746,33 @@
           "title": "Come si calcola",
           "intro": "Per un mese di 30 giorni, la stima fa sempre le stesse cinque cose:",
           "steps": {
-            "a": "Potenza: il prezzo giornaliero della tua potenza contrattuale, per 30 giorni.",
-            "b": "Energia: i tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi.",
-            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente.",
-            "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
-            "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo giornaliero della tua potenza contrattuale, per 30 giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi."
+            },
+            "c": {
+              "term": "Contributo audiovisivo (CAV)",
+              "body": "Un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente."
+            },
+            "d": {
+              "term": "Imposta speciale sul consumo di elettricità (IEC)",
+              "body": "Un importo fisso per kWh, con IVA all'aliquota ordinaria."
+            },
+            "e": {
+              "term": "IVA",
+              "body": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            }
           },
-          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
-          "bi": "Bioraria contro semplice: il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
-          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni."
+          "vat": "L'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
+          "bi": "Il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
+          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni.",
+          "formulasLabel": "Formula",
+          "vatTerm": "Regole dell'IVA, come le spiega l'ERSE",
+          "biTerm": "Bioraria contro semplice"
         },
         "data": {
           "title": "Dati e fonti",
@@ -5191,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Come usare il confronto",
+          "quickTerm": "Modalità rapida",
+          "fullTerm": "Modalità completa",
+          "diagramTerm": "File E-REDES",
+          "optionsTerm": "Opzioni e filtri",
           "quick": "La modalità rapida richiede solo la potenza contrattuale e la bolletta mensile o i kWh. Una bolletta in euro viene convertita in kWh ricostruendo a ritroso la bolletta della tariffa regolata, imposte incluse, come fa la simulazione rapida dell'ERSE.",
           "full": "La modalità completa usa i kWh di ogni fascia indicati in bolletta, oppure un totale per un numero qualsiasi di giorni ripartito tra le fasce con il profilo standard di E-REDES per la tua potenza e i tuoi consumi.",
           "diagram": "Puoi anche usare il file dei consumi di E-REDES, scaricato dal Balcão Digital. Le sue letture di ogni quarto d'ora danno i tuoi kWh reali in ogni fascia e ciclo. Il file viene letto nel tuo browser e non viene mai inviato da nessuna parte.",
@@ -5200,6 +5225,9 @@
         },
         "example": {
           "title": "Esempio pratico",
+          "regulatedLabel": "Tariffa regolata",
+          "cheapestLabel": "Offerta più economica",
+          "differenceLabel": "Differenza",
           "setup": "Una casa con 3,45 kVA in opzione monoraria consuma {{kwh}} al mese. Nell'esportazione dell'ERSE del {{date}} ci sono {{count}} offerte per questa casa, tariffa regolata compresa.",
           "result": "La tariffa regolata costa {{regulated}} nel primo anno, imposte incluse. L'offerta più economica costa {{cheapest}}, {{difference}} in meno. {{cheaper}} offerte costano meno della tariffa regolata.",
           "bill": "In modalità rapida, una bolletta mensile di {{bill}} restituisce gli stessi {{kwh}}: è la bolletta della tariffa regolata per quei consumi."
@@ -5208,13 +5236,34 @@
           "title": "Come viene calcolato",
           "intro": "Ogni offerta è calcolata come nel simulatore dell'ERSE (Manual do Simulador de Preços de Energia, giugno 2026):",
           "steps": {
-            "a": "Potenza: il prezzo al giorno per il numero di giorni.",
-            "b": "Energia: i kWh di ogni fascia per il relativo prezzo.",
-            "c": "Tariffa sociale: lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA.",
-            "d": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge.",
-            "e": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE.",
-            "f": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto.",
-            "g": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo al giorno per il numero di giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I kWh di ogni fascia per il relativo prezzo."
+            },
+            "c": {
+              "term": "Tariffa sociale",
+              "body": "Lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA."
+            },
+            "d": {
+              "term": "Imposte",
+              "body": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge."
+            },
+            "e": {
+              "term": "Servizi e sconti",
+              "body": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE."
+            },
+            "f": {
+              "term": "IVA",
+              "body": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto."
+            },
+            "g": {
+              "term": "Anno",
+              "body": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            }
           },
           "vat": "L'IVA è al {{reduced}} sul contributo audiovisivo, sulla quota di accesso alle reti del prezzo della potenza fino a 3,45 kVA e sui primi {{allowance}} kWh ogni 30 giorni fino a 6,9 kVA ({{allowanceLarge}} kWh per una famiglia di cinque o più persone). Tutto il resto paga il {{standard}}.",
           "month": "Un mese è un dodicesimo dell'anno, {{days}} giorni, come nel simulatore dell'ERSE, quindi un anno corrisponde esattamente a dodici mesi.",
@@ -5324,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "calculatorTerm": "Calcolatore del costo",
+          "noForecastTerm": "Nessuna previsione",
           "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
           "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
           "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima.",
@@ -5338,13 +5389,26 @@
           "title": "Come si calcola",
           "intro": "Il calcolatore fa quattro cose:",
           "steps": {
-            "a": "Distanza al mese: la distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese.",
-            "b": "Litri: distanza per consumo diviso 100.",
-            "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
-            "d": "Anno: dodici mesi così."
+            "a": {
+              "term": "Distanza al mese",
+              "body": "La distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese."
+            },
+            "b": {
+              "term": "Litri",
+              "body": "Distanza per consumo diviso 100."
+            },
+            "c": {
+              "term": "Costo",
+              "body": "Litri per il prezzo al litro inserito, arrotondato al centesimo."
+            },
+            "d": {
+              "term": "Anno",
+              "body": "Dodici mesi così."
+            }
           },
           "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente.",
-          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri."
+          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri.",
+          "formulasLabel": "Formule"
         },
         "data": {
           "title": "Dati e fonti",
@@ -5359,13 +5423,28 @@
         "limits": {
           "title": "Cosa non includono questi valori",
           "items": {
-            "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
-            "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
-            "stations": "Distributori: l'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa.",
-            "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
-            "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
-            "education": "Solo a scopo informativo, non è una consulenza."
-          }
+            "noForecast": {
+              "term": "Nessuna previsione",
+              "body": "Niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo."
+            },
+            "average": {
+              "term": "Media nazionale",
+              "body": "Riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse."
+            },
+            "stations": {
+              "term": "Distributori",
+              "body": "L'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa."
+            },
+            "consumption": {
+              "term": "Consumo",
+              "body": "Lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale."
+            },
+            "scope": {
+              "term": "Solo carburante",
+              "body": "Pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati."
+            }
+          },
+          "education": "Solo a scopo informativo, non è una consulenza."
         },
         "related": {
           "title": "Per andare avanti",
