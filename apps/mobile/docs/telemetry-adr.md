@@ -22,6 +22,16 @@ date for screens that had none: `asset_edit`, `installment_plan_create`,
 `installment_plan_detail`, `home_customize`, `bank_sync_history`, `pending_changes` and
 `settings_rules`.
 
+**Record (2026-11-21), no change to the decision:** the allowlist now lives in the product
+analytics event catalogue, `packages/shared/lib/analytics/catalogue.ts`
+(`@wondermoney/shared/analytics`), shared with web and the API (epic #628); the generated list is
+`docs/analytics-events.md`, and the catalogue's `README.md` has the rules each event must follow.
+`AnalyticsCaptureArgs` in `src/lib/telemetry/analytics.ts` is derived from the catalogue's events
+whose surfaces include `mobile`, so the table below and the 2026-11-13 record describe what the
+catalogue holds today, and adding or changing a mobile event is a pull request that edits the
+catalogue rather than this document. The `screen` list moved with it, to
+`packages/shared/lib/analytics/feature-screens.ts`. This document keeps the reasoning.
+
 ## Why this exists
 
 Earlier mobile tickets, and this document's own companion Sentry work, all cite the same

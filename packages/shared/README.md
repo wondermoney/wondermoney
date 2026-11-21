@@ -27,7 +27,8 @@ subpath entries listed below, straight from source. Build it with
   `@wondermoney/shared/decimal` (locale-aware parsing of typed amounts), `/amount-expression`
   (arithmetic in amount fields), `/bank-sync` (the bank-sync error codes), `/crypto-wallet`
   (refusing a pasted private key or seed phrase), `/dashboard-layout` (the home sections' order
-  and visibility) and `/name-match`.
+  and visibility), `/name-match` and `/analytics` (the product analytics event catalogue,
+  `lib/analytics/README.md`).
 
 ## Usage
 

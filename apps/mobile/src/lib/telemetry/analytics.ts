@@ -1,12 +1,11 @@
 /**
  * Product analytics boundary, bound by `docs/telemetry-adr.md`.
  *
- * The ADR is the spec, not a guideline: event names come from a closed allowlist
- * and every property on every event is enumerated there. This module is the
- * technical safeguard the ADR is counting on — `AnalyticsCaptureArgs` is a
- * discriminated union over exactly the nine approved events, so an event name or
- * a property shape that is not on the allowlist is a compile error at the call
- * site rather than a code-review question.
+ * Event names and their properties come from the event catalogue in
+ * `@wondermoney/shared/analytics` (`packages/shared/lib/analytics/catalogue.ts`):
+ * `AnalyticsCaptureArgs` is a discriminated union over exactly the catalogue's
+ * mobile events, so an event name or a property shape that is not catalogued is
+ * a compile error at the call site rather than a code-review question.
  *
  * Deliberately absent: `identify`, `alias`, `group`, `register`, and any
  * free-form `properties` escape hatch. The ADR leaves user-level identification
@@ -18,164 +17,49 @@
  * dependency-injected shape as the auth and security adapters.
  */
 
+import {
+  type AnalyticsCaptureArgs as CatalogueCaptureArgs,
+  type AnalyticsEventNameFor,
+  type AnalyticsEventProperties,
+  type AnalyticsPropertyValue,
+  featureScreens,
+  type FeatureScreen,
+} from '@wondermoney/shared/analytics'
+
 /** Fixed by decision, not configuration: this app's only approved ingest host. */
 export const POSTHOG_HOST = 'https://eu.posthog.com'
 
-export type AnalyticsAuthProvider = 'email' | 'apple' | 'google'
-export type AnalyticsAccountMethod = 'manual' | 'bank_connection'
-export type AnalyticsFeedbackCategory = 'bug' | 'feature_request' | 'other'
-
 /**
- * Closed enum of route identifiers for `feature_screen_viewed`. Derived from the
- * real `src/app` route tree, but deliberately *not* the route paths themselves:
- * a path like `/portfolio/abc123` round-trips to a specific portfolio, so only
- * the identifier (`portfolio_detail`) is ever sent. Routes that resolve to no
- * identifier are simply not captured — see `resolveFeatureScreen`.
+ * The closed list of route identifiers for `feature_screen_viewed`, kept in the event catalogue
+ * with the event it belongs to. Routes that resolve to no identifier are simply not captured — see
+ * `resolveFeatureScreen`.
  */
-export const featureScreens = [
-  // Unauthenticated
-  'sign_in',
-  'sign_up',
-  'forgot_password',
-  'reset_password',
-  'access_blocked',
-  // Activation
-  'onboarding',
-  'onboarding_create_account',
-  // Tabs
-  'dashboard',
-  'home_customize',
-  'accounts',
-  'goals',
-  'portfolio',
-  'more',
-  // Accounts & transactions
-  'account_detail',
-  'account_edit',
-  'account_transactions',
-  'account_create',
-  'recurring',
-  'transactions',
-  'transaction_create',
-  'transaction_import',
-  'transaction_scan',
-  // Credit-card installment plans
-  'installment_plan_create',
-  'installment_plan_detail',
-  // Budgets
-  'budgets',
-  'budget_create',
-  'budget_accounts',
-  'budget_edit',
-  'budget_add_category',
-  'budget_year',
-  'budget_month',
-  // Loans
-  'loans',
-  'loan_create',
-  'loan_detail',
-  'loan_edit',
-  // Expense groups
-  'expense_groups',
-  'expense_group_create',
-  'expense_group_detail',
-  // Manually valued assets
-  'assets',
-  'asset_create',
-  'crypto_wallet_create',
-  'asset_detail',
-  'asset_edit',
-  'asset_value',
-  // Goals
-  'goal_detail',
-  'goal_create',
-  'debt_strategy',
-  // Markets
-  'markets',
-  'market_detail',
-  'market_screener',
-  'market_watchlist',
-  // Banking
-  'bank_connections',
-  'bank_connect',
-  'bank_connect_simplefin',
-  'bank_statement_import',
-  'bank_sync_history',
-  // Assistant proposals
-  'pending_changes',
-  // Net worth
-  'net_worth_history',
-  // Portfolio
-  'portfolio_create',
-  'portfolio_activity',
-  'portfolio_detail',
-  'portfolio_detail_activity',
-  'portfolio_import',
-  'portfolio_settings',
-  'portfolio_transaction_create',
-  'portfolio_holding_detail',
-  // Reports
-  'reports',
-  'report_budget_vs_actual',
-  'report_cashflow',
-  'report_month_comparison',
-  'report_net_worth_history',
-  'report_portfolio_performance',
-  'report_sankey',
-  'report_spending_by_category',
-  // Settings
-  'settings_categories',
-  'settings_category_create',
-  'settings_category_edit',
-  'settings_household',
-  'settings_household_join',
-  'settings_notifications',
-  'settings_preferences',
-  'settings_profile',
-  'settings_profile_edit',
-  'settings_rules',
-  'settings_security',
-] as const
+export { featureScreens, type FeatureScreen }
 
-export type FeatureScreen = (typeof featureScreens)[number]
+export type AnalyticsAuthProvider = AnalyticsEventProperties<'sign_in_completed'>['provider']
+export type AnalyticsAccountMethod = AnalyticsEventProperties<'first_account_created'>['method']
+export type AnalyticsFeedbackCategory = AnalyticsEventProperties<'feedback_submitted'>['category']
+
+export type AnalyticsEvent = AnalyticsEventNameFor<'mobile'>
 
 /**
- * The allowlist itself. `never` means "this event takes no properties" and the
- * capture signature below turns that into a one-argument call.
+ * Argument tuples for `capture`, one per catalogue event with `mobile` among its surfaces
+ * (`@wondermoney/shared/analytics`). Because the property type is the exact object type for that
+ * event, TypeScript's excess-property check rejects an extra key on an object literal — that is
+ * what keeps a well-meaning `{ provider: 'email', userId }` from ever compiling.
  */
-type AllowlistedEvents = {
-  sign_up_completed: { provider: AnalyticsAuthProvider }
-  sign_in_completed: { provider: AnalyticsAuthProvider }
-  onboarding_completed: never
-  first_account_created: { method: AnalyticsAccountMethod }
-  bank_connection_started: never
-  bank_connection_completed: never
-  bank_connection_failed: never
-  feedback_submitted: { category: AnalyticsFeedbackCategory }
-  feature_screen_viewed: { screen: FeatureScreen }
-}
-
-export type AnalyticsEvent = keyof AllowlistedEvents
+export type AnalyticsCaptureArgs = CatalogueCaptureArgs<'mobile'>
 
 /**
- * Argument tuples for `capture`, one per allowlisted event. Because the property
- * type is the exact object type for that event, TypeScript's excess-property
- * check rejects an extra key on an object literal — that is what keeps a
- * well-meaning `{ provider: 'email', userId }` from ever compiling.
- */
-export type AnalyticsCaptureArgs = {
-  [E in AnalyticsEvent]: [AllowlistedEvents[E]] extends [never]
-    ? [event: E]
-    : [event: E, properties: AllowlistedEvents[E]]
-}[AnalyticsEvent]
-
-/**
- * The vendor seam. Property values are constrained to strings because every
- * approved property is a closed string enum; a number or an object cannot be
- * passed through this port even by an adapter.
+ * The vendor seam. Property values are the catalogue's kinds (a value from a
+ * fixed list, a boolean or a count); an object cannot be passed through this
+ * port even by an adapter.
  */
 export type AnalyticsClientPort = Readonly<{
-  capture: (event: AnalyticsEvent, properties?: Readonly<Record<string, string>>) => void
+  capture: (
+    event: AnalyticsEvent,
+    properties?: Readonly<Record<string, AnalyticsPropertyValue>>,
+  ) => void
 }>
 
 export type Analytics = Readonly<{
