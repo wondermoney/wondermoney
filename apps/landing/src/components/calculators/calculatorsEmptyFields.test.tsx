@@ -104,7 +104,7 @@ describe.each(CALCULATORS)("%s calculator", (_name, Calculator) => {
 
 /** The result figures (not the inputs, which are monospaced too). */
 const figures = () =>
-  Array.from(document.querySelectorAll("p.font-mono, td.font-mono"), (node) => node.textContent);
+  Array.from(document.querySelectorAll("p.font-mono, dd.font-mono, td.font-mono"), (node) => node.textContent);
 
 /**
  * The empty-state rule: an empty optional amount (a starting amount, a contribution, savings,

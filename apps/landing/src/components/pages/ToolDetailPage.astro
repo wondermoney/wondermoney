@@ -416,7 +416,7 @@ const schema = {
     />
 
     <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
-      <div id="calculator" class="scroll-mt-24">
+      <div id="calculator" class="tool-calculator scroll-mt-24">
         {routeId === "toolCompoundInterest" && <CompoundInterestCalculatorComp locale={locale} client:load />}
         {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
         {routeId === "toolSavingsRate" && <SavingsRateCalculatorComp locale={locale} client:load />}
@@ -530,7 +530,7 @@ const schema = {
         </div>
       )}
 
-      <div class="mt-12 max-w-[40rem]">
+      <div class="tool-guide-aside mt-12 max-w-[42rem]">
         <FinancialDisclaimer locale={locale} client:idle />
       </div>
     </div>

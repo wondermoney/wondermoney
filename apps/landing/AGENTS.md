@@ -32,6 +32,7 @@ public/                # Static assets
 | Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
 | Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels, books, courses, forums, events |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
+| Calculator guides | `src/components/calculators/ToolGuide.astro`, `guideBlocks.ts` | The guide column and its blocks (term list, worked-example figures, formula block); `HouseholdBudgetGuide.astro` uses all three |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
 | Visual rules | `DESIGN.md` | Tokens shared with `apps/web/DESIGN.md` |
