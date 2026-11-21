@@ -1,16 +1,11 @@
 ---
 // Prerendered explanation for the broker fee comparison: how to read the table, a worked example
-// computed with the same functions the calculator runs, the method, what it leaves out and the
-// tools to go on with.
+// computed with the same functions the calculator runs (brokerFeesGuide.ts), the method, what it
+// leaves out and the tools to go on with, on the guide building blocks (guideBlocks.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  BROKER_FEES,
-  BROKER_FEES_ASSUMPTIONS,
-  BROKER_FEES_REVIEWED,
-  SCENARIO_PROFILES,
-  brokerYearlyCost,
-} from "@/lib/calculators/brokerFees";
-import { createFeeFormat, formatCheckedDate } from "@/lib/calculators/brokerFeesFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildBrokerFeesGuide } from "./brokerFeesGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -18,60 +13,17 @@ interface Props {
   locale: Lang;
 }
 
-/** The two brokers the worked example walks through: a Portuguese bank with stamp duty and VAT, and an online broker. */
-const EXAMPLE_BROKER_IDS = ["banco-best", "ibkr"] as const;
-
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.brokerFees.guide.${key}`;
-const format = createFeeFormat(t, locale);
 
-const find = (id: string) => {
-  const broker = BROKER_FEES.find((item) => item.id === id);
-  if (!broker) throw new Error(`Unknown broker ${id}`);
-  return broker;
-};
-const profile = SCENARIO_PROFILES.occasionalStocks;
-const bank = find(EXAMPLE_BROKER_IDS[0]);
-const online = find(EXAMPLE_BROKER_IDS[1]);
-const bankCost = brokerYearlyCost(bank, profile);
-const onlineCost = brokerYearlyCost(online, profile);
-if (!bank.usStock || !online.usStock || bank.fxPct === null || online.fxPct === null || !bank.custody || !online.custody)
-  throw new Error("The worked example needs published US stock, FX and custody fees");
+const guide = buildBrokerFeesGuide(locale);
+const { values } = guide;
 
-const values = {
-  count: String(profile.trades),
-  amount: format.money(profile.tradeAmount),
-  portfolio: format.money(profile.portfolio),
-  converted: format.money(profile.trades * profile.tradeAmount),
-  bank: bank.name,
-  bankFormula: format.orderFee(bank.usStock),
-  bankTrading: format.eur2(bankCost.trading),
-  bankFx: format.percent(bank.fxPct),
-  bankFxTotal: format.eur2(bankCost.fx),
-  bankCustodyFormula: format.custody(bank.custody),
-  bankCustody: format.eur2(bankCost.custody),
-  bankStampDuty: format.eur2(bankCost.taxes.find((tax) => tax.kind === "stampDuty")?.amount ?? 0),
-  bankVat: format.eur2(bankCost.taxes.find((tax) => tax.kind === "vat")?.amount ?? 0),
-  bankTotal: format.eur2(bankCost.total),
-  online: online.name,
-  onlineFormula: format.orderFee(online.usStock),
-  onlineTrading: format.eur2(onlineCost.trading),
-  onlineFx: format.percent(online.fxPct),
-  onlineFxTotal: format.eur2(onlineCost.fx),
-  onlineCustody: format.eur2(onlineCost.custody),
-  onlineTotal: format.eur2(onlineCost.total),
-  rate: format.number(BROKER_FEES_ASSUMPTIONS.eurUsd),
-  date: formatCheckedDate(locale, BROKER_FEES_REVIEWED),
-};
-
-// Each item is read through t() with the example's values, so a step can quote the assumptions.
-const list = (key: string) =>
-  Object.keys(t<Record<string, string>>(k(key), { returnObjects: true })).map((item) =>
-    t(k(`${key}.${item}`), values),
-  );
-const steps = list("method.steps");
-const limits = list("limits.items");
+// Each item is read through t() with the example's values, so a limit can quote the assumptions.
+const limits = Object.keys(t<Record<string, string>>(k("limits.items"), { returnObjects: true })).map((item) =>
+  t(k(`limits.items.${item}`), values),
+);
 
 const related = [
   { key: "compound", href: toLocalizedPath("toolCompoundInterest", locale) },
@@ -79,67 +31,47 @@ const related = [
   { key: "profile", href: toLocalizedPath("toolInvestorProfile", locale) },
   { key: "netWorth", href: toLocalizedPath("toolNetWorth", locale) },
 ] as const;
-
-const linkClass =
-  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
 <ToolGuide>
-  <section aria-labelledby="broker-read">
-    <h2 id="broker-read" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("read.title"))}
-    </h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("read.what"))}</p>
-      <p>{t(k("read.protection"))}</p>
-      <p>{t(k("read.notRec"))}</p>
-    </div>
+  <section>
+    <h2>{t(k("read.title"))}</h2>
+    <p>{t(k("read.what"))}</p>
+    <p>{t(k("read.protection"))}</p>
+    <p>{t(k("read.notRec"))}</p>
   </section>
 
-  <section aria-labelledby="broker-example">
-    <h2 id="broker-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("example.title"))}
-    </h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("example.setup"), values)}</p>
-      <p>{t(k("example.bank"), values)}</p>
-      <p>{t(k("example.online"), values)}</p>
-      <p>{t(k("example.takeaway"), values)}</p>
-    </div>
+  <section>
+    <h2>{t(k("example.title"))}</h2>
+    <p>{t(k("example.setup"), values)}</p>
+    <p>{t(k("example.bank"), values)}</p>
+    <GuideFigures items={guide.bankFlow} operators={guide.flowOperators} caption={values.bank} />
+    <p>{t(k("example.online"), values)}</p>
+    <GuideFigures items={guide.onlineFlow} operators={guide.flowOperators} caption={values.online} />
+    <p>{t(k("example.takeaway"), values)}</p>
   </section>
 
-  <section aria-labelledby="broker-method">
-    <h2 id="broker-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("method.title"))}
-    </h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("method.intro"), values)}</p>
-      <ol class="list-decimal space-y-2 pl-5">
-        {steps.map((item) => <li>{item}</li>)}
-      </ol>
-    </div>
+  <section>
+    <h2>{t(k("method.title"))}</h2>
+    <p>{t(k("method.intro"), values)}</p>
+    <GuideTermList items={guide.steps} />
+    <p>{guide.stepsNote}</p>
   </section>
 
-  <section aria-labelledby="broker-limits">
-    <h2 id="broker-limits" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("limits.title"))}
-    </h2>
-    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+  <section>
+    <h2>{t(k("limits.title"))}</h2>
+    <ul class="list-disc space-y-2 pl-6">
       {limits.map((item) => <li>{item}</li>)}
     </ul>
   </section>
 
-  <section aria-labelledby="broker-related">
-    <h2 id="broker-related" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("related.title"))}
-    </h2>
-    <ul class="mt-3 space-y-3 leading-7">
+  <section>
+    <h2>{t(k("related.title"))}</h2>
+    <ul class="space-y-3">
       {
         related.map((item) => (
           <li>
-            <a href={item.href} class={linkClass}>
-              {t(k(`related.${item.key}Link`))}
-            </a>
+            <a href={item.href}>{t(k(`related.${item.key}Link`))}</a>
             <p>{t(k(`related.${item.key}Body`))}</p>
           </li>
         ))

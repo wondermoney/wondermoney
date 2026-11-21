@@ -2995,12 +2995,25 @@
           "title": "Cómo se calcula",
           "intro": "Los tipos son estadísticas publicadas. WonderMoney añade solo estos cálculos:",
           "steps": {
-            "a": "Tipo anual: la media simple de las doce medias mensuales del año. No pondera los meses por lo depositado.",
-            "b": "Inflación: la variación del índice de precios de consumo portugués, en media anual, del año anterior al año.",
-            "c": "Tipo real: (1 + tipo) ÷ (1 + inflación) − 1. Para la cifra tras impuestos, primero se descuenta el 28 % de IRS al tipo.",
-            "d": "Calculadora: interés simple durante el plazo en meses completos, pagado al vencimiento, con el 28 % retenido, al tipo medio del grupo de plazos. Lo que se lleva la inflación es el importe × ((1 + inflación)^(meses ÷ 12) − 1)."
+            "aTerm": "Tipo anual",
+            "aBody": "La media simple de las doce medias mensuales del año. No pondera los meses por lo depositado.",
+            "bTerm": "Inflación",
+            "bBody": "La variación del índice de precios de consumo portugués, en media anual, del año anterior al año.",
+            "cTerm": "Tipo real",
+            "cBody": "(1 + tipo) ÷ (1 + inflación) − 1. Para la cifra tras impuestos, primero se descuenta el 28 % de IRS al tipo.",
+            "dTerm": "Calculadora",
+            "dBody": "Interés simple durante el plazo en meses completos, pagado al vencimiento, con el 28 % retenido, al tipo medio del grupo de plazos. Lo que se lleva la inflación es el importe × ((1 + inflación)^(meses ÷ 12) − 1)."
           },
-          "realRate": "Dividir en lugar de restar importa cuando los tipos son altos: mide cuánto más puede comprar el dinero, no solo la diferencia entre dos porcentajes."
+          "realRate": "Dividir en lugar de restar importa cuando los tipos son altos: mide cuánto más puede comprar el dinero, no solo la diferencia entre dos porcentajes.",
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "realRate": "Tipo real",
+            "realRateAfterTax": "Tipo real tras impuestos",
+            "rate": "tipo",
+            "inflation": "inflación",
+            "amount": "importe",
+            "months": "meses"
+          }
         },
         "data": {
           "title": "Datos y fuentes",
@@ -3129,10 +3142,14 @@
           "title": "Cómo se calcula",
           "intro": "Cada cifra sale del mismo motor que la calculadora de depósitos a plazo:",
           "steps": {
-            "a": "Intereses brutos: importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
-            "b": "Impuesto: el {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
-            "c": "Rentabilidad neta anual: los intereses netos anualizados a lo largo del plazo.",
-            "d": "Filtros: una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
+            "aTerm": "Intereses brutos",
+            "aBody": "Importe × TANB × plazo en meses ÷ 12, pagados de una vez al vencimiento.",
+            "bTerm": "Impuesto",
+            "bBody": "El {{taxRate}}% de los intereses. Los bancos extranjeros no lo retienen en Portugal, así que la cifra supone que declaras los intereses y pagas el mismo tipo.",
+            "cTerm": "Rentabilidad neta anual",
+            "cBody": "Los intereses netos anualizados a lo largo del plazo.",
+            "dTerm": "Filtros",
+            "dBody": "Una oferta se oculta si su mínimo supera tu importe o su máximo es inferior. Una oferta sin límite indicado se mantiene."
           }
         },
         "data": {
@@ -5151,22 +5168,47 @@
           "title": "Quilates y ley",
           "intro": "La pureza del oro se indica en quilates, sobre 24, o en milésimas, el número grabado en el contraste. Estas son las seis leyes legales del oro en Portugal:",
           "items": {
-            "k24": "24 quilates, 999 milésimas: oro puro, como en los lingotes y monedas de inversión.",
-            "k22": "22 quilates, 916: monedas de oro como el soberano y el Krugerrand, y muchas joyas de la India.",
-            "k19_2": "19,2 quilates, 800: el oro portugués, la ley tradicional de la orfebrería portuguesa.",
-            "k18": "18 quilates, 750: la ley más habitual en la joyería europea.",
-            "k14": "14 quilates, 585: joyas más duras y más baratas.",
-            "k9": "9 quilates, 375: la ley legal más baja."
+            "k24Term": "24 quilates, 999 milésimas",
+            "k24Body": "Oro puro, como en los lingotes y monedas de inversión.",
+            "k22Term": "22 quilates, 916",
+            "k22Body": "Monedas de oro como el soberano y el Krugerrand, y muchas joyas de la India.",
+            "k19_2Term": "19,2 quilates, 800",
+            "k19_2Body": "El oro portugués, la ley tradicional de la orfebrería portuguesa.",
+            "k18Term": "18 quilates, 750",
+            "k18Body": "La ley más habitual en la joyería europea.",
+            "k14Term": "14 quilates, 585",
+            "k14Body": "Joyas más duras y más baratas.",
+            "k9Term": "9 quilates, 375",
+            "k9Body": "La ley legal más baja."
           }
         },
         "method": {
           "title": "Cómo se calcula",
           "intro": "La página hace cuatro cosas:",
           "steps": {
-            "a": "Precio: el precio de un gramo de oro puro del NBP en eslotis, dividido por los eslotis por euro del BCE del mismo día.",
-            "b": "Oro puro: el peso por la ley dividido entre 1000. Una pieza de 24 quilates cuenta con 999 milésimas.",
-            "c": "Valor: los gramos de oro puro por el precio de un gramo de oro puro, redondeado al céntimo.",
-            "d": "Oferta: si la introduces, la oferta dividida por el valor, en porcentaje, y la diferencia en euros."
+            "aTerm": "Precio",
+            "aBody": "El precio de un gramo de oro puro del NBP en eslotis, dividido por los eslotis por euro del BCE del mismo día.",
+            "bTerm": "Oro puro",
+            "bBody": "El peso por la ley dividido entre 1000. Una pieza de 24 quilates cuenta con 999 milésimas.",
+            "cTerm": "Valor",
+            "cBody": "Los gramos de oro puro por el precio de un gramo de oro puro, redondeado al céntimo.",
+            "dTerm": "Oferta",
+            "dBody": "Si la introduces, la oferta dividida por el valor, en porcentaje, y la diferencia en euros."
+          },
+          "formulasLabel": "Fórmulas",
+          "formula": {
+            "pureGold": "Oro puro",
+            "pureGoldLower": "oro puro",
+            "weight": "peso",
+            "fineness": "ley",
+            "value": "Valor",
+            "valueLower": "valor",
+            "price": "Precio por gramo",
+            "priceLower": "precio por gramo",
+            "nbpPrice": "precio del NBP en eslotis",
+            "zlotyPerEuro": "eslotis por euro",
+            "offerShare": "Oferta frente al valor",
+            "offer": "oferta"
           }
         },
         "buyers": {
@@ -5187,10 +5229,14 @@
         "limits": {
           "title": "Lo que este valor deja fuera",
           "items": {
-            "metal": "Solo el metal: el valor es el oro que contiene la pieza a un precio de referencia. Las piedras, otros metales, la hechura y la marca no cuentan.",
-            "buyers": "No es un precio de venta: quien compra paga menos, y una tienda que vende oro cobra más.",
-            "purity": "Ley: la calculadora se fía de la ley que eliges. Una pieza sin contraste o chapada en oro puede tener mucho menos oro, o ninguno.",
-            "reference": "Precio de referencia: el precio diario del NBP, no una cotización al minuto. El mercado se mueve a lo largo del día.",
+            "metalTerm": "Solo el metal",
+            "metalBody": "El valor es el oro que contiene la pieza a un precio de referencia. Las piedras, otros metales, la hechura y la marca no cuentan.",
+            "buyersTerm": "No es un precio de venta",
+            "buyersBody": "Quien compra paga menos, y una tienda que vende oro cobra más.",
+            "purityTerm": "Ley",
+            "purityBody": "La calculadora se fía de la ley que eliges. Una pieza sin contraste o chapada en oro puede tener mucho menos oro, o ninguno.",
+            "referenceTerm": "Precio de referencia",
+            "referenceBody": "El precio diario del NBP, no una cotización al minuto. El mercado se mueve a lo largo del día.",
             "education": "Solo con fines educativos, no es asesoramiento."
           }
         },
@@ -5394,7 +5440,12 @@
           "title": "Ejemplo",
           "setup": "Supón que guardas {{amount}} durante 12 meses en {{product}} de {{bank}}, al {{rate}} anual. Genera {{gross}}; el 28% de IRS se lleva {{tax}} y quedan {{net}}.",
           "capped": "El máximo importa. {{product2}} de {{bank2}} paga {{rate2}}, pero solo hasta {{cap}}. Con {{amount2}}, los intereses son {{gross2}} antes de impuestos y {{net2}} después, como si hubieras ahorrado {{cap}}.",
-          "plans": "Las comisiones también importan. {{product3}} de {{bank3}} va de {{low}} a {{high}} según el plan. Con {{amount}}, el plan Standard deja {{standardNet}} netos, mientras que el plan Ultra, tras {{ultraFees}} al año en costes, deja {{ultraNet}}."
+          "plans": "Las comisiones también importan. {{product3}} de {{bank3}} va de {{low}} a {{high}} según el plan. Con {{amount}}, el plan Standard deja {{standardNet}} netos, mientras que el plan Ultra, tras {{ultraFees}} al año en costes, deja {{ultraNet}}.",
+          "figures": {
+            "gross": "Intereses brutos",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Intereses netos"
+          }
         },
         "method": {
           "title": "Método",
@@ -5594,17 +5645,25 @@
           "setup": "Piensa en el comprador ocasional de acciones: {{count}} compras de {{amount}} en acciones de EE. UU. en un año, con {{portfolio}} invertidos.",
           "bank": "En {{bank}}, cada orden cuesta {{bankFormula}}, así que las {{count}} órdenes cuestan {{bankTrading}} con el impuesto de sello. Convertir {{converted}} en dólares al {{bankFx}} suma {{bankFxTotal}}, y la custodia ({{bankCustodyFormula}}) suma {{bankCustody}} con IVA. El año cuesta {{bankTotal}}, de los que {{bankStampDuty}} son impuesto de sello y {{bankVat}} son IVA.",
           "online": "En {{online}}, cada orden cuesta {{onlineFormula}}: {{onlineTrading}} en el año. El cambio de divisa al {{onlineFx}} suma {{onlineFxTotal}} y la custodia {{onlineCustody}}, en total {{onlineTotal}}.",
-          "takeaway": "Con órdenes pequeñas y poco frecuentes pesan más las comisiones mínimas y las custodias de importe fijo; con órdenes grandes o una cartera grande, pesan más las comisiones porcentuales. Cambia el perfil de arriba para ver cómo cambia el orden."
+          "takeaway": "Con órdenes pequeñas y poco frecuentes pesan más las comisiones mínimas y las custodias de importe fijo; con órdenes grandes o una cartera grande, pesan más las comisiones porcentuales. Cambia el perfil de arriba para ver cómo cambia el orden.",
+          "figures": {
+            "total": "Total del año"
+          }
         },
         "method": {
           "title": "Método",
           "intro": "Cada comisión se ha leído en la tarifa publicada por el propio bróker, en la fecha indicada en su fila; toda la tabla se revisó el {{date}} y se comprueba de nuevo cada trimestre. Las comisiones que una tarifa no indica aparecen como no publicadas y quedan fuera de los totales, que se muestran entonces como incompletos.",
           "steps": {
-            "a": "Órdenes: la comisión de cada orden es la parte fija más el porcentaje de la orden, con el mínimo y el máximo por orden. Las comisiones por acción cuentan acciones enteras al precio supuesto. Un importe mensual sin comisión se aplica mes a mes.",
-            "b": "Plan de inversión: en las compras de ETF, con la opción activada y cuando el bróker publica un plan periódico, su comisión sustituye a la de la orden.",
-            "c": "Divisa: las órdenes en EE. UU. pagan la comisión de cambio del bróker sobre el importe convertido; las comisiones en dólares se convierten a {{rate}} dólares por euro.",
-            "d": "Custodia: la fórmula publicada, por periodo y con su mínimo y máximo, se cobra sobre el valor invertido tantas veces como periodos tiene un año.",
-            "e": "Impuestos sobre las comisiones: cuando la tarifa dice que sus comisiones no incluyen el impuesto de sello portugués (4% sobre el corretaje) o el IVA (23% sobre la custodia), se suman a las comisiones a las que se aplican.",
+            "aTerm": "Órdenes",
+            "aBody": "La comisión de cada orden es la parte fija más el porcentaje de la orden, con el mínimo y el máximo por orden. Las comisiones por acción cuentan acciones enteras al precio supuesto. Un importe mensual sin comisión se aplica mes a mes.",
+            "bTerm": "Plan de inversión",
+            "bBody": "En las compras de ETF, con la opción activada y cuando el bróker publica un plan periódico, su comisión sustituye a la de la orden.",
+            "cTerm": "Divisa",
+            "cBody": "Las órdenes en EE. UU. pagan la comisión de cambio del bróker sobre el importe convertido; las comisiones en dólares se convierten a {{rate}} dólares por euro.",
+            "dTerm": "Custodia",
+            "dBody": "La fórmula publicada, por periodo y con su mínimo y máximo, se cobra sobre el valor invertido tantas veces como periodos tiene un año.",
+            "eTerm": "Impuestos sobre las comisiones",
+            "eBody": "Cuando la tarifa dice que sus comisiones no incluyen el impuesto de sello portugués (4% sobre el corretaje) o el IVA (23% sobre la custodia), se suman a las comisiones a las que se aplican.",
             "f": "El total suma las órdenes del año, el cambio de divisa y la custodia, y los brókers aparecen del más barato al más caro. Los que no publican una comisión que el perfil necesita van al final."
           }
         },
@@ -5792,7 +5851,8 @@
             "insuranceLinked": "seguro vinculado a fondos",
             "insuranceGuaranteed": "seguro no vinculado a fondos",
             "pensionFund": "fondo de pensiones"
-          }
+          },
+          "gapLabel": "Diferencia de costes sobre {{invested}}, al año"
         },
         "tax": {
           "title": "La deducción en el IRS (EBF, artículo 21)",
@@ -5804,7 +5864,8 @@
           },
           "example": "La edad que cuenta es la del 1 de enero del año de la aportación (n.º 9). A los {{age}} años, {{exampleContribution}} aportados en el año dan {{exampleDeduction}}, la deducción máxima.",
           "conditions": "La deducción entra en el límite global de deducciones del artículo 78, n.º 7, del Código del IRS: sin límite para las bases liquidables más bajas, después de {{capMax}} a {{capMin}} por hogar. Reduce el impuesto debido y no se paga en efectivo, y las aportaciones hechas después de la jubilación no son deducibles (n.º 10).",
-          "payout": "Cuando el plan se rescata en un caso que prevé la ley, un rescate de una sola vez tributa sobre la ganancia al {{legalRate}} sobre dos quintos de ella, un {{legalEffective}} efectivo de la ganancia (n.º 3); los pagos periódicos tributan como pensiones."
+          "payout": "Cuando el plan se rescata en un caso que prevé la ley, un rescate de una sola vez tributa sobre la ganancia al {{legalRate}} sobre dos quintos de ella, un {{legalEffective}} efectivo de la ganancia (n.º 3); los pagos periódicos tributan como pensiones.",
+          "deductionLabel": "Deducción de la cuota del IRS"
         },
         "redemption": {
           "title": "Cuándo puedes rescatar y cuánto cuesta un rescate anticipado",

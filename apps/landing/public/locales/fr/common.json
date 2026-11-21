@@ -2995,12 +2995,25 @@
           "title": "Comment c'est calculé",
           "intro": "Les taux sont des statistiques publiées. WonderMoney ajoute seulement ces calculs :",
           "steps": {
-            "a": "Taux annuel : la moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
-            "b": "Inflation : la variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
-            "c": "Taux réel : (1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
-            "d": "Simulateur : intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
+            "aTerm": "Taux annuel",
+            "aBody": "La moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
+            "bTerm": "Inflation",
+            "bBody": "La variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
+            "cTerm": "Taux réel",
+            "cBody": "(1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
+            "dTerm": "Simulateur",
+            "dBody": "Intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
           },
-          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages."
+          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages.",
+          "formulasLabel": "Formules",
+          "formula": {
+            "realRate": "Taux réel",
+            "realRateAfterTax": "Taux réel après impôt",
+            "rate": "taux",
+            "inflation": "inflation",
+            "amount": "montant",
+            "months": "mois"
+          }
         },
         "data": {
           "title": "Données et sources",
@@ -3129,10 +3142,14 @@
           "title": "Comment c'est calculé",
           "intro": "Chaque chiffre vient du même moteur que le calculateur de dépôt à terme :",
           "steps": {
-            "a": "Intérêts bruts : montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
-            "b": "Impôt : {{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
-            "c": "Rendement net annuel : les intérêts nets annualisés sur la durée.",
-            "d": "Filtres : une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
+            "aTerm": "Intérêts bruts",
+            "aBody": "Montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
+            "bTerm": "Impôt",
+            "bBody": "{{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
+            "cTerm": "Rendement net annuel",
+            "cBody": "Les intérêts nets annualisés sur la durée.",
+            "dTerm": "Filtres",
+            "dBody": "Une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
           }
         },
         "data": {
@@ -5250,7 +5267,12 @@
           "title": "Exemple chiffré",
           "setup": "Supposons que vous gardiez {{amount}} pendant 12 mois sur {{product}} chez {{bank}}, à {{rate}} par an. Il rapporte {{gross}} ; l'IRS de 28 % prélève {{tax}}, il reste {{net}}.",
           "capped": "Le plafond compte. {{product2}} chez {{bank2}} paie {{rate2}}, mais seulement jusqu'à {{cap}}. Avec {{amount2}}, les intérêts sont de {{gross2}} avant impôt et de {{net2}} après, comme si vous aviez épargné {{cap}}.",
-          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}."
+          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}.",
+          "figures": {
+            "gross": "Intérêts bruts",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Intérêts nets"
+          }
         },
         "method": {
           "title": "Méthode",
@@ -5450,17 +5472,25 @@
           "setup": "Prenons l'acheteur occasionnel d'actions : {{count}} achats de {{amount}} d'actions américaines dans l'année, {{portfolio}} investis.",
           "bank": "Chez {{bank}}, chaque ordre coûte {{bankFormula}}, donc les {{count}} ordres coûtent {{bankTrading}} droit de timbre compris. Convertir {{converted}} en dollars à {{bankFx}} ajoute {{bankFxTotal}}, et la garde ({{bankCustodyFormula}}) ajoute {{bankCustody}} TVA comprise. L'année coûte {{bankTotal}}, dont {{bankStampDuty}} de droit de timbre et {{bankVat}} de TVA.",
           "online": "Chez {{online}}, chaque ordre coûte {{onlineFormula}} : {{onlineTrading}} sur l'année. Le change à {{onlineFx}} ajoute {{onlineFxTotal}} et la garde {{onlineCustody}}, soit {{onlineTotal}} au total.",
-          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer."
+          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer.",
+          "figures": {
+            "total": "Total de l'année"
+          }
         },
         "method": {
           "title": "Méthode",
           "intro": "Tous les frais ont été relevés dans la grille tarifaire publiée par le courtier lui-même, à la date indiquée sur sa ligne ; tout le tableau a été revu le {{date}} et est revérifié chaque trimestre. Les frais qu'une grille n'indique pas apparaissent comme non publiés et sont exclus des totaux, alors signalés comme incomplets.",
           "steps": {
-            "a": "Ordres : la commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
-            "b": "Plan d'investissement : pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
-            "c": "Change : les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
-            "d": "Garde : la formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
-            "e": "Taxes sur les frais : quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
+            "aTerm": "Ordres",
+            "aBody": "La commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
+            "bTerm": "Plan d'investissement",
+            "bBody": "Pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
+            "cTerm": "Change",
+            "cBody": "Les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
+            "dTerm": "Garde",
+            "dBody": "La formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
+            "eTerm": "Taxes sur les frais",
+            "eBody": "Quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
             "f": "Le total additionne les ordres de l'année, le change et la garde, et les courtiers sont listés du moins cher au plus cher. Ceux qui ne publient pas des frais nécessaires au profil viennent en dernier."
           }
         },
@@ -5648,7 +5678,8 @@
             "insuranceLinked": "assurance liée à des fonds",
             "insuranceGuaranteed": "assurance non liée à des fonds",
             "pensionFund": "fonds de pension"
-          }
+          },
+          "gapLabel": "Écart de frais sur {{invested}}, par an"
         },
         "tax": {
           "title": "La déduction d'IRS (EBF, article 21)",
@@ -5660,7 +5691,8 @@
           },
           "example": "L'âge retenu est celui au 1er janvier de l'année du versement (n.º 9). À {{age}} ans, {{exampleContribution}} versés dans l'année donnent {{exampleDeduction}}, la déduction maximale.",
           "conditions": "La déduction entre dans le plafond global des déductions de l'article 78, n.º 7, du Code de l'IRS : aucun plafond pour les revenus imposables les plus bas, puis de {{capMax}} à {{capMin}} par foyer. Elle réduit l'impôt dû et n'est pas versée en argent, et les versements faits après le départ à la retraite ne sont pas déductibles (n.º 10).",
-          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions."
+          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions.",
+          "deductionLabel": "Déduction de l'IRS"
         },
         "redemption": {
           "title": "Quand racheter, et ce que coûte un rachat anticipé",
@@ -5812,22 +5844,47 @@
           "title": "Carats et titre",
           "intro": "La pureté de l'or s'exprime en carats, sur 24, ou en millièmes, le nombre gravé dans le poinçon. Voici les six titres légaux de l'or au Portugal :",
           "items": {
-            "k24": "24 carats, 999 millièmes : or pur, comme dans les lingots et pièces d'investissement.",
-            "k22": "22 carats, 916 : pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
-            "k19_2": "19,2 carats, 800 : l'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
-            "k18": "18 carats, 750 : le titre le plus courant de la bijouterie européenne.",
-            "k14": "14 carats, 585 : des bijoux plus durs et moins chers.",
-            "k9": "9 carats, 375 : le titre légal le plus bas."
+            "k24Term": "24 carats, 999 millièmes",
+            "k24Body": "Or pur, comme dans les lingots et pièces d'investissement.",
+            "k22Term": "22 carats, 916",
+            "k22Body": "Pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
+            "k19_2Term": "19,2 carats, 800",
+            "k19_2Body": "L'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
+            "k18Term": "18 carats, 750",
+            "k18Body": "Le titre le plus courant de la bijouterie européenne.",
+            "k14Term": "14 carats, 585",
+            "k14Body": "Des bijoux plus durs et moins chers.",
+            "k9Term": "9 carats, 375",
+            "k9Body": "Le titre légal le plus bas."
           }
         },
         "method": {
           "title": "Mode de calcul",
           "intro": "La page fait quatre choses :",
           "steps": {
-            "a": "Prix : le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
-            "b": "Or pur : le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
-            "c": "Valeur : les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
-            "d": "Offre : si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+            "aTerm": "Prix",
+            "aBody": "Le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
+            "bTerm": "Or pur",
+            "bBody": "Le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
+            "cTerm": "Valeur",
+            "cBody": "Les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
+            "dTerm": "Offre",
+            "dBody": "Si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+          },
+          "formulasLabel": "Formules",
+          "formula": {
+            "pureGold": "Or pur",
+            "pureGoldLower": "or pur",
+            "weight": "poids",
+            "fineness": "titre",
+            "value": "Valeur",
+            "valueLower": "valeur",
+            "price": "Prix au gramme",
+            "priceLower": "prix au gramme",
+            "nbpPrice": "prix de la NBP en zlotys",
+            "zlotyPerEuro": "zlotys par euro",
+            "offerShare": "Offre par rapport à la valeur",
+            "offer": "offre"
           }
         },
         "buyers": {
@@ -5848,10 +5905,14 @@
         "limits": {
           "title": "Ce que cette valeur laisse de côté",
           "items": {
-            "metal": "Le métal seul : la valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
-            "buyers": "Pas un prix de vente : les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
-            "purity": "Titre : le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
-            "reference": "Prix de référence : le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
+            "metalTerm": "Le métal seul",
+            "metalBody": "La valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
+            "buyersTerm": "Pas un prix de vente",
+            "buyersBody": "Les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
+            "purityTerm": "Titre",
+            "purityBody": "Le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
+            "referenceTerm": "Prix de référence",
+            "referenceBody": "Le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
             "education": "À usage éducatif uniquement, ce n'est pas un conseil."
           }
         },

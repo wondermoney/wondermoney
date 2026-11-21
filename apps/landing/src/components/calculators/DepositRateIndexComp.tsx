@@ -206,7 +206,7 @@ function Snapshot() {
           </div>
           <div>
             <dt className="text-muted-foreground">{t(k("real.net"), { tax: String(DEPOSIT_TAX_RATE) })}</dt>
-            <dd className="font-mono font-semibold text-primary">{percent(year.realNet, "always")}</dd>
+            <dd className="font-mono font-semibold text-foreground">{percent(year.realNet, "always")}</dd>
           </div>
         </dl>
         <p className="mt-3 text-sm text-muted-foreground">

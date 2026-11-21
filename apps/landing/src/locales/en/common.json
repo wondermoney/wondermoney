@@ -2995,12 +2995,25 @@
           "title": "How it is calculated",
           "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
           "steps": {
-            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
-            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
-            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
-            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+            "aTerm": "Yearly rate",
+            "aBody": "The plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "bTerm": "Inflation",
+            "bBody": "The change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "cTerm": "Real rate",
+            "cBody": "(1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "dTerm": "Calculator",
+            "dBody": "Simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
           },
-          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages.",
+          "formulasLabel": "Formulas",
+          "formula": {
+            "realRate": "Real rate",
+            "realRateAfterTax": "Real rate after tax",
+            "rate": "rate",
+            "inflation": "inflation",
+            "amount": "amount",
+            "months": "months"
+          }
         },
         "data": {
           "title": "Data and sources",
@@ -3129,10 +3142,14 @@
           "title": "How it is calculated",
           "intro": "Each figure comes from the same engine as the term deposit calculator:",
           "steps": {
-            "a": "Gross interest: amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
-            "b": "Tax: {{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
-            "c": "Net annual yield: the net interest annualised over the term.",
-            "d": "Filters: an offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
+            "aTerm": "Gross interest",
+            "aBody": "Amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
+            "bTerm": "Tax",
+            "bBody": "{{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
+            "cTerm": "Net annual yield",
+            "cBody": "The net interest annualised over the term.",
+            "dTerm": "Filters",
+            "dBody": "An offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
           }
         },
         "data": {
@@ -5151,22 +5168,47 @@
           "title": "Karats and fineness",
           "intro": "The purity of gold is given in karats, out of 24, or in thousandths, the number stamped in the hallmark. These are the six legal finenesses of gold in Portugal:",
           "items": {
-            "k24": "24k, 999 thousandths: pure gold, as in investment bars and coins.",
-            "k22": "22k, 916: gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
-            "k19_2": "19.2k, 800: Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
-            "k18": "18k, 750: the most common fineness of jewellery in Europe.",
-            "k14": "14k, 585: harder, cheaper jewellery.",
-            "k9": "9k, 375: the lowest legal fineness."
+            "k24Term": "24k, 999 thousandths",
+            "k24Body": "Pure gold, as in investment bars and coins.",
+            "k22Term": "22k, 916",
+            "k22Body": "Gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
+            "k19_2Term": "19.2k, 800",
+            "k19_2Body": "Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
+            "k18Term": "18k, 750",
+            "k18Body": "The most common fineness of jewellery in Europe.",
+            "k14Term": "14k, 585",
+            "k14Body": "Harder, cheaper jewellery.",
+            "k9Term": "9k, 375",
+            "k9Body": "The lowest legal fineness."
           }
         },
         "method": {
           "title": "How it is calculated",
           "intro": "The page does four things:",
           "steps": {
-            "a": "Price: NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
-            "b": "Pure gold: the weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
-            "c": "Value: the grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
-            "d": "Offer: when you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+            "aTerm": "Price",
+            "aBody": "NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
+            "bTerm": "Pure gold",
+            "bBody": "The weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
+            "cTerm": "Value",
+            "cBody": "The grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
+            "dTerm": "Offer",
+            "dBody": "When you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+          },
+          "formulasLabel": "Formulas",
+          "formula": {
+            "pureGold": "Pure gold",
+            "pureGoldLower": "pure gold",
+            "weight": "weight",
+            "fineness": "fineness",
+            "value": "Value",
+            "valueLower": "value",
+            "price": "Price per gram",
+            "priceLower": "price per gram",
+            "nbpPrice": "NBP price in zloty",
+            "zlotyPerEuro": "zloty per euro",
+            "offerShare": "Offer against the value",
+            "offer": "offer"
           }
         },
         "buyers": {
@@ -5187,10 +5229,14 @@
         "limits": {
           "title": "What this value leaves out",
           "items": {
-            "metal": "Metal only: the value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
-            "buyers": "Not a selling price: buyers pay less, and a shop selling gold charges more.",
-            "purity": "Purity: the calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
-            "reference": "Reference price: NBP's daily price, not a live quote. The market moves during the day.",
+            "metalTerm": "Metal only",
+            "metalBody": "The value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
+            "buyersTerm": "Not a selling price",
+            "buyersBody": "Buyers pay less, and a shop selling gold charges more.",
+            "purityTerm": "Purity",
+            "purityBody": "The calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
+            "referenceTerm": "Reference price",
+            "referenceBody": "NBP's daily price, not a live quote. The market moves during the day.",
             "education": "Educational use only, not advice."
           }
         },
@@ -5394,7 +5440,12 @@
           "title": "Worked example",
           "setup": "Say you keep {{amount}} for 12 months in {{product}} at {{bank}}, at {{rate}} a year. It earns {{gross}}; the 28% IRS takes {{tax}}, leaving {{net}}.",
           "capped": "The maximum matters. {{product2}} at {{bank2}} pays {{rate2}}, but only up to {{cap}}. With {{amount2}}, interest is {{gross2}} before tax and {{net2}} after, as if you had saved {{cap}}.",
-          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}."
+          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}.",
+          "figures": {
+            "gross": "Gross interest",
+            "tax": "IRS ({{tax}}%)",
+            "net": "Net interest"
+          }
         },
         "method": {
           "title": "Method",
@@ -5594,17 +5645,25 @@
           "setup": "Take the occasional stock buyer: {{count}} buys of {{amount}} of US shares in a year, {{portfolio}} held.",
           "bank": "At {{bank}}, each order costs {{bankFormula}}, so the {{count}} orders cost {{bankTrading}} with stamp duty. Converting {{converted}} to dollars at {{bankFx}} adds {{bankFxTotal}}, and custody ({{bankCustodyFormula}}) adds {{bankCustody}} with VAT. The year costs {{bankTotal}}, of which {{bankStampDuty}} is stamp duty and {{bankVat}} is VAT.",
           "online": "At {{online}}, each order costs {{onlineFormula}}: {{onlineTrading}} for the year. Currency conversion at {{onlineFx}} adds {{onlineFxTotal}} and custody {{onlineCustody}}, for {{onlineTotal}} in total.",
-          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes."
+          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes.",
+          "figures": {
+            "total": "Total for the year"
+          }
         },
         "method": {
           "title": "Method",
           "intro": "Every fee was read from the broker's own published price list on the date shown in its row; the whole table was reviewed on {{date}} and is re-checked every quarter. Fees that a price list does not state are marked as not published and left out of the totals, which are then shown as incomplete.",
           "steps": {
-            "a": "Orders: each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
-            "b": "Savings plan: for ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
-            "c": "Currency: US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
-            "d": "Custody: the published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
-            "e": "Taxes on fees: where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
+            "aTerm": "Orders",
+            "aBody": "Each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
+            "bTerm": "Savings plan",
+            "bBody": "For ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
+            "cTerm": "Currency",
+            "cBody": "US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
+            "dTerm": "Custody",
+            "dBody": "The published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
+            "eTerm": "Taxes on fees",
+            "eBody": "Where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
             "f": "The total adds the year's orders, currency conversion and custody, and the brokers are listed from cheapest to dearest. Brokers missing a fee the profile needs go last."
           }
         },
@@ -5792,7 +5851,8 @@
             "insuranceLinked": "insurance linked to funds",
             "insuranceGuaranteed": "insurance not linked to funds",
             "pensionFund": "pension fund"
-          }
+          },
+          "gapLabel": "Yearly cost gap on {{invested}}"
         },
         "tax": {
           "title": "The IRS deduction (EBF, article 21)",
@@ -5804,7 +5864,8 @@
           },
           "example": "The age that counts is the one on 1 January of the year of the contribution (n.º 9). At {{age}}, {{exampleContribution}} contributed in the year gives {{exampleDeduction}}, the full deduction.",
           "conditions": "The deduction is part of the overall cap on deductions in article 78, n.º 7 of the IRS code: no cap for the lowest taxable incomes, then from {{capMax}} down to {{capMin}} for the household. It lowers tax due and is not paid out, and contributions made after retirement are not deductible (n.º 10).",
-          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions."
+          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions.",
+          "deductionLabel": "Deduction from IRS tax"
         },
         "redemption": {
           "title": "When you can redeem, and what an early redemption costs",
