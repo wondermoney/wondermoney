@@ -44,6 +44,7 @@ vi.mock('@service/auth/signup-record.service', () => ({ recordSignup: mocked.rec
 vi.mock('@validators/parser', () => ({ zParse: mocked.zParse }));
 
 import { AppuserAccountType, SupportedLanguages } from '@entity/Appuser';
+import { loginEventId } from '@service/analytics/service-events.service';
 
 import { mockRes } from '../../__tests__/__helpers__/mock-request';
 import { authCallback } from '../auth';
@@ -122,7 +123,7 @@ describe('auth callback', () => {
     expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
       distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f601',
-      eventId: 'login.v1:session-demo',
+      eventId: loginEventId('session-demo'),
       eventName: 'login',
       properties: { locale: 'EN', method: 'email' },
     }, undefined);
@@ -159,7 +160,7 @@ describe('auth callback', () => {
     expect(mocked.getPrimaryAuthProvider).toHaveBeenCalledWith('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f602');
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
       distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f602',
-      eventId: 'login.v1:session-provider',
+      eventId: loginEventId('session-provider'),
       eventName: 'login',
       properties: expect.objectContaining({ method: 'google' }),
     }, undefined);
@@ -182,7 +183,7 @@ describe('auth callback', () => {
 
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
       distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f603',
-      eventId: 'login.v1:session-broken',
+      eventId: loginEventId('session-broken'),
       eventName: 'login',
       properties: expect.objectContaining({ method: 'email' }),
     }, undefined);

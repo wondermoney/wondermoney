@@ -1,8 +1,10 @@
 import type { EntityManager } from '@mikro-orm/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { AppuserAccountType } from '@entity/Appuser';
 import {
   importCommittedEventId,
+  loginEventId,
   recordAccountCreated,
   recordBudgetCreated,
   recordGoalCreated,
@@ -84,6 +86,11 @@ describe('service events', () => {
     expect(outbox.upsert).not.toHaveBeenCalled();
   });
 
+  it('keys a login by a hash of its session, never the session id itself', () => {
+    expect(loginEventId('session-1')).toBe(loginEventId('session-1'));
+    expect(loginEventId('session-1')).not.toContain('session-1');
+  });
+
   it('keeps one import_committed per import', () => {
     expect(importCommittedEventId('import-a')).toBe(importCommittedEventId('import-a'));
     expect(importCommittedEventId('import-a')).not.toBe(importCommittedEventId('import-b'));
@@ -123,6 +130,14 @@ describe('user_active', () => {
     await recordUserActive(outbox.em, PERSON, 'mobile', evening, LIVE);
 
     expect(outbox.rows.size).toBe(1);
+  });
+
+  it('records nothing for the shared demo account', async () => {
+    const outbox = fakeOutbox();
+
+    await recordUserActive(outbox.em, { ...PERSON, accountType: AppuserAccountType.DEMO }, 'web', morning, LIVE);
+
+    expect(outbox.upsert).not.toHaveBeenCalled();
   });
 
   it('records nothing while delivery is off', async () => {

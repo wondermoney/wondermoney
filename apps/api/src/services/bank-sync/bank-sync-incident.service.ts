@@ -421,7 +421,7 @@ function bankSyncAnalyticsProperties(event: BankSyncEvent): AnalyticsEventProper
   };
 }
 
-function bankSyncEventName(flow: BankSyncFlow, result: BankSyncContractResult): string {
+function bankSyncEventName(flow: BankSyncFlow, result: BankSyncContractResult): 'account_add_sync_failed' | 'account_sync_succeeded' | typeof BANK_SYNC_EVENT_NAME {
   if (flow === BankSyncFlow.INITIAL_ADD && result !== 'full_success') return 'account_add_sync_failed';
   if (flow === BankSyncFlow.SCHEDULED_REFRESH && result === 'full_success') return 'account_sync_succeeded';
   return BANK_SYNC_EVENT_NAME;

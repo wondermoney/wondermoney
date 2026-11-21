@@ -58,7 +58,8 @@ interface FinalizeDeps {
 
 class PortfolioImportFinalizeService {
   async finalizeImportSession(input: FinalizePortfolioImportSessionInput, deps: FinalizeDeps = {}): Promise<FinalizePortfolioImportSessionResult> {
-    return DI.em.transactional(async (em) => {
+    let committed: undefined | { importer: PortfolioImportSession['appuserKey']; importId: string; partial: boolean };
+    const result = await DI.em.transactional(async (em) => {
       const session = await em.findOne(PortfolioImportSession, { deletedAt: undefined, portfolioImportSessionKey: input.importSessionId }, { lockMode: LockMode.PESSIMISTIC_WRITE, populate: ['appuserKey.currencyKey', 'portfolioKey', 'tenantKey', 'financialBrokerKey'] });
       if (!session) throw new NotFoundError('Import session not found');
       if (session.status !== PortfolioImportSessionStatus.IMPORTING) throw new ConflictError('Import session cannot be finalized');
@@ -196,12 +197,9 @@ class PortfolioImportFinalizeService {
 
       if (rowFailureReason || summary.failedRows > 0) logger.error({ failedRows: summary.failedRows, failureReason: rowFailureReason, importedRows: summary.importedRows, importSessionId: input.importSessionId, status: nextStatus }, 'Portfolio CSV import finalized with failed rows');
       await em.persist([session, ...rows]).flush();
-      if (nextStatus !== PortfolioImportSessionStatus.FAILED) {
-        await recordServiceEvent(em, session.appuserKey, 'import_committed', {
-          format: 'broker_csv',
-          kind: 'portfolio',
-          result: nextStatus === PortfolioImportSessionStatus.SUCCEEDED ? 'succeeded' : 'partial',
-        }, { eventId: importCommittedEventId(session.correlationId) });
+      // Recorded once the transaction commits (below), so the analytics write can never abort it.
+      if (summary.importedRows > 0) {
+        committed = { importer: session.appuserKey, importId: session.correlationId, partial: summary.failedRows + summary.invalidRows > 0 };
       }
       const parserSpecKey = session.columnMappingJson?.['candidateParserSpecKey'];
       const candidateContentHash = session.columnMappingJson?.['candidateParserSpecContentHash'];
@@ -249,6 +247,14 @@ class PortfolioImportFinalizeService {
       }
       return { ...summary, status: session.status, terminalKind: sessionTerminalKind };
     }, { clear: true });
+    if (committed) {
+      await recordServiceEvent(DI.em, committed.importer, 'import_committed', {
+        format: 'broker_csv',
+        kind: 'portfolio',
+        result: committed.partial ? 'partial' : 'succeeded',
+      }, { eventId: importCommittedEventId(committed.importId) });
+    }
+    return result;
   }
 
   async retryParserSpecPromotion(input: { importSessionId: number }, deps: Pick<FinalizeDeps, 'promoteParserSpec'> = {}) {

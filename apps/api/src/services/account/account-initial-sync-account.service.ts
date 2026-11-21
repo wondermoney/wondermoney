@@ -239,10 +239,13 @@ class AccountInitialSyncAccountService {
         if (creditCardType) account.accountTypeKey = creditCardType;
       }
       if (existingDeleted) existingDeleted.deletedAt = undefined;
+      // Created here only when this flush inserted it: on a unique conflict another sync made it.
+      let createdHere = !wasExisting;
       try {
         await em.persist(account).flush();
       } catch (error) {
         if (!isUniqueConstraintError(error)) throw error;
+        createdHere = false;
         const reloaded = await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: undefined });
         if (!reloaded) throw error;
         reloaded.accountName = account.accountName;
@@ -261,7 +264,7 @@ class AccountInitialSyncAccountService {
       }
 
       // A new bank-linked account (SimpleFIN's arrive here; Enable Banking's usually already exist).
-      if (!wasExisting && 'upsert' in em) {
+      if (createdHere && 'upsert' in em) {
         await recordAccountCreated(em as Pick<EntityManager, 'upsert'>, tenant.appuserKey, { method: 'bank_connection' });
       }
       fulfilled.push({ accountId, created: !wasExisting, institutionId });

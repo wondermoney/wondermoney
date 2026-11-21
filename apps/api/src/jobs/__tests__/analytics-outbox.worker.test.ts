@@ -49,7 +49,7 @@ function makeRow(overrides: Partial<AnalyticsOutbox> = {}) {
     distinctId: EXTERNAL_USER_ID,
     eventId: `signup.v1:${EXTERNAL_USER_ID}`,
     eventName: 'signup',
-    properties: { appuser_key: '42', locale: 'EN' },
+    properties: { locale: 'EN', method: 'email' },
     ...overrides,
   });
 }
@@ -210,6 +210,24 @@ describe('analytics outbox worker', () => {
 
   it('never delivers properties containing an email address', async () => {
     const harness = makeHarness({ row: makeRow({ properties: { email: 'ada@example.com' } }) });
+
+    const result = await deliverAnalyticsOutboxBatch({
+      em: harness.em as unknown as NonNullable<AnalyticsOutboxDeps>['em'],
+      env: liveEnv(),
+      logger: harness.logger,
+      posthogClient: harness.posthog,
+    });
+
+    expect(result).toEqual({ blocked: 1, delivered: 0, scanned: 1 });
+    expect(harness.posthog.captureBatch).not.toHaveBeenCalled();
+    expect(harness.row.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it.each([
+    ['a database key written by an older API', makeRow({ properties: { appuser_key: '42', locale: 'EN', method: 'email' } })],
+    ['an event that is not a catalogued service event', makeRow({ eventName: 'account_delete', properties: {} })],
+  ])('never delivers %s', async (_case, row) => {
+    const harness = makeHarness({ row });
 
     const result = await deliverAnalyticsOutboxBatch({
       em: harness.em as unknown as NonNullable<AnalyticsOutboxDeps>['em'],

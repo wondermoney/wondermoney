@@ -260,7 +260,7 @@ export const ANALYTICS_EVENTS = {
   },
   import_committed: {
     description:
-      'An import finished writing its rows, once per import. A failed import sends nothing.',
+      'An import finished and wrote at least one row, once per import. One that wrote none (failed, or every row a duplicate) sends nothing.',
     surfaces: ['server'],
     tier: 'service',
     question: 'imports',
@@ -280,7 +280,8 @@ export const ANALYTICS_EVENTS = {
       result: {
         type: 'enum',
         values: ['succeeded', 'partial'],
-        description: 'Every row written, or some rows failed.',
+        description:
+          'Every row read was written or skipped as a duplicate, or some rows failed or did not read.',
       },
     },
   },

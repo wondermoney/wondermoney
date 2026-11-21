@@ -37,8 +37,8 @@ and `CuratedListPage.astro` pass it to the layout as `landingSource`, which puts
   account. The first budget and the first goal a person creates each record one event
   (`first_budget_created`, `first_goal_created`, beside `budget_created` and `goal_created` for
   every one), keyed by the same distinct id (the account's external id) with an event id that
-  repeats for later ones, so the outbox keeps only the first. A person who had budgets before
-  these events existed gets a "first" on their next one; the funnel counts only signups in its
+  repeats for later ones, so the outbox keeps only the first. A person who had accounts, budgets or
+  goals before these events existed gets a "first" on their next one; the funnel counts only signups in its
   window, so they don't reach it. Like every outbox event, they exist only with
   `ANALYTICS_OUTBOX_MODE=live`, so a self-hosted server records none of this.
 

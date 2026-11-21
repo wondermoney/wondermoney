@@ -2,7 +2,7 @@ import { type Request, type Response } from 'express';
 
 import { DI } from '@app/app';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
-import { analyticsSignInMethod, recordServiceEvent } from '@service/analytics/service-events.service';
+import { analyticsSignInMethod, loginEventId, recordServiceEvent } from '@service/analytics/service-events.service';
 import { isAppError, provisionHomeTenant } from '@service/auth/auth-callback.service';
 import { getAuthUserFullName } from '@service/auth/auth-callback.utils';
 import { type AuthContext, betterAuthUserExists, getPrimaryAuthProvider, sendReconnectVerificationEmail } from '@service/auth/better-auth';
@@ -42,7 +42,7 @@ export async function authCallback(req: Request, res: Response) {
       const sessionId = getAuthSessionId(authUser);
       if (sessionId) {
         await recordServiceEvent(DI.em, { externalUserId }, 'login', getBaseAnalyticsProperties(existingUserByExternalId, method), {
-          eventId: `login.v1:${sessionId}`,
+          eventId: loginEventId(sessionId),
         });
       } else {
         logger.warn({ appuserKey: existingUserByExternalId.appuserKey }, 'Skipping login analytics because the auth session id is missing');

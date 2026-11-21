@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import type { AnalyticsEventProperties } from '@wondermoney/shared';
 
 import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
@@ -30,4 +32,12 @@ export function bankConnectionFailureReason(error: unknown): BankConnectionFailu
 /** The surface an Enable Banking connection was started from, stored on the connection. */
 export function enableBankingPlatform(returnTo: EnableBankingReturnTo | null | undefined): 'mobile' | 'web' {
   return returnTo === EnableBankingReturnTo.MOBILE ? 'mobile' : 'web';
+}
+
+/**
+ * The event id of a connection attempt's outcome, the same for completed and failed, so whichever
+ * is recorded first stands. Hashed: the attempt's state is a secret of the consent flow.
+ */
+export function bankConnectionOutcomeEventId(state: string): string {
+  return `bank_connection.v1:${createHash('sha256').update(`bank-connection:${state}`).digest('hex')}`;
 }

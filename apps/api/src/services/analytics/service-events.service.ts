@@ -4,7 +4,7 @@ import type { EntityManager } from '@mikro-orm/core';
 import type { AnalyticsEventNameFor, AnalyticsEventProperties } from '@wondermoney/shared';
 import type { Request } from 'express';
 
-import type { Appuser } from '@entity/Appuser';
+import { type Appuser, AppuserAccountType } from '@entity/Appuser';
 import {
   isAnalyticsOutboxEnabled,
   isCanonicalExternalUserId,
@@ -64,6 +64,11 @@ const SIGN_IN_METHODS = new Set(['apple', 'email', 'google', 'oidc']);
 /** better-auth's provider id as the catalogue's `method`: a provider added later is `other`. */
 export function analyticsSignInMethod(providerId: string): AnalyticsEventProperties<'login'>['method'] {
   return SIGN_IN_METHODS.has(providerId) ? (providerId as AnalyticsEventProperties<'login'>['method']) : 'other';
+}
+
+/** One `login` per session, keyed by a hash of its id, which is a better-auth key. */
+export function loginEventId(sessionId: string): string {
+  return `login.v2:${createHash('sha256').update(`session:${sessionId}`).digest('hex')}`;
 }
 
 /** One `import_committed` per import: its id, hashed so the session's own id is not sent. */
@@ -138,12 +143,13 @@ let recordedActiveDay = '';
  */
 export async function recordUserActive(
   em: EventEm,
-  subject: Subject,
+  subject: null | (Partial<Pick<Appuser, 'accountType'>> & Pick<Appuser, 'externalUserId'>) | undefined,
   platform: AnalyticsPlatform,
   now: Date = new Date(),
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<void> {
-  if (!isAnalyticsOutboxEnabled(env) || !subject) return;
+  // The demo account is one identity shared by every visitor: not a person.
+  if (!isAnalyticsOutboxEnabled(env) || !subject || subject.accountType === AppuserAccountType.DEMO) return;
   const day = now.toISOString().slice(0, 10);
   if (day !== recordedActiveDay) {
     recordedActiveDays.clear();
