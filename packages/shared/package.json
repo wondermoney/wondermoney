@@ -27,12 +27,14 @@
     "./amount-expression": "./lib/amount-expression/index.ts",
     "./dashboard-layout": "./lib/dashboard-layout/index.ts",
     "./name-match": "./lib/import/name-match.ts",
+    "./analytics": "./lib/analytics/index.ts",
     "./package.json": "./package.json"
   },
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "test": "vitest run",
+    "analytics-events": "vitest run tests/analytics/events-doc.test.ts --update",
     "coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "build:lib": "tsup index.ts --format cjs,esm && tsc -p tsconfig.build.json",

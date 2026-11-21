@@ -66,6 +66,9 @@ subdomains when `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN` is set.
 - Tables are TanStack Table v9: import `ColumnDef`, `Row`, `Table`, `createColumnHelper` from
   `components/ui/Table/features.ts`, not from `@tanstack/react-table`. Charts are Recharts
   through `components/ui/chart.tsx`.
+- Product analytics: `track()` from `lib/analytics/track.ts`, with an event from the catalogue in
+  `@wondermoney/shared/analytics` (`packages/shared/lib/analytics/README.md`); lint bans
+  `posthog.capture` elsewhere.
 - `pnpm lint` is check-only with zero warnings; `pnpm lint:fix` and `pnpm format` write files.
 
 ## Households
