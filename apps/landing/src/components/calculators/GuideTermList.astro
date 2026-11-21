@@ -1,0 +1,36 @@
+---
+/**
+ * A definition list for a calculator guide: each term in bold with its explanation after
+ * it, in place of "Term: body" bullets. Use it for "how to read the result" lists and for
+ * the method's notes.
+ *
+ *   <GuideTermList items={[{ term: t(k("readSurplusTerm")), body: t(k("readSurplusBody")),
+ *     id: "my-tool-surplus" }]} />
+ *
+ * Keep the term and the body as two translation keys (`…Term`, `…Body`) rather than
+ * splitting one string at its colon. Give an item an `id` when a formula or another part of
+ * the page links to it (GuideFormula.astro): ids never change with the locale, and the
+ * linked item is marked while it is the page's target. Two columns from `md` by default;
+ * `columns={1}` for long explanations. Server-rendered, no script.
+ */
+import type { GuideTerm } from "./guideBlocks";
+
+interface Props {
+  items: GuideTerm[];
+  columns?: 1 | 2;
+  class?: string;
+}
+
+const { items, columns = 2, class: className } = Astro.props;
+---
+
+<dl class:list={["guide-terms", columns === 2 && "guide-terms--two", className]}>
+  {
+    items.map((item) => (
+      <div id={item.id} class="guide-terms__item">
+        <dt class="font-semibold text-foreground">{item.term}</dt>
+        <dd class="mt-1">{item.body}</dd>
+      </div>
+    ))
+  }
+</dl>

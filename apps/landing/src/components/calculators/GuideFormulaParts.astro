@@ -1,0 +1,38 @@
+---
+// The parts of one side of a formula (GuideFormula.astro); draws fractions by calling
+// itself for the numerator and the denominator.
+import type { GuideFormulaPart } from "./guideBlocks";
+
+interface Props {
+  parts: GuideFormulaPart[];
+}
+
+const { parts } = Astro.props;
+---
+
+{
+  parts.map((part) => {
+    if (part.kind === "variable") {
+      return part.href ? (
+        <a href={part.href} class="guide-formula__variable">
+          {part.label}
+        </a>
+      ) : (
+        <span class="guide-formula__variable">{part.label}</span>
+      );
+    }
+    if (part.kind === "number") return <span class="font-mono text-foreground">{part.value}</span>;
+    if (part.kind === "operator") return <span class="guide-formula__operator">{part.symbol}</span>;
+    return (
+      <span class="guide-formula__fraction">
+        <span class="guide-formula__numerator">
+          <Astro.self parts={part.numerator} />
+        </span>
+        <span class="sr-only"> ÷ </span>
+        <span class="guide-formula__denominator">
+          <Astro.self parts={part.denominator} />
+        </span>
+      </span>
+    );
+  })
+}

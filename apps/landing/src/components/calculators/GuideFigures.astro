@@ -1,0 +1,82 @@
+---
+/**
+ * The figures of a calculator guide's worked example, as value cards: an icon and a label,
+ * the value in the financial face, and an optional detail line or share bar.
+ *
+ * - `variant="flow"` (default) puts the cards in a row joined by `operators` (one fewer than
+ *   the cards), so the example reads as a sum: income − expenses = surplus → savings rate.
+ *   It stacks on a phone. Keep it to two to four cards.
+ * - `variant="grid"` lays the cards out two or three to a row; a card with `share` (0 to
+ *   100) draws it as a bar with `shareLabel` beside it. Use it for a breakdown.
+ *
+ *   <GuideFigures items={flow} operators={["−", "=", "→"]} caption={t(k("exampleFlowCaption"))} />
+ *
+ * Build `items` from the calculator's own computation on the worked example (see
+ * householdBudgetGuide.ts), never from typed numbers, so the guide and the calculator
+ * always agree. Icons are lucide-react components, drawn on the server. Server-rendered,
+ * no script.
+ */
+import type { GuideFigure, GuideFlowOperator } from "./guideBlocks";
+
+interface Props {
+  items: GuideFigure[];
+  variant?: "flow" | "grid";
+  operators?: GuideFlowOperator[];
+  /** Says what the figures show; drawn under them. */
+  caption?: string;
+  class?: string;
+}
+
+const { items, variant = "flow", operators = [], caption, class: className } = Astro.props;
+
+const valueTone = (figure: GuideFigure) =>
+  figure.tone === "positive"
+    ? "text-success-text"
+    : figure.tone === "negative"
+      ? "text-destructive-text"
+      : "text-foreground";
+---
+
+<figure class:list={["guide-figures", `guide-figures--${variant}`, className]}>
+  <ul class="guide-figures__list" role="list">
+    {
+      items.map((figure, index) => {
+        const Icon = figure.icon;
+        const symbol = variant === "flow" && index > 0 ? operators[index - 1] : undefined;
+        return (
+          <>
+            {symbol && (
+              <li class="guide-figures__operator" aria-hidden="true">
+                {symbol}
+              </li>
+            )}
+            <li class="guide-figures__card">
+              <p class="flex items-center gap-2 text-sm leading-5 text-ink-2">
+                {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" strokeWidth={1.75} />}
+                <span>{figure.label}</span>
+              </p>
+              <p class:list={["mt-2 font-mono font-semibold leading-tight tracking-tight", valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
+                {figure.value}
+              </p>
+              {figure.detail && <p class="mt-1 font-mono text-sm text-muted-foreground">{figure.detail}</p>}
+              {typeof figure.share === "number" && (
+                <div class="mt-3 flex items-center gap-3">
+                  <span class="guide-figures__track" aria-hidden="true">
+                    <span
+                      class:list={["guide-figures__bar", figure.tone === "positive" && "guide-figures__bar--positive"]}
+                      style={`transform: scaleX(${Math.min(Math.max(figure.share, 0), 100) / 100})`}
+                    />
+                  </span>
+                  {figure.shareLabel && (
+                    <span class="shrink-0 font-mono text-sm text-ink-2">{figure.shareLabel}</span>
+                  )}
+                </div>
+              )}
+            </li>
+          </>
+        );
+      })
+    }
+  </ul>
+  {caption && <figcaption class="mt-3 text-sm leading-6 text-muted-foreground">{caption}</figcaption>}
+</figure>

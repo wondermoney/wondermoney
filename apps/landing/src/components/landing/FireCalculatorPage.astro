@@ -61,7 +61,7 @@ const relatedCards: FigureCard[] = [
   />
 
   <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
-    <section id="calculator" class="scroll-mt-24 space-y-5" aria-labelledby="fire-calculator-heading">
+    <section id="calculator" class="tool-calculator scroll-mt-24 space-y-5" aria-labelledby="fire-calculator-heading">
       <h2 id="fire-calculator-heading" class="text-2xl font-bold tracking-[-0.015em] text-foreground sm:text-3xl">
         {t(k("calcTitle"))}
       </h2>
@@ -73,7 +73,7 @@ const relatedCards: FigureCard[] = [
       <FireGuide locale={locale} />
     </div>
 
-    <div class="mt-12 max-w-[40rem]">
+    <div class="tool-guide-aside mt-12 max-w-[42rem]">
       <FinancialDisclaimer locale={locale} client:idle />
     </div>
   </div>
