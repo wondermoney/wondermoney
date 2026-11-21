@@ -23,7 +23,9 @@ export const LEGACY_TOP_LEVEL_PAGE_SLUG_BY_ROUTE_ID: Partial<Record<TopLevelRout
 	pageFireCalculator: "fire-calculator",
 }
 
-export const LEGACY_FEATURE_SLUG_BY_ROUTE_ID: Record<FeatureRouteId, string> = {
+// Only the feature pages that once lived at an English slug have one; feature pages added
+// since start at their localized slug and need no alias.
+export const LEGACY_FEATURE_SLUG_BY_ROUTE_ID: Partial<Record<FeatureRouteId, string>> = {
 	featureAccounts: "accounts",
 	featureBudgeting: "budgeting",
 	featureCategorization: "categorization",

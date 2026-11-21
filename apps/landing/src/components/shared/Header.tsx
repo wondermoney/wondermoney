@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import logo from "../../assets/logo.png";
 import { toLocalizedPath, toToolsHubPath } from "@/lib/routes";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
-import { FEATURE_MENU } from "@/lib/featureMenu";
+import { FEATURE_MENU, FEATURE_MENU_GROUPS } from "@/lib/featureMenu";
 import {
   buildHeaderToolMenus,
   type ToolsHubTool,
@@ -153,10 +153,10 @@ export default function Header({ locale }: Props) {
 
         {/* Desktop nav */}
         <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-x-6 lg:self-stretch xl:gap-x-7">
-          {/* Features dropdown: two columns, starting under its trigger */}
+          {/* Features mega menu: one column per group, spanning the nav like the tools menu */}
           <div
             {...menus.rootProps("features")}
-            className="relative flex items-center self-stretch"
+            className="flex items-center self-stretch"
           >
             <button
               {...menus.triggerProps("features")}
@@ -175,35 +175,39 @@ export default function Header({ locale }: Props) {
             <div
               {...menus.panelProps("features")}
               data-features-menu
-              className="absolute -left-4 top-full z-50 w-[40rem] pt-1"
+              className="absolute inset-x-6 top-full z-50 pt-1 lg:inset-x-8"
             >
-              <ul className="grid grid-cols-2 gap-1 rounded-card border border-border bg-card p-2 shadow-lg">
-                {FEATURE_MENU.map((item) => (
-                  <li key={item.routeId}>
-                    <a
-                      href={toLocalizedPath(item.routeId, locale)}
-                      className={tileLinkClassName}
-                      onClick={menus.close}
-                    >
-                      <span className={tileClassName}>
-                        <item.icon
-                          className={tileIconClassName}
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-medium leading-5 text-foreground">
-                          {t(`header.nav.${item.key}.name`)}
-                        </span>
-                        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
-                          {t(`header.nav.${item.key}.description`)}
-                        </span>
-                      </span>
-                    </a>
-                  </li>
+              <div className="grid max-h-[calc(100vh-5rem)] grid-cols-3 gap-1 overflow-y-auto rounded-card border border-border bg-card p-2 shadow-lg">
+                {FEATURE_MENU_GROUPS.map((group) => (
+                  <ul key={group} className="min-w-0 space-y-1" data-features-group={group}>
+                    {FEATURE_MENU.filter((item) => item.group === group).map((item) => (
+                      <li key={item.routeId}>
+                        <a
+                          href={toLocalizedPath(item.routeId, locale)}
+                          className={tileLinkClassName}
+                          onClick={menus.close}
+                        >
+                          <span className={tileClassName}>
+                            <item.icon
+                              className={tileIconClassName}
+                              strokeWidth={1.5}
+                              aria-hidden="true"
+                            />
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block text-sm font-medium leading-5 text-foreground">
+                              {t(`header.nav.${item.key}.name`)}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                              {t(`header.nav.${item.key}.description`)}
+                            </span>
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 ))}
-              </ul>
+              </div>
             </div>
           </div>
 

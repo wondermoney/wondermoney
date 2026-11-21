@@ -13,9 +13,11 @@ import FeatureNetWorth from "../FeatureNetWorth";
 import FeaturePortfolio from "../FeaturePortfolio";
 import FeaturePrivacy from "../FeaturePrivacy";
 import FeatureReports from "../FeatureReports";
+import FeatureDetail from "../FeatureDetail";
+import { FEATURE_DETAIL_ROUTE_IDS } from "../featureDetails";
 import { FEATURE_ROUTE_IDS, SUPPORTED_LANGS, type Lang } from "@/lib/routes";
 
-const FEATURE_PAGES: Record<(typeof FEATURE_ROUTE_IDS)[number], ComponentType<{ locale: Lang }>> = {
+const FEATURE_PAGES = {
 	featureAccounts: FeatureAccounts,
 	featureBudgeting: FeatureBudgeting,
 	featureCategorization: FeatureCategorization,
@@ -26,7 +28,13 @@ const FEATURE_PAGES: Record<(typeof FEATURE_ROUTE_IDS)[number], ComponentType<{ 
 	featurePrivacy: FeaturePrivacy,
 	featurePortfolio: FeaturePortfolio,
 	featureReports: FeatureReports,
-};
+	...Object.fromEntries(
+		FEATURE_DETAIL_ROUTE_IDS.map((routeId) => [
+			routeId,
+			({ locale }: { locale: Lang }) => <FeatureDetail locale={locale} routeId={routeId} />,
+		]),
+	),
+} as Record<(typeof FEATURE_ROUTE_IDS)[number], ComponentType<{ locale: Lang }>>;
 
 function explainerSections(html: string): string[] {
 	return html.split("<section").filter((chunk) => chunk.includes("data-feature-explainer"));

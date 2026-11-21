@@ -4,16 +4,22 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import { toLocalizedPath, type RouteId } from "@/lib/routes";
 
 const ADJACENCY: Partial<Record<RouteId, ReadonlyArray<RouteId>>> = {
-	featureAccounts: ["featureBudgeting", "featureReports"],
-	featureBudgeting: ["featureAccounts", "featureCategorization"],
-	featureCategorization: ["featureAccounts", "featureBudgeting"],
+	featureAccounts: ["featureBudgeting", "featureImports", "featureReports"],
+	featureBudgeting: ["featureAccounts", "featureCategorization", "featureRecurring"],
+	featureCategorization: ["featureAccounts", "featureBudgeting", "featureImports"],
 	featureCredits: ["featureAccounts", "featureBudgeting", "featurePortfolio"],
 	featureFinancialMarkets: ["featurePortfolio", "featureAccounts"],
 	featureGoals: ["featureBudgeting", "featurePortfolio", "featureReports"],
 	featureNetWorth: ["featureAccounts", "featureGoals", "featureCredits", "featurePortfolio"],
-	featurePrivacy: ["featureAccounts", "featurePortfolio"],
+	featurePrivacy: ["featureAccounts", "featurePortfolio", "featureSelfHosting"],
 	featurePortfolio: ["featureAccounts", "featureBudgeting", "featureReports"],
 	featureReports: ["featureBudgeting", "featurePortfolio"],
+	featureHousehold: ["featureBudgeting", "featureNetWorth", "featurePrivacy"],
+	featureImports: ["featureAccounts", "featureCategorization", "featureRecurring"],
+	featureRecurring: ["featureBudgeting", "featureImports", "featureAccounts"],
+	featureAssistant: ["featureCategorization", "featurePrivacy", "featureReports"],
+	featureMultiCurrency: ["featureNetWorth", "featurePortfolio", "featureHousehold"],
+	featureSelfHosting: ["featurePrivacy", "featureAssistant", "featureImports"],
 };
 
 type Props = { locale: Lang; routeId: RouteId };

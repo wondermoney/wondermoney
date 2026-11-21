@@ -1,6 +1,6 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
-import { ChartPie, MousePointerClick, Shapes, Split, Store, Tags } from "lucide-react";
+import { ChartPie, FileDown, History, Lightbulb, ListFilter, MousePointerClick, ScanEye, Shapes, Split, Store, Tags, Wand } from "lucide-react";
 import CTABanner from "@/components/shared/CTABanner";
 import CategorizationPreview from "@/components/homepage/previews/CategorizationPreview";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
@@ -99,6 +99,21 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 				points={features}
 				visual={<TransactionsPreview />}
 				tone="muted"
+			/>
+
+			{/* Rules: the categorisation the household writes itself */}
+			<FeatureExplainer
+				title={t("lp.featureCategorization.rulesTitle")}
+				body={t("lp.featureCategorization.rulesBody")}
+				points={[
+					{ icon: ListFilter, text: t("lp.featureCategorization.rulesPoint1") },
+					{ icon: Wand, text: t("lp.featureCategorization.rulesPoint2") },
+					{ icon: ScanEye, text: t("lp.featureCategorization.rulesPoint3") },
+					{ icon: History, text: t("lp.featureCategorization.rulesPoint4") },
+					{ icon: Lightbulb, text: t("lp.featureCategorization.rulesPoint5") },
+					{ icon: FileDown, text: t("lp.featureCategorization.rulesPoint6") },
+				]}
+				reverse
 			/>
 
 			<TrustStripInline />

@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { EyeOff, Ban, Server, KeyRound, Landmark, LogOut, FingerprintPattern } from "lucide-react";
+import { EyeOff, Ban, Fingerprint, Server, KeyRound, Landmark, LogOut, FingerprintPattern, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CTABanner from "@/components/shared/CTABanner";
 import SecurityDashboardPreview from "@/components/homepage/previews/SecurityDashboardPreview";
@@ -102,6 +102,19 @@ function FeaturePrivacyContent({ locale }: { locale: Lang }) {
 					</div>
 				</div>
 			</section>
+
+			{/* Account security: sign-in and what shows on screen */}
+			<FeatureExplainer
+				title={t("lp.featurePrivacy.securityTitle")}
+				body={t("lp.featurePrivacy.securityBody")}
+				points={[1, 2, 3, 4].map((n, index) => ({
+					icon: [Fingerprint, KeyRound, Smartphone, EyeOff][index],
+					title: t(`lp.featurePrivacy.securityPoint${n}Title`),
+					text: t(`lp.featurePrivacy.securityPoint${n}Body`),
+				}))}
+				columns={1}
+				reverse
+			/>
 
 			{/* Read-only open banking, beside the provider behind it */}
 			<FeatureExplainer
