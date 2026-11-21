@@ -519,7 +519,14 @@
         "exampleBudget": "A {{amount}} budget in {{from}} needs {{equivalent}} in {{to}} to buy the same basket. Average prices changed by {{inflation}}.",
         "exampleInvestment": "If an investment rose from {{amount}} in {{from}} to {{finalValue}} in {{to}}, the final balance would be worth {{realValue}} in {{from}} euros.",
         "methodTitle": "How the inflation adjustment works",
-        "method": "We use the annual average of Portugal’s all-items consumer price index (CPI), with {{baseYear}} as the base year. Each year represents average prices from January to December. Divide the comparison-year CPI by the starting-year CPI, then multiply the starting amount by that ratio. Divide the final balance by the same ratio to express it in starting-year euros.",
+        "method": "We use the annual average of Portugal’s all-items consumer price index (CPI), with {{baseYear}} as the base year. Each year represents average prices from January to December.",
+        "methodFormulasLabel": "Formulas",
+        "formulaAmount": "Starting amount",
+        "formulaEquivalent": "Equivalent amount",
+        "formulaFinal": "Final balance",
+        "formulaReal": "Balance in starting-year euros",
+        "formulaCpiStart": "Starting-year CPI",
+        "formulaCpiComparison": "Comparison-year CPI",
         "limitations": "Your own spending can differ from the national basket. The investment comparison assumes a single starting and final balance with zero contributions or withdrawals. It uses the nominal balance you enter, so fees and taxes are reflected only if they are already included. Enter euro amounts throughout, converting any historical escudo figures first.",
         "coverage": "Coverage is {{first}}–{{last}}. The series includes complete years only.",
         "retrieved": "Data retrieved on {{date}}.",
@@ -1043,15 +1050,13 @@
       "whatBody2": "Size it on essential expenses only, the costs that keep going if your income stops: housing, food, utilities, transport, insurance and minimum loan payments. Leave out spending you could pause. Keep the money somewhere safe that you can withdraw from quickly and without a penalty, such as a savings account, rather than invested.",
       "exampleTitle": "A worked example",
       "exampleIntro": "Say your essential costs come to {{expenses}} a month, you already have {{savings}} set aside and you can save {{contribution}} a month. You choose {{months}} months of cover.",
-      "exampleStep1": "Target: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Still to save: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Time to reach it: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} months.",
       "exampleOutro": "With 3 months of cover instead, the target is {{lowTarget}} and you reach it in {{lowMonths}} months. Start smaller if a long goal is putting you off, then raise the target once the first months are covered.",
       "methodTitle": "How the calculator works",
-      "method1": "Target = essential monthly expenses × months of cover.",
-      "method2": "Still to save = target − emergency savings today. When your savings are higher, the difference is shown as the amount above your target.",
-      "method3": "Time to reach it = still to save ÷ monthly contribution, rounded up to a whole month. The target month counts that many months from this one, with one contribution a month starting next month.",
-      "method4": "Your savings earn no interest here, and your expenses and contribution stay the same every month. Interest would get you there a little sooner and rising prices a little later, so check the numbers again once or twice a year.",
+      "methodFormulasLabel": "Formulas",
+      "methodShortfallBody": "When your savings are higher, the difference is shown as the amount above your target.",
+      "methodTimeBody": "Rounded up to a whole month. The target month counts that many months from this one, with one contribution a month starting next month.",
+      "methodInterestTerm": "No interest",
+      "methodInterestBody": "Your savings earn no interest here, and your expenses and contribution stay the same every month. Interest would get you there a little sooner and rising prices a little later, so check the numbers again once or twice a year.",
       "nextStepHeadline": "Create and track your emergency-fund goal",
       "nextStepDescription": "Save this target as a goal in WonderMoney and follow your progress against your real account balances.",
       "nextStepCta": "Create your goal"
@@ -1930,12 +1935,16 @@
         "exampleStep3": "The smallest monthly contribution that gets there is {{contribution}}. Over {{months}} months you pay in {{contributions}} and growth adds {{growth}}, for {{final}} at the end.",
         "exampleOutro": "Turn it around: put aside a round {{rounded}} a month instead and you reach the goal after {{timeMonths}} months, and by the end of the {{years}} years you have {{finalAmount}}.",
         "methodTitle": "How the calculator works",
-        "methodIntro": "Your balance grows once a month and your contribution is added at the end of each month. After n months it comes to:",
-        "methodLegend": "S is what you have already saved, C the monthly contribution, r the monthly rate and n the number of months. With a 0% return there is nothing to divide by r, and the balance is simply S + C × n.",
-        "methodRate": "The monthly rate r is the one that compounds to your annual return over twelve months: (1 + annual return)^(1/12) − 1. Dividing the annual return by 12 would overstate it slightly.",
-        "methodOrder": "Each month's growth is rounded to the cent before the contribution is added, so the year-by-year schedule adds up to the totals exactly.",
-        "methodContribution": "The contribution needed comes from solving the formula for C. It is rounded up to the cent and checked month by month, so it really does reach the goal.",
-        "methodTime": "The time needed is the first whole month in which the balance reaches the goal, searched up to {{maxYears}} years.",
+        "methodIntro": "Your balance grows once a month and your contribution is added at the end of each month. At the end of the period it comes to:",
+        "methodFormulasLabel": "Formulas",
+        "formulaMonthlyRate": "Monthly rate",
+        "methodRateBody": "The rate that compounds to your annual return over twelve months. Dividing the annual return by 12 would overstate it slightly.",
+        "methodZeroTerm": "A 0% return",
+        "methodZeroBody": "There is nothing to divide by the monthly rate, and the balance is simply what you have already saved plus the monthly contribution × the number of months.",
+        "methodOrderTerm": "Rounding",
+        "methodOrderBody": "Each month's growth is rounded to the cent before the contribution is added, so the year-by-year schedule adds up to the totals exactly.",
+        "methodContributionBody": "It comes from solving the formula for the monthly contribution. It is rounded up to the cent and checked month by month, so it really does reach the goal.",
+        "methodTimeBody": "The time needed is the first whole month in which the balance reaches the goal, searched up to {{maxYears}} years.",
         "assumptionsTitle": "Assumptions",
         "assumptionReturn": "The return is the same every year. Real returns vary, and investments can lose value.",
         "assumptionCosts": "No taxes, fees or other charges are taken from the growth.",
@@ -3465,6 +3474,7 @@
         "methodMeal": "The meal allowance is exempt up to the daily limit, which depends on whether it is paid in cash or on a meal card. The calculator adds only the excess to the taxable pay.",
         "methodAllowances": "With 14 payments, the holiday and Christmas allowances are each taxed on their own, as the tables require. In twelfths, the extra pay is added to each month.",
         "methodBudget": "The net figures are what reaches your account, so they are the right starting point for a monthly budget.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "Withholding is not your final IRS",
         "final": "The amount withheld each month is an advance payment. The Tax Authority settles your real IRS in the annual return, using your whole year's income and your deductions. Withholding can be higher or lower than the tax you finally owe, which is why many people get a refund or a payment due.",
         "unsupportedTitle": "Not supported",
@@ -3542,6 +3552,9 @@
         "howTransition": "In the first rows the parcela a abater is a formula with the letter R, which is the monthly pay. It makes the withholding rise gently from zero, so a small raise never lowers net pay.",
         "howDependants": "Each dependant lowers the withholding by a fixed amount. With three or more dependants, the marginal rate of the row is one percentage point lower.",
         "howTables": "Table I serves unmarried people without dependants and married people with two earners. Table II serves unmarried people with dependants and table III married people with one earner.",
+        "methodFormulasLabel": "Formula",
+        "formulaPerDependant": "Amount per dependant",
+        "howTransitionTerm": "Parcela a abater with R",
         "finalTitle": "Withholding is not the final tax",
         "final": "The tables set how much your employer withholds each month. They do not calculate your final IRS, which the annual return settles with the brackets above, your whole income and your deductions.",
         "unsupportedTitle": "Not included",
@@ -3644,6 +3657,20 @@
         "methodNoReduction": "The old 10% cut after 180 days of payment is not applied: the 2026 Segurança Social guide does not list it.",
         "methodTax": "The Segurança Social guide says the benefit does not have to be declared for IRS. Confirm your own case with the Tax Authority.",
         "methodBudget": "The monthly benefit is the income to plan with. Compare it with your net pay to see the drop, then see how long your savings cover the gap.",
+        "methodFormulasLabel": "Formulas",
+        "formulaReference": "Reference remuneration",
+        "formulaPay": "Pay registered in the 12 months",
+        "formulaDaily": "Daily benefit",
+        "formulaMonthly": "Monthly benefit",
+        "methodReferenceTerm": "Reference remuneration",
+        "methodAmountTerm": "Amount",
+        "methodLimitsTerm": "Limits",
+        "methodNetTerm": "Net reference remuneration",
+        "methodIncreaseTerm": "10% increase",
+        "methodDurationTerm": "Duration",
+        "methodNoReductionTerm": "No cut after 180 days",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Not supported",
         "unsupportedTransitional": "The transitional table for people who already met the contribution requirement on 31 March 2012 and have not been unemployed since. The calculator uses only the general table.",
         "unsupportedSocial": "The social unemployment benefit (subsídio social de desemprego), which the guide says can only be requested until 30 December 2026.",
@@ -3742,6 +3769,20 @@
         "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
         "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
         "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
+        "methodFormulasLabel": "Formulas",
+        "formulaReference": "Reference pay",
+        "formulaPay": "Pay registered in the 6 months",
+        "formulaDaily": "Daily benefit",
+        "formulaPercent": "Band percentage",
+        "methodReferenceTerm": "Reference pay",
+        "methodBandsTerm": "Percentage by duration",
+        "methodWaitingTerm": "Waiting days",
+        "methodMinimumTerm": "Minimum",
+        "methodIncreaseTerm": "5-point increase",
+        "methodFloorTerm": "Floor above 500 euros",
+        "methodNetCapTerm": "Net cap",
+        "methodGapTerm": "Income gap",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Not supported",
         "unsupportedTuberculosis": "Tuberculosis, paid at 80% or 100% of the RR depending on dependants, with no time limit.",
         "unsupportedSelfEmployed": "Self-employed workers (10 days of waiting, up to 365 days), voluntary social insurance and domestic workers.",
@@ -4089,6 +4130,9 @@
         "methodWithholding": "Each payment is withheld on its own with the 2026 monthly table, never added to the month's salary: Despacho n.º 233-A/2026 (n.º 10) asks employers to show a separate effective rate for each remuneration, as in the months the holiday and Christmas allowances are paid.",
         "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year). Each twelfth is withheld on its own at the effective rate of the whole allowance, the usual payroll practice since Lei n.º 11/2013, art. 3 (not stated in the Despacho). Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
         "methodSocialSecurity": "Employee Social Security is 11% of the gross allowance.",
+        "hiringYearTerm": "Year you are hired",
+        "twelfthsTerm": "In twelfths",
+        "planTerm": "Plan",
         "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. An allowance paid in November would be withheld at half.",
         "unsupportedOther": "Only the base salary counts. Seniority supplements, other pay components, a contract ending or suspended during the year, collective agreements that pay more and employer costs are outside this estimate.",
         "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
@@ -4182,6 +4226,22 @@
         "methodFraction": "An incomplete year counts proportionally: the calculator counts whole anniversaries of the start date plus the days since the last one over the days of that year. The termination date counts as a day worked.",
         "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
         "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
+        "methodFormulasLabel": "Formulas",
+        "formulaDaily": "Daily amount",
+        "formulaBase": "Base pay",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Days per year",
+        "formulaYears": "Years of seniority",
+        "formulaCompensation": "Compensation",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Days per year",
+        "methodTransitionalTerm": "Older contracts",
+        "methodFixedTermTerm": "Fixed-term expiry",
+        "methodDurationLimitTerm": "Maximum duration",
+        "methodCapsTerm": "Caps",
+        "methodFractionTerm": "Incomplete year",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Supported",
         "supported": "Collective dismissal, extinction of the post and unsuitability of the worker on a permanent contract, and the expiry of a fixed-term contract of certain or uncertain term, with termination in 2026.",
         "unsupportedTitle": "Not supported",
@@ -4669,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "estimatorTerm": "Bill estimator",
+          "indexTerm": "Price index",
+          "marketTerm": "Free market",
           "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
           "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
           "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
@@ -4683,15 +4746,33 @@
           "title": "How it is calculated",
           "intro": "For one 30-day month the estimator does the same five things:",
           "steps": {
-            "a": "Power: the daily price for your contracted power, times 30 days.",
-            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
-            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt.",
-            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
-            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            "a": {
+              "term": "Power",
+              "body": "The daily price for your contracted power, times 30 days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "Your kWh at the simple price, or split between the two bi-hourly prices by the share you enter."
+            },
+            "c": {
+              "term": "Audiovisual contribution (CAV)",
+              "body": "A fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt."
+            },
+            "d": {
+              "term": "Electricity consumption tax (IEC)",
+              "body": "A fixed amount per kWh, with the standard VAT rate."
+            },
+            "e": {
+              "term": "VAT",
+              "body": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            }
           },
-          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
-          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
-          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+          "vat": "The reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "The simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days.",
+          "formulasLabel": "Formula",
+          "vatTerm": "VAT rules, as ERSE explains them",
+          "biTerm": "Bi-hourly versus simple"
         },
         "data": {
           "title": "Data and sources",
@@ -5131,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "How to use the comparison",
+          "quickTerm": "Quick mode",
+          "fullTerm": "Full mode",
+          "diagramTerm": "E-REDES file",
+          "optionsTerm": "Options and filters",
           "quick": "Quick mode needs only your contracted power and your monthly bill or kWh. A bill in euro is turned into kWh by working back the regulated tariff's bill, taxes included, as ERSE's quick simulation does.",
           "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
@@ -5140,6 +5225,9 @@
         },
         "example": {
           "title": "Worked example",
+          "regulatedLabel": "Regulated tariff",
+          "cheapestLabel": "Cheapest offer",
+          "differenceLabel": "Difference",
           "setup": "A home with 3.45 kVA on the simple option uses {{kwh}} a month. On ERSE's export of {{date}} there are {{count}} offers for it, including the regulated tariff.",
           "result": "The regulated tariff comes to {{regulated}} in the first year, taxes included. The cheapest offer comes to {{cheapest}}, {{difference}} less. {{cheaper}} offers cost less than the regulated tariff.",
           "bill": "In quick mode, a monthly bill of {{bill}} gives back the same {{kwh}}: that is the regulated tariff's bill for that consumption."
@@ -5148,13 +5236,34 @@
           "title": "How it is calculated",
           "intro": "Each offer is priced the way ERSE's simulator does it (Manual do Simulador de Preços de Energia, June 2026):",
           "steps": {
-            "a": "Power: the price per day times the days.",
-            "b": "Energy: the kWh of each period times its price.",
-            "c": "Social tariff: ERSE's discount on power and energy, up to 6.9 kVA.",
-            "d": "The audiovisual contribution and the electricity tax, at their legal amounts.",
-            "e": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE.",
-            "f": "VAT at the reduced and standard rates, as set out below.",
-            "g": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            "a": {
+              "term": "Power",
+              "body": "The price per day times the days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "The kWh of each period times its price."
+            },
+            "c": {
+              "term": "Social tariff",
+              "body": "ERSE's discount on power and energy, up to 6.9 kVA."
+            },
+            "d": {
+              "term": "Taxes",
+              "body": "The audiovisual contribution and the electricity tax, at their legal amounts."
+            },
+            "e": {
+              "term": "Services and discounts",
+              "body": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE."
+            },
+            "f": {
+              "term": "VAT",
+              "body": "VAT at the reduced and standard rates, as set out below."
+            },
+            "g": {
+              "term": "Year",
+              "body": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            }
           },
           "vat": "VAT is {{reduced}} on the audiovisual contribution, on the network-access part of the power price up to 3.45 kVA, and on the first {{allowance}} kWh every 30 days up to 6.9 kVA ({{allowanceLarge}} kWh for a household of five or more). Everything else pays {{standard}}.",
           "month": "A month is a twelfth of a year, {{days}} days, as in ERSE's simulator, so a year is exactly twelve months.",
@@ -5264,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "calculatorTerm": "Cost calculator",
+          "noForecastTerm": "No forecast",
           "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
           "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
           "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week.",
@@ -5278,13 +5389,26 @@
           "title": "How it is calculated",
           "intro": "The calculator does four things:",
           "steps": {
-            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
-            "b": "Litres: distance times consumption divided by 100.",
-            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
-            "d": "Year: twelve such months."
+            "a": {
+              "term": "Distance a month",
+              "body": "The distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month."
+            },
+            "b": {
+              "term": "Litres",
+              "body": "Distance times consumption divided by 100."
+            },
+            "c": {
+              "term": "Cost",
+              "body": "Litres times the price per litre you enter, rounded to the cent."
+            },
+            "d": {
+              "term": "Year",
+              "body": "Twelve such months."
+            }
           },
           "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price.",
-          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres."
+          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres.",
+          "formulasLabel": "Formulas"
         },
         "data": {
           "title": "Data and sources",
@@ -5299,13 +5423,28 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
-            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
-            "stations": "Stations: the list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump.",
-            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
-            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
-            "education": "Educational use only, not advice."
-          }
+            "noForecast": {
+              "term": "No forecast",
+              "body": "Nothing here predicts future prices, and past moves do not say where the price goes next."
+            },
+            "average": {
+              "term": "National average",
+              "body": "It blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included."
+            },
+            "stations": {
+              "term": "Stations",
+              "body": "The list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump."
+            },
+            "consumption": {
+              "term": "Consumption",
+              "body": "The same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one."
+            },
+            "scope": {
+              "term": "Only fuel",
+              "body": "Tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown."
+            }
+          },
+          "education": "Educational use only, not advice."
         },
         "related": {
           "title": "Keep going",

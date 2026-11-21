@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
+import CalculatorResult from "./CalculatorResult";
 import {
   ANNUAL_IRS_BRACKETS_2026,
   PAYROLL_LIMITS,
@@ -137,9 +138,8 @@ function WithholdingTables() {
           <div aria-live="polite" aria-atomic="true">
             {withholding !== null ? (
               <>
-                <p className="text-sm text-muted-foreground">{t(k("result.withholding"))}</p>
-                <p id="withholding-result" className="font-mono text-3xl font-bold text-primary">{money(withholding)}</p>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <CalculatorResult items={[{ label: t(k("result.withholding")), value: money(withholding), highlight: true }]} />
+                <p className="text-sm text-muted-foreground">
                   {t(k("result.row"), { rate: rate(table.rows[activeIndex].rateBp) })}
                 </p>
               </>

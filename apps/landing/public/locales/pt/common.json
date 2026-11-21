@@ -519,7 +519,14 @@
         "exampleBudget": "Um orçamento de {{amount}} em {{from}} exige {{equivalent}} em {{to}} para comprar o mesmo cabaz. Os preços médios variaram {{inflation}}.",
         "exampleInvestment": "Se um investimento passar de {{amount}} em {{from}} para {{finalValue}} em {{to}}, o saldo final vale {{realValue}} em euros de {{from}}.",
         "methodTitle": "Como funciona o ajuste à inflação",
-        "method": "Usamos a média anual do índice de preços no consumidor (IPC) total de Portugal, com base em {{baseYear}}. Cada ano representa a média dos preços de janeiro a dezembro. Divide o IPC do ano de comparação pelo IPC do ano de partida e multiplica o montante inicial por esse rácio. Divide o saldo final pelo mesmo rácio para o expressar em euros do ano de partida.",
+        "method": "Usamos a média anual do índice de preços no consumidor (IPC) total de Portugal, com base em {{baseYear}}. Cada ano representa a média dos preços de janeiro a dezembro.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaAmount": "Montante inicial",
+        "formulaEquivalent": "Montante equivalente",
+        "formulaFinal": "Saldo final",
+        "formulaReal": "Saldo em euros do ano de partida",
+        "formulaCpiStart": "IPC do ano de partida",
+        "formulaCpiComparison": "IPC do ano de comparação",
         "limitations": "As tuas despesas podem evoluir de forma diferente do cabaz nacional. A comparação de investimentos usa um saldo inicial e um saldo final, sem reforços nem levantamentos. Só considera comissões e impostos se já estiverem refletidos no saldo nominal indicado. Introduz todos os valores em euros e converte primeiro eventuais montantes antigos em escudos.",
         "coverage": "A série abrange {{first}}–{{last}} e inclui apenas anos completos.",
         "retrieved": "Dados consultados em {{date}}.",
@@ -1043,15 +1050,13 @@
       "whatBody2": "Calcula-o só com as despesas essenciais, as que continuam se o teu rendimento parar: habitação, alimentação, contas da casa, transportes, seguros e prestações mínimas de créditos. Deixa de fora o que conseguirias pôr em pausa. Guarda o dinheiro num sítio seguro, de onde o possas levantar depressa e sem penalização, como uma conta poupança, em vez de o investir.",
       "exampleTitle": "Um exemplo prático",
       "exampleIntro": "Imagina que as tuas despesas essenciais somam {{expenses}} por mês, já tens {{savings}} de parte e consegues poupar {{contribution}} por mês. Escolhes {{months}} meses de cobertura.",
-      "exampleStep1": "Objetivo: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Falta poupar: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Tempo até ao objetivo: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} meses.",
       "exampleOutro": "Com 3 meses de cobertura, o objetivo passa a {{lowTarget}} e chegas lá em {{lowMonths}} meses. Se um objetivo longo te desmotiva, começa por um mais pequeno e sobe-o quando os primeiros meses estiverem cobertos.",
       "methodTitle": "Como funciona a calculadora",
-      "method1": "Objetivo = despesas essenciais mensais × meses de cobertura.",
-      "method2": "Falta poupar = objetivo − poupança de emergência atual. Se a tua poupança for maior, a diferença aparece como o valor acima do objetivo.",
-      "method3": "Tempo até ao objetivo = falta poupar ÷ contribuição mensal, arredondado para cima até um mês inteiro. O mês do objetivo conta esses meses a partir deste, com uma contribuição por mês a começar no próximo.",
-      "method4": "Aqui a tua poupança não rende juros, e as despesas e a contribuição mantêm-se iguais todos os meses. Os juros levar-te-iam lá um pouco mais cedo e a subida dos preços um pouco mais tarde, por isso revê os números uma ou duas vezes por ano.",
+      "methodFormulasLabel": "Fórmulas",
+      "methodShortfallBody": "Se a tua poupança for maior, a diferença aparece como o valor acima do objetivo.",
+      "methodTimeBody": "Arredondado para cima até um mês inteiro. O mês do objetivo conta esses meses a partir deste, com uma contribuição por mês a começar no próximo.",
+      "methodInterestTerm": "Sem juros",
+      "methodInterestBody": "Aqui a tua poupança não rende juros, e as despesas e a contribuição mantêm-se iguais todos os meses. Os juros levar-te-iam lá um pouco mais cedo e a subida dos preços um pouco mais tarde, por isso revê os números uma ou duas vezes por ano.",
       "nextStepHeadline": "Cria e acompanha o teu objetivo de fundo de emergência",
       "nextStepDescription": "Guarda este valor como um objetivo no WonderMoney e acompanha o progresso com os saldos reais das tuas contas.",
       "nextStepCta": "Criar objetivo"
@@ -1930,12 +1935,16 @@
         "exampleStep3": "A contribuição mensal mais pequena que lá chega é {{contribution}}. Em {{months}} meses pões de parte {{contributions}} e o rendimento soma {{growth}}, para um total de {{final}} no fim.",
         "exampleOutro": "Ao contrário: se puseres de parte {{rounded}} por mês, um valor redondo, chegas ao objetivo ao fim de {{timeMonths}} meses, e no fim dos {{years}} anos tens {{finalAmount}}.",
         "methodTitle": "Como funciona o simulador",
-        "methodIntro": "O saldo rende uma vez por mês e a contribuição entra no fim de cada mês. Ao fim de n meses, o saldo é:",
-        "methodLegend": "S é o que já tens poupado, C a contribuição mensal, r a taxa mensal e n o número de meses. Com um rendimento de 0% não há nada a dividir por r, e o saldo é simplesmente S + C × n.",
-        "methodRate": "A taxa mensal r é a que, capitalizada durante doze meses, dá o rendimento anual: (1 + rendimento anual)^(1/12) − 1. Dividir o rendimento anual por 12 dava um valor um pouco acima do real.",
-        "methodOrder": "O rendimento de cada mês é arredondado ao cêntimo antes de a contribuição entrar, por isso o plano ano a ano bate certo com os totais.",
-        "methodContribution": "A contribuição necessária obtém-se resolvendo a fórmula em ordem a C. É arredondada para cima ao cêntimo e confirmada mês a mês, para chegar mesmo ao objetivo.",
-        "methodTime": "O tempo necessário é o primeiro mês completo em que o saldo chega ao objetivo, procurado até {{maxYears}} anos.",
+        "methodIntro": "O saldo rende uma vez por mês e a contribuição entra no fim de cada mês. Ao fim do período, o saldo é:",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaMonthlyRate": "Taxa mensal",
+        "methodRateBody": "A que, capitalizada durante doze meses, dá o rendimento anual. Dividir o rendimento anual por 12 dava um valor um pouco acima do real.",
+        "methodZeroTerm": "Rendimento de 0%",
+        "methodZeroBody": "Não há nada a dividir pela taxa mensal, e o saldo é simplesmente o que já tens poupado mais a contribuição mensal × o número de meses.",
+        "methodOrderTerm": "Arredondamento",
+        "methodOrderBody": "O rendimento de cada mês é arredondado ao cêntimo antes de a contribuição entrar, por isso o plano ano a ano bate certo com os totais.",
+        "methodContributionBody": "Obtém-se resolvendo a fórmula em ordem à contribuição mensal. É arredondada para cima ao cêntimo e confirmada mês a mês, para chegar mesmo ao objetivo.",
+        "methodTimeBody": "O tempo necessário é o primeiro mês completo em que o saldo chega ao objetivo, procurado até {{maxYears}} anos.",
         "assumptionsTitle": "Pressupostos",
         "assumptionReturn": "O rendimento é igual todos os anos. Na realidade varia, e os investimentos podem perder valor.",
         "assumptionCosts": "Não se descontam impostos, comissões nem outros custos ao rendimento.",
@@ -3465,6 +3474,7 @@
         "methodMeal": "O subsídio de alimentação está isento até ao limite diário, que depende de ser pago em dinheiro ou em cartão. O simulador soma à remuneração tributável apenas o excesso.",
         "methodAllowances": "Com 14 pagamentos, os subsídios de férias e de Natal são tributados cada um por si, como as tabelas exigem. Em duodécimos, o valor extra soma-se a cada mês.",
         "methodBudget": "Os valores líquidos são o que chega à tua conta, por isso são o ponto de partida certo para um orçamento mensal.",
+        "methodBudgetTerm": "Orçamento",
         "finalTitle": "A retenção não é o teu IRS final",
         "final": "O que é retido todos os meses é um pagamento por conta. A Autoridade Tributária apura o IRS real na declaração anual, com os rendimentos do ano inteiro e as tuas deduções. A retenção pode ficar acima ou abaixo do imposto devido, e é por isso que muita gente recebe reembolso ou tem imposto a pagar.",
         "unsupportedTitle": "Não suportado",
@@ -3542,6 +3552,9 @@
         "howTransition": "Nos primeiros escalões a parcela a abater é uma fórmula com a letra R, a remuneração mensal. Faz a retenção subir de forma suave a partir de zero, para que um pequeno aumento nunca reduza o salário líquido.",
         "howDependants": "Cada dependente reduz a retenção num valor fixo. Com três ou mais dependentes, a taxa marginal do escalão é um ponto percentual mais baixa.",
         "howTables": "A tabela I serve os não casados sem dependentes e os casados dois titulares. A tabela II serve os não casados com dependentes e a tabela III os casados, único titular.",
+        "methodFormulasLabel": "Fórmula",
+        "formulaPerDependant": "Valor por dependente",
+        "howTransitionTerm": "Parcela a abater com R",
         "finalTitle": "A retenção não é o imposto final",
         "final": "As tabelas definem quanto a entidade patronal retém todos os meses. Não calculam o teu IRS final, que a declaração anual apura com os escalões acima, o rendimento do ano inteiro e as tuas deduções.",
         "unsupportedTitle": "Não incluído",
@@ -3563,14 +3576,14 @@
     "unemploymentBenefit": {
       "title": "Simulador de subsídio de desemprego 2026",
       "shortName": "Subsídio de desemprego",
-      "subtitle": "Estime o subsídio de desemprego mensal, durante quanto tempo o recebe e o total, com os limites de 2026.",
-      "description": "Estime o seu subsídio de desemprego em Portugal: valor mensal, duração e total.",
+      "subtitle": "Estima o subsídio de desemprego mensal, durante quanto tempo o recebes e o total, com os limites de 2026.",
+      "description": "Estima o teu subsídio de desemprego em Portugal: valor mensal, duração e total.",
       "pageTitle": "Simulador de Subsídio de Desemprego 2026: Valor e Duração",
-      "pageDescription": "Estime o subsídio de desemprego em Portugal: 65% da remuneração de referência, os limites do IAS de 2026, a duração por idade e descontos e um valor de rendimento reduzido para o orçamento.",
+      "pageDescription": "Estima o subsídio de desemprego em Portugal: 65% da remuneração de referência, os limites do IAS de 2026, a duração por idade e descontos e um valor de rendimento reduzido para o orçamento.",
       "fields": {
         "grossMonthly": "Salário bruto mensal",
         "allowances": "Subsídios de férias e de Natal",
-        "age": "Idade quando ficou desempregado",
+        "age": "Idade quando ficaste desempregado/a",
         "contributionMonths": "Meses com registo de remunerações",
         "years20": "Anos com registo de remunerações nos últimos 20",
         "household": "Agregado familiar",
@@ -3589,18 +3602,18 @@
       "help": {
         "gross": "O salário base dos últimos meses, antes de Segurança Social e IRS. Os 12 meses contados incluem os subsídios de férias e de Natal.",
         "allowances": "Com 14 pagamentos o simulador conta 14 vezes o salário; em duodécimos conta 12 vezes, porque os subsídios já estão incluídos.",
-        "age": "A sua idade no dia em que ficou desempregado/a.",
-        "months": "Meses com registo de remunerações desde a última vez que recebeu subsídio de desemprego. A tabela começa nos 12 meses.",
+        "age": "A tua idade no dia em que ficaste desempregado/a.",
+        "months": "Meses com registo de remunerações desde a última vez que recebeste subsídio de desemprego. A tabela começa nos 12 meses.",
         "years20": "Anos completos com registo de remunerações nos últimos 20. Cada 5 anos acrescentam dias.",
         "household": "O aumento de 10% exige filhos ou dependentes e que ambos os elementos do casal estejam desempregados e inscritos, ou um agregado monoparental. Tem de ser pedido."
       },
       "errors": {
-        "required": "Indique um número válido.",
-        "tooSmall": "Indique um valor de pelo menos {{min}}.",
-        "tooLarge": "Indique um valor até {{max}}.",
-        "whole": "Indique um número inteiro.",
+        "required": "Indica um número válido.",
+        "tooSmall": "Indica um valor de pelo menos {{min}}.",
+        "tooLarge": "Indica um valor até {{max}}.",
+        "whole": "Indica um número inteiro.",
         "belowTable": "A tabela de duração começa nos {{min}} meses com registo de remunerações. Com menos, esta estimativa não se aplica.",
-        "summary": "Verifique os campos assinalados para ver a estimativa."
+        "summary": "Verifica os campos assinalados para ver a estimativa."
       },
       "result": {
         "monthly": "Subsídio mensal estimado (30 dias)",
@@ -3625,11 +3638,11 @@
       "checklist": {
         "title": "Condições a confirmar (não é uma decisão)",
         "involuntary": "O desemprego é involuntário, por exemplo um despedimento ou o fim de um contrato a termo.",
-        "contributions": "Tem pelo menos 360 dias de registo de remunerações nos 24 meses antes de ficar desempregado/a.",
-        "registration": "Está inscrito/a no centro de emprego (IEFP).",
-        "ready": "Vive em Portugal e tem capacidade e disponibilidade para trabalhar.",
-        "deadline": "Pede o subsídio até 90 dias depois de ficar desempregado/a.",
-        "note": "Só a Segurança Social decide se tem direito. Esta lista é um lembrete, não um veredito."
+        "contributions": "Tens pelo menos 360 dias de registo de remunerações nos 24 meses antes de ficar desempregado/a.",
+        "registration": "Estás inscrito/a no centro de emprego (IEFP).",
+        "ready": "Vives em Portugal e tens capacidade e disponibilidade para trabalhar.",
+        "deadline": "Pedes o subsídio até 90 dias depois de ficar desempregado/a.",
+        "note": "Só a Segurança Social decide se tens direito. Esta lista é um lembrete, não um veredito."
       },
       "guide": {
         "exampleTitle": "Exemplo",
@@ -3642,8 +3655,22 @@
         "methodIncrease": "O subsídio aumenta 10% quando ambos os elementos do casal estão desempregados e inscritos, ou é o único responsável, e há filhos ou dependentes. Tem de ser pedido. O simulador aplica-o ao valor já limitado e nunca acima de 2,5 IAS.",
         "methodDuration": "A duração depende da idade e dos meses com registo de remunerações, com dias a mais por cada 5 anos completos com registo nos últimos 20: 30 dias até aos 39 anos, 45 dias dos 40 aos 49 e 60 dias a partir dos 50.",
         "methodNoReduction": "A antiga redução de 10% ao fim de 180 dias não é aplicada: o guia prático da Segurança Social de 2026 não a refere.",
-        "methodTax": "O guia da Segurança Social diz que o subsídio não tem de ser declarado em IRS. Confirme o seu caso junto da Autoridade Tributária.",
+        "methodTax": "O guia da Segurança Social diz que o subsídio não tem de ser declarado em IRS. Confirma o teu caso junto da Autoridade Tributária.",
         "methodBudget": "O subsídio mensal é o rendimento com que deve planear. Compare-o com o salário líquido para ver a quebra e depois veja durante quanto tempo as poupanças cobrem a diferença.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaReference": "Remuneração de referência",
+        "formulaPay": "Remunerações dos 12 meses",
+        "formulaDaily": "Subsídio diário",
+        "formulaMonthly": "Subsídio mensal",
+        "methodReferenceTerm": "Remuneração de referência",
+        "methodAmountTerm": "Montante",
+        "methodLimitsTerm": "Limites",
+        "methodNetTerm": "Remuneração de referência líquida",
+        "methodIncreaseTerm": "Majoração de 10%",
+        "methodDurationTerm": "Duração",
+        "methodNoReductionTerm": "Sem corte aos 180 dias",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Orçamento",
         "unsupportedTitle": "Não suportado",
         "unsupportedTransitional": "A tabela transitória para quem já cumpria o prazo de garantia a 31 de março de 2012 e não esteve desempregado desde então. O simulador usa só a tabela geral.",
         "unsupportedSocial": "O subsídio social de desemprego, que segundo o guia só pode ser pedido até 30 de dezembro de 2026.",
@@ -3656,16 +3683,16 @@
         "reviewed": "Regras e valores de 2026 revistos a 19 de novembro de 2026 face ao guia da Segurança Social (versão de outubro de 2026), à página do serviço no gov.pt (atualizada a 19 de outubro de 2026) e ao texto do art. 29.º do Decreto-Lei n.º 220/2006 (lido numa cópia secundária, não na versão consolidada oficial). A ordem dos limites segue esse artigo; a ordem da majoração de 10% em relação aos limites não vem nas fontes que lemos, por isso é uma simplificação nossa. A página do gov.pt resolve um exemplo com uma taxa de IRS de 9,4% que não conseguimos reproduzir com as tabelas de 2026, pelo que o limite real pode ser inferior ao mostrado. O fim da redução de 10% ao fim de 180 dias vem do guia e da imprensa, não da lei consolidada."
       },
       "nextStepHeadline": "Antes de o rendimento baixar, planeie a almofada",
-      "nextStepDescription": "A WonderMoney mostra o seu dinheiro, a despesa mensal e quanto tempo duram as poupanças com um rendimento mais baixo.",
-      "nextStepCta": "Estime quanto tempo dura a sua reserva de dinheiro"
+      "nextStepDescription": "A WonderMoney mostra o teu dinheiro, a despesa mensal e quanto tempo duram as poupanças com um rendimento mais baixo.",
+      "nextStepCta": "Estima quanto tempo dura a tua reserva de dinheiro"
     },
     "sickPay": {
       "title": "Simulador de subsídio de doença 2026 (baixa médica)",
       "shortName": "Subsídio de doença",
-      "subtitle": "Estime o subsídio de doença de uma baixa médica: valor por escalão de duração, dias de espera e a perda de rendimento.",
-      "description": "Estime o subsídio de doença em Portugal: valor diário, total, dias de espera e diferença face ao seu salário líquido.",
+      "subtitle": "Estima o subsídio de doença de uma baixa médica: valor por escalão de duração, dias de espera e a perda de rendimento.",
+      "description": "Estima o subsídio de doença em Portugal: valor diário, total, dias de espera e diferença face ao teu salário líquido.",
       "pageTitle": "Simulador de Subsídio de Doença 2026: Baixa Médica em Portugal",
-      "pageDescription": "Estime o subsídio de doença em Portugal: remuneração de referência a 180 dias, 55% a 75% consoante a duração, os 3 dias de espera, o mínimo de 9,20 € e a perda de rendimento durante a baixa.",
+      "pageDescription": "Estima o subsídio de doença em Portugal: remuneração de referência a 180 dias, 55% a 75% consoante a duração, os 3 dias de espera, o mínimo de 9,20 € e a perda de rendimento durante a baixa.",
       "fields": {
         "grossMonthly": "Salário bruto mensal",
         "allowances": "Subsídios",
@@ -3691,11 +3718,11 @@
         "hospitalisation": "Com internamento hospitalar ou cirurgia de ambulatório, o subsídio é pago desde o 1.º dia, sem período de espera."
       },
       "errors": {
-        "required": "Introduza um número válido.",
-        "tooSmall": "Introduza um valor de pelo menos {{min}}.",
-        "tooLarge": "Introduza um valor até {{max}}.",
-        "whole": "Introduza um número inteiro.",
-        "summary": "Verifique os campos assinalados para ver a estimativa."
+        "required": "Introduz um número válido.",
+        "tooSmall": "Introduz um valor de pelo menos {{min}}.",
+        "tooLarge": "Introduz um valor até {{max}}.",
+        "whole": "Introduz um número inteiro.",
+        "summary": "Verifica os campos assinalados para ver a estimativa."
       },
       "result": {
         "total": "Total estimado pago pela Segurança Social",
@@ -3711,7 +3738,7 @@
         "bandLabel": "Dias {{from}} a {{to}} ({{percent}}%)",
         "bandValue": "{{paid}} dias pagos × {{daily}} = {{amount}}",
         "increaseApplied": "Inclui o acréscimo de 5 pontos (remuneração de referência até 500 euros, 3 ou mais filhos, ou bonificação por deficiência).",
-        "allWaiting": "Todos os dias desta baixa são dias de espera, por isso a Segurança Social não paga nada. Verifique se o contrato ou o instrumento de regulamentação coletiva obriga a entidade patronal a pagá-los.",
+        "allWaiting": "Todos os dias desta baixa são dias de espera, por isso a Segurança Social não paga nada. Verifica se o contrato ou o instrumento de regulamentação coletiva obriga a entidade patronal a pagá-los.",
         "waitingNote": "A Segurança Social não paga os 3 primeiros dias. Se a entidade patronal os paga depende do contrato ou do instrumento de regulamentação coletiva.",
         "estimate": "Uma estimativa para planear, não uma decisão. A Segurança Social calcula o valor real com as remunerações registadas.",
         "limit": {
@@ -3724,24 +3751,38 @@
       },
       "checklist": {
         "title": "Condições a verificar (não é uma decisão)",
-        "certificate": "Tem um certificado de incapacidade temporária (CIT) passado por um médico e enviado eletronicamente para a Segurança Social.",
-        "guarantee": "Tem 6 meses de remunerações registadas (não têm de ser seguidos) no dia em que deixa de trabalhar.",
-        "professionalIndex": "Trabalhou pelo menos 12 dias nos primeiros quatro dos últimos seis meses, contando o mês em que deixa de trabalhar.",
+        "certificate": "Tens um certificado de incapacidade temporária (CIT) passado por um médico e enviado eletronicamente para a Segurança Social.",
+        "guarantee": "Tens 6 meses de remunerações registadas (não têm de ser seguidos) no dia em que deixas de trabalhar.",
+        "professionalIndex": "Trabalhaste pelo menos 12 dias nos primeiros quatro dos últimos seis meses, contando o mês em que deixas de trabalhar.",
         "waiting": "Não há período de espera com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e continua depois dele. O simulador só tem opção para a primeira.",
-        "note": "Só a Segurança Social decide se tem direito. Esta lista é um lembrete, não uma decisão."
+        "note": "Só a Segurança Social decide se tens direito. Esta lista é um lembrete, não uma decisão."
       },
       "guide": {
         "exampleTitle": "Exemplo prático",
         "example": "Um trabalhador com {{gross}} por mês em 14 pagamentos, de baixa durante {{days}} dias e sem internamento. A remuneração de referência é {{reference}} por dia. Os dias 1 a 3 são de espera, por isso o primeiro escalão paga 27 dias a 55% e os 15 seguintes a 60%: {{total}} no total. O salário líquido normal é {{net}} por mês; ao longo da baixa a perda média é de {{gap}} por mês.",
         "methodTitle": "Como funciona a estimativa",
-        "methodReference": "A remuneração de referência (RR) é a soma das remunerações registadas nos 6 meses mais antigos dos 8 anteriores ao mês em que começa a baixa, sem subsídios de férias e de Natal, a dividir por 180. O simulador usa o seu salário mensal a dividir por 30.",
+        "methodReference": "A remuneração de referência (RR) é a soma das remunerações registadas nos 6 meses mais antigos dos 8 anteriores ao mês em que começa a baixa, sem subsídios de férias e de Natal, a dividir por 180. O simulador usa o teu salário mensal a dividir por 30.",
         "methodBands": "O subsídio diário é uma percentagem da RR que aumenta com a duração da baixa: 55% até 30 dias, 60% do dia 31 ao 90, 70% do dia 91 ao 365 e 75% depois, até 1095 dias para trabalhadores por conta de outrem. Os dias contam desde o primeiro dia da baixa, incluindo os de espera.",
         "methodWaiting": "Os trabalhadores por conta de outrem têm um período de espera de 3 dias que a Segurança Social não paga. Com internamento hospitalar ou cirurgia de ambulatório, tuberculose, ou doença que começa durante o subsídio parental e vai além dele, o pagamento começa no 1.º dia.",
         "methodMinimum": "O subsídio diário não pode ser inferior a {{min}} (30% da retribuição mínima mensal garantida de {{rmmg}}). Se a própria RR for inferior, o subsídio é igual à RR.",
         "methodIncrease": "Nos escalões de 55% e 60%, a percentagem sobe 5 pontos quando se verifica uma destas situações (n.º 1 do art. 17.º do Decreto-Lei n.º 28/2004): a RR é de, no máximo, 500 euros por mês, o agregado tem 3 ou mais filhos até 16 anos (ou 24 com abono de família), ou o agregado tem filhos que recebem a bonificação por deficiência do abono de família. As condições são alternativas e os 5 pontos somam-se uma só vez, mesmo que se verifique mais do que uma (n.º 3 do art. 17.º). O simulador pergunta pelas três.",
         "methodNetCap": "O subsídio diário também não pode ultrapassar o valor líquido da RR. O simulador estima-o com 11% de Segurança Social e a taxa de retenção de IRS de 2026 do continente para um titular não casado.",
-        "methodGap": "A perda de rendimento compara o seu salário líquido normal (14 ou 12 pagamentos, em média por 12 meses) com o que a Segurança Social paga. Os subsídios de férias e de Natal não são repostos pelos dias de baixa.",
-        "methodBudget": "A diferença é o rendimento que tem de cobrir com poupanças ou cortando despesas durante a baixa. Use-a para dimensionar a sua reserva.",
+        "methodGap": "A perda de rendimento compara o teu salário líquido normal (14 ou 12 pagamentos, em média por 12 meses) com o que a Segurança Social paga. Os subsídios de férias e de Natal não são repostos pelos dias de baixa.",
+        "methodBudget": "A diferença é o rendimento que tem de cobrir com poupanças ou cortando despesas durante a baixa. Usa-a para dimensionar a tua reserva.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaReference": "Remuneração de referência",
+        "formulaPay": "Remunerações dos 6 meses",
+        "formulaDaily": "Subsídio diário",
+        "formulaPercent": "Percentagem do escalão",
+        "methodReferenceTerm": "Remuneração de referência",
+        "methodBandsTerm": "Percentagem por duração",
+        "methodWaitingTerm": "Período de espera",
+        "methodMinimumTerm": "Mínimo",
+        "methodIncreaseTerm": "Acréscimo de 5 pontos",
+        "methodFloorTerm": "Mínimo acima de 500 euros",
+        "methodNetCapTerm": "Limite líquido",
+        "methodGapTerm": "Quebra de rendimento",
+        "methodBudgetTerm": "Orçamento",
         "unsupportedTitle": "Não suportado",
         "unsupportedTuberculosis": "Tuberculose, paga a 80% ou 100% da RR consoante os familiares a cargo, sem limite de tempo.",
         "unsupportedSelfEmployed": "Trabalhadores independentes (10 dias de espera, até 365 dias), seguro social voluntário e trabalhadores do serviço doméstico.",
@@ -3754,8 +3795,8 @@
         "methodFloor": "Acima de uma remuneração de referência de 500 euros por mês, o subsídio diário a 55% e 60% não pode ser inferior ao subsídio majorado calculado sobre 500 euros: 60% e 65% de 500 a dividir por 30, ou seja, {{floor55}} e {{floor60}} por dia (art. 17.º, n.º 2, do Decreto-Lei n.º 28/2004). Só conta para uma remuneração de referência pouco acima de 500 euros, até cerca de 545 euros, quando não há majoração. Não se aplica aos escalões de 70% e 75%."
       },
       "nextStepHeadline": "Planeie a quebra temporária de rendimento",
-      "nextStepDescription": "O WonderMoney mostra o seu dinheiro, as suas despesas e durante quanto tempo as poupanças cobrem um rendimento mais baixo.",
-      "nextStepCta": "Ajuste o seu orçamento à quebra temporária de rendimento"
+      "nextStepDescription": "O WonderMoney mostra o teu dinheiro, as tuas despesas e durante quanto tempo as poupanças cobrem um rendimento mais baixo.",
+      "nextStepCta": "Ajusta o teu orçamento à quebra temporária de rendimento"
     },
     "vehicleTax": {
       "title": "Simulador de IUC",
@@ -4089,6 +4130,9 @@
         "methodWithholding": "Cada pagamento é retido à parte com a tabela mensal de 2026, sem ser somado ao salário do mês: o Despacho n.º 233-A/2026 (n.º 10) manda as entidades pagadoras apresentar uma taxa efetiva em separado para cada remuneração, como nos meses em que se pagam os subsídios de férias e de Natal.",
         "methodTwelfths": "Em duodécimos, o subsídio reparte-se por igual pelos meses que trabalhas no ano (12 num ano completo). Cada duodécimo é retido à parte à taxa efetiva do subsídio inteiro, a prática habitual das empresas desde a Lei n.º 11/2013, art. 3.º (não consta do Despacho). A tua empresa pode somar o duodécimo ao salário do mês e reter sobre o total, o que costuma reter mais: confere o recibo de vencimento.",
         "methodSocialSecurity": "A Segurança Social a cargo do trabalhador é 11% do subsídio bruto.",
+        "hiringYearTerm": "Ano de admissão",
+        "twelfthsTerm": "Em duodécimos",
+        "planTerm": "Plano",
         "unsupportedNovember": "O ajustamento extraordinário dos rendimentos pagos em novembro de 2026 (Despacho 12523-A/2026, Continente) é ignorado. Um subsídio pago em novembro teria retenção reduzida a metade.",
         "unsupportedOther": "Conta só o salário base. Diuturnidades, outras componentes da retribuição, cessação ou suspensão do contrato durante o ano, contratos coletivos que paguem mais e custos do empregador ficam fora desta estimativa.",
         "sourceCode": "Código do Trabalho, arts. 239.º, 263.º e 264.º: duração das férias, subsídio de Natal e subsídio de férias",
@@ -4182,6 +4226,22 @@
         "methodFraction": "Um ano incompleto conta proporcionalmente: o simulador conta os aniversários completos da data de início mais os dias desde o último, a dividir pelos dias desse ano. A data de cessação conta como dia trabalhado.",
         "methodTax": "Só como informação, não entra no valor: parte da indemnização pode ficar excluída de IRS ao abrigo do art. 2.º, n.º 4, do CIRS, até um limite ligado à remuneração regular dos últimos 12 meses e aos anos de antiguidade. O resto é rendimento tributável. Pergunta à Autoridade Tributária ou a um contabilista qual é o limite exato no teu caso.",
         "methodBudget": "A compensação é um valor único. Repartires o valor pelos próximos meses, juntamente com o subsídio de desemprego a que tenhas direito, mostra quanto tempo cobre as tuas despesas.",
+        "methodFormulasLabel": "Fórmulas",
+        "formulaDaily": "Valor diário",
+        "formulaBase": "Retribuição base",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Dias por ano",
+        "formulaYears": "Anos de antiguidade",
+        "formulaCompensation": "Compensação",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Dias por ano",
+        "methodTransitionalTerm": "Contratos antigos",
+        "methodFixedTermTerm": "Caducidade de contrato a termo",
+        "methodDurationLimitTerm": "Duração máxima",
+        "methodCapsTerm": "Limites",
+        "methodFractionTerm": "Ano incompleto",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Orçamento",
         "supportedTitle": "Situações cobertas",
         "supported": "Despedimento coletivo, extinção do posto de trabalho e inadaptação do trabalhador num contrato sem termo, e caducidade de contrato a termo, certo ou incerto, com cessação em 2026.",
         "unsupportedTitle": "Não cobre",
@@ -4669,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Como ler esta página",
+          "estimatorTerm": "Simulador da fatura",
+          "indexTerm": "Índice de preços",
+          "marketTerm": "Mercado livre",
           "estimator": "O simulador calcula um mês de 30 dias na tarifa regulada: a potência contratada, a energia que consomes, a contribuição para o audiovisual e o imposto da eletricidade, e soma o IVA parcela a parcela, à taxa que se aplica a cada uma.",
           "index": "O índice olha para as faturas de todas as famílias, não só para a tarifa regulada: o preço médio por kWh do Eurostat em Portugal e na UE, com impostos, para que os dois sejam comparáveis.",
           "market": "A tarifa regulada é apenas uma opção. A maioria das famílias está no mercado livre, onde os comercializadores definem os preços e as ofertas podem ser mais baratas ou mais caras do que a tarifa regulada. O simulador é um ponto de referência, não uma recomendação."
@@ -4683,15 +4746,33 @@
           "title": "Como é calculado",
           "intro": "Para um mês de 30 dias, o simulador faz sempre as mesmas cinco coisas:",
           "steps": {
-            "a": "Potência: o preço diário da tua potência contratada, vezes 30 dias.",
-            "b": "Energia: os teus kWh ao preço simples, ou repartidos pelos dois preços do bi-horário segundo a percentagem que indicas.",
-            "c": "Contribuição para o audiovisual (CAV): um valor mensal fixo, com IVA reduzido. Quem consome menos de 400 kWh por ano está isento.",
-            "d": "Imposto especial de consumo de eletricidade (IEC): um valor fixo por kWh, com IVA à taxa normal.",
-            "e": "IVA em cada parcela e, no fim, a soma. O resultado é arredondado ao cêntimo no fim."
+            "a": {
+              "term": "Potência",
+              "body": "O preço diário da tua potência contratada, vezes 30 dias."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "Os teus kWh ao preço simples, ou repartidos pelos dois preços do bi-horário segundo a percentagem que indicas."
+            },
+            "c": {
+              "term": "Contribuição para o audiovisual (CAV)",
+              "body": "Um valor mensal fixo, com IVA reduzido. Quem consome menos de 400 kWh por ano está isento."
+            },
+            "d": {
+              "term": "Imposto especial de consumo de eletricidade (IEC)",
+              "body": "Um valor fixo por kWh, com IVA à taxa normal."
+            },
+            "e": {
+              "term": "IVA",
+              "body": "IVA em cada parcela e, no fim, a soma. O resultado é arredondado ao cêntimo no fim."
+            }
           },
-          "vat": "Regras do IVA, como a ERSE as explica: a taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, à parte do termo de potência que corresponde à tarifa de acesso às redes fixada pela ERSE, com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
-          "bi": "Bi-horário contra simples: o preço simples é {{energySimple}}, contra {{energyPeak}} fora de vazio e {{energyValley}} em vazio. Só pela energia, os dois custam o mesmo quando {{breakEven}}% do consumo é em horas de vazio. Com uma parte menor, o simples é mais barato; com uma maior, o bi-horário.",
-          "days": "O limite do IVA reduzido é por 30 dias, o período usado aqui. Numa fatura real de um período maior ou menor, o limite ajusta-se ao número de dias."
+          "vat": "A taxa reduzida ({{reduced}}) aplica-se aos primeiros {{allowance}} kWh de energia em 30 dias ({{allowanceLarge}} kWh para agregados de cinco ou mais pessoas) com potência contratada até 6,9 kVA, à parte do termo de potência que corresponde à tarifa de acesso às redes fixada pela ERSE, com potência contratada até 3,45 kVA e à contribuição para o audiovisual. Tudo o resto paga {{standard}}. A regra da taxa reduzida aplica-se da mesma forma no mercado regulado e no mercado livre.",
+          "bi": "O preço simples é {{energySimple}}, contra {{energyPeak}} fora de vazio e {{energyValley}} em vazio. Só pela energia, os dois custam o mesmo quando {{breakEven}}% do consumo é em horas de vazio. Com uma parte menor, o simples é mais barato; com uma maior, o bi-horário.",
+          "days": "O limite do IVA reduzido é por 30 dias, o período usado aqui. Numa fatura real de um período maior ou menor, o limite ajusta-se ao número de dias.",
+          "formulasLabel": "Fórmula",
+          "vatTerm": "Regras do IVA, como a ERSE as explica",
+          "biTerm": "Bi-horário contra simples"
         },
         "data": {
           "title": "Dados e fontes",
@@ -5131,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Como usar o comparador",
+          "quickTerm": "Modo rápido",
+          "fullTerm": "Modo completo",
+          "diagramTerm": "Ficheiro da E-REDES",
+          "optionsTerm": "Opções e filtros",
           "quick": "O modo rápido só precisa da potência contratada e da fatura ou dos kWh de um mês. Uma fatura em euros é convertida em kWh a partir da fatura da tarifa regulada, com impostos, como faz a simulação rápida da ERSE.",
           "full": "O modo completo usa os kWh de cada período da tua fatura, ou um total para qualquer número de dias repartido pelos períodos com o perfil padrão da E-REDES para a tua potência e consumo.",
           "diagram": "Também podes usar o ficheiro de consumos da E-REDES, descarregado do Balcão Digital. As leituras de cada quarto de hora dão os teus kWh reais em cada período e ciclo. O ficheiro é lido no teu navegador e nunca é enviado.",
@@ -5140,6 +5225,9 @@
         },
         "example": {
           "title": "Exemplo",
+          "regulatedLabel": "Tarifa regulada",
+          "cheapestLabel": "Oferta mais barata",
+          "differenceLabel": "Diferença",
           "setup": "Uma casa com 3,45 kVA na opção simples gasta {{kwh}} por mês. Na exportação da ERSE de {{date}} há {{count}} ofertas para ela, incluindo a tarifa regulada.",
           "result": "A tarifa regulada custa {{regulated}} no primeiro ano, com impostos. A oferta mais barata custa {{cheapest}}, menos {{difference}}. {{cheaper}} ofertas custam menos do que a tarifa regulada.",
           "bill": "No modo rápido, uma fatura mensal de {{bill}} dá os mesmos {{kwh}}: é a fatura da tarifa regulada para esse consumo."
@@ -5148,13 +5236,34 @@
           "title": "Como é calculado",
           "intro": "Cada oferta é calculada como no simulador da ERSE (Manual do Simulador de Preços de Energia, junho de 2026):",
           "steps": {
-            "a": "Potência: o preço por dia vezes os dias.",
-            "b": "Energia: os kWh de cada período vezes o preço desse período.",
-            "c": "Tarifa social: o desconto da ERSE na potência e na energia, até 6,9 kVA.",
-            "d": "A contribuição audiovisual e o imposto especial de consumo, nos valores legais.",
-            "e": "Serviços obrigatórios, reembolsos e descontos para qualquer cliente e o desconto de cliente novo no primeiro ano, como cada oferta os comunica à ERSE.",
-            "f": "IVA às taxas reduzida e normal, como se explica abaixo.",
-            "g": "Um ano é o mesmo consumo em 365 dias; \"anos seguintes\" deixa de fora o desconto de cliente novo."
+            "a": {
+              "term": "Potência",
+              "body": "O preço por dia vezes os dias."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "Os kWh de cada período vezes o preço desse período."
+            },
+            "c": {
+              "term": "Tarifa social",
+              "body": "O desconto da ERSE na potência e na energia, até 6,9 kVA."
+            },
+            "d": {
+              "term": "Taxas e impostos",
+              "body": "A contribuição audiovisual e o imposto especial de consumo, nos valores legais."
+            },
+            "e": {
+              "term": "Serviços e descontos",
+              "body": "Serviços obrigatórios, reembolsos e descontos para qualquer cliente e o desconto de cliente novo no primeiro ano, como cada oferta os comunica à ERSE."
+            },
+            "f": {
+              "term": "IVA",
+              "body": "IVA às taxas reduzida e normal, como se explica abaixo."
+            },
+            "g": {
+              "term": "Ano",
+              "body": "Um ano é o mesmo consumo em 365 dias; \"anos seguintes\" deixa de fora o desconto de cliente novo."
+            }
           },
           "vat": "O IVA é de {{reduced}} na contribuição audiovisual, na parte de acesso às redes do preço da potência até 3,45 kVA e nos primeiros {{allowance}} kWh de cada 30 dias até 6,9 kVA ({{allowanceLarge}} kWh num agregado de cinco ou mais pessoas). Tudo o resto paga {{standard}}.",
           "month": "Um mês é um duodécimo do ano, {{days}} dias, como no simulador da ERSE, por isso um ano são exatamente doze meses.",
@@ -5264,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Como ler esta página",
+          "calculatorTerm": "Calculadora de custo",
+          "noForecastTerm": "Sem previsão",
           "prices": "No topo da página está o último preço médio nacional por litro do gasóleo, da gasolina 95 e do GPL, tal como a DGEG o publicou para {{asOf}}, e quanto cada um variou numa semana: gasóleo {{dieselChange}} e gasolina {{gasolineChange}} face à semana anterior.",
           "calculator": "A calculadora transforma a tua condução num custo mensal de combustível. Indicas a distância, o consumo em litros por 100 km e o combustível; o preço começa na média mais recente e podes alterá-lo para o que realmente pagas.",
           "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana.",
@@ -5278,13 +5389,26 @@
           "title": "Como é calculado",
           "intro": "A calculadora faz quatro coisas:",
           "steps": {
-            "a": "Distância por mês: a distância que indicas, uma semana contada como 52 a dividir por 12 semanas por mês, ou uma viagem multiplicada pelas viagens por mês.",
-            "b": "Litros: distância vezes consumo a dividir por 100.",
-            "c": "Custo: litros vezes o preço por litro que indicas, arredondado ao cêntimo.",
-            "d": "Ano: doze meses assim."
+            "a": {
+              "term": "Distância por mês",
+              "body": "A distância que indicas, uma semana contada como 52 a dividir por 12 semanas por mês, ou uma viagem multiplicada pelas viagens por mês."
+            },
+            "b": {
+              "term": "Litros",
+              "body": "Distância vezes consumo a dividir por 100."
+            },
+            "c": {
+              "term": "Custo",
+              "body": "Litros vezes o preço por litro que indicas, arredondado ao cêntimo."
+            },
+            "d": {
+              "term": "Ano",
+              "body": "Doze meses assim."
+            }
           },
           "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior.",
-          "stations": "Os postos mais baratos são os preços por posto da DGEG ordenados do mais baixo para o mais alto; em caso de empate, fica primeiro o preço atualizado mais recentemente. Ficam de fora os preços sem atualização há 30 dias e os que estão muito fora do intervalo habitual (muito provavelmente um erro de digitação). A mediana é o preço do meio de todos os postos da zona, e a poupança num depósito é a mediana menos o preço mais barato, vezes 50 litros."
+          "stations": "Os postos mais baratos são os preços por posto da DGEG ordenados do mais baixo para o mais alto; em caso de empate, fica primeiro o preço atualizado mais recentemente. Ficam de fora os preços sem atualização há 30 dias e os que estão muito fora do intervalo habitual (muito provavelmente um erro de digitação). A mediana é o preço do meio de todos os postos da zona, e a poupança num depósito é a mediana menos o preço mais barato, vezes 50 litros.",
+          "formulasLabel": "Fórmulas"
         },
         "data": {
           "title": "Dados e fontes",
@@ -5299,13 +5423,28 @@
         "limits": {
           "title": "O que estes valores não incluem",
           "items": {
-            "noForecast": "Sem previsão: nada aqui prevê preços futuros, e os movimentos passados não dizem para onde o preço vai a seguir.",
-            "average": "Média nacional: junta todos os postos de Portugal continental e é ponderada pelas vendas. O preço no teu posto pode ser mais alto ou mais baixo, e os Açores e a Madeira não estão incluídos.",
-            "stations": "Postos: a lista mostra só os poucos postos mais baratos de cada zona, tal como a DGEG os publica, e não avalia o serviço nem a qualidade. Um preço pode mudar depois do retrato, por isso confirma-o na bomba.",
-            "consumption": "Consumo: o mesmo valor em todas as viagens. O consumo real muda com a velocidade, a carga, o trânsito e a estação do ano, e costuma ser superior ao oficial.",
-            "scope": "Só combustível: portagens, seguro, imposto, manutenção e estacionamento não estão incluídos. O carregamento elétrico não é coberto e outros combustíveis não são mostrados.",
-            "education": "Apenas para fins educativos, não é aconselhamento."
-          }
+            "noForecast": {
+              "term": "Sem previsão",
+              "body": "Nada aqui prevê preços futuros, e os movimentos passados não dizem para onde o preço vai a seguir."
+            },
+            "average": {
+              "term": "Média nacional",
+              "body": "Junta todos os postos de Portugal continental e é ponderada pelas vendas. O preço no teu posto pode ser mais alto ou mais baixo, e os Açores e a Madeira não estão incluídos."
+            },
+            "stations": {
+              "term": "Postos",
+              "body": "A lista mostra só os poucos postos mais baratos de cada zona, tal como a DGEG os publica, e não avalia o serviço nem a qualidade. Um preço pode mudar depois do retrato, por isso confirma-o na bomba."
+            },
+            "consumption": {
+              "term": "Consumo",
+              "body": "O mesmo valor em todas as viagens. O consumo real muda com a velocidade, a carga, o trânsito e a estação do ano, e costuma ser superior ao oficial."
+            },
+            "scope": {
+              "term": "Só combustível",
+              "body": "Portagens, seguro, imposto, manutenção e estacionamento não estão incluídos. O carregamento elétrico não é coberto e outros combustíveis não são mostrados."
+            }
+          },
+          "education": "Apenas para fins educativos, não é aconselhamento."
         },
         "related": {
           "title": "Continua",

@@ -519,7 +519,14 @@
         "exampleBudget": "Un budget di {{amount}} nel {{from}} richiede {{equivalent}} nel {{to}} per comprare lo stesso paniere. I prezzi medi sono variati del {{inflation}}.",
         "exampleInvestment": "Se un investimento passa da {{amount}} nel {{from}} a {{finalValue}} nel {{to}}, il saldo finale equivale a {{realValue}} in euro del {{from}}.",
         "methodTitle": "Come si calcola l'adeguamento all'inflazione",
-        "method": "Usiamo la media annua dell'indice generale dei prezzi al consumo (IPC) del Portogallo, con base {{baseYear}}. Ogni anno rappresenta la media dei prezzi da gennaio a dicembre. Dividi l'IPC dell'anno di confronto per l'IPC dell'anno di partenza e moltiplica l'importo iniziale per quel rapporto. Dividi il saldo finale per lo stesso rapporto per esprimerlo in euro dell'anno di partenza.",
+        "method": "Usiamo la media annua dell'indice generale dei prezzi al consumo (IPC) del Portogallo, con base {{baseYear}}. Ogni anno rappresenta la media dei prezzi da gennaio a dicembre.",
+        "methodFormulasLabel": "Formule",
+        "formulaAmount": "Importo iniziale",
+        "formulaEquivalent": "Importo equivalente",
+        "formulaFinal": "Saldo finale",
+        "formulaReal": "Saldo in euro dell'anno di partenza",
+        "formulaCpiStart": "IPC dell'anno di partenza",
+        "formulaCpiComparison": "IPC dell'anno di confronto",
         "limitations": "Le tue spese possono evolvere in modo diverso dal paniere nazionale. Il confronto di un investimento considera un saldo iniziale e uno finale senza versamenti o prelievi. Le commissioni e le imposte incidono solo se sono già incluse nel saldo nominale inserito. Indica tutti gli importi in euro: converti prima eventuali importi storici espressi in escudi.",
         "coverage": "Il periodo disponibile è {{first}}–{{last}} e include solo anni completi.",
         "retrieved": "Dati consultati il {{date}}.",
@@ -1043,15 +1050,13 @@
       "whatBody2": "Calcolalo solo sulle spese essenziali, quelle che continuano anche se il reddito si ferma: casa, alimentari, utenze, trasporti, assicurazioni e rate minime dei prestiti. Lascia fuori ciò che potresti sospendere. Tieni il denaro in un posto sicuro da cui puoi prelevarlo in fretta e senza penali, come un conto deposito libero, invece di investirlo.",
       "exampleTitle": "Un esempio pratico",
       "exampleIntro": "Supponiamo che le tue spese essenziali siano {{expenses}} al mese, che tu abbia già {{savings}} da parte e che riesca a risparmiare {{contribution}} al mese. Scegli {{months}} mesi di copertura.",
-      "exampleStep1": "Obiettivo: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Ancora da risparmiare: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Tempo per raggiungerlo: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} mesi.",
       "exampleOutro": "Con 3 mesi di copertura l'obiettivo scende a {{lowTarget}} e lo raggiungi in {{lowMonths}} mesi. Se un obiettivo lontano ti scoraggia, parti da uno più piccolo e alzalo quando i primi mesi sono coperti.",
       "methodTitle": "Come funziona il calcolatore",
-      "method1": "Obiettivo = spese essenziali mensili × mesi di copertura.",
-      "method2": "Ancora da risparmiare = obiettivo − risparmi di emergenza attuali. Se i tuoi risparmi sono più alti, la differenza appare come importo oltre l'obiettivo.",
-      "method3": "Tempo per raggiungerlo = ancora da risparmiare ÷ versamento mensile, arrotondato per eccesso al mese intero. Il mese dell'obiettivo conta quei mesi a partire da quello attuale, con un versamento al mese dal prossimo.",
-      "method4": "Qui i tuoi risparmi non producono interessi, e spese e versamento restano uguali ogni mese. Gli interessi ti farebbero arrivare un po' prima e l'aumento dei prezzi un po' dopo, quindi ricontrolla i numeri una o due volte l'anno.",
+      "methodFormulasLabel": "Formule",
+      "methodShortfallBody": "Se i tuoi risparmi sono più alti, la differenza appare come importo oltre l'obiettivo.",
+      "methodTimeBody": "Arrotondato per eccesso al mese intero. Il mese dell'obiettivo conta quei mesi a partire da quello attuale, con un versamento al mese dal prossimo.",
+      "methodInterestTerm": "Senza interessi",
+      "methodInterestBody": "Qui i tuoi risparmi non producono interessi, e spese e versamento restano uguali ogni mese. Gli interessi ti farebbero arrivare un po' prima e l'aumento dei prezzi un po' dopo, quindi ricontrolla i numeri una o due volte l'anno.",
       "nextStepHeadline": "Crea e segui il tuo obiettivo di fondo di emergenza",
       "nextStepDescription": "Salva questo importo come obiettivo in WonderMoney e segui i tuoi progressi con i saldi reali dei tuoi conti.",
       "nextStepCta": "Crea il tuo obiettivo"
@@ -1930,12 +1935,16 @@
         "exampleStep3": "Il versamento mensile minimo per arrivarci è {{contribution}}. In {{months}} mesi versi {{contributions}} e il rendimento aggiunge {{growth}}, per un totale di {{final}} alla fine.",
         "exampleOutro": "Ribalta il calcolo: se metti da parte una cifra tonda di {{rounded}} al mese, raggiungi l'obiettivo dopo {{timeMonths}} mesi, e alla fine dei {{years}} anni hai {{finalAmount}}.",
         "methodTitle": "Come funziona il simulatore",
-        "methodIntro": "Il saldo rende una volta al mese e il versamento arriva alla fine di ogni mese. Dopo n mesi il saldo è:",
-        "methodLegend": "S è quanto hai già risparmiato, C il versamento mensile, r il tasso mensile e n il numero di mesi. Con un rendimento dello 0% non c'è nulla da dividere per r, e il saldo è semplicemente S + C × n.",
-        "methodRate": "Il tasso mensile r è quello che, capitalizzato per dodici mesi, dà il rendimento annuo: (1 + rendimento annuo)^(1/12) − 1. Dividere il rendimento annuo per 12 darebbe una cifra un po' più alta del vero.",
-        "methodOrder": "Il rendimento di ogni mese viene arrotondato al centesimo prima di aggiungere il versamento, così il piano anno per anno torna esattamente con i totali.",
-        "methodContribution": "Il versamento necessario si ottiene risolvendo la formula rispetto a C. Viene arrotondato per eccesso al centesimo e verificato mese per mese, perché arrivi davvero all'obiettivo.",
-        "methodTime": "Il tempo necessario è il primo mese intero in cui il saldo raggiunge l'obiettivo, entro un massimo di {{maxYears}} anni.",
+        "methodIntro": "Il saldo rende una volta al mese e il versamento arriva alla fine di ogni mese. Alla fine del periodo il saldo è:",
+        "methodFormulasLabel": "Formule",
+        "formulaMonthlyRate": "Tasso mensile",
+        "methodRateBody": "Quello che, capitalizzato per dodici mesi, dà il rendimento annuo. Dividere il rendimento annuo per 12 darebbe una cifra un po' più alta del vero.",
+        "methodZeroTerm": "Rendimento dello 0%",
+        "methodZeroBody": "Non c'è nulla da dividere per il tasso mensile, e il saldo è semplicemente quanto hai già risparmiato più il versamento mensile × il numero di mesi.",
+        "methodOrderTerm": "Arrotondamento",
+        "methodOrderBody": "Il rendimento di ogni mese viene arrotondato al centesimo prima di aggiungere il versamento, così il piano anno per anno torna esattamente con i totali.",
+        "methodContributionBody": "Si ottiene risolvendo la formula rispetto al versamento mensile. Viene arrotondato per eccesso al centesimo e verificato mese per mese, perché arrivi davvero all'obiettivo.",
+        "methodTimeBody": "Il tempo necessario è il primo mese intero in cui il saldo raggiunge l'obiettivo, entro un massimo di {{maxYears}} anni.",
         "assumptionsTitle": "Ipotesi",
         "assumptionReturn": "Il rendimento è lo stesso ogni anno. Nella realtà varia, e gli investimenti possono perdere valore.",
         "assumptionCosts": "Dal rendimento non si sottraggono tasse, commissioni o altri costi.",
@@ -3465,6 +3474,7 @@
         "methodMeal": "L'indennità pasto è esente fino al limite giornaliero, che dipende dal pagamento in contanti o con carta. Il calcolatore aggiunge alla retribuzione imponibile solo l'eccedenza.",
         "methodAllowances": "Con 14 pagamenti, le mensilità aggiuntive sono tassate ciascuna a sé, come richiedono le tabelle. In dodicesimi, l'importo extra si somma a ogni mese.",
         "methodBudget": "I valori netti sono ciò che arriva sul tuo conto, quindi sono il punto di partenza giusto per un budget mensile.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "La ritenuta non è il tuo IRS definitivo",
         "final": "Quanto viene trattenuto ogni mese è un acconto. L'Autorità tributaria determina l'IRS effettivo nella dichiarazione annuale, con i redditi dell'intero anno e le tue deduzioni. La ritenuta può essere superiore o inferiore all'imposta dovuta, ed è per questo che molti ricevono un rimborso o devono pagare.",
         "unsupportedTitle": "Non supportato",
@@ -3542,6 +3552,9 @@
         "howTransition": "Nei primi scaglioni la parcela a abater è una formula con la lettera R, la retribuzione mensile. Fa salire la ritenuta gradualmente da zero, così un piccolo aumento non riduce mai il netto.",
         "howDependants": "Ogni persona a carico riduce la ritenuta di un importo fisso. Con tre o più persone a carico, l'aliquota marginale dello scaglione è inferiore di un punto percentuale.",
         "howTables": "La tabella I vale per i non sposati senza persone a carico e per gli sposati con due redditi. La tabella II vale per i non sposati con persone a carico e la tabella III per gli sposati con un solo reddito.",
+        "methodFormulasLabel": "Formula",
+        "formulaPerDependant": "Importo per persona a carico",
+        "howTransitionTerm": "Parcela a abater con R",
         "finalTitle": "La ritenuta non è l'imposta definitiva",
         "final": "Le tabelle stabiliscono quanto trattiene il datore di lavoro ogni mese. Non calcolano il tuo IRS definitivo, che la dichiarazione annuale determina con gli scaglioni qui sopra, i redditi dell'intero anno e le tue deduzioni.",
         "unsupportedTitle": "Non incluso",
@@ -3644,6 +3657,20 @@
         "methodNoReduction": "La vecchia riduzione del 10% dopo 180 giorni di pagamento non è applicata: la guida della Segurança Social del 2026 non la menziona.",
         "methodTax": "La guida della Segurança Social dice che il sussidio non va dichiarato ai fini IRS. Verifica il tuo caso con l'Autorità Tributaria.",
         "methodBudget": "Il sussidio mensile è il reddito con cui pianificare. Confrontalo con lo stipendio netto per vedere il calo e poi guarda quanto a lungo i risparmi coprono la differenza.",
+        "methodFormulasLabel": "Formule",
+        "formulaReference": "Retribuzione di riferimento",
+        "formulaPay": "Retribuzioni dei 12 mesi",
+        "formulaDaily": "Sussidio giornaliero",
+        "formulaMonthly": "Sussidio mensile",
+        "methodReferenceTerm": "Retribuzione di riferimento",
+        "methodAmountTerm": "Importo",
+        "methodLimitsTerm": "Limiti",
+        "methodNetTerm": "Retribuzione di riferimento netta",
+        "methodIncreaseTerm": "Maggiorazione del 10%",
+        "methodDurationTerm": "Durata",
+        "methodNoReductionTerm": "Nessun taglio dopo 180 giorni",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non supportato",
         "unsupportedTransitional": "La tabella transitoria per chi soddisfaceva già il requisito contributivo al 31 marzo 2012 e non è stato disoccupato da allora. Il calcolatore usa solo la tabella generale.",
         "unsupportedSocial": "Il sussidio sociale di disoccupazione (subsídio social de desemprego), che secondo la guida può essere richiesto solo fino al 30 dicembre 2026.",
@@ -3742,6 +3769,20 @@
         "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di contributi previdenziali e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
         "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive relative ai giorni di malattia non vengono reintegrate.",
         "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
+        "methodFormulasLabel": "Formule",
+        "formulaReference": "Retribuzione di riferimento",
+        "formulaPay": "Retribuzioni dei 6 mesi",
+        "formulaDaily": "Indennità giornaliera",
+        "formulaPercent": "Percentuale della fascia",
+        "methodReferenceTerm": "Retribuzione di riferimento",
+        "methodBandsTerm": "Percentuale per durata",
+        "methodWaitingTerm": "Giorni di carenza",
+        "methodMinimumTerm": "Minimo",
+        "methodIncreaseTerm": "Maggiorazione di 5 punti",
+        "methodFloorTerm": "Soglia sopra i 500 euro",
+        "methodNetCapTerm": "Tetto netto",
+        "methodGapTerm": "Calo di reddito",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non supportato",
         "unsupportedTuberculosis": "Tubercolosi, pagata all'80% o al 100% della RR in base ai familiari a carico, senza limite di tempo.",
         "unsupportedSelfEmployed": "Lavoratori autonomi (10 giorni di carenza, fino a 365 giorni), assicurazione sociale volontaria e lavoratori domestici.",
@@ -4089,6 +4130,9 @@
         "methodWithholding": "La ritenuta su ogni pagamento si calcola a parte con la tabella mensile 2026, senza essere sommato allo stipendio del mese: il Despacho n.º 233-A/2026 (n. 10) chiede ai datori di lavoro di indicare un'aliquota effettiva separata per ogni retribuzione, come nei mesi in cui si pagano l'indennità di ferie e la tredicesima.",
         "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero). La ritenuta su ogni dodicesimo si applica a parte all'aliquota effettiva dell'importo intero, la prassi abituale degli uffici paghe dalla Lei n.º 11/2013, art. 3 (non indicata nel Despacho). Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e applicare la ritenuta sul totale, che di solito risulta più alta: controlla la busta paga.",
         "methodSocialSecurity": "I contributi previdenziali a carico del lavoratore sono l'11% dell'importo lordo.",
+        "hiringYearTerm": "Anno di assunzione",
+        "twelfthsTerm": "In dodicesimi",
+        "planTerm": "Piano",
         "unsupportedNovember": "L'aggiustamento una tantum dei redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Un importo pagato a novembre avrebbe la ritenuta dimezzata.",
         "unsupportedOther": "Conta solo lo stipendio base. Scatti di anzianità, altre voci retributive, cessazione o sospensione del contratto durante l'anno, contratti collettivi più generosi e costi del datore di lavoro restano fuori da questa stima.",
         "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
@@ -4182,6 +4226,22 @@
         "methodFraction": "Un anno incompleto conta in proporzione: il calcolatore conta gli anniversari completi della data di inizio più i giorni dall'ultimo, divisi per i giorni di quell'anno. La data di cessazione conta come giorno lavorato.",
         "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
         "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale sussidio di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
+        "methodFormulasLabel": "Formule",
+        "formulaDaily": "Importo giornaliero",
+        "formulaBase": "Retribuzione base",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Giorni per anno",
+        "formulaYears": "Anni di anzianità",
+        "formulaCompensation": "Indennità",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Giorni per anno",
+        "methodTransitionalTerm": "Contratti meno recenti",
+        "methodFixedTermTerm": "Scadenza di un contratto a termine",
+        "methodDurationLimitTerm": "Durata massima",
+        "methodCapsTerm": "Tetti",
+        "methodFractionTerm": "Anno incompleto",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Situazioni coperte",
         "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore in un contratto a tempo indeterminato, e scadenza di un contratto a termine, certo o incerto, con cessazione nel 2026.",
         "unsupportedTitle": "Non coperto",
@@ -4669,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "estimatorTerm": "Stima della bolletta",
+          "indexTerm": "Indice dei prezzi",
+          "marketTerm": "Mercato libero",
           "estimator": "La stima calcola un mese di 30 giorni con la tariffa regolata: la potenza contrattuale, l'energia che consumi, il contributo audiovisivo e l'imposta sull'elettricità, poi aggiunge l'IVA voce per voce, con l'aliquota che spetta a ciascuna.",
           "index": "L'indice guarda le bollette di tutte le famiglie, non solo la tariffa regolata: il prezzo medio al kWh di Eurostat in Portogallo e nell'UE, imposte incluse, così che i due siano confrontabili.",
           "market": "La tariffa regolata è solo un'opzione. La maggior parte delle famiglie è sul mercato libero, dove i fornitori fissano i propri prezzi e le offerte possono costare meno o più della tariffa regolata. Le regole dell'IVA sono le stesse in entrambi. La stima è un punto di riferimento, non un consiglio."
@@ -4683,15 +4746,33 @@
           "title": "Come si calcola",
           "intro": "Per un mese di 30 giorni, la stima fa sempre le stesse cinque cose:",
           "steps": {
-            "a": "Potenza: il prezzo giornaliero della tua potenza contrattuale, per 30 giorni.",
-            "b": "Energia: i tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi.",
-            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente.",
-            "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
-            "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo giornaliero della tua potenza contrattuale, per 30 giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi."
+            },
+            "c": {
+              "term": "Contributo audiovisivo (CAV)",
+              "body": "Un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente."
+            },
+            "d": {
+              "term": "Imposta speciale sul consumo di elettricità (IEC)",
+              "body": "Un importo fisso per kWh, con IVA all'aliquota ordinaria."
+            },
+            "e": {
+              "term": "IVA",
+              "body": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            }
           },
-          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
-          "bi": "Bioraria contro semplice: il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
-          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni."
+          "vat": "L'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
+          "bi": "Il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
+          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni.",
+          "formulasLabel": "Formula",
+          "vatTerm": "Regole dell'IVA, come le spiega l'ERSE",
+          "biTerm": "Bioraria contro semplice"
         },
         "data": {
           "title": "Dati e fonti",
@@ -5131,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Come usare il confronto",
+          "quickTerm": "Modalità rapida",
+          "fullTerm": "Modalità completa",
+          "diagramTerm": "File E-REDES",
+          "optionsTerm": "Opzioni e filtri",
           "quick": "La modalità rapida richiede solo la potenza contrattuale e la bolletta mensile o i kWh. Una bolletta in euro viene convertita in kWh ricostruendo a ritroso la bolletta della tariffa regolata, imposte incluse, come fa la simulazione rapida dell'ERSE.",
           "full": "La modalità completa usa i kWh di ogni fascia indicati in bolletta, oppure un totale per un numero qualsiasi di giorni ripartito tra le fasce con il profilo standard di E-REDES per la tua potenza e i tuoi consumi.",
           "diagram": "Puoi anche usare il file dei consumi di E-REDES, scaricato dal Balcão Digital. Le sue letture di ogni quarto d'ora danno i tuoi kWh reali in ogni fascia e ciclo. Il file viene letto nel tuo browser e non viene mai inviato da nessuna parte.",
@@ -5140,6 +5225,9 @@
         },
         "example": {
           "title": "Esempio pratico",
+          "regulatedLabel": "Tariffa regolata",
+          "cheapestLabel": "Offerta più economica",
+          "differenceLabel": "Differenza",
           "setup": "Una casa con 3,45 kVA in opzione monoraria consuma {{kwh}} al mese. Nell'esportazione dell'ERSE del {{date}} ci sono {{count}} offerte per questa casa, tariffa regolata compresa.",
           "result": "La tariffa regolata costa {{regulated}} nel primo anno, imposte incluse. L'offerta più economica costa {{cheapest}}, {{difference}} in meno. {{cheaper}} offerte costano meno della tariffa regolata.",
           "bill": "In modalità rapida, una bolletta mensile di {{bill}} restituisce gli stessi {{kwh}}: è la bolletta della tariffa regolata per quei consumi."
@@ -5148,13 +5236,34 @@
           "title": "Come viene calcolato",
           "intro": "Ogni offerta è calcolata come nel simulatore dell'ERSE (Manual do Simulador de Preços de Energia, giugno 2026):",
           "steps": {
-            "a": "Potenza: il prezzo al giorno per il numero di giorni.",
-            "b": "Energia: i kWh di ogni fascia per il relativo prezzo.",
-            "c": "Tariffa sociale: lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA.",
-            "d": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge.",
-            "e": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE.",
-            "f": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto.",
-            "g": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo al giorno per il numero di giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I kWh di ogni fascia per il relativo prezzo."
+            },
+            "c": {
+              "term": "Tariffa sociale",
+              "body": "Lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA."
+            },
+            "d": {
+              "term": "Imposte",
+              "body": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge."
+            },
+            "e": {
+              "term": "Servizi e sconti",
+              "body": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE."
+            },
+            "f": {
+              "term": "IVA",
+              "body": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto."
+            },
+            "g": {
+              "term": "Anno",
+              "body": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            }
           },
           "vat": "L'IVA è al {{reduced}} sul contributo audiovisivo, sulla quota di accesso alle reti del prezzo della potenza fino a 3,45 kVA e sui primi {{allowance}} kWh ogni 30 giorni fino a 6,9 kVA ({{allowanceLarge}} kWh per una famiglia di cinque o più persone). Tutto il resto paga il {{standard}}.",
           "month": "Un mese è un dodicesimo dell'anno, {{days}} giorni, come nel simulatore dell'ERSE, quindi un anno corrisponde esattamente a dodici mesi.",
@@ -5264,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "calculatorTerm": "Calcolatore del costo",
+          "noForecastTerm": "Nessuna previsione",
           "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
           "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
           "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima.",
@@ -5278,13 +5389,26 @@
           "title": "Come si calcola",
           "intro": "Il calcolatore fa quattro cose:",
           "steps": {
-            "a": "Distanza al mese: la distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese.",
-            "b": "Litri: distanza per consumo diviso 100.",
-            "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
-            "d": "Anno: dodici mesi così."
+            "a": {
+              "term": "Distanza al mese",
+              "body": "La distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese."
+            },
+            "b": {
+              "term": "Litri",
+              "body": "Distanza per consumo diviso 100."
+            },
+            "c": {
+              "term": "Costo",
+              "body": "Litri per il prezzo al litro inserito, arrotondato al centesimo."
+            },
+            "d": {
+              "term": "Anno",
+              "body": "Dodici mesi così."
+            }
           },
           "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente.",
-          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri."
+          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri.",
+          "formulasLabel": "Formule"
         },
         "data": {
           "title": "Dati e fonti",
@@ -5299,13 +5423,28 @@
         "limits": {
           "title": "Cosa non includono questi valori",
           "items": {
-            "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
-            "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
-            "stations": "Distributori: l'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa.",
-            "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
-            "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
-            "education": "Solo a scopo informativo, non è una consulenza."
-          }
+            "noForecast": {
+              "term": "Nessuna previsione",
+              "body": "Niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo."
+            },
+            "average": {
+              "term": "Media nazionale",
+              "body": "Riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse."
+            },
+            "stations": {
+              "term": "Distributori",
+              "body": "L'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa."
+            },
+            "consumption": {
+              "term": "Consumo",
+              "body": "Lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale."
+            },
+            "scope": {
+              "term": "Solo carburante",
+              "body": "Pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati."
+            }
+          },
+          "education": "Solo a scopo informativo, non è una consulenza."
         },
         "related": {
           "title": "Per andare avanti",

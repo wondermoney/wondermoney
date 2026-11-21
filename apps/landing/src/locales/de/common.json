@@ -519,7 +519,14 @@
         "exampleBudget": "Für denselben Warenkorb braucht ein Budget von {{amount}} aus dem Jahr {{from}} im Jahr {{to}} {{equivalent}}. Die durchschnittlichen Preise änderten sich um {{inflation}}.",
         "exampleInvestment": "Steigt eine Anlage von {{amount}} im Jahr {{from}} auf {{finalValue}} im Jahr {{to}}, entspricht der Endbetrag {{realValue}} in Euro des Jahres {{from}}.",
         "methodTitle": "So funktioniert die Inflationsbereinigung",
-        "method": "Wir verwenden den Jahresdurchschnitt des portugiesischen Verbraucherpreisindex (VPI) für alle Waren und Dienstleistungen mit Basisjahr {{baseYear}}. Jedes Jahr steht für den Durchschnitt der Preise von Januar bis Dezember. Teilen Sie den VPI des Vergleichsjahres durch den VPI des Ausgangsjahres. Multiplizieren Sie den Ausgangsbetrag mit diesem Verhältnis und teilen Sie den Endbetrag durch dasselbe Verhältnis, um ihn in Euro des Ausgangsjahres auszudrücken.",
+        "method": "Wir verwenden den Jahresdurchschnitt des portugiesischen Verbraucherpreisindex (VPI) für alle Waren und Dienstleistungen mit Basisjahr {{baseYear}}. Jedes Jahr steht für den Durchschnitt der Preise von Januar bis Dezember.",
+        "methodFormulasLabel": "Formeln",
+        "formulaAmount": "Ausgangsbetrag",
+        "formulaEquivalent": "Gleichwertiger Betrag",
+        "formulaFinal": "Endbetrag",
+        "formulaReal": "Endbetrag in Euro des Ausgangsjahres",
+        "formulaCpiStart": "VPI des Ausgangsjahres",
+        "formulaCpiComparison": "VPI des Vergleichsjahres",
         "limitations": "Ihre Ausgaben können sich anders entwickeln als der landesweite Warenkorb. Der Anlagevergleich geht von einem Anfangs- und Endbetrag ohne Ein- oder Auszahlungen aus. Gebühren und Steuern sind nur berücksichtigt, soweit sie bereits im eingegebenen Endbetrag enthalten sind. Geben Sie alle Beträge in Euro ein und rechnen Sie historische Escudo-Beträge vorher um.",
         "coverage": "Die Daten decken die vollständigen Jahre von {{first}} bis {{last}} ab.",
         "retrieved": "Daten abgerufen am {{date}}.",
@@ -1043,15 +1050,13 @@
       "whatBody2": "Berechnen Sie ihn nur aus den notwendigen Ausgaben, die weiterlaufen, wenn Ihr Einkommen wegfällt: Wohnen, Lebensmittel, Nebenkosten, Mobilität, Versicherungen und Mindestraten für Kredite. Lassen Sie weg, was Sie pausieren könnten. Bewahren Sie das Geld sicher und schnell verfügbar auf, ohne Gebühren beim Abheben, etwa auf einem Tagesgeldkonto, statt es anzulegen.",
       "exampleTitle": "Ein Rechenbeispiel",
       "exampleIntro": "Angenommen, Ihre notwendigen Ausgaben liegen bei {{expenses}} im Monat, Sie haben schon {{savings}} zurückgelegt und können {{contribution}} im Monat sparen. Sie wählen {{months}} Monate Absicherung.",
-      "exampleStep1": "Ziel: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Noch zu sparen: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Zeit bis zum Ziel: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} Monate.",
       "exampleOutro": "Mit 3 Monaten Absicherung sinkt das Ziel auf {{lowTarget}} und Sie erreichen es in {{lowMonths}} Monaten. Wenn ein fernes Ziel Sie bremst, fangen Sie kleiner an und erhöhen Sie es, sobald die ersten Monate abgedeckt sind.",
       "methodTitle": "So funktioniert der Rechner",
-      "method1": "Ziel = notwendige monatliche Ausgaben × Monate Absicherung.",
-      "method2": "Noch zu sparen = Ziel − aktuelle Notfallrücklage. Sind Ihre Ersparnisse höher, erscheint die Differenz als Betrag über dem Ziel.",
-      "method3": "Zeit bis zum Ziel = noch zu sparen ÷ monatliche Sparrate, aufgerundet auf ganze Monate. Der Zielmonat liegt so viele Monate nach dem aktuellen, mit einer Sparrate pro Monat ab dem nächsten Monat.",
-      "method4": "Ihre Ersparnisse bringen hier keine Zinsen, und Ausgaben und Sparrate bleiben jeden Monat gleich. Zinsen würden Sie etwas früher ans Ziel bringen, steigende Preise etwas später. Prüfen Sie die Zahlen deshalb ein- oder zweimal im Jahr.",
+      "methodFormulasLabel": "Formeln",
+      "methodShortfallBody": "Sind Ihre Ersparnisse höher, erscheint die Differenz als Betrag über dem Ziel.",
+      "methodTimeBody": "Aufgerundet auf ganze Monate. Der Zielmonat liegt so viele Monate nach dem aktuellen, mit einer Sparrate pro Monat ab dem nächsten Monat.",
+      "methodInterestTerm": "Keine Zinsen",
+      "methodInterestBody": "Ihre Ersparnisse bringen hier keine Zinsen, und Ausgaben und Sparrate bleiben jeden Monat gleich. Zinsen würden Sie etwas früher ans Ziel bringen, steigende Preise etwas später. Prüfen Sie die Zahlen deshalb ein- oder zweimal im Jahr.",
       "nextStepHeadline": "Legen Sie Ihr Notgroschen-Ziel an und verfolgen Sie es",
       "nextStepDescription": "Speichern Sie diesen Betrag als Ziel in WonderMoney und verfolgen Sie Ihren Fortschritt anhand Ihrer echten Kontostände.",
       "nextStepCta": "Ziel anlegen"
@@ -1930,12 +1935,16 @@
         "exampleStep3": "Die kleinste monatliche Sparrate, die dafür reicht, ist {{contribution}}. In {{months}} Monaten zahlen Sie {{contributions}} ein und die Zinsen bringen {{growth}}, zusammen {{final}} am Ende.",
         "exampleOutro": "Andersherum: Legen Sie stattdessen glatte {{rounded}} im Monat zurück, erreichen Sie das Ziel nach {{timeMonths}} Monaten und haben nach den {{years}} Jahren {{finalAmount}}.",
         "methodTitle": "So rechnet der Rechner",
-        "methodIntro": "Der Saldo wird einmal im Monat verzinst, die Einzahlung kommt am Ende jedes Monats dazu. Nach n Monaten beträgt er:",
-        "methodLegend": "S ist Ihr bereits Erspartes, C die monatliche Sparrate, r der Monatszins und n die Zahl der Monate. Bei 0 % Rendite gibt es nichts durch r zu teilen, und der Saldo ist einfach S + C × n.",
-        "methodRate": "Der Monatszins r ist der Zins, der über zwölf Monate verzinst die Jahresrendite ergibt: (1 + Jahresrendite)^(1/12) − 1. Die Jahresrendite einfach durch 12 zu teilen, ergäbe einen etwas zu hohen Wert.",
-        "methodOrder": "Die Zinsen jedes Monats werden auf den Cent gerundet, bevor die Einzahlung dazukommt. So passt der Plan Jahr für Jahr genau zu den Summen.",
-        "methodContribution": "Die nötige Sparrate ergibt sich, wenn man die Formel nach C auflöst. Sie wird auf den Cent aufgerundet und Monat für Monat geprüft, damit sie das Ziel wirklich erreicht.",
-        "methodTime": "Die nötige Zeit ist der erste volle Monat, in dem der Saldo das Ziel erreicht; gesucht wird bis zu {{maxYears}} Jahre.",
+        "methodIntro": "Der Saldo wird einmal im Monat verzinst, die Einzahlung kommt am Ende jedes Monats dazu. Am Ende des Zeitraums beträgt er:",
+        "methodFormulasLabel": "Formeln",
+        "formulaMonthlyRate": "Monatszins",
+        "methodRateBody": "Der Zins, der über zwölf Monate verzinst die Jahresrendite ergibt. Die Jahresrendite einfach durch 12 zu teilen, ergäbe einen etwas zu hohen Wert.",
+        "methodZeroTerm": "0 % Rendite",
+        "methodZeroBody": "Es gibt nichts durch den Monatszins zu teilen, und der Saldo ist einfach Ihr bereits Erspartes plus die monatliche Sparrate × die Zahl der Monate.",
+        "methodOrderTerm": "Rundung",
+        "methodOrderBody": "Die Zinsen jedes Monats werden auf den Cent gerundet, bevor die Einzahlung dazukommt. So passt der Plan Jahr für Jahr genau zu den Summen.",
+        "methodContributionBody": "Sie ergibt sich, wenn man die Formel nach der monatlichen Sparrate auflöst. Sie wird auf den Cent aufgerundet und Monat für Monat geprüft, damit sie das Ziel wirklich erreicht.",
+        "methodTimeBody": "Die nötige Zeit ist der erste volle Monat, in dem der Saldo das Ziel erreicht; gesucht wird bis zu {{maxYears}} Jahre.",
         "assumptionsTitle": "Annahmen",
         "assumptionReturn": "Die Rendite ist jedes Jahr gleich. In Wirklichkeit schwankt sie, und Geldanlagen können an Wert verlieren.",
         "assumptionCosts": "Von den Zinserträgen werden keine Steuern, Gebühren oder sonstigen Kosten abgezogen.",
@@ -3465,6 +3474,7 @@
         "methodMeal": "Der Essenszuschuss ist bis zur täglichen Freigrenze steuerfrei, die davon abhängt, ob er bar oder per Karte gezahlt wird. Der Rechner addiert nur den Mehrbetrag zum steuerpflichtigen Entgelt.",
         "methodAllowances": "Bei 14 Zahlungen werden Urlaubs- und Weihnachtsgeld jeweils für sich besteuert, wie es die Tabellen verlangen. In Zwölfteln wird der Zusatzbetrag auf jeden Monat aufgeschlagen.",
         "methodBudget": "Die Nettowerte sind das, was auf Ihrem Konto ankommt, und damit der richtige Ausgangspunkt für ein Monatsbudget.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "Die Quellensteuer ist nicht Ihre endgültige IRS",
         "final": "Was jeden Monat einbehalten wird, ist eine Vorauszahlung. Die Steuerbehörde setzt Ihre tatsächliche IRS in der Jahreserklärung fest, mit dem Einkommen des ganzen Jahres und Ihren Abzügen. Die Quellensteuer kann über oder unter der geschuldeten Steuer liegen, deshalb gibt es Erstattungen oder Nachzahlungen.",
         "unsupportedTitle": "Nicht unterstützt",
@@ -3542,6 +3552,9 @@
         "howTransition": "In den ersten Zeilen ist die Parcela a abater eine Formel mit dem Buchstaben R, dem Monatsentgelt. Sie lässt die Quellensteuer ab null sanft steigen, damit eine kleine Gehaltserhöhung das Netto nie senkt.",
         "howDependants": "Jeder Unterhaltsberechtigte senkt die Quellensteuer um einen festen Betrag. Ab drei Unterhaltsberechtigten liegt der Grenzsteuersatz der Zeile einen Prozentpunkt niedriger.",
         "howTables": "Tabelle I gilt für Unverheiratete ohne Unterhaltsberechtigte und für Verheiratete mit zwei Einkommen. Tabelle II gilt für Unverheiratete mit Unterhaltsberechtigten und Tabelle III für Verheiratete mit einem Einkommen.",
+        "methodFormulasLabel": "Formel",
+        "formulaPerDependant": "Betrag je Unterhaltsberechtigtem",
+        "howTransitionTerm": "Parcela a abater mit R",
         "finalTitle": "Die Quellensteuer ist nicht die endgültige Steuer",
         "final": "Die Tabellen legen fest, wie viel Ihr Arbeitgeber jeden Monat einbehält. Sie berechnen nicht Ihre endgültige IRS, die die Jahreserklärung mit den obigen Stufen, dem Einkommen des ganzen Jahres und Ihren Abzügen festsetzt.",
         "unsupportedTitle": "Nicht enthalten",
@@ -3644,6 +3657,20 @@
         "methodNoReduction": "Die frühere Kürzung um 10 % nach 180 Bezugstagen wird nicht angewendet: Der Leitfaden der Segurança Social von 2026 nennt sie nicht.",
         "methodTax": "Laut Leitfaden der Segurança Social muss die Leistung nicht in der IRS-Erklärung angegeben werden. Klären Sie Ihren Fall mit der Steuerbehörde.",
         "methodBudget": "Der Monatsbetrag ist das Einkommen, mit dem Sie planen. Vergleichen Sie ihn mit Ihrem Nettogehalt, um den Rückgang zu sehen, und prüfen Sie dann, wie lange Ihre Ersparnisse die Lücke decken.",
+        "methodFormulasLabel": "Formeln",
+        "formulaReference": "Referenzentgelt",
+        "formulaPay": "Entgelt der 12 Monate",
+        "formulaDaily": "Tagessatz",
+        "formulaMonthly": "Monatsbetrag",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodAmountTerm": "Höhe",
+        "methodLimitsTerm": "Grenzen",
+        "methodNetTerm": "Netto-Referenzentgelt",
+        "methodIncreaseTerm": "Zuschlag von 10 %",
+        "methodDurationTerm": "Dauer",
+        "methodNoReductionTerm": "Keine Kürzung nach 180 Tagen",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Nicht unterstützt",
         "unsupportedTransitional": "Die Übergangstabelle für Personen, die die Beitragsvoraussetzung schon am 31. März 2012 erfüllten und seitdem nicht arbeitslos waren. Der Rechner nutzt nur die allgemeine Tabelle.",
         "unsupportedSocial": "Das soziale Arbeitslosengeld (subsídio social de desemprego), das laut Leitfaden nur bis zum 30. Dezember 2026 beantragt werden kann.",
@@ -3742,6 +3769,20 @@
         "methodNetCap": "Der Tagessatz darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Quellensteuersatz 2026 des Festlands für einen Alleinstehenden.",
         "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
         "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
+        "methodFormulasLabel": "Formeln",
+        "formulaReference": "Referenzentgelt",
+        "formulaPay": "Entgelt der 6 Monate",
+        "formulaDaily": "Tagessatz",
+        "formulaPercent": "Prozentsatz der Stufe",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodBandsTerm": "Prozentsatz nach Dauer",
+        "methodWaitingTerm": "Karenztage",
+        "methodMinimumTerm": "Mindestbetrag",
+        "methodIncreaseTerm": "Zuschlag von 5 Punkten",
+        "methodFloorTerm": "Untergrenze über 500 Euro",
+        "methodNetCapTerm": "Netto-Obergrenze",
+        "methodGapTerm": "Einkommenslücke",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Nicht abgedeckt",
         "unsupportedTuberculosis": "Tuberkulose, bezahlt mit 80 % oder 100 % der RR je nach unterhaltsberechtigten Angehörigen, ohne zeitliche Begrenzung.",
         "unsupportedSelfEmployed": "Selbstständige (10 Karenztage, bis 365 Tage), freiwillige Sozialversicherung und Hausangestellte.",
@@ -4089,6 +4130,9 @@
         "methodWithholding": "Für jede Zahlung wird die Quellensteuer getrennt nach der Monatstabelle 2026 berechnet, ohne sie zum Monatsgehalt zu addieren: Der Despacho n.º 233-A/2026 (Nr. 10) verlangt von Arbeitgebern einen getrennten effektiven Satz je Vergütung, wie in den Monaten, in denen Urlaubs- und Weihnachtsgeld gezahlt werden.",
         "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr). Auf jedes Zwölftel wird für sich der effektive Satz der gesamten Sonderzahlung angewendet, übliche Lohnabrechnungspraxis seit der Lei n.º 11/2013, Art. 3 (nicht im Despacho geregelt). Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und die Steuer auf die Summe einbehalten, wodurch meist mehr einbehalten wird: Prüfen Sie Ihre Gehaltsabrechnung.",
         "methodSocialSecurity": "Die Sozialversicherung zulasten des Arbeitnehmers beträgt 11 % der Brutto-Sonderzahlung.",
+        "hiringYearTerm": "Jahr des Eintritts",
+        "twelfthsTerm": "In Zwölfteln",
+        "planTerm": "Planung",
         "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Für eine im November gezahlte Sonderzahlung würde nur die halbe Quellensteuer einbehalten.",
         "unsupportedOther": "Es zählt nur das Grundgehalt. Dienstalterszulagen, andere Vergütungsbestandteile, ein Vertragsende oder Ruhen des Vertrags im Lauf des Jahres, großzügigere Tarifverträge und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
         "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
@@ -4182,6 +4226,22 @@
         "methodFraction": "Ein unvollständiges Jahr zählt anteilig: Der Rechner zählt volle Jahrestage ab Vertragsbeginn plus die Tage seit dem letzten, geteilt durch die Tage dieses Jahres. Das Beendigungsdatum zählt als Arbeitstag.",
         "methodTax": "Nur zur Information, nicht im Betrag enthalten: Ein Teil der Abfindung kann nach Art. 2 Abs. 4 des CIRS von der IRS ausgenommen sein, bis zu einer Grenze, die an Ihr reguläres Entgelt der letzten 12 Monate und Ihre Dienstjahre gebunden ist. Der Rest ist steuerpflichtiges Einkommen. Fragen Sie die Steuerbehörde oder einen Steuerberater nach der genauen Grenze in Ihrem Fall.",
         "methodBudget": "Die Abfindung ist ein einmaliger Betrag. Wenn Sie sie zusammen mit einem möglichen Arbeitslosengeld auf die kommenden Monate verteilen, sehen Sie, wie lange sie Ihre Ausgaben deckt.",
+        "methodFormulasLabel": "Formeln",
+        "formulaDaily": "Tagesbetrag",
+        "formulaBase": "Grundgehalt",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Tage pro Jahr",
+        "formulaYears": "Jahre der Betriebszugehörigkeit",
+        "formulaCompensation": "Abfindung",
+        "methodBaseTerm": "Basis",
+        "methodRatesTerm": "Tage pro Jahr",
+        "methodTransitionalTerm": "Ältere Verträge",
+        "methodFixedTermTerm": "Auslaufen eines befristeten Vertrags",
+        "methodDurationLimitTerm": "Höchstdauer",
+        "methodCapsTerm": "Obergrenzen",
+        "methodFractionTerm": "Angefangenes Jahr",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Abgedeckt",
         "supported": "Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung des Arbeitnehmers in einem unbefristeten Vertrag sowie das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr 2026.",
         "unsupportedTitle": "Nicht abgedeckt",
@@ -4669,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "estimatorTerm": "Rechnungsschätzung",
+          "indexTerm": "Preisindex",
+          "marketTerm": "Freier Markt",
           "estimator": "Der Schätzer rechnet einen Monat mit 30 Tagen im regulierten Tarif: die vertraglich vereinbarte Leistung, die verbrauchte Energie, den Rundfunkbeitrag und die Stromsteuer, und addiert die Mehrwertsteuer Posten für Posten mit dem jeweils geltenden Satz.",
           "index": "Der Index betrachtet die Rechnungen aller Haushalte, nicht nur den regulierten Tarif: den durchschnittlichen Preis je kWh laut Eurostat in Portugal und in der EU, inklusive Steuern, damit beide vergleichbar sind.",
           "market": "Der regulierte Tarif ist nur eine Möglichkeit. Die meisten Haushalte sind im freien Markt, wo die Anbieter ihre Preise selbst festlegen und die Angebote günstiger oder teurer als der regulierte Tarif sein können. Der Schätzer ist ein Richtwert, keine Empfehlung."
@@ -4683,15 +4746,33 @@
           "title": "So wird gerechnet",
           "intro": "Für einen Monat mit 30 Tagen macht der Schätzer immer dieselben fünf Dinge:",
           "steps": {
-            "a": "Leistung: der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage.",
-            "b": "Energie: Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt.",
-            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit.",
-            "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
-            "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt."
+            },
+            "c": {
+              "term": "Rundfunkbeitrag (CAV)",
+              "body": "Ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit."
+            },
+            "d": {
+              "term": "Stromverbrauchsteuer (IEC)",
+              "body": "Ein fester Betrag je kWh mit normalem Mehrwertsteuersatz."
+            },
+            "e": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            }
           },
-          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
-          "bi": "Zweitarif gegen Eintarif: Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
-          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
+          "vat": "Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "bi": "Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
+          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst.",
+          "formulasLabel": "Formel",
+          "vatTerm": "Mehrwertsteuerregeln, wie die ERSE sie erklärt",
+          "biTerm": "Zweitarif gegen Eintarif"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -5131,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "So nutzen Sie den Vergleich",
+          "quickTerm": "Schnellmodus",
+          "fullTerm": "Ausführlicher Modus",
+          "diagramTerm": "E-REDES-Datei",
+          "optionsTerm": "Optionen und Filter",
           "quick": "Der Schnellmodus braucht nur Ihre vertraglich vereinbarte Leistung und Ihre Monatsrechnung oder Ihre kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
           "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von Ihrer Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für Ihre Leistung und Ihren Verbrauch auf die Zeiträume verteilt wird.",
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
@@ -5140,6 +5225,9 @@
         },
         "example": {
           "title": "Rechenbeispiel",
+          "regulatedLabel": "Regulierter Tarif",
+          "cheapestLabel": "Günstigstes Angebot",
+          "differenceLabel": "Differenz",
           "setup": "Ein Haushalt mit 3,45 kVA im Eintarif verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
           "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
           "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
@@ -5148,13 +5236,34 @@
           "title": "So wird gerechnet",
           "intro": "Jedes Angebot wird so berechnet wie im Simulator der ERSE (Manual do Simulador de Preços de Energia, Juni 2026):",
           "steps": {
-            "a": "Leistung: der Tagespreis mal die Anzahl der Tage.",
-            "b": "Energie: die kWh jedes Zeitraums mal dessen Preis.",
-            "c": "Sozialtarif: der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA.",
-            "d": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe.",
-            "e": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet.",
-            "f": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben.",
-            "g": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis mal die Anzahl der Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Die kWh jedes Zeitraums mal dessen Preis."
+            },
+            "c": {
+              "term": "Sozialtarif",
+              "body": "Der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA."
+            },
+            "d": {
+              "term": "Abgaben",
+              "body": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe."
+            },
+            "e": {
+              "term": "Dienste und Rabatte",
+              "body": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet."
+            },
+            "f": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben."
+            },
+            "g": {
+              "term": "Jahr",
+              "body": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            }
           },
           "vat": "Die Mehrwertsteuer beträgt {{reduced}} auf den Rundfunkbeitrag, auf den Netzzugangsanteil des Leistungspreises bis 3,45 kVA und auf die ersten {{allowance}} kWh alle 30 Tage bis 6,9 kVA ({{allowanceLarge}} kWh für einen Haushalt mit fünf oder mehr Personen). Für alles andere gilt {{standard}}.",
           "month": "Ein Monat ist ein Zwölftel eines Jahres, {{days}} Tage, wie im Simulator der ERSE, sodass ein Jahr genau zwölf Monate hat.",
@@ -5264,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "calculatorTerm": "Kostenrechner",
+          "noForecastTerm": "Keine Prognose",
           "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
           "calculator": "Der Rechner macht aus Ihrem Fahren monatliche Tankkosten. Sie geben Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und Sie können ihn auf den Preis ändern, den Sie wirklich zahlen.",
           "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird.",
@@ -5278,13 +5389,26 @@
           "title": "So wird gerechnet",
           "intro": "Der Rechner macht vier Dinge:",
           "steps": {
-            "a": "Strecke pro Monat: die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat.",
-            "b": "Liter: Strecke mal Verbrauch geteilt durch 100.",
-            "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
-            "d": "Jahr: zwölf solche Monate."
+            "a": {
+              "term": "Strecke pro Monat",
+              "body": "Die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat."
+            },
+            "b": {
+              "term": "Liter",
+              "body": "Strecke mal Verbrauch geteilt durch 100."
+            },
+            "c": {
+              "term": "Kosten",
+              "body": "Liter mal der eingegebene Literpreis, auf den Cent gerundet."
+            },
+            "d": {
+              "term": "Jahr",
+              "body": "Zwölf solche Monate."
+            }
           },
           "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises.",
-          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter."
+          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter.",
+          "formulasLabel": "Formeln"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -5299,13 +5423,28 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
-            "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
-            "stations": "Tankstellen: Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule.",
-            "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
-            "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
-            "education": "Nur zu Informationszwecken, keine Beratung."
-          }
+            "noForecast": {
+              "term": "Keine Prognose",
+              "body": "Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht."
+            },
+            "average": {
+              "term": "Nationaler Durchschnitt",
+              "body": "Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten."
+            },
+            "stations": {
+              "term": "Tankstellen",
+              "body": "Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule."
+            },
+            "consumption": {
+              "term": "Verbrauch",
+              "body": "Derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen."
+            },
+            "scope": {
+              "term": "Nur Kraftstoff",
+              "body": "Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt."
+            }
+          },
+          "education": "Nur zu Informationszwecken, keine Beratung."
         },
         "related": {
           "title": "Weiter geht's",

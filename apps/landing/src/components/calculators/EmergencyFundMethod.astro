@@ -1,12 +1,13 @@
 ---
+// Prerendered explanation, worked example and method for the emergency fund calculator, on
+// the guide building blocks (guideBlocks.ts). The figures come from the same calculation the
+// calculator runs (emergencyFundGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  EXAMPLE_INPUTS,
-  GUIDANCE_RANGE_MONTHS,
-  computeEmergencyFund,
-} from "@/lib/calculators/emergencyFund";
-import type { Lang } from "@/lib/i18nLocale";
-import { formatMoney } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildEmergencyFundGuide } from "./emergencyFundGuide";
+import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
 interface Props {
@@ -15,62 +16,28 @@ interface Props {
 
 const { locale } = Astro.props;
 const t = getTranslations(locale);
-const money = (value: number) => formatMoney(locale, value);
+const k = (key: string) => `tools.emergencyFund.${key}`;
 
-// The worked example is the calculator's starting state, computed by the same
-// function, so the prose and the tool never disagree.
-const example = computeEmergencyFund(EXAMPLE_INPUTS);
-const lowCover = computeEmergencyFund({
-  ...EXAMPLE_INPUTS,
-  monthsOfCover: GUIDANCE_RANGE_MONTHS[0],
-});
-
-const values = {
-  expenses: money(EXAMPLE_INPUTS.monthlyExpenses),
-  savings: money(EXAMPLE_INPUTS.currentSavings),
-  contribution: money(EXAMPLE_INPUTS.monthlyContribution),
-  months: example.monthsOfCover,
-  target: money(example.target),
-  shortfall: money(example.shortfall),
-  monthsToTarget: example.monthsToTarget,
-  lowTarget: money(lowCover.target),
-  lowMonths: lowCover.monthsToTarget,
-};
-
-const exampleSteps = ["exampleStep1", "exampleStep2", "exampleStep3"].map((key) =>
-  t(`tools.emergencyFund.${key}`, values),
-);
-const methodSteps = ["method1", "method2", "method3", "method4"].map((key) =>
-  t(`tools.emergencyFund.${key}`),
-);
+const guide = buildEmergencyFundGuide(locale);
 ---
 
 <ToolGuide>
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
-      {t("tools.emergencyFund.whatTitle")}
-    </h2>
-    <p class="mt-4">{t("tools.emergencyFund.whatBody1")}</p>
-    <p class="mt-4">{t("tools.emergencyFund.whatBody2")}</p>
+    <h2>{t(k("whatTitle"))}</h2>
+    <p>{t(k("whatBody1"))}</p>
+    <p>{t(k("whatBody2"))}</p>
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
-      {t("tools.emergencyFund.exampleTitle")}
-    </h2>
-    <p class="mt-4">{t("tools.emergencyFund.exampleIntro", values)}</p>
-    <ol class="mt-4 list-decimal space-y-2 pl-6">
-      {exampleSteps.map((step) => <li>{step}</li>)}
-    </ol>
-    <p class="mt-4">{t("tools.emergencyFund.exampleOutro", values)}</p>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("exampleIntro"), guide.exampleValues)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
+    <p>{t(k("exampleOutro"), guide.exampleValues)}</p>
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">
-      {t("tools.emergencyFund.methodTitle")}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {methodSteps.map((step) => <li>{step}</li>)}
-    </ul>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
   </section>
 </ToolGuide>

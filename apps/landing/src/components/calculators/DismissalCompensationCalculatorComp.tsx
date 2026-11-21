@@ -237,20 +237,23 @@ function DismissalCompensationCalculator() {
         </p>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
+        <div id="dismissal-result" aria-live="polite">
           {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.compensation"))}</p>
-              <p id="dismissal-compensation" className="font-mono text-3xl font-bold text-primary">
-                {money(result.compensationCents)}
-              </p>
-            </>
+            <CalculatorResult
+              items={[
+                { label: t(k("result.compensation")), value: money(result.compensationCents), highlight: true },
+                { label: t(k("result.seniority")), value: t(k("result.seniorityValue"), { years: years(result.seniorityYears) }) },
+                { label: t(k("result.usedMonthly")), value: money(result.usedMonthlyCents) },
+                { label: t(k("result.daily")), value: money(result.dailyCents) },
+                { label: t(k("result.cap")), value: money(result.capCents) },
+              ]}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
           )}
         </div>
         {warned && (
-          // Non-blocking: the expiry figure above stays, and the button moves the same dates to the dismissal option.
+          // Non-blocking: the expiry figure stays, and the button moves the same dates to the dismissal option.
           <div role="note" aria-labelledby="dismissal-duration-warning" className="space-y-2 rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
             <p id="dismissal-duration-warning" className="font-semibold">{t(k("durationWarning.title"))}</p>
             {overLimit && (
@@ -282,17 +285,12 @@ function DismissalCompensationCalculator() {
         )}
         {result && (
           <>
-            <CalculatorResult
-              items={[
-                { label: t(k("result.seniority")), value: t(k("result.seniorityValue"), { years: years(result.seniorityYears) }) },
-                { label: t(k("result.regime")), value: t(k(`result.regimes.${result.regime}`)) },
-                { label: t(k("result.usedMonthly")), value: money(result.usedMonthlyCents) },
-                { label: t(k("result.daily")), value: money(result.dailyCents) },
-                { label: t(k("result.cap")), value: money(result.capCents) },
-              ]}
-            />
             <div>
               <h3 className="text-sm font-semibold text-foreground">{t(k("result.breakdownTitle"))}</h3>
+              <p className="mt-1 flex flex-wrap gap-x-2 text-sm">
+                <span className="text-muted-foreground">{t(k("result.regime"))}</span>
+                <span className="text-foreground">{t(k(`result.regimes.${result.regime}`))}</span>
+              </p>
               <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
                 {result.lines.map((line) => (
                   <li key={line.key} className="flex justify-between gap-3">

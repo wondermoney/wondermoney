@@ -151,22 +151,11 @@ function UnemploymentBenefitCalculator() {
         />
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
+        <div id="unemployment-result" aria-live="polite">
           {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.monthly"))}</p>
-              <p id="unemployment-monthly" className="font-mono text-3xl font-bold text-primary">
-                {money(result.monthlyCents)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
-        {result && (
-          <>
             <CalculatorResult
               items={[
+                { label: t(k("result.monthly")), value: money(result.monthlyCents), highlight: true },
                 { label: t(k("result.daily")), value: money(result.dailyCents) },
                 {
                   label: t(k("result.duration")),
@@ -181,22 +170,30 @@ function UnemploymentBenefitCalculator() {
                     base: String(result.duration.baseDays), extra: String(result.duration.extraDays),
                   }),
                 },
-                { label: t(k("result.total")), value: money(result.totalCents), highlight: true },
+                { label: t(k("result.total")), value: money(result.totalCents) },
                 { label: t(k("result.netBefore")), value: money(result.netReferenceMonthlyCents) },
                 { label: t(k("result.drop")), value: `−${money(result.monthlyDropCents)}` },
               ]}
             />
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-              {t(k(`result.limit.${result.limit}`), {
-                ias: money(IAS_2026_CENTS),
-                max: money(Math.round(IAS_2026_CENTS * 2.5)),
-              })}
-              {result.childrenIncrease ? ` ${t(k("result.increaseApplied"))}` : ""}
-            </p>
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">{t(k("result.estimate"))}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
+          )}
+        </div>
+        {result && (
+          <>
+            <div className="space-y-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+              <p>
+                {t(k(`result.limit.${result.limit}`), {
+                  ias: money(IAS_2026_CENTS),
+                  max: money(Math.round(IAS_2026_CENTS * 2.5)),
+                })}
+                {result.childrenIncrease ? ` ${t(k("result.increaseApplied"))}` : ""}
+              </p>
+              <p>{t(k("result.estimate"))}</p>
+            </div>
           </>
         )}
-        <div>
+        <div className="border-t border-border pt-4">
           <h3 className="text-sm font-semibold text-foreground">{t(k("checklist.title"))}</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
             {CHECKLIST.map((key) => <li key={key}>{t(k(`checklist.${key}`))}</li>)}

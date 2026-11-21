@@ -509,7 +509,7 @@ function ElectricityTariffComparison({
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
-      <form className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
+      <form className="min-w-0 space-y-6" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
         <ElectricityInvoiceUpload
           onApply={(reading) => {
             setEdited(true);
