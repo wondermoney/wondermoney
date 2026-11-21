@@ -27,9 +27,11 @@ import {
 } from "./guideBlocks";
 
 type Translate = ReturnType<typeof getTranslations>;
+/** Values a page passes for its strings' placeholders. */
+type GuideValues = Record<string, string | number>;
 
 /** A `{ term, body }` pair from the catalogue as a term list entry. */
-const pair = (t: Translate, key: string, id?: string, params?: Record<string, string>): GuideTerm => ({
+const pair = (t: Translate, key: string, id?: string, params?: GuideValues): GuideTerm => ({
   term: t(`${key}.term`),
   body: t(`${key}.body`, params),
   ...(id ? { id } : {}),
@@ -55,7 +57,7 @@ export type ElectricityIndexGuideContent = {
 
 export function buildElectricityIndexGuide(
   locale: Lang,
-  values: Record<string, string>,
+  values: GuideValues,
 ): ElectricityIndexGuideContent {
   const t = getTranslations(locale);
   const k = (key: string) => `tools.electricityIndex.guide.${key}`;
@@ -169,7 +171,7 @@ export const FUEL_PRICES_GUIDE_IDS = {
 
 export type FuelPricesGuideContent = {
   /** Values for the guide's strings. */
-  values: Record<string, string>;
+  values: GuideValues;
   readTerms: GuideTerm[];
   /** Litres → monthly cost → year. */
   flow: GuideFigure[];
@@ -179,7 +181,7 @@ export type FuelPricesGuideContent = {
   limits: GuideTerm[];
 };
 
-export function buildFuelPricesGuide(locale: Lang, values: Record<string, string>): FuelPricesGuideContent {
+export function buildFuelPricesGuide(locale: Lang, values: GuideValues): FuelPricesGuideContent {
   const t = getTranslations(locale);
   const k = (key: string) => `tools.fuelPrices.guide.${key}`;
   const tool = (key: string) => t(`tools.fuelPrices.${key}`);
