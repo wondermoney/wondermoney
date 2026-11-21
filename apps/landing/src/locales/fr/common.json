@@ -1111,15 +1111,20 @@
         "exampleBody": "Un couple perçoit {{income}} nets par mois à deux. Il rembourse {{home}} de crédit immobilier, {{car}} de crédit auto et {{cards}} de carte de crédit, soit {{total}} au total. En divisant les mensualités par les revenus et en multipliant par 100, son taux d'endettement est de {{ratio}}, dans la zone de vigilance.",
         "exampleScenario": "Le crédit auto se termine bientôt. Sans lui, les mensualités tombent à {{scenarioTotal}} et le taux à {{scenarioRatio}}, de retour dans la zone saine. Le calculateur ci-dessus part de ce foyer et de ce changement, pour que vous y mettiez vos propres chiffres.",
         "methodHeading": "Méthode",
-        "methodFormula": "Taux d'endettement = total des mensualités de crédit ÷ revenus nets mensuels du foyer × 100",
-        "methodCounts": "Compté comme dette : chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
-        "methodExcludes": "Non compté : le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
-        "methodIncome": "Les revenus sont nets : ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
         "methodRounding": "Le taux est arrondi à une décimale, et la zone suit le chiffre arrondi. Des mensualités supérieures aux revenus donnent un taux de plus de 100 %.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
         "nextHeading": "Un nouveau crédit en vue ?",
         "nextBody": "Un crédit immobilier ou un autre prêt ajoute une mensualité. Calculez ce que coûterait chaque mois un nouveau prêt immobilier, puis saisissez cette mensualité dans le panneau de scénario pour voir le nouveau taux.",
-        "nextLink": "Ouvrir le simulateur de prêt immobilier"
+        "nextLink": "Ouvrir le simulateur de prêt immobilier",
+        "methodCountsTerm": "Compté comme dette",
+        "methodCountsBody": "Chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
+        "methodExcludesTerm": "Non compté",
+        "methodExcludesBody": "Le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
+        "methodIncomeTerm": "Les revenus sont nets",
+        "methodIncomeBody": "Ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "householdBudget": {
@@ -1324,7 +1329,6 @@
         "method": {
           "title": "Comment la mensualité est calculée",
           "intro": "La plupart des prêts immobiliers à taux fixe se remboursent par mensualités constantes : le même montant chaque mois, fixé pour que la dette tombe à zéro avec la dernière. La mensualité découle de la formule de l'annuité :",
-          "legend": "M est la mensualité, P la somme empruntée, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement P divisé par n.",
           "schedule": "Chaque mois, les intérêts sont calculés sur le capital restant dû et le reste de la mensualité rembourse du capital. À mesure que la dette baisse, la part d'intérêts diminue et la part de capital augmente : la dette baisse donc lentement au début et plus vite à la fin. L'assurance et les frais s'ajoutent à la mensualité et ne réduisent jamais la dette.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1335,7 +1339,24 @@
             "rounding": "Les montants sont en euros. Chaque mensualité est calculée à partir du capital restant dû et du nombre de mois restants, puis arrondie au centime : une mensualité peut donc différer des autres d'un centime, et la dernière solde exactement la dette. Sur un prêt très long à taux élevé, les premières mensualités peuvent rembourser moins d'un centime de capital.",
             "lenderFigures": "Les chiffres de votre banque peuvent différer légèrement selon sa façon de compter les jours, d'arrondir ou de fixer la date de paiement. Les informations précontractuelles qu'elle vous remet font référence."
           },
-          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}."
+          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}.",
+          "formulasLabel": "Formules",
+          "zeroRate": "À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement le montant du prêt divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "monthly": "Mensualités",
+            "nominalRate": "Taux nominal, pas le TAEG",
+            "flatFees": "Assurances et frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites"
+          }
+        },
+        "labels": {
+          "firstInterest": "Intérêts de la première mensualité",
+          "firstPrincipal": "Capital de la première mensualité",
+          "monthlyRate": "Taux mensuel",
+          "payments": "Nombre de mensualités"
         }
       },
       "cta": {

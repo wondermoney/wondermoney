@@ -1111,15 +1111,20 @@
         "exampleBody": "Ein Paar hat zusammen {{income}} netto im Monat. Es zahlt {{home}} für die Baufinanzierung, {{car}} für einen Autokredit und {{cards}} auf eine Kreditkarte, zusammen {{total}}. Raten geteilt durch Einkommen, mal 100: Die Quote liegt bei {{ratio}}, im Vorsichtsbereich.",
         "exampleScenario": "Der Autokredit ist bald abbezahlt. Ohne ihn sinken die Raten auf {{scenarioTotal}} und die Quote auf {{scenarioRatio}}, wieder im gesunden Bereich. Der Rechner oben startet mit diesem Haushalt und dieser Änderung, damit Sie Ihre eigenen Zahlen einsetzen können.",
         "methodHeading": "Methode",
-        "methodFormula": "Schuldendienstquote = monatliche Kreditraten gesamt ÷ monatliches Haushaltsnettoeinkommen × 100",
-        "methodCounts": "Als Schulden zählen: alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
-        "methodExcludes": "Nicht gezählt: Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
-        "methodIncome": "Das Einkommen ist netto: was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
         "methodRounding": "Die Quote wird auf eine Nachkommastelle gerundet, und der Bereich richtet sich nach dem gerundeten Wert. Raten über dem Einkommen ergeben eine Quote über 100 %.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
         "nextHeading": "Planen Sie einen neuen Kredit?",
         "nextBody": "Eine Baufinanzierung oder ein anderer Kredit bringt eine weitere Rate. Berechnen Sie, was eine neue Hypothek im Monat kosten würde, und tragen Sie diese Rate im Szenario-Bereich ein, um die neue Quote zu sehen.",
-        "nextLink": "Hypothekenrechner öffnen"
+        "nextLink": "Hypothekenrechner öffnen",
+        "methodCountsTerm": "Als Schulden zählen",
+        "methodCountsBody": "Alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
+        "methodExcludesTerm": "Nicht gezählt",
+        "methodExcludesBody": "Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
+        "methodIncomeTerm": "Das Einkommen ist netto",
+        "methodIncomeBody": "Was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "householdBudget": {
@@ -1324,7 +1329,6 @@
         "method": {
           "title": "So wird die Rate berechnet",
           "intro": "Die meisten Darlehen mit festem Zins werden in gleichbleibenden Raten zurückgezahlt: jeden Monat derselbe Betrag, so bemessen, dass die Schuld mit der letzten Rate auf null fällt. Die Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "Dabei ist M die Monatsrate, P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
           "schedule": "Jeden Monat werden Zinsen auf die verbleibende Schuld berechnet, der Rest der Rate tilgt das Darlehen. Je weiter die Schuld sinkt, desto kleiner wird der Zinsanteil und desto größer der Tilgungsanteil. Deshalb sinkt die Schuld anfangs langsam und gegen Ende schneller. Versicherung und Gebühren kommen zur Rate hinzu und verringern die Schuld nie.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1335,7 +1339,24 @@
             "rounding": "Beträge sind in Euro. Jede Monatsrate wird aus der Restschuld und den verbleibenden Monaten berechnet und auf den Cent gerundet. Eine Rate kann deshalb um einen Cent von den anderen abweichen, und die letzte tilgt die Schuld genau. Bei einem sehr langen Darlehen mit hohem Zins können die ersten Raten weniger als einen Cent tilgen.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt, rundet oder den Zahlungstermin festlegt. Maßgeblich sind die vorvertraglichen Informationen, die Sie von ihr erhalten."
           },
-          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
+          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}.",
+          "formulasLabel": "Formeln",
+          "zeroRate": "Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach der Kreditbetrag geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "monthly": "Monatliche Raten",
+            "nominalRate": "Nominalzins, nicht der Effektivzins",
+            "flatFees": "Versicherungen und Gebühren",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen deiner Bank",
+            "limits": "Grenzen"
+          }
+        },
+        "labels": {
+          "firstInterest": "Zinsen in der ersten Rate",
+          "firstPrincipal": "Tilgung in der ersten Rate",
+          "monthlyRate": "Monatszins",
+          "payments": "Zahl der Raten"
         }
       },
       "cta": {

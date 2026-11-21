@@ -1111,15 +1111,20 @@
         "exampleBody": "Una coppia guadagna {{income}} netti al mese in due. Paga {{home}} di mutuo, {{car}} per il finanziamento dell'auto e {{cards}} per la carta di credito: {{total}} in tutto. Dividendo le rate per il reddito e moltiplicando per 100, il rapporto è del {{ratio}}, nella fascia di attenzione.",
         "exampleScenario": "Il finanziamento dell'auto sta per finire. Senza, le rate scendono a {{scenarioTotal}} e il rapporto al {{scenarioRatio}}, di nuovo nella fascia sana. Il calcolatore qui sopra parte da questo nucleo e da questo cambiamento, così puoi inserire i tuoi numeri.",
         "methodHeading": "Metodo",
-        "methodFormula": "Rapporto rata/reddito = totale delle rate mensili ÷ reddito netto mensile del nucleo familiare × 100",
-        "methodCounts": "Conta come debito: ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
-        "methodExcludes": "Non conta: l'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
-        "methodIncome": "Il reddito è netto: quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
         "methodRounding": "Il rapporto è arrotondato a un decimale, e la fascia segue il valore arrotondato. Rate superiori al reddito danno un rapporto oltre il 100%.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati.",
         "nextHeading": "Pensi a un nuovo finanziamento?",
         "nextBody": "Un mutuo o un altro prestito aggiunge una rata. Calcola quanto costerebbe al mese un nuovo mutuo e inserisci quella rata nel pannello dello scenario per vedere il nuovo rapporto.",
-        "nextLink": "Apri il calcolatore del mutuo"
+        "nextLink": "Apri il calcolatore del mutuo",
+        "methodCountsTerm": "Conta come debito",
+        "methodCountsBody": "Ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
+        "methodExcludesTerm": "Non conta",
+        "methodExcludesBody": "L'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
+        "methodIncomeTerm": "Il reddito è netto",
+        "methodIncomeBody": "Quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "householdBudget": {
@@ -1324,7 +1329,6 @@
         "method": {
           "title": "Come si calcola la rata",
           "intro": "La maggior parte dei mutui a tasso fisso si rimborsa con rate costanti: lo stesso importo ogni mese, fissato in modo che il debito arrivi a zero con l'ultima rata. La rata deriva dalla formula della rendita:",
-          "legend": "Qui M è la rata mensile, P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
           "schedule": "Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa capitale. Man mano che il debito scende, la quota interessi si riduce e la quota capitale cresce: per questo il debito scende piano all'inizio e più in fretta verso la fine. Assicurazioni e spese si sommano alla rata e non riducono mai il debito.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1335,7 +1339,24 @@
             "rounding": "Gli importi sono in euro. La rata di ogni mese si calcola dal debito residuo e dai mesi che restano, arrotondata al centesimo: per questo una rata può differire dalle altre di un centesimo, e l'ultima estingue il debito esattamente. In un mutuo molto lungo a un tasso alto, le prime rate possono rimborsare meno di un centesimo di capitale.",
             "lenderFigures": "Le cifre della tua banca possono differire leggermente per come conta i giorni, arrotonda gli importi o fissa la data di pagamento. Il riferimento sono le informazioni precontrattuali che ti consegna."
           },
-          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
+          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}.",
+          "formulasLabel": "Formule",
+          "zeroRate": "Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente l'importo del prestito diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "monthly": "Rate mensili",
+            "nominalRate": "Tasso nominale, non il TAEG",
+            "flatFees": "Assicurazioni e commissioni",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interessi nella prima rata",
+          "firstPrincipal": "Capitale nella prima rata",
+          "monthlyRate": "Tasso mensile",
+          "payments": "Numero di rate"
         }
       },
       "cta": {

@@ -1111,15 +1111,20 @@
         "exampleBody": "A couple brings home {{income}} a month between them. They pay {{home}} on their mortgage, {{car}} on a car loan and {{cards}} towards a credit card, {{total}} in all. Divide the payments by the income and multiply by 100: their ratio is {{ratio}}, in the caution band.",
         "exampleScenario": "Their car loan ends soon. Without it, payments fall to {{scenarioTotal}} and the ratio to {{scenarioRatio}}, back in the healthy band. The calculator above starts from this household and this change, so you can swap in your own figures.",
         "methodHeading": "Method",
-        "methodFormula": "Debt-to-income ratio = total monthly credit payments ÷ net monthly household income × 100",
-        "methodCounts": "Counted as debt: every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
-        "methodExcludes": "Not counted: rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
-        "methodIncome": "Income is net: what reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
         "methodRounding": "The ratio is rounded to one decimal place, and the band follows the rounded figure. Payments above income give a ratio over 100%.",
         "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
         "nextHeading": "Planning a new loan?",
         "nextBody": "A mortgage or another loan adds a payment. Work out what a new mortgage would cost each month, then enter that payment in the scenario panel to see the new ratio.",
-        "nextLink": "Open the mortgage calculator"
+        "nextLink": "Open the mortgage calculator",
+        "methodCountsTerm": "Counted as debt",
+        "methodCountsBody": "Every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
+        "methodExcludesTerm": "Not counted",
+        "methodExcludesBody": "Rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
+        "methodIncomeTerm": "Income is net",
+        "methodIncomeBody": "What reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "householdBudget": {
@@ -1324,7 +1329,6 @@
         "method": {
           "title": "How the payment is calculated",
           "intro": "Most fixed-rate mortgages are repaid in level payments: the same amount every month, set so the balance reaches zero with the last one. The payment comes from the annuity formula:",
-          "legend": "Here M is the monthly payment, P is the amount borrowed, r is the annual rate divided by 12, and n is the number of monthly payments. At 0% interest there is nothing to discount, so the payment is simply P divided by n.",
           "schedule": "Each month, interest is charged on the balance still owed and the rest of the payment repays principal. As the balance falls, the interest part shrinks and the principal part grows, which is why the balance falls slowly at first and faster towards the end. Insurance and fees are added on top of the payment and never reduce the balance.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1335,7 +1339,24 @@
             "rounding": "Amounts are in euros. Each month's payment is worked out from the balance still owed and the months left, then rounded to the cent, so a payment can differ from the others by a cent and the last one clears the balance exactly. On a very long loan at a high rate, the first payments may repay less than a cent of the loan.",
             "lenderFigures": "Your lender's figures can differ slightly, because of how they count days, round amounts or set the payment date. The pre-contract information they give you is the figure to rely on."
           },
-          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}."
+          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}.",
+          "formulasLabel": "Formulas",
+          "zeroRate": "At 0% interest there is nothing to discount, so the payment is simply the loan amount divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "monthly": "Monthly payments",
+            "nominalRate": "Nominal rate, not the APR",
+            "flatFees": "Insurance and fees",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interest in the first payment",
+          "firstPrincipal": "Principal in the first payment",
+          "monthlyRate": "Monthly rate",
+          "payments": "Number of payments"
         }
       },
       "cta": {

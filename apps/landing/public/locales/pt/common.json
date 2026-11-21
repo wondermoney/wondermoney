@@ -1111,15 +1111,20 @@
         "exampleBody": "Um casal recebe {{income}} líquidos por mês, somando os dois. Paga {{home}} de crédito à habitação, {{car}} de crédito automóvel e {{cards}} do cartão de crédito: {{total}} no total. Dividindo as prestações pelo rendimento e multiplicando por 100, a taxa de esforço é de {{ratio}}, no escalão de atenção.",
         "exampleScenario": "O crédito automóvel está quase pago. Sem ele, as prestações descem para {{scenarioTotal}} e a taxa para {{scenarioRatio}}, de volta ao escalão saudável. A calculadora acima começa com este agregado e esta alteração, para poderes pôr os teus próprios valores.",
         "methodHeading": "Método",
-        "methodFormula": "Taxa de esforço = total das prestações mensais de crédito ÷ rendimento líquido mensal do agregado × 100",
-        "methodCounts": "Conta como dívida: todas as prestações a pagar em cada mês de crédito à habitação, crédito pessoal e automóvel, cartões de crédito, leasing e qualquer outro crédito. Num cartão, usa o valor que pagas de facto todos os meses.",
-        "methodExcludes": "Não conta: a renda paga a um senhorio, as contas da casa, o supermercado, os seguros e a poupança. Pesam no orçamento, mas não são reembolsos de dinheiro emprestado.",
-        "methodIncome": "O rendimento é líquido: o que chega à conta depois de impostos e contribuições, de todos no agregado que partilham as prestações. Se o rendimento varia, usa a média mensal do último ano.",
         "methodRounding": "A taxa é arredondada a uma casa decimal, e o escalão segue o valor arredondado. Prestações acima do rendimento dão uma taxa superior a 100%.",
         "methodPrivacy": "O cálculo é feito no teu navegador. Os valores que introduzes ficam no teu dispositivo e não são guardados.",
         "nextHeading": "A pensar num crédito novo?",
         "nextBody": "Um crédito à habitação ou outro empréstimo acrescenta uma prestação. Calcula quanto custaria por mês um novo crédito habitação e indica essa prestação no painel de cenário para veres a nova taxa.",
-        "nextLink": "Abrir o simulador de crédito habitação"
+        "nextLink": "Abrir o simulador de crédito habitação",
+        "methodCountsTerm": "Conta como dívida",
+        "methodCountsBody": "Todas as prestações a pagar em cada mês de crédito à habitação, crédito pessoal e automóvel, cartões de crédito, leasing e qualquer outro crédito. Num cartão, usa o valor que pagas de facto todos os meses.",
+        "methodExcludesTerm": "Não conta",
+        "methodExcludesBody": "A renda paga a um senhorio, as contas da casa, o supermercado, os seguros e a poupança. Pesam no orçamento, mas não são reembolsos de dinheiro emprestado.",
+        "methodIncomeTerm": "O rendimento é líquido",
+        "methodIncomeBody": "O que chega à conta depois de impostos e contribuições, de todos no agregado que partilham as prestações. Se o rendimento varia, usa a média mensal do último ano.",
+        "methodRoundingTerm": "Arredondamento",
+        "methodPrivacyTerm": "Privacidade",
+        "methodFormulasLabel": "Fórmulas"
       }
     },
     "householdBudget": {
@@ -1324,7 +1329,6 @@
         "method": {
           "title": "Como é calculada a prestação",
           "intro": "A maioria dos créditos habitação a taxa fixa é paga em prestações constantes: o mesmo valor todos os meses, definido para que a dívida chegue a zero com a última. A prestação resulta da fórmula das rendas:",
-          "legend": "Aqui, M é a prestação mensal, P é o montante pedido, r é a taxa anual a dividir por 12 e n é o número de prestações mensais. Com juro de 0% não há nada a descontar, e a prestação é simplesmente P a dividir por n.",
           "schedule": "Em cada mês, os juros incidem sobre o capital ainda em dívida e o resto da prestação amortiza capital. À medida que a dívida desce, a parte de juros encolhe e a parte de capital cresce, por isso a dívida desce devagar no início e mais depressa no fim. Os seguros e comissões somam-se à prestação e nunca reduzem a dívida.",
           "assumptionsTitle": "Pressupostos",
           "assumptions": {
@@ -1335,7 +1339,24 @@
             "rounding": "Os valores estão em euros. A prestação de cada mês é calculada a partir do capital em dívida e dos meses que faltam, e arredondada ao cêntimo; por isso, uma prestação pode diferir das outras num cêntimo, e a última liquida a dívida exatamente. Num empréstimo muito longo com taxa alta, as primeiras prestações podem amortizar menos de um cêntimo.",
             "lenderFigures": "Os valores do teu banco podem diferir ligeiramente, pela forma como contam os dias, arredondam valores ou fixam a data de pagamento. A informação pré-contratual que te entregam é a referência a usar."
           },
-          "limits": "O simulador aceita empréstimos de {{minAmount}} a {{maxAmount}}, prazos até {{maxYears}} anos e taxas até {{maxRate}}."
+          "limits": "O simulador aceita empréstimos de {{minAmount}} a {{maxAmount}}, prazos até {{maxYears}} anos e taxas até {{maxRate}}.",
+          "formulasLabel": "Fórmulas",
+          "zeroRate": "Com juro de 0% não há nada a descontar, e a prestação é simplesmente o montante do empréstimo a dividir pelo número de prestações.",
+          "terms": {
+            "fixedRate": "Taxa fixa",
+            "monthly": "Prestações mensais",
+            "nominalRate": "Taxa nominal, não a TAEG",
+            "flatFees": "Seguros e comissões",
+            "rounding": "Arredondamento",
+            "lenderFigures": "Os valores do teu banco",
+            "limits": "Limites"
+          }
+        },
+        "labels": {
+          "firstInterest": "Juros na primeira prestação",
+          "firstPrincipal": "Capital na primeira prestação",
+          "monthlyRate": "Taxa mensal",
+          "payments": "Número de prestações"
         }
       },
       "cta": {
