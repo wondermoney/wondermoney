@@ -256,9 +256,10 @@ function Bill({ result, input, euro }: { result: ElectricityBillResult; input: E
       {result.monthlyKwh === 0 && (
         <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">{t(k("result.noConsumption"))}</p>
       )}
-      {/* A plain table under the ledger: the panel is the card, so no second border around it. */}
+      {/* A plain table under the ledger: the panel is the card, so no second border around it.
+          Its labels wrap, so it fits a phone without scrolling sideways. */}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[22rem] text-sm">
+        <table className="w-full text-sm">
           <caption className="sr-only">{t(k("result.breakdown"))}</caption>
           <thead className="text-muted-foreground">
             <tr className="border-b border-border">
