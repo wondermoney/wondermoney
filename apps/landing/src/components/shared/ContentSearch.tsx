@@ -15,17 +15,19 @@ type SearchableItem = {
 type Props = {
   items: SearchableItem[];
   placeholder?: string;
+  /** The field's accessible name, naming what it searches ("Search guides"); a placeholder is not one. */
+  label?: string;
 };
 
-export default function ContentSearch({ items, placeholder, locale }: Props & { locale: Lang }) {
+export default function ContentSearch({ items, placeholder, label, locale }: Props & { locale: Lang }) {
   return (
     <ReactTranslationsProvider locale={locale}>
-      <ContentSearchContent items={items} placeholder={placeholder} />
+      <ContentSearchContent items={items} placeholder={placeholder} label={label} />
     </ReactTranslationsProvider>
   );
 }
 
-function ContentSearchContent({ items, placeholder }: Props) {
+function ContentSearchContent({ items, placeholder, label }: Props) {
   const { t } = useTranslations();
   const [query, setQuery] = useState("");
 
@@ -46,8 +48,8 @@ function ContentSearchContent({ items, placeholder }: Props) {
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        aria-label={label || t("global.search.label")}
         placeholder={placeholder || t("global.search.placeholder")}
-        className="pl-10"
         prefix={
           <svg
             aria-hidden="true"

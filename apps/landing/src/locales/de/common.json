@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Suchen...",
+      "label": "Suchen",
       "noResults": "Keine Ergebnisse gefunden. Versuchen Sie einen anderen Suchbegriff."
     },
     "relatedContent": {
@@ -6642,6 +6643,7 @@
       "title": "Ratgeber zur persönlichen Finanzplanung",
       "description": "Ausführliche Artikel und Ratgeber, die Ihnen helfen, bessere finanzielle Entscheidungen zu treffen.",
       "searchPlaceholder": "Ratgeber suchen...",
+      "searchLabel": "Ratgeber durchsuchen",
       "comingSoon": "Ratgeber folgen in Kürze.",
       "defaultCategory": "Allgemein",
       "readGuide": "Ratgeber lesen"
@@ -6687,6 +6689,7 @@
       "schemaDescription": "Ein umfassendes Glossar mit Finanz- und Anlagebegriffen.",
       "description": "Jeder Finanz- und Anlagebegriff in verständlicher Sprache erklärt. Nach Buchstabe durchsuchen oder nach einem bestimmten Begriff suchen.",
       "searchPlaceholder": "Begriffe suchen...",
+      "searchLabel": "Glossarbegriffe durchsuchen",
       "comingSoon": "Glossarbegriffe folgen in Kürze.",
       "letterNav": "Begriffe nach Buchstaben"
     },
