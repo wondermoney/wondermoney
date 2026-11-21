@@ -205,7 +205,7 @@ The app's radius scale, from one `--radius: 0.5rem`: `sm` 4px (badges), `md` 6px
 
 ### Text fields
 - **One component:** every text, number, date and search field is `Input` (`src/components/ui/input.tsx`); a number field is `NumericInput`, which draws it, and `CalculatorInput` adds the label, help and error lines around that. `inputUsage.test.ts` fails on a raw text-like `<input>` anywhere else. Checkboxes, radios, file pickers and sliders keep their own controls.
-- **Shape:** one box with the select (`fieldControlClass` in `src/components/ui/fieldControl.ts`): 40px tall, 6px radius, Input Stroke border, canvas fill, instant focus ring with a 2px offset; `disabled` dims the field and its adornments.
+- **Shape:** one box with the select (`fieldControlClass` in `src/components/ui/fieldControl.ts`): 40px tall, 6px radius, Input Stroke border, canvas fill, instant focus ring with a 2px offset; `disabled` dims the field and its adornments. No call site sets its own height or corner on a field or a select (`inputUsage.test.ts` fails on one), so a filter row of a search and dropdowns lines up.
 - **Adornments:** a currency sign or an icon (`prefix`) 12px from the left edge and a percent sign or unit (`suffix`) 12px from the right, in muted 14px, with the text clearing them.
 - **Type:** the body face for words and dates; `NumericInput` sets the figure in Geist Mono.
 - **Invalid:** a field with `aria-invalid="true"` draws its border in `destructive-text`, and its message under it in the same token, tied to the field by `aria-describedby`. The focus ring stays violet.

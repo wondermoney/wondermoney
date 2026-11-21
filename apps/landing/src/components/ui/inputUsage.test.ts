@@ -35,6 +35,26 @@ function rawTextInputs(source: string): { line: number; tag: string }[] {
   });
 }
 
+/** Classes that would change the shared box's height or corner, in any variant. */
+const BOX_OVERRIDE = /(?:^|[\s"'`:])(?:(?:min-|max-)?h-[\w[\]./-]+|rounded(?:-[\w[\]-]+)?)(?=$|[\s"'`])/;
+
+/**
+ * Every `<Input>`, `<NumericInput>`, `<CalculatorInput>` or `<Select>` in `source` whose
+ * `className` or `wrapperClassName` sets a height or a corner, with the line it starts on.
+ */
+function boxOverrides(source: string): { line: number; classes: string }[] {
+  return [...source.matchAll(/<(?:Input|NumericInput|CalculatorInput|Select)(?=[\s/>])/g)].flatMap((match) => {
+    const rest = source.slice(match.index);
+    const end = Math.min(...[rest.indexOf("/>"), rest.indexOf("<", 1)].filter((index) => index >= 0), rest.length);
+    const tag = rest.slice(0, end);
+    const line = source.slice(0, match.index).split("\n").length;
+    return [...tag.matchAll(/(?:className|wrapperClassName)=(?:"([^"]*)"|\{([^}]*)\})/g)]
+      .map((attribute) => attribute[1] ?? attribute[2])
+      .filter((classes) => BOX_OVERRIDE.test(classes))
+      .map((classes) => ({ line, classes }));
+  });
+}
+
 describe("text fields", () => {
   it("render through the shared Input, never a raw text, number or date <input>", () => {
     // Given every component, page and layout under src
@@ -51,6 +71,42 @@ describe("text fields", () => {
     // box, focus ring and error border
     expect(files).toContain(COMPONENT);
     expect(offenders).toEqual([]);
+  });
+
+  it("keep the shared box: no field or dropdown overrides its height or corner", () => {
+    // Given every component, page and layout under src
+    const files = sourceFiles(SRC).map((file) => relative(SRC, file).split(sep).join("/"));
+
+    // When we look for a height or radius class passed to a field or a select
+    const offenders = files.flatMap((file) =>
+      boxOverrides(readFileSync(join(SRC, file), "utf8")).map(({ line, classes }) => `${file}:${line} ${classes}`),
+    );
+
+    // Then there is none: inputs and selects stand 40px with the 6px control radius everywhere
+    expect(offenders).toEqual([]);
+  });
+
+  it("flags a height or corner on a field and leaves widths, flex sizing and adornment icons alone", () => {
+    // Given
+    const source = `
+      <Select className="h-11" value={a}>
+        <option>A</option>
+      </Select>
+      <Input className={cn("rounded-lg", wide && "w-full")} />
+      <NumericInput wrapperClassName="w-32 shrink-0 sm:min-h-12" value={b} onChange={(next) => set(next)} />
+      <Input className="min-w-0 flex-1" prefix={<svg className="h-5 w-5" />} />
+      <CalculatorInput id="rate" label="Rate" />
+    `;
+
+    // When
+    const found = boxOverrides(source);
+
+    // Then
+    expect(found).toEqual([
+      { line: 2, classes: "h-11" },
+      { line: 5, classes: 'cn("rounded-lg", wide && "w-full")' },
+      { line: 6, classes: "w-32 shrink-0 sm:min-h-12" },
+    ]);
   });
 
   it("flags text, number, date and untyped inputs and leaves checkboxes, radios, files and ranges alone", () => {

@@ -141,7 +141,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-kind"
-            className="h-11"
             value={filters.kind}
             onChange={(event) => update({ kind: event.currentTarget.value as PprFilters["kind"] })}
           >
@@ -159,7 +158,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-risk"
-            className="h-11"
             value={String(filters.riskClass)}
             onChange={(event) => {
               const value = event.currentTarget.value;
@@ -181,7 +179,6 @@ function Comparison({ onUse }: { onUse: () => void }) {
           </label>
           <Select
             id="ppr-sort"
-            className="h-11"
             value={sort}
             onChange={(event) => {
               onUse();

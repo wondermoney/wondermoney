@@ -134,7 +134,6 @@ function BrokerFees() {
                 </label>
                 <Select
                   id="broker-fees-market"
-                  className="h-11"
                   value={scenario.market}
                   onChange={(event) => update("market", event.currentTarget.value as Market)}
                 >

@@ -113,7 +113,6 @@ function RemuneratedAccounts() {
         <Field id="remunerated-type" label={t(k("filters.type"))}>
           <Select
             id="remunerated-type"
-            className="h-11"
             value={filters.type}
             onChange={(event) => setFilter("type", event.currentTarget.value as RemuneratedFilters["type"])}
           >
@@ -128,7 +127,6 @@ function RemuneratedAccounts() {
         <Field id="remunerated-iban" label={t(k("filters.iban"))}>
           <Select
             id="remunerated-iban"
-            className="h-11"
             value={filters.iban}
             onChange={(event) => setFilter("iban", event.currentTarget.value as IbanFilter)}
           >
@@ -142,7 +140,6 @@ function RemuneratedAccounts() {
         <Field id="remunerated-tax" label={t(k("filters.tax"))}>
           <Select
             id="remunerated-tax"
-            className="h-11"
             value={filters.tax}
             onChange={(event) => setFilter("tax", event.currentTarget.value as TaxFilter)}
           >
@@ -165,7 +162,6 @@ function RemuneratedAccounts() {
         <Field id="remunerated-sort" label={t(k("sort.label"))}>
           <Select
             id="remunerated-sort"
-            className="h-11"
             value={sort}
             onChange={(event) => {
               touch();
