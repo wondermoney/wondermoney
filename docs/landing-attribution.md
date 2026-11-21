@@ -20,7 +20,7 @@ and `CuratedListPage.astro` pass it to the layout as `landingSource`, which puts
 | Use | website | `tool_used` (tools), `curated_list_viewed` and `curated_list_entry_click` (lists) | site **Analytics** |
 | Next step | website | `cta_click` (`cta_position` `cta_banner` or `tool_result`) | site **Analytics** |
 | Signup | API outbox | `signup` with `landing_source` | site **and** app analytics |
-| Activation | API outbox | `first_budget_created`, `first_goal_created` | (keyed to the signup) |
+| Activation | API outbox | `first_budget_created`, `first_goal_created` | none: service events (keyed to the signup) |
 
 - **Website** (`apps/landing/src/lib/landingSource.ts`, `posthog.ts`, `curatedListTracking.ts`).
   PostHog's `before_send` adds `landing_source` to every event a tool or list page sends. As a
@@ -32,11 +32,14 @@ and `CuratedListPage.astro` pass it to the layout as `landingSource`, which puts
   an email signup, and through the `/auth/complete` callback URL for Google. The website's
   consent alone never records anything in the app.
 - **API** (`validators/auth.ts`, `services/auth/signup-record.service.ts`,
-  `services/analytics/first-activation.service.ts`). `landingSource` must look like a route id,
+  `services/analytics/service-events.service.ts`). `landingSource` must look like a route id,
   else it is dropped (never a 400). It goes on the `signup` outbox event only, never on the
-  account. The first budget and the first goal a person creates each record one event, keyed by
-  the same distinct id (the account's external id) with an event id that repeats for later
-  ones, so the outbox keeps only the first. Like every outbox event, they exist only with
+  account. The first budget and the first goal a person creates each record one event
+  (`first_budget_created`, `first_goal_created`, beside `budget_created` and `goal_created` for
+  every one), keyed by the same distinct id (the account's external id) with an event id that
+  repeats for later ones, so the outbox keeps only the first. A person who had budgets before
+  these events existed gets a "first" on their next one; the funnel counts only signups in its
+  window, so they don't reach it. Like every outbox event, they exist only with
   `ANALYTICS_OUTBOX_MODE=live`, so a self-hosted server records none of this.
 
 The app's PostHog keeps no identity across visits (memory persistence, no person profiles), so

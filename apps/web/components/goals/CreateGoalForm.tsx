@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -83,7 +82,6 @@ export default function CreateGoalForm({
 }: CreateGoalFormProps) {
   const t = useTranslations();
   const router = useRouter();
-  const posthog = usePostHog();
   const createGoal = useCreateGoal();
   const { data: accountsData } = useAccounts();
   const { data: loansData } = useLoans();
@@ -250,12 +248,6 @@ export default function CreateGoalForm({
     try {
       const response = await createGoal.mutateAsync(body);
       const goalKey = response.data?.goal?.goalKey;
-      posthog.capture("goal_created", {
-        currency: currencyCode,
-        goal_key: goalKey,
-        goal_type: values.type,
-        has_target_date: Boolean(values.targetDate),
-      });
       form.reset();
       toast.success(t("goals.create-success"));
       if (onSuccess) onSuccess(goalKey);

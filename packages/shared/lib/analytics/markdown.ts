@@ -28,6 +28,8 @@ function describeProperty(
         : property.values.map(code).join(', ');
   } else if (property.type === 'boolean') {
     kind = 'true or false';
+  } else if (property.type === 'code') {
+    kind = `a code matching ${code(property.pattern.source)}`;
   } else {
     kind = 'a count';
   }

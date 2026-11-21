@@ -24,6 +24,7 @@ import { resolveAccountCsvImportFormat } from '@service/account/account-csv-impo
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
+import { importCommittedEventId, recordAccountCreated, recordServiceEvent } from '@service/analytics/service-events.service';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -759,6 +760,7 @@ export class TransactionImportService {
       account.fxStatus = converted.fxStatus;
       this.em.persist(account);
       await this.em.flush();
+      await recordAccountCreated(this.em, owner, { method: 'import' });
       created[label] = account.accountKey;
     }
     return created;
@@ -998,9 +1000,16 @@ export class TransactionImportService {
       await tx.nativeUpdate(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { status: ROW_STATUS.SKIPPED, updatedAt: this.now });
       const counts = await this.countRows(tx, sessionKey);
       const totals: CommitTotals = { failed: counts.statuses.failed + counts.statuses.invalid, imported: counts.statuses.imported, skipped: counts.statuses.skipped, totalRows: Object.values(counts.statuses).reduce((sum, count) => sum + count, 0) };
-      locked.status = OUTCOME_OF[transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported })];
+      const outcome = transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported });
+      locked.status = OUTCOME_OF[outcome];
       locked.committedAt = this.now;
       await tx.flush();
+      if (outcome !== 'failed') {
+        const importer = await tx.findOne(Appuser, { appuserKey: keyOf(locked.appuserKey, 'appuserKey')! }, { filters: false });
+        if (importer) {
+          await recordServiceEvent(tx, importer, 'import_committed', { format: locked.format, kind: 'transactions', result: outcome }, { eventId: importCommittedEventId(locked.publicId) });
+        }
+      }
       return { accounts, totals };
     });
   }

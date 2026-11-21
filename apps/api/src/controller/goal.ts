@@ -5,7 +5,7 @@ import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { GoalType } from '@entity/Goal';
 import { accountActor, assertTransactionWritable } from '@service/account/account-access';
-import { recordFirstActivation } from '@service/analytics/first-activation.service';
+import { recordGoalCreated, requestPlatform } from '@service/analytics/service-events.service';
 import { GoalService } from '@service/goal/goal.service';
 import { getRef } from '@utils/em-helpers';
 import { BadRequestError } from '@utils/errors';
@@ -64,7 +64,7 @@ export async function createGoal(req: Request, res: Response) {
     tenantKey,
     type: isDebt ? GoalType.DEBT_PAYDOWN : GoalType.SAVE_UP,
   });
-  await recordFirstActivation(DI.em, user, 'goal');
+  await recordGoalCreated(DI.em, user, { platform: requestPlatform(req), type: isDebt ? 'debt_paydown' : 'save_up' });
   return res.status(201).json({ goal });
 }
 

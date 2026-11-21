@@ -4,39 +4,12 @@ import { useCallback, useRef } from 'react'
 import { type AuthEpochId, useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { netWorthKey } from '@/features/net-worth/query-keys'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
-import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import type { AccountsResponseDto } from './accounts-contract'
 import { createOfflineAccountEndpoint, offlineAccountPayloadSchema, type OfflineAccountPayload } from './offline-account-contract'
 import { accountFamilyKey, accountsKey, offlineAccountCreateGuardKey } from './query-keys'
 
 export type OfflineAccountCreateFailure = 'validation' | 'demo' | 'read-only' | 'access' | 'mfa' | 'cancelled' | 'unknown' | 'general'
 export type OfflineAccountUnknownGuard = Readonly<{ payload: OfflineAccountPayload }>
-
-/**
- * Which entry point asked for the account. `onboarding` is the activation
- * journey, which only renders while the user has not completed onboarding.
- */
-export type OfflineAccountCreateOrigin = 'accounts' | 'onboarding'
-
-/**
- * `first_account_created` is an activation-funnel event, so it must
- * describe the account that takes someone from zero accounts to one, not every
- * account they ever add.
- *
- * Two honest signals exist, and nothing else: the onboarding journey (which the
- * onboarding gate only shows before activation), and a cached accounts list that
- * the app has actually read back as empty. An absent cache is deliberately *not*
- * treated as "no accounts" — it usually means the list simply was not loaded on
- * this launch, and guessing there would report a fifth account as a first one.
- */
-export function isFirstAccountCreation(
-  origin: OfflineAccountCreateOrigin,
-  snapshot: AccountsResponseDto | undefined,
-): boolean {
-  if (origin === 'onboarding') return true
-  return snapshot !== undefined && snapshot.accounts.length === 0
-}
 
 export function classifyOfflineAccountCreateFailure(error: unknown): OfflineAccountCreateFailure {
   if (!(error instanceof ApiError)) return error instanceof Error && error.name === 'ZodError' ? 'validation' : 'general'
@@ -61,7 +34,7 @@ export function classifyOfflineAccountCreateFailure(error: unknown): OfflineAcco
 // makes the create button interactive that early).
 const unauthenticatedEpochId = -1 as AuthEpochId
 
-export function useCreateOfflineAccount(origin: OfflineAccountCreateOrigin = 'accounts') {
+export function useCreateOfflineAccount() {
   const { runtime, blockAccess } = useProductRuntime()
   const queryClient = useQueryClient()
   const inFlight = useRef(false)
@@ -91,12 +64,6 @@ export function useCreateOfflineAccount(origin: OfflineAccountCreateOrigin = 'ac
       if (inFlight.current) throw new Error('Account creation is already pending.')
       if (queryClient.getQueryData(guardKey)) throw new ApiError('network')
       const payload = Object.freeze(offlineAccountPayloadSchema.parse(value))
-      // Read before the write: the commit below invalidates and refetches this
-      // very key, so afterwards the list can no longer answer "was it empty?".
-      const firstAccount = isFirstAccountCreation(
-        origin,
-        queryClient.getQueryData<AccountsResponseDto>(accountsKey(runtime.epochId)),
-      )
       inFlight.current = true
       let refresh: Promise<void> | undefined
       try {
@@ -115,9 +82,8 @@ export function useCreateOfflineAccount(origin: OfflineAccountCreateOrigin = 'ac
         // A confirmed 201 remains success even if the subsequent read cannot refresh.
         // Await the attempt, then let Accounts present its own refresh failure state.
         await refresh?.catch(() => undefined)
-        // How the account was created, and nothing about the account:
-        // no name, institution, currency, balance or identifier.
-        if (firstAccount) captureAnalyticsEvent('first_account_created', { method: 'manual' })
+        // `account_created` and `first_account_created` are recorded by the API
+        // (`@wondermoney/shared/analytics`), so the app sends nothing here.
       } finally {
         inFlight.current = false
       }

@@ -51,8 +51,9 @@ it('runs an initial producer through the real deterministic contract and outbox 
     bankSyncIncidentService: service,
   })).resolves.toBe(true);
   expect(outbox).toHaveBeenCalledWith(tx, expect.objectContaining({
+    eventId: expect.stringMatching(/^bank-sync\.v1:[a-f0-9]{64}$/),
     eventName: 'bank_sync_completed',
-    properties: expect.objectContaining({ contract_version: 'bank-sync.v1', event_id: expect.stringMatching(/^bank-sync\.v1:[a-f0-9]{64}$/), result: 'full_success' }),
+    properties: expect.objectContaining({ contract_version: 'bank-sync.v1', result: 'full_success' }),
   }));
 });
 
@@ -77,7 +78,7 @@ it('runs a controlled initial failure through one safe deterministic outbox row'
   expect(outbox).toHaveBeenCalledTimes(1);
   const event = outbox.mock.calls[0]?.[1] as { eventId: string; eventName: string; properties: Record<string, unknown> };
   expect(event).toMatchObject({ eventName: 'account_add_sync_failed', properties: expect.objectContaining({ error_code: 'account_phase_failed', result: 'failed' }) });
-  expect(event.eventId).toBe(event.properties['event_id']);
-  expect(tx.upsert).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ eventId: event.eventId, properties: expect.objectContaining({ $insert_id: event.eventId, event_id: event.eventId }) }), expect.anything());
+  expect(event.eventId).toMatch(/^bank-sync\.v1:[a-f0-9]{64}$/);
+  expect(tx.upsert).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ eventId: event.eventId, properties: expect.objectContaining({ $insert_id: event.eventId }) }), expect.anything());
   expect(JSON.stringify(event)).not.toContain('raw-connection-secret');
 });

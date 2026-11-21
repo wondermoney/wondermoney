@@ -119,7 +119,7 @@ describe('ConnectBankRoute', () => {
     expect(serialized).not.toContain('enablebanking')
   })
 
-  it('captures bank_connection_failed with no error text when the requisition never starts', async () => {
+  it('sends no analytics when the requisition never starts', async () => {
     mockMutate.mockImplementation((_bankId, { onError }: { onError: (error: unknown) => void }) => {
       onError(new ApiError('mfa-required', 401))
     })
@@ -127,7 +127,7 @@ describe('ConnectBankRoute', () => {
 
     await fireEvent.press(view.getByRole('button', { name: 'Select' }))
 
-    expect(captured.mock.calls).toEqual([['bank_connection_failed']])
+    expect(captured).not.toHaveBeenCalled()
   })
 
   it('opens the consent URL in an auth session that closes on the app return link', async () => {

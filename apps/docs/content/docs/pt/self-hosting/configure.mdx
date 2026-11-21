@@ -308,7 +308,7 @@ A tua instância não carrega analytics nem gestor de tags, nem regista eventos 
 |---|---|
 | `NEXT_PUBLIC_GTM_ID` | O teu contentor do Google Tag Manager (`GTM-XXXXXXX`), carregado apenas após autorização no navegador |
 | `NEXT_PUBLIC_POSTHOG_KEY` | O PostHog na aplicação web: visualizações de página e eventos de utilização apenas após autorização no navegador. A gravação de sessões e a identificação por email estão desativadas |
-| `ANALYTICS_OUTBOX_MODE=live` com `POSTHOG_API_KEY` | Eventos de registo, início de sessão e sincronização bancária enviados para o PostHog pela API e pelo worker. Define ambos na API e no worker; com o modo desligado, nenhum evento é registado. O `POSTHOG_HOST`, no worker, define o endereço do PostHog, por omissão `https://eu.i.posthog.com` |
+| `ANALYTICS_OUTBOX_MODE=live` com `POSTHOG_API_KEY` | Os eventos do serviço enviados para o PostHog pela API e pelo worker: registo, início de sessão, atividade diária, contas, orçamentos, objetivos, importações, ligações e sincronizações bancárias, sem montantes nem conteúdo ([a lista completa](https://github.com/wondermoney/wondermoney/blob/develop/docs/analytics-events.md)). Define ambos na API e no worker; com o modo desligado, nenhum evento é registado. O `POSTHOG_HOST`, no worker, define o endereço do PostHog, por omissão `https://eu.i.posthog.com` |
 
 Se ligares algum destes, informa os teus utilizadores na tua política de privacidade (`NEXT_PUBLIC_PRIVACY_URL`) e pede consentimento quando a lei o exigir.
 

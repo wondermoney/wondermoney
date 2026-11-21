@@ -2,11 +2,13 @@ import { randomUUID } from 'node:crypto';
 
 import type { RequiredEntityData } from '@mikro-orm/core';
 import { type EntityManager, LockMode } from '@mikro-orm/core';
+import type { AnalyticsEventProperties } from '@wondermoney/shared';
 
 import {
   BANK_SYNC_EVENT_NAME,
   type BankSyncContractResult,
   type BankSyncEnvironment,
+  type BankSyncEvent,
   buildBankSyncEvent,
   type BankSyncFlow as ContractFlow,
   type BankSyncProducer as ContractProducer,
@@ -344,7 +346,7 @@ export class BankSyncIncidentService {
         distinctId: incident.distinctId,
         eventId: event.event_id,
         eventName: bankSyncEventName(incident.flow, event.result),
-        properties: event,
+        properties: bankSyncAnalyticsProperties(event),
       });
       await this.transitionBackgroundOperation?.(em, { attempt, event, incident });
       await em.flush();
@@ -397,6 +399,26 @@ async function reconcileTask14Fields(em: EntityManager, incident: BankSyncIncide
     changed = true;
   }
   if (changed) await em.flush();
+}
+
+/**
+ * The event's catalogued properties (`@wondermoney/shared`'s ANALYTICS_EVENTS). The incident,
+ * requisition and institution stay on the incident row: they identify a connection, and a
+ * person's bank, so they are not sent. `distinct_id` and `event_id` ride on the outbox row.
+ */
+function bankSyncAnalyticsProperties(event: BankSyncEvent): AnalyticsEventProperties<'bank_sync_completed'> {
+  return {
+    account_count: event.account_count,
+    attempt: event.attempt,
+    contract_version: event.contract_version,
+    environment: event.environment,
+    error_category: event.error_category,
+    error_code: event.error_code,
+    final: event.final,
+    flow: event.flow,
+    producer: event.producer,
+    result: event.result,
+  };
 }
 
 function bankSyncEventName(flow: BankSyncFlow, result: BankSyncContractResult): string {

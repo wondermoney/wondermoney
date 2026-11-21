@@ -10,6 +10,7 @@ import { FinancialTransaction } from '@entity/FinancialTransaction';
 import { FinancialTransactionType } from '@entity/FinancialTransactionType';
 import { PortfolioImportRow, PortfolioImportRowStatus } from '@entity/PortfolioImportRow';
 import { PortfolioImportSession, PortfolioImportSessionStatus } from '@entity/PortfolioImportSession';
+import { importCommittedEventId, recordServiceEvent } from '@service/analytics/service-events.service';
 import { ConflictError, NotFoundError } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -195,6 +196,13 @@ class PortfolioImportFinalizeService {
 
       if (rowFailureReason || summary.failedRows > 0) logger.error({ failedRows: summary.failedRows, failureReason: rowFailureReason, importedRows: summary.importedRows, importSessionId: input.importSessionId, status: nextStatus }, 'Portfolio CSV import finalized with failed rows');
       await em.persist([session, ...rows]).flush();
+      if (nextStatus !== PortfolioImportSessionStatus.FAILED) {
+        await recordServiceEvent(em, session.appuserKey, 'import_committed', {
+          format: 'broker_csv',
+          kind: 'portfolio',
+          result: nextStatus === PortfolioImportSessionStatus.SUCCEEDED ? 'succeeded' : 'partial',
+        }, { eventId: importCommittedEventId(session.correlationId) });
+      }
       const parserSpecKey = session.columnMappingJson?.['candidateParserSpecKey'];
       const candidateContentHash = session.columnMappingJson?.['candidateParserSpecContentHash'];
       const successfulImport = summary.importedRows > 0 && summary.failedRows === 0 && summary.invalidRows === 0;

@@ -39,6 +39,7 @@ import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFo
  * 404 rather than 403. That is deliberate — a 403 would confirm the row exists.
  */
 import { authedUser } from '@middleware/authed-context';
+import { recordAccountCreated, requestPlatform } from '@service/analytics/service-events.service';
 import { getFullName } from '@utils/misc';
 import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccountOwnershipRequestSchema, getAccountRequestSchema, getAccountSharesRequestSchema, putAccountOwnershipRequestSchema, putAccountSharesRequestSchema, recalculateAccountRequestSchema, reorderAccountsRequestSchema, updateAccountRequestSchema } from '@validators/account';
 import { zParse } from '@validators/parser';
@@ -101,6 +102,7 @@ export async function createOfflineAccount(req: Request, res: Response, next: Ne
     account.accountTypeKey = accountType;
   }
   await DI.em.persist(account).flush();
+  await recordAccountCreated(DI.em, user, { method: 'manual', platform: requestPlatform(req) });
   return res.sendStatus(201);
 }
 

@@ -73,7 +73,8 @@ describe('SimplefinConnectRoute', () => {
     await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Submit' })) })
     expect(view.getByTestId('failure')).toHaveTextContent('rejected:SimpleFIN did not accept this setup token.')
     expect(mockReplace).not.toHaveBeenCalled()
-    expect(captured.mock.calls).toEqual([['bank_connection_failed']])
+    // The API records the failure (`bank_connection_failed`).
+    expect(captured).not.toHaveBeenCalled()
   })
 
   it('reads an already-claimed token by its code', async () => {

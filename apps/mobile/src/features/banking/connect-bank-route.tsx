@@ -74,9 +74,7 @@ export function ConnectBankRoute() {
             )
           },
           onError: (error) => {
-            // The connection never got off the ground. The classified reason
-            // stays on screen; no error text or code reaches analytics.
-            captureAnalyticsEvent('bank_connection_failed')
+            // The connection never got off the ground; the classified reason stays on screen.
             setStartFailure(classifyStartBankConnectionFailure(error))
           },
         })

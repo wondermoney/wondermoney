@@ -1,5 +1,6 @@
 import type {
   AnalyticsCatalogue,
+  AnalyticsPropertySpec,
   AnalyticsPropertyValue,
   AnalyticsSurface,
   CatalogueCaptureArgs,
@@ -7,6 +8,30 @@ import type {
 
 function hasOwn(object: object, key: string): boolean {
   return Object.prototype.hasOwnProperty.call(object, key);
+}
+
+const CODE_MAX_LENGTH = 64;
+
+function isValidPropertyValue(
+  property: AnalyticsPropertySpec,
+  value: unknown,
+): boolean {
+  switch (property.type) {
+    case 'enum':
+      return typeof value === 'string' && property.values.includes(value);
+    case 'boolean':
+      return typeof value === 'boolean';
+    case 'count':
+      return (
+        typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
+      );
+    case 'code':
+      return (
+        typeof value === 'string' &&
+        value.length <= CODE_MAX_LENGTH &&
+        property.pattern.test(value)
+      );
+  }
 }
 
 /**
@@ -35,15 +60,7 @@ export function analyticsEventProblems(
       continue;
     }
     if (value === undefined && property.optional) continue;
-    const valid =
-      property.type === 'enum'
-        ? typeof value === 'string' && property.values.includes(value)
-        : property.type === 'boolean'
-          ? typeof value === 'boolean'
-          : typeof value === 'number' &&
-            Number.isSafeInteger(value) &&
-            value >= 0;
-    if (!valid)
+    if (!isValidPropertyValue(property, value))
       problems.push(`${event}.${key} is not a valid ${property.type}`);
   }
   for (const [key, property] of Object.entries(spec.properties)) {

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React, { useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useWatch } from "react-hook-form";
@@ -146,7 +145,6 @@ export default function IncomePage() {
   const createBudgetMutation = useCreateBudget();
   const editBudgetAccountsMutation = useEditBudgetTemplateAccounts();
   const { data: accountsData } = useAccounts();
-  const posthog = usePostHog();
 
   const onSubmit: SubmitHandler<IncomeData> = async (data) => {
     if (!household || !dependents) return;
@@ -174,14 +172,6 @@ export default function IncomePage() {
         visibility,
       });
 
-      posthog.capture("budget_created", {
-        budget_key: response.data.budgetKey,
-        household_size: household.householdSize,
-        dependents_count: dependents.dependentsNum,
-        incomes_count: data.incomes.length,
-        source: "wizard",
-        visibility,
-      });
       setBudgetId(response.data.budgetKey);
 
       // A freshly created budget starts with zero linked accounts,

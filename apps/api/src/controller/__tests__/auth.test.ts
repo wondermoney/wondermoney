@@ -36,7 +36,10 @@ vi.mock('@service/email/email', () => ({
   sendSignupEmail: mocked.sendSignupEmail,
   sendWelcomeEmail: mocked.sendWelcomeEmail,
 }));
-vi.mock('@service/analytics/analytics-outbox.service', () => ({ recordAnalyticsOutboxEvent: mocked.recordAnalyticsOutboxEvent }));
+vi.mock('@service/analytics/analytics-outbox.service', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@service/analytics/analytics-outbox.service')>(),
+  recordAnalyticsOutboxEvent: mocked.recordAnalyticsOutboxEvent,
+}));
 vi.mock('@service/auth/signup-record.service', () => ({ recordSignup: mocked.recordSignup }));
 vi.mock('@validators/parser', () => ({ zParse: mocked.zParse }));
 
@@ -109,32 +112,32 @@ describe('auth callback', () => {
   });
 
   it('returns early for demo existing-user logins and tracks login with the auth session identity without provider calls', async () => {
-    const existingUser = { accountType: AppuserAccountType.DEMO, appuserKey: 7, emailAddress: 'demo@wonder.money' };
+    const existingUser = { accountType: AppuserAccountType.DEMO, appuserKey: 7, emailAddress: 'demo@wonder.money', language: SupportedLanguages.EN };
     mocked.getUserByExternalId.mockResolvedValueOnce(existingUser);
 
     const res = makeRes();
 
-    await authCallback(makeAuthUser('supabase-id', 'demo@wonder.money', 'session-demo'), res.res);
+    await authCallback(makeAuthUser('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f601', 'demo@wonder.money', 'session-demo'), res.res);
 
     expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
-      distinctId: 'supabase-id',
+      distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f601',
       eventId: 'login.v1:session-demo',
       eventName: 'login',
-      properties: expect.objectContaining({ appuser_key: '7' }),
-    });
+      properties: { locale: 'EN', method: 'email' },
+    }, undefined);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ appuserKey: 7, method: 'email', outcome: 'demo' });
   });
 
   it('returns early for demo email matches after external-id miss without writes or provider calls', async () => {
-    const existingUser = { accountType: AppuserAccountType.DEMO, appuserKey: 9, emailAddress: 'demo@wonder.money' };
+    const existingUser = { accountType: AppuserAccountType.DEMO, appuserKey: 9, emailAddress: 'demo@wonder.money', language: SupportedLanguages.EN };
     mocked.getUserByExternalId.mockResolvedValueOnce(null);
     mocked.getUserByEmail.mockResolvedValueOnce(existingUser);
 
     const res = makeRes();
 
-    await authCallback(makeAuthUser('supabase-id', 'demo@wonder.money'), res.res);
+    await authCallback(makeAuthUser('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f601', 'demo@wonder.money'), res.res);
 
     expect(mocked.provisionHomeTenant).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -142,29 +145,29 @@ describe('auth callback', () => {
   });
 
   it('uses the primary auth provider for login analytics and response', async () => {
-    const existingUser = { accountType: AppuserAccountType.REGULAR, appuserKey: 12, emailAddress: 'provider@example.com' };
+    const existingUser = { accountType: AppuserAccountType.REGULAR, appuserKey: 12, emailAddress: 'provider@example.com', language: SupportedLanguages.EN };
     mocked.getUserByExternalId.mockResolvedValueOnce(existingUser);
     mocked.getPrimaryAuthProvider.mockResolvedValueOnce('google');
 
     const res = makeRes();
 
     await authCallback(
-      makeAuthUser('supabase-provider', 'provider@example.com', 'session-provider'),
+      makeAuthUser('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f602', 'provider@example.com', 'session-provider'),
       res.res,
     );
 
-    expect(mocked.getPrimaryAuthProvider).toHaveBeenCalledWith('supabase-provider');
+    expect(mocked.getPrimaryAuthProvider).toHaveBeenCalledWith('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f602');
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
-      distinctId: 'supabase-provider',
+      distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f602',
       eventId: 'login.v1:session-provider',
       eventName: 'login',
-      properties: expect.objectContaining({ appuser_key: '12', method: 'google' }),
-    });
+      properties: expect.objectContaining({ method: 'google' }),
+    }, undefined);
     expect(res.json).toHaveBeenCalledWith({ appuserKey: 12, method: 'google', outcome: 'login' });
   });
 
   it('falls back to email when the primary auth provider is a credential account', async () => {
-    const existingUser = { accountType: AppuserAccountType.REGULAR, appuserKey: 13, emailAddress: 'broken@example.com' };
+    const existingUser = { accountType: AppuserAccountType.REGULAR, appuserKey: 13, emailAddress: 'broken@example.com', language: SupportedLanguages.EN };
     mocked.getUserByExternalId.mockResolvedValueOnce(existingUser);
     mocked.getPrimaryAuthProvider.mockResolvedValueOnce('email');
 
@@ -172,17 +175,17 @@ describe('auth callback', () => {
 
     await expect(
       authCallback(
-        makeAuthUser('supabase-broken', 'broken@example.com', 'session-broken'),
+        makeAuthUser('a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f603', 'broken@example.com', 'session-broken'),
         res.res,
       ),
     ).resolves.toBeUndefined();
 
     expect(mocked.recordAnalyticsOutboxEvent).toHaveBeenCalledWith(expect.anything(), {
-      distinctId: 'supabase-broken',
+      distinctId: 'a1f0c3d2-5b6e-4f70-8a91-b2c3d4e5f603',
       eventId: 'login.v1:session-broken',
       eventName: 'login',
-      properties: expect.objectContaining({ appuser_key: '13', method: 'email' }),
-    });
+      properties: expect.objectContaining({ method: 'email' }),
+    }, undefined);
     expect(res.json).toHaveBeenCalledWith({ appuserKey: 13, method: 'email', outcome: 'login' });
   });
 });

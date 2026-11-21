@@ -9,6 +9,7 @@ import { AppuserTenant } from '@entity/AppuserTenant';
 import { BankConnectionStatus } from '@entity/BankConnection';
 import { Currency } from '@entity/Currency';
 import { FxStatus } from '@entity/Transaction';
+import { recordAccountCreated } from '@service/analytics/service-events.service';
 import type { BankReportedErrorCode } from '@service/bank-providers/errors';
 import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
 import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
@@ -259,6 +260,10 @@ class AccountInitialSyncAccountService {
         await em.persist(reloaded).flush();
       }
 
+      // A new bank-linked account (SimpleFIN's arrive here; Enable Banking's usually already exist).
+      if (!wasExisting && 'upsert' in em) {
+        await recordAccountCreated(em as Pick<EntityManager, 'upsert'>, tenant.appuserKey, { method: 'bank_connection' });
+      }
       fulfilled.push({ accountId, created: !wasExisting, institutionId });
       } catch (error) {
         failedAccountIds.push(accountId);
