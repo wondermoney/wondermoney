@@ -10,7 +10,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import { useTranslations } from "@/lib/reactTranslations";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
@@ -287,7 +287,6 @@ function FireCalculatorContent() {
                   name={t(k("chartAssets"))}
                   stroke="oklch(var(--chart-1))"
                   fill="oklch(var(--chart-1) / 0.2)"
-                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -296,7 +295,6 @@ function FireCalculatorContent() {
                   stroke="oklch(var(--chart-2))"
                   strokeDasharray="4 4"
                   dot={false}
-                  isAnimationActive={false}
                 />
                 <ReferenceLine
                   y={result.fireNumber}

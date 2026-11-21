@@ -8,7 +8,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
@@ -293,7 +293,6 @@ function EuriborContent() {
               <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
               {EURIBOR_TENORS.map((tenor, position) => (
                 <Line
-                  isAnimationActive={false}
                   key={tenor}
                   type="monotone"
                   dataKey={TENOR_KEY[tenor]}

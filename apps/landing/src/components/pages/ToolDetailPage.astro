@@ -530,7 +530,8 @@ const schema = {
         </div>
       )}
 
-      <div class="tool-guide-aside mt-12 max-w-[42rem]">
+      {/* Under a guide it lines up with the guide's body column; with no guide, with the calculator. */}
+      <div class:list={["mt-12 max-w-[42rem]", hasGuide && "tool-guide-aside"]}>
         <FinancialDisclaimer locale={locale} client:idle />
       </div>
     </div>

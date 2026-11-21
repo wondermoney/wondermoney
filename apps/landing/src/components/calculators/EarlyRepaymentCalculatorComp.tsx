@@ -8,7 +8,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
@@ -601,7 +601,6 @@ function BalanceChart({
           <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           {series.map(({ key, color, dash }) => (
             <Line
-              isAnimationActive={false}
               key={key}
               type="monotone"
               dataKey={key}

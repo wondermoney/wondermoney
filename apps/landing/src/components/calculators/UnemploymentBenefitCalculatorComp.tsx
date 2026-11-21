@@ -161,12 +161,14 @@ function UnemploymentBenefitCalculator() {
                     days: String(result.duration.totalDays),
                     months: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(result.duration.totalDays / 30),
                   }),
+                  text: true,
                 },
                 {
                   label: t(k("result.durationParts")),
                   value: t(k("result.durationPartsValue"), {
                     base: String(result.duration.baseDays), extra: String(result.duration.extraDays),
                   }),
+                  text: true,
                 },
                 { label: t(k("result.total")), value: money(result.totalCents) },
                 { label: t(k("result.netBefore")), value: money(result.netReferenceMonthlyCents) },

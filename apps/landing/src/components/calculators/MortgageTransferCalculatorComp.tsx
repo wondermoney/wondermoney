@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import { remainingTerm } from "@/lib/calculators/earlyRepayment";
@@ -600,7 +600,6 @@ function SavingsChart({ result, money }: { result: MortgageTransferResult; money
           )}
           <ReferenceLine y={0} stroke="oklch(var(--input))" />
           <Line
-            isAnimationActive={false}
             type="linear"
             dataKey="saved"
             name={t(k("chart.saved"))}
@@ -611,7 +610,6 @@ function SavingsChart({ result, money }: { result: MortgageTransferResult; money
           {result.costs.total > 0 && (
             // An empty series so the legend names the dashed costs line.
             <Line
-              isAnimationActive={false}
               dataKey="costs"
               name={t(k("chart.costs"))}
               stroke="oklch(var(--chart-2))"

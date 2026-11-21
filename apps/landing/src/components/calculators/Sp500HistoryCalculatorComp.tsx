@@ -8,7 +8,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
@@ -283,7 +283,7 @@ function ValueChart({ result, usd }: { result: Sp500HistoryResult; usd: Usd }) {
             type="monotone"
             dataKey="value"
             name={t(k("chart.value"))}
-            stroke="oklch(var(--chart-2))"
+            stroke="oklch(var(--chart-1))"
             strokeWidth={2}
             dot={false}
           />
@@ -291,7 +291,7 @@ function ValueChart({ result, usd }: { result: Sp500HistoryResult; usd: Usd }) {
             type="stepAfter"
             dataKey="contributed"
             name={t(k("chart.contributed"))}
-            stroke="oklch(var(--chart-1))"
+            stroke="oklch(var(--chart-2))"
             strokeWidth={2}
             strokeDasharray="4 4"
             dot={false}

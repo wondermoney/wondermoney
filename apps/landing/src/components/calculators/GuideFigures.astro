@@ -5,9 +5,13 @@
  *
  * - `variant="flow"` (default) puts the cards in a row joined by `operators` (one fewer than
  *   the cards), so the example reads as a sum: income − expenses = surplus → savings rate.
- *   It stacks on a phone. Keep it to two to four cards.
- * - `variant="grid"` lays the cards out two or three to a row; a card with `share` (0 to
- *   100) draws it as a bar with `shareLabel` beside it. Use it for a breakdown.
+ *   It stacks on a phone. Keep it to two to four cards. Each operator travels with the card
+ *   after it, so a card that wraps to the next row starts it with its operator.
+ * - `variant="grid"` lays the cards out two or three to a row (two for two or four cards,
+ *   so no column stays empty); a card with `share` (0 to 100) draws it as a bar with
+ *   `shareLabel` beside it. Use it for a breakdown.
+ *
+ * A value stays on one line: when a row's values do not fit, cards wrap to the next row.
  *
  *   <GuideFigures items={flow} operators={["−", "=", "→"]} caption={t(k("exampleFlowCaption"))} />
  *
@@ -29,6 +33,9 @@ interface Props {
 
 const { items, variant = "flow", operators = [], caption, class: className } = Astro.props;
 
+// One to three cards take a column each, four take two; more run three to a row.
+const gridColumns = items.length === 4 ? 2 : Math.min(Math.max(items.length, 1), 3);
+
 const valueTone = (figure: GuideFigure) =>
   figure.tone === "positive"
     ? "text-success-text"
@@ -37,25 +44,28 @@ const valueTone = (figure: GuideFigure) =>
       : "text-foreground";
 ---
 
-<figure class:list={["guide-figures", `guide-figures--${variant}`, className]}>
+<figure
+  class:list={["guide-figures", `guide-figures--${variant}`, className]}
+  style={variant === "grid" ? `--guide-figures-columns: ${gridColumns}` : undefined}
+>
   <ul class="guide-figures__list" role="list">
     {
       items.map((figure, index) => {
         const Icon = figure.icon;
         const symbol = variant === "flow" && index > 0 ? operators[index - 1] : undefined;
         return (
-          <>
+          <li class="guide-figures__item">
             {symbol && (
-              <li class="guide-figures__operator" aria-hidden="true">
+              <span class="guide-figures__operator" aria-hidden="true">
                 {symbol}
-              </li>
+              </span>
             )}
-            <li class="guide-figures__card">
+            <div class="guide-figures__card">
               <p class="flex items-center gap-2 text-sm leading-5 text-ink-2">
                 {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" strokeWidth={1.75} />}
                 <span>{figure.label}</span>
               </p>
-              <p class:list={["mt-2 font-mono font-semibold leading-tight tracking-tight", valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
+              <p class:list={["guide-figures__value mt-2 font-mono font-semibold leading-tight tracking-tight", valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
                 {figure.value}
               </p>
               {figure.detail && <p class="mt-1 font-mono text-sm text-muted-foreground">{figure.detail}</p>}
@@ -72,8 +82,8 @@ const valueTone = (figure: GuideFigure) =>
                   )}
                 </div>
               )}
-            </li>
-          </>
+            </div>
+          </li>
         );
       })
     }

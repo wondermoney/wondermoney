@@ -32,6 +32,7 @@ public/                # Static assets
 | Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
 | Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels, books, courses, forums, events |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
+| Charts | `src/components/shared/charts.tsx` | Recharts with series that draw at once; import chart parts from here, never from `recharts` |
 | Calculator guides | `src/components/calculators/ToolGuide.astro`, `guideBlocks.ts` | The guide column and its blocks (term list, worked-example figures, formula block); `HouseholdBudgetGuide.astro` uses all three |
 | Feature pages | `src/components/landing/Feature*.tsx`, `featureDetails.ts` | One per `FEATURE_ROUTE_IDS` entry. Explanatory sections use `sections/FeatureExplainer.tsx`; a new page is an entry in `featureDetails.ts` (rendered by `FeatureDetail.tsx`) with `lp.<namespace>.*` copy in all six locales, and every claim checked against the user docs and the app |
 | Page composition | `src/components/pages/` | Shared across locales |

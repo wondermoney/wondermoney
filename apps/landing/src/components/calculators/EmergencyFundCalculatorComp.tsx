@@ -83,10 +83,12 @@ function EmergencyFundCalculatorContent() {
     {
       label: t("tools.emergencyFund.monthsToTarget"),
       value: timeToTargetLabel(result, monthsLabel, t),
+      text: true,
     },
     {
       label: t("tools.emergencyFund.targetMonth"),
       value: targetMonthLabel(result, now, locale, t),
+      text: true,
     },
   ];
 

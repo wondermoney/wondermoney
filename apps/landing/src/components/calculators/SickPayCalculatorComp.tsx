@@ -153,6 +153,7 @@ function SickPayCalculator() {
                   value: result.waitingDays > 0
                     ? t(k("result.waitingValue"), { days: String(result.waitingDays), amount: money(result.waitingNetPayCents) })
                     : t(k("result.waitingNone")),
+                  text: true,
                 },
                 { label: t(k("result.netPay")), value: money(result.netMonthlyCents) },
                 { label: t(k("result.firstGap")), value: `−${money(result.firstMonthGapCents)}` },
