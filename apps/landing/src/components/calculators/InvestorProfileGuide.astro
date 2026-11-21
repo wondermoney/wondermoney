@@ -1,27 +1,37 @@
 ---
+// Prerendered method, worked example and limits for the investor profile quiz, on the guide
+// building blocks (guideBlocks.ts). The example's scores come from the quiz's own scoring
+// (investorProfileGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
+import GuideFigures from "./GuideFigures.astro";
+import { buildInvestorProfileGuide } from "./investorProfileGuide";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
 const { locale } = Astro.props as { locale: Lang };
 const t = getTranslations(locale);
 const copy = (key: string) => t(`tools.investorProfile.${key}`);
+const guide = buildInvestorProfileGuide(locale);
 ---
 
 <ToolGuide>
-  <section class="space-y-4">
-    <h2 class="text-2xl font-semibold tracking-tight">{copy("methodHeading")}</h2>
+  <section>
+    <h2>{copy("methodHeading")}</h2>
     <p>{copy("dimensions")}</p>
     <p>{copy("method")}</p>
-    <h3 class="pt-2 font-semibold text-foreground">{copy("exampleHeading")}</h3>
+  </section>
+
+  <section>
+    <h2>{copy("exampleHeading")}</h2>
     <p>{copy("example")}</p>
-    <h3 class="pt-2 font-semibold text-foreground">{copy("assumptionsHeading")}</h3>
+    <GuideFigures variant="grid" items={guide.figures} />
+  </section>
+
+  <section>
+    <h2>{copy("assumptionsHeading")}</h2>
     <p>{copy("limitations")}</p>
     <p>
-      <a
-        href="https://www.investor.gov/introduction-investing/investing-basics/glossary/risk-tolerance"
-        class="text-primary underline underline-offset-4"
-      >{copy("source")}</a>
+      <a href="https://www.investor.gov/introduction-investing/investing-basics/glossary/risk-tolerance">{copy("source")}</a>
     </p>
   </section>
 </ToolGuide>

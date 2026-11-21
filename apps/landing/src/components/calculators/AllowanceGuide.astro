@@ -1,12 +1,12 @@
 ---
+// Prerendered worked example and method for the Christmas and holiday allowance calculators,
+// on the guide building blocks (guideBlocks.ts). The figures come from the calculator's own
+// function (salaryGuides.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  ALLOWANCE_EXAMPLE,
-  HOLIDAY_HIRING_YEAR_EXAMPLE,
-  computeAllowance,
-  type AllowanceKind,
-} from "@/lib/calculators/allowance";
-import { formatMoney } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildAllowanceGuide } from "./salaryGuides";
+import type { AllowanceKind } from "@/lib/calculators/allowance";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -20,63 +20,39 @@ const t = getTranslations(locale);
 const page = (key: string) => `tools.${kind}Allowance.guide.${key}`;
 const shared = (key: string) => `tools.allowance.guide.${key}`;
 const net = (key: string) => `tools.netSalary.guide.${key}`;
-const input = kind === "christmas" ? ALLOWANCE_EXAMPLE : HOLIDAY_HIRING_YEAR_EXAMPLE;
-const example = computeAllowance(input);
-if (!example.ok) throw new Error("Invalid allowance worked example");
-
-const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
-const { total, holidayDays } = example.result;
-const values = {
-  salary: formatMoney(locale, input.grossMonthly, { decimals: 0 }),
-  days: String(holidayDays ?? 0),
-  gross: money(total.grossCents),
-  withholding: money(total.withholdingCents),
-  socialSecurity: money(total.socialSecurityCents),
-  net: money(total.netCents),
-};
+const guide = buildAllowanceGuide(locale, kind);
 const sources = [
   [net("sourceDespacho"), "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/legislacao/Despachos_SEAF/Documents/Despacho-SEAF-2026-01-05-XXV.pdf"],
   [net("sourceRegional"), "https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/tabela_ret_doclib/Pages/default.aspx"],
   [shared("sourceCode"), "https://diariodarepublica.pt/dr/legislacao-consolidada/lei/2009-34546475"],
   [net("sourceSocialSecurity"), "https://www.seg-social.pt/"],
 ] as const;
-const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
 
 <ToolGuide>
-  <section aria-labelledby={`${kind}-allowance-example`}>
-    <h2 id={`${kind}-allowance-example`} class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(net("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(page("example"), values)}</p>
+  <section>
+    <h2>{t(net("exampleTitle"))}</h2>
+    <p>{t(page("example"), guide.values)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
   </section>
-  <section aria-labelledby={`${kind}-allowance-method`}>
-    <h2 id={`${kind}-allowance-method`} class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(net("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      <li>{t(page("ruleAmount"))}</li>
-      <li>{t(page("ruleHiringYear"))}</li>
-      <li>{t(shared("methodWithholding"))}</li>
-      <li>{t(shared("methodTwelfths"))}</li>
-      <li>{t(shared("methodSocialSecurity"))}</li>
-      <li>{t(page("methodPlan"))}</li>
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(net("finalTitle"))}</h3>
-    <p class="mt-3">{t(net("final"))}</p>
-    <h3 class="mt-8 font-semibold text-foreground">{t(net("unsupportedTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+  <section>
+    <h2>{t(net("methodTitle"))}</h2>
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(net("finalTitle"))}</h3>
+    <p>{t(net("final"))}</p>
+    <h3 class="font-semibold text-foreground">{t(net("unsupportedTitle"))}</h3>
+    <ul class="list-disc space-y-2 pl-6">
       <li>{t(net("unsupportedYouth"))}</li>
       <li>{t(net("unsupportedDisability"))}</li>
       <li>{t(shared("unsupportedNovember"))}</li>
       <li>{t(shared("unsupportedOther"))}</li>
     </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(net("sourcesTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+    <h3 class="font-semibold text-foreground">{t(net("sourcesTitle"))}</h3>
+    <ul class="list-disc space-y-2 pl-6">
       {sources.map(([label, href]) => (
-        <li><a href={href} rel="noopener" class={linkClass}>{t(label)}</a></li>
+        <li><a href={href} rel="noopener">{t(label)}</a></li>
       ))}
     </ul>
-    <p class="mt-4 text-sm">{t(shared("reviewed"))}</p>
+    <p class="text-sm">{t(shared("reviewed"))}</p>
   </section>
 </ToolGuide>

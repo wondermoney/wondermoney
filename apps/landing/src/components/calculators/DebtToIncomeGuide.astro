@@ -1,14 +1,12 @@
 ---
-// Prerendered explanation, worked example and method for the debt-to-income
-// calculator. The figures come from the same calculation the calculator runs.
+// Prerendered explanation, worked example and method for the debt-to-income calculator, on
+// the guide building blocks. The figures come from the same calculation the calculator runs
+// (debtToIncomeGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  DEBT_TO_INCOME_CAUTION_FROM,
-  DEBT_TO_INCOME_HIGH_ABOVE,
-  DEBT_TO_INCOME_WORKED_EXAMPLE,
-  compareDebtScenario,
-} from "@/lib/calculators/debtToIncome";
-import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildDebtToIncomeGuide } from "./debtToIncomeGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -19,37 +17,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.debtToIncome.guide.${key}`;
-
-const example = DEBT_TO_INCOME_WORKED_EXAMPLE;
-const comparison = compareDebtScenario(example.monthlyIncome, example.rows, example.scenario);
-const amountOf = (id: string) => example.rows.find((row) => row.id === id)?.amount ?? 0;
-const money = (value: number) => formatMoney(locale, value);
-const percent = (value: number | null) => (value === null ? "" : formatPercent(locale, value));
-
-const exampleValues = {
-  income: money(example.monthlyIncome),
-  home: money(amountOf("home")),
-  car: money(amountOf("car")),
-  cards: money(amountOf("cards")),
-  total: money(comparison.current.totalPayments),
-  ratio: percent(comparison.current.ratio),
-  scenarioTotal: money(comparison.scenario.totalPayments),
-  scenarioRatio: percent(comparison.scenario.ratio),
-};
-
-const bands = [
-  { key: "healthy", range: t(k("bandHealthyRange"), { caution: DEBT_TO_INCOME_CAUTION_FROM }) },
-  {
-    key: "caution",
-    range: t(k("bandCautionRange"), {
-      caution: DEBT_TO_INCOME_CAUTION_FROM,
-      high: DEBT_TO_INCOME_HIGH_ABOVE,
-    }),
-  },
-  { key: "high", range: t(k("bandHighRange"), { high: DEBT_TO_INCOME_HIGH_ABOVE }) },
-] as const;
-
-const methodItems = ["methodCounts", "methodExcludes", "methodIncome", "methodRounding", "methodPrivacy"];
+const guide = buildDebtToIncomeGuide(locale);
 
 // A new mortgage is the usual new payment; the mortgage tool works it out.
 const nextHref = toLocalizedPath("toolMortgage", locale);
@@ -57,54 +25,35 @@ const nextHref = toLocalizedPath("toolMortgage", locale);
 
 <ToolGuide>
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("whatHeading"))}</h2>
-    <p class="mt-3">{t(k("whatBody"))}</p>
+    <h2>{t(k("whatHeading"))}</h2>
+    <p>{t(k("whatBody"))}</p>
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("readHeading"))}</h2>
-    <ul class="mt-3 space-y-2">
-      {
-        bands.map((band) => (
-          <li>
-            <strong class="font-semibold text-foreground">{band.range}</strong>{" "}
-            {t(k(`band${band.key[0].toUpperCase()}${band.key.slice(1)}Body`))}
-          </li>
-        ))
-      }
-    </ul>
-    <p class="mt-4">{t(k("limitsBody"))}</p>
+    <h2>{t(k("readHeading"))}</h2>
+    <GuideTermList items={guide.bands} columns={1} />
+    <p>{t(k("limitsBody"))}</p>
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("exampleHeading"))}</h2>
-    <p class="mt-3">{t(k("exampleBody"), exampleValues)}</p>
-    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      {exampleValues.total} ÷ {exampleValues.income} × 100 = {exampleValues.ratio}
-    </p>
-    <p class="mt-3">{t(k("exampleScenario"), exampleValues)}</p>
+    <h2>{t(k("exampleHeading"))}</h2>
+    <p>{t(k("exampleBody"), guide.exampleValues)}</p>
+    <GuideFigures items={guide.flow} operators={["÷", "="]} />
+    <p>{t(k("exampleScenario"), guide.exampleValues)}</p>
+    <GuideFigures variant="grid" items={guide.comparison} />
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("methodHeading"))}</h2>
-    <p class="mt-3 rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
-      {t(k("methodFormula"))}
-    </p>
-    <ul class="mt-4 list-disc space-y-2 pl-5">
-      {methodItems.map((item) => <li>{t(k(item))}</li>)}
-    </ul>
+    <h2>{t(k("methodHeading"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("nextHeading"))}</h2>
-    <p class="mt-3">
+    <h2>{t(k("nextHeading"))}</h2>
+    <p>
       {t(k("nextBody"))}{" "}
-      <a
-        href={nextHref}
-        class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
-      >
-        {t(k("nextLink"))}
-      </a>
+      <a href={nextHref}>{t(k("nextLink"))}</a>
     </p>
   </section>
 </ToolGuide>

@@ -375,8 +375,31 @@
     "features": "Fonctionnalités",
     "about": "À propos",
     "tools": "Outils",
+    "comparators": "Comparateurs",
     "toolsMenu": {
-      "seeAll": "Voir tous les outils"
+      "seeAll": "Voir tous les outils",
+      "subgroups": {
+        "planAndSave": "Planifier et épargner",
+        "salaryAndBenefits": "Salaire et prestations",
+        "pricesAndInflation": "Prix et inflation",
+        "homeLoan": "Crédit immobilier",
+        "buyingAndTaxes": "Achat immobilier et impôts",
+        "carAndPersonalLoans": "Auto et prêts personnels",
+        "investing": "Investir",
+        "retirement": "Retraite",
+        "depositsAndCertificates": "Dépôts et certificats d’épargne"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Les offres des banques, courtiers, assureurs et fournisseurs d’énergie au Portugal, côte à côte.",
+      "items": {
+        "electricityTariffComparison": "Toutes les offres pour les ménages, classées selon leur coût annuel pour vous",
+        "freeBankAccounts": "Comptes courants gratuits et les conditions de chacun",
+        "termDepositOffers": "Offres de dépôts à terme par durée et montant, intérêts nets d’impôt",
+        "remuneratedAccounts": "Comptes rémunérés et d’épargne, avec l’intérêt net d’IRS",
+        "brokerFees": "Frais de garde, de courtage et de change des courtiers au Portugal",
+        "pprComparison": "Fonds, assurances et fonds de pension PPR par risque, frais et rendement"
+      }
     },
     "learn": "Apprendre",
     "glossary": "Glossaire",
@@ -409,6 +432,22 @@
         "name": "Confidentialité",
         "description": "Les connexions bancaires utilisent l’Open Banking en lecture seule via Enable Banking. WonderMoney ne peut pas initier de virements."
       },
+      "netWorth": {
+        "name": "Patrimoine net",
+        "description": "Comptes, investissements et dettes réunis en un seul chiffre"
+      },
+      "financialMarkets": {
+        "name": "Marchés financiers",
+        "description": "Actions, ETF et watchlists avec des données actualisées, à côté de vos comptes"
+      },
+      "goals": {
+        "name": "Objectifs",
+        "description": "Fixez des objectifs d’épargne et suivez vos progrès"
+      },
+      "credits": {
+        "name": "Prêts",
+        "description": "Votre dette totale et chaque paiement, avec un plan de remboursement"
+      },
       "learn": {
         "name": "Apprendre",
         "description": "Guides et articles sur les finances personnelles"
@@ -416,6 +455,30 @@
       "glossary": {
         "name": "Glossaire",
         "description": "Définitions en langage clair des termes financiers"
+      },
+      "household": {
+        "name": "Foyer",
+        "description": "Partagez vos finances avec ceux qui vivent avec vous, et gardez privés vos comptes privés"
+      },
+      "imports": {
+        "name": "Import",
+        "description": "Importez des relevés CSV, Excel, OFX, QIF et CAMT.053, ou votre historique YNAB"
+      },
+      "recurring": {
+        "name": "Factures et abonnements",
+        "description": "Les paiements récurrents repérés pour vous, dans un calendrier et une prévision à 30 jours"
+      },
+      "assistant": {
+        "name": "Assistant IA",
+        "description": "Interrogez votre argent en langage simple : il propose, vous décidez"
+      },
+      "multiCurrency": {
+        "name": "Multidevise",
+        "description": "Des comptes dans toutes les devises, des totaux dans la vôtre aux taux quotidiens de la BCE"
+      },
+      "selfHosting": {
+        "name": "Auto-hébergement et API",
+        "description": "Faites tourner WonderMoney sur votre serveur et connectez vos scripts via l'API"
       }
     },
     "faq": "FAQ"
@@ -456,7 +519,14 @@
         "exampleBudget": "Un budget de {{amount}} en {{from}} exige {{equivalent}} en {{to}} pour acheter le même panier. Les prix moyens ont varié de {{inflation}}.",
         "exampleInvestment": "Si un placement passe de {{amount}} en {{from}} à {{finalValue}} en {{to}}, le solde final représente {{realValue}} en euros de {{from}}.",
         "methodTitle": "Comment fonctionne la correction de l'inflation",
-        "method": "Nous utilisons la moyenne annuelle de l'indice général des prix à la consommation (IPC) au Portugal, en base {{baseYear}}. Chaque année représente la moyenne des prix de janvier à décembre. Divisez l'IPC de l'année de comparaison par celui de l'année de départ, puis multipliez le montant initial par ce rapport. Divisez le solde final par le même rapport pour l'exprimer en euros de l'année de départ.",
+        "method": "Nous utilisons la moyenne annuelle de l'indice général des prix à la consommation (IPC) au Portugal, en base {{baseYear}}. Chaque année représente la moyenne des prix de janvier à décembre.",
+        "methodFormulasLabel": "Formules",
+        "formulaAmount": "Montant initial",
+        "formulaEquivalent": "Montant équivalent",
+        "formulaFinal": "Solde final",
+        "formulaReal": "Solde en euros de l'année de départ",
+        "formulaCpiStart": "IPC de l'année de départ",
+        "formulaCpiComparison": "IPC de l'année de comparaison",
         "limitations": "Vos dépenses peuvent évoluer différemment du panier national. La comparaison d'un placement suppose un solde de départ et un solde final sans versement ni retrait. Les frais et impôts sont pris en compte s'ils figurent déjà dans le solde nominal saisi. Indiquez tous les montants en euros après avoir converti les éventuels montants historiques en escudos.",
         "coverage": "La période disponible va de {{first}} à {{last}} et couvre uniquement les années complètes.",
         "retrieved": "Données consultées le {{date}}.",
@@ -534,7 +604,18 @@
         "reviewed": "Règles vérifiées le 20 novembre 2026 pour l'IMI payable en 2026 et 2027. Les montants de l'IMI Familiar proviennent de l'article 112-A du Código do IMI (Portal das Finanças).",
         "methodMinimum": "Si l'impôt à percevoir, après toute réduction de l'IMI Familiar, est inférieur à 10 €, aucun IMI n'est liquidé et le calculateur affiche 0 € avec une note (article 113, n.º 6, du Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113 : liquidation, pas d'IMI en dessous de 10 € (consulté le 19 novembre 2026)",
-        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de la résidence principale, dans la rédaction de la Lei n.º 82/2023, identique au texte consolidé du Diário da República (consulté le 20 novembre 2026)"
+        "sourceEbf": "Statut des avantages fiscaux (EBF), article 46 : exonération de la résidence principale, dans la rédaction de la Lei n.º 82/2023, identique au texte consolidé du Diário da República (consulté le 20 novembre 2026)",
+        "terms": {
+          "tax": "IMI annuel",
+          "family": "IMI Familiar",
+          "minimum": "Montant minimum",
+          "payment": "Échéances",
+          "budget": "Provision mensuelle",
+          "rate": "Taux municipal",
+          "scope": "Champ couvert",
+          "educational": "Estimation pédagogique"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Ne soyez plus surpris par l'IMI",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de l'IMI chaque mois, pour que les échéances soient déjà couvertes.",
@@ -612,13 +693,30 @@
         "exampleTarget": "Avec un taux de retrait de {{rate}}, votre chiffre FIRE est {{spending}} ÷ {{rate}} = {{target}} : vos {{assets}} actuels représentent {{progress}} du chemin.",
         "exampleTime": "En croissant mois après mois, versements compris, les placements dépassent {{target}} au bout de {{time}}. En dépensant {{cut}} de moins, soit {{cutSpending}} par an, l'objectif tombe à {{cutTarget}}, atteint au bout de {{cutTime}}. Le calculateur ci-dessus part de ces chiffres : remplacez-les par les vôtres.",
         "methodHeading": "Méthode",
-        "methodFormula": "Chiffre FIRE = dépenses annuelles ÷ taux de retrait",
-        "methodMultiple": "À 4 %, l'objectif vaut 25 fois vos dépenses annuelles ; à 3 %, environ 33 fois. Un taux plus bas donne un objectif plus élevé et plus de marge pour les mauvaises années.",
-        "methodGrowth": "Chaque mois, les placements croissent au taux mensuel qui, composé, donne le rendement annuel saisi, puis le versement du mois s'y ajoute. La durée affichée correspond au premier mois où le total atteint votre chiffre FIRE.",
-        "methodRealMoney": "Le rendement est réel, après inflation : tous les montants sont donc en euros d'aujourd'hui. On suppose que les dépenses et les versements suivent les prix, c'est pourquoi ils restent constants dans le calcul.",
-        "methodHorizon": "La projection s'arrête après {{years}} ans. Si les versements et la croissance ne peuvent pas atteindre l'objectif, par exemple sans versement ni rendement, le calculateur l'indique au lieu de donner une date.",
-        "methodLeftOut": "Ne sont pas pris en compte les impôts sur les gains et les retraits, les frais des fonds et des plateformes, ni le risque de séquence, c'est-à-dire de mauvais rendements dans les premières années où vous vivez de vos placements. Un taux de retrait est une règle empirique tirée des rendements passés, pas une garantie.",
-        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés."
+        "methodMultipleBody": "À 4 %, l'objectif vaut 25 fois vos dépenses annuelles ; à 3 %, environ 33 fois. Un taux plus bas donne un objectif plus élevé et plus de marge pour les mauvaises années.",
+        "methodGrowthBody": "Chaque mois, les placements croissent au taux mensuel qui, composé, donne le rendement annuel saisi, puis le versement du mois s'y ajoute. La durée affichée correspond au premier mois où le total atteint votre chiffre FIRE.",
+        "methodRealMoneyBody": "Le rendement est réel, après inflation : tous les montants sont donc en euros d'aujourd'hui. On suppose que les dépenses et les versements suivent les prix, c'est pourquoi ils restent constants dans le calcul.",
+        "methodHorizonBody": "La projection s'arrête après {{years}} ans. Si les versements et la croissance ne peuvent pas atteindre l'objectif, par exemple sans versement ni rendement, le calculateur l'indique au lieu de donner une date.",
+        "methodLeftOutBody": "Ne sont pas pris en compte les impôts sur les gains et les retraits, les frais des fonds et des plateformes, ni le risque de séquence, c'est-à-dire de mauvais rendements dans les premières années où vous vivez de vos placements. Un taux de retrait est une règle empirique tirée des rendements passés, pas une garantie.",
+        "methodPrivacyBody": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
+        "methodMultipleTerm": "Taux de retrait",
+        "methodGrowthTerm": "Croissance mensuelle",
+        "methodRealMoneyTerm": "Euros d'aujourd'hui",
+        "methodHorizonTerm": "Horizon",
+        "methodLeftOutTerm": "Non pris en compte",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "fireNumber": "Chiffre FIRE",
+          "annualSpending": "dépenses annuelles",
+          "withdrawalRate": "taux de retrait",
+          "monthlyRate": "Taux mensuel",
+          "monthlyRateLower": "taux mensuel",
+          "realReturn": "rendement réel annuel",
+          "assetsEnd": "Placements en fin de mois",
+          "assetsStart": "placements en début de mois",
+          "contribution": "versement mensuel"
+        }
       }
     },
     "compoundInterest": {
@@ -693,13 +791,11 @@
         "exampleStep3": "En euros d'aujourd'hui, la valeur finale est de {{realFinal}} : ce que vous avez versé vaut {{realContributed}} et la croissance après inflation est de {{realGrowth}}.",
         "exampleComparison": "Porter le versement à {{comparisonMonthly}} par mois ajoute {{extraContributed}} versés sur la période et {{extraFinal}} à la valeur finale, qui atteint {{comparisonFinal}}. En euros d'aujourd'hui, l'écart est de {{extraReal}}.",
         "methodHeading": "Comment fonctionne le calculateur",
-        "methodFormula": "Chaque mois : solde = solde × (1 + rendement annuel ÷ 12) + versement mensuel",
-        "methodRealFormula": "Valeur en euros d'aujourd'hui = valeur ÷ (1 + inflation annuelle) ^ années",
-        "methodMonthly": "Le rendement annuel est divisé en 12 taux mensuels égaux. Chaque mois, le solde croît à ce taux, puis le versement s'ajoute en fin de mois. Un rendement de {{rate}} capitalisé chaque mois donne {{effectiveRate}} sur une année complète.",
-        "methodInflation": "L'inflation est convertie en un taux mensuel équivalent qui, composé sur l'année, redonne le taux annuel. La valeur finale est divisée par l'inflation cumulée sur toute la période, et chaque versement par l'inflation cumulée jusqu'au mois où il est effectué : le montant versé apparaît donc lui aussi en euros d'aujourd'hui.",
-        "methodRounding": "La croissance est arrondie au centime chaque mois. Les totaux s'affichent en euros entiers et la croissance est toujours la valeur finale moins ce qui a été versé : les chiffres concordent.",
-        "methodRanges": "Les montants vont de 0 à {{maxAmount}}, le rendement et l'inflation de 0 % à {{maxRate}} % et la durée de 0 à {{maxYears}} années entières. Les valeurs hors de ces limites sont ajustées, et le calculateur vous le signale.",
-        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les montants que vous saisissez ne sont envoyés nulle part.",
+        "methodMonthlyBody": "Le rendement annuel est divisé en 12 taux mensuels égaux. Chaque mois, le solde croît à ce taux, puis le versement s'ajoute en fin de mois. Un rendement de {{rate}} capitalisé chaque mois donne {{effectiveRate}} sur une année complète.",
+        "methodInflationBody": "L'inflation est convertie en un taux mensuel équivalent qui, composé sur l'année, redonne le taux annuel. La valeur finale est divisée par l'inflation cumulée sur toute la période, et chaque versement par l'inflation cumulée jusqu'au mois où il est effectué : le montant versé apparaît donc lui aussi en euros d'aujourd'hui.",
+        "methodRoundingBody": "La croissance est arrondie au centime chaque mois. Les totaux s'affichent en euros entiers et la croissance est toujours la valeur finale moins ce qui a été versé : les chiffres concordent.",
+        "methodRangesBody": "Les montants vont de 0 à {{maxAmount}}, le rendement et l'inflation de 0 % à {{maxRate}} % et la durée de 0 à {{maxYears}} années entières. Les valeurs hors de ces limites sont ajustées, et le calculateur vous le signale.",
+        "methodPrivacyBody": "Le calcul se fait dans votre navigateur. Les montants que vous saisissez ne sont envoyés nulle part.",
         "assumptionsHeading": "Hypothèses",
         "assumption1": "Le rendement est le même chaque année.",
         "assumption2": "Les versements ont lieu en fin de mois et restent identiques sur toute la période.",
@@ -708,7 +804,21 @@
         "assumptionsNote": "Les placements réels montent et baissent, et les impôts et frais réduisent ce qui vous reste. Considérez le résultat comme une projection pour comparer des options, pas comme une prévision.",
         "rateHeading": "Quel rendement retenir",
         "rateBody1": "Retenez le rendement que vous attendez après frais et avant inflation. Un livret d'épargne ou des obligations d'État rapportent moins qu'un fonds actions diversifié, qui peut croître davantage sur de longues durées mais perd aussi de la valeur certaines années.",
-        "rateBody2": "En cas de doute, essayez un taux prudent et un taux plus optimiste, puis comparez. L'écart entre les deux montre la part du résultat qui dépend du taux, que vous ne maîtrisez pas, et celle qui dépend du versement et de la durée, que vous maîtrisez."
+        "rateBody2": "En cas de doute, essayez un taux prudent et un taux plus optimiste, puis comparez. L'écart entre les deux montre la part du résultat qui dépend du taux, que vous ne maîtrisez pas, et celle qui dépend du versement et de la durée, que vous maîtrisez.",
+        "methodFormulasLabel": "Formules",
+        "formulaBalanceEnd": "Solde en fin de mois",
+        "formulaBalanceStart": "solde en début de mois",
+        "formulaAnnualReturn": "rendement annuel",
+        "formulaContribution": "versement mensuel",
+        "formulaRealValue": "Valeur en euros d'aujourd'hui",
+        "formulaValue": "valeur",
+        "formulaInflation": "inflation annuelle",
+        "formulaYears": "années",
+        "methodMonthlyTerm": "Capitalisation mensuelle",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Arrondis",
+        "methodRangesTerm": "Plages de valeurs",
+        "methodPrivacyTerm": "Confidentialité"
       }
     },
     "netWorth": {
@@ -879,7 +989,21 @@
         "assumptions": "Le modèle suppose un rendement et des frais constants, le réinvestissement des distributions et des versements en fin de mois. Il exclut les impôts, les frais de courtage, les variations de change et l'inflation. Les taux sont des hypothèses illustratives pour un indice comme le S&P 500. Les rendements réels varient et peuvent être négatifs. L'effet des frais inclut le rendement que les sommes prélevées auraient pu générer.",
         "ctaHeadline": "Suivez la performance réelle de vos placements",
         "ctaDescription": "Utilisez WonderMoney pour suivre votre portefeuille et comparer son rendement réel au scénario simulé.",
-        "ctaText": "Comparez vos placements à la projection"
+        "ctaText": "Comparez vos placements à la projection",
+        "methodTerm": "Croissance et frais",
+        "assumptionsTerm": "Hypothèses",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "netFactor": "Facteur de croissance annuel net",
+          "annualReturn": "rendement annuel",
+          "annualFee": "frais annuels du fonds",
+          "monthlyFactor": "Facteur mensuel",
+          "monthlyFactorLower": "facteur mensuel",
+          "netFactorLower": "facteur annuel net",
+          "balanceEnd": "Solde en fin de mois",
+          "balanceStart": "solde en début de mois",
+          "contribution": "versement mensuel"
+        }
       }
     },
     "emergencyFund": {
@@ -926,15 +1050,13 @@
       "whatBody2": "Calculez-la uniquement sur vos dépenses essentielles, celles qui continuent si vos revenus s'arrêtent : logement, alimentation, énergie, transports, assurances et mensualités minimales de crédit. Laissez de côté ce que vous pourriez suspendre. Placez l'argent dans un endroit sûr où vous pouvez le retirer vite et sans pénalité, comme un livret d'épargne, plutôt que de l'investir.",
       "exampleTitle": "Un exemple chiffré",
       "exampleIntro": "Imaginons que vos dépenses essentielles s'élèvent à {{expenses}} par mois, que vous ayez déjà {{savings}} de côté et que vous puissiez épargner {{contribution}} par mois. Vous choisissez {{months}} mois de couverture.",
-      "exampleStep1": "Objectif : {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Reste à épargner : {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Délai : {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} mois.",
       "exampleOutro": "Avec 3 mois de couverture, l'objectif descend à {{lowTarget}} et vous l'atteignez en {{lowMonths}} mois. Si un objectif lointain vous décourage, commencez plus petit et relevez-le une fois les premiers mois couverts.",
       "methodTitle": "Comment fonctionne le calculateur",
-      "method1": "Objectif = dépenses essentielles mensuelles × mois de couverture.",
-      "method2": "Reste à épargner = objectif − épargne de précaution actuelle. Si votre épargne est plus élevée, la différence s'affiche comme le montant au-delà de l'objectif.",
-      "method3": "Délai = reste à épargner ÷ versement mensuel, arrondi au mois entier supérieur. Le mois de l'objectif compte ce nombre de mois à partir du mois en cours, avec un versement par mois à partir du mois prochain.",
-      "method4": "Ici, votre épargne ne rapporte pas d'intérêts, et vos dépenses comme votre versement restent identiques chaque mois. Les intérêts vous feraient arriver un peu plus tôt et la hausse des prix un peu plus tard : revoyez les chiffres une ou deux fois par an.",
+      "methodFormulasLabel": "Formules",
+      "methodShortfallBody": "Si votre épargne est plus élevée, la différence s'affiche comme le montant au-delà de l'objectif.",
+      "methodTimeBody": "Arrondi au mois entier supérieur. Le mois de l'objectif compte ce nombre de mois à partir du mois en cours, avec un versement par mois à partir du mois prochain.",
+      "methodInterestTerm": "Sans intérêts",
+      "methodInterestBody": "Ici, votre épargne ne rapporte pas d'intérêts, et vos dépenses comme votre versement restent identiques chaque mois. Les intérêts vous feraient arriver un peu plus tôt et la hausse des prix un peu plus tard : revoyez les chiffres une ou deux fois par an.",
       "nextStepHeadline": "Créez et suivez votre objectif d'épargne de précaution",
       "nextStepDescription": "Enregistrez ce montant comme objectif dans WonderMoney et suivez votre progression à partir des soldes réels de vos comptes.",
       "nextStepCta": "Créer votre objectif"
@@ -1005,15 +1127,20 @@
         "exampleBody": "Un couple perçoit {{income}} nets par mois à deux. Il rembourse {{home}} de crédit immobilier, {{car}} de crédit auto et {{cards}} de carte de crédit, soit {{total}} au total. En divisant les mensualités par les revenus et en multipliant par 100, son taux d'endettement est de {{ratio}}, dans la zone de vigilance.",
         "exampleScenario": "Le crédit auto se termine bientôt. Sans lui, les mensualités tombent à {{scenarioTotal}} et le taux à {{scenarioRatio}}, de retour dans la zone saine. Le calculateur ci-dessus part de ce foyer et de ce changement, pour que vous y mettiez vos propres chiffres.",
         "methodHeading": "Méthode",
-        "methodFormula": "Taux d'endettement = total des mensualités de crédit ÷ revenus nets mensuels du foyer × 100",
-        "methodCounts": "Compté comme dette : chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
-        "methodExcludes": "Non compté : le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
-        "methodIncome": "Les revenus sont nets : ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
         "methodRounding": "Le taux est arrondi à une décimale, et la zone suit le chiffre arrondi. Des mensualités supérieures aux revenus donnent un taux de plus de 100 %.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont pas enregistrés.",
         "nextHeading": "Un nouveau crédit en vue ?",
         "nextBody": "Un crédit immobilier ou un autre prêt ajoute une mensualité. Calculez ce que coûterait chaque mois un nouveau prêt immobilier, puis saisissez cette mensualité dans le panneau de scénario pour voir le nouveau taux.",
-        "nextLink": "Ouvrir le simulateur de prêt immobilier"
+        "nextLink": "Ouvrir le simulateur de prêt immobilier",
+        "methodCountsTerm": "Compté comme dette",
+        "methodCountsBody": "Chaque mensualité due dans le mois au titre d'un crédit immobilier, d'un prêt personnel ou auto, d'une carte de crédit, d'un leasing ou de tout autre crédit. Pour une carte, prenez le montant réellement payé chaque mois.",
+        "methodExcludesTerm": "Non compté",
+        "methodExcludesBody": "Le loyer versé à un propriétaire, les factures, les courses, les assurances et l'épargne. Ils pèsent sur le budget, mais ne remboursent pas de l'argent emprunté.",
+        "methodIncomeTerm": "Les revenus sont nets",
+        "methodIncomeBody": "Ce qui arrive sur le compte après impôts et cotisations, pour toutes les personnes du foyer qui partagent les remboursements. Si vos revenus varient, prenez la moyenne mensuelle de l'année écoulée.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "householdBudget": {
@@ -1094,21 +1221,35 @@
         "whatHeading": "Ce que montre un budget familial",
         "whatBody": "Un budget familial met côte à côte ce qui entre et ce qui sort en un mois. Regrouper les dépenses en quelques catégories transforme une longue liste de paiements en une réponse courte : combien il reste en fin de mois, et quels postes prennent la plus grosse part.",
         "readHeading": "Comment lire le résultat",
-        "readSurplus": "Excédent : revenus moins dépenses, quand le chiffre est positif. C'est l'argent que vous pouvez épargner, investir ou mettre de côté pour les factures qui ne tombent pas tous les mois.",
-        "readDeficit": "Déficit : des dépenses au-dessus des revenus. Un tel mois se paie avec l'épargne ou à crédit, il vaut donc la peine de trouver où réduire avant qu'il ne se répète.",
-        "readShares": "Poids dans les revenus : chaque catégorie en pourcentage du total des revenus. Il permet de comparer des budgets de tailles différentes et montre par quelle catégorie commencer.",
-        "readDiagram": "Le diagramme des flux reprend les mêmes chiffres. Chaque bande est aussi large que son montant, des revenus à gauche jusqu'aux catégories et à l'excédent à droite.",
+        "readSurplusTerm": "Excédent",
+        "readSurplusBody": "Revenus moins dépenses, quand le chiffre est positif. C'est l'argent que vous pouvez épargner, investir ou mettre de côté pour les factures qui ne tombent pas tous les mois.",
+        "readDeficitTerm": "Déficit",
+        "readDeficitBody": "Des dépenses au-dessus des revenus. Un tel mois se paie avec l'épargne ou à crédit, il vaut donc la peine de trouver où réduire avant qu'il ne se répète.",
+        "readSharesTerm": "Poids dans les revenus",
+        "readSharesBody": "Chaque catégorie en pourcentage du total des revenus. Il permet de comparer des budgets de tailles différentes et montre par quelle catégorie commencer.",
+        "readDiagramTerm": "Diagramme des flux",
+        "readDiagramBody": "Il reprend les mêmes chiffres. Chaque bande est aussi large que son montant, des revenus à gauche jusqu'aux catégories et à l'excédent à droite.",
         "exampleHeading": "Exemple chiffré",
         "exampleBody": "Un foyer touche {{salary}} de salaire et {{other}} d'autres sources, soit {{income}} par mois. Ses dépenses s'élèvent à {{expenses}}, ce qui laisse un excédent de {{surplus}}. Divisez l'excédent par les revenus et multipliez par 100 : le taux d'épargne est de {{savingsRate}}.",
+        "exampleFlowCaption": "Le mois de ce foyer, des revenus à l'excédent",
         "exampleShares": "Le logement est la plus grosse catégorie avec {{housing}}, soit {{housingShare}} des revenus, suivi de l'alimentation avec {{food}} ({{foodShare}}). Les charges regroupent deux lignes, énergie et télécoms, pour {{utilities}}. Le calculateur ci-dessus part de ce foyer : vous pouvez y mettre vos propres chiffres.",
+        "exampleSharesCaption": "Chaque catégorie et l'excédent en pourcentage des revenus",
         "methodHeading": "Méthode",
-        "methodFormula": "Excédent = total des revenus − total des dépenses. Taux d'épargne = excédent ÷ total des revenus × 100. Poids d'une catégorie = total de la catégorie ÷ total des revenus × 100.",
-        "methodIncome": "Les revenus sont nets : ce qui arrive sur les comptes du foyer après impôts et cotisations sociales. S'ils varient, prenez la moyenne mensuelle de l'année écoulée.",
-        "methodExpenses": "Les dépenses sont ce qui sort de ces comptes chaque mois, remboursements de crédits compris. L'argent que vous versez sur votre épargne n'est pas une dépense : il fait partie de l'excédent.",
-        "methodIrregular": "Pour les frais annuels ou ponctuels, comme les assurances, l'entretien de la voiture ou les vacances, divisez le montant annuel par 12 et ajoutez-le sur une ligne.",
-        "methodShares": "Chaque pourcentage est calculé sur les revenus, pas sur les dépenses. Avec un excédent, les catégories et l'excédent font 100 % ; avec un déficit, les catégories dépassent 100 %. Sans revenus, il n'y a ni pourcentages ni taux d'épargne.",
-        "methodRounding": "Les montants sont additionnés au centime près et les pourcentages arrondis à une décimale. Les montants vides ou négatifs comptent pour zéro.",
-        "methodPrivacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés.",
+        "methodFormulasLabel": "Formules",
+        "formulaCategoryShare": "Poids d'une catégorie",
+        "formulaCategoryTotal": "Total de la catégorie",
+        "methodIncomeTerm": "Revenus",
+        "methodIncomeBody": "Les revenus sont nets : ce qui arrive sur les comptes du foyer après impôts et cotisations sociales. S'ils varient, prenez la moyenne mensuelle de l'année écoulée.",
+        "methodExpensesTerm": "Dépenses",
+        "methodExpensesBody": "Les dépenses sont ce qui sort de ces comptes chaque mois, remboursements de crédits compris. L'argent que vous versez sur votre épargne n'est pas une dépense : il fait partie de l'excédent.",
+        "methodIrregularTerm": "Frais irréguliers",
+        "methodIrregularBody": "Pour les frais annuels ou ponctuels, comme les assurances, l'entretien de la voiture ou les vacances, divisez le montant annuel par 12 et ajoutez-le sur une ligne.",
+        "methodSharesTerm": "Pourcentages",
+        "methodSharesBody": "Chaque pourcentage est calculé sur les revenus, pas sur les dépenses. Avec un excédent, les catégories et l'excédent font 100 % ; avec un déficit, les catégories dépassent 100 %. Sans revenus, il n'y a ni pourcentages ni taux d'épargne.",
+        "methodRoundingTerm": "Arrondis",
+        "methodRoundingBody": "Les montants sont additionnés au centime près et les pourcentages arrondis à une décimale. Les montants vides ou négatifs comptent pour zéro.",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodPrivacyBody": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés.",
         "nextHeading": "D'un budget ponctuel à une habitude mensuelle",
         "nextBody": "Un budget est plus utile quand on le compare à ce qu'on a vraiment dépensé. Les budgets par enveloppes de WonderMoney appliquent la même idée, mois après mois.",
         "nextLink": "Voir comment fonctionnent les budgets dans WonderMoney"
@@ -1204,7 +1345,6 @@
         "method": {
           "title": "Comment la mensualité est calculée",
           "intro": "La plupart des prêts immobiliers à taux fixe se remboursent par mensualités constantes : le même montant chaque mois, fixé pour que la dette tombe à zéro avec la dernière. La mensualité découle de la formule de l'annuité :",
-          "legend": "M est la mensualité, P la somme empruntée, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement P divisé par n.",
           "schedule": "Chaque mois, les intérêts sont calculés sur le capital restant dû et le reste de la mensualité rembourse du capital. À mesure que la dette baisse, la part d'intérêts diminue et la part de capital augmente : la dette baisse donc lentement au début et plus vite à la fin. L'assurance et les frais s'ajoutent à la mensualité et ne réduisent jamais la dette.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1215,7 +1355,24 @@
             "rounding": "Les montants sont en euros. Chaque mensualité est calculée à partir du capital restant dû et du nombre de mois restants, puis arrondie au centime : une mensualité peut donc différer des autres d'un centime, et la dernière solde exactement la dette. Sur un prêt très long à taux élevé, les premières mensualités peuvent rembourser moins d'un centime de capital.",
             "lenderFigures": "Les chiffres de votre banque peuvent différer légèrement selon sa façon de compter les jours, d'arrondir ou de fixer la date de paiement. Les informations précontractuelles qu'elle vous remet font référence."
           },
-          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}."
+          "limits": "Le simulateur accepte des prêts de {{minAmount}} à {{maxAmount}}, des durées jusqu'à {{maxYears}} ans et des taux jusqu'à {{maxRate}}.",
+          "formulasLabel": "Formules",
+          "zeroRate": "À 0 % d'intérêt, il n'y a rien à actualiser : la mensualité vaut simplement le montant du prêt divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "monthly": "Mensualités",
+            "nominalRate": "Taux nominal, pas le TAEG",
+            "flatFees": "Assurances et frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites"
+          }
+        },
+        "labels": {
+          "firstInterest": "Intérêts de la première mensualité",
+          "firstPrincipal": "Capital de la première mensualité",
+          "monthlyRate": "Taux mensuel",
+          "payments": "Nombre de mensualités"
         }
       },
       "cta": {
@@ -1338,11 +1495,26 @@
         "before": {
           "title": "Avant de rembourser",
           "items": {
-            "fee": "Vérifiez les indemnités. La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette.",
-            "rate": "Les taux variables et mixtes ne sont pas couverts : les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt.",
-            "reserves": "Gardez une réserve. L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement.",
-            "otherDebts": "Remboursez d'abord la dette la plus chère. Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher.",
-            "lender": "Demandez à votre banque comment elle applique le remboursement. Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            "fee": {
+              "term": "Vérifiez les indemnités",
+              "body": "La banque peut facturer un pourcentage de la somme remboursée par anticipation, et les règles et plafonds légaux changent selon le pays et le type de prêt. Indiquez-les dans le simulateur pour voir l'économie nette."
+            },
+            "rate": {
+              "term": "Les taux variables et mixtes ne sont pas couverts",
+              "body": "Les calculs supposent que le taux indiqué reste fixe jusqu'à la fin du prêt."
+            },
+            "reserves": {
+              "term": "Gardez une réserve",
+              "body": "L'argent versé à la banque est difficile à récupérer : assurez-vous que votre épargne de précaution est toujours là après le remboursement."
+            },
+            "otherDebts": {
+              "term": "Remboursez d'abord la dette la plus chère",
+              "body": "Si vous avez une carte de crédit ou un prêt personnel à un taux plus élevé, le rembourser rapporte en général plus que rembourser un prêt immobilier moins cher."
+            },
+            "lender": {
+              "term": "Demandez à votre banque comment elle applique le remboursement",
+              "body": "Certaines baissent la mensualité par défaut, d'autres réduisent la durée, et beaucoup vous laissent choisir."
+            }
           }
         },
         "example": {
@@ -1355,9 +1527,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule d'abord le prêt tel quel, avec le même moteur à taux fixe que le simulateur de prêt immobilier. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités restantes. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n.",
-          "lowerPayment": "Garder la durée : le capital restant après le remboursement repasse dans la formule avec le même n, ce qui donne la nouvelle mensualité, plus basse.",
-          "shorterTerm": "Garder la mensualité : vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
           "fee": "Les indemnités sont le pourcentage indiqué, appliqué à la somme remboursée. Les intérêts économisés sont les intérêts restants du prêt tel quel moins ceux de chaque scénario, et l'économie nette est ce montant moins les indemnités. Une somme supérieure au capital restant dû solde le prêt, et seul ce capital compte pour les indemnités.",
           "assumptionsTitle": "Hypothèses",
           "assumptions": {
@@ -1368,7 +1537,23 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page concordent.",
             "lenderFigures": "Les chiffres de votre banque peuvent légèrement différer selon sa façon de compter les jours et d'arrondir. Demandez-lui sa propre simulation avant de rembourser."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, jusqu'à {{maxYears}} ans restants, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxFee}} de la somme remboursée.",
+          "lowerPaymentTerm": "Garder la durée",
+          "lowerPaymentBody": "Le capital restant après le remboursement repasse dans la formule avec le même nombre de mensualités, ce qui donne la nouvelle mensualité, plus basse.",
+          "shorterTermTerm": "Garder la mensualité",
+          "shorterTermBody": "Vous continuez à payer ce que prévoit le tableau d'origine chaque mois jusqu'à ce que le capital réduit soit soldé. La dernière mensualité ne couvre que le reste, elle est donc souvent plus faible.",
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "terms": {
+            "fixedRate": "Taux fixe",
+            "timing": "Moment du remboursement",
+            "oneOff": "Un seul remboursement",
+            "costs": "Frais",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres de votre banque",
+            "limits": "Limites",
+            "feeNote": "Indemnités et économie nette"
+          },
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1543,10 +1728,22 @@
           "title": "Ce qu'il faut comparer avant de faire racheter son prêt",
           "intro": "Faire racheter votre prêt immobilier par une autre banque, ou renégocier avec la vôtre, peut faire baisser ce que vous payez. Un taux plus bas n'est qu'une partie du calcul : comparez l'offre dans son ensemble.",
           "items": {
-            "rate": "Le taux. Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez.",
-            "monthlyCosts": "Les frais mensuels. La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher.",
-            "term": "La durée. Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps.",
-            "oneOff": "Les frais ponctuels. Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            "rate": {
+              "term": "Le taux",
+              "body": "Un taux fixe plus bas réduit les intérêts facturés chaque mois sur ce que vous devez."
+            },
+            "monthlyCosts": {
+              "term": "Les frais mensuels",
+              "body": "La banque demande souvent de souscrire son assurance emprunteur ou habitation, ou d'ouvrir un compte payant. Ajoutez-les à la mensualité, sinon un taux plus bas peut finir par coûter plus cher."
+            },
+            "term": {
+              "term": "La durée",
+              "body": "Un nouveau prêt sur plus d'années baisse la mensualité, mais vous payez des intérêts plus longtemps."
+            },
+            "oneOff": {
+              "term": "Les frais ponctuels",
+              "body": "Solder un prêt et en souscrire un autre a un coût, payé sur votre épargne."
+            }
           },
           "outro": "Le simulateur réunit tout cela : la mensualité avec ses frais, le total que chaque prêt coûte encore et le mois où les frais du rachat sont récupérés."
         },
@@ -1571,7 +1768,6 @@
         "method": {
           "title": "Comment c'est calculé",
           "intro": "Le simulateur calcule les deux prêts avec le même moteur à taux fixe que le simulateur de prêt immobilier, sur le capital restant dû. Chaque mois, les intérêts portent sur le capital restant dû et le reste de la mensualité rembourse le prêt. La mensualité constante vient de la formule des annuités :",
-          "legend": "M est la mensualité, P le capital restant dû, r le taux annuel divisé par 12 et n le nombre de mensualités. À 0 %, il n'y a pas d'intérêts : la mensualité est simplement P divisé par n. Les assurances et frais de chaque mois s'ajoutent par-dessus.",
           "saving": "L'économie d'un mois est ce que coûterait ce mois-là le prêt actuel, moins ce que coûte le nouveau. Un prêt soldé ne coûte plus rien : avec une nouvelle durée plus longue, les mois qui suivent la fin de votre prêt actuel comptent donc comme un coût. Le coût total de chaque option correspond aux mensualités, assurances et frais, plus les frais du rachat pour le nouveau prêt. L'économie nette est la différence.",
           "breakEven": "Le mois où le rachat est amorti est le premier mois où les économies cumulées atteignent au moins les frais du rachat. Si cela n'arrive pas avant la fin des deux prêts, le rachat n'est pas amorti.",
           "longerTerm": "Quand la nouvelle durée dépasse la durée restante, le simulateur calcule aussi l'offre sur la durée restante, pour montrer quelle part de la baisse de mensualité vient du taux et quelle part vient d'un remboursement plus long.",
@@ -1585,7 +1781,22 @@
             "rounding": "Les montants sont en euros. Les intérêts et la mensualité de chaque mois sont arrondis au centime, donc tous les totaux de la page tombent juste. La mensualité affichée est la première ; les suivantes restent à moins d'un centime d'elle.",
             "lenderFigures": "Chaque banque compte les jours et arrondit à sa façon, ses chiffres peuvent donc différer légèrement. Demandez à chacune son offre officielle avant de décider."
           },
-          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital."
+          "limits": "Le simulateur accepte des capitaux de {{minBalance}} à {{maxBalance}}, des durées jusqu'à {{maxYears}} ans, des taux jusqu'à {{maxRate}} et des indemnités jusqu'à {{maxExitFee}} du capital.",
+          "terms": {
+            "saving": "Économie et coût total",
+            "breakEven": "Mois de rentabilité",
+            "longerTerm": "Une durée plus longue",
+            "fixedRate": "Taux fixes",
+            "sameBalance": "Le même capital",
+            "timing": "Moment du changement",
+            "fees": "Assurances et frais",
+            "noDiscounting": "Sans actualisation",
+            "rounding": "Arrondis",
+            "lenderFigures": "Les chiffres des banques",
+            "limits": "Limites"
+          },
+          "zeroRate": "À 0 %, il n'y a pas d'intérêts : la mensualité est simplement le capital restant dû divisé par le nombre de mensualités.",
+          "formulasLabel": "Formules"
         },
         "related": {
           "title": "Autres simulateurs",
@@ -1595,6 +1806,13 @@
           "earlyRepaymentBody": "Ce que ferait économiser un remboursement partiel sur votre prêt actuel, plutôt qu'un rachat.",
           "debtToIncomeLink": "Calculateur de taux d'endettement",
           "debtToIncomeBody": "La part de vos revenus consacrée aux remboursements, aujourd'hui et avec la nouvelle mensualité."
+        },
+        "labels": {
+          "monthlySaving": "Économie par mois",
+          "currentMonthTotal": "Coût du prêt actuel ce mois-là",
+          "offerMonthTotal": "Coût du nouveau prêt ce mois-là",
+          "currentTotalCost": "Coût total du prêt actuel",
+          "offerTotalCost": "Coût total du nouveau prêt"
         }
       },
       "cta": {
@@ -1717,12 +1935,16 @@
         "exampleStep3": "Le plus petit versement mensuel qui y parvient est de {{contribution}}. En {{months}} mois, vous versez {{contributions}} et les intérêts ajoutent {{growth}}, soit {{final}} à la fin.",
         "exampleOutro": "À l'inverse : si vous mettez de côté un montant rond de {{rounded}} par mois, vous atteignez l'objectif au bout de {{timeMonths}} mois, et au terme des {{years}} ans vous avez {{finalAmount}}.",
         "methodTitle": "Comment fonctionne le simulateur",
-        "methodIntro": "Le solde rapporte une fois par mois et le versement arrive à la fin de chaque mois. Au bout de n mois, le solde vaut :",
-        "methodLegend": "S est ce que vous avez déjà épargné, C le versement mensuel, r le taux mensuel et n le nombre de mois. Avec un rendement de 0 %, on ne divise pas par r et le solde vaut simplement S + C × n.",
-        "methodRate": "Le taux mensuel r est celui qui, capitalisé sur douze mois, donne le rendement annuel : (1 + rendement annuel)^(1/12) − 1. Diviser le rendement annuel par 12 donnerait un chiffre un peu trop élevé.",
-        "methodOrder": "Les intérêts de chaque mois sont arrondis au centime avant l'ajout du versement, si bien que le plan année par année correspond exactement aux totaux.",
-        "methodContribution": "Le versement nécessaire s'obtient en résolvant la formule pour C. Il est arrondi au centime supérieur et vérifié mois par mois, pour atteindre réellement l'objectif.",
-        "methodTime": "La durée nécessaire est le premier mois complet où le solde atteint l'objectif, recherché jusqu'à {{maxYears}} ans.",
+        "methodIntro": "Le solde rapporte une fois par mois et le versement arrive à la fin de chaque mois. À la fin de la période, le solde vaut :",
+        "methodFormulasLabel": "Formules",
+        "formulaMonthlyRate": "Taux mensuel",
+        "methodRateBody": "Celui qui, capitalisé sur douze mois, donne le rendement annuel. Diviser le rendement annuel par 12 donnerait un chiffre un peu trop élevé.",
+        "methodZeroTerm": "Rendement de 0 %",
+        "methodZeroBody": "On ne divise pas par le taux mensuel, et le solde vaut simplement ce que vous avez déjà épargné plus le versement mensuel × le nombre de mois.",
+        "methodOrderTerm": "Arrondi",
+        "methodOrderBody": "Les intérêts de chaque mois sont arrondis au centime avant l'ajout du versement, si bien que le plan année par année correspond exactement aux totaux.",
+        "methodContributionBody": "Il s'obtient en résolvant la formule pour le versement mensuel. Il est arrondi au centime supérieur et vérifié mois par mois, pour atteindre réellement l'objectif.",
+        "methodTimeBody": "La durée nécessaire est le premier mois complet où le solde atteint l'objectif, recherché jusqu'à {{maxYears}} ans.",
         "assumptionsTitle": "Hypothèses",
         "assumptionReturn": "Le rendement est le même chaque année. En réalité il varie, et un placement peut perdre de la valeur.",
         "assumptionCosts": "Aucun impôt, frais ou autre coût n'est déduit des intérêts.",
@@ -1864,16 +2086,12 @@
         "relatedDebtToIncome": "montre quelle part de vos revenus vos mensualités actuelles prennent, avec les mêmes tranches que cet outil.",
         "exampleTitle": "Exemple chiffré",
         "exampleIntro": "Un couple gagne {{income}} nets par mois et paie {{existing}} par mois pour un crédit auto. Il a {{savings}} d'épargne pour le logement, compte sur un taux fixe de {{rate}} sur {{years}} ans et prévoit des frais d'achat de {{costsRate}} du prix. Sa banque finance jusqu'à {{ltv}} du prix, et le couple réserve {{share}} de ses revenus au crédit.",
-        "exampleStep1": "Marge mensuelle : {{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
-        "exampleStep2": "Prêt maximal : une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
-        "exampleStep3": "Argent au départ : chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
         "exampleStep4": "Le plus bas des deux est {{monthlyPrice}} : c'est donc le budget mensuel qui fixe la limite.",
         "exampleResult": "À {{price}}, le couple emprunterait {{loan}}, verserait {{downPayment}} d'apport et paierait {{purchaseCosts}} de frais, en utilisant la totalité de ses {{savings}} d'épargne. Le simulateur de prêt immobilier place la mensualité à {{payment}}.",
         "exampleLift": "Environ {{extraIncome}} de revenus nets en plus par mois le mèneraient à {{liftPrice}}, où la limite de l'épargne prend le relais.",
         "exampleSavings": "Avec seulement {{lowSavings}} d'épargne, tout s'inverse : l'épargne couvre un prix de {{lowSavingsPrice}}, avec un prêt de {{lowSavingsLoan}}, bien en deçà de ce que ses revenus pourraient porter. Pour relever la limite, c'est épargner davantage qui compte, pas gagner davantage. Le calculateur ci-dessus part du premier couple, pour que vous y mettiez vos propres chiffres.",
         "methodTitle": "Méthode",
         "methodIntro": "Le calcul traite chaque limite séparément, puis retient le prix le plus bas.",
-        "methodLegend": "I désigne les revenus nets mensuels, d la part permise pour le crédit, E les mensualités actuelles et M la marge pour la nouvelle mensualité. r est le taux annuel divisé par 12, n le nombre de mensualités et L le prêt maximal. S désigne l'épargne, c les frais d'achat et v le financement, tous deux en pourcentage du prix. P₁ est le prix que permet le budget mensuel et P₂ celui que permet l'épargne.",
         "methodShare": "La part de départ de {{share}} se situe dans la tranche de vigilance du calculateur de taux d'endettement ({{caution}} % à {{high}} %). C'est un repère, pas une limite légale.",
         "methodCosts": "Au prix maximal, chaque euro d'épargne va dans l'achat : d'abord les frais, le reste en apport. Le prêt couvre ce qui manque, et jamais plus que le financement maximal ne le permet.",
         "methodRounding": "Les montants sont calculés en centimes. Le prêt est arrondi au centime inférieur, si bien que la première mensualité, calculée par le simulateur de prêt immobilier, tient dans votre marge ; les suivantes peuvent varier d'un centime. Le prix vaut exactement le prêt plus l'apport, et les revenus ou l'épargne en plus sont arrondis à l'euro supérieur.",
@@ -1885,11 +2103,33 @@
         "assumptionCostsShare": "Les frais d'achat sont un pourcentage fixe du prix. En pratique, les taxes suivent souvent des tranches et certains frais sont des montants fixes.",
         "lendersTitle": "Ce que les banques vérifient et que cet outil ne fait pas",
         "lendersIntro": "La réponse d'une banque peut être inférieure à cette estimation, parfois nettement. Les règles changent d'une banque et d'un pays à l'autre, et ce calculateur n'en intègre aucune.",
-        "lenderStress": "Taux de stress : beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
-        "lenderIncome": "Définition des revenus : certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
-        "lenderCountry": "Limites nationales : dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
-        "lenderProfile": "Votre profil : l'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
-        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous."
+        "lendersOutro": "Servez-vous du résultat pour savoir à peu près où vous en êtes avant de parler à une banque, puis demandez-lui quelles limites s'appliquent à vous.",
+        "exampleStep1Term": "Marge mensuelle",
+        "exampleStep1Body": "{{share}} de {{income}} font {{allowed}}. Moins les {{existing}} du crédit auto, il reste {{room}} par mois pour le nouveau prêt.",
+        "exampleStep2Term": "Prêt maximal",
+        "exampleStep2Body": "Une mensualité de {{room}} à {{rate}} sur {{years}} ans rembourse {{maxLoan}}. En ajoutant toute l'épargne et en payant les frais d'achat sur le total, la limite mensuelle permet un prix de {{monthlyPrice}}.",
+        "exampleStep3Term": "Argent au départ",
+        "exampleStep3Body": "Chaque euro du prix demande {{deposit}} d'apport et {{costsRate}} de frais, {{cashShare}} en tout. {{savings}} ÷ {{cashShare}} donne un prix de {{cashPrice}}.",
+        "lenderStressTerm": "Taux de stress",
+        "lenderStressBody": "Beaucoup de banques vérifient que vous pourriez encore payer si le taux montait de quelques points, surtout pour les prêts à taux variable.",
+        "lenderIncomeTerm": "Définition des revenus",
+        "lenderIncomeBody": "Certaines ne retiennent qu'une partie des primes, des revenus d'indépendant ou des loyers, ou en font la moyenne sur plusieurs années.",
+        "lenderCountryTerm": "Limites nationales",
+        "lenderCountryBody": "Dans de nombreux pays, le régulateur plafonne le financement, la part des revenus consacrée aux remboursements, le prêt par rapport aux revenus ou la durée.",
+        "lenderProfileTerm": "Votre profil",
+        "lenderProfileBody": "L'âge en fin de prêt, la stabilité de l'emploi, l'historique de crédit et le logement lui-même comptent aussi.",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules",
+        "labels": {
+          "maxLoan": "Prêt maximal"
+        },
+        "methodShareTerm": "Part pour le crédit",
+        "methodCostsTerm": "Où va l'épargne",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionSavingsTerm": "Toute l'épargne",
+        "assumptionPaymentTerm": "Ce que la mensualité laisse de côté",
+        "assumptionCostsShareTerm": "Frais d'achat"
       }
     },
     "termDeposit": {
@@ -1978,11 +2218,16 @@
         "whatBody": "Un dépôt à terme immobilise une somme à la banque pendant un nombre de mois fixé, à un taux fixe. Au-delà du taux, ce que vous gagnez dépend de trois choses : la durée pendant laquelle l'argent reste placé, le moment où les intérêts sont versés, à la fin ou en cours de route, et la part prélevée par l'impôt. Ce calculateur tient compte des trois avec le taux que vous saisissez, pour comparer les offres sur la même base.",
         "readHeading": "Lire le résultat",
         "read": {
-          "gross": "Intérêts bruts : tout ce que rapporte le dépôt avant impôt.",
-          "tax": "Impôt prélevé : la part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
-          "net": "Intérêts nets : ce qui vous revient, les intérêts bruts moins l'impôt.",
-          "final": "Solde à l'échéance, ou total perçu lorsque les intérêts sont versés sur votre compte : le montant déposé plus tous les intérêts nets.",
-          "yield": "Rendement net annuel : le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
+          "grossTerm": "Intérêts bruts",
+          "grossBody": "Tout ce que rapporte le dépôt avant impôt.",
+          "taxTerm": "Impôt prélevé",
+          "taxBody": "La part de chaque versement d'intérêts retenue au titre de l'impôt, au taux que vous saisissez.",
+          "netTerm": "Intérêts nets",
+          "netBody": "Ce qui vous revient, les intérêts bruts moins l'impôt.",
+          "finalTerm": "Solde à l'échéance, ou total perçu lorsque les intérêts sont versés sur votre compte",
+          "finalBody": "Le montant déposé plus tous les intérêts nets.",
+          "yieldTerm": "Rendement net annuel",
+          "yieldBody": "Le gain net exprimé en taux annuel, pour comparer des dépôts de durées et de versements différents."
         },
         "exampleHeading": "Exemple chiffré",
         "exampleSetup": "Supposons que vous déposiez {{amount}} pendant {{months}} mois à un taux brut de {{rate}} par an, avec des intérêts versés à l'échéance. Les intérêts sont simples : le montant multiplié par le taux et par la part de l'année pendant laquelle l'argent reste placé.",
@@ -1990,15 +2235,21 @@
         "exampleTax": "Supposons maintenant que {{taxRate}} soient prélevés sur les intérêts versés à l'échéance, un taux choisi uniquement à titre d'illustration et non tiré des règles d'un pays : le calculateur démarre à 0 % pour que vous saisissiez le vôtre. La banque prélève {{tax}}, vous recevez {{net}} et terminez avec {{taxedFinal}}, soit un rendement net de {{taxedYield}} par an.",
         "methodHeading": "Méthode et hypothèses",
         "methodIntro": "Les intérêts se comptent en mois entiers, sans décompte des jours. Le taux saisi est un taux nominal annuel : chaque période rapporte le taux multiplié par son nombre de mois, divisé par 12.",
-        "methodFormula": "Intérêts d'une période = solde × taux annuel × mois de la période ÷ 12. Intérêts nets = intérêts − impôt. Rendement net annuel = le taux annuel qui transforme le montant déposé en versements nets et en montant restitué, chacun compté à sa date. Avec tous les intérêts à l'échéance, il vaut (solde à l'échéance ÷ montant déposé)^(12 ÷ durée en mois) − 1.",
         "method": {
-          "maturity": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
-          "periodic": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
-          "reinvest": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte quittent le dépôt, et les suivants sont calculés sur le montant déposé.",
-          "tax": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
-          "yield": "Le rendement net annuel est le taux de rendement interne du dépôt : le taux annuel auquel la somme placée devient tout ce que vous récupérez, chaque versement net étant compté le mois où il est payé. Des intérêts versés en cours de route valent donc davantage que les mêmes intérêts à l'échéance. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions.",
-          "excluded": "Non compris : pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
-          "privacy": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés."
+          "maturityBody": "Versés à l'échéance, les intérêts sont simples : un seul versement de montant × taux × durée en mois ÷ 12.",
+          "periodicBody": "Versés chaque mois, trimestre ou année, les intérêts arrivent à la fin de chaque période. Si la durée n'est pas un nombre entier de périodes, la dernière est plus courte et ses intérêts sont versés au prorata à l'échéance. Une durée plus courte qu'une période donne un seul versement à l'échéance.",
+          "reinvestBody": "Les intérêts ajoutés au dépôt le sont après impôt : le dépôt se capitalise donc au rythme des versements. Les intérêts versés sur votre compte quittent le dépôt, et les suivants sont calculés sur le montant déposé.",
+          "taxBody": "L'impôt est prélevé sur chaque versement séparément et arrondi au centime, comme le fait la banque. Tous les montants sont calculés en centimes, si bien que les lignes de versements s'additionnent exactement aux totaux.",
+          "yieldBody": "Le rendement net annuel est le taux de rendement interne du dépôt : le taux annuel auquel la somme placée devient tout ce que vous récupérez, chaque versement net étant compté le mois où il est payé. Des intérêts versés en cours de route valent donc davantage que les mêmes intérêts à l'échéance. Un dépôt de moins d'un an est supposé renouvelé aux mêmes conditions.",
+          "excludedTerm": "Non compris",
+          "excludedBody": "Pénalités de retrait anticipé, frais de tenue de compte, changements de taux en cours de durée, plafonds de garantie des dépôts et effet de l'inflation.",
+          "privacyBody": "Le calcul se fait dans votre navigateur. Les chiffres saisis restent sur votre appareil et ne sont ni enregistrés ni envoyés.",
+          "maturityTerm": "Versement à l'échéance",
+          "periodicTerm": "Versements périodiques",
+          "reinvestTerm": "Intérêts capitalisés ou versés",
+          "taxTerm": "Impôt",
+          "yieldTerm": "Rendement net annuel",
+          "privacyTerm": "Confidentialité"
         },
         "methodLimits": "Les durées vont de 1 à {{maxMonths}} mois.",
         "nextHeading": "Calculateurs associés",
@@ -2007,7 +2258,23 @@
         "nextEmergency": "Un dépôt à terme peut accueillir l'épargne dont vous n'aurez pas besoin de sitôt, tandis que votre épargne de précaution reste disponible.",
         "nextEmergencyLink": "Calculer votre épargne de précaution",
         "nextSavingsGoal": "Vous mettez de côté la somme à déposer, ou vous préparez la suite après l'échéance ? Le simulateur d'épargne calcule l'effort mensuel ou le temps nécessaire.",
-        "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne"
+        "nextSavingsGoalLink": "Ouvrir le simulateur d'épargne",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "interest": "Intérêts d'une période",
+          "balance": "solde",
+          "annualRate": "taux annuel",
+          "periodMonths": "mois de la période",
+          "tax": "Impôt",
+          "taxLower": "impôt",
+          "taxRate": "taux d'imposition",
+          "interestLower": "intérêts",
+          "netInterest": "Intérêts nets",
+          "yield": "Rendement net annuel, avec les intérêts à l'échéance",
+          "finalBalance": "solde à l'échéance",
+          "amount": "montant déposé",
+          "termMonths": "durée en mois"
+        }
       }
     },
     "buyVsRent": {
@@ -2113,10 +2380,22 @@
         "whatHeading": "Ce que montre la comparaison",
         "whatBody": "Acheter remplace le loyer par des mensualités, mais immobilise aussi de l'argent dans l'apport et les frais d'achat et ajoute les frais de propriété. Louer laisse cet argent libre d'être placé. Le calculateur suit les deux options avec la même somme de départ et compare ce que chacune vous laisse.",
         "read": {
-          "netWorth": "Le patrimoine de chaque option : pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements.",
-          "difference": "L'écart : de combien une option devance l'autre à la fin de la période choisie.",
-          "breakEven": "L'année d'équilibre : la première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire.",
-          "chart": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          "netWorth": {
+            "term": "Le patrimoine de chaque option",
+            "body": "Pour l'achat, ce que laisserait la vente du logement après les frais de vente et le remboursement du prêt, plus les placements ; pour la location, les placements."
+          },
+          "difference": {
+            "term": "L'écart",
+            "body": "De combien une option devance l'autre à la fin de la période choisie."
+          },
+          "breakEven": {
+            "term": "L'année d'équilibre",
+            "body": "La première année qui se termine avec l'achat devant. L'achat part derrière dès qu'il y a des frais d'achat ou de vente : les frais d'achat sont payés le premier jour, et vendre aussitôt coûterait en plus les frais de vente. L'achat peut aussi passer devant puis repasser derrière, par exemple quand la valeur du logement progresse moins vite que les placements du locataire."
+          },
+          "chart": {
+            "term": "Graphique et tableau",
+            "body": "Le graphique et le tableau montrent les deux options chaque année, pour voir si l'écart se réduit ou se creuse."
+          }
         },
         "exampleHeading": "Exemple chiffré",
         "example": {
@@ -2136,10 +2415,7 @@
           "returns": "Les placements progressent chaque mois au taux mensuel qui, composé sur douze mois, donne le rendement annuel.",
           "netWorth": "À la fin de chaque année, le patrimoine du propriétaire est la valeur du logement moins les frais de vente et le capital restant dû, plus ses placements. Celui du locataire correspond à ses placements. L'année d'équilibre est la première qui se termine avec le propriétaire devant."
         },
-        "formulaOwner": "Acheter = valeur du logement − frais de vente − capital restant dû + placements",
-        "formulaRenter": "Louer = placements",
         "formulaReturn": "Rendement mensuel",
-        "formulaLegend": "Ici, R est le rendement annuel des placements : {{investmentReturn}} par an donnent environ {{monthlyReturn}} par mois.",
         "leftOutHeading": "Ce qui n'est pas pris en compte",
         "leftOut": {
           "gainsTax": "L'impôt sur les gains des placements ou sur la plus-value de la vente du logement.",
@@ -2154,7 +2430,20 @@
         "relatedMortgage": "Pour voir le prêt seul, avec son tableau d'amortissement année par année, utilisez le",
         "relatedMortgageLink": "simulateur de prêt immobilier",
         "relatedNetWorth": "Pour additionner le logement, le prêt et votre épargne tels qu'ils sont aujourd'hui, utilisez le",
-        "relatedNetWorthLink": "calculateur de patrimoine net"
+        "relatedNetWorthLink": "calculateur de patrimoine net",
+        "formulaExample": "Un rendement de {{investmentReturn}} par an donne environ {{monthlyReturn}} par mois.",
+        "labels": {
+          "investments": "Placements"
+        },
+        "formulasLabel": "Formules",
+        "methodTerms": {
+          "start": "Mise de départ",
+          "loan": "Le prêt",
+          "monthly": "Chaque mois",
+          "growth": "Valorisation et loyer",
+          "returns": "Rendement des placements",
+          "netWorth": "Patrimoine et année d'équilibre"
+        }
       }
     },
     "rateRevision": {
@@ -2274,7 +2563,6 @@
         "exampleIncome": "Avec un revenu net de {{income}} par mois, la mensualité en prend {{currentShare}} aujourd'hui, {{newShare}} après la première hausse et {{stressShare}} après la plus forte, un niveau que les seuils du taux d'endettement classent en « {{stressBand}} ».",
         "methodTitle": "Comment c'est calculé",
         "methodIntro": "Chaque mensualité est la mensualité constante qui rembourse le capital restant dû sur les mois restants, avec le même moteur à taux fixe que le simulateur de prêt immobilier :",
-        "methodLegend": "i est l'indice et s la marge, tous deux en taux annuels. r est le taux mensuel, M la mensualité, P le capital restant dû et n le nombre de mensualités restantes. Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement P divisé par n.",
         "methodItems": {
           "change": "L'écart par mois est la première mensualité au nouveau taux moins la première mensualité au taux actuel, toutes deux sur le capital d'aujourd'hui et sur le même nombre de mois.",
           "year": "L'écart annuel compare la somme des 12 premières mensualités de chaque tableau, ou de toutes les mensualités restantes s'il en reste moins. Chaque mensualité est arrondie séparément, si bien que le total peut différer de l'écart mensuel multiplié par le nombre de mensualités.",
@@ -2293,12 +2581,40 @@
         "contractTitle": "Ce que décide votre contrat",
         "contractIntro": "Une révision réelle dépend de votre contrat et des règles du pays où vous vivez. Rien de cela n'est intégré au simulateur :",
         "contractItems": {
-          "resetDates": "Les dates de révision : à quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence.",
-          "capsFloors": "Les plafonds et planchers : certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %.",
-          "index": "L'indice : l'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication.",
-          "mixed": "Les prêts à taux mixte : une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          "resetDates": {
+            "term": "Les dates de révision",
+            "body": "À quel rythme le taux est révisé, à quelle date la valeur de l'indice est relevée et quand la nouvelle mensualité commence."
+          },
+          "capsFloors": {
+            "term": "Les plafonds et planchers",
+            "body": "Certains contrats limitent la hausse ou la baisse du taux, ou l'empêchent de descendre sous un certain niveau. Le simulateur empêche seulement le taux de passer sous 0 %."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un taux de banque centrale ou un taux de référence national, chacun avec ses propres durées (par exemple 3, 6 ou 12 mois) et son calendrier de publication."
+          },
+          "mixed": {
+            "term": "Les prêts à taux mixte",
+            "body": "Une période à taux fixe d'abord, puis le taux variable. Saisissez le capital et la durée tels qu'ils seront au début de la période variable."
+          }
         },
-        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque."
+        "contractOutro": "Ce sont les chiffres de votre banque qui font foi. Utilisez ce simulateur pour anticiper une révision, puis comparez ses chiffres avec ceux de votre banque.",
+        "terms": {
+          "change": "Écart par mois",
+          "year": "Écart sur un an",
+          "interest": "Écart d'intérêts",
+          "income": "Part des revenus",
+          "privacy": "Confidentialité",
+          "fromNextMonth": "Dès la prochaine mensualité",
+          "sameTerm": "La même durée",
+          "statement": "La mensualité actuelle",
+          "noFeed": "Pas de données d'indice",
+          "limits": "Limites",
+          "annualRate": "Taux annuel",
+          "incomeShare": "Part de la mensualité dans les revenus"
+        },
+        "zeroRate": "Quand l'indice plus la marge est inférieur à 0 %, le taux est pris à 0 % et la mensualité vaut simplement le capital restant dû divisé par le nombre de mensualités.",
+        "methodFormulasLabel": "Formules"
       }
     },
     "carLoan": {
@@ -2361,7 +2677,16 @@
         "assumptionsTitle": "Hypothèses",
         "assumptionLoan": "L'estimation suppose un prêt à taux fixe, remboursé chaque mois, sans versement final majoré ni location. Saisissez le prix et les conditions proposés pour la voiture neuve ou d'occasion. Pour une voiture que vous possédez déjà, indiquez zéro comme prix et apport pour estimer les frais d'utilisation.",
         "assumptionFees": "Les frais de financement initiaux sont payés à l'achat avec l'apport. Saisissez une seule fois les assurances et frais liés au crédit. Le simulateur ne prend en compte que les taxes et les frais que vous saisissez.",
-        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année."
+        "assumptionRunning": "Le budget mensuel couvre les postes affichés. Il exclut la décote, la valeur de revente, le stationnement, les péages et les réparations qui dépassent la réserve d'entretien. Les factures annuelles peuvent être dues en une seule fois, même si le simulateur les répartit sur l'année.",
+        "terms": {
+          "loan": "La mensualité",
+          "budget": "Le budget mensuel",
+          "apr": "Le TAEG estimé",
+          "assumptionLoan": "Prêt à taux fixe",
+          "assumptionFees": "Frais de financement",
+          "assumptionRunning": "Ce que couvre le budget"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Prévoyez le coût mensuel total de la voiture dans votre budget",
       "nextStepDescription": "Mettez de l'argent de côté dans WonderMoney pour la mensualité, le carburant et les factures à payer dans l'année.",
@@ -2442,9 +2767,26 @@
         "assumptionScope": "Ce simulateur suit la loi fiscale portugaise et ne s'applique qu'aux biens situés au Portugal, quel que soit votre pays de résidence. Il est pédagogique et ne constitue pas un conseil fiscal.",
         "assumptionYoung": "L'exonération des jeunes (35 ans ou moins, premier logement permanent, conditions remplies à la date de l'acte, logement gardé comme résidence permanente) est un choix distinct, pris en compte seulement si vous la cochez. Elle est totale jusqu'à {{youngFull}} et partielle jusqu'à {{youngPartial}}. L'exonération du timbre d'achat est une déduction plafonnée à 0,8 % du plafond d'exonération totale : au-delà, vous payez 0,8 % uniquement sur l'excédent. Le timbre du prêt reste dû.",
         "assumptionLoan": "Le timbre du prêt suppose un crédit de cinq ans ou plus et est toujours dû. Les frais de dossier, l'expertise et les frais de notaire ou de registre ne sont pas inclus.",
-        "assumptionUnsupported": "Non pris en charge : non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT.",
         "assumptionIslands": "Pour les Açores et Madère, le simulateur utilise les plafonds régionaux des tableaux IV à VI de l'Ofício Circulado 40129/2026, avec les mêmes taux que le continent.",
-        "sourceCircular": "Ofício Circulado 40129/2026 : barèmes de l'IMT (Autorité fiscale)"
+        "sourceCircular": "Ofício Circulado 40129/2026 : barèmes de l'IMT (Autorité fiscale)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Droit de timbre sur l'achat",
+          "stampLoan": "Droit de timbre sur le prêt"
+        },
+        "terms": {
+          "base": "Valeur imposable",
+          "imt": "IMT",
+          "stamp": "Droit de timbre",
+          "rounding": "Arrondis",
+          "scope": "Champ couvert",
+          "young": "Exonération pour les jeunes",
+          "loan": "Prêt immobilier",
+          "islands": "Açores et Madère"
+        },
+        "formulasLabel": "Formules",
+        "assumptionUnsupportedTerm": "Non pris en charge",
+        "assumptionUnsupportedBody": "Non-résidents, acheteurs résidant dans des juridictions à fiscalité privilégiée, sociétés, autres exonérations et avantages d'IMT, et logements relevant de l'article 9 du CIMT."
       },
       "nextStepHeadline": "Planifiez la somme dont vous avez besoin pour acheter",
       "nextStepDescription": "Ajoutez l'IMT et le droit de timbre à l'épargne nécessaire avant d'acheter, puis suivez votre progression dans WonderMoney.",
@@ -2538,7 +2880,28 @@
         "assumptionBanks": "Les banques évaluent votre risque de crédit et peuvent refuser le prêt ou proposer d'autres conditions, quelle que soit la liste. Pour un prêt à deux emprunteurs, les deux doivent remplir les conditions.",
         "assumptionRate": "Le taux est celui que vous saisissez. La garantie ne change pas le taux d'intérêt.",
         "assumptionTaxes": "Les taxes concernent une résidence principale au Portugal continental et, dans les montants avec exonération, supposent que vous remplissez les conditions de l'IMT Jovem.",
-        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique."
+        "assumptionScope": "À titre pédagogique uniquement : ni conseil financier, ni fiscal, ni juridique.",
+        "labels": {
+          "cash": "Somme à la signature",
+          "taxes": "IMT et droit de timbre"
+        },
+        "terms": {
+          "payment": "Prêt et mensualité",
+          "taxes": "Impôts",
+          "cash": "Somme à la signature",
+          "guarantee": "La garantie",
+          "banks": "La banque décide",
+          "rate": "Taux d'intérêt",
+          "assumptionTaxes": "Impôts pris en compte",
+          "scope": "Champ couvert",
+          "conditionAge": "Âge",
+          "conditionHome": "Résidence principale",
+          "conditionProperty": "Autre logement",
+          "conditionPrice": "Prix",
+          "conditionIncome": "Revenus",
+          "conditionDate": "Date du contrat"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Planifiez l'apport et le coût de votre logement",
       "nextStepDescription": "Fixez un objectif d'apport et budgétez la mensualité, les taxes et les charges du logement dans WonderMoney.",
@@ -2638,15 +3001,29 @@
         "exampleOutro": "Le simulateur ci-dessus part de ce prêt, sans les frais, pour que vous puissiez saisir votre propre offre.",
         "methodTitle": "Comment le simulateur fait le calcul",
         "methodIntro": "La mensualité est le versement constant qui rembourse le montant sur la durée au taux mensuel, et le TAEG est le taux qui équilibre ce que vous recevez et ce que vous payez :",
-        "methodLegend": "M est la mensualité de capital et d'intérêts, P le montant emprunté, r le taux annuel nominal divisé par 12 et n le nombre de mois. Les frais mensuels f s'ajoutent à chaque mensualité.",
-        "methodApr": "Le TAEG est le taux A qui résout la deuxième ligne : ce que vous recevez au départ, le montant P moins les frais initiaux F, égale la mensualité de chaque mois Mₖ plus les frais f, actualisée par (1 + A) à la puissance k ÷ 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
+        "methodApr": "Le TAEG est le taux qui résout la dernière ligne : ce que vous recevez au départ, le montant emprunté moins les frais initiaux, égale la mensualité de chaque mois plus les frais mensuels, actualisée par un plus le TAEG à la puissance du numéro du mois divisé par 12, chaque mois comptant pour un douzième d'année. Le simulateur le trouve par dichotomie.",
         "methodRounding": "Chaque chiffre est calculé en centimes entiers. Chaque mensualité est recalculée à partir du capital restant dû : les mensualités restent à un centime l'une de l'autre, la dernière solde exactement le capital et le tableau correspond aux totaux.",
         "methodPrivacy": "Le calcul se fait dans votre navigateur. Rien de ce que vous saisissez n'est envoyé ni enregistré.",
         "assumptionsTitle": "Hypothèses",
         "assumptionFixedRate": "Le taux est fixe sur toute la durée et chaque mensualité est payée à temps.",
         "assumptionFees": "Les frais initiaux sont payés, ou retirés du montant, au départ du prêt ; les frais mensuels sont les mêmes chaque mois.",
         "assumptionOtherCosts": "Les coûts que le simulateur ne demande pas, comme une assurance facultative, des pénalités de retard ou une indemnité de remboursement anticipé, ne sont pas inclus.",
-        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}."
+        "assumptionLimits": "Montants de {{minAmount}} à {{maxAmount}}, durées de {{minMonths}} à {{maxMonths}} mois et taux jusqu'à {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Montant reçu",
+          "month": "Mois",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG sans frais",
+          "aprFees": "TAEG avec frais"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Taux fixe",
+        "assumptionFeesTerm": "Frais",
+        "assumptionOtherCostsTerm": "Autres coûts",
+        "assumptionLimitsTerm": "Limites",
+        "methodRoundingTerm": "Arrondis",
+        "methodPrivacyTerm": "Confidentialité",
+        "methodFormulasLabel": "Formules"
       }
     },
     "savingsCertificates": {
@@ -2705,14 +3082,31 @@
         "exampleTitle": "Exemple chiffré",
         "exampleText": "Vous souscrivez {{amount}} et les conservez {{years}} ans avec un taux de base de {{baseRate}}. Les certificats rapportent {{grossInterest}} d'intérêts bruts, dont {{irs}} d'IRS, soit {{netInterest}} nets. Le solde atteint {{finalValue}}, un rendement net de {{netYield}} par an.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodQuarter": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
-        "methodTax": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s'ajoutent au solde : ils produisent à leur tour des intérêts les trimestres suivants.",
-        "methodYield": "Le rendement net annuel est le taux de croissance annuel composé entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
+        "methodQuarterBody": "Chaque trimestre rapporte un quart du taux annuel (taux de base plus prime) sur le solde courant. Les montants sont arrondis au centime à chaque trimestre.",
+        "methodTaxBody": "{{irsRate}} des intérêts de chaque trimestre sont retenus et les intérêts nets s'ajoutent au solde : ils produisent à leur tour des intérêts les trimestres suivants.",
+        "methodYieldBody": "Le rendement net annuel est le taux de croissance annuel composé entre le montant souscrit et le solde final. Les chiffres bruts montrent les intérêts avant IRS.",
         "assumptionsTitle": "Hypothèses",
         "assumptionBase": "Le taux de base est celui que vous saisissez et reste fixe pendant toute la durée. Par défaut, il correspond au taux fixé par l'IGCP pour {{referenceMonth}} ({{referenceRateNote}}) ; l'IGCP le révise chaque mois, donc les intérêts effectifs seront différents. Vérifiez le taux actuel sur le site de l'IGCP.",
         "assumptionRules": "Le taux d'IRS est le taux général pour ce type de revenu. Votre situation fiscale et les changements de règles après {{rulesDate}} ne sont pas pris en compte.",
         "assumptionScope": "Information générale, pas une recommandation de souscrire ou d'éviter un produit, et aucune comparaison avec d'autres produits d'épargne.",
-        "referenceRateAtCeiling": "{{rate}}, le plafond"
+        "referenceRateAtCeiling": "{{rate}}, le plafond",
+        "methodQuarterTerm": "Intérêts trimestriels",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Rendement net annuel",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "quarterInterest": "Intérêts du trimestre",
+          "balance": "solde",
+          "baseRate": "taux de base",
+          "bonus": "prime de permanence",
+          "irs": "IRS",
+          "interestLower": "intérêts",
+          "newBalance": "Solde en fin de trimestre",
+          "yield": "Rendement net annuel",
+          "finalValue": "valeur finale",
+          "amount": "montant souscrit",
+          "years": "années"
+        }
       },
       "nextStepHeadline": "Voyez vos certificats avec le reste de votre épargne",
       "nextStepDescription": "Ajoutez-les dans WonderMoney pour suivre tout ce que vous avez épargné au même endroit.",
@@ -2831,12 +3225,25 @@
           "title": "Comment c'est calculé",
           "intro": "Les taux sont des statistiques publiées. WonderMoney ajoute seulement ces calculs :",
           "steps": {
-            "a": "Taux annuel : la moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
-            "b": "Inflation : la variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
-            "c": "Taux réel : (1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
-            "d": "Simulateur : intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
+            "aTerm": "Taux annuel",
+            "aBody": "La moyenne simple des douze moyennes mensuelles de l'année. Elle ne pondère pas les mois selon les montants déposés.",
+            "bTerm": "Inflation",
+            "bBody": "La variation de l'indice des prix à la consommation portugais, en moyenne annuelle, entre l'année précédente et l'année considérée.",
+            "cTerm": "Taux réel",
+            "cBody": "(1 + taux) ÷ (1 + inflation) − 1. Pour le chiffre après impôt, on retire d'abord 28 % d'IRS du taux.",
+            "dTerm": "Simulateur",
+            "dBody": "Intérêts simples sur la durée en mois entiers, versés à l'échéance, avec 28 % retenus, au taux moyen du groupe d'échéances. Ce que l'inflation retire vaut montant × ((1 + inflation)^(mois ÷ 12) − 1)."
           },
-          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages."
+          "realRate": "Diviser plutôt que soustraire compte quand les taux sont élevés : cela mesure combien l'argent peut acheter de plus, et pas seulement l'écart entre deux pourcentages.",
+          "formulasLabel": "Formules",
+          "formula": {
+            "realRate": "Taux réel",
+            "realRateAfterTax": "Taux réel après impôt",
+            "rate": "taux",
+            "inflation": "inflation",
+            "amount": "montant",
+            "months": "mois"
+          }
         },
         "data": {
           "title": "Données et sources",
@@ -2965,10 +3372,14 @@
           "title": "Comment c'est calculé",
           "intro": "Chaque chiffre vient du même moteur que le calculateur de dépôt à terme :",
           "steps": {
-            "a": "Intérêts bruts : montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
-            "b": "Impôt : {{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
-            "c": "Rendement net annuel : les intérêts nets annualisés sur la durée.",
-            "d": "Filtres : une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
+            "aTerm": "Intérêts bruts",
+            "aBody": "Montant × TANB × durée en mois ÷ 12, versés en une fois à l'échéance.",
+            "bTerm": "Impôt",
+            "bBody": "{{taxRate}} % des intérêts. Les banques étrangères ne le retiennent pas au Portugal ; le chiffre suppose donc que vous déclarez les intérêts et payez le même taux.",
+            "cTerm": "Rendement net annuel",
+            "cBody": "Les intérêts nets annualisés sur la durée.",
+            "dTerm": "Filtres",
+            "dBody": "Une offre est masquée si son minimum dépasse votre montant ou si son maximum est inférieur. Une offre sans plafond indiqué reste affichée."
           }
         },
         "data": {
@@ -3063,6 +3474,7 @@
         "methodMeal": "L'indemnité repas est exonérée jusqu'au plafond journalier, qui dépend du versement en espèces ou sur carte. Le calculateur n'ajoute que l'excédent à la rémunération imposable.",
         "methodAllowances": "Avec 14 versements, les primes de vacances et de Noël sont imposées chacune séparément, comme l'exigent les barèmes. En douzièmes, le supplément s'ajoute à chaque mois.",
         "methodBudget": "Les montants nets sont ce qui arrive sur votre compte : c'est le bon point de départ d'un budget mensuel.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "La retenue n'est pas votre IRS définitif",
         "final": "Ce qui est retenu chaque mois est un acompte. L'administration fiscale établit votre IRS réel dans la déclaration annuelle, avec les revenus de toute l'année et vos déductions. La retenue peut être supérieure ou inférieure à l'impôt dû, d'où les remboursements ou les compléments à payer.",
         "unsupportedTitle": "Non pris en charge",
@@ -3140,6 +3552,9 @@
         "howTransition": "Dans les premières tranches, la parcela a abater est une formule avec la lettre R, la rémunération mensuelle. Elle fait monter la retenue progressivement à partir de zéro, si bien qu'une petite augmentation ne réduit jamais le net.",
         "howDependants": "Chaque personne à charge réduit la retenue d'un montant fixe. À partir de trois personnes à charge, le taux marginal de la tranche est inférieur d'un point.",
         "howTables": "Le barème I s'applique aux non mariés sans personne à charge et aux mariés avec deux revenus. Le barème II s'applique aux non mariés avec personnes à charge et le barème III aux mariés avec un seul revenu.",
+        "methodFormulasLabel": "Formule",
+        "formulaPerDependant": "Montant par personne à charge",
+        "howTransitionTerm": "Parcela a abater avec R",
         "finalTitle": "La retenue n'est pas l'impôt définitif",
         "final": "Les barèmes fixent ce que votre employeur retient chaque mois. Ils ne calculent pas votre IRS final, que la déclaration annuelle établit avec les tranches ci-dessus, les revenus de toute l'année et vos déductions.",
         "unsupportedTitle": "Non inclus",
@@ -3242,6 +3657,20 @@
         "methodNoReduction": "L'ancienne réduction de 10 % après 180 jours de versement n'est pas appliquée : le guide 2026 de la Segurança Social ne la mentionne pas.",
         "methodTax": "Le guide de la Segurança Social indique que l'allocation n'a pas à être déclarée à l'IRS. Vérifiez votre cas auprès de l'administration fiscale.",
         "methodBudget": "C'est sur l'allocation mensuelle qu'il faut baser votre budget. Comparez-la à votre salaire net pour voir la baisse, puis voyez combien de temps vos économies couvrent l'écart.",
+        "methodFormulasLabel": "Formules",
+        "formulaReference": "Rémunération de référence",
+        "formulaPay": "Rémunérations des 12 mois",
+        "formulaDaily": "Allocation journalière",
+        "formulaMonthly": "Allocation mensuelle",
+        "methodReferenceTerm": "Rémunération de référence",
+        "methodAmountTerm": "Montant",
+        "methodLimitsTerm": "Plafond et plancher",
+        "methodNetTerm": "Rémunération de référence nette",
+        "methodIncreaseTerm": "Majoration de 10 %",
+        "methodDurationTerm": "Durée",
+        "methodNoReductionTerm": "Pas de baisse après 180 jours",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non pris en charge",
         "unsupportedTransitional": "Le tableau transitoire pour les personnes qui remplissaient déjà la condition de cotisation au 31 mars 2012 et n'ont pas été au chômage depuis. Le calculateur n'utilise que le tableau général.",
         "unsupportedSocial": "L'allocation sociale de chômage (subsídio social de desemprego), qui selon le guide ne peut être demandée que jusqu'au 30 décembre 2026.",
@@ -3340,6 +3769,20 @@
         "methodNetCap": "L'indemnité journalière ne peut pas non plus dépasser la valeur nette de la RR. Le calculateur l'estime avec 11 % de sécurité sociale et le taux de retenue d'IRS 2026 du continent pour un titulaire célibataire.",
         "methodGap": "La perte de revenu compare votre salaire net normal (14 ou 12 paiements, en moyenne sur 12 mois) à ce que verse la Segurança Social. Les primes de vacances et de Noël ne sont pas reconstituées pour les jours d'arrêt.",
         "methodBudget": "L'écart est le revenu à couvrir avec votre épargne ou en réduisant vos dépenses pendant l'arrêt. Servez-vous-en pour dimensionner votre épargne de précaution.",
+        "methodFormulasLabel": "Formules",
+        "formulaReference": "Rémunération de référence",
+        "formulaPay": "Rémunérations des 6 mois",
+        "formulaDaily": "Indemnité journalière",
+        "formulaPercent": "Pourcentage de la tranche",
+        "methodReferenceTerm": "Rémunération de référence",
+        "methodBandsTerm": "Pourcentage selon la durée",
+        "methodWaitingTerm": "Délai de carence",
+        "methodMinimumTerm": "Minimum",
+        "methodIncreaseTerm": "Majoration de 5 points",
+        "methodFloorTerm": "Plancher au-delà de 500 euros",
+        "methodNetCapTerm": "Plafond net",
+        "methodGapTerm": "Perte de revenu",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non pris en charge",
         "unsupportedTuberculosis": "La tuberculose, payée à 80 % ou 100 % de la RR selon les personnes à charge, sans limite de durée.",
         "unsupportedSelfEmployed": "Les indépendants (10 jours de carence, jusqu'à 365 jours), l'assurance sociale volontaire et les employés de maison.",
@@ -3422,8 +3865,6 @@
         "exampleTitle": "Exemple chiffré",
         "example": "Une voiture diesel de {{cc}} cm³, avec des émissions officielles WLTP de {{co2}} g/km et immatriculée en {{year}}, doit {{tax}} d'IUC par an. Mettre {{monthly}} de côté chaque mois suffit.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodA": "Catégorie A (voitures immatriculées de 1981 à juin 2007) : l'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
-        "methodB": "Catégorie B (voitures immatriculées à partir de juillet 2007) : on additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
         "methodAdditional": "Les voitures de la catégorie B immatriculées après le 1er janvier 2017 paient un taux additionnel quand les émissions sont élevées : 31,77 € au-delà de 205 g/km (WLTP) ou 180 g/km (NEDC), et 63,74 € au-delà de 260 g/km (WLTP) ou 250 g/km (NEDC). Le taux additionnel est lui aussi multiplié par le coefficient. Le texte légal ne le limite pas par carburant, donc le calculateur l'applique à tous.",
         "methodDiesel": "Les voitures diesel paient aussi le supplément diesel (adicional de IUC, article 216 de la loi n.º 82-B/2014, maintenu en 2026 par le budget de l'État). Il dépend de la cylindrée, s'applique aux catégories A et B et s'ajoute après le coefficient, sans être multiplié par lui.",
         "methodPayment": "Jusqu'en 2026, l'IUC se paie le mois de l'anniversaire de l'immatriculation. Le décret-loi n.º 161/2026 (4 août 2026) instaure une liquidation annuelle par contribuable, couvrant tous ses véhicules. 2027 est une année transitoire : un paiement en octobre jusqu'à 500 €, sinon deux en juillet et octobre (ou tout en juillet). À partir de 2028, il est liquidé avant fin avril et payé en avril jusqu'à 100 €, en avril et octobre de 100 € à 500 €, et en avril, juillet et octobre au-delà de 500 €. Les seuils s'appliquent au total de tous vos véhicules.",
@@ -3431,8 +3872,6 @@
         "exemptionTitle": "Voitures électriques",
         "exemption": "Les voitures entièrement électriques de la catégorie B sont exonérées d'IUC et le calculateur affiche zéro. Les hybrides rechargeables et autres véhicules sont taxés selon leur cylindrée et leur CO2 figurant sur la carte grise : saisissez ces valeurs.",
         "scopeTitle": "Ce qui est couvert",
-        "scopeSupported": "Voitures particulières légères : catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
-        "scopeUnsupported": "Non pris en charge : véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
         "assumptionsTitle": "Hypothèses",
         "assumptionYear": "Les taux sont les tableaux {{taxYear}} du Código do IUC (articles 9 et 10), dans la rédaction de la {{law}}. Le Portal das Finanças n'indique aucune modification ultérieure de ces taux.",
         "assumptionPayment": "Le mois de paiement de 2026 suit la règle de l'anniversaire de l'immatriculation, que le préambule du décret-loi n.º 161/2026 confirme comme la règle en vigueur. À partir de 2027, l'impôt est établi par contribuable, sur l'ensemble de ses véhicules : ajoutez chacune de vos voitures et saisissez l'IUC de vos autres véhicules comme autre IUC, pour que les mois des échéances suivent votre total (la loi applique ses seuils à ce total). Les calendriers de 2027 et 2028 montrent le montant de chaque mois pour les voitures ajoutées ; avec une seule voiture, sa part dans chaque échéance. L'année d'immatriculation, l'impôt se paie dans les 30 jours suivant le délai légal d'enregistrement.",
@@ -3444,7 +3883,31 @@
         "sourceDiesel": "Portal das Finanças : article 216 de la loi n.º 82-B/2014, tableaux I et II du supplément diesel (consulté le 20 novembre 2026)",
         "reviewed": "Taux de {{taxYear}} vérifiés le {{reviewed}}.",
         "sourceSchedule": "Décret-loi n.º 161/2026 du 4 août : nouvelles règles de paiement de l'IUC, avec la transition de 2027 (Portal das Finanças, consulté le 19 novembre 2026)",
-        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)"
+        "sourceBudget": "Diário da República : article 94 de la loi n.º 73-A/2025 (budget de l'État pour 2026), qui maintient le supplément diesel sans en modifier les montants (consulté le 20 novembre 2026)",
+        "methodATerm": "Catégorie A (voitures immatriculées de 1981 à juin 2007)",
+        "methodABody": "L'impôt vient d'un tableau par carburant, cylindrée et période d'immatriculation (après 1995, de 1990 à 1995, de 1981 à 1989).",
+        "methodBTerm": "Catégorie B (voitures immatriculées à partir de juillet 2007)",
+        "methodBBody": "On additionne le taux de cylindrée et celui du CO2, puis on multiplie par un coefficient selon l'année d'immatriculation (1,00 en 2007, 1,05 en 2008, 1,10 en 2009, 1,15 à partir de 2010). Le CO2 se lit dans la colonne WLTP ou NEDC, selon le cycle d'essai de votre carte grise.",
+        "scopeSupportedTerm": "Voitures particulières légères",
+        "scopeSupportedBody": "Catégorie A (immatriculées de 1981 à juin 2007) et catégorie B (immatriculées à partir de juillet 2007).",
+        "scopeUnsupportedTerm": "Non pris en charge",
+        "scopeUnsupportedBody": "Véhicules de marchandises et plus lourds (catégories C et D), motos (E), bateaux de plaisance (F), aéronefs (G) et voitures immatriculées avant 1981.",
+        "labels": {
+          "diesel": "Supplément diesel",
+          "engineRate": "Taux de cylindrée",
+          "co2Rate": "Taux de CO2",
+          "provision": "Provision mensuelle"
+        },
+        "terms": {
+          "additional": "Taux additionnel",
+          "diesel": "Supplément diesel",
+          "payment": "Paiement",
+          "budget": "Provision mensuelle",
+          "year": "Barèmes",
+          "paymentRule": "Échéance",
+          "educational": "Estimation pédagogique"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Ne vous laissez plus surprendre par la taxe auto",
       "nextStepDescription": "WonderMoney vous aide à mettre de côté un douzième de votre taxe auto chaque mois, pour que l'avis soit déjà couvert.",
@@ -3551,7 +4014,6 @@
         "methodCash": "Le solde retranche du prix de vente les frais de vente, le prêt remboursé et l'IRS estimé. Il ne retranche pas ce que vous dépensez pour le logement suivant.",
         "scopeTitle": "Ce qui est couvert",
         "scopeSupported": "Les personnes physiques résidentes fiscales au Portugal qui vendent en {{saleYear}} un bien de leur patrimoine privé acheté depuis {{firstYear}}.",
-        "scopeUnsupported": "Non couvert : non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, la surtaxe de solidarité et les réductions d'impôt.",
         "assumptionsTitle": "Hypothèses",
         "assumptionBrackets": "L'IRS supplémentaire utilise le barème annuel de l'IRS de {{saleYear}} sur le revenu saisi, comme estimation de l'effet sur la déclaration annuelle. L'imposition commune est modélisée en divisant le revenu par deux.",
         "assumptionNotModelled": "Le calculateur ne vérifie pas les conditions du remploi. Les coefficients ont été vérifiés sur le tableau de la {{portaria}} au Diário da República.",
@@ -3566,7 +4028,29 @@
         "sourceAcquisition": "CIRS, article 46 : valeur d'acquisition d'un bien acheté à titre onéreux (consulté le 20 novembre 2026)",
         "sourceCorrection": "CIRS, article 50 : correction monétaire après 24 mois (consulté le 20 novembre 2026)",
         "sourceExpenses": "CIRS, article 51 : travaux des 12 dernières années et frais d'acquisition et de vente (consulté le 20 novembre 2026)",
-        "sourceImt": "CIMT, article 12 : l'IMT est payé sur le montant le plus élevé entre le prix et la VPT (consulté le 20 novembre 2026)"
+        "sourceImt": "CIMT, article 12 : l'IMT est payé sur le montant le plus élevé entre le prix et la VPT (consulté le 20 novembre 2026)",
+        "scopeUnsupportedTerm": "Non couvert",
+        "scopeUnsupportedBody": "Non-résidents, biens achetés avant {{firstYear}}, sociétés et biens affectés à une activité, successions et donations, logements ayant reçu une aide publique supérieure à 30 % de leur valeur fiscale, la surtaxe de solidarité et les réductions d'impôt.",
+        "labels": {
+          "included": "Ajouté au revenu",
+          "irsWith": "IRS avec la plus-value",
+          "irsWithout": "IRS sans la plus-value",
+          "cashAfter": "Solde"
+        },
+        "terms": {
+          "gain": "Plus-value",
+          "taxValue": "Valeur de vente et VPT",
+          "coefficient": "Coefficient",
+          "expenses": "Frais",
+          "half": "La moitié de la plus-value",
+          "exemption": "Réinvestissement",
+          "cash": "Solde",
+          "brackets": "Tranches de l'IRS",
+          "notModelled": "Ce qui n'est pas vérifié",
+          "educational": "Estimation pédagogique",
+          "supported": "Couvert"
+        },
+        "formulasLabel": "Formules"
       },
       "nextStepHeadline": "Sachez ce que vous pouvez vraiment utiliser de la vente",
       "nextStepDescription": "WonderMoney vous aide à mettre l'impôt de côté et à voir ce qui reste pour votre prochain logement.",
@@ -3646,6 +4130,9 @@
         "methodWithholding": "Chaque versement est soumis à retenue séparément avec le barème mensuel 2026, sans être ajouté au salaire du mois : le Despacho n.º 233-A/2026 (n.º 10) demande aux employeurs d'indiquer un taux effectif distinct pour chaque rémunération, comme les mois où l'on verse les primes de vacances et de Noël.",
         "methodTwelfths": "En douzièmes, la prime est répartie à parts égales sur les mois travaillés dans l'année (12 pour une année complète). Chaque douzième est soumis à retenue séparément au taux effectif de la prime entière, la pratique habituelle des employeurs depuis la Lei n.º 11/2013, art. 3 (absente du Despacho). Votre employeur peut au contraire ajouter le douzième au salaire du mois et appliquer la retenue sur le total, ce qui l'alourdit en général : vérifiez votre fiche de paie.",
         "methodSocialSecurity": "La sécurité sociale à la charge du salarié représente 11 % de la prime brute.",
+        "hiringYearTerm": "Année d'embauche",
+        "twelfthsTerm": "En douzièmes",
+        "planTerm": "Plan",
         "unsupportedNovember": "L'ajustement ponctuel des revenus versés en novembre 2026 (Despacho 12523-A/2026, Portugal continental) est ignoré. Une prime versée en novembre verrait sa retenue réduite de moitié.",
         "unsupportedOther": "Seul le salaire de base compte. Les compléments d'ancienneté, les autres éléments de rémunération, la fin ou la suspension du contrat en cours d'année, les conventions collectives plus généreuses et les coûts de l'employeur sont hors de cette estimation.",
         "sourceCode": "Código do Trabalho, art. 239, 263 et 264 : durée des congés, prime de Noël et prime de vacances",
@@ -3739,6 +4226,22 @@
         "methodFraction": "Une année incomplète compte au prorata : le calculateur compte les anniversaires complets de la date de début plus les jours écoulés depuis le dernier, rapportés aux jours de cette année. La date de fin compte comme un jour travaillé.",
         "methodTax": "À titre d'information, hors du résultat : une partie de l'indemnité peut être exclue de l'IRS selon l'art. 2, n° 4, du CIRS, jusqu'à une limite liée à votre rémunération régulière des 12 derniers mois et à vos années d'ancienneté. Le reste est un revenu imposable. Demandez à l'administration fiscale ou à un comptable la limite exacte pour votre cas.",
         "methodBudget": "L'indemnité est un montant unique. La répartir sur les mois à venir, avec les allocations chômage auxquelles vous avez droit, montre combien de temps elle couvre vos dépenses.",
+        "methodFormulasLabel": "Formules",
+        "formulaDaily": "Montant journalier",
+        "formulaBase": "Salaire de base",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Jours par an",
+        "formulaYears": "Années d'ancienneté",
+        "formulaCompensation": "Indemnité",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Jours par an",
+        "methodTransitionalTerm": "Contrats anciens",
+        "methodFixedTermTerm": "Arrivée à terme d'un CDD",
+        "methodDurationLimitTerm": "Durée maximale",
+        "methodCapsTerm": "Plafonds",
+        "methodFractionTerm": "Année incomplète",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Situations couvertes",
         "supported": "Licenciement collectif, suppression de poste et inadaptation du salarié sur un CDI, et arrivée à terme d'un CDD à terme certain ou incertain, avec une fin de contrat en 2026.",
         "unsupportedTitle": "Non couvert",
@@ -3851,14 +4354,14 @@
         "exampleTitle": "Exemple chiffré",
         "example": "Une personne gagnant {{gross}} par mois en moyenne (euros d'aujourd'hui, 14 versements), avec {{years}} années de cotisation, part à {{age}}. La pension de base est de {{statutory}} par mois, soit un taux global de formation de {{rate}}. Partir {{months}} mois avant l'âge normal entraîne une décote de {{penalty}} et l'application du facteur de durabilité, ce qui laisse {{monthly}} bruts par mois, soit {{replacement}} du salaire. Après l'IRS, la pension est de {{netPension}} par mois. Face à un salaire net estimé de {{net}}, l'écart est de {{gap}} par mois.",
         "methodTitle": "Comment fonctionne l'estimation",
-        "methodReference": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
-        "methodRate": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
-        "methodAges": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
-        "methodEarly": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation entraîne une décote de {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
-        "methodLate": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
-        "methodMinimum": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
-        "methodGap": "L'écart compare la pension nette à votre salaire net d'aujourd'hui, tous deux par versement, sur 14 versements. Le salaire net est le salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. La pension nette est la pension brute estimée moins l'IRS retenu selon la table de retenue des pensions VIII de 2026 (Despacho n.º 233-A/2026, titulaire non marié ou marié avec deux revenus, sans handicap) ; les pensions ne paient pas de sécurité sociale et celles jusqu'à 920 euros par mois ne sont pas soumises à retenue. L'IRS définitif dépend de l'ensemble de vos revenus et déductions.",
-        "methodBudget": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il varie avec chacune des hypothèses ci-dessus.",
+        "methodReferenceBody": "La rémunération de référence est la moyenne des rémunérations annuelles sur toute la carrière, revalorisées avec des coefficients liés aux prix à la consommation et divisées par 14. Le simulateur raisonne en euros d'aujourd'hui : vous saisissez un salaire mensuel moyen réel et le résultat est aussi en euros d'aujourd'hui.",
+        "methodRateBody": "Le taux annuel dépend des tranches de la rémunération de référence, en multiples de l'IAS ({{ias}} en 2026) : {{rates}} pour les tranches jusqu'à 1,1, jusqu'à 2, jusqu'à 4, jusqu'à 8 et au-delà de 8 fois l'IAS. Les carrières jusqu'à 20 ans utilisent un taux fixe de 2 %. Le taux est multiplié par les années de cotisation, 40 au maximum, pour donner le taux global de formation.",
+        "methodAgesBody": "L'âge normal d'accès à la pension de vieillesse est de {{normal2026}} en 2026 et a été fixé à {{normal2027}} pour 2027. Le simulateur utilise la valeur de 2026.",
+        "methodEarlyBody": "Avant l'âge normal, dès 60 ans et avec au moins 15 années de cotisation, chaque mois d'anticipation entraîne une décote de {{penalty}}, et le facteur de durabilité 2026 ({{factor}}, une baisse de 17,63 %) s'applique aussi. Les deux se multiplient. Les exceptions, comme les carrières très longues, ne sont pas modélisées.",
+        "methodLateBody": "Après l'âge normal, jusqu'à 70 ans, chaque mois ajoute une surcote qui dépend des années de cotisation : 0,33 % dès 15 ans, 0,50 % dès 25, 0,65 % dès 35 et 1 % dès 40. La pension avec surcote ne peut pas dépasser 92 % de la rémunération de référence.",
+        "methodMinimumBody": "Si la formule donne moins que la pension minimale 2026 pour votre carrière, le minimum est affiché : {{min15}} pour 15 à 20 ans, {{min21}} pour 21 à 30 et {{min31}} pour 31 ans ou plus. Le minimum ne s'applique pas au départ anticipé.",
+        "methodGapBody": "L'écart compare la pension nette à votre salaire net d'aujourd'hui, tous deux par versement, sur 14 versements. Le salaire net est le salaire brut moins 11 % de sécurité sociale et la retenue d'IRS 2026 pour une personne seule sans personne à charge sur le continent. La pension nette est la pension brute estimée moins l'IRS retenu selon la table de retenue des pensions VIII de 2026 (Despacho n.º 233-A/2026, titulaire non marié ou marié avec deux revenus, sans handicap) ; les pensions ne paient pas de sécurité sociale et celles jusqu'à 920 euros par mois ne sont pas soumises à retenue. L'IRS définitif dépend de l'ensemble de vos revenus et déductions.",
+        "methodBudgetBody": "Lisez l'écart comme le montant mensuel que votre épargne et vos investissements devraient couvrir. Il varie avec chacune des hypothèses ci-dessus.",
         "unsupportedTitle": "Non pris en charge",
         "unsupportedMixed": "Les carrières commencées avant 2002 (formule mixte, avec les anciennes règles pour les années jusqu'en 2001). Ce simulateur ne couvre que la formule de toute la carrière pour ceux qui ont commencé à cotiser en 2002 ou après.",
         "unsupportedSpecial": "Les salaires très variables sur la carrière, les trous de cotisation et les carrières de plus de 40 ans.",
@@ -3871,7 +4374,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1 : revalorisation des pensions 2026 et pensions minimales",
         "sourceSimulator": "Segurança Social Direta : simulateur officiel de pensions",
         "reviewed": "Règles et valeurs 2026 vérifiées le 19 novembre 2026 par rapport au décret-loi n.º 187/2007 et aux portarias de 2026. Les taux annuels, la surcote et les pensions minimales ont été recoupés dans des sources secondaires et sur les pages de la Segurança Social, sans lecture dans la loi consolidée, et les simplifications ci-dessus sont les nôtres. La table de retenue des pensions VIII a été vérifiée ligne par ligne le 20 novembre 2026 d'après l'annexe du Despacho n.º 233-A/2026 publiée au Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República) : tables de retenue à la source de l'IRS 2026, dont la table VIII des pensions",
+        "methodReferenceTerm": "Rémunération de référence",
+        "methodRateTerm": "Taux global de formation",
+        "methodAgesTerm": "Âge normal d'accès",
+        "methodEarlyTerm": "Retraite anticipée",
+        "methodLateTerm": "Départ après l'âge normal",
+        "methodMinimumTerm": "Pension minimale",
+        "methodGapTerm": "Écart",
+        "methodBudgetTerm": "Lire l'écart",
+        "methodFormulasLabel": "Formules",
+        "formula": {
+          "globalRate": "Taux global de formation",
+          "globalRateLower": "taux global de formation",
+          "annualRate": "taux annuel",
+          "years": "années de cotisation",
+          "statutory": "Pension de base",
+          "statutoryLower": "pension de base",
+          "reference": "rémunération de référence",
+          "earlyPension": "Pension en cas de départ anticipé",
+          "monthsEarly": "mois d'anticipation",
+          "factor": "facteur de durabilité",
+          "gap": "Écart",
+          "netPay": "salaire net",
+          "netPension": "pension nette"
+        }
       }
     },
     "sp500History": {
@@ -3979,10 +4506,14 @@
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
-            "fx": "Devise : les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
-            "fees": "Coûts : les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
-            "taxes": "Impôts : l'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
-            "sequence": "Biais rétrospectif : il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
+            "fxTerm": "Devise",
+            "fxBody": "Les rendements sont en dollars américains. Si vous investissez depuis la zone euro, le taux de change euro-dollar s'ajoute à ces chiffres ou en retranche, parfois de plusieurs points par an. Le risque de change est distinct de celui du marché.",
+            "feesTerm": "Coûts",
+            "feesBody": "Les frais des fonds, les frais de courtage et les écarts acheteur-vendeur ne sont pas déduits. Un fonds qui réplique l'indice rapporte l'indice moins ses coûts.",
+            "taxesTerm": "Impôts",
+            "taxesBody": "L'impôt sur les dividendes et les plus-values n'est pas inclus et dépend de votre lieu de résidence.",
+            "sequenceTerm": "Biais rétrospectif",
+            "sequenceBody": "Il s'agit d'un grand indice américain dans l'histoire d'un seul pays. D'autres marchés et périodes ont fait bien pire, et décaler le début ou la fin de quelques années peut beaucoup changer le résultat.",
             "past": "Les performances passées ne préjugent pas des performances futures. Cet outil est éducatif et ne constitue pas un conseil en investissement."
           }
         },
@@ -4198,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Comment lire cette page",
+          "estimatorTerm": "Estimation de la facture",
+          "indexTerm": "Indice des prix",
+          "marketTerm": "Marché libre",
           "estimator": "Le simulateur chiffre un mois de 30 jours au tarif réglementé : la puissance souscrite, l'énergie consommée, la contribution audiovisuelle et la taxe sur l'électricité, puis ajoute la TVA poste par poste, au taux qui s'applique à chacun.",
           "index": "L'indice regarde les factures de tous les ménages, pas seulement le tarif réglementé : le prix moyen du kWh d'Eurostat au Portugal et dans l'UE, taxes comprises, pour que les deux soient comparables.",
           "market": "Le tarif réglementé n'est qu'une option. La plupart des ménages sont sur le marché libre, où les fournisseurs fixent leurs propres prix et où les offres peuvent être moins chères ou plus chères que le tarif réglementé. Le simulateur est un repère, pas une recommandation."
@@ -4212,15 +4746,33 @@
           "title": "Comment c'est calculé",
           "intro": "Pour un mois de 30 jours, le simulateur fait toujours les mêmes cinq choses :",
           "steps": {
-            "a": "Puissance : le prix journalier de votre puissance souscrite, multiplié par 30 jours.",
-            "b": "Énergie : vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez.",
-            "c": "Contribution audiovisuelle (CAV) : un montant mensuel fixe, avec TVA réduite. Les foyers qui consomment moins de 400 kWh par an en sont exonérés.",
-            "d": "Taxe spéciale sur la consommation d'électricité (IEC) : un montant fixe par kWh, avec la TVA au taux normal.",
-            "e": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
+            "a": {
+              "term": "Puissance",
+              "body": "Le prix journalier de votre puissance souscrite, multiplié par 30 jours."
+            },
+            "b": {
+              "term": "Énergie",
+              "body": "Vos kWh au prix simple, ou répartis entre les deux prix du bi-horaire selon la part que vous indiquez."
+            },
+            "c": {
+              "term": "Contribution audiovisuelle (CAV)",
+              "body": "Un montant mensuel fixe, avec TVA réduite. Les foyers qui consomment moins de 400 kWh par an en sont exonérés."
+            },
+            "d": {
+              "term": "Taxe spéciale sur la consommation d'électricité (IEC)",
+              "body": "Un montant fixe par kWh, avec la TVA au taux normal."
+            },
+            "e": {
+              "term": "TVA",
+              "body": "TVA sur chaque poste, puis la somme. Le résultat est arrondi au centime à la fin."
+            }
           },
-          "vat": "Règles de TVA, telles que l'ERSE les explique : le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, à la part du terme de puissance qui correspond au tarif d'accès aux réseaux fixé par l'ERSE, pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
-          "bi": "Bi-horaire contre simple : le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
-          "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours."
+          "vat": "Le taux réduit ({{reduced}}) s'applique aux {{allowance}} premiers kWh d'énergie sur 30 jours ({{allowanceLarge}} kWh pour les foyers de cinq personnes ou plus) pour une puissance souscrite jusqu'à 6,9 kVA, à la part du terme de puissance qui correspond au tarif d'accès aux réseaux fixé par l'ERSE, pour une puissance souscrite jusqu'à 3,45 kVA et à la contribution audiovisuelle. Tout le reste paie {{standard}}. La règle du taux réduit s'applique de la même façon sur le marché réglementé et sur le marché libre.",
+          "bi": "Le prix simple est de {{energySimple}}, contre {{energyPeak}} hors heures creuses et {{energyValley}} en heures creuses. Sur la seule énergie, les deux coûtent autant quand {{breakEven}} % de la consommation a lieu en heures creuses. Avec une part plus faible, le simple est moins cher ; avec une part plus forte, le bi-horaire.",
+          "days": "Le plafond de TVA réduite est par période de 30 jours, celle utilisée ici. Sur une facture réelle d'une période plus longue ou plus courte, le plafond est ajusté au nombre de jours.",
+          "formulasLabel": "Formule",
+          "vatTerm": "Règles de TVA, telles que l'ERSE les explique",
+          "biTerm": "Bi-horaire contre simple"
         },
         "data": {
           "title": "Données et sources",
@@ -4660,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Comment utiliser le comparateur",
+          "quickTerm": "Mode rapide",
+          "fullTerm": "Mode complet",
+          "diagramTerm": "Fichier E-REDES",
+          "optionsTerm": "Options et filtres",
           "quick": "Le mode rapide ne demande que votre puissance souscrite et votre facture mensuelle ou vos kWh. Une facture en euros est convertie en kWh en remontant la facture du tarif réglementé, taxes comprises, comme le fait la simulation rapide de l'ERSE.",
           "full": "Le mode complet utilise les kWh de chaque période indiqués sur votre facture, ou un total sur un nombre de jours quelconque, réparti entre les périodes selon le profil type E-REDES correspondant à votre puissance et à votre consommation.",
           "diagram": "Vous pouvez aussi lui fournir votre fichier de consommation E-REDES, téléchargé depuis le Balcão Digital. Ses relevés au quart d'heure donnent vos kWh réels dans chaque période et chaque cycle. Le fichier est lu dans votre navigateur et n'est jamais envoyé nulle part.",
@@ -4669,6 +5225,9 @@
         },
         "example": {
           "title": "Exemple chiffré",
+          "regulatedLabel": "Tarif réglementé",
+          "cheapestLabel": "Offre la moins chère",
+          "differenceLabel": "Différence",
           "setup": "Un logement de 3,45 kVA en option simple consomme {{kwh}} par mois. Dans l'export de l'ERSE du {{date}}, il existe {{count}} offres pour lui, tarif réglementé compris.",
           "result": "Le tarif réglementé revient à {{regulated}} la première année, taxes comprises. L'offre la moins chère revient à {{cheapest}}, soit {{difference}} de moins. {{cheaper}} offres coûtent moins cher que le tarif réglementé.",
           "bill": "En mode rapide, une facture mensuelle de {{bill}} redonne les mêmes {{kwh}} : c'est la facture du tarif réglementé pour cette consommation."
@@ -4677,13 +5236,34 @@
           "title": "Comment c'est calculé",
           "intro": "Chaque offre est calculée comme dans le simulateur de l'ERSE (Manual do Simulador de Preços de Energia, juin 2026) :",
           "steps": {
-            "a": "Puissance : le prix par jour multiplié par le nombre de jours.",
-            "b": "Énergie : les kWh de chaque période multipliés par leur prix.",
-            "c": "Tarif social : la réduction de l'ERSE sur la puissance et l'énergie, jusqu'à 6,9 kVA.",
-            "d": "La contribution audiovisuelle et la taxe sur l'électricité, à leurs montants légaux.",
-            "e": "Les services obligatoires, les remboursements et réductions accordés à tout client, et la réduction nouveau client la première année, tels que chaque offre les déclare à l'ERSE.",
-            "f": "La TVA aux taux réduit et normal, comme indiqué ci-dessous.",
-            "g": "Une année correspond à la même consommation sur 365 jours ; « années suivantes » exclut la réduction nouveau client."
+            "a": {
+              "term": "Puissance",
+              "body": "Le prix par jour multiplié par le nombre de jours."
+            },
+            "b": {
+              "term": "Énergie",
+              "body": "Les kWh de chaque période multipliés par leur prix."
+            },
+            "c": {
+              "term": "Tarif social",
+              "body": "La réduction de l'ERSE sur la puissance et l'énergie, jusqu'à 6,9 kVA."
+            },
+            "d": {
+              "term": "Taxes",
+              "body": "La contribution audiovisuelle et la taxe sur l'électricité, à leurs montants légaux."
+            },
+            "e": {
+              "term": "Services et remises",
+              "body": "Les services obligatoires, les remboursements et réductions accordés à tout client, et la réduction nouveau client la première année, tels que chaque offre les déclare à l'ERSE."
+            },
+            "f": {
+              "term": "TVA",
+              "body": "La TVA aux taux réduit et normal, comme indiqué ci-dessous."
+            },
+            "g": {
+              "term": "Année",
+              "body": "Une année correspond à la même consommation sur 365 jours ; « années suivantes » exclut la réduction nouveau client."
+            }
           },
           "vat": "La TVA est de {{reduced}} sur la contribution audiovisuelle, sur la part accès aux réseaux du prix de la puissance jusqu'à 3,45 kVA, et sur les {{allowance}} premiers kWh tous les 30 jours jusqu'à 6,9 kVA ({{allowanceLarge}} kWh pour un foyer de cinq personnes ou plus). Tout le reste est soumis à {{standard}}.",
           "month": "Un mois est un douzième d'année, soit {{days}} jours, comme dans le simulateur de l'ERSE, de sorte qu'une année fait exactement douze mois.",
@@ -4793,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Comment lire cette page",
+          "calculatorTerm": "Calculateur de coût",
+          "noForecastTerm": "Aucune prévision",
           "prices": "Le haut de la page affiche le dernier prix moyen national au litre du gazole, de l'essence 95 et du GPL, tel que la DGEG l'a publié pour le {{asOf}}, et de combien chacun a bougé en une semaine : gazole {{dieselChange}} et essence {{gasolineChange}} par rapport à la semaine précédente.",
           "calculator": "Le calculateur transforme votre conduite en coût mensuel de carburant. Vous indiquez la distance, la consommation en litres aux 100 km et le carburant ; le prix part de la dernière moyenne et vous pouvez le remplacer par celui que vous payez vraiment.",
           "noForecast": "Cette page ne fait aucune prévision. Elle montre ce que la DGEG a mesuré et ce que coûte votre conduite à ce prix ; elle ne dit pas quel sera le prix la semaine prochaine.",
@@ -4807,13 +5389,26 @@
           "title": "Comment c'est calculé",
           "intro": "Le calculateur fait quatre choses :",
           "steps": {
-            "a": "Distance par mois : la distance saisie, une semaine comptée pour 52 divisé par 12 semaines par mois, ou un trajet multiplié par les trajets par mois.",
-            "b": "Litres : distance fois consommation divisé par 100.",
-            "c": "Coût : litres fois le prix au litre saisi, arrondi au centime.",
-            "d": "Année : douze mois comme celui-ci."
+            "a": {
+              "term": "Distance par mois",
+              "body": "La distance saisie, une semaine comptée pour 52 divisé par 12 semaines par mois, ou un trajet multiplié par les trajets par mois."
+            },
+            "b": {
+              "term": "Litres",
+              "body": "Distance fois consommation divisé par 100."
+            },
+            "c": {
+              "term": "Coût",
+              "body": "Litres fois le prix au litre saisi, arrondi au centime."
+            },
+            "d": {
+              "term": "Année",
+              "body": "Douze mois comme celui-ci."
+            }
           },
           "change": "La variation hebdomadaire est la dernière moyenne de la DGEG moins celle d'il y a sept jours, en euros par litre et en pourcentage du prix précédent.",
-          "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres."
+          "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres.",
+          "formulasLabel": "Formules"
         },
         "data": {
           "title": "Données et sources",
@@ -4828,13 +5423,28 @@
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
           "items": {
-            "noForecast": "Aucune prévision : rien ici ne prédit les prix futurs, et les variations passées n'indiquent pas où ira le prix.",
-            "average": "Moyenne nationale : elle regroupe toutes les stations du Portugal continental et est pondérée par les ventes. Le prix de votre station peut être plus haut ou plus bas, et les Açores et Madère ne sont pas inclus.",
-            "stations": "Stations : la liste ne montre que les quelques stations les moins chères de chaque zone, telles que la DGEG les publie, et ne juge ni le service ni la qualité. Un prix peut changer après le relevé : vérifiez-le à la pompe.",
-            "consumption": "Consommation : la même valeur à chaque trajet. La consommation réelle varie avec la vitesse, la charge, la circulation et la saison, et dépasse souvent la valeur officielle.",
-            "scope": "Carburant seulement : péages, assurance, taxe de circulation, entretien et stationnement ne sont pas inclus. La recharge électrique n'est pas couverte et les autres carburants ne sont pas affichés.",
-            "education": "À usage éducatif uniquement, ce n'est pas un conseil."
-          }
+            "noForecast": {
+              "term": "Aucune prévision",
+              "body": "Rien ici ne prédit les prix futurs, et les variations passées n'indiquent pas où ira le prix."
+            },
+            "average": {
+              "term": "Moyenne nationale",
+              "body": "Elle regroupe toutes les stations du Portugal continental et est pondérée par les ventes. Le prix de votre station peut être plus haut ou plus bas, et les Açores et Madère ne sont pas inclus."
+            },
+            "stations": {
+              "term": "Stations",
+              "body": "La liste ne montre que les quelques stations les moins chères de chaque zone, telles que la DGEG les publie, et ne juge ni le service ni la qualité. Un prix peut changer après le relevé : vérifiez-le à la pompe."
+            },
+            "consumption": {
+              "term": "Consommation",
+              "body": "La même valeur à chaque trajet. La consommation réelle varie avec la vitesse, la charge, la circulation et la saison, et dépasse souvent la valeur officielle."
+            },
+            "scope": {
+              "term": "Carburant seulement",
+              "body": "Péages, assurance, taxe de circulation, entretien et stationnement ne sont pas inclus. La recharge électrique n'est pas couverte et les autres carburants ne sont pas affichés."
+            }
+          },
+          "education": "À usage éducatif uniquement, ce n'est pas un conseil."
         },
         "related": {
           "title": "Pour aller plus loin",
@@ -5058,7 +5668,12 @@
           "title": "Exemple chiffré",
           "setup": "Supposons que vous gardiez {{amount}} pendant 12 mois sur {{product}} chez {{bank}}, à {{rate}} par an. Il rapporte {{gross}} ; l'IRS de 28 % prélève {{tax}}, il reste {{net}}.",
           "capped": "Le plafond compte. {{product2}} chez {{bank2}} paie {{rate2}}, mais seulement jusqu'à {{cap}}. Avec {{amount2}}, les intérêts sont de {{gross2}} avant impôt et de {{net2}} après, comme si vous aviez épargné {{cap}}.",
-          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}."
+          "plans": "Les frais comptent aussi. {{product3}} chez {{bank3}} va de {{low}} à {{high}} selon la formule. Avec {{amount}}, la formule Standard rapporte {{standardNet}} net, alors que la formule Ultra, après {{ultraFees}} de frais par an, rapporte {{ultraNet}}.",
+          "figures": {
+            "gross": "Intérêts bruts",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Intérêts nets"
+          }
         },
         "method": {
           "title": "Méthode",
@@ -5258,17 +5873,25 @@
           "setup": "Prenons l'acheteur occasionnel d'actions : {{count}} achats de {{amount}} d'actions américaines dans l'année, {{portfolio}} investis.",
           "bank": "Chez {{bank}}, chaque ordre coûte {{bankFormula}}, donc les {{count}} ordres coûtent {{bankTrading}} droit de timbre compris. Convertir {{converted}} en dollars à {{bankFx}} ajoute {{bankFxTotal}}, et la garde ({{bankCustodyFormula}}) ajoute {{bankCustody}} TVA comprise. L'année coûte {{bankTotal}}, dont {{bankStampDuty}} de droit de timbre et {{bankVat}} de TVA.",
           "online": "Chez {{online}}, chaque ordre coûte {{onlineFormula}} : {{onlineTrading}} sur l'année. Le change à {{onlineFx}} ajoute {{onlineFxTotal}} et la garde {{onlineCustody}}, soit {{onlineTotal}} au total.",
-          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer."
+          "takeaway": "Avec des ordres petits et peu fréquents, ce sont les commissions minimales et les frais de garde fixes qui pèsent ; avec de gros ordres ou un gros portefeuille, les frais en pourcentage pèsent davantage. Changez de profil ci-dessus pour voir l'ordre des courtiers changer.",
+          "figures": {
+            "total": "Total de l'année"
+          }
         },
         "method": {
           "title": "Méthode",
           "intro": "Tous les frais ont été relevés dans la grille tarifaire publiée par le courtier lui-même, à la date indiquée sur sa ligne ; tout le tableau a été revu le {{date}} et est revérifié chaque trimestre. Les frais qu'une grille n'indique pas apparaissent comme non publiés et sont exclus des totaux, alors signalés comme incomplets.",
           "steps": {
-            "a": "Ordres : la commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
-            "b": "Plan d'investissement : pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
-            "c": "Change : les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
-            "d": "Garde : la formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
-            "e": "Taxes sur les frais : quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
+            "aTerm": "Ordres",
+            "aBody": "La commission de chaque ordre est la partie fixe plus le pourcentage de l'ordre, avec le minimum et le maximum par ordre. Les frais par action comptent des actions entières au prix supposé. Une franchise mensuelle sans frais s'applique mois par mois.",
+            "bTerm": "Plan d'investissement",
+            "bBody": "Pour les achats d'ETF, quand l'option est cochée et que le courtier publie un plan programmé, ses frais remplacent ceux de l'ordre.",
+            "cTerm": "Change",
+            "cBody": "Les ordres américains paient les frais de change du courtier sur le montant converti ; les frais en dollars sont convertis à {{rate}} dollars pour un euro.",
+            "dTerm": "Garde",
+            "dBody": "La formule publiée, par période avec son minimum et son maximum, est appliquée à la valeur détenue autant de fois qu'il y a de périodes dans l'année.",
+            "eTerm": "Taxes sur les frais",
+            "eBody": "Quand la grille indique que ses frais n'incluent pas le droit de timbre portugais (4 % sur le courtage) ou la TVA (23 % sur la garde), ils sont ajoutés aux frais concernés.",
             "f": "Le total additionne les ordres de l'année, le change et la garde, et les courtiers sont listés du moins cher au plus cher. Ceux qui ne publient pas des frais nécessaires au profil viennent en dernier."
           }
         },
@@ -5456,7 +6079,8 @@
             "insuranceLinked": "assurance liée à des fonds",
             "insuranceGuaranteed": "assurance non liée à des fonds",
             "pensionFund": "fonds de pension"
-          }
+          },
+          "gapLabel": "Écart de frais sur {{invested}}, par an"
         },
         "tax": {
           "title": "La déduction d'IRS (EBF, article 21)",
@@ -5468,7 +6092,8 @@
           },
           "example": "L'âge retenu est celui au 1er janvier de l'année du versement (n.º 9). À {{age}} ans, {{exampleContribution}} versés dans l'année donnent {{exampleDeduction}}, la déduction maximale.",
           "conditions": "La déduction entre dans le plafond global des déductions de l'article 78, n.º 7, du Code de l'IRS : aucun plafond pour les revenus imposables les plus bas, puis de {{capMax}} à {{capMin}} par foyer. Elle réduit l'impôt dû et n'est pas versée en argent, et les versements faits après le départ à la retraite ne sont pas déductibles (n.º 10).",
-          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions."
+          "payout": "Lorsque le plan est racheté dans un cas prévu par la loi, un rachat en une fois est imposé sur le gain à {{legalRate}} sur deux cinquièmes de celui-ci, soit {{legalEffective}} effectifs du gain (n.º 3) ; les versements réguliers sont imposés comme des pensions.",
+          "deductionLabel": "Déduction de l'IRS"
         },
         "redemption": {
           "title": "Quand racheter, et ce que coûte un rachat anticipé",
@@ -5620,22 +6245,47 @@
           "title": "Carats et titre",
           "intro": "La pureté de l'or s'exprime en carats, sur 24, ou en millièmes, le nombre gravé dans le poinçon. Voici les six titres légaux de l'or au Portugal :",
           "items": {
-            "k24": "24 carats, 999 millièmes : or pur, comme dans les lingots et pièces d'investissement.",
-            "k22": "22 carats, 916 : pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
-            "k19_2": "19,2 carats, 800 : l'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
-            "k18": "18 carats, 750 : le titre le plus courant de la bijouterie européenne.",
-            "k14": "14 carats, 585 : des bijoux plus durs et moins chers.",
-            "k9": "9 carats, 375 : le titre légal le plus bas."
+            "k24Term": "24 carats, 999 millièmes",
+            "k24Body": "Or pur, comme dans les lingots et pièces d'investissement.",
+            "k22Term": "22 carats, 916",
+            "k22Body": "Pièces d'or comme le souverain et le Krugerrand, et de nombreux bijoux d'Inde.",
+            "k19_2Term": "19,2 carats, 800",
+            "k19_2Body": "L'or portugais, le titre traditionnel de l'orfèvrerie portugaise.",
+            "k18Term": "18 carats, 750",
+            "k18Body": "Le titre le plus courant de la bijouterie européenne.",
+            "k14Term": "14 carats, 585",
+            "k14Body": "Des bijoux plus durs et moins chers.",
+            "k9Term": "9 carats, 375",
+            "k9Body": "Le titre légal le plus bas."
           }
         },
         "method": {
           "title": "Mode de calcul",
           "intro": "La page fait quatre choses :",
           "steps": {
-            "a": "Prix : le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
-            "b": "Or pur : le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
-            "c": "Valeur : les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
-            "d": "Offre : si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+            "aTerm": "Prix",
+            "aBody": "Le prix d'un gramme d'or pur de la NBP en zlotys, divisé par le nombre de zlotys par euro de la BCE le même jour.",
+            "bTerm": "Or pur",
+            "bBody": "Le poids fois le titre divisé par 1 000. Une pièce de 24 carats compte pour 999 millièmes.",
+            "cTerm": "Valeur",
+            "cBody": "Les grammes d'or pur fois le prix d'un gramme d'or pur, arrondie au centime.",
+            "dTerm": "Offre",
+            "dBody": "Si vous en saisissez une, l'offre divisée par la valeur, en pourcentage, et l'écart en euros."
+          },
+          "formulasLabel": "Formules",
+          "formula": {
+            "pureGold": "Or pur",
+            "pureGoldLower": "or pur",
+            "weight": "poids",
+            "fineness": "titre",
+            "value": "Valeur",
+            "valueLower": "valeur",
+            "price": "Prix au gramme",
+            "priceLower": "prix au gramme",
+            "nbpPrice": "prix de la NBP en zlotys",
+            "zlotyPerEuro": "zlotys par euro",
+            "offerShare": "Offre par rapport à la valeur",
+            "offer": "offre"
           }
         },
         "buyers": {
@@ -5656,10 +6306,14 @@
         "limits": {
           "title": "Ce que cette valeur laisse de côté",
           "items": {
-            "metal": "Le métal seul : la valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
-            "buyers": "Pas un prix de vente : les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
-            "purity": "Titre : le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
-            "reference": "Prix de référence : le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
+            "metalTerm": "Le métal seul",
+            "metalBody": "La valeur est l'or contenu dans la pièce à un prix de référence. Les pierres, les autres métaux, la façon et la marque ne comptent pas.",
+            "buyersTerm": "Pas un prix de vente",
+            "buyersBody": "Les acheteurs paient moins, et une boutique qui vend de l'or demande plus.",
+            "purityTerm": "Titre",
+            "purityBody": "Le calculateur se fie au titre que vous choisissez. Une pièce sans poinçon ou plaquée or peut contenir beaucoup moins d'or, voire pas du tout.",
+            "referenceTerm": "Prix de référence",
+            "referenceBody": "Le prix quotidien de la NBP, pas une cotation en direct. Le marché bouge dans la journée.",
             "education": "À usage éducatif uniquement, ce n'est pas un conseil."
           }
         },
@@ -6210,7 +6864,66 @@
       "historyPeriod": "6 derniers mois",
       "chartTrend": "Patrimoine net, de {{start}} à {{end}}, en hausse de {{from}} à {{to}}"
     },
-    "perMonth": "/mois"
+    "perMonth": "/mois",
+    "household": {
+      "title": "Foyer",
+      "roleOwner": "Propriétaire",
+      "roleMember": "Membre",
+      "roleViewer": "Lecteur",
+      "jointAccount": "Compte courant joint",
+      "privateAccount": "Épargne d'Ana",
+      "shared": "Partagé",
+      "private": "Privé"
+    },
+    "imports": {
+      "title": "Vérifier l'import",
+      "fileName": "releve-octobre.csv",
+      "rows": "{{count}} lignes",
+      "statusNew": "Nouvelle",
+      "statusExisting": "Déjà dans le compte",
+      "statusDuplicate": "Doublon possible",
+      "note": "Rien n'est importé avant votre confirmation."
+    },
+    "recurring": {
+      "title": "Factures et abonnements",
+      "day": "Jour {{day}}",
+      "rent": "Loyer",
+      "electricity": "Électricité",
+      "internet": "Internet",
+      "gym": "Salle de sport",
+      "paid": "Payé",
+      "due": "À payer",
+      "projected": "Prévu",
+      "stillToPay": "Reste à payer ce mois-ci"
+    },
+    "assistant": {
+      "title": "Assistant",
+      "question": "Combien ai-je dépensé en restaurants ce mois-ci ?",
+      "answer": "{{amount}} sur {{count}} transactions, un peu moins que le mois dernier.",
+      "proposalLabel": "Modification proposée",
+      "proposal": "Catégoriser 3 transactions en Alimentation",
+      "apply": "Appliquer",
+      "dismiss": "Écarter"
+    },
+    "currencies": {
+      "title": "Comptes",
+      "account1": "Compte courant",
+      "account2": "Liquidités du compte-titres",
+      "account3": "Épargne au Royaume-Uni",
+      "estimated": "Estimé",
+      "total": "Total en euros",
+      "rateNote": "Converti au taux de référence de la BCE de chaque jour."
+    },
+    "selfHosting": {
+      "title": "Votre serveur",
+      "subtitle": "docker compose",
+      "database": "Postgres",
+      "api": "API",
+      "worker": "Processus en arrière-plan",
+      "web": "Application web",
+      "running": "En cours",
+      "note": "Vos données restent dans votre propre base de données."
+    }
   },
   "lp": {
     "shared": {
@@ -6540,7 +7253,15 @@
       "feature5": "Transactions fractionnées : assignez des parties à différentes catégories",
       "feature6": "Graphiques de dépenses par catégorie pour l'analyse du budget",
       "ctaHeadline": "Arrêtez d'étiqueter vos transactions manuellement",
-      "ctaBody": "Importez vos transactions bancaires et WonderMoney gère la catégorisation. Gratuit et open source."
+      "ctaBody": "Importez vos transactions bancaires et WonderMoney gère la catégorisation. Gratuit et open source.",
+      "rulesTitle": "Des règles pour les transactions que vous connaissez",
+      "rulesBody": "Une règle indique à WonderMoney quoi faire des transactions d'un certain type : quand la description contient NETFLIX, attribuer la catégorie Loisirs. Les règles appartiennent au foyer, donc tout le monde travaille à partir de la même liste.",
+      "rulesPoint1": "Des conditions sur la description, le commerçant, le montant, le compte et plus encore",
+      "rulesPoint2": "Définir la catégorie ou le commerçant, renommer, ajouter une étiquette, marquer comme vérifiée ou masquer",
+      "rulesPoint3": "Un aperçu des transactions qu'une règle cible, avant de l'enregistrer",
+      "rulesPoint4": "Appliquer une règle aux transactions que vous avez déjà",
+      "rulesPoint5": "Une règle suggérée dès que vous corrigez trois fois le même type de transaction",
+      "rulesPoint6": "Exporter les règles dans un fichier et les importer sur un autre serveur"
     },
     "featurePrivacy": {
       "eyebrow": "Confidentialité & Sécurité",
@@ -6566,7 +7287,17 @@
       "ctaHeadline": "Gérez vos finances avec un outil en qui vous pouvez avoir confiance",
       "ctaBody": "WonderMoney mérite votre confiance en gardant vos données privées, sécurisées et entre vos mains. Gratuit et open source.",
       "principle6Title": "Vos identifiants restent chez votre banque",
-      "principle6Body": "Vous vous authentifiez directement sur le portail de votre banque. Votre mot de passe ne passe jamais par WonderMoney."
+      "principle6Body": "Vous vous authentifiez directement sur le portail de votre banque. Votre mot de passe ne passe jamais par WonderMoney.",
+      "securityTitle": "Protégez la connexion et l'écran",
+      "securityBody": "L'accès bancaire en lecture seule laisse votre argent là où il est. Ces réglages protègent le compte WonderMoney lui-même, et ce que les autres peuvent voir quand vous l'ouvrez.",
+      "securityPoint1Title": "Clés d'accès",
+      "securityPoint1Body": "Connectez-vous avec votre empreinte digitale, votre visage ou le code PIN de votre appareil au lieu de saisir un mot de passe.",
+      "securityPoint2Title": "Authentification à deux facteurs",
+      "securityPoint2Body": "Un code d'une application d'authentification après votre mot de passe, avec des codes de secours si vous perdez votre téléphone.",
+      "securityPoint3Title": "Verrouillage de l'application",
+      "securityPoint3Body": "L'application mobile demande Face ID, Touch ID ou le code de votre appareil à chaque ouverture.",
+      "securityPoint4Title": "Mode confidentialité",
+      "securityPoint4Body": "Masquez tous les montants à l'écran d'un seul appui, ou avec Shift+P sur le web, dans le train ou pendant un partage d'écran."
     },
     "pricing": {
       "metaTitle": "Tarifs — WonderMoney",
@@ -7150,6 +7881,239 @@
       "how3Body": "Chaque compte connecté alimente un seul tableau de bord — soldes, dépenses et patrimoine net, toujours synchronisés.",
       "ctaHeadline": "Faites valoir votre droit",
       "ctaBody": "Connectez vos comptes et découvrez votre situation financière complète — en toute sécurité, selon vos conditions."
+    },
+    "featureHousehold": {
+      "eyebrow": "Foyer",
+      "metaTitle": "Finances partagées du foyer avec des comptes privés | WonderMoney",
+      "metaDescription": "Gérez votre argent avec votre partenaire ou votre famille : chacun se connecte avec ses propres identifiants, partage les comptes qu'il choisit et garde le reste privé. Partagez les dépenses avec vos amis dans des groupes.",
+      "heroTitle": "Gérez l'argent ensemble, gardez privé ce qui est à vous",
+      "heroSubtitle": "Invitez les personnes avec qui vous vivez dans un même foyer. Chacune se connecte avec ses propres identifiants, partage les comptes qu'elle choisit et voit les chiffres du foyer dans sa propre devise.",
+      "schemaName": "WonderMoney Finances du foyer",
+      "schemaDescription": "Finances partagées du foyer avec des identifiants pour chaque personne, quatre rôles, des comptes privés, un filtre par membre, des quotes-parts de propriété et des groupes de dépenses partagées.",
+      "whatTitle": "Un seul foyer, chacun avec ses propres identifiants",
+      "whatBody": "Un foyer regroupe les comptes, les budgets, les objectifs et le patrimoine net que vous gérez ensemble. Jusqu'à six personnes peuvent en faire partie, chacune avec ses propres identifiants et un rôle qui détermine ce qu'elle peut modifier.",
+      "whatPoint1Title": "Quatre rôles",
+      "whatPoint1Body": "Propriétaire, administrateur, membre ou lecteur. Un lecteur voit les données partagées mais ne peut pas les modifier.",
+      "whatPoint2Title": "Comptes privés",
+      "whatPoint2Body": "Gardez un compte pour vous, ou permettez à chaque personne de le consulter ou de le modifier. Personne d'autre ne le voit, pas même le propriétaire du foyer.",
+      "whatPoint3Title": "Qui a dépensé quoi",
+      "whatPoint3Body": "Marquez les comptes joints, indiquez qui a effectué une transaction, et filtrez les transactions, les rapports, les budgets et le patrimoine net par personne.",
+      "whatPoint4Title": "Quotes-parts de propriété",
+      "whatPoint4Body": "Répartissez un compte en pourcentages, comme une cagnotte pour la maison détenue à 60/40, et le patrimoine net de chaque personne compte sa part.",
+      "howTitle": "Comment fonctionne un foyer",
+      "step1Title": "Inscrivez-vous",
+      "step1Body": "Votre foyer est créé avec votre compte, et vous en êtes le propriétaire. Vous pourrez transférer la propriété à quelqu'un d'autre plus tard.",
+      "step2Title": "Invitez des personnes par e-mail",
+      "step2Body": "Choisissez le rôle de chaque personne. Le lien ne fonctionne que pour l'adresse que vous avez invitée, et expire au bout de sept jours.",
+      "step3Title": "Choisissez ce que chaque compte partage",
+      "step3Body": "Les comptes sont partagés avec le foyer par défaut. Rendez-en un privé et choisissez, pour chaque personne : masqué, consultation ou modification.",
+      "groupsTitle": "Partagez les dépenses entre amis, colocataires et en voyage",
+      "groupsBody": "Un groupe est un ensemble de personnes qui partagent des dépenses. Partagez une transaction avec lui et WonderMoney la répartit, calcule qui doit combien à qui, et ne compte que la part de votre foyer dans vos dépenses.",
+      "groupsPoint1": "Ajoutez des personnes par leur nom : elles n'ont pas besoin d'un compte WonderMoney",
+      "groupsPoint2": "Répartition à parts égales, par montant ou par pourcentage",
+      "groupsPoint3": "Un solde pour chaque personne, et le moins de paiements possible pour régler les comptes",
+      "groupsPoint4": "Enregistrez un remboursement et liez-le au virement qui l'a payé",
+      "faqTitle": "Questions sur le foyer",
+      "faq1Q": "Le propriétaire du foyer peut-il voir mes comptes privés ?",
+      "faq1A": "Non. Un compte privé n'est visible que par vous et par les personnes avec qui vous le partagez. Le propriétaire et les administrateurs ne le voient pas, sauf si vous le partagez avec eux.",
+      "faq2Q": "Combien de personnes peut compter un foyer ?",
+      "faq2A": "Jusqu'à six, propriétaire compris. Sur votre propre serveur, vous pouvez modifier ce nombre.",
+      "faq3Q": "Que se passe-t-il quand quelqu'un part ?",
+      "faq3A": "Ses comptes privés restent dans le foyer, partagés comme avant : les personnes qui y avaient accès le conservent, et personne d'autre ne l'obtient. L'argent que cette personne a dépensé est compté comme Partagé.",
+      "ctaHeadline": "Réunissez le foyer en un seul endroit",
+      "ctaBody": "Invitez les personnes avec qui vous vivez et choisissez ce que chaque compte partage."
+    },
+    "featureImports": {
+      "eyebrow": "Import",
+      "metaTitle": "Importer des relevés bancaires : CSV, Excel, OFX, QIF et CAMT.053 | WonderMoney",
+      "metaDescription": "Importez les transactions de l'export CSV, Excel, OFX, QIF ou CAMT.053 de n'importe quelle banque, ou transférez votre historique depuis YNAB ou Actual Budget. Vérifiez chaque ligne avant que quoi que ce soit ne soit ajouté.",
+      "heroTitle": "Importez n'importe quel relevé, et rien en double",
+      "heroSubtitle": "Quand une banque ne peut pas être connectée, ou que vous voulez l'historique d'avant sa connexion, importez le fichier que votre banque vous fournit. Vous vérifiez chaque ligne avant que quoi que ce soit ne soit ajouté.",
+      "schemaName": "WonderMoney Import de transactions",
+      "schemaDescription": "Import de relevés bancaires depuis des fichiers CSV, Excel, OFX, QFX, QIF et CAMT.053, et de l'historique des transactions depuis YNAB et Actual Budget, avec une étape de vérification et la détection des doublons.",
+      "whatTitle": "Tous les fichiers que votre banque vous fournit",
+      "whatBody": "Téléchargez le relevé et laissez-le tel que la banque l'a produit. WonderMoney trouve les colonnes de date, de description et de montant et déduit les formats de date et de nombre : il lit ainsi les exports de la plupart des banques sans modèle.",
+      "whatPoint1": "CSV avec n'importe quel séparateur, et Excel (.xls, .xlsx)",
+      "whatPoint2": "OFX, QFX et QIF, issus des banques, de Quicken, de Microsoft Money et de GnuCash",
+      "whatPoint3": "CAMT.053, le relevé ISO 20022 des banques SEPA",
+      "whatPoint4": "Des fichiers à plusieurs comptes, chacun envoyé vers l'un des vôtres",
+      "whatPoint5": "Votre registre YNAB, avec ses comptes et ses catégories associés aux vôtres",
+      "whatPoint6": "L'export des transactions d'Actual Budget, avec les virements conservés comme virements",
+      "howTitle": "Comment fonctionne un import",
+      "step1Title": "Ajoutez le fichier",
+      "step1Body": "Ouvrez le compte et choisissez Importer des transactions. WonderMoney lit le fichier et indique combien de transactions il a trouvées et les dates qu'elles couvrent.",
+      "step2Title": "Vérifiez les lignes",
+      "step2Body": "Chaque ligne est nouvelle, déjà dans le compte, un doublon possible, ou n'a pas pu être lue. Cochez ou décochez celles que vous voulez.",
+      "step3Title": "Importez",
+      "step3Body": "L'import s'exécute en arrière-plan. S'il s'arrête en cours de route, relancez-le : il reprend là où il s'est arrêté et n'importe rien en double.",
+      "reviewTitle": "Rien n'est ajouté avant que vous l'ayez vérifié",
+      "reviewBody": "Le même achat arrive souvent deux fois, une fois par la synchronisation bancaire et une fois par un fichier. La vérification montre chaque ligne et ce qui va lui arriver : c'est vous qui décidez.",
+      "reviewPoint1Title": "Doublons possibles",
+      "reviewPoint1Body": "Une ligne du même montant qu'une transaction déjà présente dans le compte, avec jusqu'à trois jours d'écart, est ignorée sauf si vous l'incluez.",
+      "reviewPoint2Title": "Déjà importées",
+      "reviewPoint2Body": "Les lignes déjà présentes dans le compte sont ignorées : importer un export qui en chevauche un autre n'ajoute que ce qui est nouveau.",
+      "reviewPoint3Title": "Catégorisées comme les transactions synchronisées",
+      "reviewPoint3Body": "Les lignes importées sont catégorisées de la même façon que les transactions apportées par la synchronisation bancaire, et les règles du foyer s'y appliquent.",
+      "faqTitle": "Questions sur l'import",
+      "faq1Q": "Avec quelles banques est-ce que ça fonctionne ?",
+      "faq1A": "Avec toute banque qui exporte un relevé en CSV, Excel, OFX, QIF ou CAMT.053. Pour Millennium BCP, ActivoBank, Bankinter, Banco BPI et Montepio, WonderMoney lit aussi le format propre à la banque.",
+      "faq2Q": "Puis-je importer depuis mon téléphone ?",
+      "faq2A": "Oui, les fichiers CSV, OFX, QIF et CAMT.053, avec la même vérification avant tout import. Les exports YNAB et Actual Budget s'importent sur le web.",
+      "faq3Q": "Puis-je migrer depuis YNAB ou Actual Budget ?",
+      "faq3A": "Oui, avec votre historique de transactions : chaque compte et chaque catégorie est associé à l'un des vôtres, et les virements restent liés. Les montants budgétés et les objectifs ne sont pas importés.",
+      "ctaHeadline": "Apportez votre historique avec vous",
+      "ctaBody": "Importez les relevés que vous avez déjà et partez d'une vue complète."
+    },
+    "featureRecurring": {
+      "eyebrow": "Factures et abonnements",
+      "metaTitle": "Suivez factures, abonnements et paiements récurrents | WonderMoney",
+      "metaDescription": "WonderMoney repère les paiements qui se répètent, du loyer aux abonnements, les affiche sur un calendrier, prévoit le solde de chaque compte pour les 30 prochains jours et peut ajouter vos factures à votre propre application de calendrier.",
+      "heroTitle": "Voyez ce qui arrive avant que ça quitte votre compte",
+      "heroSubtitle": "WonderMoney repère le loyer, le salaire, les abonnements et les autres paiements qui se répètent, pour que vous sachiez ce qui est payé, ce qui est à payer et vers où va votre solde.",
+      "schemaName": "WonderMoney Factures et abonnements",
+      "schemaDescription": "Détection des paiements récurrents avec un calendrier des factures, une prévision de solde sur 30 jours pour chaque compte et un flux iCal des prochaines factures.",
+      "whatTitle": "Vos factures et abonnements, trouvés pour vous",
+      "whatBody": "La détection s'exécute chaque fois que des transactions sont ajoutées, importées ou synchronisées. Les paiements dont elle est sûre sont listés d'emblée ; les autres attendent votre confirmation.",
+      "whatPoint1": "Les paiements et revenus récurrents trouvés dans vos transactions",
+      "whatPoint2": "Confirmez ou écartez chacun d'eux, et restaurez-le plus tard",
+      "whatPoint3": "Un calendrier qui marque chaque facture comme payée, à payer, en retard ou prévue",
+      "whatPoint4": "Une prévision de solde sur 30 jours pour chaque compte, avec son point le plus bas",
+      "howTitle": "Comment ça fonctionne",
+      "step1Title": "Les transactions arrivent",
+      "step1Body": "Par la synchronisation bancaire, l'import d'un fichier ou la saisie manuelle. WonderMoney cherche les paiements qui se répètent.",
+      "step2Title": "Vérifiez ce qu'il a trouvé",
+      "step2Body": "Contrôlez le commerçant, le montant habituel et la fréquence de chaque paiement, puis confirmez-le ou marquez-le comme non récurrent.",
+      "step3Title": "Planifiez avec",
+      "step3Body": "Lisez le mois sur le calendrier et la prévision de chaque compte. Une facture déjà payée sort de la prévision : elle n'est donc jamais comptée deux fois.",
+      "calendarTitle": "Vos factures dans le calendrier que vous utilisez déjà",
+      "calendarBody": "Publiez vos factures confirmées sous forme de flux de calendrier en lecture seule, et abonnez-vous-y une fois dans Google Calendar, Apple Calendar ou toute application qui lit iCal.",
+      "calendarPoint1": "Un événement sur la journée entière pour chaque facture des 90 prochains jours",
+      "calendarPoint2": "Le nom de la facture et son montant prévu, dans votre langue",
+      "calendarPoint3": "Aucun solde, nom de compte ni numéro de compte",
+      "calendarPoint4": "Réinitialisez ou révoquez le lien quand vous le souhaitez",
+      "faqTitle": "Questions sur les paiements récurrents",
+      "faq1Q": "Les paiements prévus comptent-ils dans mes rapports ?",
+      "faq1A": "Non. Une prévision n'est pas une transaction : elle reste hors des rapports, des budgets et des totaux jusqu'à ce que le paiement soit enregistré.",
+      "faq2Q": "Faut-il une connexion bancaire ?",
+      "faq2A": "Non. La détection s'exécute sur chaque transaction ajoutée, qu'elle vienne de la synchronisation bancaire, d'un fichier ou de votre propre saisie.",
+      "faq3Q": "Qui voit les factures d'un compte privé ?",
+      "faq3A": "Seulement les personnes qui peuvent voir ce compte. Les paiements récurrents, les prévisions et le flux de calendrier suivent le partage du compte.",
+      "ctaHeadline": "Sachez ce qui est dû avant l'échéance",
+      "ctaBody": "Laissez WonderMoney trouver vos paiements récurrents et organisez le mois autour d'eux."
+    },
+    "featureAssistant": {
+      "eyebrow": "Assistant IA",
+      "metaTitle": "Assistant IA pour vos finances personnelles | WonderMoney",
+      "metaDescription": "Posez vos questions sur vos dépenses, budgets, objectifs et portefeuille avec des mots simples. L'assistant lit vos données, propose des modifications que vous appliquez et reste désactivé jusqu'à ce que vous l'activiez. Connectez Claude Desktop ou Cursor via MCP.",
+      "heroTitle": "Posez une question à votre argent",
+      "heroSubtitle": "Combien est parti en restaurants ce mois-ci ? Quel budget est en dépassement ? L'assistant répond à partir de vos propres comptes, et ne change rien sans vous.",
+      "schemaName": "WonderMoney Assistant IA",
+      "schemaDescription": "Un assistant IA qui répond aux questions sur vos comptes, dépenses, budgets, objectifs et portefeuille, propose des modifications que vous confirmez, et un serveur MCP en lecture seule pour les clients IA.",
+      "whatTitle": "Un assistant qui lit, et demande avant de modifier",
+      "whatBody": "L'assistant répond aux questions sur vos comptes, dépenses, budgets, objectifs et portefeuille. Il peut préparer une modification, comme une catégorie pour un ensemble de transactions, mais rien ne se passe tant que vous ne l'appliquez pas.",
+      "whatPoint1": "Des réponses tirées de vos propres données, avec les mêmes règles de partage que l'application",
+      "whatPoint2": "Désactivé jusqu'à ce que vous l'activiez, et vous pouvez le désactiver à nouveau dans les réglages",
+      "whatPoint3": "Propose des catégories, des marques de vérification et des notes que vous appliquez ou écartez",
+      "whatPoint4": "Un seul interrupteur masque toutes les fonctionnalités IA, et le serveur les refuse aussi",
+      "howTitle": "Comment fonctionne l'assistant",
+      "step1Title": "Activez-le",
+      "step1Body": "L'assistant reste désactivé jusqu'à ce que vous choisissiez Activer l'assistant sur son écran de consentement dans l'application web.",
+      "step2Title": "Posez votre question",
+      "step2Body": "Interrogez-le sur un mois, une catégorie, un budget ou un objectif. Il lit les données que vous voyez dans l'application, et rien de plus.",
+      "step3Title": "Appliquez ou écartez",
+      "step3Body": "Une modification proposée affiche la valeur actuelle de chaque transaction et la valeur proposée. Appliquez-la, écartez-la, ou laissez-la expirer au bout de sept jours.",
+      "mcpTitle": "Utilisez votre propre client IA",
+      "mcpBody": "WonderMoney fait tourner un serveur MCP en lecture seule. Connectez Claude Desktop, Cursor, VS Code ou un autre client MCP avec un jeton, et posez vos questions sur vos finances depuis son chat.",
+      "mcpPoint1": "Des outils en lecture seule pour les soldes, les dépenses, les budgets, les objectifs et le portefeuille",
+      "mcpPoint2": "Le client voit exactement ce que vous voyez, et jamais les données d'un autre foyer",
+      "mcpPoint3": "Des propositions facultatives qui attendent que vous les appliquiez dans l'application",
+      "mcpPoint4": "Son propre jeton, qui expire au bout de 90 jours et peut être révoqué",
+      "faqTitle": "Questions sur l'assistant",
+      "faq1Q": "L'assistant peut-il déplacer de l'argent ?",
+      "faq1A": "Non. Il ne peut pas déplacer d'argent, initier de transactions ni modifier les données de la banque. Il lit vos données et peut seulement proposer des modifications que vous appliquez vous-même.",
+      "faq2Q": "Est-il activé par défaut ?",
+      "faq2A": "Non. Il reste désactivé jusqu'à ce que vous l'activiez. Pour désactiver toutes les fonctionnalités IA d'un coup, utilisez Masquer les fonctionnalités IA dans Réglages › Confidentialité.",
+      "faq3Q": "Voit-il les comptes privés des autres membres de mon foyer ?",
+      "faq3A": "Seulement ceux qui sont partagés avec vous. Un compte privé qui vous est masqué reste aussi masqué pour l'assistant et pour les clients MCP, et vos propositions ne sont visibles que par vous.",
+      "ctaHeadline": "Interrogez WonderMoney sur votre argent",
+      "ctaBody": "Activez l'assistant quand vous le voulez, et gardez chaque modification entre vos mains."
+    },
+    "featureMultiCurrency": {
+      "eyebrow": "Multidevise",
+      "metaTitle": "Application de finances personnelles multidevise | WonderMoney",
+      "metaDescription": "Gérez des comptes en euros, en dollars, en livres ou dans toute autre devise et voyez chaque total dans la vôtre, converti aux taux quotidiens de la Banque centrale européenne. Un montant sans taux est signalé, pas deviné.",
+      "heroTitle": "Toutes les devises, un total honnête",
+      "heroSubtitle": "Les comptes et les transactions peuvent être dans n'importe quelle devise. WonderMoney affiche chaque total dans la vôtre, et indique clairement quand un montant n'a pas pu être converti.",
+      "schemaName": "WonderMoney Multidevise",
+      "schemaDescription": "Comptes et transactions dans n'importe quelle devise, avec des totaux convertis aux taux de référence quotidiens de la Banque centrale européenne et les montants sans taux signalés.",
+      "whatTitle": "Converti au taux de chaque jour",
+      "whatBody": "Chaque montant dans une autre devise est converti au taux de la Banque centrale européenne à sa date, qui couvre les principales devises. Les taux sont mis à jour les jours ouvrés, sans rien à configurer.",
+      "whatPoint1": "Comptes et transactions dans n'importe quelle devise",
+      "whatPoint2": "Des totaux dans votre devise aux taux de référence quotidiens de la BCE",
+      "whatPoint3": "Le montant d'origine affiché sous le montant converti",
+      "whatPoint4": "Un montant sans taux marqué Non converti et exclu des totaux",
+      "whatPoint5": "Marqué Estimé quand le seul taux disponible date de plus d'une semaine, et converti à nouveau quand un taux plus récent arrive",
+      "howTitle": "Comment ça fonctionne",
+      "step1Title": "Ajoutez vos comptes dans leur propre devise",
+      "step1Body": "Un compte courant en euros, un compte-titres en dollars, une épargne en livres : chacun garde sa devise.",
+      "step2Title": "Choisissez votre devise",
+      "step2Body": "Le patrimoine net, les flux de trésorerie, les rapports et les totaux s'affichent dans cette devise.",
+      "step3Title": "Lisez des totaux fiables",
+      "step3Body": "Quand un total exclut un montant, il indique combien et dans quelles devises : il n'additionne donc jamais deux devises entre elles.",
+      "householdTitle": "Chaque personne dans sa propre devise",
+      "householdBody": "Dans un foyer, chacun choisit sa propre devise et y voit chaque total. Les soldes et les transactions des autres membres sont convertis avant d'être additionnés.",
+      "householdPoint1": "Patrimoine net, flux de trésorerie et dépenses dans la devise de chaque membre",
+      "householdPoint2": "Les budgets gardent la devise dans laquelle ils ont été créés",
+      "householdPoint3": "L'historique du portefeuille converti au taux de chaque jour",
+      "householdPoint4": "Les soldes des groupes de dépenses partagées tenus par devise, jamais convertis",
+      "faqTitle": "Questions sur les devises",
+      "faq1Q": "Quelles devises puis-je utiliser ?",
+      "faq1A": "Les comptes et les transactions peuvent être dans n'importe quelle devise. La conversion utilise les taux de référence de la Banque centrale européenne, qui couvrent les principales devises ; un montant dans une devise sans taux reste dans sa propre devise et hors de vos totaux.",
+      "faq2Q": "Dois-je saisir les taux de change ?",
+      "faq2A": "Non. Les taux sont récupérés automatiquement les jours ouvrés, et les montants estimés ou non convertis sont convertis à nouveau après chaque mise à jour.",
+      "faq3Q": "Pourquoi un total indique-t-il qu'il est incomplet ?",
+      "faq3A": "Parce qu'un des montants qu'il contient n'avait pas de taux de change. WonderMoney l'exclut plutôt que de l'ajouter à sa valeur nominale, et vous indique quelles devises manquaient.",
+      "ctaHeadline": "Voyez tout votre argent dans une seule devise",
+      "ctaBody": "Ajoutez des comptes dans n'importe quelle devise et lisez un total fiable."
+    },
+    "featureSelfHosting": {
+      "eyebrow": "Auto-hébergement et API",
+      "metaTitle": "Application de finances personnelles auto-hébergée avec API | WonderMoney",
+      "metaDescription": "WonderMoney est open source sous licence AGPL. Faites-le tourner sur votre propre serveur avec un seul fichier Docker Compose, connectez-vous avec votre propre fournisseur d'identité et reliez des scripts via l'API REST.",
+      "heroTitle": "Faites-le tourner sur votre propre serveur",
+      "heroSubtitle": "WonderMoney est gratuit et open source. Utilisez-le sur wonder.money, ou faites tourner la même application sur un serveur domestique, un NAS ou un petit VPS, avec vos données dans votre propre base de données.",
+      "schemaName": "WonderMoney Auto-hébergement",
+      "schemaDescription": "Logiciel open source de finances personnelles sous licence AGPL, qui tourne sur votre propre serveur avec Docker Compose ou Kubernetes, avec authentification unique et une API REST à jetons personnels.",
+      "whatTitle": "La même application, sur votre machine",
+      "whatBody": "Un serveur auto-hébergé fait tourner la même application que wonder.money : comptes, synchronisation bancaire, budgets, objectifs, prêts, foyers et portefeuilles. Les options supplémentaires s'activent quand vous les configurez, et restent masquées sinon.",
+      "whatPoint1": "Un seul fichier Docker Compose fait tourner Postgres, l'API, un processus en arrière-plan et l'application web",
+      "whatPoint2": "Environ 2 Go de mémoire libre : un petit VPS, un serveur domestique ou un NAS",
+      "whatPoint3": "Fonctionnalités IA avec n'importe quel endpoint compatible OpenAI, y compris un Ollama local",
+      "whatPoint4": "Authentification unique avec votre propre fournisseur d'identité, comme Authentik ou Keycloak",
+      "whatPoint5": "Synchronisation bancaire avec votre propre clé Enable Banking, et SimpleFIN pour les banques américaines et canadiennes",
+      "whatPoint6": "Un chart Helm pour Kubernetes",
+      "howTitle": "Pour commencer",
+      "step1Title": "Trouvez une machine avec Docker",
+      "step1Body": "Docker avec le plugin Compose et environ 2 Go de mémoire libre suffisent.",
+      "step2Title": "Lancez l'installation",
+      "step2Body": "Le script d'installation configure les conteneurs et génère les secrets. Ajoutez un domaine et HTTPS pour l'utiliser en dehors de votre propre réseau.",
+      "step3Title": "Installez-vous",
+      "step3Body": "Créez votre compte, ou restaurez un export de wonder.money : un export se charge dans un foyer vide sur un autre serveur.",
+      "apiTitle": "Une API pour vos propres scripts",
+      "apiBody": "Donnez à un script, un tableur ou un tableau de bord domestique l'accès à vos finances avec un jeton d'API personnel, sur wonder.money ou sur votre propre serveur.",
+      "apiPoint1": "Une API REST avec une référence publique",
+      "apiPoint2": "Un accès en lecture ou en écriture, qui ne s'étend jamais aux suppressions, aux connexions bancaires ni au foyer",
+      "apiPoint3": "Des jetons qui expirent au bout de 30, 90 ou 365 jours",
+      "apiPoint4": "Seul un hachage de chaque jeton est conservé : il n'est donc affiché qu'une fois",
+      "faqTitle": "Questions sur l'auto-hébergement",
+      "faq1Q": "Est-ce vraiment gratuit ?",
+      "faq1A": "Oui. Le code est open source sous licence GNU AGPL v3, et le service hébergé sur wonder.money est gratuit aussi.",
+      "faq2Q": "La synchronisation bancaire fonctionne-t-elle sur mon propre serveur ?",
+      "faq2A": "Oui. Rien n'est nécessaire sur le serveur : chaque personne ajoute sa propre clé Enable Banking dans les Réglages. Vous pouvez aussi activer SimpleFIN pour les banques aux États-Unis et au Canada.",
+      "faq3Q": "Puis-je passer de wonder.money à mon propre serveur, et inversement ?",
+      "faq3A": "Oui. Exportez vos données de l'un et restaurez-les dans un foyer vide sur l'autre.",
+      "ctaHeadline": "Votre serveur, vos données",
+      "ctaBody": "Commencez sur wonder.money et passez à votre propre serveur quand vous le voulez, ou dans l'autre sens."
     }
   },
   "article": {

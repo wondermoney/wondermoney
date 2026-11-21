@@ -13,6 +13,9 @@ function orNone(value: number): number {
   return Number.isFinite(value) ? value : 0;
 }
 
+/** The rates the bar marks: a recommended minimum and a FIRE target. */
+const BENCHMARKS = [20, 50] as const;
+
 function getSavingsRateColor(rate: number): string {
   if (rate >= 50) return "bg-success";
   if (rate >= 20) return "bg-success";
@@ -175,23 +178,26 @@ function SavingsRateCalculatorContent() {
               className={`h-full w-full origin-left rounded-full transition-transform duration-500 motion-reduce:transition-none ${getSavingsRateColor(savingsRate)}`}
               style={{ transform: `scaleX(${clampedRate / 100})` }}
             />
-            {/* Benchmark markers */}
-            <div
-              className="absolute top-0 h-full w-0.5 bg-muted-foreground"
-              style={{ left: "20%" }}
-              title="20% — Recommended minimum"
-            />
-            <div
-              className="absolute top-0 h-full w-0.5 bg-muted-foreground"
-              style={{ left: "50%" }}
-              title="50% — FIRE target"
-            />
+            {/* Benchmark markers at 20% and 50%, with their labels under the same points. */}
+            {BENCHMARKS.map((mark) => (
+              <div
+                key={mark}
+                aria-hidden="true"
+                className="absolute top-0 h-full w-0.5 -translate-x-1/2 bg-muted-foreground"
+                style={{ left: `${mark}%` }}
+              />
+            ))}
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>0%</span>
-            <span>20%</span>
-            <span>50%</span>
-            <span>100%</span>
+          <div className="relative h-4 text-xs text-muted-foreground" aria-hidden="true">
+            {[0, ...BENCHMARKS, 100].map((mark) => (
+              <span
+                key={mark}
+                className={`absolute top-0 ${mark === 0 ? "" : mark === 100 ? "-translate-x-full" : "-translate-x-1/2"}`}
+                style={{ left: `${mark}%` }}
+              >
+                {formatPercent(locale, mark, { decimals: 0 })}
+              </span>
+            ))}
           </div>
           {complete && (
             <p className="text-sm font-medium text-foreground">

@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import {
@@ -189,18 +189,8 @@ function ResultSummary({
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-sm text-muted-foreground">{t(k("finalBalance"))}</p>
-        <p className="font-mono text-2xl font-bold text-primary">
-          {figure(result.nominal, "finalValue")}
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">{t(k("finalValueReal"))}</p>
-        <p className="font-mono text-xl font-semibold text-foreground">
-          {figure(result.real, "finalValue")}
-        </p>
-      </div>
-
-      <table className="w-full text-sm">
+      {/* One ledger: the parts, then the final value as the answer under a firmer rule. */}
+      <table className="w-full text-sm sm:text-base">
         <caption className="sr-only">
           {t(k("resultsCaption"), { years: yearsLabel(result.inputs.years) })}
         </caption>
@@ -218,21 +208,33 @@ function ResultSummary({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr
-              key={row.key}
-              className={cn(
-                "border-b border-border-2 last:border-0",
-                row.key === "finalValue" && "font-semibold text-foreground",
-              )}
-            >
-              <th scope="row" className="py-2 pr-2 text-left font-normal text-foreground">
-                {row.label}
-              </th>
-              <td className="px-2 py-2 text-right font-mono">{figure(result.nominal, row.key)}</td>
-              <td className="py-2 pl-2 text-right font-mono">{figure(result.real, row.key)}</td>
-            </tr>
-          ))}
+          {rows.map((row) =>
+            row.key === "finalValue" ? (
+              <tr key={row.key} className="border-t border-foreground/20 align-baseline">
+                <th scope="row" className="pt-4 pr-2 pb-1 text-left font-medium text-foreground">
+                  {row.label}
+                </th>
+                <td className="px-2 pt-4 pb-1 text-right font-mono text-xl font-semibold leading-tight tracking-tight text-primary sm:text-2xl">
+                  {figure(result.nominal, row.key)}
+                </td>
+                <td className="pt-4 pb-1 pl-2 text-right font-mono text-lg font-semibold leading-tight tracking-tight text-foreground sm:text-xl">
+                  {figure(result.real, row.key)}
+                </td>
+              </tr>
+            ) : (
+              <tr key={row.key} className="border-b border-border">
+                <th scope="row" className="py-2.5 pr-2 text-left font-normal text-ink-2">
+                  {row.label}
+                </th>
+                <td className="px-2 py-2.5 text-right font-mono font-medium text-foreground">
+                  {figure(result.nominal, row.key)}
+                </td>
+                <td className="py-2.5 pl-2 text-right font-mono font-medium text-foreground">
+                  {figure(result.real, row.key)}
+                </td>
+              </tr>
+            ),
+          )}
         </tbody>
       </table>
 
@@ -330,7 +332,6 @@ function GrowthChart({
               stackId="1"
               stroke="oklch(var(--chart-1))"
               fill="oklch(var(--chart-1) / 0.3)"
-              isAnimationActive={false}
             />
             <Area
               type="monotone"
@@ -339,7 +340,6 @@ function GrowthChart({
               stackId="1"
               stroke="oklch(var(--chart-3))"
               fill="oklch(var(--chart-3) / 0.3)"
-              isAnimationActive={false}
             />
             <Line
               type="monotone"
@@ -349,7 +349,6 @@ function GrowthChart({
               strokeWidth={2}
               strokeDasharray="6 4"
               dot={false}
-              isAnimationActive={false}
             />
           </ComposedChart>
         </ResponsiveContainer>

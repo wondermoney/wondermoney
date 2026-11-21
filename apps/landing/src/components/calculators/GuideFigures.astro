@@ -1,0 +1,96 @@
+---
+/**
+ * The figures of a calculator guide's worked example, as value cards: an icon and a label,
+ * the value in the financial face, and an optional detail line or share bar.
+ *
+ * - `variant="flow"` (default) puts the cards in a row joined by `operators` (one fewer than
+ *   the cards), so the example reads as a sum: income − expenses = surplus → savings rate.
+ *   It stacks on a phone. Keep it to two to four cards. Each operator travels with the card
+ *   after it, so a card that wraps to the next row starts it with its operator.
+ * - `variant="grid"` lays the cards out two or three to a row (two for two or four cards,
+ *   so no column stays empty); a card with `share` (0 to 100) draws it as a bar with
+ *   `shareLabel` beside it. Use it for a breakdown.
+ *
+ * A value stays on one line: when a row's values do not fit, cards wrap to the next row.
+ * Values, details and share labels are figures in the financial face; one that is words
+ * ("4 anos e 10 meses", a band name) sets `text`, `detailText` or `shareLabelText` for the
+ * body face.
+ *
+ *   <GuideFigures items={flow} operators={["−", "=", "→"]} caption={t(k("exampleFlowCaption"))} />
+ *
+ * Build `items` from the calculator's own computation on the worked example (see
+ * householdBudgetGuide.ts), never from typed numbers, so the guide and the calculator
+ * always agree. Icons are lucide-react components, drawn on the server. Server-rendered,
+ * no script.
+ */
+import { guideFigureFaces, type GuideFigure, type GuideFlowOperator } from "./guideBlocks";
+
+interface Props {
+  items: GuideFigure[];
+  variant?: "flow" | "grid";
+  operators?: GuideFlowOperator[];
+  /** Says what the figures show; drawn under them. */
+  caption?: string;
+  class?: string;
+}
+
+const { items, variant = "flow", operators = [], caption, class: className } = Astro.props;
+
+// One to three cards take a column each, four take two; more run three to a row.
+const gridColumns = items.length === 4 ? 2 : Math.min(Math.max(items.length, 1), 3);
+
+const valueTone = (figure: GuideFigure) =>
+  figure.tone === "positive"
+    ? "text-success-text"
+    : figure.tone === "negative"
+      ? "text-destructive-text"
+      : "text-foreground";
+---
+
+<figure
+  class:list={["guide-figures", `guide-figures--${variant}`, className]}
+  style={variant === "grid" ? `--guide-figures-columns: ${gridColumns}` : undefined}
+>
+  <ul class="guide-figures__list" role="list">
+    {
+      items.map((figure, index) => {
+        const Icon = figure.icon;
+        const symbol = variant === "flow" && index > 0 ? operators[index - 1] : undefined;
+        const faces = guideFigureFaces(figure);
+        return (
+          <li class="guide-figures__item">
+            {symbol && (
+              <span class="guide-figures__operator" aria-hidden="true">
+                {symbol}
+              </span>
+            )}
+            <div class="guide-figures__card">
+              <p class="flex items-center gap-2 text-sm leading-5 text-ink-2">
+                {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" strokeWidth={1.75} />}
+                <span>{figure.label}</span>
+              </p>
+              <p class:list={["guide-figures__value mt-2 font-semibold leading-tight tracking-tight", faces.value, valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
+                {figure.value}
+              </p>
+              {figure.detail && <p class:list={["mt-1 text-sm text-muted-foreground", faces.detail]}>{figure.detail}</p>}
+              {typeof figure.share === "number" && (
+                <div class="mt-3 flex items-center gap-3">
+                  <span class="guide-figures__track" aria-hidden="true">
+                    <span
+                      class:list={["guide-figures__bar", figure.tone === "positive" && "guide-figures__bar--positive"]}
+                      style={`transform: scaleX(${Math.min(Math.max(figure.share, 0), 100) / 100})`}
+                    />
+                  </span>
+                  {figure.shareLabel && (
+                    <span class:list={["shrink-0 text-sm text-ink-2", faces.shareLabel]}>{figure.shareLabel}</span>
+                  )}
+                </div>
+              )}
+            </div>
+          </li>
+        );
+      })
+    }
+  </ul>
+  {caption && <figcaption class="mt-3 text-sm leading-6 text-muted-foreground">{caption}</figcaption>}
+</figure>

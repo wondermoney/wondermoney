@@ -11,6 +11,9 @@ vi.mock("@/lib/gtm", () => ({
 
 const { default: SickPayCalculatorComp } = await import("./SickPayCalculatorComp");
 
+/** The headline figure: the first value of the result ledger. */
+const headline = () => document.querySelector("#sick-result dd")?.textContent;
+
 afterEach(() => {
   cleanup();
   pushGtmEvent.mockClear();
@@ -23,17 +26,17 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(cents / 100);
 
   render(<SickPayCalculatorComp locale="en" />);
-  expect(document.getElementById("sick-total")?.textContent).toBe(euros(outcome.result.totalCents));
+  expect(headline()).toBe(euros(outcome.result.totalCents));
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   const days = screen.getByRole("spinbutton", { name: "Days of sick leave" });
   fireEvent.change(days, { target: { value: "2000" } });
   expect(days.getAttribute("aria-invalid")).toBe("true");
-  expect(document.getElementById("sick-total")).toBeNull();
+  expect(headline()).toBeUndefined();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   fireEvent.change(days, { target: { value: "3" } });
-  expect(document.getElementById("sick-total")?.textContent).toBe(euros(0));
+  expect(headline()).toBe(euros(0));
   expect(screen.getByText(/Every day of this leave is a waiting day/)).toBeTruthy();
   expect(pushGtmEvent).toHaveBeenCalledExactlyOnceWith({
     event: "tool_used", tool: "sick_pay", page_type: "tools/portugal-sick-pay-calculator",
@@ -54,7 +57,7 @@ it("asks about the disability bonus and adds the 5-point increase when the answe
   expect(screen.queryByText(/5-point increase .* is included/)).toBeNull();
 
   fireEvent.change(question, { target: { value: "yes" } });
-  expect(document.getElementById("sick-total")?.textContent).toBe(euros(expected.result.totalCents));
+  expect(headline()).toBe(euros(expected.result.totalCents));
   expect(screen.getByText(/Days 1 to 30 \(60%\)/)).toBeTruthy();
   expect(screen.getByText(/5-point increase .* is included/)).toBeTruthy();
 });

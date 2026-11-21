@@ -1,41 +1,31 @@
 ---
+// Prerendered worked example and method for the index projection on the investment return
+// page, on the guide building blocks (guideBlocks.ts). The figures come from the same
+// calculation the projection runs (indexProjectionGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  computeIndexProjection,
-  INDEX_PROJECTION_EXAMPLE,
-} from "@/lib/calculators/indexProjection";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildIndexProjectionGuide } from "./indexProjectionGuide";
 import type { Lang } from "@/lib/i18nLocale";
-import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { getTranslations } from "@/lib/translations";
 
 const { locale } = Astro.props as { locale: Lang };
 const t = getTranslations(locale);
 const key = "tools.investmentReturn.projection";
-const inputs = INDEX_PROJECTION_EXAMPLE;
-const result = computeIndexProjection(inputs);
-if (result.status !== "ok") throw new Error("Invalid index projection worked example");
-
-const money = (value: number) => formatMoney(locale, value);
-const example = t(`${key}.example`, {
-  principal: money(inputs.principal),
-  monthly: money(inputs.monthlyContribution),
-  years: inputs.years,
-  annualRate: formatPercent(locale, inputs.annualRate),
-  fee: formatPercent(locale, inputs.annualFee, { decimals: 2 }),
-  beforeFees: money(result.beforeFees),
-  afterFees: money(result.afterFees),
-  feeImpact: money(result.feeImpact),
-});
+const guide = buildIndexProjectionGuide(locale);
 ---
 
 <ToolGuide>
-  <section class="space-y-3">
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(`${key}.exampleTitle`)}</h2>
-    <p class="max-w-3xl">{example}</p>
+  <section>
+    <h2>{t(`${key}.exampleTitle`)}</h2>
+    <p>{t(`${key}.example`, guide.values)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
   </section>
-  <section class="space-y-3">
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(`${key}.methodTitle`)}</h2>
-    <p class="max-w-3xl">{t(`${key}.method`)}</p>
-    <p class="max-w-3xl">{t(`${key}.assumptions`)}</p>
+
+  <section>
+    <h2>{t(`${key}.methodTitle`)}</h2>
+    <GuideFormula lines={guide.formulas} label={t(`${key}.methodFormulasLabel`)} />
+    <GuideTermList items={guide.notes} columns={1} />
   </section>
 </ToolGuide>

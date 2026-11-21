@@ -1,10 +1,19 @@
 ---
 /**
- * The column every calculator guide is written in (Direction B): the reading
- * measure and type of a learn guide's body (GuideBody.astro) with numbered
- * section heads, from `.tool-guide` in globals.css. A guide puts its
- * `<section>`s, each opening with its `<h2>`, straight inside; with two or
- * more, each head carries its index ("01") above it.
+ * The column every calculator guide is written in: it spans the page container like the
+ * calculator above it (`.tool-guide` in globals.css). A guide puts its `<section>`s, each
+ * opening with its `<h2>`, straight inside; with two or more, each head carries its index
+ * ("01") above it. From `lg` a section is two columns: the head on the left third, sticky
+ * while the section scrolls, and the body on the right. Running text (p, lists, h3) keeps a
+ * readable measure; anything else takes the body column's full width.
+ *
+ * Plain `<h2>`, `<p>` and `<a>` need no classes: the column styles them. For the parts a
+ * guide repeats, use the building blocks beside this file (types and helpers in
+ * guideBlocks.ts; HouseholdBudgetGuide.astro uses all three):
+ *
+ * - GuideTermList.astro: "how to read the result" terms and the method's notes;
+ * - GuideFigures.astro: a worked example's figures as value cards, a flow or a grid;
+ * - GuideFormula.astro: the method's formulas, each variable linking to its note.
  */
 interface Props {
   class?: string;

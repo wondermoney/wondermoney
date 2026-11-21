@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "@/components/shared/charts";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
@@ -26,6 +26,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.depositRateIndex.${key}`;
 
@@ -206,7 +207,7 @@ function Snapshot() {
           </div>
           <div>
             <dt className="text-muted-foreground">{t(k("real.net"), { tax: String(DEPOSIT_TAX_RATE) })}</dt>
-            <dd className="font-mono font-semibold text-primary">{percent(year.realNet, "always")}</dd>
+            <dd className="font-mono font-semibold text-foreground">{percent(year.realNet, "always")}</dd>
           </div>
         </dl>
         <p className="mt-3 text-sm text-muted-foreground">
@@ -285,18 +286,17 @@ function History() {
         <label htmlFor="deposit-bucket" className="block text-sm font-medium text-foreground">
           {t(k("history.bucket"))}
         </label>
-        <select
+        <Select
           id="deposit-bucket"
           value={bucket}
           onChange={(event) => setBucket(event.currentTarget.value as DepositBucket)}
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {DEPOSIT_BUCKETS.map((option) => (
             <option key={option} value={option}>
               {bucketLabel(t, option)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="h-72 w-full min-w-0" role="img" aria-label={t(k("history.chartLabel"))}>
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>

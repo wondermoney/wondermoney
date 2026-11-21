@@ -8,7 +8,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
@@ -320,11 +320,9 @@ function ResultPanel({
 
   return (
     <div className="space-y-4">
-      <div>
-        <p className="text-sm text-muted-foreground">{t(k(`answer.${result.solveFor}`))}</p>
-        <p className="font-mono text-2xl font-bold text-primary">{answer}</p>
-      </div>
-      {items.length > 0 && <CalculatorResult items={items} />}
+      <CalculatorResult
+        items={[{ label: t(k(`answer.${result.solveFor}`)), value: answer, highlight: true }, ...items]}
+      />
       <p
         aria-live="polite"
         className={cn(

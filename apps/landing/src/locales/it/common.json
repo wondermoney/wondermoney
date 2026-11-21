@@ -375,8 +375,31 @@
     "features": "Funzionalità",
     "about": "Chi siamo",
     "tools": "Strumenti",
+    "comparators": "Comparatori",
     "toolsMenu": {
-      "seeAll": "Vedi tutti gli strumenti"
+      "seeAll": "Vedi tutti gli strumenti",
+      "subgroups": {
+        "planAndSave": "Pianificare e risparmiare",
+        "salaryAndBenefits": "Stipendio e sussidi",
+        "pricesAndInflation": "Prezzi e inflazione",
+        "homeLoan": "Mutui",
+        "buyingAndTaxes": "Acquisto casa e imposte",
+        "carAndPersonalLoans": "Auto e prestiti personali",
+        "investing": "Investire",
+        "retirement": "Pensione",
+        "depositsAndCertificates": "Depositi e certificati di risparmio"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Offerte di banche, broker, assicuratori e fornitori di energia in Portogallo, a confronto.",
+      "items": {
+        "electricityTariffComparison": "Tutte le offerte per la casa, ordinate per quanto ti costerebbero in un anno",
+        "freeBankAccounts": "Conti correnti gratuiti e le condizioni di ciascuno",
+        "termDepositOffers": "Offerte di depositi vincolati per durata e importo, con interessi netti",
+        "remuneratedAccounts": "Conti remunerati e di risparmio, con interessi netti di IRS",
+        "brokerFees": "Commissioni di custodia, negoziazione e cambio dei broker in Portogallo",
+        "pprComparison": "Fondi, assicurazioni e fondi pensione PPR per rischio, costi e rendimenti"
+      }
     },
     "learn": "Impara",
     "glossary": "Glossario",
@@ -409,6 +432,22 @@
         "name": "Privacy",
         "description": "Accesso bancario solo in lettura. I tuoi dati non vengono mai venduti."
       },
+      "netWorth": {
+        "name": "Patrimonio netto",
+        "description": "Conti, investimenti e debiti riuniti in un unico numero"
+      },
+      "financialMarkets": {
+        "name": "Mercati finanziari",
+        "description": "Azioni, ETF e watchlist con dati aggiornati, accanto ai tuoi conti"
+      },
+      "goals": {
+        "name": "Obiettivi",
+        "description": "Imposta obiettivi di risparmio e segui i tuoi progressi"
+      },
+      "credits": {
+        "name": "Prestiti",
+        "description": "Il tuo debito totale e ogni rata, con un piano per estinguerlo"
+      },
       "learn": {
         "name": "Impara",
         "description": "Guide e articoli sulla finanza personale"
@@ -416,6 +455,30 @@
       "glossary": {
         "name": "Glossario",
         "description": "Definizioni in linguaggio semplice per i termini finanziari"
+      },
+      "household": {
+        "name": "Famiglia",
+        "description": "Condividi le finanze con chi vive con te e tieni privati i conti privati"
+      },
+      "imports": {
+        "name": "Importazione",
+        "description": "Importa estratti CSV, Excel, OFX, QIF e CAMT.053, o il tuo storico di YNAB"
+      },
+      "recurring": {
+        "name": "Bollette e abbonamenti",
+        "description": "Pagamenti ricorrenti trovati per te, in un calendario e in una previsione a 30 giorni"
+      },
+      "assistant": {
+        "name": "Assistente IA",
+        "description": "Chiedi del tuo denaro in parole semplici: lui propone, tu decidi"
+      },
+      "multiCurrency": {
+        "name": "Multivaluta",
+        "description": "Conti in qualsiasi valuta, totali nella tua ai tassi giornalieri della BCE"
+      },
+      "selfHosting": {
+        "name": "Self-hosting e API",
+        "description": "Esegui WonderMoney sul tuo server e collega i tuoi script tramite l'API"
       }
     },
     "faq": "FAQ"
@@ -456,7 +519,14 @@
         "exampleBudget": "Un budget di {{amount}} nel {{from}} richiede {{equivalent}} nel {{to}} per comprare lo stesso paniere. I prezzi medi sono variati del {{inflation}}.",
         "exampleInvestment": "Se un investimento passa da {{amount}} nel {{from}} a {{finalValue}} nel {{to}}, il saldo finale equivale a {{realValue}} in euro del {{from}}.",
         "methodTitle": "Come si calcola l'adeguamento all'inflazione",
-        "method": "Usiamo la media annua dell'indice generale dei prezzi al consumo (IPC) del Portogallo, con base {{baseYear}}. Ogni anno rappresenta la media dei prezzi da gennaio a dicembre. Dividi l'IPC dell'anno di confronto per l'IPC dell'anno di partenza e moltiplica l'importo iniziale per quel rapporto. Dividi il saldo finale per lo stesso rapporto per esprimerlo in euro dell'anno di partenza.",
+        "method": "Usiamo la media annua dell'indice generale dei prezzi al consumo (IPC) del Portogallo, con base {{baseYear}}. Ogni anno rappresenta la media dei prezzi da gennaio a dicembre.",
+        "methodFormulasLabel": "Formule",
+        "formulaAmount": "Importo iniziale",
+        "formulaEquivalent": "Importo equivalente",
+        "formulaFinal": "Saldo finale",
+        "formulaReal": "Saldo in euro dell'anno di partenza",
+        "formulaCpiStart": "IPC dell'anno di partenza",
+        "formulaCpiComparison": "IPC dell'anno di confronto",
         "limitations": "Le tue spese possono evolvere in modo diverso dal paniere nazionale. Il confronto di un investimento considera un saldo iniziale e uno finale senza versamenti o prelievi. Le commissioni e le imposte incidono solo se sono già incluse nel saldo nominale inserito. Indica tutti gli importi in euro: converti prima eventuali importi storici espressi in escudi.",
         "coverage": "Il periodo disponibile è {{first}}–{{last}} e include solo anni completi.",
         "retrieved": "Dati consultati il {{date}}.",
@@ -534,7 +604,18 @@
         "reviewed": "Regole verificate il 20 novembre 2026 per l'IMI dovuta nel 2026 e nel 2027. Gli importi dell'IMI Familiar provengono dall'articolo 112-A del Código do IMI (Portal das Finanças).",
         "methodMinimum": "Se l'imposta da riscuotere, dopo l'eventuale riduzione dell'IMI Familiar, è inferiore a 10 €, non viene liquidata alcuna IMI e il calcolatore mostra 0 € con una nota (articolo 113, n.º 6, del Código do IMI).",
         "sourceMinimum": "Código do IMI, articolo 113: liquidazione, nessuna IMI sotto i 10 € (consultato il 19 novembre 2026)",
-        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)"
+        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)",
+        "terms": {
+          "tax": "IMI annuale",
+          "family": "IMI Familiar",
+          "minimum": "Importo minimo",
+          "payment": "Rate",
+          "budget": "Accantonamento mensile",
+          "rate": "Aliquota comunale",
+          "scope": "Ambito",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dall'IMI",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo dell'IMI ogni mese, così le rate sono già coperte.",
@@ -612,13 +693,30 @@
         "exampleTarget": "Con un tasso di prelievo del {{rate}}, il tuo numero FIRE è {{spending}} ÷ {{rate}} = {{target}}: i {{assets}} di oggi sono il {{progress}} del percorso.",
         "exampleTime": "Crescendo mese dopo mese, con i versamenti aggiunti, gli investimenti superano {{target}} dopo {{time}}. Spendendo il {{cut}} in meno, {{cutSpending}} all'anno, l'obiettivo scende a {{cutTarget}} e lo raggiungi dopo {{cutTime}}. Il calcolatore qui sopra parte da queste cifre, così puoi sostituirle con le tue.",
         "methodHeading": "Metodo",
-        "methodFormula": "Numero FIRE = spesa annua ÷ tasso di prelievo",
-        "methodMultiple": "Al 4% l'obiettivo è 25 volte la tua spesa annua; al 3% circa 33 volte. Un tasso più basso dà un obiettivo più alto e più margine per gli anni negativi.",
-        "methodGrowth": "Ogni mese gli investimenti crescono al tasso mensile che, composto, dà il rendimento annuo che indichi, poi si aggiunge il versamento del mese. Il tempo mostrato è il primo mese in cui il totale raggiunge il tuo numero FIRE.",
-        "methodRealMoney": "Il rendimento è reale, al netto dell'inflazione, quindi tutti gli importi sono in euro di oggi. Si assume che spesa e versamenti crescano con i prezzi, ed è per questo che restano uguali nel calcolo.",
-        "methodHorizon": "La proiezione si ferma dopo {{years}} anni. Se versamenti e crescita non possono raggiungere l'obiettivo, per esempio senza versamenti e senza rendimento, il calcolatore lo dice invece di dare una data.",
-        "methodLeftOut": "Non sono incluse le tasse su guadagni e prelievi, le commissioni di fondi e piattaforme né il rischio di sequenza, cioè rendimenti scarsi nei primi anni in cui vivi dei tuoi investimenti. Il tasso di prelievo è una regola pratica basata sui rendimenti passati, non una garanzia.",
-        "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati."
+        "methodMultipleBody": "Al 4% l'obiettivo è 25 volte la tua spesa annua; al 3% circa 33 volte. Un tasso più basso dà un obiettivo più alto e più margine per gli anni negativi.",
+        "methodGrowthBody": "Ogni mese gli investimenti crescono al tasso mensile che, composto, dà il rendimento annuo che indichi, poi si aggiunge il versamento del mese. Il tempo mostrato è il primo mese in cui il totale raggiunge il tuo numero FIRE.",
+        "methodRealMoneyBody": "Il rendimento è reale, al netto dell'inflazione, quindi tutti gli importi sono in euro di oggi. Si assume che spesa e versamenti crescano con i prezzi, ed è per questo che restano uguali nel calcolo.",
+        "methodHorizonBody": "La proiezione si ferma dopo {{years}} anni. Se versamenti e crescita non possono raggiungere l'obiettivo, per esempio senza versamenti e senza rendimento, il calcolatore lo dice invece di dare una data.",
+        "methodLeftOutBody": "Non sono incluse le tasse su guadagni e prelievi, le commissioni di fondi e piattaforme né il rischio di sequenza, cioè rendimenti scarsi nei primi anni in cui vivi dei tuoi investimenti. Il tasso di prelievo è una regola pratica basata sui rendimenti passati, non una garanzia.",
+        "methodPrivacyBody": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati.",
+        "methodMultipleTerm": "Tasso di prelievo",
+        "methodGrowthTerm": "Crescita mensile",
+        "methodRealMoneyTerm": "Euro di oggi",
+        "methodHorizonTerm": "Orizzonte",
+        "methodLeftOutTerm": "Non incluso",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "fireNumber": "Numero FIRE",
+          "annualSpending": "spesa annua",
+          "withdrawalRate": "tasso di prelievo",
+          "monthlyRate": "Tasso mensile",
+          "monthlyRateLower": "tasso mensile",
+          "realReturn": "rendimento reale annuo",
+          "assetsEnd": "Investimenti a fine mese",
+          "assetsStart": "investimenti a inizio mese",
+          "contribution": "versamento mensile"
+        }
       }
     },
     "compoundInterest": {
@@ -693,13 +791,11 @@
         "exampleStep3": "In euro di oggi il valore finale è {{realFinal}}: ciò che hai versato vale {{realContributed}} e la crescita al netto dell'inflazione è {{realGrowth}}.",
         "exampleComparison": "Portare il versamento a {{comparisonMonthly}} al mese aggiunge {{extraContributed}} versati nel periodo e {{extraFinal}} al valore finale, che arriva a {{comparisonFinal}}. In euro di oggi la differenza è {{extraReal}}.",
         "methodHeading": "Come funziona il calcolatore",
-        "methodFormula": "Ogni mese: saldo = saldo × (1 + rendimento annuo ÷ 12) + versamento mensile",
-        "methodRealFormula": "Valore in euro di oggi = valore ÷ (1 + inflazione annua) ^ anni",
-        "methodMonthly": "Il rendimento annuo è diviso in 12 tassi mensili uguali. Ogni mese il saldo cresce a quel tasso, poi si aggiunge il versamento a fine mese. Un rendimento del {{rate}} capitalizzato mensilmente dà il {{effectiveRate}} in un anno intero.",
-        "methodInflation": "L'inflazione è convertita in un tasso mensile equivalente che, composto nel corso dell'anno, dà il tasso annuo. Il valore finale è diviso per l'inflazione accumulata sull'intero periodo, e ogni versamento per l'inflazione accumulata fino al mese in cui viene fatto, così anche l'importo versato compare in euro di oggi.",
-        "methodRounding": "La crescita è arrotondata al centesimo ogni mese. I totali sono in euro interi e la crescita è sempre il valore finale meno quanto versato, quindi i numeri tornano.",
-        "methodRanges": "Gli importi vanno da 0 a {{maxAmount}}, rendimento e inflazione dallo 0% al {{maxRate}}% e la durata da 0 a {{maxYears}} anni interi. I valori fuori da questi limiti vengono corretti, e il calcolatore te lo segnala.",
-        "methodPrivacy": "Il calcolo avviene nel tuo browser. Gli importi che inserisci non vengono inviati da nessuna parte.",
+        "methodMonthlyBody": "Il rendimento annuo è diviso in 12 tassi mensili uguali. Ogni mese il saldo cresce a quel tasso, poi si aggiunge il versamento a fine mese. Un rendimento del {{rate}} capitalizzato mensilmente dà il {{effectiveRate}} in un anno intero.",
+        "methodInflationBody": "L'inflazione è convertita in un tasso mensile equivalente che, composto nel corso dell'anno, dà il tasso annuo. Il valore finale è diviso per l'inflazione accumulata sull'intero periodo, e ogni versamento per l'inflazione accumulata fino al mese in cui viene fatto, così anche l'importo versato compare in euro di oggi.",
+        "methodRoundingBody": "La crescita è arrotondata al centesimo ogni mese. I totali sono in euro interi e la crescita è sempre il valore finale meno quanto versato, quindi i numeri tornano.",
+        "methodRangesBody": "Gli importi vanno da 0 a {{maxAmount}}, rendimento e inflazione dallo 0% al {{maxRate}}% e la durata da 0 a {{maxYears}} anni interi. I valori fuori da questi limiti vengono corretti, e il calcolatore te lo segnala.",
+        "methodPrivacyBody": "Il calcolo avviene nel tuo browser. Gli importi che inserisci non vengono inviati da nessuna parte.",
         "assumptionsHeading": "Ipotesi",
         "assumption1": "Il rendimento è lo stesso ogni anno.",
         "assumption2": "I versamenti avvengono alla fine di ogni mese e restano uguali per tutto il periodo.",
@@ -708,7 +804,21 @@
         "assumptionsNote": "Gli investimenti reali salgono e scendono, e imposte e commissioni riducono ciò che ti resta. Usa il risultato come proiezione per confrontare opzioni, non come previsione.",
         "rateHeading": "Quale rendimento usare",
         "rateBody1": "Usa il rendimento che ti aspetti al netto dei costi e prima dell'inflazione. Un conto deposito o i titoli di Stato rendono meno di un fondo azionario diversificato, che può crescere di più su periodi lunghi ma in alcuni anni perde anche valore.",
-        "rateBody2": "Se non sei sicuro, prova un tasso prudente e uno più ottimista e confronta i risultati. La distanza tra i due mostra quanto del risultato dipende dal tasso, che non controlli, e quanto dal versamento e dalla durata, che invece controlli."
+        "rateBody2": "Se non sei sicuro, prova un tasso prudente e uno più ottimista e confronta i risultati. La distanza tra i due mostra quanto del risultato dipende dal tasso, che non controlli, e quanto dal versamento e dalla durata, che invece controlli.",
+        "methodFormulasLabel": "Formule",
+        "formulaBalanceEnd": "Saldo a fine mese",
+        "formulaBalanceStart": "saldo a inizio mese",
+        "formulaAnnualReturn": "rendimento annuo",
+        "formulaContribution": "versamento mensile",
+        "formulaRealValue": "Valore in euro di oggi",
+        "formulaValue": "valore",
+        "formulaInflation": "inflazione annua",
+        "formulaYears": "anni",
+        "methodMonthlyTerm": "Capitalizzazione mensile",
+        "methodInflationTerm": "Inflazione",
+        "methodRoundingTerm": "Arrotondamenti",
+        "methodRangesTerm": "Limiti",
+        "methodPrivacyTerm": "Privacy"
       }
     },
     "netWorth": {
@@ -879,7 +989,21 @@
         "assumptions": "Il modello ipotizza un rendimento e un costo costanti, il reinvestimento delle distribuzioni e versamenti a fine mese. Esclude tasse, costi di intermediazione, variazioni dei cambi e inflazione. I tassi sono ipotesi illustrative per un indice come l'S&P 500. I rendimenti effettivi variano e possono essere negativi. L'impatto dei costi comprende anche il rendimento che gli importi dedotti avrebbero potuto generare.",
         "ctaHeadline": "Segui il rendimento effettivo dei tuoi investimenti",
         "ctaDescription": "Usa WonderMoney per tenere sotto controllo il tuo portafoglio e confrontare il rendimento effettivo con lo scenario simulato.",
-        "ctaText": "Confronta gli investimenti con la proiezione"
+        "ctaText": "Confronta gli investimenti con la proiezione",
+        "methodTerm": "Crescita e costi",
+        "assumptionsTerm": "Ipotesi",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "netFactor": "Fattore di crescita annuo netto",
+          "annualReturn": "rendimento annuo",
+          "annualFee": "costo annuo del fondo",
+          "monthlyFactor": "Fattore mensile",
+          "monthlyFactorLower": "fattore mensile",
+          "netFactorLower": "fattore annuo netto",
+          "balanceEnd": "Saldo a fine mese",
+          "balanceStart": "saldo a inizio mese",
+          "contribution": "versamento mensile"
+        }
       }
     },
     "emergencyFund": {
@@ -926,15 +1050,13 @@
       "whatBody2": "Calcolalo solo sulle spese essenziali, quelle che continuano anche se il reddito si ferma: casa, alimentari, utenze, trasporti, assicurazioni e rate minime dei prestiti. Lascia fuori ciò che potresti sospendere. Tieni il denaro in un posto sicuro da cui puoi prelevarlo in fretta e senza penali, come un conto deposito libero, invece di investirlo.",
       "exampleTitle": "Un esempio pratico",
       "exampleIntro": "Supponiamo che le tue spese essenziali siano {{expenses}} al mese, che tu abbia già {{savings}} da parte e che riesca a risparmiare {{contribution}} al mese. Scegli {{months}} mesi di copertura.",
-      "exampleStep1": "Obiettivo: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Ancora da risparmiare: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Tempo per raggiungerlo: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} mesi.",
       "exampleOutro": "Con 3 mesi di copertura l'obiettivo scende a {{lowTarget}} e lo raggiungi in {{lowMonths}} mesi. Se un obiettivo lontano ti scoraggia, parti da uno più piccolo e alzalo quando i primi mesi sono coperti.",
       "methodTitle": "Come funziona il calcolatore",
-      "method1": "Obiettivo = spese essenziali mensili × mesi di copertura.",
-      "method2": "Ancora da risparmiare = obiettivo − risparmi di emergenza attuali. Se i tuoi risparmi sono più alti, la differenza appare come importo oltre l'obiettivo.",
-      "method3": "Tempo per raggiungerlo = ancora da risparmiare ÷ versamento mensile, arrotondato per eccesso al mese intero. Il mese dell'obiettivo conta quei mesi a partire da quello attuale, con un versamento al mese dal prossimo.",
-      "method4": "Qui i tuoi risparmi non producono interessi, e spese e versamento restano uguali ogni mese. Gli interessi ti farebbero arrivare un po' prima e l'aumento dei prezzi un po' dopo, quindi ricontrolla i numeri una o due volte l'anno.",
+      "methodFormulasLabel": "Formule",
+      "methodShortfallBody": "Se i tuoi risparmi sono più alti, la differenza appare come importo oltre l'obiettivo.",
+      "methodTimeBody": "Arrotondato per eccesso al mese intero. Il mese dell'obiettivo conta quei mesi a partire da quello attuale, con un versamento al mese dal prossimo.",
+      "methodInterestTerm": "Senza interessi",
+      "methodInterestBody": "Qui i tuoi risparmi non producono interessi, e spese e versamento restano uguali ogni mese. Gli interessi ti farebbero arrivare un po' prima e l'aumento dei prezzi un po' dopo, quindi ricontrolla i numeri una o due volte l'anno.",
       "nextStepHeadline": "Crea e segui il tuo obiettivo di fondo di emergenza",
       "nextStepDescription": "Salva questo importo come obiettivo in WonderMoney e segui i tuoi progressi con i saldi reali dei tuoi conti.",
       "nextStepCta": "Crea il tuo obiettivo"
@@ -1005,15 +1127,20 @@
         "exampleBody": "Una coppia guadagna {{income}} netti al mese in due. Paga {{home}} di mutuo, {{car}} per il finanziamento dell'auto e {{cards}} per la carta di credito: {{total}} in tutto. Dividendo le rate per il reddito e moltiplicando per 100, il rapporto è del {{ratio}}, nella fascia di attenzione.",
         "exampleScenario": "Il finanziamento dell'auto sta per finire. Senza, le rate scendono a {{scenarioTotal}} e il rapporto al {{scenarioRatio}}, di nuovo nella fascia sana. Il calcolatore qui sopra parte da questo nucleo e da questo cambiamento, così puoi inserire i tuoi numeri.",
         "methodHeading": "Metodo",
-        "methodFormula": "Rapporto rata/reddito = totale delle rate mensili ÷ reddito netto mensile del nucleo familiare × 100",
-        "methodCounts": "Conta come debito: ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
-        "methodExcludes": "Non conta: l'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
-        "methodIncome": "Il reddito è netto: quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
         "methodRounding": "Il rapporto è arrotondato a un decimale, e la fascia segue il valore arrotondato. Rate superiori al reddito danno un rapporto oltre il 100%.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati.",
         "nextHeading": "Pensi a un nuovo finanziamento?",
         "nextBody": "Un mutuo o un altro prestito aggiunge una rata. Calcola quanto costerebbe al mese un nuovo mutuo e inserisci quella rata nel pannello dello scenario per vedere il nuovo rapporto.",
-        "nextLink": "Apri il calcolatore del mutuo"
+        "nextLink": "Apri il calcolatore del mutuo",
+        "methodCountsTerm": "Conta come debito",
+        "methodCountsBody": "Ogni rata in scadenza nel mese per mutuo, prestiti personali e auto, carte di credito, leasing e qualsiasi altro finanziamento. Per una carta, usa quanto paghi davvero ogni mese.",
+        "methodExcludesTerm": "Non conta",
+        "methodExcludesBody": "L'affitto pagato a un proprietario, le bollette, la spesa, le assicurazioni e il risparmio. Pesano sul bilancio, ma non sono rimborsi di denaro preso in prestito.",
+        "methodIncomeTerm": "Il reddito è netto",
+        "methodIncomeBody": "Quanto arriva sul conto dopo tasse e contributi, per tutte le persone del nucleo che condividono le rate. Se il reddito varia, usa la media mensile dell'ultimo anno.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "householdBudget": {
@@ -1094,21 +1221,35 @@
         "whatHeading": "Cosa mostra un budget familiare",
         "whatBody": "Un budget familiare mette a confronto quello che entra e quello che esce in un mese. Raggruppare le spese in poche categorie trasforma un lungo elenco di pagamenti in una risposta breve: quanto resta a fine mese e quali parti della vita si prendono la fetta più grande.",
         "readHeading": "Come leggere il risultato",
-        "readSurplus": "Avanzo: entrate meno spese, quando il valore è positivo. È il denaro che puoi risparmiare, investire o mettere da parte per le bollette che non arrivano ogni mese.",
-        "readDeficit": "Disavanzo: spese superiori alle entrate. Un mese così si paga con i risparmi o a credito, quindi conviene capire dove tagliare prima che si ripeta.",
-        "readShares": "Peso sul reddito: ogni categoria in percentuale delle entrate totali. Permette di confrontare budget di dimensioni diverse e indica da quale categoria partire.",
-        "readDiagram": "Il diagramma dei flussi disegna le stesse cifre. Ogni banda è larga quanto il suo importo, dalle entrate a sinistra fino alle categorie e all'avanzo a destra.",
+        "readSurplusTerm": "Avanzo",
+        "readSurplusBody": "Entrate meno spese, quando il valore è positivo. È il denaro che puoi risparmiare, investire o mettere da parte per le bollette che non arrivano ogni mese.",
+        "readDeficitTerm": "Disavanzo",
+        "readDeficitBody": "Spese superiori alle entrate. Un mese così si paga con i risparmi o a credito, quindi conviene capire dove tagliare prima che si ripeta.",
+        "readSharesTerm": "Peso sul reddito",
+        "readSharesBody": "Ogni categoria in percentuale delle entrate totali. Permette di confrontare budget di dimensioni diverse e indica da quale categoria partire.",
+        "readDiagramTerm": "Diagramma dei flussi",
+        "readDiagramBody": "Disegna le stesse cifre. Ogni banda è larga quanto il suo importo, dalle entrate a sinistra fino alle categorie e all'avanzo a destra.",
         "exampleHeading": "Esempio pratico",
         "exampleBody": "Una famiglia guadagna {{salary}} di stipendio e {{other}} da altre fonti, {{income}} al mese. Le sue spese arrivano a {{expenses}} e lasciano un avanzo di {{surplus}}. Dividi l'avanzo per le entrate e moltiplica per 100: il tasso di risparmio è del {{savingsRate}}.",
+        "exampleFlowCaption": "Il mese di questa famiglia, dalle entrate all'avanzo",
         "exampleShares": "La casa è la categoria più grande con {{housing}}, cioè il {{housingShare}} del reddito, seguita dagli alimentari con {{food}} ({{foodShare}}). Le utenze uniscono due righe, energia e telefonia, per {{utilities}}. Il calcolatore qui sopra parte da questa famiglia, così puoi sostituire le cifre con le tue.",
+        "exampleSharesCaption": "Ogni categoria e l'avanzo in percentuale delle entrate",
         "methodHeading": "Metodo",
-        "methodFormula": "Avanzo = entrate totali − spese totali. Tasso di risparmio = avanzo ÷ entrate totali × 100. Peso della categoria = totale della categoria ÷ entrate totali × 100.",
-        "methodIncome": "Le entrate sono nette: ciò che arriva sui conti della famiglia dopo tasse e contributi. Se variano, usa la media mensile dell'ultimo anno.",
-        "methodExpenses": "Le spese sono ciò che esce da quei conti ogni mese, rate dei prestiti comprese. Il denaro che sposti sui risparmi non è una spesa: fa parte dell'avanzo.",
-        "methodIrregular": "Per i costi annuali o occasionali, come assicurazioni, tagliando dell'auto o vacanze, dividi l'importo annuo per 12 e aggiungilo come riga.",
-        "methodShares": "Ogni percentuale è calcolata sulle entrate, non sulle spese. Con un avanzo, categorie e avanzo sommano il 100%; con un disavanzo, le categorie superano il 100%. Senza entrate non ci sono percentuali né tasso di risparmio.",
-        "methodRounding": "Gli importi si sommano al centesimo e le percentuali sono arrotondate a un decimale. Gli importi vuoti o negativi contano come zero.",
-        "methodPrivacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati né inviati.",
+        "methodFormulasLabel": "Formule",
+        "formulaCategoryShare": "Peso della categoria",
+        "formulaCategoryTotal": "Totale della categoria",
+        "methodIncomeTerm": "Entrate",
+        "methodIncomeBody": "Le entrate sono nette: ciò che arriva sui conti della famiglia dopo tasse e contributi. Se variano, usa la media mensile dell'ultimo anno.",
+        "methodExpensesTerm": "Spese",
+        "methodExpensesBody": "Le spese sono ciò che esce da quei conti ogni mese, rate dei prestiti comprese. Il denaro che sposti sui risparmi non è una spesa: fa parte dell'avanzo.",
+        "methodIrregularTerm": "Costi irregolari",
+        "methodIrregularBody": "Per i costi annuali o occasionali, come assicurazioni, tagliando dell'auto o vacanze, dividi l'importo annuo per 12 e aggiungilo come riga.",
+        "methodSharesTerm": "Percentuali",
+        "methodSharesBody": "Ogni percentuale è calcolata sulle entrate, non sulle spese. Con un avanzo, categorie e avanzo sommano il 100%; con un disavanzo, le categorie superano il 100%. Senza entrate non ci sono percentuali né tasso di risparmio.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodRoundingBody": "Gli importi si sommano al centesimo e le percentuali sono arrotondate a un decimale. Gli importi vuoti o negativi contano come zero.",
+        "methodPrivacyTerm": "Privacy",
+        "methodPrivacyBody": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati né inviati.",
         "nextHeading": "Da un budget una tantum a un'abitudine mensile",
         "nextBody": "Un budget è più utile quando lo confronti con quanto hai speso davvero. I budget a buste di WonderMoney applicano la stessa idea mese dopo mese.",
         "nextLink": "Scopri come funzionano i budget in WonderMoney"
@@ -1204,7 +1345,6 @@
         "method": {
           "title": "Come si calcola la rata",
           "intro": "La maggior parte dei mutui a tasso fisso si rimborsa con rate costanti: lo stesso importo ogni mese, fissato in modo che il debito arrivi a zero con l'ultima rata. La rata deriva dalla formula della rendita:",
-          "legend": "Qui M è la rata mensile, P è l'importo chiesto, r è il tasso annuo diviso 12 e n è il numero di rate mensili. Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente P diviso n.",
           "schedule": "Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa capitale. Man mano che il debito scende, la quota interessi si riduce e la quota capitale cresce: per questo il debito scende piano all'inizio e più in fretta verso la fine. Assicurazioni e spese si sommano alla rata e non riducono mai il debito.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1215,7 +1355,24 @@
             "rounding": "Gli importi sono in euro. La rata di ogni mese si calcola dal debito residuo e dai mesi che restano, arrotondata al centesimo: per questo una rata può differire dalle altre di un centesimo, e l'ultima estingue il debito esattamente. In un mutuo molto lungo a un tasso alto, le prime rate possono rimborsare meno di un centesimo di capitale.",
             "lenderFigures": "Le cifre della tua banca possono differire leggermente per come conta i giorni, arrotonda gli importi o fissa la data di pagamento. Il riferimento sono le informazioni precontrattuali che ti consegna."
           },
-          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}."
+          "limits": "Il calcolatore accetta mutui da {{minAmount}} a {{maxAmount}}, durate fino a {{maxYears}} anni e tassi fino a {{maxRate}}.",
+          "formulasLabel": "Formule",
+          "zeroRate": "Con un tasso dello 0% non c'è nulla da scontare, e la rata è semplicemente l'importo del prestito diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "monthly": "Rate mensili",
+            "nominalRate": "Tasso nominale, non il TAEG",
+            "flatFees": "Assicurazioni e commissioni",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interessi nella prima rata",
+          "firstPrincipal": "Capitale nella prima rata",
+          "monthlyRate": "Tasso mensile",
+          "payments": "Numero di rate"
         }
       },
       "cta": {
@@ -1338,11 +1495,26 @@
         "before": {
           "title": "Prima di rimborsare",
           "items": {
-            "fee": "Controlla la penale. La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto.",
-            "rate": "I tassi variabili e misti non sono coperti: i calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito.",
-            "reserves": "Tieni una riserva. Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso.",
-            "otherDebts": "Rimborsa prima il debito più caro. Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico.",
-            "lender": "Chiedi alla banca come applica il rimborso. Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            "fee": {
+              "term": "Controlla la penale",
+              "body": "La banca può chiedere una percentuale della somma rimborsata in anticipo, e le regole e i limiti di legge cambiano a seconda del paese e del tipo di prestito. Inseriscila nel calcolatore per vedere il risparmio netto."
+            },
+            "rate": {
+              "term": "I tassi variabili e misti non sono coperti",
+              "body": "I calcoli presuppongono che il tasso inserito resti fisso fino alla fine del prestito."
+            },
+            "reserves": {
+              "term": "Tieni una riserva",
+              "body": "Il denaro versato alla banca è difficile da riavere, quindi assicurati che il tuo fondo di emergenza resti intatto dopo il rimborso."
+            },
+            "otherDebts": {
+              "term": "Rimborsa prima il debito più caro",
+              "body": "Se hai una carta di credito o un prestito personale a un tasso più alto, rimborsare quello di solito fa risparmiare più che rimborsare un mutuo più economico."
+            },
+            "lender": {
+              "term": "Chiedi alla banca come applica il rimborso",
+              "body": "Alcune riducono la rata in automatico, altre accorciano la durata, e molte ti lasciano scegliere."
+            }
           }
         },
         "example": {
@@ -1355,9 +1527,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce prima il prestito così com'è, con lo stesso motore a tasso fisso del calcolatore del mutuo. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate che restano. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n.",
-          "lowerPayment": "Mantenere la durata: il debito che resta dopo il rimborso torna nella formula con lo stesso n, che dà la nuova rata, più bassa.",
-          "shorterTerm": "Mantenere la rata: continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
           "fee": "La penale è la percentuale che inserisci, applicata alla somma rimborsata. Gli interessi risparmiati sono gli interessi residui del prestito così com'è meno quelli di ciascuno scenario, e il risparmio netto è questa cifra meno la penale. Una somma superiore al debito residuo estingue il prestito, e solo il debito residuo conta per la penale.",
           "assumptionsTitle": "Ipotesi",
           "assumptions": {
@@ -1368,7 +1537,23 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano esattamente.",
             "lenderFigures": "I numeri della tua banca possono differire leggermente per come conta i giorni e arrotonda. Chiedile una simulazione prima di rimborsare."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, fino a {{maxYears}} anni residui, tassi fino a {{maxRate}} e penali fino al {{maxFee}} della somma rimborsata.",
+          "lowerPaymentTerm": "Mantenere la durata",
+          "lowerPaymentBody": "Il debito che resta dopo il rimborso torna nella formula con lo stesso numero di rate, che dà la nuova rata, più bassa.",
+          "shorterTermTerm": "Mantenere la rata",
+          "shorterTermBody": "Continui a pagare ogni mese quanto previsto dal piano originale finché il debito ridotto non è estinto. L'ultima rata copre solo ciò che resta, quindi di solito è più bassa.",
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "terms": {
+            "fixedRate": "Tasso fisso",
+            "timing": "Momento del rimborso",
+            "oneOff": "Un solo rimborso",
+            "costs": "Costi",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre della tua banca",
+            "limits": "Limiti",
+            "feeNote": "Penale e risparmio netto"
+          },
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1543,10 +1728,22 @@
           "title": "Cosa confrontare prima di cambiare",
           "intro": "Portare il mutuo in un'altra banca, o rinegoziare le condizioni con la tua, può abbassare quello che paghi. Un tasso più basso è solo una parte del conto, quindi confronta l'offerta per intero:",
           "items": {
-            "rate": "Il tasso. Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi.",
-            "monthlyCosts": "Gli extra mensili. Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più.",
-            "term": "La durata. Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo.",
-            "oneOff": "I costi una tantum. Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            "rate": {
+              "term": "Il tasso",
+              "body": "Un tasso fisso più basso riduce gli interessi che paghi ogni mese su quanto devi."
+            },
+            "monthlyCosts": {
+              "term": "Gli extra mensili",
+              "body": "Spesso la banca chiede di sottoscrivere le sue assicurazioni vita e casa o di aprire un conto con spese. Sommali alla rata, altrimenti un tasso più conveniente può finire per costare di più."
+            },
+            "term": {
+              "term": "La durata",
+              "body": "Un nuovo mutuo su più anni abbassa la rata, ma paghi interessi più a lungo."
+            },
+            "oneOff": {
+              "term": "I costi una tantum",
+              "body": "Chiudere un mutuo e aprirne un altro ha dei costi, ed escono dai tuoi risparmi."
+            }
           },
           "outro": "Il calcolatore mette tutto insieme: la rata con gli extra, quanto costa ancora ogni mutuo in totale e il mese in cui recuperi i costi del passaggio."
         },
@@ -1571,7 +1768,6 @@
         "method": {
           "title": "Come viene calcolato",
           "intro": "Il calcolatore ricostruisce i due mutui con lo stesso motore a tasso fisso del calcolatore del mutuo, sul debito che hai ancora. Ogni mese gli interessi si calcolano sul debito residuo e il resto della rata rimborsa il prestito. La rata costante viene dalla formula della rendita:",
-          "legend": "M è la rata mensile, P il debito residuo, r il tasso annuo diviso 12 e n il numero di rate. Allo 0% non ci sono interessi, quindi la rata è semplicemente P diviso n. Le assicurazioni e le spese di ogni mese si sommano sopra.",
           "saving": "Il risparmio di un mese è quanto costerebbe quel mese il mutuo attuale meno quanto costa il nuovo. Un mutuo estinto non costa più nulla, quindi con una nuova durata più lunga i mesi dopo la fine del mutuo attuale contano come un costo. Il costo totale di ogni opzione sono le rate, le assicurazioni e le spese, più i costi del passaggio per il nuovo mutuo. Il risparmio netto è la differenza.",
           "breakEven": "Il mese in cui il passaggio si ripaga è il primo in cui il risparmio accumulato arriva almeno ai costi del passaggio. Se non succede prima della fine dei due mutui, il passaggio non si ripaga.",
           "longerTerm": "Quando la nuova durata è più lunga della durata residua, il calcolatore calcola anche l'offerta sulla durata residua, così vedi quanto del calo della rata viene dal tasso e quanto dal pagare più a lungo.",
@@ -1585,7 +1781,22 @@
             "rounding": "Gli importi sono in euro. Gli interessi e la rata di ogni mese sono arrotondati al centesimo, quindi tutti i totali della pagina tornano. La rata indicata è la prima; le successive differiscono al massimo di un centesimo.",
             "lenderFigures": "Ogni banca conta i giorni e arrotonda a modo suo, quindi i suoi importi possono differire di poco. Chiedi a ciascuna l'offerta ufficiale prima di decidere."
           },
-          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito."
+          "limits": "Il calcolatore accetta debiti da {{minBalance}} a {{maxBalance}}, durate fino a {{maxYears}} anni, tassi fino a {{maxRate}} e penali di uscita fino al {{maxExitFee}} del debito.",
+          "terms": {
+            "saving": "Risparmio e costo totale",
+            "breakEven": "Mese in cui il cambio si ripaga",
+            "longerTerm": "Una durata più lunga",
+            "fixedRate": "Tassi fissi",
+            "sameBalance": "Lo stesso debito",
+            "timing": "Momento del cambio",
+            "fees": "Assicurazioni e spese",
+            "noDiscounting": "Nessuno sconto nel tempo",
+            "rounding": "Arrotondamento",
+            "lenderFigures": "Le cifre delle banche",
+            "limits": "Limiti"
+          },
+          "zeroRate": "Allo 0% non ci sono interessi, quindi la rata è semplicemente il debito residuo diviso il numero di rate.",
+          "formulasLabel": "Formule"
         },
         "related": {
           "title": "Altri calcolatori",
@@ -1595,6 +1806,13 @@
           "earlyRepaymentBody": "Quanto risparmieresti con un rimborso parziale sul mutuo attuale, invece di surrogarlo.",
           "debtToIncomeLink": "Calcolatore del rapporto rata/reddito",
           "debtToIncomeBody": "La parte del tuo reddito che va in rate, oggi e con la nuova rata."
+        },
+        "labels": {
+          "monthlySaving": "Risparmio al mese",
+          "currentMonthTotal": "Costo del mutuo attuale in quel mese",
+          "offerMonthTotal": "Costo del nuovo mutuo in quel mese",
+          "currentTotalCost": "Costo totale del mutuo attuale",
+          "offerTotalCost": "Costo totale del nuovo mutuo"
         }
       },
       "cta": {
@@ -1717,12 +1935,16 @@
         "exampleStep3": "Il versamento mensile minimo per arrivarci è {{contribution}}. In {{months}} mesi versi {{contributions}} e il rendimento aggiunge {{growth}}, per un totale di {{final}} alla fine.",
         "exampleOutro": "Ribalta il calcolo: se metti da parte una cifra tonda di {{rounded}} al mese, raggiungi l'obiettivo dopo {{timeMonths}} mesi, e alla fine dei {{years}} anni hai {{finalAmount}}.",
         "methodTitle": "Come funziona il simulatore",
-        "methodIntro": "Il saldo rende una volta al mese e il versamento arriva alla fine di ogni mese. Dopo n mesi il saldo è:",
-        "methodLegend": "S è quanto hai già risparmiato, C il versamento mensile, r il tasso mensile e n il numero di mesi. Con un rendimento dello 0% non c'è nulla da dividere per r, e il saldo è semplicemente S + C × n.",
-        "methodRate": "Il tasso mensile r è quello che, capitalizzato per dodici mesi, dà il rendimento annuo: (1 + rendimento annuo)^(1/12) − 1. Dividere il rendimento annuo per 12 darebbe una cifra un po' più alta del vero.",
-        "methodOrder": "Il rendimento di ogni mese viene arrotondato al centesimo prima di aggiungere il versamento, così il piano anno per anno torna esattamente con i totali.",
-        "methodContribution": "Il versamento necessario si ottiene risolvendo la formula rispetto a C. Viene arrotondato per eccesso al centesimo e verificato mese per mese, perché arrivi davvero all'obiettivo.",
-        "methodTime": "Il tempo necessario è il primo mese intero in cui il saldo raggiunge l'obiettivo, entro un massimo di {{maxYears}} anni.",
+        "methodIntro": "Il saldo rende una volta al mese e il versamento arriva alla fine di ogni mese. Alla fine del periodo il saldo è:",
+        "methodFormulasLabel": "Formule",
+        "formulaMonthlyRate": "Tasso mensile",
+        "methodRateBody": "Quello che, capitalizzato per dodici mesi, dà il rendimento annuo. Dividere il rendimento annuo per 12 darebbe una cifra un po' più alta del vero.",
+        "methodZeroTerm": "Rendimento dello 0%",
+        "methodZeroBody": "Non c'è nulla da dividere per il tasso mensile, e il saldo è semplicemente quanto hai già risparmiato più il versamento mensile × il numero di mesi.",
+        "methodOrderTerm": "Arrotondamento",
+        "methodOrderBody": "Il rendimento di ogni mese viene arrotondato al centesimo prima di aggiungere il versamento, così il piano anno per anno torna esattamente con i totali.",
+        "methodContributionBody": "Si ottiene risolvendo la formula rispetto al versamento mensile. Viene arrotondato per eccesso al centesimo e verificato mese per mese, perché arrivi davvero all'obiettivo.",
+        "methodTimeBody": "Il tempo necessario è il primo mese intero in cui il saldo raggiunge l'obiettivo, entro un massimo di {{maxYears}} anni.",
         "assumptionsTitle": "Ipotesi",
         "assumptionReturn": "Il rendimento è lo stesso ogni anno. Nella realtà varia, e gli investimenti possono perdere valore.",
         "assumptionCosts": "Dal rendimento non si sottraggono tasse, commissioni o altri costi.",
@@ -1864,16 +2086,12 @@
         "relatedDebtToIncome": "mostra quale parte del tuo reddito occupano le rate attuali, con le stesse fasce che usa questo strumento.",
         "exampleTitle": "Esempio pratico",
         "exampleIntro": "Una coppia guadagna {{income}} netti al mese e paga {{existing}} al mese per un prestito auto. Ha {{savings}} da parte per la casa, conta su un tasso fisso del {{rate}} per {{years}} anni e prevede costi d'acquisto del {{costsRate}} del prezzo. La banca finanzia fino al {{ltv}} del prezzo, e la coppia destina al credito il {{share}} del reddito.",
-        "exampleStep1": "Margine mensile: il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
-        "exampleStep2": "Mutuo massimo: una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
-        "exampleStep3": "Soldi in anticipo: ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
         "exampleStep4": "Il più basso dei due è {{monthlyPrice}}, quindi è il budget mensile a fissare il limite.",
         "exampleResult": "A {{price}} la coppia chiederebbe {{loan}}, verserebbe {{downPayment}} di anticipo e pagherebbe {{purchaseCosts}} di costi, usando tutti i {{savings}} risparmiati. Il calcolatore del mutuo dà una rata di {{payment}} al mese.",
         "exampleLift": "Con circa {{extraIncome}} di reddito netto in più al mese arriverebbe a {{liftPrice}}, dove subentra il limite dei risparmi.",
         "exampleSavings": "Con solo {{lowSavings}} da parte il quadro si ribalta: i risparmi coprono un prezzo di {{lowSavingsPrice}}, con un mutuo di {{lowSavingsLoan}}, ben dentro ciò che il reddito potrebbe sostenere. Per alzare il limite conta risparmiare di più, non guadagnare di più. Il calcolatore qui sopra parte dalla prima coppia, così puoi inserire le tue cifre.",
         "methodTitle": "Metodo",
         "methodIntro": "Il calcolo considera ogni limite separatamente e poi prende il prezzo più basso.",
-        "methodLegend": "I è il reddito netto mensile, d la quota consentita per il credito, E le rate attuali e M il margine per la nuova rata. r è il tasso annuo diviso 12, n il numero di rate mensili e L il mutuo massimo. S sono i risparmi, c i costi d'acquisto e v il finanziamento, entrambi in percentuale del prezzo. P₁ è il prezzo che permette il budget mensile e P₂ quello che permettono i risparmi.",
         "methodShare": "La quota iniziale del {{share}} rientra nella fascia di attenzione del calcolatore del rapporto rata/reddito (dal {{caution}}% al {{high}}%). È una regola pratica, non un limite di legge.",
         "methodCosts": "Al prezzo massimo ogni euro di risparmio va nell'acquisto: prima i costi, il resto come anticipo. Il mutuo copre ciò che manca, e mai più di quanto consente il finanziamento massimo.",
         "methodRounding": "Gli importi sono calcolati in centesimi. Il mutuo è arrotondato per difetto al centesimo, così la prima rata, calcolata dal calcolatore del mutuo, rientra nel tuo margine; le successive possono variare di un centesimo. Il prezzo è esattamente mutuo più anticipo, e il reddito o il risparmio in più è arrotondato per eccesso all'euro.",
@@ -1885,11 +2103,33 @@
         "assumptionCostsShare": "I costi d'acquisto sono una percentuale fissa del prezzo. In pratica le imposte vanno spesso a scaglioni e alcune spese sono importi fissi.",
         "lendersTitle": "Cosa controllano le banche e questo strumento no",
         "lendersIntro": "La risposta di una banca può essere più bassa di questa stima, a volte di molto. Le regole cambiano da banca a banca e da paese a paese, e questo calcolatore non ne include nessuna.",
-        "lenderStress": "Stress test sul tasso: molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
-        "lenderIncome": "Definizione del reddito: alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
-        "lenderCountry": "Limiti del paese: in molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
-        "lenderProfile": "Il tuo profilo: l'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
-        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te."
+        "lendersOutro": "Usa il risultato per sapere più o meno dove sei prima di parlare con una banca, poi chiedi quali limiti valgono per te.",
+        "exampleStep1Term": "Margine mensile",
+        "exampleStep1Body": "Il {{share}} di {{income}} fa {{allowed}}. Tolti i {{existing}} del prestito auto, restano {{room}} al mese per il nuovo mutuo.",
+        "exampleStep2Term": "Mutuo massimo",
+        "exampleStep2Body": "Una rata di {{room}} al {{rate}} per {{years}} anni rimborsa {{maxLoan}}. Aggiungendo tutti i risparmi e pagando i costi d'acquisto dal totale, il limite mensile permette un prezzo di {{monthlyPrice}}.",
+        "exampleStep3Term": "Soldi in anticipo",
+        "exampleStep3Body": "Ogni euro di prezzo richiede il {{deposit}} di anticipo e il {{costsRate}} di costi, il {{cashShare}} in tutto. {{savings}} ÷ {{cashShare}} dà un prezzo di {{cashPrice}}.",
+        "lenderStressTerm": "Stress test sul tasso",
+        "lenderStressBody": "Molte banche verificano che tu riesca ancora a pagare con un tasso più alto di qualche punto, soprattutto sui mutui a tasso variabile.",
+        "lenderIncomeTerm": "Definizione del reddito",
+        "lenderIncomeBody": "Alcune contano solo in parte premi, redditi da lavoro autonomo o affitti, o ne fanno la media su più anni.",
+        "lenderCountryTerm": "Limiti del paese",
+        "lenderCountryBody": "In molti paesi l'autorità di vigilanza limita il finanziamento, la quota del reddito destinata alle rate, il mutuo rispetto al reddito o la durata.",
+        "lenderProfileTerm": "Il tuo profilo",
+        "lenderProfileBody": "L'età a fine mutuo, la stabilità del lavoro, la storia creditizia e la casa stessa contano anch'esse.",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule",
+        "labels": {
+          "maxLoan": "Mutuo massimo"
+        },
+        "methodShareTerm": "Quota per il credito",
+        "methodCostsTerm": "Dove vanno i risparmi",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionSavingsTerm": "Tutti i risparmi",
+        "assumptionPaymentTerm": "Cosa resta fuori dalla rata",
+        "assumptionCostsShareTerm": "Costi di acquisto"
       }
     },
     "termDeposit": {
@@ -1978,11 +2218,16 @@
         "whatBody": "Con un conto deposito vincolato lasci una somma in banca per un numero fisso di mesi a un tasso fisso. Oltre al tasso, quanto guadagni dipende da tre cose: per quanto tempo il denaro resta vincolato, se gli interessi arrivano alla fine o durante il vincolo e quanto viene trattenuto in imposte. Questo calcolatore tiene conto di tutte e tre con il tasso che inserisci, così puoi confrontare le offerte sulla stessa base.",
         "readHeading": "Come leggere il risultato",
         "read": {
-          "gross": "Interessi lordi: tutto ciò che il deposito rende prima delle imposte.",
-          "tax": "Ritenuta: la parte di ogni pagamento di interessi trattenuta per le imposte, all'aliquota che inserisci.",
-          "net": "Interessi netti: ciò che ti arriva, cioè gli interessi lordi meno la ritenuta.",
-          "final": "Saldo alla scadenza, o totale ricevuto quando gli interessi sono accreditati sul tuo conto: l'importo depositato più tutti gli interessi netti.",
-          "yield": "Rendimento netto annuo: il guadagno netto espresso come tasso annuo, per confrontare depositi con durate e pagamenti diversi."
+          "grossTerm": "Interessi lordi",
+          "grossBody": "Tutto ciò che il deposito rende prima delle imposte.",
+          "taxTerm": "Ritenuta",
+          "taxBody": "La parte di ogni pagamento di interessi trattenuta per le imposte, all'aliquota che inserisci.",
+          "netTerm": "Interessi netti",
+          "netBody": "Ciò che ti arriva, cioè gli interessi lordi meno la ritenuta.",
+          "finalTerm": "Saldo alla scadenza, o totale ricevuto quando gli interessi sono accreditati sul tuo conto",
+          "finalBody": "L'importo depositato più tutti gli interessi netti.",
+          "yieldTerm": "Rendimento netto annuo",
+          "yieldBody": "Il guadagno netto espresso come tasso annuo, per confrontare depositi con durate e pagamenti diversi."
         },
         "exampleHeading": "Esempio pratico",
         "exampleSetup": "Immagina di depositare {{amount}} per {{months}} mesi a un tasso lordo del {{rate}} annuo, con interessi pagati alla scadenza. L'interesse è semplice: l'importo per il tasso per la parte di anno in cui il denaro resta in banca.",
@@ -1990,15 +2235,21 @@
         "exampleTax": "Ora immagina che sugli interessi pagati alla scadenza venga trattenuto il {{taxRate}}, un'aliquota scelta solo come esempio e non presa dalle regole di alcun paese: il calcolatore parte da 0% così puoi inserire la tua. La banca trattiene {{tax}}, ricevi {{net}} e alla fine hai {{taxedFinal}}, un rendimento netto del {{taxedYield}} annuo.",
         "methodHeading": "Metodo e ipotesi",
         "methodIntro": "Gli interessi si contano in mesi interi, senza conteggio dei giorni. Il tasso che inserisci è un tasso annuo nominale: ogni periodo rende il tasso per i suoi mesi diviso 12.",
-        "methodFormula": "Interessi di un periodo = saldo × tasso annuo × mesi del periodo ÷ 12. Interessi netti = interessi − ritenuta. Rendimento netto annuo = il tasso annuo che trasforma l'importo depositato nei pagamenti netti e nell'importo restituito, ciascuno contato quando arriva. Con tutti gli interessi alla scadenza, è (saldo alla scadenza ÷ importo depositato)^(12 ÷ durata in mesi) − 1.",
         "method": {
-          "maturity": "Pagati alla scadenza, gli interessi sono semplici: un unico pagamento di importo × tasso × durata in mesi ÷ 12.",
-          "periodic": "Con pagamenti mensili, trimestrali o annuali, ogni pagamento arriva alla fine del suo periodo. Se la durata non è un numero intero di periodi, l'ultimo è più breve e i suoi interessi sono pagati in proporzione alla scadenza. Una durata più breve di un periodo ha un unico pagamento alla scadenza.",
-          "reinvest": "Gli interessi aggiunti al deposito entrano al netto delle imposte, quindi il deposito si capitalizza con la frequenza dei pagamenti. Gli interessi accreditati sul tuo conto escono dal deposito, quindi i successivi si calcolano sull'importo depositato.",
-          "tax": "La ritenuta si applica a ogni pagamento separatamente ed è arrotondata al centesimo, come fa la banca. Tutti gli importi sono calcolati in centesimi, così le righe dei pagamenti sommano esattamente i totali.",
-          "yield": "Il rendimento netto annuo è il tasso interno di rendimento del deposito: il tasso annuo al quale la somma che versi diventa tutto ciò che ricevi, contando ogni pagamento netto nel mese in cui arriva. Per questo gli interessi pagati durante il vincolo valgono più degli stessi interessi alla scadenza. Un deposito di meno di un anno si considera rinnovato alle stesse condizioni.",
-          "excluded": "Non sono compresi: penali per lo svincolo anticipato, costi del conto, variazioni del tasso durante il vincolo, limiti del fondo di garanzia dei depositi ed effetto dell'inflazione.",
-          "privacy": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati né inviati."
+          "maturityBody": "Pagati alla scadenza, gli interessi sono semplici: un unico pagamento di importo × tasso × durata in mesi ÷ 12.",
+          "periodicBody": "Con pagamenti mensili, trimestrali o annuali, ogni pagamento arriva alla fine del suo periodo. Se la durata non è un numero intero di periodi, l'ultimo è più breve e i suoi interessi sono pagati in proporzione alla scadenza. Una durata più breve di un periodo ha un unico pagamento alla scadenza.",
+          "reinvestBody": "Gli interessi aggiunti al deposito entrano al netto delle imposte, quindi il deposito si capitalizza con la frequenza dei pagamenti. Gli interessi accreditati sul tuo conto escono dal deposito, quindi i successivi si calcolano sull'importo depositato.",
+          "taxBody": "La ritenuta si applica a ogni pagamento separatamente ed è arrotondata al centesimo, come fa la banca. Tutti gli importi sono calcolati in centesimi, così le righe dei pagamenti sommano esattamente i totali.",
+          "yieldBody": "Il rendimento netto annuo è il tasso interno di rendimento del deposito: il tasso annuo al quale la somma che versi diventa tutto ciò che ricevi, contando ogni pagamento netto nel mese in cui arriva. Per questo gli interessi pagati durante il vincolo valgono più degli stessi interessi alla scadenza. Un deposito di meno di un anno si considera rinnovato alle stesse condizioni.",
+          "excludedTerm": "Non sono compresi",
+          "excludedBody": "Penali per lo svincolo anticipato, costi del conto, variazioni del tasso durante il vincolo, limiti del fondo di garanzia dei depositi ed effetto dell'inflazione.",
+          "privacyBody": "Il calcolo avviene nel tuo browser. I numeri che inserisci restano sul tuo dispositivo e non vengono salvati né inviati.",
+          "maturityTerm": "Pagamento alla scadenza",
+          "periodicTerm": "Pagamenti periodici",
+          "reinvestTerm": "Interessi capitalizzati o pagati",
+          "taxTerm": "Ritenuta",
+          "yieldTerm": "Rendimento netto annuo",
+          "privacyTerm": "Privacy"
         },
         "methodLimits": "Le durate vanno da 1 a {{maxMonths}} mesi.",
         "nextHeading": "Calcolatori correlati",
@@ -2007,7 +2258,23 @@
         "nextEmergency": "Un conto deposito vincolato può custodire i risparmi che non ti serviranno a breve, mentre il fondo di emergenza resta a portata di mano.",
         "nextEmergencyLink": "Calcola il tuo fondo di emergenza",
         "nextSavingsGoal": "Stai mettendo da parte la somma da depositare o pensi a cosa fare alla scadenza? Il simulatore di risparmio calcola quanto accantonare ogni mese o quanto tempo serve.",
-        "nextSavingsGoalLink": "Apri il simulatore di risparmio"
+        "nextSavingsGoalLink": "Apri il simulatore di risparmio",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "interest": "Interessi di un periodo",
+          "balance": "saldo",
+          "annualRate": "tasso annuo",
+          "periodMonths": "mesi del periodo",
+          "tax": "Ritenuta",
+          "taxLower": "ritenuta",
+          "taxRate": "aliquota della ritenuta",
+          "interestLower": "interessi",
+          "netInterest": "Interessi netti",
+          "yield": "Rendimento netto annuo, con gli interessi alla scadenza",
+          "finalBalance": "saldo alla scadenza",
+          "amount": "importo depositato",
+          "termMonths": "durata in mesi"
+        }
       }
     },
     "buyVsRent": {
@@ -2113,10 +2380,22 @@
         "whatHeading": "Cosa mostra il confronto",
         "whatBody": "Comprare sostituisce l'affitto con la rata del mutuo, ma blocca anche denaro nell'anticipo e nei costi di acquisto e aggiunge i costi della proprietà. Affittare lascia quel denaro libero di essere investito. Il calcolatore segue le due strade con lo stesso capitale iniziale e confronta quanto ti lascia ciascuna.",
         "read": {
-          "netWorth": "Il patrimonio di ogni strada: per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti.",
-          "difference": "La differenza: di quanto una strada è avanti alla fine del periodo che hai scelto.",
-          "breakEven": "L'anno di pareggio: il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta.",
-          "chart": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          "netWorth": {
+            "term": "Il patrimonio di ogni strada",
+            "body": "Per chi compra, ciò che resterebbe vendendo la casa dopo i costi di vendita e l'estinzione del mutuo, più quanto investito; per chi affitta, gli investimenti."
+          },
+          "difference": {
+            "term": "La differenza",
+            "body": "Di quanto una strada è avanti alla fine del periodo che hai scelto."
+          },
+          "breakEven": {
+            "term": "L'anno di pareggio",
+            "body": "Il primo anno che si chiude con l'acquisto in vantaggio. Comprare parte in svantaggio ogni volta che ci sono costi di acquisto o di vendita: i costi di acquisto si pagano il primo giorno e vendendo il giorno stesso si pagherebbero in più i costi di vendita. Comprare può anche passare in vantaggio e poi tornare in svantaggio, per esempio quando il valore della casa cresce più lentamente degli investimenti di chi affitta."
+          },
+          "chart": {
+            "term": "Grafico e tabella",
+            "body": "Il grafico e la tabella mostrano le due strade ogni anno, così vedi se la distanza si riduce o si allarga."
+          }
         },
         "exampleHeading": "Esempio pratico",
         "example": {
@@ -2136,10 +2415,7 @@
           "returns": "Gli investimenti crescono ogni mese al tasso mensile che, composto su dodici mesi, dà il rendimento annuo.",
           "netWorth": "Alla fine di ogni anno il patrimonio di chi compra è il valore della casa meno i costi di vendita e il debito residuo, più i suoi investimenti. Quello di chi affitta è dato dai suoi investimenti. L'anno di pareggio è il primo che si chiude con chi compra in vantaggio."
         },
-        "formulaOwner": "Comprare = valore della casa − costi di vendita − debito residuo + investimenti",
-        "formulaRenter": "Affittare = investimenti",
         "formulaReturn": "Rendimento mensile",
-        "formulaLegend": "Qui R è il rendimento annuo degli investimenti: il {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
         "leftOutHeading": "Cosa resta fuori",
         "leftOut": {
           "gainsTax": "Le imposte sui guadagni degli investimenti o sulla plusvalenza della vendita della casa.",
@@ -2154,7 +2430,20 @@
         "relatedMortgage": "Per vedere il mutuo da solo, con il piano di ammortamento anno per anno, usa il",
         "relatedMortgageLink": "calcolatore del mutuo",
         "relatedNetWorth": "Per sommare la casa, il mutuo e i tuoi risparmi come sono oggi, usa il",
-        "relatedNetWorthLink": "calcolatore del patrimonio netto"
+        "relatedNetWorthLink": "calcolatore del patrimonio netto",
+        "formulaExample": "Un rendimento del {{investmentReturn}} all'anno corrisponde a circa lo {{monthlyReturn}} al mese.",
+        "labels": {
+          "investments": "Investimenti"
+        },
+        "formulasLabel": "Formule",
+        "methodTerms": {
+          "start": "Soldi di partenza",
+          "loan": "Il mutuo",
+          "monthly": "Ogni mese",
+          "growth": "Rivalutazione e affitto",
+          "returns": "Rendimento degli investimenti",
+          "netWorth": "Patrimonio e anno di pareggio"
+        }
       }
     },
     "rateRevision": {
@@ -2274,7 +2563,6 @@
         "exampleIncome": "Con un reddito netto di {{income}} al mese, la rata ne prende oggi il {{currentShare}}, il {{newShare}} dopo il primo aumento e il {{stressShare}} dopo quello più forte, un valore che i livelli del rapporto rata/reddito classificano come «{{stressBand}}».",
         "methodTitle": "Come si calcola",
         "methodIntro": "Ogni rata è la rata costante che rimborsa il debito residuo nei mesi che restano, con lo stesso motore a tasso fisso del calcolatore del mutuo:",
-        "methodLegend": "i è l'indice e s lo spread, entrambi come tassi annui. r è il tasso mensile, M la rata mensile, P il debito residuo e n il numero di rate che restano. Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente P diviso n.",
         "methodItems": {
           "change": "La differenza al mese è la prima rata al nuovo tasso meno la prima rata al tasso di oggi, entrambe sul debito di oggi e sullo stesso numero di mesi.",
           "year": "La differenza annua confronta la somma delle prime 12 rate di ciascun piano o di tutte le rate residue se ne restano meno. Ogni rata viene arrotondata singolarmente, quindi il totale può differire dalla differenza mensile moltiplicata per il numero di rate.",
@@ -2293,12 +2581,40 @@
         "contractTitle": "Cosa decide il tuo contratto",
         "contractIntro": "Come funziona una revisione reale dipende dal tuo contratto e dalle regole del paese in cui vivi. Niente di tutto questo è incluso nel simulatore:",
         "contractItems": {
-          "resetDates": "Date di revisione: ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata.",
-          "capsFloors": "Tetti e minimi: alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%.",
-          "index": "L'indice: l'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione.",
-          "mixed": "Prestiti a tasso misto: prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          "resetDates": {
+            "term": "Date di revisione",
+            "body": "Ogni quanto viene rivisto il tasso, a quale data si rileva il valore dell'indice e da quando parte la nuova rata."
+          },
+          "capsFloors": {
+            "term": "Tetti e minimi",
+            "body": "Alcuni contratti limitano quanto il tasso può salire o scendere, o gli impediscono di andare sotto un certo livello. Il simulatore impedisce solo che il tasso scenda sotto lo 0%."
+          },
+          "index": {
+            "term": "L'indice",
+            "body": "L'Euribor, un tasso di banca centrale o un tasso di riferimento nazionale, ognuno con le proprie scadenze (per esempio 3, 6 o 12 mesi) e il proprio calendario di pubblicazione."
+          },
+          "mixed": {
+            "term": "Prestiti a tasso misto",
+            "body": "Prima c'è un periodo a tasso fisso e poi il tasso variabile. Inserisci debito e durata come saranno all'inizio del periodo variabile."
+          }
         },
-        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca."
+        "contractOutro": "Le cifre che contano sono quelle della tua banca. Usa questo simulatore per prepararti prima di una revisione, poi confronta le sue cifre con quelle della banca.",
+        "terms": {
+          "change": "Differenza al mese",
+          "year": "Differenza in un anno",
+          "interest": "Differenza negli interessi",
+          "income": "Peso sul reddito",
+          "privacy": "Privacy",
+          "fromNextMonth": "Dalla prossima rata",
+          "sameTerm": "La stessa durata",
+          "statement": "La rata di oggi",
+          "noFeed": "Nessun dato sull'indice",
+          "limits": "Limiti",
+          "annualRate": "Tasso annuo",
+          "incomeShare": "Peso della rata sul reddito"
+        },
+        "zeroRate": "Quando l'indice più lo spread è sotto lo 0%, il tasso si considera pari a 0% e la rata è semplicemente il debito residuo diviso il numero di rate.",
+        "methodFormulasLabel": "Formule"
       }
     },
     "carLoan": {
@@ -2361,7 +2677,16 @@
         "assumptionsTitle": "Ipotesi",
         "assumptionLoan": "La stima presuppone un prestito a tasso fisso con rate mensili, senza maxi rata finale e senza leasing. Inserisci il prezzo e le condizioni dell'offerta per l'auto nuova o usata. Per un'auto che possiedi già, inserisci zero per prezzo e anticipo per stimare i costi di gestione.",
         "assumptionFees": "Le spese iniziali del finanziamento si pagano all'acquisto insieme all'anticipo. Inserisci una sola volta ogni assicurazione o spesa legata al finanziamento. Il simulatore considera solo le imposte e le spese che inserisci.",
-        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno."
+        "assumptionRunning": "Il budget mensile copre le voci mostrate. Sono esclusi la svalutazione, il valore di rivendita, il parcheggio, i pedaggi e le riparazioni che superano la riserva per la manutenzione. Le spese annuali possono essere dovute in un unico mese, anche se il simulatore le distribuisce nell'anno.",
+        "terms": {
+          "loan": "La rata",
+          "budget": "Il budget mensile",
+          "apr": "Il TAEG stimato",
+          "assumptionLoan": "Prestito a tasso fisso",
+          "assumptionFees": "Spese di finanziamento",
+          "assumptionRunning": "Cosa copre il budget"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Includi il costo mensile totale dell'auto nel tuo budget",
       "nextStepDescription": "Metti da parte in WonderMoney i soldi per la rata, il carburante e le spese in scadenza durante l'anno.",
@@ -2442,9 +2767,26 @@
         "assumptionScope": "Questo calcolo segue la legge fiscale portoghese e vale solo per immobili situati in Portogallo, qualunque sia il tuo paese di residenza. È solo a scopo informativo e non è consulenza fiscale.",
         "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. L'esenzione del bollo sull'acquisto è una deduzione limitata allo 0,8% del limite dell'esenzione totale, quindi oltre paghi lo 0,8% solo sulla parte eccedente. Il bollo sul mutuo resta dovuto.",
         "assumptionLoan": "Il bollo sul mutuo presuppone un finanziamento di cinque anni o più e si paga sempre. Commissioni del mutuo, perizia e costi di notaio o registro non sono inclusi.",
-        "assumptionUnsupported": "Non supportati: non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT.",
         "assumptionIslands": "Per le Azzorre e Madeira il calcolatore usa i limiti regionali delle tabelle da IV a VI dell'Ofício Circulado 40129/2026, con le stesse aliquote del continente.",
-        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)"
+        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Imposta di bollo sull'acquisto",
+          "stampLoan": "Imposta di bollo sul mutuo"
+        },
+        "terms": {
+          "base": "Valore imponibile",
+          "imt": "IMT",
+          "stamp": "Imposta di bollo",
+          "rounding": "Arrotondamento",
+          "scope": "Ambito",
+          "young": "Esenzione per i giovani",
+          "loan": "Mutuo",
+          "islands": "Azzorre e Madeira"
+        },
+        "formulasLabel": "Formule",
+        "assumptionUnsupportedTerm": "Non supportati",
+        "assumptionUnsupportedBody": "Non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT."
       },
       "nextStepHeadline": "Pianifica il contante che ti serve per comprare",
       "nextStepDescription": "Aggiungi IMT e bollo al risparmio che ti serve prima di comprare e segui i progressi in WonderMoney.",
@@ -2538,7 +2880,28 @@
         "assumptionBanks": "Le banche valutano il tuo rischio di credito e possono rifiutare il mutuo o proporre condizioni diverse, a prescindere dall'elenco. In un mutuo cointestato entrambi devono rispettare le condizioni.",
         "assumptionRate": "Il tasso è quello che inserisci. La garanzia non cambia il tasso di interesse.",
         "assumptionTaxes": "Le imposte riguardano un'abitazione principale e permanente nel Portogallo continentale e, nei valori con esenzione, presuppongono che tu rispetti le condizioni dell'IMT Jovem.",
-        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale."
+        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale.",
+        "labels": {
+          "cash": "Denaro al rogito",
+          "taxes": "IMT e imposta di bollo"
+        },
+        "terms": {
+          "payment": "Mutuo e rata",
+          "taxes": "Imposte",
+          "cash": "Denaro al rogito",
+          "guarantee": "La garanzia",
+          "banks": "Decide la banca",
+          "rate": "Tasso di interesse",
+          "assumptionTaxes": "Imposte considerate",
+          "scope": "Ambito",
+          "conditionAge": "Età",
+          "conditionHome": "Abitazione principale",
+          "conditionProperty": "Altro immobile",
+          "conditionPrice": "Prezzo",
+          "conditionIncome": "Reddito",
+          "conditionDate": "Data del contratto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Pianifica l'anticipo e quanto costa vivere nella tua casa",
       "nextStepDescription": "Fissa un obiettivo per l'anticipo e preventiva rata, imposte e spese correnti della casa in WonderMoney.",
@@ -2638,15 +3001,29 @@
         "exampleOutro": "Lo strumento qui sopra parte da questo prestito, senza le commissioni, così puoi inserire la tua offerta.",
         "methodTitle": "Come fa i conti lo strumento",
         "methodIntro": "La rata è la rata costante che rimborsa l'importo nell'arco della durata al tasso mensile, e il TAEG è il tasso che pareggia quello che ricevi con quello che paghi:",
-        "methodLegend": "M è la rata di capitale e interessi, P l'importo del prestito, r il tasso annuo nominale diviso per 12 e n il numero di mesi. Le commissioni mensili f si sommano a ogni rata.",
-        "methodApr": "Il TAEG è il tasso A che risolve la seconda riga: quello che ricevi all'inizio, l'importo P meno le commissioni iniziali F, è pari alla rata di ogni mese Mₖ più le commissioni f, scontata per (1 + A) elevato a k ÷ 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
+        "methodApr": "Il TAEG è il tasso che risolve l'ultima riga: quello che ricevi all'inizio, l'importo meno le commissioni iniziali, è pari alla rata di ogni mese più le commissioni mensili, scontata per uno più il TAEG elevato al numero del mese diviso 12, contando ogni mese come un dodicesimo di anno. Lo strumento lo trova per bisezione.",
         "methodRounding": "Ogni cifra è calcolata in centesimi interi. Ogni rata viene ricalcolata dal debito residuo, così le rate differiscono al massimo di un centesimo l'una dall'altra, l'ultima estingue esattamente il debito e il piano quadra con i totali.",
         "methodPrivacy": "Il calcolo avviene nel tuo browser. Niente di quello che inserisci viene inviato o salvato.",
         "assumptionsTitle": "Ipotesi",
         "assumptionFixedRate": "Il tasso è fisso per tutta la durata e ogni rata è pagata puntualmente.",
         "assumptionFees": "Le commissioni iniziali si pagano, o si tolgono dall'importo, all'inizio del prestito; le commissioni mensili sono uguali ogni mese.",
         "assumptionOtherCosts": "Restano fuori i costi che lo strumento non chiede, come assicurazioni facoltative, penali di mora o una commissione di estinzione anticipata.",
-        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}."
+        "assumptionLimits": "Importi da {{minAmount}} a {{maxAmount}}, durate da {{minMonths}} a {{maxMonths}} mesi e tassi fino a {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Importo ricevuto",
+          "month": "Mese",
+          "apr": "TAEG",
+          "aprNoFees": "TAEG senza commissioni",
+          "aprFees": "TAEG con commissioni"
+        },
+        "methodAprTerm": "TAEG",
+        "assumptionFixedRateTerm": "Tasso fisso",
+        "assumptionFeesTerm": "Commissioni",
+        "assumptionOtherCostsTerm": "Altri costi",
+        "assumptionLimitsTerm": "Limiti",
+        "methodRoundingTerm": "Arrotondamento",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formule"
       }
     },
     "savingsCertificates": {
@@ -2705,14 +3082,31 @@
         "exampleTitle": "Esempio pratico",
         "exampleText": "Sottoscrivi {{amount}} e mantieni l'investimento per {{years}} anni con un tasso base del {{baseRate}}. I certificati rendono {{grossInterest}} di interessi lordi, di cui {{irs}} vanno all'IRS, lasciando {{netInterest}} netti. Il saldo arriva a {{finalValue}}, un rendimento netto del {{netYield}} annuo.",
         "methodTitle": "Come funziona la stima",
-        "methodQuarter": "Ogni trimestre rende un quarto del tasso annuo (tasso base più premio) sul saldo corrente. Gli importi sono arrotondati al centesimo a ogni trimestre.",
-        "methodTax": "Si trattiene il {{irsRate}} degli interessi di ogni trimestre e gli interessi netti si sommano al saldo, così i trimestri successivi maturano interessi anche su di essi.",
-        "methodYield": "Il rendimento netto annuo è la crescita composta annua dall'importo sottoscritto al saldo finale. I valori lordi mostrano gli interessi prima dell'IRS.",
+        "methodQuarterBody": "Ogni trimestre rende un quarto del tasso annuo (tasso base più premio) sul saldo corrente. Gli importi sono arrotondati al centesimo a ogni trimestre.",
+        "methodTaxBody": "Si trattiene il {{irsRate}} degli interessi di ogni trimestre e gli interessi netti si sommano al saldo, così i trimestri successivi maturano interessi anche su di essi.",
+        "methodYieldBody": "Il rendimento netto annuo è la crescita composta annua dall'importo sottoscritto al saldo finale. I valori lordi mostrano gli interessi prima dell'IRS.",
         "assumptionsTitle": "Ipotesi",
         "assumptionBase": "Il tasso base è quello che inserisci e resta fisso per tutta la permanenza. Parte dal tasso fissato dall'IGCP per {{referenceMonth}} ({{referenceRateNote}}), che viene fissato di nuovo ogni mese, quindi gli interessi effettivi saranno diversi. Controlla il tasso attuale sul sito dell'IGCP.",
         "assumptionRules": "L'aliquota IRS è quella generale per questo tipo di reddito. La tua situazione fiscale e le modifiche alle regole successive a {{rulesDate}} non sono considerate.",
         "assumptionScope": "Si tratta di informazioni generali, non di una raccomandazione a sottoscrivere o evitare un prodotto, e non c'è alcun confronto tra i certificati e altre forme di risparmio.",
-        "referenceRateAtCeiling": "{{rate}}, il massimo"
+        "referenceRateAtCeiling": "{{rate}}, il massimo",
+        "methodQuarterTerm": "Interessi trimestrali",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Rendimento netto annuo",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "quarterInterest": "Interessi del trimestre",
+          "balance": "saldo",
+          "baseRate": "tasso base",
+          "bonus": "premio di permanenza",
+          "irs": "IRS",
+          "interestLower": "interessi",
+          "newBalance": "Saldo a fine trimestre",
+          "yield": "Rendimento netto annuo",
+          "finalValue": "valore finale",
+          "amount": "importo sottoscritto",
+          "years": "anni"
+        }
       },
       "nextStepHeadline": "Vedi i tuoi certificati accanto al resto dei risparmi",
       "nextStepDescription": "Aggiungili in WonderMoney per seguire tutto ciò che hai risparmiato in un unico posto.",
@@ -2831,12 +3225,25 @@
           "title": "Come si calcola",
           "intro": "I tassi sono statistiche pubblicate. WonderMoney aggiunge soltanto questi calcoli:",
           "steps": {
-            "a": "Tasso annuo: la media semplice delle dodici medie mensili dell'anno. Non pondera i mesi in base agli importi depositati.",
-            "b": "Inflazione: la variazione dell'indice dei prezzi al consumo portoghese, in media annua, rispetto all'anno precedente.",
-            "c": "Tasso reale: (1 + tasso) ÷ (1 + inflazione) − 1. Per il valore dopo le imposte si detrae prima il 28% di IRS dal tasso.",
-            "d": "Calcolatore: interessi semplici per la durata in mesi interi, pagati alla scadenza, con il 28% trattenuto, al tasso medio del gruppo di scadenze. Ciò che toglie l'inflazione è importo × ((1 + inflazione)^(mesi ÷ 12) − 1)."
+            "aTerm": "Tasso annuo",
+            "aBody": "La media semplice delle dodici medie mensili dell'anno. Non pondera i mesi in base agli importi depositati.",
+            "bTerm": "Inflazione",
+            "bBody": "La variazione dell'indice dei prezzi al consumo portoghese, in media annua, rispetto all'anno precedente.",
+            "cTerm": "Tasso reale",
+            "cBody": "(1 + tasso) ÷ (1 + inflazione) − 1. Per il valore dopo le imposte si detrae prima il 28% di IRS dal tasso.",
+            "dTerm": "Calcolatore",
+            "dBody": "Interessi semplici per la durata in mesi interi, pagati alla scadenza, con il 28% trattenuto, al tasso medio del gruppo di scadenze. Ciò che toglie l'inflazione è importo × ((1 + inflazione)^(mesi ÷ 12) − 1)."
           },
-          "realRate": "Dividere invece di sottrarre conta quando i tassi sono alti: misura quanto in più può comprare il denaro, non solo la differenza tra due percentuali."
+          "realRate": "Dividere invece di sottrarre conta quando i tassi sono alti: misura quanto in più può comprare il denaro, non solo la differenza tra due percentuali.",
+          "formulasLabel": "Formule",
+          "formula": {
+            "realRate": "Tasso reale",
+            "realRateAfterTax": "Tasso reale dopo le imposte",
+            "rate": "tasso",
+            "inflation": "inflazione",
+            "amount": "importo",
+            "months": "mesi"
+          }
         },
         "data": {
           "title": "Dati e fonti",
@@ -2965,10 +3372,14 @@
           "title": "Come si calcola",
           "intro": "Ogni valore viene dallo stesso motore del calcolatore di depositi vincolati:",
           "steps": {
-            "a": "Interessi lordi: importo × TANB × durata in mesi ÷ 12, pagati in un'unica soluzione a scadenza.",
-            "b": "Imposta: il {{taxRate}}% degli interessi. Le banche estere non la trattengono in Portogallo, quindi il valore presume che tu dichiari gli interessi e paghi la stessa aliquota.",
-            "c": "Rendimento netto annuo: gli interessi netti annualizzati sulla durata.",
-            "d": "Filtri: un'offerta viene nascosta se il suo minimo supera il tuo importo o il suo massimo è inferiore. Un'offerta senza limite indicato resta."
+            "aTerm": "Interessi lordi",
+            "aBody": "Importo × TANB × durata in mesi ÷ 12, pagati in un'unica soluzione a scadenza.",
+            "bTerm": "Imposta",
+            "bBody": "Il {{taxRate}}% degli interessi. Le banche estere non la trattengono in Portogallo, quindi il valore presume che tu dichiari gli interessi e paghi la stessa aliquota.",
+            "cTerm": "Rendimento netto annuo",
+            "cBody": "Gli interessi netti annualizzati sulla durata.",
+            "dTerm": "Filtri",
+            "dBody": "Un'offerta viene nascosta se il suo minimo supera il tuo importo o il suo massimo è inferiore. Un'offerta senza limite indicato resta."
           }
         },
         "data": {
@@ -3063,6 +3474,7 @@
         "methodMeal": "L'indennità pasto è esente fino al limite giornaliero, che dipende dal pagamento in contanti o con carta. Il calcolatore aggiunge alla retribuzione imponibile solo l'eccedenza.",
         "methodAllowances": "Con 14 pagamenti, le mensilità aggiuntive sono tassate ciascuna a sé, come richiedono le tabelle. In dodicesimi, l'importo extra si somma a ogni mese.",
         "methodBudget": "I valori netti sono ciò che arriva sul tuo conto, quindi sono il punto di partenza giusto per un budget mensile.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "La ritenuta non è il tuo IRS definitivo",
         "final": "Quanto viene trattenuto ogni mese è un acconto. L'Autorità tributaria determina l'IRS effettivo nella dichiarazione annuale, con i redditi dell'intero anno e le tue deduzioni. La ritenuta può essere superiore o inferiore all'imposta dovuta, ed è per questo che molti ricevono un rimborso o devono pagare.",
         "unsupportedTitle": "Non supportato",
@@ -3140,6 +3552,9 @@
         "howTransition": "Nei primi scaglioni la parcela a abater è una formula con la lettera R, la retribuzione mensile. Fa salire la ritenuta gradualmente da zero, così un piccolo aumento non riduce mai il netto.",
         "howDependants": "Ogni persona a carico riduce la ritenuta di un importo fisso. Con tre o più persone a carico, l'aliquota marginale dello scaglione è inferiore di un punto percentuale.",
         "howTables": "La tabella I vale per i non sposati senza persone a carico e per gli sposati con due redditi. La tabella II vale per i non sposati con persone a carico e la tabella III per gli sposati con un solo reddito.",
+        "methodFormulasLabel": "Formula",
+        "formulaPerDependant": "Importo per persona a carico",
+        "howTransitionTerm": "Parcela a abater con R",
         "finalTitle": "La ritenuta non è l'imposta definitiva",
         "final": "Le tabelle stabiliscono quanto trattiene il datore di lavoro ogni mese. Non calcolano il tuo IRS definitivo, che la dichiarazione annuale determina con gli scaglioni qui sopra, i redditi dell'intero anno e le tue deduzioni.",
         "unsupportedTitle": "Non incluso",
@@ -3242,6 +3657,20 @@
         "methodNoReduction": "La vecchia riduzione del 10% dopo 180 giorni di pagamento non è applicata: la guida della Segurança Social del 2026 non la menziona.",
         "methodTax": "La guida della Segurança Social dice che il sussidio non va dichiarato ai fini IRS. Verifica il tuo caso con l'Autorità Tributaria.",
         "methodBudget": "Il sussidio mensile è il reddito con cui pianificare. Confrontalo con lo stipendio netto per vedere il calo e poi guarda quanto a lungo i risparmi coprono la differenza.",
+        "methodFormulasLabel": "Formule",
+        "formulaReference": "Retribuzione di riferimento",
+        "formulaPay": "Retribuzioni dei 12 mesi",
+        "formulaDaily": "Sussidio giornaliero",
+        "formulaMonthly": "Sussidio mensile",
+        "methodReferenceTerm": "Retribuzione di riferimento",
+        "methodAmountTerm": "Importo",
+        "methodLimitsTerm": "Limiti",
+        "methodNetTerm": "Retribuzione di riferimento netta",
+        "methodIncreaseTerm": "Maggiorazione del 10%",
+        "methodDurationTerm": "Durata",
+        "methodNoReductionTerm": "Nessun taglio dopo 180 giorni",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non supportato",
         "unsupportedTransitional": "La tabella transitoria per chi soddisfaceva già il requisito contributivo al 31 marzo 2012 e non è stato disoccupato da allora. Il calcolatore usa solo la tabella generale.",
         "unsupportedSocial": "Il sussidio sociale di disoccupazione (subsídio social de desemprego), che secondo la guida può essere richiesto solo fino al 30 dicembre 2026.",
@@ -3340,6 +3769,20 @@
         "methodNetCap": "L'indennità giornaliera non può nemmeno superare il valore netto della RR. Il calcolatore lo stima con l'11% di contributi previdenziali e l'aliquota di ritenuta IRS 2026 del continente per un titolare non sposato.",
         "methodGap": "La perdita di reddito confronta il tuo stipendio netto normale (14 o 12 pagamenti, in media su 12 mesi) con quanto paga la Segurança Social. Le mensilità aggiuntive relative ai giorni di malattia non vengono reintegrate.",
         "methodBudget": "La differenza è il reddito da coprire con i risparmi o tagliando le spese durante la malattia. Usala per dimensionare il tuo cuscinetto.",
+        "methodFormulasLabel": "Formule",
+        "formulaReference": "Retribuzione di riferimento",
+        "formulaPay": "Retribuzioni dei 6 mesi",
+        "formulaDaily": "Indennità giornaliera",
+        "formulaPercent": "Percentuale della fascia",
+        "methodReferenceTerm": "Retribuzione di riferimento",
+        "methodBandsTerm": "Percentuale per durata",
+        "methodWaitingTerm": "Giorni di carenza",
+        "methodMinimumTerm": "Minimo",
+        "methodIncreaseTerm": "Maggiorazione di 5 punti",
+        "methodFloorTerm": "Soglia sopra i 500 euro",
+        "methodNetCapTerm": "Tetto netto",
+        "methodGapTerm": "Calo di reddito",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Non supportato",
         "unsupportedTuberculosis": "Tubercolosi, pagata all'80% o al 100% della RR in base ai familiari a carico, senza limite di tempo.",
         "unsupportedSelfEmployed": "Lavoratori autonomi (10 giorni di carenza, fino a 365 giorni), assicurazione sociale volontaria e lavoratori domestici.",
@@ -3422,8 +3865,6 @@
         "exampleTitle": "Esempio pratico",
         "example": "Un'auto diesel da {{cc}} cm³, con emissioni ufficiali WLTP di {{co2}} g/km e immatricolata nel {{year}}, paga {{tax}} di IUC all'anno. Accantonando {{monthly}} al mese copri la spesa.",
         "methodTitle": "Come funziona la stima",
-        "methodA": "Categoria A (auto immatricolate dal 1981 a giugno 2007): l'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
-        "methodB": "Categoria B (auto immatricolate da luglio 2007): si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
         "methodAdditional": "Le auto di categoria B immatricolate dopo il 1° gennaio 2017 pagano un'aliquota aggiuntiva se le emissioni sono alte: 31,77 € sopra 205 g/km (WLTP) o 180 g/km (NEDC) e 63,74 € sopra 260 g/km (WLTP) o 250 g/km (NEDC). Anche l'aliquota aggiuntiva è moltiplicata per il coefficiente. Il testo di legge non la limita per carburante, quindi il calcolo la applica a tutti.",
         "methodDiesel": "Le auto diesel pagano anche il supplemento diesel (adicional de IUC, articolo 216 della legge n.º 82-B/2014, mantenuto per il 2026 dalla legge di bilancio). Dipende dalla cilindrata, vale per le categorie A e B e si somma dopo il coefficiente, senza essere moltiplicato per esso.",
         "methodPayment": "Fino al 2026 l'IUC si paga nel mese dell'anniversario dell'immatricolazione. Il Decreto-Lei n.º 161/2026 (4 agosto 2026) introduce una liquidazione annuale per contribuente, che comprende tutti i veicoli. Il 2027 è un anno transitorio: un pagamento a ottobre fino a 500 €, altrimenti due a luglio e ottobre (o tutto a luglio). Dal 2028 viene liquidata entro aprile e pagata ad aprile fino a 100 €, ad aprile e ottobre da 100 € a 500 €, e ad aprile, luglio e ottobre oltre 500 €. Le soglie valgono per il totale di tutti i tuoi veicoli.",
@@ -3431,8 +3872,6 @@
         "exemptionTitle": "Auto elettriche",
         "exemption": "Le auto interamente elettriche della categoria B sono esenti dall'IUC e il calcolo mostra zero. Gli ibridi plug-in e gli altri veicoli sono tassati secondo cilindrata e CO2 del libretto: inserisci quei valori.",
         "scopeTitle": "Cosa è coperto",
-        "scopeSupported": "Autovetture leggere: categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
-        "scopeUnsupported": "Non supportati: veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
         "assumptionsTitle": "Ipotesi",
         "assumptionYear": "Le aliquote sono le tabelle {{taxYear}} del Código do IUC (articoli 9 e 10), nella versione della {{law}}. Il Portal das Finanças non indica modifiche successive a queste aliquote.",
         "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. Dal 2027 l'imposta è liquidata per contribuente, su tutti i suoi veicoli: aggiungi ognuna delle tue auto e inserisci l'IUC degli altri veicoli come altra IUC, così i mesi delle rate seguono il tuo totale (la legge applica le soglie a quel totale). I calendari 2027 e 2028 mostrano l'importo di ogni mese per le auto che hai aggiunto; con una sola auto, la sua quota di ogni rata. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
@@ -3444,7 +3883,31 @@
         "sourceDiesel": "Portal das Finanças: articolo 216 della legge n.º 82-B/2014, tabelle I e II del supplemento diesel (consultato il 20 novembre 2026)",
         "reviewed": "Aliquote {{taxYear}} verificate il {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026 del 4 agosto: nuove regole di pagamento dell'IUC, con la transizione 2027 (Portal das Finanças, consultato il 19 novembre 2026)",
-        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)"
+        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)",
+        "methodATerm": "Categoria A (auto immatricolate dal 1981 a giugno 2007)",
+        "methodABody": "L'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
+        "methodBTerm": "Categoria B (auto immatricolate da luglio 2007)",
+        "methodBBody": "Si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
+        "scopeSupportedTerm": "Autovetture leggere",
+        "scopeSupportedBody": "Categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
+        "scopeUnsupportedTerm": "Non supportati",
+        "scopeUnsupportedBody": "Veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
+        "labels": {
+          "diesel": "Supplemento diesel",
+          "engineRate": "Aliquota per cilindrata",
+          "co2Rate": "Aliquota per CO2",
+          "provision": "Accantonamento mensile"
+        },
+        "terms": {
+          "additional": "Aliquota aggiuntiva",
+          "diesel": "Supplemento diesel",
+          "payment": "Pagamento",
+          "budget": "Accantonamento mensile",
+          "year": "Tabelle",
+          "paymentRule": "Scadenza",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così alla scadenza l'importo è già coperto.",
@@ -3551,7 +4014,6 @@
         "methodCash": "Il ricavato che resta sottrae dal prezzo di vendita le spese di vendita, il mutuo estinto e l'IRS stimato. Non sottrae ciò che spendi per la casa successiva.",
         "scopeTitle": "Cosa è coperto",
         "scopeSupported": "Persone fisiche residenti fiscali in Portogallo che vendono nel {{saleYear}} un immobile del patrimonio privato acquistato dal {{firstYear}}.",
-        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
         "assumptionsTitle": "Ipotesi",
         "assumptionBrackets": "L'IRS aggiuntivo usa gli scaglioni annuali dell'IRS del {{saleYear}} sul reddito indicato, come stima dell'effetto sulla dichiarazione annuale. La tassazione congiunta è modellata dividendo il reddito per due.",
         "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento. I coefficienti sono stati confrontati con la tabella della {{portaria}} nel Diário da República.",
@@ -3566,7 +4028,29 @@
         "sourceAcquisition": "CIRS, articolo 46: valore di acquisto degli immobili acquistati a titolo oneroso (consultato il 20 novembre 2026)",
         "sourceCorrection": "CIRS, articolo 50: correzione monetaria dopo 24 mesi (consultato il 20 novembre 2026)",
         "sourceExpenses": "CIRS, articolo 51: lavori degli ultimi 12 anni e spese di acquisto e di vendita (consultato il 20 novembre 2026)",
-        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)"
+        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)",
+        "scopeUnsupportedTerm": "Non coperto",
+        "scopeUnsupportedBody": "Non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
+        "labels": {
+          "included": "Sommato al reddito",
+          "irsWith": "IRS con la plusvalenza",
+          "irsWithout": "IRS senza la plusvalenza",
+          "cashAfter": "Ricavato che resta"
+        },
+        "terms": {
+          "gain": "Plusvalenza",
+          "taxValue": "Valore di vendita e VPT",
+          "coefficient": "Coefficiente",
+          "expenses": "Spese",
+          "half": "Metà della plusvalenza",
+          "exemption": "Reinvestimento",
+          "cash": "Ricavato che resta",
+          "brackets": "Scaglioni IRS",
+          "notModelled": "Cosa non viene verificato",
+          "educational": "Stima educativa",
+          "supported": "Coperto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Scopri quanto del ricavato puoi davvero usare",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'imposta e a vedere cosa resta per la prossima casa.",
@@ -3646,6 +4130,9 @@
         "methodWithholding": "La ritenuta su ogni pagamento si calcola a parte con la tabella mensile 2026, senza essere sommato allo stipendio del mese: il Despacho n.º 233-A/2026 (n. 10) chiede ai datori di lavoro di indicare un'aliquota effettiva separata per ogni retribuzione, come nei mesi in cui si pagano l'indennità di ferie e la tredicesima.",
         "methodTwelfths": "In dodicesimi, l'importo si divide in parti uguali sui mesi lavorati nell'anno (12 per un anno intero). La ritenuta su ogni dodicesimo si applica a parte all'aliquota effettiva dell'importo intero, la prassi abituale degli uffici paghe dalla Lei n.º 11/2013, art. 3 (non indicata nel Despacho). Il tuo datore di lavoro può invece sommare il dodicesimo allo stipendio del mese e applicare la ritenuta sul totale, che di solito risulta più alta: controlla la busta paga.",
         "methodSocialSecurity": "I contributi previdenziali a carico del lavoratore sono l'11% dell'importo lordo.",
+        "hiringYearTerm": "Anno di assunzione",
+        "twelfthsTerm": "In dodicesimi",
+        "planTerm": "Piano",
         "unsupportedNovember": "L'aggiustamento una tantum dei redditi pagati a novembre 2026 (Despacho 12523-A/2026, continente) è ignorato. Un importo pagato a novembre avrebbe la ritenuta dimezzata.",
         "unsupportedOther": "Conta solo lo stipendio base. Scatti di anzianità, altre voci retributive, cessazione o sospensione del contratto durante l'anno, contratti collettivi più generosi e costi del datore di lavoro restano fuori da questa stima.",
         "sourceCode": "Código do Trabalho, artt. 239, 263 e 264: durata delle ferie, tredicesima e indennità di ferie",
@@ -3739,6 +4226,22 @@
         "methodFraction": "Un anno incompleto conta in proporzione: il calcolatore conta gli anniversari completi della data di inizio più i giorni dall'ultimo, divisi per i giorni di quell'anno. La data di cessazione conta come giorno lavorato.",
         "methodTax": "Solo a titolo informativo, non fa parte della cifra: una parte dell'indennità può essere esclusa dall'IRS ai sensi dell'art. 2, n. 4, del CIRS, fino a un limite legato alla tua retribuzione regolare degli ultimi 12 mesi e agli anni di anzianità. Il resto è reddito imponibile. Chiedi all'Autorità tributaria o a un commercialista il limite esatto nel tuo caso.",
         "methodBudget": "L'indennità è un importo una tantum. Ripartirla sui prossimi mesi, insieme all'eventuale sussidio di disoccupazione a cui hai diritto, mostra per quanto tempo copre le tue spese.",
+        "methodFormulasLabel": "Formule",
+        "formulaDaily": "Importo giornaliero",
+        "formulaBase": "Retribuzione base",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Giorni per anno",
+        "formulaYears": "Anni di anzianità",
+        "formulaCompensation": "Indennità",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Giorni per anno",
+        "methodTransitionalTerm": "Contratti meno recenti",
+        "methodFixedTermTerm": "Scadenza di un contratto a termine",
+        "methodDurationLimitTerm": "Durata massima",
+        "methodCapsTerm": "Tetti",
+        "methodFractionTerm": "Anno incompleto",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Situazioni coperte",
         "supported": "Licenziamento collettivo, soppressione del posto e inidoneità del lavoratore in un contratto a tempo indeterminato, e scadenza di un contratto a termine, certo o incerto, con cessazione nel 2026.",
         "unsupportedTitle": "Non coperto",
@@ -3851,14 +4354,14 @@
         "exampleTitle": "Esempio pratico",
         "example": "Una persona con uno stipendio medio di {{gross}} al mese (euro di oggi, 14 mensilità), con {{years}} anni di contributi, va in pensione a {{age}}. La pensione statutaria è di {{statutory}} al mese, un tasso globale di formazione del {{rate}}. Andare in pensione {{months}} mesi prima dell'età normale toglie {{penalty}} e applica il fattore di sostenibilità, lasciando {{monthly}} lordi al mese, cioè il {{replacement}} dello stipendio. Dopo l'IRS la pensione è di {{netPension}} al mese. Rispetto a uno stipendio netto stimato di {{net}}, il divario è di {{gap}} al mese.",
         "methodTitle": "Come funziona la stima",
-        "methodReference": "La retribuzione di riferimento è la media delle retribuzioni annuali di tutta la carriera, rivalutate con coefficienti legati ai prezzi al consumo e divise per 14. Il calcolatore lavora in euro di oggi: inserisci uno stipendio mensile medio reale e il risultato è anch'esso in euro di oggi.",
-        "methodRate": "Il tasso annuo dipende dagli scaglioni della retribuzione di riferimento in multipli dell'IAS ({{ias}} nel 2026): {{rates}} per le quote fino a 1,1, fino a 2, fino a 4, fino a 8 e oltre 8 volte l'IAS. Le carriere fino a 20 anni usano un 2% fisso. Il tasso si moltiplica per gli anni di contributi, al massimo 40, e dà il tasso globale di formazione.",
-        "methodAges": "L'età normale di accesso alla pensione di vecchiaia è {{normal2026}} nel 2026 ed è stata fissata a {{normal2027}} per il 2027. Il calcolatore usa il valore del 2026.",
-        "methodEarly": "Prima dell'età normale, dai 60 anni e con almeno 15 anni di contributi, ogni mese di anticipo toglie {{penalty}} e si applica anche il fattore di sostenibilità 2026 ({{factor}}, un taglio del 17,63%). I due si moltiplicano. Le eccezioni, come le carriere molto lunghe, non sono modellate.",
-        "methodLate": "Dopo l'età normale, fino a 70 anni, ogni mese aggiunge un bonus che dipende dagli anni di contributi: 0,33% da 15 anni, 0,50% da 25, 0,65% da 35 e 1% da 40. La pensione con il bonus non può superare il 92% della retribuzione di riferimento.",
-        "methodMinimum": "Se la formula dà meno della pensione minima 2026 per la tua carriera, viene mostrato il minimo: {{min15}} da 15 a 20 anni, {{min21}} da 21 a 30 e {{min31}} da 31 anni in su. Il minimo non si applica al pensionamento anticipato.",
-        "methodGap": "Il divario confronta la pensione netta con il tuo stipendio netto di oggi, entrambi per mensilità, su 14 mensilità. Lo stipendio netto è il lordo meno l'11% di contributi previdenziali e la ritenuta IRS 2026 per una persona single senza familiari a carico nel Portogallo continentale. La pensione netta è la pensione lorda stimata meno l'IRS trattenuto secondo la tabella di ritenuta per pensioni VIII del 2026 (Despacho n.º 233-A/2026, titolare non coniugato o coniugato con due redditi, senza disabilità); le pensioni non pagano contributi previdenziali e quelle fino a 920 euro al mese non hanno ritenuta. L'IRS definitivo dipende dal tuo reddito complessivo e dalle deduzioni.",
-        "methodBudget": "Leggi il divario come l'importo mensile che i tuoi risparmi e investimenti dovrebbero coprire. Cambia con ogni ipotesi qui sopra.",
+        "methodReferenceBody": "La retribuzione di riferimento è la media delle retribuzioni annuali di tutta la carriera, rivalutate con coefficienti legati ai prezzi al consumo e divise per 14. Il calcolatore lavora in euro di oggi: inserisci uno stipendio mensile medio reale e il risultato è anch'esso in euro di oggi.",
+        "methodRateBody": "Il tasso annuo dipende dagli scaglioni della retribuzione di riferimento in multipli dell'IAS ({{ias}} nel 2026): {{rates}} per le quote fino a 1,1, fino a 2, fino a 4, fino a 8 e oltre 8 volte l'IAS. Le carriere fino a 20 anni usano un 2% fisso. Il tasso si moltiplica per gli anni di contributi, al massimo 40, e dà il tasso globale di formazione.",
+        "methodAgesBody": "L'età normale di accesso alla pensione di vecchiaia è {{normal2026}} nel 2026 ed è stata fissata a {{normal2027}} per il 2027. Il calcolatore usa il valore del 2026.",
+        "methodEarlyBody": "Prima dell'età normale, dai 60 anni e con almeno 15 anni di contributi, ogni mese di anticipo toglie {{penalty}} e si applica anche il fattore di sostenibilità 2026 ({{factor}}, un taglio del 17,63%). I due si moltiplicano. Le eccezioni, come le carriere molto lunghe, non sono modellate.",
+        "methodLateBody": "Dopo l'età normale, fino a 70 anni, ogni mese aggiunge un bonus che dipende dagli anni di contributi: 0,33% da 15 anni, 0,50% da 25, 0,65% da 35 e 1% da 40. La pensione con il bonus non può superare il 92% della retribuzione di riferimento.",
+        "methodMinimumBody": "Se la formula dà meno della pensione minima 2026 per la tua carriera, viene mostrato il minimo: {{min15}} da 15 a 20 anni, {{min21}} da 21 a 30 e {{min31}} da 31 anni in su. Il minimo non si applica al pensionamento anticipato.",
+        "methodGapBody": "Il divario confronta la pensione netta con il tuo stipendio netto di oggi, entrambi per mensilità, su 14 mensilità. Lo stipendio netto è il lordo meno l'11% di contributi previdenziali e la ritenuta IRS 2026 per una persona single senza familiari a carico nel Portogallo continentale. La pensione netta è la pensione lorda stimata meno l'IRS trattenuto secondo la tabella di ritenuta per pensioni VIII del 2026 (Despacho n.º 233-A/2026, titolare non coniugato o coniugato con due redditi, senza disabilità); le pensioni non pagano contributi previdenziali e quelle fino a 920 euro al mese non hanno ritenuta. L'IRS definitivo dipende dal tuo reddito complessivo e dalle deduzioni.",
+        "methodBudgetBody": "Leggi il divario come l'importo mensile che i tuoi risparmi e investimenti dovrebbero coprire. Cambia con ogni ipotesi qui sopra.",
         "unsupportedTitle": "Non supportato",
         "unsupportedMixed": "Carriere iniziate prima del 2002 (formula mista, con le vecchie regole per gli anni fino al 2001). Questo calcolatore copre solo la formula dell'intera carriera per chi ha iniziato a versare contributi nel 2002 o dopo.",
         "unsupportedSpecial": "Stipendi molto variabili nella carriera, buchi contributivi e carriere oltre i 40 anni.",
@@ -3871,7 +4374,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: adeguamento delle pensioni 2026 e pensioni minime",
         "sourceSimulator": "Segurança Social Direta: simulatore ufficiale delle pensioni",
         "reviewed": "Regole e valori 2026 verificati il 19 novembre 2026 rispetto al Decreto-Lei n.º 187/2007 e alle Portarias del 2026. I tassi annui, il bonus e le pensioni minime sono stati verificati incrociando fonti secondarie e le pagine della Segurança Social, senza leggerli nella legge consolidata, e le semplificazioni qui sopra sono nostre. La tabella di ritenuta per pensioni VIII è stata verificata riga per riga il 20 novembre 2026 sull'allegato del Despacho n.º 233-A/2026 pubblicato nel Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelle di ritenuta IRS 2026, compresa la tabella VIII per le pensioni"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): tabelle di ritenuta IRS 2026, compresa la tabella VIII per le pensioni",
+        "methodReferenceTerm": "Retribuzione di riferimento",
+        "methodRateTerm": "Tasso globale di formazione",
+        "methodAgesTerm": "Età normale di accesso",
+        "methodEarlyTerm": "Pensione anticipata",
+        "methodLateTerm": "Pensione dopo l'età normale",
+        "methodMinimumTerm": "Pensione minima",
+        "methodGapTerm": "Divario",
+        "methodBudgetTerm": "Come leggere il divario",
+        "methodFormulasLabel": "Formule",
+        "formula": {
+          "globalRate": "Tasso globale di formazione",
+          "globalRateLower": "tasso globale di formazione",
+          "annualRate": "tasso annuo",
+          "years": "anni di contributi",
+          "statutory": "Pensione statutaria",
+          "statutoryLower": "pensione statutaria",
+          "reference": "retribuzione di riferimento",
+          "earlyPension": "Pensione con uscita anticipata",
+          "monthsEarly": "mesi di anticipo",
+          "factor": "fattore di sostenibilità",
+          "gap": "Divario",
+          "netPay": "stipendio netto",
+          "netPension": "pensione netta"
+        }
       }
     },
     "sp500History": {
@@ -3979,10 +4506,14 @@
         "limits": {
           "title": "Cosa queste cifre non includono",
           "items": {
-            "fx": "Valuta: i rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
-            "fees": "Costi: commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
-            "taxes": "Tasse: l'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
-            "sequence": "Col senno di poi: è un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
+            "fxTerm": "Valuta",
+            "fxBody": "I rendimenti sono in dollari statunitensi. Se investi dall'area euro, il cambio euro-dollaro aggiunge o toglie a queste cifre, a volte diversi punti l'anno. Il rischio di cambio è distinto da quello di mercato.",
+            "feesTerm": "Costi",
+            "feesBody": "Commissioni dei fondi, di intermediazione e spread non sono dedotti. Un fondo che replica l'indice rende l'indice meno i suoi costi.",
+            "taxesTerm": "Tasse",
+            "taxesBody": "L'imposta su dividendi e plusvalenze non è inclusa e dipende da dove vivi.",
+            "sequenceTerm": "Col senno di poi",
+            "sequenceBody": "È un grande indice USA nella storia di un solo paese. Altri mercati e periodi sono andati molto peggio, e spostare l'inizio o la fine di qualche anno può cambiare molto il risultato.",
             "past": "I rendimenti passati non sono indicativi di quelli futuri. Questo strumento ha solo scopo informativo e non è una consulenza finanziaria."
           }
         },
@@ -4198,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "estimatorTerm": "Stima della bolletta",
+          "indexTerm": "Indice dei prezzi",
+          "marketTerm": "Mercato libero",
           "estimator": "La stima calcola un mese di 30 giorni con la tariffa regolata: la potenza contrattuale, l'energia che consumi, il contributo audiovisivo e l'imposta sull'elettricità, poi aggiunge l'IVA voce per voce, con l'aliquota che spetta a ciascuna.",
           "index": "L'indice guarda le bollette di tutte le famiglie, non solo la tariffa regolata: il prezzo medio al kWh di Eurostat in Portogallo e nell'UE, imposte incluse, così che i due siano confrontabili.",
           "market": "La tariffa regolata è solo un'opzione. La maggior parte delle famiglie è sul mercato libero, dove i fornitori fissano i propri prezzi e le offerte possono costare meno o più della tariffa regolata. Le regole dell'IVA sono le stesse in entrambi. La stima è un punto di riferimento, non un consiglio."
@@ -4212,15 +4746,33 @@
           "title": "Come si calcola",
           "intro": "Per un mese di 30 giorni, la stima fa sempre le stesse cinque cose:",
           "steps": {
-            "a": "Potenza: il prezzo giornaliero della tua potenza contrattuale, per 30 giorni.",
-            "b": "Energia: i tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi.",
-            "c": "Contributo audiovisivo (CAV): un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente.",
-            "d": "Imposta speciale sul consumo di elettricità (IEC): un importo fisso per kWh, con IVA all'aliquota ordinaria.",
-            "e": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo giornaliero della tua potenza contrattuale, per 30 giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I tuoi kWh al prezzo semplice, oppure ripartiti tra i due prezzi della bioraria secondo la quota che indichi."
+            },
+            "c": {
+              "term": "Contributo audiovisivo (CAV)",
+              "body": "Un importo mensile fisso, con IVA ridotta. Chi consuma meno di 400 kWh l'anno ne è esente."
+            },
+            "d": {
+              "term": "Imposta speciale sul consumo di elettricità (IEC)",
+              "body": "Un importo fisso per kWh, con IVA all'aliquota ordinaria."
+            },
+            "e": {
+              "term": "IVA",
+              "body": "IVA su ogni voce, poi la somma. Il risultato è arrotondato al centesimo alla fine."
+            }
           },
-          "vat": "Regole dell'IVA, come le spiega l'ERSE: l'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
-          "bi": "Bioraria contro semplice: il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
-          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni."
+          "vat": "L'aliquota ridotta ({{reduced}}) si applica ai primi {{allowance}} kWh di energia in 30 giorni ({{allowanceLarge}} kWh per le famiglie di cinque o più persone) con potenza contrattuale fino a 6,9 kVA, alla quota del termine di potenza che corrisponde alla tariffa di accesso alle reti fissata dall'ERSE, con potenza contrattuale fino a 3,45 kVA e al contributo audiovisivo. Tutto il resto paga il {{standard}}. La regola dell'aliquota ridotta si applica allo stesso modo nel mercato regolato e in quello libero.",
+          "bi": "Il prezzo semplice è {{energySimple}}, contro {{energyPeak}} nelle altre ore e {{energyValley}} nelle ore fuori punta. Solo sull'energia, le due costano uguale quando il {{breakEven}}% del consumo avviene nelle ore fuori punta. Con una quota minore conviene la semplice, con una maggiore la bioraria.",
+          "days": "Il limite dell'IVA ridotta è per 30 giorni, il periodo usato qui. In una bolletta reale per un periodo più lungo o più breve, il limite si adegua al numero di giorni.",
+          "formulasLabel": "Formula",
+          "vatTerm": "Regole dell'IVA, come le spiega l'ERSE",
+          "biTerm": "Bioraria contro semplice"
         },
         "data": {
           "title": "Dati e fonti",
@@ -4660,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "Come usare il confronto",
+          "quickTerm": "Modalità rapida",
+          "fullTerm": "Modalità completa",
+          "diagramTerm": "File E-REDES",
+          "optionsTerm": "Opzioni e filtri",
           "quick": "La modalità rapida richiede solo la potenza contrattuale e la bolletta mensile o i kWh. Una bolletta in euro viene convertita in kWh ricostruendo a ritroso la bolletta della tariffa regolata, imposte incluse, come fa la simulazione rapida dell'ERSE.",
           "full": "La modalità completa usa i kWh di ogni fascia indicati in bolletta, oppure un totale per un numero qualsiasi di giorni ripartito tra le fasce con il profilo standard di E-REDES per la tua potenza e i tuoi consumi.",
           "diagram": "Puoi anche usare il file dei consumi di E-REDES, scaricato dal Balcão Digital. Le sue letture di ogni quarto d'ora danno i tuoi kWh reali in ogni fascia e ciclo. Il file viene letto nel tuo browser e non viene mai inviato da nessuna parte.",
@@ -4669,6 +5225,9 @@
         },
         "example": {
           "title": "Esempio pratico",
+          "regulatedLabel": "Tariffa regolata",
+          "cheapestLabel": "Offerta più economica",
+          "differenceLabel": "Differenza",
           "setup": "Una casa con 3,45 kVA in opzione monoraria consuma {{kwh}} al mese. Nell'esportazione dell'ERSE del {{date}} ci sono {{count}} offerte per questa casa, tariffa regolata compresa.",
           "result": "La tariffa regolata costa {{regulated}} nel primo anno, imposte incluse. L'offerta più economica costa {{cheapest}}, {{difference}} in meno. {{cheaper}} offerte costano meno della tariffa regolata.",
           "bill": "In modalità rapida, una bolletta mensile di {{bill}} restituisce gli stessi {{kwh}}: è la bolletta della tariffa regolata per quei consumi."
@@ -4677,13 +5236,34 @@
           "title": "Come viene calcolato",
           "intro": "Ogni offerta è calcolata come nel simulatore dell'ERSE (Manual do Simulador de Preços de Energia, giugno 2026):",
           "steps": {
-            "a": "Potenza: il prezzo al giorno per il numero di giorni.",
-            "b": "Energia: i kWh di ogni fascia per il relativo prezzo.",
-            "c": "Tariffa sociale: lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA.",
-            "d": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge.",
-            "e": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE.",
-            "f": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto.",
-            "g": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            "a": {
+              "term": "Potenza",
+              "body": "Il prezzo al giorno per il numero di giorni."
+            },
+            "b": {
+              "term": "Energia",
+              "body": "I kWh di ogni fascia per il relativo prezzo."
+            },
+            "c": {
+              "term": "Tariffa sociale",
+              "body": "Lo sconto dell'ERSE su potenza ed energia, fino a 6,9 kVA."
+            },
+            "d": {
+              "term": "Imposte",
+              "body": "Il contributo audiovisivo e l'imposta sull'elettricità, negli importi di legge."
+            },
+            "e": {
+              "term": "Servizi e sconti",
+              "body": "Servizi obbligatori, rimborsi e sconti validi per qualsiasi cliente e lo sconto nuovo cliente nel primo anno, come ogni offerta li comunica all'ERSE."
+            },
+            "f": {
+              "term": "IVA",
+              "body": "IVA all'aliquota ridotta e a quella ordinaria, come spiegato sotto."
+            },
+            "g": {
+              "term": "Anno",
+              "body": "Un anno corrisponde agli stessi consumi su 365 giorni; «anni successivi» esclude lo sconto nuovo cliente."
+            }
           },
           "vat": "L'IVA è al {{reduced}} sul contributo audiovisivo, sulla quota di accesso alle reti del prezzo della potenza fino a 3,45 kVA e sui primi {{allowance}} kWh ogni 30 giorni fino a 6,9 kVA ({{allowanceLarge}} kWh per una famiglia di cinque o più persone). Tutto il resto paga il {{standard}}.",
           "month": "Un mese è un dodicesimo dell'anno, {{days}} giorni, come nel simulatore dell'ERSE, quindi un anno corrisponde esattamente a dodici mesi.",
@@ -4793,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "Come leggere questa pagina",
+          "calculatorTerm": "Calcolatore del costo",
+          "noForecastTerm": "Nessuna previsione",
           "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
           "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
           "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima.",
@@ -4807,13 +5389,26 @@
           "title": "Come si calcola",
           "intro": "Il calcolatore fa quattro cose:",
           "steps": {
-            "a": "Distanza al mese: la distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese.",
-            "b": "Litri: distanza per consumo diviso 100.",
-            "c": "Costo: litri per il prezzo al litro inserito, arrotondato al centesimo.",
-            "d": "Anno: dodici mesi così."
+            "a": {
+              "term": "Distanza al mese",
+              "body": "La distanza indicata, una settimana contata come 52 diviso 12 settimane al mese, oppure un viaggio moltiplicato per i viaggi al mese."
+            },
+            "b": {
+              "term": "Litri",
+              "body": "Distanza per consumo diviso 100."
+            },
+            "c": {
+              "term": "Costo",
+              "body": "Litri per il prezzo al litro inserito, arrotondato al centesimo."
+            },
+            "d": {
+              "term": "Anno",
+              "body": "Dodici mesi così."
+            }
           },
           "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente.",
-          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri."
+          "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri.",
+          "formulasLabel": "Formule"
         },
         "data": {
           "title": "Dati e fonti",
@@ -4828,13 +5423,28 @@
         "limits": {
           "title": "Cosa non includono questi valori",
           "items": {
-            "noForecast": "Nessuna previsione: niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo.",
-            "average": "Media nazionale: riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse.",
-            "stations": "Distributori: l'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa.",
-            "consumption": "Consumo: lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale.",
-            "scope": "Solo carburante: pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati.",
-            "education": "Solo a scopo informativo, non è una consulenza."
-          }
+            "noForecast": {
+              "term": "Nessuna previsione",
+              "body": "Niente qui prevede i prezzi futuri, e i movimenti passati non dicono dove andrà il prezzo."
+            },
+            "average": {
+              "term": "Media nazionale",
+              "body": "Riunisce tutti i distributori del Portogallo continentale ed è ponderata per le vendite. Il prezzo al tuo distributore può essere più alto o più basso, e Azzorre e Madeira non sono incluse."
+            },
+            "stations": {
+              "term": "Distributori",
+              "body": "L'elenco mostra solo i pochi distributori più economici di ogni zona, come li pubblica la DGEG, e non valuta servizio né qualità. Un prezzo può cambiare dopo l'istantanea, quindi verificalo alla pompa."
+            },
+            "consumption": {
+              "term": "Consumo",
+              "body": "Lo stesso valore in ogni viaggio. Il consumo reale cambia con velocità, carico, traffico e stagione, e di solito supera quello ufficiale."
+            },
+            "scope": {
+              "term": "Solo carburante",
+              "body": "Pedaggi, assicurazione, bollo, manutenzione e parcheggio non sono inclusi. La ricarica elettrica non è coperta e gli altri carburanti non sono mostrati."
+            }
+          },
+          "education": "Solo a scopo informativo, non è una consulenza."
         },
         "related": {
           "title": "Per andare avanti",
@@ -5058,7 +5668,12 @@
           "title": "Esempio",
           "setup": "Supponi di tenere {{amount}} per 12 mesi in {{product}} presso {{bank}}, al {{rate}} annuo. Rende {{gross}}; il 28% di IRS ne toglie {{tax}}, restano {{net}}.",
           "capped": "Il massimo conta. {{product2}} presso {{bank2}} paga {{rate2}}, ma solo fino a {{cap}}. Con {{amount2}}, gli interessi sono {{gross2}} prima delle imposte e {{net2}} dopo, come se avessi risparmiato {{cap}}.",
-          "plans": "Contano anche i costi. {{product3}} presso {{bank3}} va da {{low}} a {{high}} a seconda del piano. Con {{amount}}, il piano Standard rende {{standardNet}} netti, mentre il piano Ultra, dopo {{ultraFees}} di costi all'anno, rende {{ultraNet}}."
+          "plans": "Contano anche i costi. {{product3}} presso {{bank3}} va da {{low}} a {{high}} a seconda del piano. Con {{amount}}, il piano Standard rende {{standardNet}} netti, mentre il piano Ultra, dopo {{ultraFees}} di costi all'anno, rende {{ultraNet}}.",
+          "figures": {
+            "gross": "Interessi lordi",
+            "tax": "IRS ({{tax}}%)",
+            "net": "Interessi netti"
+          }
         },
         "method": {
           "title": "Metodo",
@@ -5258,17 +5873,25 @@
           "setup": "Prendi l'acquirente occasionale di azioni: {{count}} acquisti da {{amount}} di azioni USA in un anno, {{portfolio}} investiti.",
           "bank": "Presso {{bank}} ogni ordine costa {{bankFormula}}, quindi i {{count}} ordini costano {{bankTrading}} con l'imposta di bollo. Convertire {{converted}} in dollari con una commissione pari a {{bankFx}} aggiunge {{bankFxTotal}}, e la custodia ({{bankCustodyFormula}}) aggiunge {{bankCustody}} con l'IVA. L'anno costa {{bankTotal}}, di cui {{bankStampDuty}} di imposta di bollo e {{bankVat}} di IVA.",
           "online": "Presso {{online}} ogni ordine costa {{onlineFormula}}: {{onlineTrading}} nell'anno. Il cambio, con una commissione pari a {{onlineFx}}, aggiunge {{onlineFxTotal}} e la custodia {{onlineCustody}}, per {{onlineTotal}} in totale.",
-          "takeaway": "Con ordini piccoli e poco frequenti pesano di più le commissioni minime e le commissioni di custodia fisse; con ordini grandi o un portafoglio grande pesano di più le commissioni in percentuale. Cambia il profilo qui sopra per vedere come cambia l'ordinamento."
+          "takeaway": "Con ordini piccoli e poco frequenti pesano di più le commissioni minime e le commissioni di custodia fisse; con ordini grandi o un portafoglio grande pesano di più le commissioni in percentuale. Cambia il profilo qui sopra per vedere come cambia l'ordinamento.",
+          "figures": {
+            "total": "Totale dell'anno"
+          }
         },
         "method": {
           "title": "Metodo",
           "intro": "Ogni commissione è stata letta nel foglio commissioni pubblicato dal broker stesso, alla data indicata nella sua riga; l'intera tabella è stata rivista il {{date}} e viene ricontrollata ogni trimestre. Le commissioni che un foglio non indica sono segnate come non pubblicate e restano fuori dai totali, che appaiono allora come incompleti.",
           "steps": {
-            "a": "Ordini: la commissione di ogni ordine è la parte fissa più la percentuale dell'ordine, con il minimo e il massimo per ordine. Le commissioni per azione contano azioni intere al prezzo ipotizzato. Una franchigia mensile senza commissioni si applica mese per mese.",
-            "b": "Piano di accumulo: per gli acquisti di ETF, con l'opzione attiva e se il broker pubblica un piano periodico, la sua commissione sostituisce quella dell'ordine.",
-            "c": "Valuta: gli ordini USA pagano la commissione di cambio del broker sull'importo convertito; le commissioni in dollari sono convertite a {{rate}} dollari per euro.",
-            "d": "Custodia: la formula pubblicata, per periodo con il suo minimo e massimo, si applica al valore detenuto tante volte quanti sono i periodi dell'anno.",
-            "e": "Imposte sulle commissioni: quando il foglio commissioni dice che le commissioni non includono l'imposta di bollo portoghese (4% sull'intermediazione) o l'IVA (23% sulla custodia), si aggiungono alle commissioni a cui si applicano.",
+            "aTerm": "Ordini",
+            "aBody": "La commissione di ogni ordine è la parte fissa più la percentuale dell'ordine, con il minimo e il massimo per ordine. Le commissioni per azione contano azioni intere al prezzo ipotizzato. Una franchigia mensile senza commissioni si applica mese per mese.",
+            "bTerm": "Piano di accumulo",
+            "bBody": "Per gli acquisti di ETF, con l'opzione attiva e se il broker pubblica un piano periodico, la sua commissione sostituisce quella dell'ordine.",
+            "cTerm": "Valuta",
+            "cBody": "Gli ordini USA pagano la commissione di cambio del broker sull'importo convertito; le commissioni in dollari sono convertite a {{rate}} dollari per euro.",
+            "dTerm": "Custodia",
+            "dBody": "La formula pubblicata, per periodo con il suo minimo e massimo, si applica al valore detenuto tante volte quanti sono i periodi dell'anno.",
+            "eTerm": "Imposte sulle commissioni",
+            "eBody": "Quando il foglio commissioni dice che le commissioni non includono l'imposta di bollo portoghese (4% sull'intermediazione) o l'IVA (23% sulla custodia), si aggiungono alle commissioni a cui si applicano.",
             "f": "Il totale somma gli ordini dell'anno, il cambio e la custodia, e i broker sono elencati dal più economico al più caro. Quelli che non pubblicano una commissione necessaria al profilo vanno in fondo."
           }
         },
@@ -5456,7 +6079,8 @@
             "insuranceLinked": "assicurazione collegata a fondi",
             "insuranceGuaranteed": "assicurazione non collegata a fondi",
             "pensionFund": "fondo pensione"
-          }
+          },
+          "gapLabel": "Differenza di costi su {{invested}}, all'anno"
         },
         "tax": {
           "title": "La deduzione IRS (EBF, articolo 21)",
@@ -5468,7 +6092,8 @@
           },
           "example": "Conta l'età al 1° gennaio dell'anno del versamento (n.º 9). A {{age}} anni, {{exampleContribution}} versati nell'anno danno {{exampleDeduction}}, la deduzione massima.",
           "conditions": "La deduzione rientra nel limite complessivo delle deduzioni dell'articolo 78, n.º 7, del Codice IRS: nessun limite per i redditi imponibili più bassi, poi da {{capMax}} a {{capMin}} per nucleo familiare. Riduce l'imposta dovuta e non viene pagata in denaro, e i versamenti fatti dopo il pensionamento non sono deducibili (n.º 10).",
-          "payout": "Quando il piano viene liquidato in un caso previsto dalla legge, un riscatto in un'unica soluzione è tassato sul guadagno al {{legalRate}} su due quinti di esso, cioè un {{legalEffective}} effettivo del guadagno (n.º 3); i pagamenti periodici sono tassati come pensioni."
+          "payout": "Quando il piano viene liquidato in un caso previsto dalla legge, un riscatto in un'unica soluzione è tassato sul guadagno al {{legalRate}} su due quinti di esso, cioè un {{legalEffective}} effettivo del guadagno (n.º 3); i pagamenti periodici sono tassati come pensioni.",
+          "deductionLabel": "Deduzione dall'imposta IRS"
         },
         "redemption": {
           "title": "Quando puoi riscattare e quanto costa un riscatto anticipato",
@@ -5620,22 +6245,47 @@
           "title": "Carati e titolo",
           "intro": "La purezza dell'oro si indica in carati, su 24, o in millesimi, il numero inciso nel marchio. Questi sono i sei titoli legali dell'oro in Portogallo:",
           "items": {
-            "k24": "24 carati, 999 millesimi: oro puro, come nei lingotti e nelle monete da investimento.",
-            "k22": "22 carati, 916: monete d'oro come la sterlina (sovereign) e il Krugerrand, e molti gioielli indiani.",
-            "k19_2": "19,2 carati, 800: l'oro portoghese, il titolo tradizionale dell'oreficeria portoghese.",
-            "k18": "18 carati, 750: il titolo più comune della gioielleria europea.",
-            "k14": "14 carati, 585: gioielli più duri e più economici.",
-            "k9": "9 carati, 375: il titolo legale più basso."
+            "k24Term": "24 carati, 999 millesimi",
+            "k24Body": "Oro puro, come nei lingotti e nelle monete da investimento.",
+            "k22Term": "22 carati, 916",
+            "k22Body": "Monete d'oro come la sterlina (sovereign) e il Krugerrand, e molti gioielli indiani.",
+            "k19_2Term": "19,2 carati, 800",
+            "k19_2Body": "L'oro portoghese, il titolo tradizionale dell'oreficeria portoghese.",
+            "k18Term": "18 carati, 750",
+            "k18Body": "Il titolo più comune della gioielleria europea.",
+            "k14Term": "14 carati, 585",
+            "k14Body": "Gioielli più duri e più economici.",
+            "k9Term": "9 carati, 375",
+            "k9Body": "Il titolo legale più basso."
           }
         },
         "method": {
           "title": "Come si calcola",
           "intro": "La pagina fa quattro cose:",
           "steps": {
-            "a": "Prezzo: il prezzo NBP di un grammo d'oro puro in zloty, diviso per gli zloty per euro della BCE dello stesso giorno.",
-            "b": "Oro puro: il peso per il titolo diviso per 1.000. Un pezzo a 24 carati conta 999 millesimi.",
-            "c": "Valore: i grammi d'oro puro per il prezzo di un grammo d'oro puro, arrotondato al centesimo.",
-            "d": "Offerta: se ne inserisci una, l'offerta divisa per il valore, in percentuale, e la differenza in euro."
+            "aTerm": "Prezzo",
+            "aBody": "Il prezzo NBP di un grammo d'oro puro in zloty, diviso per gli zloty per euro della BCE dello stesso giorno.",
+            "bTerm": "Oro puro",
+            "bBody": "Il peso per il titolo diviso per 1.000. Un pezzo a 24 carati conta 999 millesimi.",
+            "cTerm": "Valore",
+            "cBody": "I grammi d'oro puro per il prezzo di un grammo d'oro puro, arrotondato al centesimo.",
+            "dTerm": "Offerta",
+            "dBody": "Se ne inserisci una, l'offerta divisa per il valore, in percentuale, e la differenza in euro."
+          },
+          "formulasLabel": "Formule",
+          "formula": {
+            "pureGold": "Oro puro",
+            "pureGoldLower": "oro puro",
+            "weight": "peso",
+            "fineness": "titolo",
+            "value": "Valore",
+            "valueLower": "valore",
+            "price": "Prezzo al grammo",
+            "priceLower": "prezzo al grammo",
+            "nbpPrice": "prezzo NBP in zloty",
+            "zlotyPerEuro": "zloty per euro",
+            "offerShare": "Offerta rispetto al valore",
+            "offer": "offerta"
           }
         },
         "buyers": {
@@ -5656,10 +6306,14 @@
         "limits": {
           "title": "Cosa lascia fuori questo valore",
           "items": {
-            "metal": "Solo il metallo: il valore è l'oro contenuto nel pezzo a un prezzo di riferimento. Pietre, altri metalli, lavorazione e marchio non contano.",
-            "buyers": "Non è un prezzo di vendita: chi compra paga meno, e un negozio che vende oro chiede di più.",
-            "purity": "Titolo: il calcolatore si fida del titolo che scegli. Un pezzo senza marchio o placcato oro può contenere molto meno oro, o nessuno.",
-            "reference": "Prezzo di riferimento: il prezzo giornaliero NBP, non una quotazione minuto per minuto. Il mercato si muove durante il giorno.",
+            "metalTerm": "Solo il metallo",
+            "metalBody": "Il valore è l'oro contenuto nel pezzo a un prezzo di riferimento. Pietre, altri metalli, lavorazione e marchio non contano.",
+            "buyersTerm": "Non è un prezzo di vendita",
+            "buyersBody": "Chi compra paga meno, e un negozio che vende oro chiede di più.",
+            "purityTerm": "Titolo",
+            "purityBody": "Il calcolatore si fida del titolo che scegli. Un pezzo senza marchio o placcato oro può contenere molto meno oro, o nessuno.",
+            "referenceTerm": "Prezzo di riferimento",
+            "referenceBody": "Il prezzo giornaliero NBP, non una quotazione minuto per minuto. Il mercato si muove durante il giorno.",
             "education": "Solo a scopo educativo, non è una consulenza."
           }
         },
@@ -6210,7 +6864,66 @@
       "historyPeriod": "Ultimi 6 mesi",
       "chartTrend": "Patrimonio netto, da {{start}} a {{end}}, in crescita da {{from}} a {{to}}"
     },
-    "perMonth": "/mese"
+    "perMonth": "/mese",
+    "household": {
+      "title": "Famiglia",
+      "roleOwner": "Proprietario",
+      "roleMember": "Membro",
+      "roleViewer": "Osservatore",
+      "jointAccount": "Conto corrente cointestato",
+      "privateAccount": "Risparmi di Ana",
+      "shared": "Condiviso",
+      "private": "Privato"
+    },
+    "imports": {
+      "title": "Controlla l'importazione",
+      "fileName": "estratto-ottobre.csv",
+      "rows": "{{count}} righe",
+      "statusNew": "Nuova",
+      "statusExisting": "Già nel conto",
+      "statusDuplicate": "Possibile duplicato",
+      "note": "Non viene importato nulla finché non confermi."
+    },
+    "recurring": {
+      "title": "Bollette e abbonamenti",
+      "day": "Giorno {{day}}",
+      "rent": "Affitto",
+      "electricity": "Luce",
+      "internet": "Internet",
+      "gym": "Palestra",
+      "paid": "Pagata",
+      "due": "In scadenza",
+      "projected": "Prevista",
+      "stillToPay": "Ancora da pagare questo mese"
+    },
+    "assistant": {
+      "title": "Assistente",
+      "question": "Quanto ho speso in ristoranti questo mese?",
+      "answer": "{{amount}} in {{count}} transazioni, un po' meno del mese scorso.",
+      "proposalLabel": "Modifica proposta",
+      "proposal": "Categorizza 3 transazioni come Spesa",
+      "apply": "Applica",
+      "dismiss": "Scarta"
+    },
+    "currencies": {
+      "title": "Conti",
+      "account1": "Conto corrente",
+      "account2": "Liquidità del conto titoli",
+      "account3": "Risparmi nel Regno Unito",
+      "estimated": "Stimato",
+      "total": "Totale in euro",
+      "rateNote": "Convertito al tasso di riferimento BCE di ogni giorno."
+    },
+    "selfHosting": {
+      "title": "Il tuo server",
+      "subtitle": "docker compose",
+      "database": "Postgres",
+      "api": "API",
+      "worker": "Worker in background",
+      "web": "App web",
+      "running": "In esecuzione",
+      "note": "I tuoi dati restano nel tuo database."
+    }
   },
   "lp": {
     "shared": {
@@ -6540,7 +7253,15 @@
       "feature5": "Transazioni suddivise: assegna parti a categorie diverse",
       "feature6": "Grafici di spesa per categoria per l'analisi del budget",
       "ctaHeadline": "Smettila di taggare le transazioni manualmente",
-      "ctaBody": "Importa le transazioni bancarie e WonderMoney gestisce la categorizzazione. Gratuito e open source."
+      "ctaBody": "Importa le transazioni bancarie e WonderMoney gestisce la categorizzazione. Gratuito e open source.",
+      "rulesTitle": "Regole per le transazioni che conosci già",
+      "rulesBody": "Una regola dice a WonderMoney cosa fare con le transazioni di un certo tipo: quando la descrizione contiene NETFLIX, imposta la categoria Svago. Le regole appartengono alla famiglia, così tutti lavorano sullo stesso elenco.",
+      "rulesPoint1": "Condizioni su descrizione, commerciante, importo, conto e altro",
+      "rulesPoint2": "Imposta la categoria o il commerciante, rinomina, aggiungi tag, segna come rivista o nascondi",
+      "rulesPoint3": "Un'anteprima di ciò a cui si applica una regola prima di salvarla",
+      "rulesPoint4": "Applica una regola alle transazioni che hai già",
+      "rulesPoint5": "Una regola suggerita quando correggi tre volte lo stesso tipo di transazione",
+      "rulesPoint6": "Esporta le regole in un file e importale su un altro server"
     },
     "featurePrivacy": {
       "eyebrow": "Privacy e sicurezza",
@@ -6566,7 +7287,17 @@
       "ctaHeadline": "Gestisci le tue finanze con uno strumento di cui ti puoi fidare",
       "ctaBody": "WonderMoney guadagna la tua fiducia mantenendo i tuoi dati privati, sicuri e tuoi. Gratuito e open source.",
       "principle6Title": "Il tuo accesso rimane presso la tua banca",
-      "principle6Body": "Ti autentichi direttamente sul portale della tua banca. La tua password non passa mai attraverso WonderMoney."
+      "principle6Body": "Ti autentichi direttamente sul portale della tua banca. La tua password non passa mai attraverso WonderMoney.",
+      "securityTitle": "Proteggi l'accesso e lo schermo",
+      "securityBody": "L'accesso bancario in sola lettura lascia il tuo denaro dov'è. Queste impostazioni proteggono l'account WonderMoney stesso e ciò che gli altri possono vedere quando lo apri.",
+      "securityPoint1Title": "Passkey",
+      "securityPoint1Body": "Accedi con l'impronta, il volto o il PIN del dispositivo invece di digitare una password.",
+      "securityPoint2Title": "Autenticazione a due fattori",
+      "securityPoint2Body": "Un codice da un'app di autenticazione dopo la password, con codici di backup nel caso perdessi il telefono.",
+      "securityPoint3Title": "Blocco dell'app",
+      "securityPoint3Body": "L'app mobile chiede Face ID, Touch ID o il codice del dispositivo ogni volta che si apre.",
+      "securityPoint4Title": "Modalità privacy",
+      "securityPoint4Body": "Nascondi tutti gli importi sullo schermo con un tocco, o con Shift+P sul web, in treno o mentre condividi lo schermo."
     },
     "pricing": {
       "metaTitle": "Prezzi — WonderMoney",
@@ -7150,6 +7881,239 @@
       "how3Body": "Ogni conto collegato alimenta un'unica dashboard — saldi, spese e patrimonio netto, sempre sincronizzati.",
       "ctaHeadline": "Metti al lavoro il tuo diritto",
       "ctaBody": "Collega i tuoi conti e vedi il tuo quadro finanziario completo — in modo sicuro, alle tue condizioni."
+    },
+    "featureHousehold": {
+      "eyebrow": "Famiglia",
+      "metaTitle": "Finanze familiari condivise con conti privati | WonderMoney",
+      "metaDescription": "Gestisci il denaro con il partner o la famiglia: ognuno accede con il proprio login, condivide i conti che sceglie e tiene privato il resto. Dividi le spese con gli amici nei gruppi.",
+      "heroTitle": "Gestisci il denaro in famiglia, tieni privato ciò che è tuo",
+      "heroSubtitle": "Invita le persone con cui vivi in un'unica famiglia. Ognuno accede con il proprio login, condivide i conti che sceglie e vede i numeri della famiglia nella propria valuta.",
+      "schemaName": "WonderMoney Finanze familiari",
+      "schemaDescription": "Finanze familiari condivise con un login per ogni persona, quattro ruoli, conti privati, un filtro per membro, quote di proprietà e gruppi di spese condivise.",
+      "whatTitle": "Una famiglia, ognuno con il proprio login",
+      "whatBody": "Una famiglia riunisce i conti, i budget, gli obiettivi e il patrimonio netto che gestite insieme. Può includere fino a sei persone, ognuna con il proprio login e un ruolo che decide cosa può modificare.",
+      "whatPoint1Title": "Quattro ruoli",
+      "whatPoint1Body": "Proprietario, amministratore, membro o osservatore. Un osservatore vede i dati condivisi ma non può modificarli.",
+      "whatPoint2Title": "Conti privati",
+      "whatPoint2Body": "Tieni un conto per te, oppure lascia che ogni persona lo veda o lo modifichi. Nessun altro lo vede, nemmeno il proprietario della famiglia.",
+      "whatPoint3Title": "Chi ha speso cosa",
+      "whatPoint3Body": "Segna i conti cointestati, indica chi ha fatto ogni spesa e filtra transazioni, report, budget e patrimonio netto per persona.",
+      "whatPoint4Title": "Quote di proprietà",
+      "whatPoint4Body": "Dividi un conto in percentuale, come un fondo per la casa al 60/40, e il patrimonio netto di ciascuno conta la sua parte.",
+      "howTitle": "Come funziona una famiglia",
+      "step1Title": "Registrati",
+      "step1Body": "La tua famiglia viene creata con il tuo account e tu ne sei il proprietario. Più avanti puoi cedere la proprietà a qualcun altro.",
+      "step2Title": "Invita le persone via email",
+      "step2Body": "Scegli il ruolo di ogni persona. Il link funziona solo per l'indirizzo che hai invitato e scade dopo sette giorni.",
+      "step3Title": "Scegli cosa condivide ogni conto",
+      "step3Body": "I conti sono condivisi con la famiglia per impostazione predefinita. Rendine uno privato e scegli, per ogni persona, nascosto, visualizzazione o modifica.",
+      "groupsTitle": "Dividi le spese con amici, coinquilini e in viaggio",
+      "groupsBody": "Un gruppo è un insieme di persone che condividono delle spese. Condividi una transazione con il gruppo e WonderMoney la divide, calcola chi deve a chi e conta nelle tue spese solo la quota della tua famiglia.",
+      "groupsPoint1": "Aggiungi le persone per nome: non serve che abbiano un account WonderMoney",
+      "groupsPoint2": "Dividi in parti uguali, per importo o in percentuale",
+      "groupsPoint3": "Un saldo per ogni persona e il minor numero di pagamenti per pareggiare i conti",
+      "groupsPoint4": "Registra un rimborso e collegalo al trasferimento con cui è stato pagato",
+      "faqTitle": "Domande sulla famiglia",
+      "faq1Q": "Il proprietario della famiglia può vedere i miei conti privati?",
+      "faq1A": "No. Un conto privato è visibile solo a te e alle persone con cui lo condividi. Il proprietario e gli amministratori lo vedono solo se lo condividi con loro.",
+      "faq2Q": "Quante persone possono far parte di una famiglia?",
+      "faq2A": "Fino a sei, proprietario incluso. Sul tuo server puoi cambiare questo numero.",
+      "faq3Q": "Cosa succede quando qualcuno se ne va?",
+      "faq3A": "I suoi conti privati restano nella famiglia, condivisi come prima: chi aveva accesso lo mantiene e nessun altro lo ottiene. Il denaro che ha speso conta come Condiviso.",
+      "ctaHeadline": "Riunisci la famiglia in un unico posto",
+      "ctaBody": "Invita le persone con cui vivi e scegli cosa condivide ogni conto."
+    },
+    "featureImports": {
+      "eyebrow": "Importazione",
+      "metaTitle": "Importa estratti conto: CSV, Excel, OFX, QIF e CAMT.053 | WonderMoney",
+      "metaDescription": "Importa le transazioni dall'esportazione CSV, Excel, OFX, QIF o CAMT.053 di qualsiasi banca, oppure porta lo storico da YNAB o Actual Budget. Controlla ogni riga prima che venga aggiunto qualcosa.",
+      "heroTitle": "Porta qualsiasi estratto conto, e niente due volte",
+      "heroSubtitle": "Quando una banca non si può collegare, o vuoi lo storico di prima del collegamento, importa il file che ti dà la tua banca. Controlli ogni riga prima che venga aggiunto qualcosa.",
+      "schemaName": "WonderMoney Importazione transazioni",
+      "schemaDescription": "Importa estratti conto da file CSV, Excel, OFX, QFX, QIF e CAMT.053, e lo storico delle transazioni da YNAB e Actual Budget, con un passaggio di revisione e il rilevamento dei duplicati.",
+      "whatTitle": "Ogni file che ti dà la tua banca",
+      "whatBody": "Scarica l'estratto conto e lascialo come l'ha generato la banca. WonderMoney trova le colonne di data, descrizione e importo e riconosce i formati di data e numero, così legge le esportazioni della maggior parte delle banche senza un modello.",
+      "whatPoint1": "CSV con qualsiasi delimitatore, ed Excel (.xls, .xlsx)",
+      "whatPoint2": "OFX, QFX e QIF, da banche, Quicken, Microsoft Money e GnuCash",
+      "whatPoint3": "CAMT.053, l'estratto conto ISO 20022 delle banche SEPA",
+      "whatPoint4": "File con più conti, ognuno inviato a uno dei tuoi",
+      "whatPoint5": "Il tuo registro YNAB, con conti e categorie abbinati ai tuoi",
+      "whatPoint6": "L'esportazione delle transazioni di Actual Budget, con i trasferimenti mantenuti come trasferimenti",
+      "howTitle": "Come funziona un'importazione",
+      "step1Title": "Aggiungi il file",
+      "step1Body": "Apri il conto e scegli Importa transazioni. WonderMoney legge il file e mostra quante transazioni ha trovato e quali date coprono.",
+      "step2Title": "Controlla le righe",
+      "step2Body": "Ogni riga è nuova, già presente nel conto, un possibile duplicato o non leggibile. Seleziona o deseleziona quelle che vuoi.",
+      "step3Title": "Importa",
+      "step3Body": "L'importazione avviene in background. Se si interrompe a metà, riprova: riparte da dove si era fermata e non importa nulla due volte.",
+      "reviewTitle": "Niente viene aggiunto finché non lo controlli",
+      "reviewBody": "Lo stesso acquisto arriva spesso due volte, una dalla sincronizzazione bancaria e una da un file. La revisione mostra ogni riga e cosa le succederà, così decidi tu.",
+      "reviewPoint1Title": "Possibili duplicati",
+      "reviewPoint1Body": "Una riga con lo stesso importo di una transazione già presente nel conto, fino a tre giorni di distanza, viene saltata a meno che tu non la includa.",
+      "reviewPoint2Title": "Già importate",
+      "reviewPoint2Body": "Le righe già presenti nel conto vengono saltate, quindi importando un'esportazione che si sovrappone si aggiunge solo ciò che è nuovo.",
+      "reviewPoint3Title": "Categorizzate come le transazioni sincronizzate",
+      "reviewPoint3Body": "Le righe importate vengono categorizzate come le transazioni portate dalla sincronizzazione bancaria, e anche a loro si applicano le regole della famiglia.",
+      "faqTitle": "Domande sull'importazione",
+      "faq1Q": "Con quali banche funziona?",
+      "faq1A": "Con qualsiasi banca che esporti un estratto conto in CSV, Excel, OFX, QIF o CAMT.053. Per Millennium BCP, ActivoBank, Bankinter, Banco BPI e Montepio, WonderMoney legge anche il formato proprio della banca.",
+      "faq2Q": "Posso importare dal telefono?",
+      "faq2A": "Sì, file CSV, OFX, QIF e CAMT.053, con la stessa revisione prima di importare qualcosa. Le esportazioni di YNAB e Actual Budget si importano dal web.",
+      "faq3Q": "Posso passare da YNAB o Actual Budget?",
+      "faq3A": "Sì, con lo storico delle transazioni: ogni conto e categoria viene abbinato a uno dei tuoi e i trasferimenti restano collegati. Gli importi di budget e gli obiettivi non vengono importati.",
+      "ctaHeadline": "Porta con te il tuo storico",
+      "ctaBody": "Importa gli estratti conto che hai già e parti dal quadro completo."
+    },
+    "featureRecurring": {
+      "eyebrow": "Bollette e abbonamenti",
+      "metaTitle": "Monitora bollette, abbonamenti e pagamenti ricorrenti | WonderMoney",
+      "metaDescription": "WonderMoney trova i pagamenti che si ripetono, dall'affitto agli abbonamenti, li mostra su un calendario, prevede il saldo di ogni conto per i prossimi 30 giorni e può inserire le tue bollette nella tua app di calendario.",
+      "heroTitle": "Vedi cosa arriva prima che esca dal tuo conto",
+      "heroSubtitle": "WonderMoney individua affitto, stipendio, abbonamenti e gli altri pagamenti che si ripetono, così sai cosa è pagato, cosa è in scadenza e dove sta andando il tuo saldo.",
+      "schemaName": "WonderMoney Bollette e abbonamenti",
+      "schemaDescription": "Rilevamento dei pagamenti ricorrenti con un calendario delle bollette, una previsione del saldo a 30 giorni per ogni conto e un feed iCal delle prossime bollette.",
+      "whatTitle": "Le tue bollette e i tuoi abbonamenti, trovati per te",
+      "whatBody": "Il rilevamento parte ogni volta che le transazioni vengono aggiunte, importate o sincronizzate. I pagamenti di cui è sicuro compaiono direttamente nell'elenco; gli altri aspettano la tua conferma.",
+      "whatPoint1": "Pagamenti ed entrate ricorrenti trovati nelle tue transazioni",
+      "whatPoint2": "Conferma o scarta ciascuno, e ripristinalo in seguito",
+      "whatPoint3": "Un calendario che segna ogni bolletta come pagata, in scadenza, scaduta o prevista",
+      "whatPoint4": "Una previsione del saldo a 30 giorni su ogni conto, con il suo punto più basso",
+      "howTitle": "Come funziona",
+      "step1Title": "Arrivano le transazioni",
+      "step1Body": "Dalla sincronizzazione bancaria, da un file importato o inserite a mano. WonderMoney cerca i pagamenti che si ripetono.",
+      "step2Title": "Controlla cosa ha trovato",
+      "step2Body": "Verifica il commerciante, l'importo abituale e la frequenza di ogni pagamento, poi confermalo o segnalo come non ricorrente.",
+      "step3Title": "Pianifica",
+      "step3Body": "Leggi il mese sul calendario e la previsione di ogni conto. Una bolletta già pagata esce dalla previsione, così non viene mai contata due volte.",
+      "calendarTitle": "Le tue bollette nel calendario che usi già",
+      "calendarBody": "Pubblica le bollette confermate come feed di calendario in sola lettura e iscriviti una volta in Google Calendar, Apple Calendar o qualsiasi app che legga iCal.",
+      "calendarPoint1": "Un evento per l'intera giornata per ogni bolletta dei prossimi 90 giorni",
+      "calendarPoint2": "Il nome della bolletta e l'importo previsto, nella tua lingua",
+      "calendarPoint3": "Nessun saldo, nome del conto o numero di conto",
+      "calendarPoint4": "Reimposta o revoca il link quando vuoi",
+      "faqTitle": "Domande sui pagamenti ricorrenti",
+      "faq1Q": "I pagamenti previsti contano nei miei report?",
+      "faq1A": "No. Una previsione non è una transazione: resta fuori da report, budget e totali finché il pagamento non viene registrato.",
+      "faq2Q": "Serve un collegamento bancario?",
+      "faq2A": "No. Il rilevamento funziona su ogni transazione aggiunta, che arrivi dalla sincronizzazione bancaria, da un file o dal tuo inserimento manuale.",
+      "faq3Q": "Chi vede le bollette di un conto privato?",
+      "faq3A": "Solo le persone che possono vedere quel conto. Pagamenti ricorrenti, previsioni e feed del calendario seguono la condivisione del conto.",
+      "ctaHeadline": "Sappi cosa scade prima che scada",
+      "ctaBody": "Lascia che WonderMoney trovi i tuoi pagamenti ricorrenti e pianifica il mese intorno a loro."
+    },
+    "featureAssistant": {
+      "eyebrow": "Assistente IA",
+      "metaTitle": "Assistente IA per le tue finanze personali | WonderMoney",
+      "metaDescription": "Chiedi delle tue spese, dei budget, degli obiettivi e del portafoglio con parole semplici. L'assistente legge i tuoi dati, propone modifiche da applicare e resta spento finché non lo attivi. Collega Claude Desktop o Cursor tramite MCP.",
+      "heroTitle": "Fai una domanda al tuo denaro",
+      "heroSubtitle": "Quanto è andato in ristoranti questo mese? Quale budget sta sforando? L'assistente risponde dai tuoi conti e non cambia nulla senza di te.",
+      "schemaName": "WonderMoney Assistente IA",
+      "schemaDescription": "Un assistente IA che risponde a domande su conti, spese, budget, obiettivi e portafoglio e propone modifiche da confermare, più un server MCP in sola lettura per i client IA.",
+      "whatTitle": "Un assistente che legge, e chiede prima di cambiare",
+      "whatBody": "L'assistente risponde a domande su conti, spese, budget, obiettivi e portafoglio. Può preparare una modifica, come una categoria per un gruppo di transazioni, ma non succede nulla finché non la applichi.",
+      "whatPoint1": "Risposte dai tuoi dati, con le stesse regole di condivisione dell'app",
+      "whatPoint2": "Spento finché non lo attivi, e puoi spegnerlo di nuovo nelle impostazioni",
+      "whatPoint3": "Propone categorie, segni di revisione e note da applicare o scartare",
+      "whatPoint4": "Un solo interruttore nasconde ogni funzione IA, e anche il server le rifiuta",
+      "howTitle": "Come funziona l'assistente",
+      "step1Title": "Attivalo",
+      "step1Body": "L'assistente resta spento finché non scegli Attiva assistente nella sua schermata di consenso nell'app web.",
+      "step2Title": "Chiedi",
+      "step2Body": "Chiedi di un mese, una categoria, un budget o un obiettivo. Legge i dati che puoi vedere nell'app, e niente di più.",
+      "step3Title": "Applica o scarta",
+      "step3Body": "Una modifica proposta mostra il valore attuale di ogni transazione e quello proposto. Applicala, scartala o lasciala scadere dopo sette giorni.",
+      "mcpTitle": "Usa il tuo client IA",
+      "mcpBody": "WonderMoney esegue un server MCP in sola lettura. Collega Claude Desktop, Cursor, VS Code o un altro client MCP con un token e chiedi delle tue finanze dalla sua chat.",
+      "mcpPoint1": "Strumenti in sola lettura per saldi, spese, budget, obiettivi e portafoglio",
+      "mcpPoint2": "Il client vede esattamente ciò che vedi tu, e mai i dati di un'altra famiglia",
+      "mcpPoint3": "Proposte facoltative che aspettano che tu le applichi nell'app",
+      "mcpPoint4": "Un token dedicato, che scade dopo 90 giorni e si può revocare",
+      "faqTitle": "Domande sull'assistente",
+      "faq1Q": "L'assistente può spostare denaro?",
+      "faq1A": "No. Non può spostare denaro, avviare transazioni o modificare i dati della banca. Legge i tuoi dati e può solo proporre modifiche che applichi tu.",
+      "faq2Q": "È attivo per impostazione predefinita?",
+      "faq2A": "No. Resta spento finché non lo attivi. Per spegnere tutte le funzioni IA in una volta, usa Nascondi funzioni IA in Impostazioni › Privacy.",
+      "faq3Q": "Vede i conti privati degli altri membri della mia famiglia?",
+      "faq3A": "Solo quelli condivisi con te. Un conto privato nascosto a te resta nascosto anche all'assistente e ai client MCP, e le tue proposte sono visibili solo a te.",
+      "ctaHeadline": "Chiedi a WonderMoney del tuo denaro",
+      "ctaBody": "Attiva l'assistente quando vuoi e tieni ogni modifica nelle tue mani."
+    },
+    "featureMultiCurrency": {
+      "eyebrow": "Multivaluta",
+      "metaTitle": "App di finanza personale multivaluta | WonderMoney",
+      "metaDescription": "Tieni conti in euro, dollari, sterline o qualsiasi altra valuta e vedi ogni totale nella tua, convertito ai tassi giornalieri della Banca Centrale Europea. Un importo senza tasso viene segnalato, non inventato.",
+      "heroTitle": "Ogni valuta, un totale onesto",
+      "heroSubtitle": "Conti e transazioni possono essere in qualsiasi valuta. WonderMoney mostra ogni totale nella tua e dice chiaramente quando non è stato possibile convertire un importo.",
+      "schemaName": "WonderMoney Multivaluta",
+      "schemaDescription": "Conti e transazioni in qualsiasi valuta, con totali convertiti ai tassi di riferimento giornalieri della Banca Centrale Europea e gli importi senza tasso segnalati.",
+      "whatTitle": "Convertito al tasso di ogni giorno",
+      "whatBody": "Ogni importo in un'altra valuta viene convertito al tasso della Banca Centrale Europea della sua data, che copre le valute principali. I tassi si aggiornano nei giorni lavorativi, senza nulla da configurare.",
+      "whatPoint1": "Conti e transazioni in qualsiasi valuta",
+      "whatPoint2": "Totali nella tua valuta ai tassi di riferimento giornalieri della BCE",
+      "whatPoint3": "L'importo originale sotto quello convertito",
+      "whatPoint4": "Un importo senza tasso segnato come Non convertito e lasciato fuori dai totali",
+      "whatPoint5": "Segnato come Stimato quando l'unico tasso ha più di una settimana, e convertito di nuovo quando ne arriva uno più recente",
+      "howTitle": "Come funziona",
+      "step1Title": "Aggiungi i conti nella loro valuta",
+      "step1Body": "Un conto corrente in euro, un conto titoli in dollari, risparmi in sterline: ognuno mantiene la sua valuta.",
+      "step2Title": "Scegli la tua valuta",
+      "step2Body": "Patrimonio netto, flusso di cassa, report e totali vengono mostrati in questa valuta.",
+      "step3Title": "Leggi totali di cui fidarti",
+      "step3Body": "Quando un totale esclude un importo, dice quanti e in quali valute, così non somma mai due valute diverse.",
+      "householdTitle": "Ognuno nella propria valuta",
+      "householdBody": "In una famiglia, ognuno sceglie la propria valuta e vede ogni totale in quella. Saldi e transazioni degli altri membri vengono convertiti prima di essere sommati.",
+      "householdPoint1": "Patrimonio netto, flusso di cassa e spese nella valuta di ogni membro",
+      "householdPoint2": "I budget mantengono la valuta in cui sono stati creati",
+      "householdPoint3": "Storico del portafoglio convertito al tasso di ogni giorno",
+      "householdPoint4": "Saldi dei gruppi di spese condivise tenuti per valuta, mai convertiti",
+      "faqTitle": "Domande sulle valute",
+      "faq1Q": "Quali valute posso usare?",
+      "faq1A": "Conti e transazioni possono essere in qualsiasi valuta. La conversione usa i tassi di riferimento della Banca Centrale Europea, che coprono le valute principali; un importo in una valuta senza tasso resta nella sua valuta e fuori dai tuoi totali.",
+      "faq2Q": "Devo inserire i tassi di cambio?",
+      "faq2A": "No. I tassi vengono scaricati automaticamente nei giorni lavorativi, e gli importi stimati o non convertiti vengono riconvertiti dopo ogni aggiornamento.",
+      "faq3Q": "Perché un totale dice di essere incompleto?",
+      "faq3A": "Perché un suo importo non aveva un tasso di cambio. WonderMoney lo lascia fuori invece di sommarlo al valore nominale, e ti dice quali valute mancavano.",
+      "ctaHeadline": "Vedi tutto il tuo denaro in una sola valuta",
+      "ctaBody": "Aggiungi conti in qualsiasi valuta e leggi un unico totale di cui fidarti."
+    },
+    "featureSelfHosting": {
+      "eyebrow": "Self-hosting e API",
+      "metaTitle": "App di finanza personale self-hosted con API | WonderMoney",
+      "metaDescription": "WonderMoney è open source con licenza AGPL. Eseguilo sul tuo server con un solo file Docker Compose, accedi con il tuo provider di identità e collega script tramite l'API REST.",
+      "heroTitle": "Eseguilo sul tuo server",
+      "heroSubtitle": "WonderMoney è gratuito e open source. Usalo su wonder.money, oppure esegui la stessa app su un server di casa, un NAS o un piccolo VPS, con i tuoi dati nel tuo database.",
+      "schemaName": "WonderMoney Self-hosting",
+      "schemaDescription": "Software open source di finanza personale con licenza AGPL che gira sul tuo server con Docker Compose o Kubernetes, con single sign-on e un'API REST con token personali.",
+      "whatTitle": "La stessa app, sulla tua macchina",
+      "whatBody": "Un server self-hosted ha la stessa app di wonder.money: conti, sincronizzazione bancaria, budget, obiettivi, prestiti, famiglie e portafogli. Gli extra facoltativi si attivano quando li configuri e restano nascosti altrimenti.",
+      "whatPoint1": "Un solo file Docker Compose esegue Postgres, l'API, un worker in background e l'app web",
+      "whatPoint2": "Circa 2 GB di memoria libera: un piccolo VPS, un server di casa o un NAS",
+      "whatPoint3": "Funzioni IA con qualsiasi endpoint compatibile con OpenAI, incluso un Ollama locale",
+      "whatPoint4": "Single sign-on con il tuo provider di identità, come Authentik o Keycloak",
+      "whatPoint5": "Sincronizzazione bancaria con la tua chiave Enable Banking, e SimpleFIN per le banche di Stati Uniti e Canada",
+      "whatPoint6": "Un chart Helm per Kubernetes",
+      "howTitle": "Come iniziare",
+      "step1Title": "Procurati una macchina con Docker",
+      "step1Body": "Bastano Docker con il plugin Compose e circa 2 GB di memoria libera.",
+      "step2Title": "Esegui l'installazione",
+      "step2Body": "Lo script di installazione configura i container e genera i segreti. Aggiungi un dominio e HTTPS per usarlo fuori dalla tua rete.",
+      "step3Title": "Comincia a usarlo",
+      "step3Body": "Crea il tuo account, o ripristina un'esportazione da wonder.money: un'esportazione si carica in una famiglia vuota su un altro server.",
+      "apiTitle": "Un'API per i tuoi script",
+      "apiBody": "Dai a uno script, a un foglio di calcolo o a una dashboard di casa l'accesso alle tue finanze con un token API personale, su wonder.money o sul tuo server.",
+      "apiPoint1": "Un'API REST con documentazione di riferimento pubblica",
+      "apiPoint2": "Accesso in lettura o in scrittura, che non arriva mai a eliminazioni, collegamenti bancari o famiglia",
+      "apiPoint3": "Token che scadono dopo 30, 90 o 365 giorni",
+      "apiPoint4": "Di ogni token si conserva solo un hash, per questo viene mostrato una sola volta",
+      "faqTitle": "Domande sul self-hosting",
+      "faq1Q": "È davvero gratuito?",
+      "faq1A": "Sì. Il codice è open source con licenza GNU AGPL v3, e anche il servizio ospitato su wonder.money è gratuito.",
+      "faq2Q": "La sincronizzazione bancaria funziona sul mio server?",
+      "faq2A": "Sì. Sul server non serve nulla: ogni persona aggiunge la propria chiave Enable Banking nelle Impostazioni. Puoi anche attivare SimpleFIN per le banche di Stati Uniti e Canada.",
+      "faq3Q": "Posso spostarmi tra wonder.money e il mio server?",
+      "faq3A": "Sì. Esporta i tuoi dati da uno e ripristinali in una famiglia vuota sull'altro.",
+      "ctaHeadline": "Il tuo server, i tuoi dati",
+      "ctaBody": "Inizia su wonder.money e passa al tuo server quando vuoi, o viceversa."
     }
   },
   "article": {

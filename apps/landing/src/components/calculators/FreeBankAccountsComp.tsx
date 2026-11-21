@@ -96,7 +96,7 @@ function AccountCards({ accounts }: { accounts: readonly FreeBankAccount[] }) {
   return (
     <ul className="mt-4 space-y-3 lg:hidden">
       {accounts.map((account) => (
-        <li key={account.id} className="rounded-card border border-border bg-background p-4 shadow-sm">
+        <li key={account.id} className="rounded-card border border-border bg-background p-4">
           <p className="break-words text-base">
             <AccountName account={account} />
           </p>
@@ -118,8 +118,14 @@ function AccountTable({ accounts, group }: { accounts: readonly FreeBankAccount[
   const { t } = useTranslations();
   return (
     <div className="mt-4 hidden overflow-x-auto rounded-lg border border-border lg:block">
-      <table className="w-full text-sm">
+      {/* Fixed columns, so the two groups' tables line up one above the other. */}
+      <table className="w-full table-fixed text-sm">
         <caption className="sr-only">{t(k(`groups.${group}.title`))}</caption>
+        <colgroup>
+          <col className="w-[30%]" />
+          <col className="w-32" />
+          <col />
+        </colgroup>
         <thead className="bg-paper-2 text-muted-foreground">
           <tr>
             <th scope="col" className="px-3 py-2 text-left font-medium">{t(k("columns.account"))}</th>

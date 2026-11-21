@@ -1,6 +1,6 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { CalendarSync, ChartColumn, RefreshCw, Sparkles, Users, WalletCards } from "lucide-react";
 import CTABanner from "@/components/shared/CTABanner";
 import BudgetsPreview from "@/components/homepage/previews/BudgetsPreview";
 import BudgetEnvelopePreview from "@/components/homepage/previews/BudgetEnvelopePreview";
@@ -10,6 +10,7 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
 
 function StepCard({ number, title, body }: { number: number; title: string; body: string }) {
@@ -26,15 +27,6 @@ function StepCard({ number, title, body }: { number: number; title: string; body
 	);
 }
 
-function FeatureItem({ text }: { text: string }) {
-	return (
-		<div className="flex items-start gap-3">
-			<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-			<span className="text-foreground text-base">{text}</span>
-		</div>
-	);
-}
-
 export default function FeatureBudgeting({ locale }: { locale: Lang }) {
 	return (
 		<ReactTranslationsProvider locale={locale}>
@@ -47,12 +39,12 @@ function FeatureBudgetingContent({ locale }: { locale: Lang }) {
 	const { t } = useTranslations();
 
 	const features = [
-		t("lp.featureBudgeting.feature1"),
-		t("lp.featureBudgeting.feature2"),
-		t("lp.featureBudgeting.feature3"),
-		t("lp.featureBudgeting.feature4"),
-		t("lp.featureBudgeting.feature5"),
-		t("lp.featureBudgeting.feature6"),
+		{ icon: WalletCards, text: t("lp.featureBudgeting.feature1") },
+		{ icon: RefreshCw, text: t("lp.featureBudgeting.feature2") },
+		{ icon: Sparkles, text: t("lp.featureBudgeting.feature3") },
+		{ icon: CalendarSync, text: t("lp.featureBudgeting.feature4") },
+		{ icon: ChartColumn, text: t("lp.featureBudgeting.feature5") },
+		{ icon: Users, text: t("lp.featureBudgeting.feature6") },
 	];
 
 	return (
@@ -90,17 +82,13 @@ function FeatureBudgetingContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			{/* What Is Envelope Budgeting */}
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-6">
-						{t("lp.featureBudgeting.whatTitle")}
-					</h2>
-					<p className="max-w-[60ch] text-muted-foreground leading-7">
-						{t("lp.featureBudgeting.whatBody")}
-					</p>
-				</div>
-			</section>
+			{/* What is envelope budgeting, beside what the budget does */}
+			<FeatureExplainer
+				title={t("lp.featureBudgeting.whatTitle")}
+				body={t("lp.featureBudgeting.whatBody")}
+				pointsTitle={t("lp.featureBudgeting.featuresTitle")}
+				points={features}
+			/>
 
 			<MidCTA locale={locale} />
 
@@ -120,18 +108,6 @@ function FeatureBudgetingContent({ locale }: { locale: Lang }) {
 						<div className="sticky top-4 lg:top-8">
 							<BudgetEnvelopePreview />
 						</div>
-					</div>
-				</div>
-			</section>
-
-			{/* Features */}
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-10 text-center">
-						{t("lp.featureBudgeting.featuresTitle")}
-					</h2>
-					<div className="grid gap-4 sm:grid-cols-2">
-						{features.map((f, i) => <FeatureItem key={i} text={f} />)}
 					</div>
 				</div>
 			</section>

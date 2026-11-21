@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
+import CalculatorLayout from "./CalculatorLayout";
 import {
   BROKER_FEES,
   BROKER_FEES_ASSUMPTIONS,
@@ -21,6 +22,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { createFeeFormat, formatCheckedDate } from "@/lib/calculators/brokerFeesFormat";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.brokerFees.${key}`;
 const MARKETS: readonly Market[] = ["etfEu", "usStock"];
@@ -74,8 +76,6 @@ function BrokerFees() {
 
   const eur = (value: number) => formatMoney(locale, value, { currency: "EUR", decimals: 0 });
   const reviewed = formatCheckedDate(locale, BROKER_FEES_REVIEWED);
-  const selectClass =
-    "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <>
@@ -96,134 +96,140 @@ function BrokerFees() {
       <h2 className="mt-10 text-2xl font-semibold tracking-tight text-foreground">{t(k("calculator.title"))}</h2>
       <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{t(k("calculator.intro"))}</p>
 
-      <fieldset className="mt-6">
-        <legend className="text-sm font-medium text-foreground">{t(k("calculator.profile"))}</legend>
-        <div className="mt-2 grid gap-3 sm:grid-cols-3">
-          {PROFILE_IDS.map((id) => (
-            <label
-              key={id}
-              className={`flex cursor-pointer gap-3 rounded-card border p-4 text-sm ${
-                profile === id ? "border-primary bg-paper-2" : "border-border bg-background"
-              }`}
-            >
-              <input
-                type="radio"
-                name="broker-fees-profile"
-                value={id}
-                checked={profile === id}
-                onChange={() => pickProfile(id)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+      <div className="mt-6">
+        <CalculatorLayout>
+          <div className="space-y-5 rounded-card border border-border bg-background p-5 sm:p-6 lg:sticky lg:top-24">
+            <fieldset>
+              <legend className="text-sm font-medium text-foreground">{t(k("calculator.profile"))}</legend>
+              <div className="mt-2 grid gap-2">
+                {PROFILE_IDS.map((id) => (
+                  <label
+                    key={id}
+                    className={`flex cursor-pointer gap-3 rounded-md border p-3 text-sm ${
+                      profile === id ? "border-primary/60 bg-paper-2" : "border-input bg-background hover:bg-accent"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="broker-fees-profile"
+                      value={id}
+                      checked={profile === id}
+                      onChange={() => pickProfile(id)}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+                    />
+                    <span>
+                      <span className="block font-semibold text-foreground">{t(k(`profiles.${id}.label`))}</span>
+                      <span className="mt-1 block text-muted-foreground">{t(k(`profiles.${id}.description`))}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+              {profile === "custom" && <p className="mt-2 text-xs text-muted-foreground">{t(k("profiles.custom"))}</p>}
+            </fieldset>
+
+            <div className="grid gap-5 border-t border-border pt-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div className="space-y-1.5">
+                <label htmlFor="broker-fees-market" className="block text-sm font-medium text-foreground">
+                  {t(k("fields.market"))}
+                </label>
+                <Select
+                  id="broker-fees-market"
+                  value={scenario.market}
+                  onChange={(event) => update("market", event.currentTarget.value as Market)}
+                >
+                  {MARKETS.map((market) => (
+                    <option key={market} value={market}>
+                      {t(k(`markets.${market}`))}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <CalculatorInput
+                id="broker-fees-trades"
+                label={t(k("fields.trades"))}
+                value={scenario.trades}
+                onChange={(value) => update("trades", value)}
+                min={0}
+                max={BROKER_FEES_LIMITS.maxTrades}
+                step={1}
+                helpText={t(k("help.trades"))}
+                error={errors.includes("trades") ? t(k("errors.trades"), { max: String(BROKER_FEES_LIMITS.maxTrades) }) : undefined}
               />
-              <span>
-                <span className="block font-semibold text-foreground">{t(k(`profiles.${id}.label`))}</span>
-                <span className="mt-1 block text-muted-foreground">{t(k(`profiles.${id}.description`))}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-        {profile === "custom" && <p className="mt-2 text-xs text-muted-foreground">{t(k("profiles.custom"))}</p>}
-      </fieldset>
+              <CalculatorInput
+                id="broker-fees-amount"
+                label={t(k("fields.tradeAmount"))}
+                value={scenario.tradeAmount}
+                onChange={(value) => update("tradeAmount", value)}
+                min={0}
+                max={BROKER_FEES_LIMITS.maxTradeAmount}
+                step={100}
+                prefix="€"
+                error={
+                  errors.includes("tradeAmount")
+                    ? t(k("errors.amount"), { max: eur(BROKER_FEES_LIMITS.maxTradeAmount) })
+                    : undefined
+                }
+              />
+              <CalculatorInput
+                id="broker-fees-portfolio"
+                label={t(k("fields.portfolio"))}
+                value={scenario.portfolio}
+                onChange={(value) => update("portfolio", value)}
+                min={0}
+                max={BROKER_FEES_LIMITS.maxPortfolio}
+                step={1000}
+                prefix="€"
+                helpText={t(k("help.portfolio"))}
+                error={
+                  errors.includes("portfolio") ? t(k("errors.amount"), { max: eur(BROKER_FEES_LIMITS.maxPortfolio) }) : undefined
+                }
+              />
+              {scenario.market === "etfEu" && (
+                <label className="col-span-full flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={scenario.useSavingsPlan}
+                    onChange={(event) => update("useSavingsPlan", event.currentTarget.checked)}
+                    className="h-5 w-5 shrink-0 rounded border-input accent-primary"
+                  />
+                  {t(k("fields.savingsPlan"))}
+                </label>
+              )}
+            </div>
+            <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+              {t(k("calculator.assumptions"), {
+                rate: number(BROKER_FEES_ASSUMPTIONS.eurUsd),
+                rateDate: formatCheckedDate(locale, BROKER_FEES_ASSUMPTIONS.eurUsdDate),
+                price: formatMoney(locale, BROKER_FEES_ASSUMPTIONS.sharePrice, { currency: "USD", decimals: 0 }),
+              })}
+            </p>
+          </div>
 
-      <div className="mt-5 grid gap-5 rounded-card border border-border bg-background p-5 shadow-sm sm:grid-cols-2 sm:p-6 lg:grid-cols-4">
-        <div className="space-y-1.5">
-          <label htmlFor="broker-fees-market" className="block text-sm font-medium text-foreground">
-            {t(k("fields.market"))}
-          </label>
-          <select
-            id="broker-fees-market"
-            className={selectClass}
-            value={scenario.market}
-            onChange={(event) => update("market", event.currentTarget.value as Market)}
-          >
-            {MARKETS.map((market) => (
-              <option key={market} value={market}>
-                {t(k(`markets.${market}`))}
-              </option>
-            ))}
-          </select>
-        </div>
-        <CalculatorInput
-          id="broker-fees-trades"
-          label={t(k("fields.trades"))}
-          value={scenario.trades}
-          onChange={(value) => update("trades", value)}
-          min={0}
-          max={BROKER_FEES_LIMITS.maxTrades}
-          step={1}
-          helpText={t(k("help.trades"))}
-          error={errors.includes("trades") ? t(k("errors.trades"), { max: String(BROKER_FEES_LIMITS.maxTrades) }) : undefined}
-        />
-        <CalculatorInput
-          id="broker-fees-amount"
-          label={t(k("fields.tradeAmount"))}
-          value={scenario.tradeAmount}
-          onChange={(value) => update("tradeAmount", value)}
-          min={0}
-          max={BROKER_FEES_LIMITS.maxTradeAmount}
-          step={100}
-          prefix="€"
-          error={
-            errors.includes("tradeAmount")
-              ? t(k("errors.amount"), { max: eur(BROKER_FEES_LIMITS.maxTradeAmount) })
-              : undefined
-          }
-        />
-        <CalculatorInput
-          id="broker-fees-portfolio"
-          label={t(k("fields.portfolio"))}
-          value={scenario.portfolio}
-          onChange={(value) => update("portfolio", value)}
-          min={0}
-          max={BROKER_FEES_LIMITS.maxPortfolio}
-          step={1000}
-          prefix="€"
-          helpText={t(k("help.portfolio"))}
-          error={
-            errors.includes("portfolio") ? t(k("errors.amount"), { max: eur(BROKER_FEES_LIMITS.maxPortfolio) }) : undefined
-          }
-        />
-        {scenario.market === "etfEu" && (
-          <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-foreground sm:col-span-2 lg:col-span-4">
-            <input
-              type="checkbox"
-              checked={scenario.useSavingsPlan}
-              onChange={(event) => update("useSavingsPlan", event.currentTarget.checked)}
-              className="h-5 w-5 rounded border-input accent-primary"
-            />
-            {t(k("fields.savingsPlan"))}
-          </label>
-        )}
+          {/* The ranking as one ledger: a hairline between brokers, no card per row. */}
+          <section aria-labelledby="broker-fees-results" className="rounded-card border border-border bg-background p-5 sm:p-6">
+            <h3 id="broker-fees-results" className="text-lg font-semibold text-foreground">
+              {t(k("result.title"))}
+            </h3>
+            <div aria-live="polite">
+              {errors.length > 0 ? (
+                <p className="mt-3 text-sm text-muted-foreground">{t(k("result.invalid"))}</p>
+              ) : (
+                <ol className="mt-2 divide-y divide-border">
+                  {costs.map((cost) => (
+                    // Equal totals share a place, so a tie does not read as an order.
+                    <CostRow
+                      key={cost.broker.id}
+                      cost={cost}
+                      rank={costs.findIndex((other) => other.total === cost.total && other.missing.length === 0) + 1}
+                      scenario={scenario}
+                    />
+                  ))}
+                </ol>
+              )}
+            </div>
+          </section>
+        </CalculatorLayout>
       </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        {t(k("calculator.assumptions"), {
-          rate: number(BROKER_FEES_ASSUMPTIONS.eurUsd),
-          rateDate: formatCheckedDate(locale, BROKER_FEES_ASSUMPTIONS.eurUsdDate),
-          price: formatMoney(locale, BROKER_FEES_ASSUMPTIONS.sharePrice, { currency: "USD", decimals: 0 }),
-        })}
-      </p>
-
-      <section aria-labelledby="broker-fees-results" className="mt-8">
-        <h3 id="broker-fees-results" className="text-lg font-semibold text-foreground">
-          {t(k("result.title"))}
-        </h3>
-        <div aria-live="polite">
-          {errors.length > 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">{t(k("result.invalid"))}</p>
-          ) : (
-            <ol className="mt-3 space-y-3">
-              {costs.map((cost) => (
-                // Equal totals share a place, so a tie does not read as an order.
-                <CostRow
-                  key={cost.broker.id}
-                  cost={cost}
-                  rank={costs.findIndex((other) => other.total === cost.total && other.missing.length === 0) + 1}
-                  scenario={scenario}
-                />
-              ))}
-            </ol>
-          )}
-        </div>
-      </section>
 
       <FeeTable />
       <Notices />
@@ -273,7 +279,7 @@ function CostRow({ cost, rank, scenario }: { cost: BrokerCost; rank: number; sce
   }
 
   return (
-    <li className="rounded-card border border-border bg-background p-4 shadow-sm">
+    <li className="py-4 last:pb-0">
       <div className="flex items-start justify-between gap-3">
         <p className="min-w-0 text-base font-semibold text-foreground">
           <span className="mr-2 font-mono text-sm text-muted-foreground">{incomplete ? "–" : `${rank}.`}</span>
@@ -408,9 +414,9 @@ function FeeTable() {
         {t(k("table.title"))}
       </h2>
       <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{t(k("table.intro"))}</p>
-      <ul className="mt-4 space-y-3 lg:hidden">
+      <ul className="mt-4 divide-y divide-border rounded-card border border-border bg-background lg:hidden">
         {brokers.map((broker) => (
-          <li key={broker.id} className="rounded-card border border-border bg-background p-4 shadow-sm">
+          <li key={broker.id} className="p-4">
             <p className="text-base font-semibold text-foreground">{broker.name}</p>
             <p className="break-words text-xs text-muted-foreground">
               {broker.entity} · {labels.countryLabel(broker)} · {t(k("table.regulator"), { name: broker.regulator })}

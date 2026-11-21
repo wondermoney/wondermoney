@@ -123,8 +123,12 @@ function StatePensionCalculator() {
         <div aria-live="polite" aria-atomic="true">
           {result ? (
             <>
-              <p className="text-sm text-muted-foreground">{t(k("result.monthly"))}</p>
-              <p id="state-pension-monthly" className="font-mono text-3xl font-bold text-primary">
+              {/* The answer heads the ledger below, as CalculatorResult sets a leading highlight. */}
+              <p className="text-sm font-medium text-foreground">{t(k("result.monthly"))}</p>
+              <p
+                id="state-pension-monthly"
+                className="mt-1 font-mono text-2xl font-semibold leading-tight tracking-tight text-primary sm:text-3xl"
+              >
                 {money(result.monthlyCents)}
               </p>
             </>
@@ -134,6 +138,7 @@ function StatePensionCalculator() {
         </div>
         {result && (
           <>
+            <div className="-mt-2 border-t border-border">
             <CalculatorResult
               items={[
                 { label: t(k("result.replacement")), value: percent(result.replacementBp, 1) },
@@ -144,10 +149,10 @@ function StatePensionCalculator() {
                 {
                   label: t(k("result.gap")),
                   value: result.gapCents > 0 ? `−${money(result.gapCents)}` : money(0),
-                  highlight: true,
                 },
               ]}
             />
+            </div>
             <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
               {adjustmentText}
               {result.floor === "minimum" ? ` ${t(k("result.floorApplied"))}` : ""}

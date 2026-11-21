@@ -64,9 +64,7 @@ const AccountTransactionDeleteModal: React.FC<
   };
 
   const onDelete = async () => {
-    posthog.capture("account_transaction_delete", {
-      transactionKey: transaction.transactionKey,
-    });
+    posthog.capture("account_transaction_delete");
     try {
       await deleteTransaction.mutateAsync(transaction.transactionKey);
       await invalidateAfterTransactionDelete(qc);

@@ -375,8 +375,31 @@
     "features": "Funktionen",
     "about": "Über uns",
     "tools": "Tools",
+    "comparators": "Vergleichsrechner",
     "toolsMenu": {
-      "seeAll": "Alle Tools ansehen"
+      "seeAll": "Alle Tools ansehen",
+      "subgroups": {
+        "planAndSave": "Planen und sparen",
+        "salaryAndBenefits": "Gehalt und Sozialleistungen",
+        "pricesAndInflation": "Preise und Inflation",
+        "homeLoan": "Baufinanzierung",
+        "buyingAndTaxes": "Hauskauf und Steuern",
+        "carAndPersonalLoans": "Auto und Privatkredite",
+        "investing": "Investieren",
+        "retirement": "Ruhestand",
+        "depositsAndCertificates": "Einlagen und Sparzertifikate"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Angebote von Banken, Brokern, Versicherern und Energieversorgern in Portugal im direkten Vergleich.",
+      "items": {
+        "electricityTariffComparison": "Alle Haushaltsangebote, sortiert nach Ihren jährlichen Kosten",
+        "freeBankAccounts": "Kostenlose Girokonten und die Bedingungen jedes Kontos",
+        "termDepositOffers": "Festgeldangebote nach Laufzeit und Betrag, mit Zinsen nach Steuern",
+        "remuneratedAccounts": "Verzinste Konten und Sparkonten, mit Nettozinsen nach IRS",
+        "brokerFees": "Depot-, Handels- und Währungsgebühren der Broker in Portugal",
+        "pprComparison": "PPR-Fonds, -Versicherungen und -Pensionsfonds nach Risiko, Kosten und Rendite"
+      }
     },
     "learn": "Lernen",
     "glossary": "Glossar",
@@ -409,6 +432,22 @@
         "name": "Datenschutz",
         "description": "Bankverbindungen nutzen Nur-Lese-Open-Banking über Enable Banking. WonderMoney kann keine Überweisungen veranlassen."
       },
+      "netWorth": {
+        "name": "Vermögen",
+        "description": "Konten, Investitionen und Schulden in einer einzigen Zahl"
+      },
+      "financialMarkets": {
+        "name": "Finanzmärkte",
+        "description": "Aktien, ETFs und Watchlists mit aktuellen Daten, neben Ihren Konten"
+      },
+      "goals": {
+        "name": "Ziele",
+        "description": "Sparziele festlegen und den Fortschritt verfolgen"
+      },
+      "credits": {
+        "name": "Kredite",
+        "description": "Ihre Gesamtschuld und jede Rate, mit einem Tilgungsplan"
+      },
       "learn": {
         "name": "Lernen",
         "description": "Ratgeber und Artikel zu persönlichen Finanzen"
@@ -416,6 +455,30 @@
       "glossary": {
         "name": "Glossar",
         "description": "Verständliche Erklärungen zu Finanzbegriffen"
+      },
+      "household": {
+        "name": "Haushalt",
+        "description": "Finanzen mit den Menschen teilen, mit denen Sie leben, und private Konten privat halten"
+      },
+      "imports": {
+        "name": "Import",
+        "description": "Kontoauszüge als CSV, Excel, OFX, QIF und CAMT.053 importieren, oder Ihren YNAB-Verlauf"
+      },
+      "recurring": {
+        "name": "Rechnungen und Abos",
+        "description": "Wiederkehrende Zahlungen automatisch erkannt, im Kalender und in einer 30-Tage-Prognose"
+      },
+      "assistant": {
+        "name": "KI-Assistent",
+        "description": "Fragen zu Ihrem Geld in einfachen Worten: Er schlägt vor, Sie entscheiden"
+      },
+      "multiCurrency": {
+        "name": "Mehrere Währungen",
+        "description": "Konten in jeder Währung, Summen in Ihrer Währung zu den täglichen EZB-Kursen"
+      },
+      "selfHosting": {
+        "name": "Self-Hosting und API",
+        "description": "WonderMoney auf Ihrem eigenen Server betreiben und Skripte über die API anbinden"
       }
     },
     "faq": "FAQ"
@@ -456,7 +519,14 @@
         "exampleBudget": "Für denselben Warenkorb braucht ein Budget von {{amount}} aus dem Jahr {{from}} im Jahr {{to}} {{equivalent}}. Die durchschnittlichen Preise änderten sich um {{inflation}}.",
         "exampleInvestment": "Steigt eine Anlage von {{amount}} im Jahr {{from}} auf {{finalValue}} im Jahr {{to}}, entspricht der Endbetrag {{realValue}} in Euro des Jahres {{from}}.",
         "methodTitle": "So funktioniert die Inflationsbereinigung",
-        "method": "Wir verwenden den Jahresdurchschnitt des portugiesischen Verbraucherpreisindex (VPI) für alle Waren und Dienstleistungen mit Basisjahr {{baseYear}}. Jedes Jahr steht für den Durchschnitt der Preise von Januar bis Dezember. Teilen Sie den VPI des Vergleichsjahres durch den VPI des Ausgangsjahres. Multiplizieren Sie den Ausgangsbetrag mit diesem Verhältnis und teilen Sie den Endbetrag durch dasselbe Verhältnis, um ihn in Euro des Ausgangsjahres auszudrücken.",
+        "method": "Wir verwenden den Jahresdurchschnitt des portugiesischen Verbraucherpreisindex (VPI) für alle Waren und Dienstleistungen mit Basisjahr {{baseYear}}. Jedes Jahr steht für den Durchschnitt der Preise von Januar bis Dezember.",
+        "methodFormulasLabel": "Formeln",
+        "formulaAmount": "Ausgangsbetrag",
+        "formulaEquivalent": "Gleichwertiger Betrag",
+        "formulaFinal": "Endbetrag",
+        "formulaReal": "Endbetrag in Euro des Ausgangsjahres",
+        "formulaCpiStart": "VPI des Ausgangsjahres",
+        "formulaCpiComparison": "VPI des Vergleichsjahres",
         "limitations": "Ihre Ausgaben können sich anders entwickeln als der landesweite Warenkorb. Der Anlagevergleich geht von einem Anfangs- und Endbetrag ohne Ein- oder Auszahlungen aus. Gebühren und Steuern sind nur berücksichtigt, soweit sie bereits im eingegebenen Endbetrag enthalten sind. Geben Sie alle Beträge in Euro ein und rechnen Sie historische Escudo-Beträge vorher um.",
         "coverage": "Die Daten decken die vollständigen Jahre von {{first}} bis {{last}} ab.",
         "retrieved": "Daten abgerufen am {{date}}.",
@@ -534,7 +604,18 @@
         "reviewed": "Regeln geprüft am 20. November 2026 für die 2026 und 2027 zu zahlende IMI. Die Beträge der IMI Familiar stammen aus Artikel 112-A des Código do IMI (Portal das Finanças).",
         "methodMinimum": "Liegt die einzuziehende Steuer nach einer etwaigen IMI-Familiar-Ermäßigung unter 10 €, wird keine IMI festgesetzt, und der Rechner zeigt 0 € mit einem Hinweis (Artikel 113 Nr. 6 des Código do IMI).",
         "sourceMinimum": "Código do IMI, Artikel 113: Festsetzung, keine IMI unter 10 € (abgerufen am 19. November 2026)",
-        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung der Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)"
+        "sourceEbf": "Steuervergünstigungsstatut (EBF), Artikel 46: Befreiung für den Hauptwohnsitz, in der Fassung der Lei n.º 82/2023, gleichlautend mit dem konsolidierten Text im Diário da República (abgerufen am 20. November 2026)",
+        "terms": {
+          "tax": "Jährliche IMI",
+          "family": "IMI Familiar",
+          "minimum": "Mindestbetrag",
+          "payment": "Raten",
+          "budget": "Monatliche Rücklage",
+          "rate": "Kommunaler Satz",
+          "scope": "Umfang",
+          "educational": "Schätzung zur Orientierung"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Lassen Sie sich von der IMI nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel der IMI zurückzulegen, damit die Raten schon gedeckt sind.",
@@ -612,13 +693,30 @@
         "exampleTarget": "Bei einer Entnahmerate von {{rate}} ist Ihre FIRE-Zahl {{spending}} ÷ {{rate}} = {{target}}. Mit den heutigen {{assets}} haben Sie also {{progress}} des Wegs geschafft.",
         "exampleTime": "Bis die Anlagen mit monatlichem Wachstum und den Sparraten die Marke von {{target}} überschreiten, dauert es {{time}}. Wenn Sie {{cut}} weniger ausgeben, also {{cutSpending}} pro Jahr, sinkt das Ziel auf {{cutTarget}}; bis dahin dauert es {{cutTime}}. Der Rechner oben startet mit diesen Zahlen, damit Sie Ihre eigenen einsetzen können.",
         "methodHeading": "Methode",
-        "methodFormula": "FIRE-Zahl = jährliche Ausgaben ÷ Entnahmerate",
-        "methodMultiple": "Bei 4 % ist das Ziel das 25-Fache Ihrer jährlichen Ausgaben, bei 3 % etwa das 33-Fache. Eine niedrigere Rate ergibt ein höheres Ziel und mehr Puffer für schlechte Jahre.",
-        "methodGrowth": "Jeden Monat wachsen die Anlagen mit dem Monatszins, der aufs Jahr gerechnet Ihre angegebene Rendite ergibt; danach kommt die Sparrate des Monats dazu. Die angezeigte Zeit ist der erste Monat, in dem die Summe Ihre FIRE-Zahl erreicht.",
-        "methodRealMoney": "Die Rendite ist real, also nach Inflation; deshalb sind alle Beträge in heutigen Euro. Ausgaben und Sparraten steigen annahmegemäß mit den Preisen und bleiben darum in der Rechnung gleich.",
-        "methodHorizon": "Die Projektion endet nach {{years}} Jahren. Können Sparraten und Wachstum das Ziel nicht erreichen, etwa ohne Sparrate und ohne Rendite, sagt der Rechner das, statt ein Datum zu nennen.",
-        "methodLeftOut": "Nicht berücksichtigt sind Steuern auf Erträge und Entnahmen, Fonds- und Plattformgebühren sowie das Sequenzrisiko, also schwache Renditen in den ersten Jahren, in denen Sie von Ihren Anlagen leben. Eine Entnahmerate ist eine Faustregel aus vergangenen Renditen, keine Garantie.",
-        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert."
+        "methodMultipleBody": "Bei 4 % ist das Ziel das 25-Fache Ihrer jährlichen Ausgaben, bei 3 % etwa das 33-Fache. Eine niedrigere Rate ergibt ein höheres Ziel und mehr Puffer für schlechte Jahre.",
+        "methodGrowthBody": "Jeden Monat wachsen die Anlagen mit dem Monatszins, der aufs Jahr gerechnet Ihre angegebene Rendite ergibt; danach kommt die Sparrate des Monats dazu. Die angezeigte Zeit ist der erste Monat, in dem die Summe Ihre FIRE-Zahl erreicht.",
+        "methodRealMoneyBody": "Die Rendite ist real, also nach Inflation; deshalb sind alle Beträge in heutigen Euro. Ausgaben und Sparraten steigen annahmegemäß mit den Preisen und bleiben darum in der Rechnung gleich.",
+        "methodHorizonBody": "Die Projektion endet nach {{years}} Jahren. Können Sparraten und Wachstum das Ziel nicht erreichen, etwa ohne Sparrate und ohne Rendite, sagt der Rechner das, statt ein Datum zu nennen.",
+        "methodLeftOutBody": "Nicht berücksichtigt sind Steuern auf Erträge und Entnahmen, Fonds- und Plattformgebühren sowie das Sequenzrisiko, also schwache Renditen in den ersten Jahren, in denen Sie von Ihren Anlagen leben. Eine Entnahmerate ist eine Faustregel aus vergangenen Renditen, keine Garantie.",
+        "methodPrivacyBody": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
+        "methodMultipleTerm": "Entnahmerate",
+        "methodGrowthTerm": "Monatliches Wachstum",
+        "methodRealMoneyTerm": "Heutige Kaufkraft",
+        "methodHorizonTerm": "Zeithorizont",
+        "methodLeftOutTerm": "Nicht berücksichtigt",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "fireNumber": "FIRE-Zahl",
+          "annualSpending": "jährliche Ausgaben",
+          "withdrawalRate": "Entnahmerate",
+          "monthlyRate": "Monatlicher Satz",
+          "monthlyRateLower": "monatlicher Satz",
+          "realReturn": "reale Jahresrendite",
+          "assetsEnd": "Anlagen am Monatsende",
+          "assetsStart": "Anlagen am Monatsanfang",
+          "contribution": "monatliche Sparrate"
+        }
       }
     },
     "compoundInterest": {
@@ -693,13 +791,11 @@
         "exampleStep3": "In heutiger Kaufkraft beträgt der Endwert {{realFinal}}: Ihre Einzahlungen sind {{realContributed}} wert, das Wachstum nach Inflation beträgt {{realGrowth}}.",
         "exampleComparison": "Wenn Sie die Sparrate auf {{comparisonMonthly}} pro Monat erhöhen, zahlen Sie über die Laufzeit {{extraContributed}} mehr ein, und der Endwert steigt um {{extraFinal}} auf {{comparisonFinal}}. In heutiger Kaufkraft beträgt der Unterschied {{extraReal}}.",
         "methodHeading": "So funktioniert der Rechner",
-        "methodFormula": "Jeden Monat: Kontostand = Kontostand × (1 + Jahresrendite ÷ 12) + monatliche Sparrate",
-        "methodRealFormula": "Wert in heutiger Kaufkraft = Wert ÷ (1 + jährliche Inflation) ^ Jahre",
-        "methodMonthly": "Die Jahresrendite wird in 12 gleiche Monatssätze aufgeteilt. Jeden Monat wächst der Kontostand um diesen Satz, danach kommt die Sparrate am Monatsende hinzu. {{rate}} Rendite mit monatlicher Verzinsung ergeben über ein volles Jahr {{effectiveRate}}.",
-        "methodInflation": "Die Inflation wird in einen gleichwertigen Monatssatz umgerechnet, der über das Jahr aufgezinst den Jahressatz ergibt. Der Endwert wird durch die Inflation über die gesamte Laufzeit geteilt, jede Einzahlung durch die Inflation bis zum Monat der Zahlung, sodass auch der eingezahlte Betrag in heutiger Kaufkraft erscheint.",
-        "methodRounding": "Das Wachstum wird jeden Monat auf den Cent gerundet. Summen werden in ganzen Euro angezeigt, und das Wachstum ist immer der Endwert minus die Einzahlungen, sodass die Zahlen zusammenpassen.",
-        "methodRanges": "Beträge reichen von 0 bis {{maxAmount}}, Rendite und Inflation von 0 % bis {{maxRate}} % und die Laufzeit von 0 bis {{maxYears}} ganzen Jahren. Werte außerhalb dieser Bereiche werden angepasst, und der Rechner weist Sie darauf hin.",
-        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Die eingegebenen Beträge werden nirgendwohin gesendet.",
+        "methodMonthlyBody": "Die Jahresrendite wird in 12 gleiche Monatssätze aufgeteilt. Jeden Monat wächst der Kontostand um diesen Satz, danach kommt die Sparrate am Monatsende hinzu. {{rate}} Rendite mit monatlicher Verzinsung ergeben über ein volles Jahr {{effectiveRate}}.",
+        "methodInflationBody": "Die Inflation wird in einen gleichwertigen Monatssatz umgerechnet, der über das Jahr aufgezinst den Jahressatz ergibt. Der Endwert wird durch die Inflation über die gesamte Laufzeit geteilt, jede Einzahlung durch die Inflation bis zum Monat der Zahlung, sodass auch der eingezahlte Betrag in heutiger Kaufkraft erscheint.",
+        "methodRoundingBody": "Das Wachstum wird jeden Monat auf den Cent gerundet. Summen werden in ganzen Euro angezeigt, und das Wachstum ist immer der Endwert minus die Einzahlungen, sodass die Zahlen zusammenpassen.",
+        "methodRangesBody": "Beträge reichen von 0 bis {{maxAmount}}, Rendite und Inflation von 0 % bis {{maxRate}} % und die Laufzeit von 0 bis {{maxYears}} ganzen Jahren. Werte außerhalb dieser Bereiche werden angepasst, und der Rechner weist Sie darauf hin.",
+        "methodPrivacyBody": "Die Berechnung läuft in Ihrem Browser. Die eingegebenen Beträge werden nirgendwohin gesendet.",
         "assumptionsHeading": "Annahmen",
         "assumption1": "Die Rendite ist jedes Jahr gleich.",
         "assumption2": "Einzahlungen erfolgen am Ende jedes Monats und bleiben über die ganze Laufzeit gleich.",
@@ -708,7 +804,21 @@
         "assumptionsNote": "Echte Geldanlagen schwanken, und Steuern und Gebühren schmälern, was Ihnen bleibt. Verstehen Sie das Ergebnis als Hochrechnung zum Vergleichen von Optionen, nicht als Vorhersage.",
         "rateHeading": "Welche Rendite Sie ansetzen sollten",
         "rateBody1": "Setzen Sie die Rendite an, die Sie nach Kosten und vor Inflation erwarten. Ein Tagesgeldkonto oder Staatsanleihen bringen weniger als ein breit gestreuter Aktienfonds, der über lange Zeiträume stärker wachsen kann, in manchen Jahren aber auch an Wert verliert.",
-        "rateBody2": "Wenn Sie unsicher sind, probieren Sie einen vorsichtigen und einen optimistischeren Satz aus und vergleichen Sie die Ergebnisse. Der Abstand zeigt, wie viel vom Ergebnis vom Zinssatz abhängt, den Sie nicht beeinflussen können, und wie viel von Sparrate und Laufzeit, die Sie selbst bestimmen."
+        "rateBody2": "Wenn Sie unsicher sind, probieren Sie einen vorsichtigen und einen optimistischeren Satz aus und vergleichen Sie die Ergebnisse. Der Abstand zeigt, wie viel vom Ergebnis vom Zinssatz abhängt, den Sie nicht beeinflussen können, und wie viel von Sparrate und Laufzeit, die Sie selbst bestimmen.",
+        "methodFormulasLabel": "Formeln",
+        "formulaBalanceEnd": "Kontostand am Monatsende",
+        "formulaBalanceStart": "Kontostand am Monatsanfang",
+        "formulaAnnualReturn": "Jahresrendite",
+        "formulaContribution": "monatliche Sparrate",
+        "formulaRealValue": "Wert in heutiger Kaufkraft",
+        "formulaValue": "Wert",
+        "formulaInflation": "jährliche Inflation",
+        "formulaYears": "Jahre",
+        "methodMonthlyTerm": "Monatliche Verzinsung",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Rundung",
+        "methodRangesTerm": "Wertebereiche",
+        "methodPrivacyTerm": "Datenschutz"
       }
     },
     "netWorth": {
@@ -879,7 +989,21 @@
         "assumptions": "Das Modell unterstellt eine konstante Rendite und konstante Kosten, wiederangelegte Ausschüttungen und Einzahlungen am Monatsende. Steuern, Ordergebühren, Wechselkursänderungen und Inflation bleiben unberücksichtigt. Die Renditen sind beispielhafte Annahmen für einen Index wie den S&P 500. Tatsächliche Renditen schwanken und können negativ sein. Der Kosteneffekt umfasst auch die entgangene Rendite auf die abgezogenen Beträge.",
         "ctaHeadline": "Die tatsächliche Wertentwicklung Ihrer Anlagen verfolgen",
         "ctaDescription": "Verfolgen Sie Ihr Portfolio mit WonderMoney und vergleichen Sie die tatsächliche Wertentwicklung mit dem simulierten Szenario.",
-        "ctaText": "Anlagen mit der Prognose vergleichen"
+        "ctaText": "Anlagen mit der Prognose vergleichen",
+        "methodTerm": "Wachstum und Kosten",
+        "assumptionsTerm": "Annahmen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "netFactor": "Jährlicher Nettowachstumsfaktor",
+          "annualReturn": "Jahresrendite",
+          "annualFee": "jährlicher Kostensatz",
+          "monthlyFactor": "Monatsfaktor",
+          "monthlyFactorLower": "Monatsfaktor",
+          "netFactorLower": "jährlicher Nettowachstumsfaktor",
+          "balanceEnd": "Saldo am Monatsende",
+          "balanceStart": "Saldo am Monatsanfang",
+          "contribution": "monatliche Einzahlung"
+        }
       }
     },
     "emergencyFund": {
@@ -926,15 +1050,13 @@
       "whatBody2": "Berechnen Sie ihn nur aus den notwendigen Ausgaben, die weiterlaufen, wenn Ihr Einkommen wegfällt: Wohnen, Lebensmittel, Nebenkosten, Mobilität, Versicherungen und Mindestraten für Kredite. Lassen Sie weg, was Sie pausieren könnten. Bewahren Sie das Geld sicher und schnell verfügbar auf, ohne Gebühren beim Abheben, etwa auf einem Tagesgeldkonto, statt es anzulegen.",
       "exampleTitle": "Ein Rechenbeispiel",
       "exampleIntro": "Angenommen, Ihre notwendigen Ausgaben liegen bei {{expenses}} im Monat, Sie haben schon {{savings}} zurückgelegt und können {{contribution}} im Monat sparen. Sie wählen {{months}} Monate Absicherung.",
-      "exampleStep1": "Ziel: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Noch zu sparen: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Zeit bis zum Ziel: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} Monate.",
       "exampleOutro": "Mit 3 Monaten Absicherung sinkt das Ziel auf {{lowTarget}} und Sie erreichen es in {{lowMonths}} Monaten. Wenn ein fernes Ziel Sie bremst, fangen Sie kleiner an und erhöhen Sie es, sobald die ersten Monate abgedeckt sind.",
       "methodTitle": "So funktioniert der Rechner",
-      "method1": "Ziel = notwendige monatliche Ausgaben × Monate Absicherung.",
-      "method2": "Noch zu sparen = Ziel − aktuelle Notfallrücklage. Sind Ihre Ersparnisse höher, erscheint die Differenz als Betrag über dem Ziel.",
-      "method3": "Zeit bis zum Ziel = noch zu sparen ÷ monatliche Sparrate, aufgerundet auf ganze Monate. Der Zielmonat liegt so viele Monate nach dem aktuellen, mit einer Sparrate pro Monat ab dem nächsten Monat.",
-      "method4": "Ihre Ersparnisse bringen hier keine Zinsen, und Ausgaben und Sparrate bleiben jeden Monat gleich. Zinsen würden Sie etwas früher ans Ziel bringen, steigende Preise etwas später. Prüfen Sie die Zahlen deshalb ein- oder zweimal im Jahr.",
+      "methodFormulasLabel": "Formeln",
+      "methodShortfallBody": "Sind Ihre Ersparnisse höher, erscheint die Differenz als Betrag über dem Ziel.",
+      "methodTimeBody": "Aufgerundet auf ganze Monate. Der Zielmonat liegt so viele Monate nach dem aktuellen, mit einer Sparrate pro Monat ab dem nächsten Monat.",
+      "methodInterestTerm": "Keine Zinsen",
+      "methodInterestBody": "Ihre Ersparnisse bringen hier keine Zinsen, und Ausgaben und Sparrate bleiben jeden Monat gleich. Zinsen würden Sie etwas früher ans Ziel bringen, steigende Preise etwas später. Prüfen Sie die Zahlen deshalb ein- oder zweimal im Jahr.",
       "nextStepHeadline": "Legen Sie Ihr Notgroschen-Ziel an und verfolgen Sie es",
       "nextStepDescription": "Speichern Sie diesen Betrag als Ziel in WonderMoney und verfolgen Sie Ihren Fortschritt anhand Ihrer echten Kontostände.",
       "nextStepCta": "Ziel anlegen"
@@ -1005,15 +1127,20 @@
         "exampleBody": "Ein Paar hat zusammen {{income}} netto im Monat. Es zahlt {{home}} für die Baufinanzierung, {{car}} für einen Autokredit und {{cards}} auf eine Kreditkarte, zusammen {{total}}. Raten geteilt durch Einkommen, mal 100: Die Quote liegt bei {{ratio}}, im Vorsichtsbereich.",
         "exampleScenario": "Der Autokredit ist bald abbezahlt. Ohne ihn sinken die Raten auf {{scenarioTotal}} und die Quote auf {{scenarioRatio}}, wieder im gesunden Bereich. Der Rechner oben startet mit diesem Haushalt und dieser Änderung, damit Sie Ihre eigenen Zahlen einsetzen können.",
         "methodHeading": "Methode",
-        "methodFormula": "Schuldendienstquote = monatliche Kreditraten gesamt ÷ monatliches Haushaltsnettoeinkommen × 100",
-        "methodCounts": "Als Schulden zählen: alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
-        "methodExcludes": "Nicht gezählt: Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
-        "methodIncome": "Das Einkommen ist netto: was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
         "methodRounding": "Die Quote wird auf eine Nachkommastelle gerundet, und der Bereich richtet sich nach dem gerundeten Wert. Raten über dem Einkommen ergeben eine Quote über 100 %.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden nicht gespeichert.",
         "nextHeading": "Planen Sie einen neuen Kredit?",
         "nextBody": "Eine Baufinanzierung oder ein anderer Kredit bringt eine weitere Rate. Berechnen Sie, was eine neue Hypothek im Monat kosten würde, und tragen Sie diese Rate im Szenario-Bereich ein, um die neue Quote zu sehen.",
-        "nextLink": "Hypothekenrechner öffnen"
+        "nextLink": "Hypothekenrechner öffnen",
+        "methodCountsTerm": "Als Schulden zählen",
+        "methodCountsBody": "Alle im Monat fälligen Raten für Baufinanzierung, Raten- und Autokredite, Kreditkarten, Leasing und sonstige Kredite. Bei einer Kreditkarte zählt der Betrag, den Sie tatsächlich jeden Monat zahlen.",
+        "methodExcludesTerm": "Nicht gezählt",
+        "methodExcludesBody": "Miete an einen Vermieter, Rechnungen, Lebensmittel, Versicherungen und Sparen. Sie belasten das Budget, tilgen aber kein geliehenes Geld.",
+        "methodIncomeTerm": "Das Einkommen ist netto",
+        "methodIncomeBody": "Was nach Steuern und Sozialabgaben auf dem Konto ankommt, für alle im Haushalt, die sich die Raten teilen. Schwankt das Einkommen, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "householdBudget": {
@@ -1094,21 +1221,35 @@
         "whatHeading": "Was ein Haushaltsbudget zeigt",
         "whatBody": "Ein Haushaltsbudget stellt die Einnahmen eines Monats seinen Ausgaben gegenüber. Wer die Ausgaben in wenige Kategorien gliedert, macht aus einer langen Liste von Zahlungen eine kurze Antwort: wie viel am Monatsende übrig bleibt und welche Lebensbereiche den größten Teil beanspruchen.",
         "readHeading": "So lesen Sie das Ergebnis",
-        "readSurplus": "Überschuss: Einnahmen minus Ausgaben, wenn der Wert positiv ist. Das ist das Geld, das Sie sparen, anlegen oder für Rechnungen zurücklegen können, die nicht jeden Monat kommen.",
-        "readDeficit": "Defizit: Ausgaben über den Einnahmen. Ein solcher Monat wird aus Ersparnissen oder mit Kredit bezahlt, daher lohnt es sich, Einsparungen zu finden, bevor er sich wiederholt.",
-        "readShares": "Anteil am Einkommen: jede Kategorie in Prozent der gesamten Einnahmen. So lassen sich Budgets unterschiedlicher Größe vergleichen, und Sie sehen, mit welcher Kategorie Sie anfangen sollten.",
-        "readDiagram": "Das Flussdiagramm zeigt dieselben Zahlen. Jedes Band ist so breit wie sein Betrag, von den Einnahmen links bis zu den Kategorien und dem Überschuss rechts.",
+        "readSurplusTerm": "Überschuss",
+        "readSurplusBody": "Einnahmen minus Ausgaben, wenn der Wert positiv ist. Das ist das Geld, das Sie sparen, anlegen oder für Rechnungen zurücklegen können, die nicht jeden Monat kommen.",
+        "readDeficitTerm": "Defizit",
+        "readDeficitBody": "Ausgaben über den Einnahmen. Ein solcher Monat wird aus Ersparnissen oder mit Kredit bezahlt, daher lohnt es sich, Einsparungen zu finden, bevor er sich wiederholt.",
+        "readSharesTerm": "Anteil am Einkommen",
+        "readSharesBody": "Jede Kategorie in Prozent der gesamten Einnahmen. So lassen sich Budgets unterschiedlicher Größe vergleichen, und Sie sehen, mit welcher Kategorie Sie anfangen sollten.",
+        "readDiagramTerm": "Flussdiagramm",
+        "readDiagramBody": "Es zeigt dieselben Zahlen. Jedes Band ist so breit wie sein Betrag, von den Einnahmen links bis zu den Kategorien und dem Überschuss rechts.",
         "exampleHeading": "Rechenbeispiel",
         "exampleBody": "Ein Haushalt verdient {{salary}} Gehalt und {{other}} aus anderen Quellen, zusammen {{income}} im Monat. Seine Ausgaben summieren sich auf {{expenses}}, es bleibt ein Überschuss von {{surplus}}. Teilen Sie den Überschuss durch die Einnahmen und multiplizieren Sie mit 100: Die Sparquote beträgt {{savingsRate}}.",
+        "exampleFlowCaption": "Der Monat dieses Haushalts, von den Einnahmen zum Überschuss",
         "exampleShares": "Wohnen ist mit {{housing}} die größte Kategorie, also {{housingShare}} des Einkommens, gefolgt von Lebensmitteln mit {{food}} ({{foodShare}}). Die Nebenkosten fassen zwei Zeilen zusammen, Energie und Telekommunikation, insgesamt {{utilities}}. Der Rechner oben startet mit diesem Haushalt, Sie können also Ihre eigenen Zahlen eintragen.",
+        "exampleSharesCaption": "Jede Kategorie und der Überschuss in Prozent der Einnahmen",
         "methodHeading": "Methode",
-        "methodFormula": "Überschuss = Einnahmen gesamt − Ausgaben gesamt. Sparquote = Überschuss ÷ Einnahmen gesamt × 100. Anteil einer Kategorie = Summe der Kategorie ÷ Einnahmen gesamt × 100.",
-        "methodIncome": "Die Einnahmen sind netto: was nach Steuern und Sozialabgaben auf den Konten des Haushalts ankommt. Schwanken sie, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
-        "methodExpenses": "Ausgaben sind, was jeden Monat von diesen Konten abgeht, Kreditraten eingeschlossen. Geld, das Sie aufs Sparkonto überweisen, ist keine Ausgabe: Es gehört zum Überschuss.",
-        "methodIrregular": "Jährliche oder gelegentliche Kosten wie Versicherungen, Autowartung oder Urlaub teilen Sie durch 12 und tragen sie als eigene Zeile ein.",
-        "methodShares": "Jeder Anteil wird auf die Einnahmen berechnet, nicht auf die Ausgaben. Bei einem Überschuss ergeben Kategorien und Überschuss zusammen 100 %; bei einem Defizit liegen die Kategorien über 100 %. Ohne Einnahmen gibt es weder Anteile noch eine Sparquote.",
-        "methodRounding": "Beträge werden auf den Cent genau addiert, Prozentwerte auf eine Nachkommastelle gerundet. Leere und negative Beträge zählen als null.",
-        "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen.",
+        "methodFormulasLabel": "Formeln",
+        "formulaCategoryShare": "Anteil einer Kategorie",
+        "formulaCategoryTotal": "Summe der Kategorie",
+        "methodIncomeTerm": "Einnahmen",
+        "methodIncomeBody": "Die Einnahmen sind netto: was nach Steuern und Sozialabgaben auf den Konten des Haushalts ankommt. Schwanken sie, nehmen Sie den Monatsdurchschnitt des letzten Jahres.",
+        "methodExpensesTerm": "Ausgaben",
+        "methodExpensesBody": "Ausgaben sind, was jeden Monat von diesen Konten abgeht, Kreditraten eingeschlossen. Geld, das Sie aufs Sparkonto überweisen, ist keine Ausgabe: Es gehört zum Überschuss.",
+        "methodIrregularTerm": "Unregelmäßige Kosten",
+        "methodIrregularBody": "Jährliche oder gelegentliche Kosten wie Versicherungen, Autowartung oder Urlaub teilen Sie durch 12 und tragen sie als eigene Zeile ein.",
+        "methodSharesTerm": "Anteile",
+        "methodSharesBody": "Jeder Anteil wird auf die Einnahmen berechnet, nicht auf die Ausgaben. Bei einem Überschuss ergeben Kategorien und Überschuss zusammen 100 %; bei einem Defizit liegen die Kategorien über 100 %. Ohne Einnahmen gibt es weder Anteile noch eine Sparquote.",
+        "methodRoundingTerm": "Rundung",
+        "methodRoundingBody": "Beträge werden auf den Cent genau addiert, Prozentwerte auf eine Nachkommastelle gerundet. Leere und negative Beträge zählen als null.",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodPrivacyBody": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen.",
         "nextHeading": "Vom einmaligen Budget zur monatlichen Gewohnheit",
         "nextBody": "Ein Budget ist am nützlichsten, wenn Sie es mit dem vergleichen, was Sie tatsächlich ausgegeben haben. Die Umschlag-Budgets von WonderMoney setzen dieselbe Idee Monat für Monat um.",
         "nextLink": "So funktionieren Budgets in WonderMoney"
@@ -1204,7 +1345,6 @@
         "method": {
           "title": "So wird die Rate berechnet",
           "intro": "Die meisten Darlehen mit festem Zins werden in gleichbleibenden Raten zurückgezahlt: jeden Monat derselbe Betrag, so bemessen, dass die Schuld mit der letzten Rate auf null fällt. Die Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "Dabei ist M die Monatsrate, P der geliehene Betrag, r der Jahreszins geteilt durch 12 und n die Zahl der Monatsraten. Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach P geteilt durch n.",
           "schedule": "Jeden Monat werden Zinsen auf die verbleibende Schuld berechnet, der Rest der Rate tilgt das Darlehen. Je weiter die Schuld sinkt, desto kleiner wird der Zinsanteil und desto größer der Tilgungsanteil. Deshalb sinkt die Schuld anfangs langsam und gegen Ende schneller. Versicherung und Gebühren kommen zur Rate hinzu und verringern die Schuld nie.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1215,7 +1355,24 @@
             "rounding": "Beträge sind in Euro. Jede Monatsrate wird aus der Restschuld und den verbleibenden Monaten berechnet und auf den Cent gerundet. Eine Rate kann deshalb um einen Cent von den anderen abweichen, und die letzte tilgt die Schuld genau. Bei einem sehr langen Darlehen mit hohem Zins können die ersten Raten weniger als einen Cent tilgen.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt, rundet oder den Zahlungstermin festlegt. Maßgeblich sind die vorvertraglichen Informationen, die Sie von ihr erhalten."
           },
-          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}."
+          "limits": "Der Rechner akzeptiert Darlehen von {{minAmount}} bis {{maxAmount}}, Laufzeiten bis {{maxYears}} Jahre und Zinssätze bis {{maxRate}}.",
+          "formulasLabel": "Formeln",
+          "zeroRate": "Bei 0 % Zins gibt es nichts abzuzinsen, und die Rate ist einfach der Kreditbetrag geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "monthly": "Monatliche Raten",
+            "nominalRate": "Nominalzins, nicht der Effektivzins",
+            "flatFees": "Versicherungen und Gebühren",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
+            "limits": "Grenzen"
+          }
+        },
+        "labels": {
+          "firstInterest": "Zinsen in der ersten Rate",
+          "firstPrincipal": "Tilgung in der ersten Rate",
+          "monthlyRate": "Monatszins",
+          "payments": "Zahl der Raten"
         }
       },
       "cta": {
@@ -1338,11 +1495,26 @@
         "before": {
           "title": "Vor der Sondertilgung",
           "items": {
-            "fee": "Prüfen Sie die Gebühr. Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen.",
-            "rate": "Variable Zinsen und Mischformen sind nicht abgedeckt: Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt.",
-            "reserves": "Behalten Sie eine Reserve. Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt.",
-            "otherDebts": "Tilgen Sie zuerst die teuerste Schuld. Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung.",
-            "lender": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet. Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            "fee": {
+              "term": "Prüfen Sie die Gebühr",
+              "body": "Banken können einen Prozentsatz des vorzeitig zurückgezahlten Betrags verlangen, und Regeln und gesetzliche Obergrenzen unterscheiden sich je nach Land und Darlehensart. Tragen Sie sie im Rechner ein, um die Nettoersparnis zu sehen."
+            },
+            "rate": {
+              "term": "Variable Zinsen und Mischformen sind nicht abgedeckt",
+              "body": "Die Rechnung nimmt an, dass der eingegebene Zinssatz bis zum Ende des Darlehens fest bleibt."
+            },
+            "reserves": {
+              "term": "Behalten Sie eine Reserve",
+              "body": "Geld, das an die Bank zurückgeflossen ist, bekommen Sie kaum zurück. Achten Sie darauf, dass Ihr Notgroschen nach der Sondertilgung erhalten bleibt."
+            },
+            "otherDebts": {
+              "term": "Tilgen Sie zuerst die teuerste Schuld",
+              "body": "Haben Sie eine Kreditkarte oder einen Ratenkredit mit höherem Zins, spart dessen Tilgung meist mehr als die einer günstigeren Baufinanzierung."
+            },
+            "lender": {
+              "term": "Fragen Sie Ihre Bank, wie sie die Sondertilgung anrechnet",
+              "body": "Manche senken standardmäßig die Rate, andere verkürzen die Laufzeit, und viele lassen Sie wählen."
+            }
           }
         },
         "example": {
@@ -1355,9 +1527,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt zuerst das Darlehen wie bisher, mit demselben Festzins-Rechenkern wie der Hypothekenrechner. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der verbleibenden Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n.",
-          "lowerPayment": "Laufzeit behalten: Die Restschuld nach der Sondertilgung geht mit demselben n zurück in die Formel, das ergibt die neue, niedrigere Rate.",
-          "shorterTerm": "Rate behalten: Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
           "fee": "Die Gebühr ist der eingegebene Prozentsatz, angewendet auf den getilgten Betrag. Die gesparten Zinsen sind die restlichen Zinsen des Darlehens wie bisher abzüglich der Zinsen im jeweiligen Szenario, und die Nettoersparnis ist dieser Betrag abzüglich der Gebühr. Ein Betrag über der Restschuld tilgt das Darlehen vollständig, und nur die Restschuld zählt für die Gebühr.",
           "assumptionsTitle": "Annahmen",
           "assumptions": {
@@ -1368,7 +1537,23 @@
             "rounding": "Beträge sind in Euro. Zinsen und Rate werden jeden Monat auf den Cent gerundet, daher gehen alle Summen auf der Seite exakt auf.",
             "lenderFigures": "Die Zahlen Ihrer Bank können leicht abweichen, je nachdem, wie sie Tage zählt und rundet. Lassen Sie sich vor der Sondertilgung ihre eigene Berechnung geben."
           },
-          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags."
+          "limits": "Der Rechner akzeptiert eine Restschuld von {{minBalance}} bis {{maxBalance}}, bis zu {{maxYears}} Jahre Restlaufzeit, Zinssätze bis {{maxRate}} und Gebühren bis {{maxFee}} des getilgten Betrags.",
+          "lowerPaymentTerm": "Laufzeit behalten",
+          "lowerPaymentBody": "Die Restschuld nach der Sondertilgung geht mit derselben Zahl von Raten zurück in die Formel, das ergibt die neue, niedrigere Rate.",
+          "shorterTermTerm": "Rate behalten",
+          "shorterTermBody": "Sie zahlen jeden Monat weiter, was der ursprüngliche Tilgungsplan vorsieht, bis die kleinere Restschuld getilgt ist. Die letzte Rate deckt nur den Rest und ist daher meist kleiner.",
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "terms": {
+            "fixedRate": "Fester Zins",
+            "timing": "Zeitpunkt",
+            "oneOff": "Eine Sondertilgung",
+            "costs": "Kosten",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen Ihrer Bank",
+            "limits": "Grenzen",
+            "feeNote": "Gebühr und Nettoersparnis"
+          },
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1543,10 +1728,22 @@
           "title": "Was Sie vor dem Wechsel vergleichen sollten",
           "intro": "Ihre Baufinanzierung zu einer anderen Bank umzuschulden, oder mit Ihrer Bank neue Konditionen auszuhandeln, kann Ihre Kosten senken. Ein niedrigerer Zins ist nur ein Teil der Rechnung, vergleichen Sie also das ganze Angebot:",
           "items": {
-            "rate": "Den Zins. Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen.",
-            "monthlyCosts": "Die monatlichen Zusatzkosten. Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer.",
-            "term": "Die Laufzeit. Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen.",
-            "oneOff": "Die einmaligen Kosten. Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            "rate": {
+              "term": "Den Zins",
+              "body": "Ein niedrigerer fester Zins senkt die Zinsen, die jeden Monat auf Ihre Restschuld anfallen."
+            },
+            "monthlyCosts": {
+              "term": "Die monatlichen Zusatzkosten",
+              "body": "Banken verlangen oft, dass Sie ihre Risikolebens- oder Gebäudeversicherung abschließen oder ein Konto mit Gebühren eröffnen. Rechnen Sie sie zur Rate dazu, sonst wird ein günstigerer Zins am Ende teurer."
+            },
+            "term": {
+              "term": "Die Laufzeit",
+              "body": "Ein neues Darlehen über mehr Jahre senkt die Rate, aber Sie zahlen länger Zinsen."
+            },
+            "oneOff": {
+              "term": "Die einmaligen Kosten",
+              "body": "Ein Darlehen abzulösen und ein neues aufzunehmen kostet Gebühren, und die zahlen Sie aus Ihren Ersparnissen."
+            }
           },
           "outro": "Der Rechner bringt das zusammen: die Rate mit ihren Zusatzkosten, was jedes Darlehen insgesamt noch kostet, und den Monat, in dem die Wechselkosten wieder hereingeholt sind."
         },
@@ -1571,7 +1768,6 @@
         "method": {
           "title": "So wird gerechnet",
           "intro": "Der Rechner ermittelt beide Darlehen mit demselben Festzins-Rechenkern wie der Hypothekenrechner, auf Basis Ihrer Restschuld. Jeden Monat fallen Zinsen auf die Restschuld an, und der Rest der Rate tilgt das Darlehen. Die gleichbleibende Rate ergibt sich aus der Annuitätenformel:",
-          "legend": "M ist die Monatsrate, P die Restschuld, r der Jahreszins geteilt durch 12 und n die Zahl der Raten. Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach P geteilt durch n. Die Versicherungen und Gebühren jedes Monats kommen hinzu.",
           "saving": "Die Ersparnis eines Monats ist, was das aktuelle Darlehen in diesem Monat kosten würde, abzüglich dessen, was das neue kostet. Ein getilgtes Darlehen kostet nichts mehr. Bei einer längeren neuen Laufzeit zählen die Monate nach dem Ende Ihres aktuellen Darlehens deshalb als Kosten. Die Gesamtkosten jeder Option sind ihre Raten, Versicherungen und Gebühren, beim neuen Darlehen zuzüglich der Wechselkosten. Die Nettoersparnis ist die Differenz.",
           "breakEven": "Der Monat, in dem sich der Wechsel rechnet, ist der erste Monat, in dem die bisherige Ersparnis mindestens die Wechselkosten erreicht. Geschieht das nicht, bevor beide Darlehen enden, rechnet sich der Wechsel nicht.",
           "longerTerm": "Ist die neue Laufzeit länger als die Restlaufzeit, rechnet der Rechner das Angebot zusätzlich über die Restlaufzeit. So sehen Sie, wie viel der niedrigeren Rate vom Zins kommt und wie viel davon, dass Sie länger zahlen.",
@@ -1585,7 +1781,22 @@
             "rounding": "Die Beträge sind in Euro. Zinsen und Rate jedes Monats werden auf den Cent gerundet, deshalb gehen alle Summen auf der Seite genau auf. Die angezeigte Rate ist die erste; die folgenden weichen höchstens um einen Cent davon ab.",
             "lenderFigures": "Jede Bank zählt Tage und rundet auf ihre Weise, daher können ihre Zahlen leicht abweichen. Lassen Sie sich von jeder Bank ein verbindliches Angebot geben, bevor Sie entscheiden."
           },
-          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld."
+          "limits": "Der Rechner akzeptiert Restschulden von {{minBalance}} bis {{maxBalance}}, Laufzeiten bis {{maxYears}} Jahre, Zinssätze bis {{maxRate}} und eine Vorfälligkeitsentschädigung bis {{maxExitFee}} der Restschuld.",
+          "terms": {
+            "saving": "Ersparnis und Gesamtkosten",
+            "breakEven": "Monat der Amortisation",
+            "longerTerm": "Eine längere Laufzeit",
+            "fixedRate": "Feste Zinsen",
+            "sameBalance": "Dieselbe Restschuld",
+            "timing": "Zeitpunkt",
+            "fees": "Versicherungen und Gebühren",
+            "noDiscounting": "Keine Abzinsung",
+            "rounding": "Rundung",
+            "lenderFigures": "Die Zahlen der Banken",
+            "limits": "Grenzen"
+          },
+          "zeroRate": "Bei 0 % fallen keine Zinsen an, die Rate ist dann einfach die Restschuld geteilt durch die Zahl der Raten.",
+          "formulasLabel": "Formeln"
         },
         "related": {
           "title": "Weitere Rechner",
@@ -1595,6 +1806,13 @@
           "earlyRepaymentBody": "Was eine Sondertilgung beim aktuellen Darlehen sparen würde, statt umzuschulden.",
           "debtToIncomeLink": "Schuldendienstquoten-Rechner",
           "debtToIncomeBody": "Der Anteil Ihres Einkommens, der in Kreditraten fließt, heute und mit der neuen Rate."
+        },
+        "labels": {
+          "monthlySaving": "Ersparnis pro Monat",
+          "currentMonthTotal": "Kosten des jetzigen Darlehens in dem Monat",
+          "offerMonthTotal": "Kosten des neuen Darlehens in dem Monat",
+          "currentTotalCost": "Gesamtkosten des jetzigen Darlehens",
+          "offerTotalCost": "Gesamtkosten des neuen Darlehens"
         }
       },
       "cta": {
@@ -1717,12 +1935,16 @@
         "exampleStep3": "Die kleinste monatliche Sparrate, die dafür reicht, ist {{contribution}}. In {{months}} Monaten zahlen Sie {{contributions}} ein und die Zinsen bringen {{growth}}, zusammen {{final}} am Ende.",
         "exampleOutro": "Andersherum: Legen Sie stattdessen glatte {{rounded}} im Monat zurück, erreichen Sie das Ziel nach {{timeMonths}} Monaten und haben nach den {{years}} Jahren {{finalAmount}}.",
         "methodTitle": "So rechnet der Rechner",
-        "methodIntro": "Der Saldo wird einmal im Monat verzinst, die Einzahlung kommt am Ende jedes Monats dazu. Nach n Monaten beträgt er:",
-        "methodLegend": "S ist Ihr bereits Erspartes, C die monatliche Sparrate, r der Monatszins und n die Zahl der Monate. Bei 0 % Rendite gibt es nichts durch r zu teilen, und der Saldo ist einfach S + C × n.",
-        "methodRate": "Der Monatszins r ist der Zins, der über zwölf Monate verzinst die Jahresrendite ergibt: (1 + Jahresrendite)^(1/12) − 1. Die Jahresrendite einfach durch 12 zu teilen, ergäbe einen etwas zu hohen Wert.",
-        "methodOrder": "Die Zinsen jedes Monats werden auf den Cent gerundet, bevor die Einzahlung dazukommt. So passt der Plan Jahr für Jahr genau zu den Summen.",
-        "methodContribution": "Die nötige Sparrate ergibt sich, wenn man die Formel nach C auflöst. Sie wird auf den Cent aufgerundet und Monat für Monat geprüft, damit sie das Ziel wirklich erreicht.",
-        "methodTime": "Die nötige Zeit ist der erste volle Monat, in dem der Saldo das Ziel erreicht; gesucht wird bis zu {{maxYears}} Jahre.",
+        "methodIntro": "Der Saldo wird einmal im Monat verzinst, die Einzahlung kommt am Ende jedes Monats dazu. Am Ende des Zeitraums beträgt er:",
+        "methodFormulasLabel": "Formeln",
+        "formulaMonthlyRate": "Monatszins",
+        "methodRateBody": "Der Zins, der über zwölf Monate verzinst die Jahresrendite ergibt. Die Jahresrendite einfach durch 12 zu teilen, ergäbe einen etwas zu hohen Wert.",
+        "methodZeroTerm": "0 % Rendite",
+        "methodZeroBody": "Es gibt nichts durch den Monatszins zu teilen, und der Saldo ist einfach Ihr bereits Erspartes plus die monatliche Sparrate × die Zahl der Monate.",
+        "methodOrderTerm": "Rundung",
+        "methodOrderBody": "Die Zinsen jedes Monats werden auf den Cent gerundet, bevor die Einzahlung dazukommt. So passt der Plan Jahr für Jahr genau zu den Summen.",
+        "methodContributionBody": "Sie ergibt sich, wenn man die Formel nach der monatlichen Sparrate auflöst. Sie wird auf den Cent aufgerundet und Monat für Monat geprüft, damit sie das Ziel wirklich erreicht.",
+        "methodTimeBody": "Die nötige Zeit ist der erste volle Monat, in dem der Saldo das Ziel erreicht; gesucht wird bis zu {{maxYears}} Jahre.",
         "assumptionsTitle": "Annahmen",
         "assumptionReturn": "Die Rendite ist jedes Jahr gleich. In Wirklichkeit schwankt sie, und Geldanlagen können an Wert verlieren.",
         "assumptionCosts": "Von den Zinserträgen werden keine Steuern, Gebühren oder sonstigen Kosten abgezogen.",
@@ -1864,16 +2086,12 @@
         "relatedDebtToIncome": "zeigt, welchen Anteil Ihres Einkommens Ihre laufenden Raten einnehmen, mit denselben Stufen wie dieses Werkzeug.",
         "exampleTitle": "Rechenbeispiel",
         "exampleIntro": "Ein Paar verdient zusammen {{income}} netto im Monat und zahlt {{existing}} im Monat für einen Autokredit. Es hat {{savings}} für eine Immobilie gespart, rechnet mit einem festen Zins von {{rate}} über {{years}} Jahre und plant Kaufnebenkosten von {{costsRate}} des Preises ein. Die Bank finanziert bis zu {{ltv}} des Preises, und das Paar erlaubt {{share}} seines Einkommens für Kredite.",
-        "exampleStep1": "Monatlicher Spielraum: {{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
-        "exampleStep2": "Größtes Darlehen: Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
-        "exampleStep3": "Geld vorab: Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
         "exampleStep4": "Der niedrigere der beiden ist {{monthlyPrice}}, also setzt das Monatsbudget die Grenze.",
         "exampleResult": "Bei {{price}} würde das Paar {{loan}} leihen, {{downPayment}} Eigenkapital einbringen und {{purchaseCosts}} Nebenkosten zahlen, mit seinem ganzen Ersparten von {{savings}}. Der Hypothekenrechner kommt auf eine Rate von {{payment}} im Monat.",
         "exampleLift": "Mit etwa {{extraIncome}} mehr Nettoeinkommen im Monat käme das Paar auf {{liftPrice}}; dort übernimmt die Grenze des Ersparten.",
         "exampleSavings": "Mit nur {{lowSavings}} Erspartem kehrt sich das Bild um: Das Ersparte deckt einen Preis von {{lowSavingsPrice}} mit einem Darlehen von {{lowSavingsLoan}}, weit unter dem, was das Einkommen tragen könnte. Mehr sparen, nicht mehr verdienen, würde die Grenze anheben. Der Rechner oben beginnt mit dem ersten Paar, damit Sie Ihre eigenen Zahlen eintragen können.",
         "methodTitle": "Methode",
         "methodIntro": "Die Rechnung bestimmt jede Grenze für sich und nimmt dann den niedrigeren Preis.",
-        "methodLegend": "I ist das monatliche Nettoeinkommen, d der für Kredite erlaubte Anteil davon, E die laufenden Raten und M der Spielraum für die neue Rate. r ist der Jahreszins geteilt durch 12, n die Zahl der Monatsraten und L das größte Darlehen. S ist das Ersparte, c die Kaufnebenkosten und v der Beleihungsauslauf, beide als Anteil am Preis. P₁ ist der Preis, den das Monatsbudget erlaubt, P₂ der, den das Ersparte erlaubt.",
         "methodShare": "Der Startwert von {{share}} liegt in der Vorsicht-Stufe des Schuldendienstquoten-Rechners ({{caution}} % bis {{high}} %). Das ist eine Faustregel, keine gesetzliche Grenze.",
         "methodCosts": "Beim höchsten Preis fließt jeder Euro des Ersparten in den Kauf: zuerst die Nebenkosten, der Rest als Eigenkapital. Das Darlehen deckt, was fehlt, und nie mehr, als der Beleihungsauslauf erlaubt.",
         "methodRounding": "Beträge werden in Cent gerechnet. Das Darlehen wird auf den Cent abgerundet, damit die erste Rate, berechnet vom Hypothekenrechner, in Ihren Spielraum passt; spätere Raten können um einen Cent abweichen. Der Preis ist genau Darlehen plus Eigenkapital, und das zusätzliche Einkommen oder Ersparte wird auf den Euro aufgerundet.",
@@ -1885,11 +2103,33 @@
         "assumptionCostsShare": "Die Kaufnebenkosten sind ein fester Anteil am Preis. In der Praxis sind Steuern oft gestaffelt und manche Gebühren feste Beträge.",
         "lendersTitle": "Was Banken prüfen und dieses Werkzeug nicht",
         "lendersIntro": "Die Antwort einer Bank kann unter dieser Schätzung liegen, manchmal deutlich. Die Regeln unterscheiden sich je nach Bank und Land, und dieser Rechner enthält keine davon.",
-        "lenderStress": "Stresszins: Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
-        "lenderIncome": "Was als Einkommen zählt: Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
-        "lenderCountry": "Grenzen je Land: In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
-        "lenderProfile": "Ihr Profil: Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
-        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten."
+        "lendersOutro": "Nutzen Sie das Ergebnis, um vor dem Bankgespräch ungefähr zu wissen, wo Sie stehen, und fragen Sie dann, welche Grenzen für Sie gelten.",
+        "exampleStep1Term": "Monatlicher Spielraum",
+        "exampleStep1Body": "{{share}} von {{income}} sind {{allowed}}. Abzüglich der {{existing}} für das Auto bleiben {{room}} im Monat für das neue Darlehen.",
+        "exampleStep2Term": "Größtes Darlehen",
+        "exampleStep2Body": "Eine Rate von {{room}} bei {{rate}} über {{years}} Jahre tilgt {{maxLoan}}. Rechnet man das ganze Ersparte hinzu und zahlt daraus die Nebenkosten, erlaubt die Monatsgrenze einen Preis von {{monthlyPrice}}.",
+        "exampleStep3Term": "Geld vorab",
+        "exampleStep3Body": "Jeder Euro Kaufpreis braucht {{deposit}} Eigenkapital und {{costsRate}} für die Nebenkosten, zusammen {{cashShare}}. {{savings}} ÷ {{cashShare}} ergibt einen Preis von {{cashPrice}}.",
+        "lenderStressTerm": "Stresszins",
+        "lenderStressBody": "Viele Banken prüfen, ob Sie auch bei einem um einige Prozentpunkte höheren Zins noch zahlen könnten, vor allem bei variabel verzinsten Darlehen.",
+        "lenderIncomeTerm": "Was als Einkommen zählt",
+        "lenderIncomeBody": "Manche rechnen Boni, Einkünfte aus Selbstständigkeit oder Mieten nur teilweise an oder bilden einen Schnitt über mehrere Jahre.",
+        "lenderCountryTerm": "Grenzen je Land",
+        "lenderCountryBody": "In vielen Ländern begrenzen die Aufsichtsbehörden den Beleihungsauslauf, den Anteil des Einkommens für Raten, das Darlehen im Verhältnis zum Einkommen oder die Laufzeit.",
+        "lenderProfileTerm": "Ihr Profil",
+        "lenderProfileBody": "Alter am Ende der Laufzeit, sicherer Arbeitsplatz, Kreditgeschichte und die Immobilie selbst zählen ebenfalls.",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln",
+        "labels": {
+          "maxLoan": "Größtes Darlehen"
+        },
+        "methodShareTerm": "Anteil für Kredite",
+        "methodCostsTerm": "Wohin die Ersparnisse gehen",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionSavingsTerm": "Alle Ersparnisse",
+        "assumptionPaymentTerm": "Was die Rate nicht enthält",
+        "assumptionCostsShareTerm": "Kaufnebenkosten"
       }
     },
     "termDeposit": {
@@ -1978,11 +2218,16 @@
         "whatBody": "Beim Festgeld legen Sie einen Betrag für eine feste Zahl von Monaten zu einem festen Zinssatz bei der Bank an. Neben dem Zinssatz hängt der Ertrag von drei Dingen ab: wie lange das Geld angelegt bleibt, ob die Zinsen am Ende oder während der Laufzeit gezahlt werden und wie viel Steuer davon einbehalten wird. Dieser Rechner berücksichtigt alle drei mit dem Zinssatz, den Sie eingeben, damit Sie Angebote auf derselben Grundlage vergleichen können.",
         "readHeading": "So lesen Sie das Ergebnis",
         "read": {
-          "gross": "Bruttozinsen: alles, was die Anlage vor Steuern bringt.",
-          "tax": "Einbehaltene Steuer: der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
-          "net": "Nettozinsen: was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
-          "final": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten: der Anlagebetrag plus alle Nettozinsen.",
-          "yield": "Nettorendite pro Jahr: der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
+          "grossTerm": "Bruttozinsen",
+          "grossBody": "Alles, was die Anlage vor Steuern bringt.",
+          "taxTerm": "Einbehaltene Steuer",
+          "taxBody": "Der Teil jeder Zinszahlung, der zum eingegebenen Satz für die Steuer zurückbehalten wird.",
+          "netTerm": "Nettozinsen",
+          "netBody": "Was bei Ihnen ankommt, also Bruttozinsen minus Steuer.",
+          "finalTerm": "Guthaben am Laufzeitende, bei ausgezahlten Zinsen insgesamt erhalten",
+          "finalBody": "Der Anlagebetrag plus alle Nettozinsen.",
+          "yieldTerm": "Nettorendite pro Jahr",
+          "yieldBody": "Der Nettoertrag als jährlicher Satz, damit sich Anlagen mit unterschiedlicher Laufzeit und Zinszahlung vergleichen lassen."
         },
         "exampleHeading": "Rechenbeispiel",
         "exampleSetup": "Angenommen, Sie legen {{amount}} für {{months}} Monate zu einem Bruttozins von {{rate}} pro Jahr an, mit Zinszahlung am Laufzeitende. Der Zins ist ein einfacher Zins: Betrag mal Zinssatz mal Anteil des Jahres, den das Geld angelegt bleibt.",
@@ -1990,15 +2235,21 @@
         "exampleTax": "Nehmen wir nun an, dass von den Zinsen am Laufzeitende {{taxRate}} einbehalten werden, ein Satz, der nur zur Veranschaulichung gewählt und keinen Regeln eines Landes entnommen ist: Der Rechner beginnt bei 0 %, damit Sie Ihren eigenen eingeben. Die Bank behält {{tax}} ein, Sie erhalten {{net}} und haben am Ende {{taxedFinal}}, eine Nettorendite von {{taxedYield}} pro Jahr.",
         "methodHeading": "Methode und Annahmen",
         "methodIntro": "Zinsen werden in ganzen Monaten gerechnet, ohne Tageszählung. Der eingegebene Zinssatz ist ein nominaler Jahreszins: Jede Periode bringt den Zinssatz mal ihre Monate geteilt durch 12.",
-        "methodFormula": "Zinsen einer Periode = Guthaben × Jahreszins × Monate der Periode ÷ 12. Nettozinsen = Zinsen − Steuer. Nettorendite pro Jahr = der jährliche Zinssatz, bei dem der Anlagebetrag den Nettozahlungen und dem zurückgezahlten Betrag entspricht, jeweils zum Zeitpunkt ihres Eingangs gezählt. Kommen alle Zinsen am Laufzeitende, ist das (Guthaben am Laufzeitende ÷ Anlagebetrag)^(12 ÷ Laufzeit in Monaten) − 1.",
         "method": {
-          "maturity": "Bei Zahlung am Laufzeitende fallen einfache Zinsen an: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
-          "periodic": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
-          "reinvest": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
-          "tax": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
-          "yield": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der jährliche Zinssatz, zu dem Ihr Anlagebetrag auf alles anwächst, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
-          "excluded": "Nicht enthalten: Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
-          "privacy": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen."
+          "maturityBody": "Bei Zahlung am Laufzeitende fallen einfache Zinsen an: eine Zahlung von Betrag × Zinssatz × Laufzeit in Monaten ÷ 12.",
+          "periodicBody": "Bei monatlicher, vierteljährlicher oder jährlicher Zahlung kommt jede Zahlung am Ende ihrer Periode. Ist die Laufzeit keine ganze Zahl von Perioden, ist die letzte kürzer und ihre Zinsen werden anteilig am Laufzeitende gezahlt. Eine Laufzeit, die kürzer als eine Periode ist, hat eine einzige Zahlung am Laufzeitende.",
+          "reinvestBody": "Gutgeschriebene Zinsen kommen nach Steuern zur Anlage hinzu, die Anlage verzinst sich also im Rhythmus der Zahlungen. Ausgezahlte Zinsen verlassen die Anlage, die folgenden Zinsen werden also auf den Anlagebetrag berechnet.",
+          "taxBody": "Die Steuer wird von jeder Zahlung einzeln abgezogen und auf den Cent gerundet, wie es die Bank tut. Alle Beträge werden in Cent gerechnet, sodass die Zeilen der Zahlungen genau die Summen ergeben.",
+          "yieldBody": "Die Nettorendite pro Jahr ist der interne Zinsfuß der Anlage: der jährliche Zinssatz, zu dem Ihr Anlagebetrag auf alles anwächst, was Sie zurückbekommen, wobei jede Nettozahlung in dem Monat zählt, in dem sie gezahlt wird. Zinsen während der Laufzeit zählen deshalb mehr als dieselben Zinsen am Laufzeitende. Bei einer Anlage unter einem Jahr wird angenommen, dass sie zu denselben Bedingungen verlängert wird.",
+          "excludedTerm": "Nicht enthalten",
+          "excludedBody": "Gebühren für eine vorzeitige Auflösung, Kontogebühren, Zinsänderungen während der Laufzeit, Grenzen der Einlagensicherung und die Wirkung der Inflation.",
+          "privacyBody": "Die Berechnung läuft in Ihrem Browser. Ihre Eingaben bleiben auf Ihrem Gerät und werden weder gespeichert noch übertragen.",
+          "maturityTerm": "Auszahlung am Laufzeitende",
+          "periodicTerm": "Regelmäßige Auszahlungen",
+          "reinvestTerm": "Zinsen angelegt oder ausgezahlt",
+          "taxTerm": "Steuer",
+          "yieldTerm": "Nettorendite pro Jahr",
+          "privacyTerm": "Datenschutz"
         },
         "methodLimits": "Laufzeiten reichen von 1 bis {{maxMonths}} Monaten.",
         "nextHeading": "Verwandte Rechner",
@@ -2007,7 +2258,23 @@
         "nextEmergency": "Festgeld eignet sich für Ersparnisse, die Sie so bald nicht brauchen, während Ihr Notgroschen griffbereit bleibt.",
         "nextEmergencyLink": "Notgroschen berechnen",
         "nextSavingsGoal": "Sie sparen den Betrag für das Festgeld erst an oder planen, was nach der Fälligkeit kommt? Der Sparzielrechner ermittelt die monatliche Sparrate oder die nötige Zeit.",
-        "nextSavingsGoalLink": "Sparzielrechner öffnen"
+        "nextSavingsGoalLink": "Sparzielrechner öffnen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "interest": "Zinsen einer Periode",
+          "balance": "Guthaben",
+          "annualRate": "Jahreszins",
+          "periodMonths": "Monate der Periode",
+          "tax": "Steuer",
+          "taxLower": "Steuer",
+          "taxRate": "Steuersatz",
+          "interestLower": "Zinsen",
+          "netInterest": "Nettozinsen",
+          "yield": "Nettorendite pro Jahr, mit den Zinsen am Laufzeitende",
+          "finalBalance": "Guthaben am Laufzeitende",
+          "amount": "Anlagebetrag",
+          "termMonths": "Laufzeit in Monaten"
+        }
       }
     },
     "buyVsRent": {
@@ -2113,10 +2380,22 @@
         "whatHeading": "Was der Vergleich zeigt",
         "whatBody": "Kaufen ersetzt die Miete durch Kreditraten, bindet aber auch Geld im Eigenkapital und in den Kaufnebenkosten und bringt laufende Eigentümerkosten mit sich. Mieten lässt dieses Geld frei für eine Anlage. Der Rechner verfolgt beide Wege mit demselben Startkapital und vergleicht, was Ihnen jeweils bleibt.",
         "read": {
-          "netWorth": "Das Vermögen beider Wege: beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen.",
-          "difference": "Die Differenz: wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt.",
-          "breakEven": "Das Jahr des Gleichstands: das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters.",
-          "chart": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          "netWorth": {
+            "term": "Das Vermögen beider Wege",
+            "body": "Beim Kauf das, was ein Verkauf nach Verkaufskosten und Tilgung des Kredits übrig ließe, plus alles Angelegte; beim Mieten die Anlagen."
+          },
+          "difference": {
+            "term": "Die Differenz",
+            "body": "Wie weit ein Weg am Ende des gewählten Zeitraums vorne liegt."
+          },
+          "breakEven": {
+            "term": "Das Jahr des Gleichstands",
+            "body": "Das erste Jahr, das mit dem Kauf vorne endet. Der Kauf startet im Rückstand, sobald es Kauf- oder Verkaufskosten gibt: Die Kaufnebenkosten fallen am ersten Tag an, und bei einem sofortigen Verkauf kämen noch die Verkaufskosten hinzu. Der Kauf kann auch vorbeiziehen und wieder zurückfallen, etwa wenn der Immobilienwert langsamer wächst als die Anlagen des Mieters."
+          },
+          "chart": {
+            "term": "Diagramm und Tabelle",
+            "body": "Diagramm und Tabelle zeigen beide Wege für jedes Jahr, damit Sie sehen, ob sich der Abstand verringert oder vergrößert."
+          }
         },
         "exampleHeading": "Rechenbeispiel",
         "example": {
@@ -2136,10 +2415,7 @@
           "returns": "Die Anlagen wachsen jeden Monat mit dem Monatszins, der über zwölf Monate die Jahresrendite ergibt.",
           "netWorth": "Am Ende jedes Jahres ist das Vermögen des Käufers der Immobilienwert abzüglich Verkaufskosten und Restschuld, plus seine Anlagen. Das des Mieters sind seine Anlagen. Das Jahr des Gleichstands ist das erste, das mit dem Käufer vorne endet."
         },
-        "formulaOwner": "Kaufen = Immobilienwert − Verkaufskosten − Restschuld + Anlagen",
-        "formulaRenter": "Mieten = Anlagen",
         "formulaReturn": "Monatsrendite",
-        "formulaLegend": "Dabei ist R die jährliche Anlagerendite: {{investmentReturn}} pro Jahr ergeben etwa {{monthlyReturn}} im Monat.",
         "leftOutHeading": "Was nicht berücksichtigt wird",
         "leftOut": {
           "gainsTax": "Steuern auf Anlageerträge oder auf den Gewinn aus dem Verkauf der Immobilie.",
@@ -2154,7 +2430,20 @@
         "relatedMortgage": "Den Kredit allein, mit seinem Tilgungsplan Jahr für Jahr, zeigt der",
         "relatedMortgageLink": "Hypothekenrechner",
         "relatedNetWorth": "Immobilie, Kredit und Ersparnisse nach heutigem Stand addiert der",
-        "relatedNetWorthLink": "Nettovermögensrechner"
+        "relatedNetWorthLink": "Nettovermögensrechner",
+        "formulaExample": "Eine Rendite von {{investmentReturn}} pro Jahr ergibt etwa {{monthlyReturn}} im Monat.",
+        "labels": {
+          "investments": "Anlagen"
+        },
+        "formulasLabel": "Formeln",
+        "methodTerms": {
+          "start": "Startkapital",
+          "loan": "Das Darlehen",
+          "monthly": "Jeden Monat",
+          "growth": "Wertentwicklung und Miete",
+          "returns": "Anlagerendite",
+          "netWorth": "Vermögen und Gleichstand"
+        }
       }
     },
     "rateRevision": {
@@ -2274,7 +2563,6 @@
         "exampleIncome": "Bei einem Nettoeinkommen von {{income}} im Monat beansprucht die Rate heute {{currentShare}} davon, nach dem ersten Anstieg {{newShare}} und nach dem größeren {{stressShare}}, was die Stufen der Schuldendienstquote als „{{stressBand}}“ einordnen.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Jede Rate ist die gleichbleibende Rate, die die Restschuld in den verbleibenden Monaten tilgt, mit derselben Festzins-Rechnung wie im Hypothekenrechner:",
-        "methodLegend": "i ist der Referenzzins und s der Aufschlag, beide als Jahreszinsen. r ist der Monatszins, M die Monatsrate, P die Restschuld und n die Zahl der restlichen Raten. Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach P geteilt durch n.",
         "methodItems": {
           "change": "Der Unterschied im Monat ist die erste Rate zum neuen Zins minus die erste Rate zum heutigen Zins, beide auf die heutige Restschuld und über dieselben Monate.",
           "year": "Der Unterschied über ein Jahr ergibt sich aus der Summe der ersten 12 Raten jedes Plans. Sind es weniger als 12, zählen alle verbleibenden Raten. Da jede Rate einzeln gerundet wird, kann die Differenz vom monatlichen Unterschied mal der Anzahl der Raten abweichen.",
@@ -2293,12 +2581,40 @@
         "contractTitle": "Was Ihr Vertrag festlegt",
         "contractIntro": "Wie eine echte Zinsanpassung abläuft, hängt von Ihrem Vertrag und den Regeln in Ihrem Land ab. Nichts davon ist im Rechner enthalten:",
         "contractItems": {
-          "resetDates": "Anpassungstermine: wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt.",
-          "capsFloors": "Ober- und Untergrenzen: Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt.",
-          "index": "Der Referenzzins: der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender.",
-          "mixed": "Kredite mit Mischzins: Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          "resetDates": {
+            "term": "Anpassungstermine",
+            "body": "Wie oft der Zins angepasst wird, welcher Stichtag für den Referenzzins zählt und ab wann die neue Rate gilt."
+          },
+          "capsFloors": {
+            "term": "Ober- und Untergrenzen",
+            "body": "Manche Verträge begrenzen, wie weit der Zins steigen oder fallen kann, oder verhindern, dass er unter einen festen Wert fällt. Der Rechner verhindert nur, dass der Zins unter 0 % fällt."
+          },
+          "index": {
+            "term": "Der Referenzzins",
+            "body": "Der Euribor, ein Leitzins oder ein nationaler Referenzzins, jeweils mit eigenen Laufzeiten (zum Beispiel 3, 6 oder 12 Monate) und eigenem Veröffentlichungskalender."
+          },
+          "mixed": {
+            "term": "Kredite mit Mischzins",
+            "body": "Zuerst gilt eine Festzinsphase, danach der variable Zins. Geben Sie Restschuld und Restlaufzeit so ein, wie sie zu Beginn der variablen Phase sein werden."
+          }
         },
-        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank."
+        "contractOutro": "Maßgeblich sind die Zahlen Ihrer Bank. Nutzen Sie diesen Rechner, um sich auf eine Anpassung vorzubereiten, und vergleichen Sie dann seine Zahlen mit denen Ihrer Bank.",
+        "terms": {
+          "change": "Änderung pro Monat",
+          "year": "Änderung über ein Jahr",
+          "interest": "Änderung der Zinsen",
+          "income": "Anteil am Einkommen",
+          "privacy": "Datenschutz",
+          "fromNextMonth": "Ab der nächsten Rate",
+          "sameTerm": "Dieselbe Laufzeit",
+          "statement": "Die heutige Rate",
+          "noFeed": "Keine Referenzzinsdaten",
+          "limits": "Grenzen",
+          "annualRate": "Jahreszins",
+          "incomeShare": "Anteil der Rate am Einkommen"
+        },
+        "zeroRate": "Liegen Referenzzins plus Aufschlag unter 0 %, wird der Zins mit 0 % angesetzt und die Rate ist einfach die Restschuld geteilt durch die Zahl der Raten.",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "carLoan": {
@@ -2361,7 +2677,16 @@
         "assumptionsTitle": "Annahmen",
         "assumptionLoan": "Die Schätzung geht von einem Kredit mit Festzins und monatlichen Raten ohne erhöhte Schlussrate aus. Leasing ist ausgeschlossen. Geben Sie den Preis und die angebotenen Kreditkonditionen für den Neu- oder Gebrauchtwagen ein. Für ein Auto, das Sie bereits besitzen, geben Sie bei Preis und Anzahlung jeweils null ein, um die laufenden Kosten zu schätzen.",
         "assumptionFees": "Einmalige Finanzierungsgebühren fallen beim Kauf zusammen mit der Anzahlung an. Geben Sie jede kreditbezogene Versicherung oder Gebühr nur einmal ein. Der Rechner leitet keine Steuern oder Gebühren aus Ihrem Angebot ab, er berücksichtigt nur, was Sie eingeben.",
-        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt."
+        "assumptionRunning": "Das monatliche Budget umfasst die angezeigten Kosten. Wertverlust, Wiederverkaufswert, Parkgebühren, Maut und Reparaturen über die Wartungsrücklage hinaus sind ausgenommen. Jahresrechnungen können auf einmal fällig werden, auch wenn der Rechner sie auf das Jahr verteilt.",
+        "terms": {
+          "loan": "Die Kreditrate",
+          "budget": "Das Monatsbudget",
+          "apr": "Der geschätzte effektive Jahreszins",
+          "assumptionLoan": "Kredit mit festem Zins",
+          "assumptionFees": "Finanzierungsgebühren",
+          "assumptionRunning": "Was das Budget abdeckt"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Planen Sie die gesamten monatlichen Autokosten in Ihrem Budget ein",
       "nextStepDescription": "Legen Sie in WonderMoney Geld für die Rate, Kraftstoff und die im Jahresverlauf fälligen Rechnungen zurück.",
@@ -2442,9 +2767,26 @@
         "assumptionScope": "Dieser Rechner folgt dem portugiesischen Steuerrecht und gilt nur für Immobilien in Portugal, unabhängig von Ihrem Wohnsitzland. Er dient der Information und ist keine Steuerberatung.",
         "assumptionYoung": "Die Befreiung für junge Käufer (bis 35 Jahre, erste eigene dauerhaft bewohnte Wohnung, Bedingungen am Tag der Urkunde erfüllt, Wohnung bleibt Hauptwohnsitz) ist eine eigene Auswahl und fließt nur ein, wenn Sie sie ankreuzen. Sie ist voll bis {{youngFull}} und teilweise bis {{youngPartial}}. Die Befreiung bei der Stempelsteuer auf den Kauf ist ein Abzug, begrenzt auf 0,8 % der Grenze der vollen Befreiung; darüber zahlen Sie 0,8 % nur auf den Mehrbetrag. Die Stempelsteuer auf das Darlehen fällt weiterhin an.",
         "assumptionLoan": "Die Stempelsteuer auf das Darlehen setzt eine Laufzeit von fünf Jahren oder mehr voraus und fällt immer an. Darlehensgebühren, Bewertung sowie Notar- und Registerkosten sind nicht enthalten.",
-        "assumptionUnsupported": "Nicht unterstützt: Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT.",
         "assumptionIslands": "Für die Azoren und Madeira verwendet der Rechner die regionalen Grenzen der Tabellen IV bis VI des Ofício Circulado 40129/2026, mit denselben Sätzen wie auf dem Festland.",
-        "sourceCircular": "Ofício Circulado 40129/2026: IMT-Tabellen (Steuerbehörde)"
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT-Tabellen (Steuerbehörde)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Stempelsteuer auf den Kauf",
+          "stampLoan": "Stempelsteuer auf das Darlehen"
+        },
+        "terms": {
+          "base": "Steuerpflichtiger Wert",
+          "imt": "IMT",
+          "stamp": "Stempelsteuer",
+          "rounding": "Rundung",
+          "scope": "Umfang",
+          "young": "Befreiung für junge Käufer",
+          "loan": "Darlehen",
+          "islands": "Azoren und Madeira"
+        },
+        "formulasLabel": "Formeln",
+        "assumptionUnsupportedTerm": "Nicht unterstützt",
+        "assumptionUnsupportedBody": "Gebietsfremde, Käufer mit Wohnsitz in Niedrigsteuergebieten, Unternehmen, weitere IMT-Befreiungen und -Vergünstigungen sowie Wohnungen nach Artikel 9 des CIMT."
       },
       "nextStepHeadline": "Planen Sie das Geld, das Sie für den Kauf brauchen",
       "nextStepDescription": "Addieren Sie IMT und Stempelsteuer zu Ihrem Sparbedarf vor dem Kauf und verfolgen Sie den Fortschritt in WonderMoney.",
@@ -2538,7 +2880,28 @@
         "assumptionBanks": "Banken bewerten Ihr Kreditrisiko und können den Kredit ablehnen oder andere Konditionen bieten, unabhängig von der Liste. Bei einem gemeinsamen Kredit müssen beide Käufer die Bedingungen erfüllen.",
         "assumptionRate": "Der Zins ist der, den Sie eingeben. Die Garantie ändert den Zinssatz nicht.",
         "assumptionTaxes": "Die Steuern gelten für den eigenen dauerhaften Wohnsitz auf dem portugiesischen Festland und setzen in den Werten mit Befreiung voraus, dass Sie die Bedingungen des IMT Jovem erfüllen.",
-        "assumptionScope": "Nur zur Information: keine Finanz-, Steuer- oder Rechtsberatung."
+        "assumptionScope": "Nur zur Information: keine Finanz-, Steuer- oder Rechtsberatung.",
+        "labels": {
+          "cash": "Eigenmittel bei Beurkundung",
+          "taxes": "IMT und Stempelsteuer"
+        },
+        "terms": {
+          "payment": "Darlehen und Rate",
+          "taxes": "Steuern",
+          "cash": "Eigenmittel bei Beurkundung",
+          "guarantee": "Die Garantie",
+          "banks": "Die Bank entscheidet",
+          "rate": "Zinssatz",
+          "assumptionTaxes": "Berücksichtigte Steuern",
+          "scope": "Umfang",
+          "conditionAge": "Alter",
+          "conditionHome": "Selbst genutzter Hauptwohnsitz",
+          "conditionProperty": "Andere Immobilie",
+          "conditionPrice": "Preis",
+          "conditionIncome": "Einkommen",
+          "conditionDate": "Vertragsdatum"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Planen Sie Eigenkapital und Wohnkosten",
       "nextStepDescription": "Setzen Sie ein Ziel für das Eigenkapital und budgetieren Sie Rate, Steuern und laufende Wohnkosten in WonderMoney.",
@@ -2638,15 +3001,29 @@
         "exampleOutro": "Der Rechner oben beginnt mit diesem Kredit ohne die Gebühren, damit Sie Ihr eigenes Angebot eingeben können.",
         "methodTitle": "So wird gerechnet",
         "methodIntro": "Die Monatsrate ist die gleichbleibende Rate, die den Betrag über die Laufzeit zum Monatszins zurückzahlt, und der effektive Jahreszins ist der Zins, bei dem sich Erhaltenes und Gezahltes ausgleichen:",
-        "methodLegend": "M ist die Rate aus Tilgung und Zinsen, P der Kreditbetrag, r der nominale Jahreszins geteilt durch 12 und n die Zahl der Monate. Die monatlichen Gebühren f kommen zu jeder Rate hinzu.",
-        "methodApr": "Der effektive Jahreszins ist der Zins A, der die zweite Zeile löst: Was Sie zu Beginn erhalten, der Betrag P abzüglich der einmaligen Gebühren F, entspricht der Rate jedes Monats Mₖ plus den Gebühren f, abgezinst mit (1 + A) hoch k ÷ 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
+        "methodApr": "Der effektive Jahreszins ist der Zins, der die letzte Zeile löst: Was Sie zu Beginn erhalten, der Kreditbetrag abzüglich der einmaligen Gebühren, entspricht der Rate jedes Monats plus den monatlichen Gebühren, abgezinst mit eins plus dem effektiven Jahreszins hoch der Nummer des Monats geteilt durch 12, wobei jeder Monat als ein Zwölftel des Jahres zählt. Der Rechner findet ihn per Bisektion.",
         "methodRounding": "Jede Zahl wird in ganzen Cent gerechnet. Jede Rate wird aus der jeweiligen Restschuld neu berechnet, so bleiben die Raten innerhalb eines Cents beieinander, die letzte tilgt den Rest genau, und der Plan ergibt die Summen.",
         "methodPrivacy": "Die Berechnung läuft in Ihrem Browser. Nichts, was Sie eingeben, wird gesendet oder gespeichert.",
         "assumptionsTitle": "Annahmen",
         "assumptionFixedRate": "Der Zinssatz ist über die ganze Laufzeit fest, und jede Rate wird pünktlich gezahlt.",
         "assumptionFees": "Die einmaligen Gebühren werden zu Beginn gezahlt oder vom Betrag abgezogen; die monatlichen Gebühren sind jeden Monat gleich.",
         "assumptionOtherCosts": "Kosten, nach denen der Rechner nicht fragt, etwa freiwillige Versicherungen, Verzugsgebühren oder eine Vorfälligkeitsentschädigung, sind nicht enthalten.",
-        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}."
+        "assumptionLimits": "Beträge von {{minAmount}} bis {{maxAmount}}, Laufzeiten von {{minMonths}} bis {{maxMonths}} Monaten und Zinssätze bis {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Ausgezahlter Betrag",
+          "month": "Monat",
+          "apr": "Effektiver Jahreszins",
+          "aprNoFees": "Effektiver Jahreszins ohne Gebühren",
+          "aprFees": "Effektiver Jahreszins mit Gebühren"
+        },
+        "methodAprTerm": "Effektiver Jahreszins",
+        "assumptionFixedRateTerm": "Fester Zins",
+        "assumptionFeesTerm": "Gebühren",
+        "assumptionOtherCostsTerm": "Andere Kosten",
+        "assumptionLimitsTerm": "Grenzen",
+        "methodRoundingTerm": "Rundung",
+        "methodPrivacyTerm": "Datenschutz",
+        "methodFormulasLabel": "Formeln"
       }
     },
     "savingsCertificates": {
@@ -2705,14 +3082,31 @@
         "exampleTitle": "Rechenbeispiel",
         "exampleText": "Sie zeichnen {{amount}} und halten die Zertifikate {{years}} Jahre bei einem Basiszins von {{baseRate}}. Die Zertifikate bringen {{grossInterest}} Bruttozinsen, davon gehen {{irs}} an die IRS, netto bleiben {{netInterest}}. Das Guthaben erreicht {{finalValue}}, eine Nettorendite von {{netYield}} pro Jahr.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodQuarter": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
-        "methodTax": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
-        "methodYield": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
+        "methodQuarterBody": "Jedes Quartal verzinst sich mit einem Viertel des Jahreszinses (Basiszins plus Prämie) auf das aktuelle Guthaben. Beträge werden jedes Quartal auf den Cent gerundet.",
+        "methodTaxBody": "{{irsRate}} der Zinsen jedes Quartals werden einbehalten, die Nettozinsen werden dem Guthaben zugeschlagen und tragen so in den folgenden Quartalen selbst Zinsen.",
+        "methodYieldBody": "Die Netto-Jahresrendite ist das jährliche Zinseszinswachstum vom gezeichneten Betrag bis zum Endguthaben. Die Bruttowerte zeigen die Zinsen vor IRS.",
         "assumptionsTitle": "Annahmen",
         "assumptionBase": "Der Basiszins ist der von Ihnen eingegebene und bleibt über die ganze Haltedauer fest. Er beginnt bei dem vom IGCP für {{referenceMonth}} festgelegten Zins ({{referenceRateNote}}), den das IGCP jeden Monat neu festlegt; die tatsächlichen Zinsen weichen daher ab. Den aktuellen Zins finden Sie auf der Website des IGCP.",
         "assumptionRules": "Der IRS-Satz ist der allgemeine Satz für diese Art von Kapitalerträgen. Ihre persönliche Steuersituation und Regeländerungen nach {{rulesDate}} sind nicht berücksichtigt.",
         "assumptionScope": "Allgemeine Information, keine Empfehlung, ein Produkt zu kaufen oder zu meiden, und kein Vergleich der Zertifikate mit anderen Sparformen.",
-        "referenceRateAtCeiling": "{{rate}}, die Obergrenze"
+        "referenceRateAtCeiling": "{{rate}}, die Obergrenze",
+        "methodQuarterTerm": "Vierteljährliche Zinsen",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Nettorendite pro Jahr",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "quarterInterest": "Zinsen des Quartals",
+          "balance": "Guthaben",
+          "baseRate": "Basiszins",
+          "bonus": "Treueprämie",
+          "irs": "IRS",
+          "interestLower": "Zinsen",
+          "newBalance": "Guthaben am Quartalsende",
+          "yield": "Nettorendite pro Jahr",
+          "finalValue": "Endguthaben",
+          "amount": "gezeichneter Betrag",
+          "years": "Jahre"
+        }
       },
       "nextStepHeadline": "Sehen Sie Ihre Zertifikate neben Ihren übrigen Ersparnissen",
       "nextStepDescription": "Fügen Sie sie in WonderMoney hinzu, um alles, was Sie gespart haben, an einem Ort zu verfolgen.",
@@ -2831,12 +3225,25 @@
           "title": "So wird gerechnet",
           "intro": "Die Zinssätze sind veröffentlichte Statistiken. WonderMoney fügt nur diese Berechnungen hinzu:",
           "steps": {
-            "a": "Jahreszins: der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
-            "b": "Inflation: die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum betreffenden Jahr.",
-            "c": "Realzins: (1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
-            "d": "Rechner: einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, abzüglich 28 % Quellensteuer, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
+            "aTerm": "Jahreszins",
+            "aBody": "Der einfache Durchschnitt der zwölf Monatsdurchschnitte des Jahres. Die Monate werden nicht nach dem angelegten Betrag gewichtet.",
+            "bTerm": "Inflation",
+            "bBody": "Die Veränderung des jahresdurchschnittlichen portugiesischen Verbraucherpreisindex vom Vorjahr zum betreffenden Jahr.",
+            "cTerm": "Realzins",
+            "cBody": "(1 + Zins) ÷ (1 + Inflation) − 1. Für den Wert nach Steuer werden zuerst 28 % IRS vom Zins abgezogen.",
+            "dTerm": "Rechner",
+            "dBody": "Einfache Zinsen für die Laufzeit in ganzen Monaten, am Ende gezahlt, abzüglich 28 % Quellensteuer, zum Durchschnittssatz der Laufzeitgruppe. Was die Inflation abzieht, ist Betrag × ((1 + Inflation)^(Monate ÷ 12) − 1)."
           },
-          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte."
+          "realRate": "Teilen statt Subtrahieren ist bei hohen Zinsen wichtig: Es misst, wie viel mehr das Geld kaufen kann, und nicht nur den Abstand zweier Prozentwerte.",
+          "formulasLabel": "Formeln",
+          "formula": {
+            "realRate": "Realzins",
+            "realRateAfterTax": "Realzins nach Steuer",
+            "rate": "Zins",
+            "inflation": "Inflation",
+            "amount": "Betrag",
+            "months": "Monate"
+          }
         },
         "data": {
           "title": "Daten und Quellen",
@@ -2965,10 +3372,14 @@
           "title": "So wird gerechnet",
           "intro": "Jede Zahl stammt aus derselben Rechenlogik wie der Festgeld-Rechner:",
           "steps": {
-            "a": "Bruttozinsen: Betrag × TANB × Laufzeit in Monaten ÷ 12, in einer Zahlung bei Fälligkeit.",
-            "b": "Steuer: {{taxRate}} % der Zinsen. Ausländische Banken behalten sie in Portugal nicht ein, daher geht die Zahl davon aus, dass Sie die Zinsen selbst in der Steuererklärung angeben und denselben Satz zahlen.",
-            "c": "Nettorendite pro Jahr: die Nettozinsen, auf ein Jahr hochgerechnet.",
-            "d": "Filter: Ein Angebot wird ausgeblendet, wenn sein Mindestbetrag über Ihrem Betrag oder sein Höchstbetrag darunter liegt. Ein Angebot ohne angegebene Grenze bleibt sichtbar."
+            "aTerm": "Bruttozinsen",
+            "aBody": "Betrag × TANB × Laufzeit in Monaten ÷ 12, in einer Zahlung bei Fälligkeit.",
+            "bTerm": "Steuer",
+            "bBody": "{{taxRate}} % der Zinsen. Ausländische Banken behalten sie in Portugal nicht ein, daher geht die Zahl davon aus, dass Sie die Zinsen selbst in der Steuererklärung angeben und denselben Satz zahlen.",
+            "cTerm": "Nettorendite pro Jahr",
+            "cBody": "Die Nettozinsen, auf ein Jahr hochgerechnet.",
+            "dTerm": "Filter",
+            "dBody": "Ein Angebot wird ausgeblendet, wenn sein Mindestbetrag über Ihrem Betrag oder sein Höchstbetrag darunter liegt. Ein Angebot ohne angegebene Grenze bleibt sichtbar."
           }
         },
         "data": {
@@ -3063,6 +3474,7 @@
         "methodMeal": "Der Essenszuschuss ist bis zur täglichen Freigrenze steuerfrei, die davon abhängt, ob er bar oder per Karte gezahlt wird. Der Rechner addiert nur den Mehrbetrag zum steuerpflichtigen Entgelt.",
         "methodAllowances": "Bei 14 Zahlungen werden Urlaubs- und Weihnachtsgeld jeweils für sich besteuert, wie es die Tabellen verlangen. In Zwölfteln wird der Zusatzbetrag auf jeden Monat aufgeschlagen.",
         "methodBudget": "Die Nettowerte sind das, was auf Ihrem Konto ankommt, und damit der richtige Ausgangspunkt für ein Monatsbudget.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "Die Quellensteuer ist nicht Ihre endgültige IRS",
         "final": "Was jeden Monat einbehalten wird, ist eine Vorauszahlung. Die Steuerbehörde setzt Ihre tatsächliche IRS in der Jahreserklärung fest, mit dem Einkommen des ganzen Jahres und Ihren Abzügen. Die Quellensteuer kann über oder unter der geschuldeten Steuer liegen, deshalb gibt es Erstattungen oder Nachzahlungen.",
         "unsupportedTitle": "Nicht unterstützt",
@@ -3140,6 +3552,9 @@
         "howTransition": "In den ersten Zeilen ist die Parcela a abater eine Formel mit dem Buchstaben R, dem Monatsentgelt. Sie lässt die Quellensteuer ab null sanft steigen, damit eine kleine Gehaltserhöhung das Netto nie senkt.",
         "howDependants": "Jeder Unterhaltsberechtigte senkt die Quellensteuer um einen festen Betrag. Ab drei Unterhaltsberechtigten liegt der Grenzsteuersatz der Zeile einen Prozentpunkt niedriger.",
         "howTables": "Tabelle I gilt für Unverheiratete ohne Unterhaltsberechtigte und für Verheiratete mit zwei Einkommen. Tabelle II gilt für Unverheiratete mit Unterhaltsberechtigten und Tabelle III für Verheiratete mit einem Einkommen.",
+        "methodFormulasLabel": "Formel",
+        "formulaPerDependant": "Betrag je Unterhaltsberechtigtem",
+        "howTransitionTerm": "Parcela a abater mit R",
         "finalTitle": "Die Quellensteuer ist nicht die endgültige Steuer",
         "final": "Die Tabellen legen fest, wie viel Ihr Arbeitgeber jeden Monat einbehält. Sie berechnen nicht Ihre endgültige IRS, die die Jahreserklärung mit den obigen Stufen, dem Einkommen des ganzen Jahres und Ihren Abzügen festsetzt.",
         "unsupportedTitle": "Nicht enthalten",
@@ -3242,6 +3657,20 @@
         "methodNoReduction": "Die frühere Kürzung um 10 % nach 180 Bezugstagen wird nicht angewendet: Der Leitfaden der Segurança Social von 2026 nennt sie nicht.",
         "methodTax": "Laut Leitfaden der Segurança Social muss die Leistung nicht in der IRS-Erklärung angegeben werden. Klären Sie Ihren Fall mit der Steuerbehörde.",
         "methodBudget": "Der Monatsbetrag ist das Einkommen, mit dem Sie planen. Vergleichen Sie ihn mit Ihrem Nettogehalt, um den Rückgang zu sehen, und prüfen Sie dann, wie lange Ihre Ersparnisse die Lücke decken.",
+        "methodFormulasLabel": "Formeln",
+        "formulaReference": "Referenzentgelt",
+        "formulaPay": "Entgelt der 12 Monate",
+        "formulaDaily": "Tagessatz",
+        "formulaMonthly": "Monatsbetrag",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodAmountTerm": "Höhe",
+        "methodLimitsTerm": "Grenzen",
+        "methodNetTerm": "Netto-Referenzentgelt",
+        "methodIncreaseTerm": "Zuschlag von 10 %",
+        "methodDurationTerm": "Dauer",
+        "methodNoReductionTerm": "Keine Kürzung nach 180 Tagen",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Nicht unterstützt",
         "unsupportedTransitional": "Die Übergangstabelle für Personen, die die Beitragsvoraussetzung schon am 31. März 2012 erfüllten und seitdem nicht arbeitslos waren. Der Rechner nutzt nur die allgemeine Tabelle.",
         "unsupportedSocial": "Das soziale Arbeitslosengeld (subsídio social de desemprego), das laut Leitfaden nur bis zum 30. Dezember 2026 beantragt werden kann.",
@@ -3340,6 +3769,20 @@
         "methodNetCap": "Der Tagessatz darf auch den Nettowert der RR nicht übersteigen. Der Rechner schätzt ihn mit 11 % Sozialversicherung und dem IRS-Quellensteuersatz 2026 des Festlands für einen Alleinstehenden.",
         "methodGap": "Die Einkommenslücke vergleicht Ihr normales Nettogehalt (14 oder 12 Zahlungen, über 12 Monate gemittelt) mit dem, was die Segurança Social zahlt. Urlaubs- und Weihnachtsgeld werden für die Krankheitstage nicht ersetzt.",
         "methodBudget": "Die Lücke ist das Einkommen, das Sie während der Krankschreibung aus Ersparnissen oder durch weniger Ausgaben decken müssen. Nutzen Sie sie, um Ihr Polster zu bemessen.",
+        "methodFormulasLabel": "Formeln",
+        "formulaReference": "Referenzentgelt",
+        "formulaPay": "Entgelt der 6 Monate",
+        "formulaDaily": "Tagessatz",
+        "formulaPercent": "Prozentsatz der Stufe",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodBandsTerm": "Prozentsatz nach Dauer",
+        "methodWaitingTerm": "Karenztage",
+        "methodMinimumTerm": "Mindestbetrag",
+        "methodIncreaseTerm": "Zuschlag von 5 Punkten",
+        "methodFloorTerm": "Untergrenze über 500 Euro",
+        "methodNetCapTerm": "Netto-Obergrenze",
+        "methodGapTerm": "Einkommenslücke",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Nicht abgedeckt",
         "unsupportedTuberculosis": "Tuberkulose, bezahlt mit 80 % oder 100 % der RR je nach unterhaltsberechtigten Angehörigen, ohne zeitliche Begrenzung.",
         "unsupportedSelfEmployed": "Selbstständige (10 Karenztage, bis 365 Tage), freiwillige Sozialversicherung und Hausangestellte.",
@@ -3422,8 +3865,6 @@
         "exampleTitle": "Rechenbeispiel",
         "example": "Ein Diesel mit {{cc}} cm³ Hubraum, offiziellen WLTP-Emissionen von {{co2}} g/km und Erstzulassung {{year}} zahlt {{tax}} IUC im Jahr. Wer {{monthly}} im Monat zurücklegt, ist abgedeckt.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodA": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007): Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
-        "methodB": "Kategorie B (Autos mit Zulassung ab Juli 2007): Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
         "methodAdditional": "Autos der Kategorie B mit Erstzulassung nach dem 1. Januar 2017 zahlen bei hohen Emissionen einen Zusatzsatz: 31,77 € über 205 g/km (WLTP) oder 180 g/km (NEDC) und 63,74 € über 260 g/km (WLTP) oder 250 g/km (NEDC). Auch der Zusatzsatz wird mit dem Koeffizienten multipliziert. Der Gesetzestext beschränkt ihn nicht nach Kraftstoff, daher wendet der Rechner ihn auf alle an.",
         "methodDiesel": "Dieselfahrzeuge zahlen zusätzlich den Dieselzuschlag (adicional de IUC, Artikel 216 des Gesetzes Nr. 82-B/2014, für 2026 durch den Staatshaushalt weitergeführt). Er hängt vom Hubraum ab, gilt für die Kategorien A und B und wird nach dem Koeffizienten addiert, nicht damit multipliziert.",
         "methodPayment": "Bis 2026 wird die IUC im Monat des Zulassungsjahrestags gezahlt. Das Decreto-Lei Nr. 161/2026 (4. August 2026) führt eine jährliche Festsetzung je Steuerpflichtigem für alle Fahrzeuge ein. 2027 ist ein Übergangsjahr: eine Zahlung im Oktober bis 500 €, sonst zwei im Juli und Oktober (oder alles im Juli). Ab 2028 wird sie bis April festgesetzt und bis 100 € im April, von 100 € bis 500 € im April und Oktober und über 500 € im April, Juli und Oktober gezahlt. Die Grenzen gelten für die Summe aller Ihrer Fahrzeuge.",
@@ -3431,8 +3872,6 @@
         "exemptionTitle": "Elektroautos",
         "exemption": "Reine Elektroautos der Kategorie B sind von der IUC befreit, der Rechner zeigt null. Plug-in-Hybride und andere Fahrzeuge werden nach Hubraum und CO2 laut Fahrzeugschein besteuert; geben Sie diese Werte ein.",
         "scopeTitle": "Was abgedeckt ist",
-        "scopeSupported": "Leichte Pkw: Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
-        "scopeUnsupported": "Nicht unterstützt: Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
         "assumptionsTitle": "Annahmen",
         "assumptionYear": "Die Sätze sind die {{taxYear}}-Tabellen des Código do IUC (Artikel 9 und 10) in der Fassung der {{law}}. Das Portal das Finanças nennt keine spätere Änderung dieser Sätze.",
         "assumptionPayment": "Der Fälligkeitsmonat 2026 folgt der Regel des Zulassungsjahrestags, die laut Präambel des Decreto-Lei Nr. 161/2026 derzeit gilt. Ab 2027 wird die Steuer je Steuerpflichtigem über alle seine Fahrzeuge festgesetzt: Fügen Sie jedes Ihrer Autos hinzu und geben Sie die IUC Ihrer übrigen Fahrzeuge als weitere IUC ein, damit die Ratenmonate Ihrer Summe folgen (das Gesetz wendet die Grenzen auf diese Summe an). Die Zahlungspläne für 2027 und 2028 zeigen den Betrag jedes Monats für die hinzugefügten Autos, bei einem Auto dessen Anteil an jeder Rate. Im Zulassungsjahr wird die Steuer innerhalb von 30 Tagen nach Ablauf der gesetzlichen Anmeldefrist gezahlt.",
@@ -3444,7 +3883,31 @@
         "sourceDiesel": "Portal das Finanças: Artikel 216 des Gesetzes Nr. 82-B/2014, Tabellen I und II des Dieselzuschlags (abgerufen am 20. November 2026)",
         "reviewed": "Sätze für {{taxYear}} geprüft am {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei Nr. 161/2026 vom 4. August: neue IUC-Zahlungsregeln mit dem Übergang 2027 (Portal das Finanças, abgerufen am 19. November 2026)",
-        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)"
+        "sourceBudget": "Diário da República: Artikel 94 des Gesetzes Nr. 73-A/2025 (Staatshaushalt 2026), der den Dieselzuschlag ohne Änderung der Beträge weiterführt (abgerufen am 20. November 2026)",
+        "methodATerm": "Kategorie A (Autos mit Zulassung von 1981 bis Juni 2007)",
+        "methodABody": "Die Steuer stammt aus einer Tabelle nach Kraftstoff, Hubraum und Zulassungszeitraum (nach 1995, 1990 bis 1995, 1981 bis 1989).",
+        "methodBTerm": "Kategorie B (Autos mit Zulassung ab Juli 2007)",
+        "methodBBody": "Hubraum- und CO2-Satz werden addiert und mit einem Koeffizienten nach Zulassungsjahr multipliziert (1,00 für 2007, 1,05 für 2008, 1,10 für 2009, 1,15 ab 2010). Das CO2 wird in der WLTP- oder NEDC-Spalte abgelesen, je nach Prüfzyklus im Fahrzeugschein.",
+        "scopeSupportedTerm": "Leichte Pkw",
+        "scopeSupportedBody": "Kategorie A (zugelassen von 1981 bis Juni 2007) und Kategorie B (zugelassen ab Juli 2007).",
+        "scopeUnsupportedTerm": "Nicht unterstützt",
+        "scopeUnsupportedBody": "Güter- und schwerere Fahrzeuge (Kategorien C und D), Motorräder (E), Sportboote (F), Luftfahrzeuge (G) und vor 1981 zugelassene Autos.",
+        "labels": {
+          "diesel": "Dieselzuschlag",
+          "engineRate": "Hubraumsatz",
+          "co2Rate": "CO2-Satz",
+          "provision": "Monatliche Rücklage"
+        },
+        "terms": {
+          "additional": "Zusatzsatz",
+          "diesel": "Dieselzuschlag",
+          "payment": "Zahlung",
+          "budget": "Monatliche Rücklage",
+          "year": "Tabellen",
+          "paymentRule": "Fälligkeit",
+          "educational": "Schätzung zur Orientierung"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Lassen Sie sich von der Kfz-Steuer nicht überraschen",
       "nextStepDescription": "WonderMoney hilft Ihnen, jeden Monat ein Zwölftel Ihrer Kfz-Steuer zurückzulegen, damit der Bescheid schon gedeckt ist.",
@@ -3551,7 +4014,6 @@
         "methodCash": "Für den verbleibenden Erlös werden vom Verkaufspreis die Verkaufskosten, das getilgte Darlehen und die geschätzte IRS abgezogen. Was Sie in die nächste Wohnung stecken, wird nicht abgezogen.",
         "scopeTitle": "Was abgedeckt ist",
         "scopeSupported": "Natürliche Personen mit steuerlichem Wohnsitz in Portugal, die {{saleYear}} eine seit {{firstYear}} gekaufte Immobilie aus dem Privatvermögen verkaufen.",
-        "scopeUnsupported": "Nicht abgedeckt: Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, der Solidaritätszuschlag und Abzüge von der Steuerschuld.",
         "assumptionsTitle": "Annahmen",
         "assumptionBrackets": "Für die zusätzliche IRS werden die IRS-Jahrestarifstufen {{saleYear}} auf das eingegebene Einkommen angewendet, als Schätzung der Wirkung auf die Jahreserklärung. Die Zusammenveranlagung wird durch Teilung des Einkommens durch zwei abgebildet.",
         "assumptionNotModelled": "Der Rechner prüft die Reinvestitionsvoraussetzungen nicht. Die Koeffizienten wurden mit der Tabelle der {{portaria}} im Diário da República abgeglichen.",
@@ -3566,7 +4028,29 @@
         "sourceAcquisition": "CIRS, Artikel 46: Anschaffungswert entgeltlich erworbener Immobilien (abgerufen am 20. November 2026)",
         "sourceCorrection": "CIRS, Artikel 50: Geldwertkorrektur nach 24 Monaten (abgerufen am 20. November 2026)",
         "sourceExpenses": "CIRS, Artikel 51: Arbeiten der letzten 12 Jahre sowie Anschaffungs- und Verkaufskosten (abgerufen am 20. November 2026)",
-        "sourceImt": "CIMT, Artikel 12: Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (abgerufen am 20. November 2026)"
+        "sourceImt": "CIMT, Artikel 12: Die IMT wird auf den höheren Betrag aus Preis und VPT gezahlt (abgerufen am 20. November 2026)",
+        "scopeUnsupportedTerm": "Nicht abgedeckt",
+        "scopeUnsupportedBody": "Nichtansässige, vor {{firstYear}} gekaufte Immobilien, Unternehmen und betrieblich genutzte Immobilien, Erbschaften und Schenkungen, Wohnungen mit öffentlicher Förderung über 30 % des Steuerwerts, der Solidaritätszuschlag und Abzüge von der Steuerschuld.",
+        "labels": {
+          "included": "Dem Einkommen zugerechnet",
+          "irsWith": "IRS mit dem Gewinn",
+          "irsWithout": "IRS ohne den Gewinn",
+          "cashAfter": "Erlös"
+        },
+        "terms": {
+          "gain": "Gewinn",
+          "taxValue": "Verkaufswert und VPT",
+          "coefficient": "Koeffizient",
+          "expenses": "Ausgaben",
+          "half": "Die Hälfte des Gewinns",
+          "exemption": "Reinvestition",
+          "cash": "Erlös",
+          "brackets": "IRS-Stufen",
+          "notModelled": "Was nicht geprüft wird",
+          "educational": "Schätzung zur Orientierung",
+          "supported": "Abgedeckt"
+        },
+        "formulasLabel": "Formeln"
       },
       "nextStepHeadline": "Sehen Sie, wie viel vom Verkaufserlös Sie wirklich nutzen können",
       "nextStepDescription": "WonderMoney hilft Ihnen, die Steuer zurückzulegen und zu sehen, was für die nächste Wohnung bleibt.",
@@ -3646,6 +4130,9 @@
         "methodWithholding": "Für jede Zahlung wird die Quellensteuer getrennt nach der Monatstabelle 2026 berechnet, ohne sie zum Monatsgehalt zu addieren: Der Despacho n.º 233-A/2026 (Nr. 10) verlangt von Arbeitgebern einen getrennten effektiven Satz je Vergütung, wie in den Monaten, in denen Urlaubs- und Weihnachtsgeld gezahlt werden.",
         "methodTwelfths": "In Zwölfteln wird der Betrag gleichmäßig auf die Monate verteilt, die Sie im Jahr arbeiten (12 bei einem vollen Jahr). Auf jedes Zwölftel wird für sich der effektive Satz der gesamten Sonderzahlung angewendet, übliche Lohnabrechnungspraxis seit der Lei n.º 11/2013, Art. 3 (nicht im Despacho geregelt). Ihr Arbeitgeber kann das Zwölftel stattdessen zum Monatsgehalt addieren und die Steuer auf die Summe einbehalten, wodurch meist mehr einbehalten wird: Prüfen Sie Ihre Gehaltsabrechnung.",
         "methodSocialSecurity": "Die Sozialversicherung zulasten des Arbeitnehmers beträgt 11 % der Brutto-Sonderzahlung.",
+        "hiringYearTerm": "Jahr des Eintritts",
+        "twelfthsTerm": "In Zwölfteln",
+        "planTerm": "Planung",
         "unsupportedNovember": "Die einmalige Anpassung für im November 2026 gezahlte Einkünfte (Despacho 12523-A/2026, Festland) wird ignoriert. Für eine im November gezahlte Sonderzahlung würde nur die halbe Quellensteuer einbehalten.",
         "unsupportedOther": "Es zählt nur das Grundgehalt. Dienstalterszulagen, andere Vergütungsbestandteile, ein Vertragsende oder Ruhen des Vertrags im Lauf des Jahres, großzügigere Tarifverträge und Arbeitgeberkosten liegen außerhalb dieser Schätzung.",
         "sourceCode": "Código do Trabalho, Art. 239, 263 und 264: Urlaubsdauer, Weihnachtsgeld und Urlaubsgeld",
@@ -3739,6 +4226,22 @@
         "methodFraction": "Ein unvollständiges Jahr zählt anteilig: Der Rechner zählt volle Jahrestage ab Vertragsbeginn plus die Tage seit dem letzten, geteilt durch die Tage dieses Jahres. Das Beendigungsdatum zählt als Arbeitstag.",
         "methodTax": "Nur zur Information, nicht im Betrag enthalten: Ein Teil der Abfindung kann nach Art. 2 Abs. 4 des CIRS von der IRS ausgenommen sein, bis zu einer Grenze, die an Ihr reguläres Entgelt der letzten 12 Monate und Ihre Dienstjahre gebunden ist. Der Rest ist steuerpflichtiges Einkommen. Fragen Sie die Steuerbehörde oder einen Steuerberater nach der genauen Grenze in Ihrem Fall.",
         "methodBudget": "Die Abfindung ist ein einmaliger Betrag. Wenn Sie sie zusammen mit einem möglichen Arbeitslosengeld auf die kommenden Monate verteilen, sehen Sie, wie lange sie Ihre Ausgaben deckt.",
+        "methodFormulasLabel": "Formeln",
+        "formulaDaily": "Tagesbetrag",
+        "formulaBase": "Grundgehalt",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Tage pro Jahr",
+        "formulaYears": "Jahre der Betriebszugehörigkeit",
+        "formulaCompensation": "Abfindung",
+        "methodBaseTerm": "Basis",
+        "methodRatesTerm": "Tage pro Jahr",
+        "methodTransitionalTerm": "Ältere Verträge",
+        "methodFixedTermTerm": "Auslaufen eines befristeten Vertrags",
+        "methodDurationLimitTerm": "Höchstdauer",
+        "methodCapsTerm": "Obergrenzen",
+        "methodFractionTerm": "Angefangenes Jahr",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Abgedeckt",
         "supported": "Massenentlassung, Wegfall des Arbeitsplatzes und Nichteignung des Arbeitnehmers in einem unbefristeten Vertrag sowie das Auslaufen eines befristeten Vertrags mit bestimmter oder unbestimmter Dauer, mit Beendigung im Jahr 2026.",
         "unsupportedTitle": "Nicht abgedeckt",
@@ -3851,14 +4354,14 @@
         "exampleTitle": "Rechenbeispiel",
         "example": "Jemand mit durchschnittlich {{gross}} im Monat (Euro von heute, 14 Zahlungen) und {{years}} Beitragsjahren geht in Rente (Rentenalter: {{age}}). Die gesetzliche Rente beträgt {{statutory}} im Monat, bei einem Gesamtsteigerungssatz von {{rate}}. Bei Rentenbeginn {{months}} Monate vor dem Regelalter werden {{penalty}} abgezogen und der Nachhaltigkeitsfaktor wird angewendet; es bleiben {{monthly}} brutto im Monat, also {{replacement}} des Gehalts. Nach IRS beträgt die Rente {{netPension}} im Monat. Gegenüber einem geschätzten Nettogehalt von {{net}} beträgt die Lücke {{gap}} im Monat.",
         "methodTitle": "So funktioniert die Schätzung",
-        "methodReference": "Das Referenzentgelt ist der Durchschnitt der Jahresentgelte der gesamten Laufbahn, aufgewertet mit Verbraucherpreis-Koeffizienten und durch 14 geteilt. Der Rechner arbeitet in Euro von heute: Sie geben ein reales durchschnittliches Monatsgehalt ein, und das Ergebnis ist ebenfalls in Euro von heute.",
-        "methodRate": "Der jährliche Steigerungssatz hängt von Abschnitten des Referenzentgelts in Vielfachen des IAS ab ({{ias}} im Jahr 2026): {{rates}} für die Abschnitte bis 1,1, bis 2, bis 4, bis 8 und über dem 8-Fachen des IAS. Laufbahnen bis 20 Jahre nutzen pauschal 2 %. Der Satz wird mit den Beitragsjahren, höchstens 40, multipliziert und ergibt den Gesamtsteigerungssatz.",
-        "methodAges": "Das Regelalter für die Altersrente beträgt 2026 {{normal2026}} und wurde für 2027 auf {{normal2027}} festgelegt. Der Rechner nutzt den Wert von 2026.",
-        "methodEarly": "Vor dem Regelalter, ab 60 mit mindestens 15 Beitragsjahren, zieht jeder Monat des früheren Beginns {{penalty}} ab, und zusätzlich gilt der Nachhaltigkeitsfaktor 2026 ({{factor}}, eine Kürzung um 17,63 %). Beide werden multipliziert. Ausnahmen, etwa für sehr lange Laufbahnen, sind nicht abgebildet.",
-        "methodLate": "Nach dem Regelalter, bis 70, bringt jeder Monat einen Zuschlag je nach Beitragsjahren: 0,33 % ab 15 Jahren, 0,50 % ab 25, 0,65 % ab 35 und 1 % ab 40. Die Rente mit Zuschlag darf 92 % des Referenzentgelts nicht übersteigen.",
-        "methodMinimum": "Ergibt die Formel weniger als die Mindestrente 2026 für Ihre Laufbahn, wird das Minimum gezeigt: {{min15}} für 15 bis 20 Jahre, {{min21}} für 21 bis 30 und {{min31}} ab 31 Jahren. Die Mindestrente gilt nicht beim vorzeitigen Rentenbeginn.",
-        "methodGap": "Die Lücke vergleicht die Nettorente mit Ihrem heutigen Nettogehalt, beide pro Zahlung über 14 Zahlungen. Das Nettogehalt ist das Brutto minus 11 % Sozialversicherung und die IRS-Quellensteuer 2026 für eine alleinstehende Person ohne Unterhaltsberechtigte auf dem Festland. Die Nettorente ist die geschätzte Bruttorente minus die IRS-Quellensteuer nach der Rentenquellensteuertabelle VIII 2026 (Despacho n.º 233-A/2026, nicht verheiratet oder verheiratet mit zwei Verdienern, ohne Behinderung); auf Renten fällt keine Sozialversicherung an, und auf Renten bis 920 Euro im Monat wird keine Quellensteuer einbehalten. Die endgültige IRS hängt von Ihrem Gesamteinkommen und den Abzügen ab.",
-        "methodBudget": "Lesen Sie die Lücke als den Monatsbetrag, den Ihre Ersparnisse und Investitionen decken müssten. Sie ändert sich mit jeder Annahme oben.",
+        "methodReferenceBody": "Das Referenzentgelt ist der Durchschnitt der Jahresentgelte der gesamten Laufbahn, aufgewertet mit Verbraucherpreis-Koeffizienten und durch 14 geteilt. Der Rechner arbeitet in Euro von heute: Sie geben ein reales durchschnittliches Monatsgehalt ein, und das Ergebnis ist ebenfalls in Euro von heute.",
+        "methodRateBody": "Der jährliche Steigerungssatz hängt von Abschnitten des Referenzentgelts in Vielfachen des IAS ab ({{ias}} im Jahr 2026): {{rates}} für die Abschnitte bis 1,1, bis 2, bis 4, bis 8 und über dem 8-Fachen des IAS. Laufbahnen bis 20 Jahre nutzen pauschal 2 %. Der Satz wird mit den Beitragsjahren, höchstens 40, multipliziert und ergibt den Gesamtsteigerungssatz.",
+        "methodAgesBody": "Das Regelalter für die Altersrente beträgt 2026 {{normal2026}} und wurde für 2027 auf {{normal2027}} festgelegt. Der Rechner nutzt den Wert von 2026.",
+        "methodEarlyBody": "Vor dem Regelalter, ab 60 mit mindestens 15 Beitragsjahren, zieht jeder Monat des früheren Beginns {{penalty}} ab, und zusätzlich gilt der Nachhaltigkeitsfaktor 2026 ({{factor}}, eine Kürzung um 17,63 %). Beide werden multipliziert. Ausnahmen, etwa für sehr lange Laufbahnen, sind nicht abgebildet.",
+        "methodLateBody": "Nach dem Regelalter, bis 70, bringt jeder Monat einen Zuschlag je nach Beitragsjahren: 0,33 % ab 15 Jahren, 0,50 % ab 25, 0,65 % ab 35 und 1 % ab 40. Die Rente mit Zuschlag darf 92 % des Referenzentgelts nicht übersteigen.",
+        "methodMinimumBody": "Ergibt die Formel weniger als die Mindestrente 2026 für Ihre Laufbahn, wird das Minimum gezeigt: {{min15}} für 15 bis 20 Jahre, {{min21}} für 21 bis 30 und {{min31}} ab 31 Jahren. Die Mindestrente gilt nicht beim vorzeitigen Rentenbeginn.",
+        "methodGapBody": "Die Lücke vergleicht die Nettorente mit Ihrem heutigen Nettogehalt, beide pro Zahlung über 14 Zahlungen. Das Nettogehalt ist das Brutto minus 11 % Sozialversicherung und die IRS-Quellensteuer 2026 für eine alleinstehende Person ohne Unterhaltsberechtigte auf dem Festland. Die Nettorente ist die geschätzte Bruttorente minus die IRS-Quellensteuer nach der Rentenquellensteuertabelle VIII 2026 (Despacho n.º 233-A/2026, nicht verheiratet oder verheiratet mit zwei Verdienern, ohne Behinderung); auf Renten fällt keine Sozialversicherung an, und auf Renten bis 920 Euro im Monat wird keine Quellensteuer einbehalten. Die endgültige IRS hängt von Ihrem Gesamteinkommen und den Abzügen ab.",
+        "methodBudgetBody": "Lesen Sie die Lücke als den Monatsbetrag, den Ihre Ersparnisse und Investitionen decken müssten. Sie ändert sich mit jeder Annahme oben.",
         "unsupportedTitle": "Nicht unterstützt",
         "unsupportedMixed": "Laufbahnen, die vor 2002 begannen (Mischformel mit den alten Regeln für die Jahre bis 2001). Dieser Rechner deckt nur die Formel der gesamten Laufbahn für alle ab, die 2002 oder später mit den Beiträgen begonnen haben.",
         "unsupportedSpecial": "Stark schwankende Gehälter, Beitragslücken und Laufbahnen über 40 Jahre.",
@@ -3871,7 +4374,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: Rentenanpassung 2026 und Mindestrenten",
         "sourceSimulator": "Segurança Social Direta: offizieller Rentenrechner",
         "reviewed": "Regeln und Werte für 2026 geprüft am 19. November 2026 anhand des Decreto-Lei n.º 187/2007 und der Portarias 2026. Die jährlichen Steigerungssätze, der Zuschlag und die Mindestrenten wurden in Sekundärquellen und auf den Seiten der Segurança Social gegengeprüft, nicht im konsolidierten Gesetzestext gelesen, und die obigen Vereinfachungen stammen von uns. Die Rentenquellensteuertabelle VIII wurde am 20. November 2026 Zeile für Zeile anhand des im Diário da República veröffentlichten Anhangs des Despacho n.º 233-A/2026 geprüft.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): die IRS-Quellensteuertabellen 2026, einschließlich der Rententabelle VIII",
+        "methodReferenceTerm": "Referenzentgelt",
+        "methodRateTerm": "Gesamtsteigerungssatz",
+        "methodAgesTerm": "Regelaltersgrenze",
+        "methodEarlyTerm": "Vorzeitiger Rentenbeginn",
+        "methodLateTerm": "Rentenbeginn nach dem Regelalter",
+        "methodMinimumTerm": "Mindestrente",
+        "methodGapTerm": "Lücke",
+        "methodBudgetTerm": "Die Lücke lesen",
+        "methodFormulasLabel": "Formeln",
+        "formula": {
+          "globalRate": "Gesamtsteigerungssatz",
+          "globalRateLower": "Gesamtsteigerungssatz",
+          "annualRate": "jährlicher Steigerungssatz",
+          "years": "Beitragsjahre",
+          "statutory": "Gesetzliche Rente",
+          "statutoryLower": "gesetzliche Rente",
+          "reference": "Referenzentgelt",
+          "earlyPension": "Rente bei vorzeitigem Rentenbeginn",
+          "monthsEarly": "Monate vor dem Regelalter",
+          "factor": "Nachhaltigkeitsfaktor",
+          "gap": "Lücke",
+          "netPay": "Nettogehalt",
+          "netPension": "Nettorente"
+        }
       }
     },
     "sp500History": {
@@ -3979,10 +4506,14 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "fx": "Währung: Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
-            "fees": "Kosten: Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
-            "taxes": "Steuern: Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
-            "sequence": "Rückblick: Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
+            "fxTerm": "Währung",
+            "fxBody": "Die Renditen sind in US-Dollar. Wenn Sie aus dem Euroraum anlegen, erhöht oder senkt der Euro-Dollar-Kurs diese Zahlen, manchmal um mehrere Prozentpunkte pro Jahr. Das Währungsrisiko kommt zum Marktrisiko hinzu.",
+            "feesTerm": "Kosten",
+            "feesBody": "Fondskosten, Ordergebühren und Spreads sind nicht abgezogen. Ein Fonds, der den Index nachbildet, erzielt die Indexrendite abzüglich seiner Kosten.",
+            "taxesTerm": "Steuern",
+            "taxesBody": "Steuern auf Dividenden und Gewinne sind nicht enthalten und hängen davon ab, wo Sie leben.",
+            "sequenceTerm": "Rückblick",
+            "sequenceBody": "Es ist ein großer US-Index in der Geschichte eines einzigen Landes. Andere Märkte und Zeiträume schnitten viel schlechter ab, und ein um wenige Jahre verschobener Start oder Schluss kann das Ergebnis stark verändern.",
             "past": "Die Wertentwicklung der Vergangenheit ist kein verlässlicher Indikator für die Zukunft. Dieses Werkzeug dient der Bildung und ist keine Anlageberatung."
           }
         },
@@ -4198,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "estimatorTerm": "Rechnungsschätzung",
+          "indexTerm": "Preisindex",
+          "marketTerm": "Freier Markt",
           "estimator": "Der Schätzer rechnet einen Monat mit 30 Tagen im regulierten Tarif: die vertraglich vereinbarte Leistung, die verbrauchte Energie, den Rundfunkbeitrag und die Stromsteuer, und addiert die Mehrwertsteuer Posten für Posten mit dem jeweils geltenden Satz.",
           "index": "Der Index betrachtet die Rechnungen aller Haushalte, nicht nur den regulierten Tarif: den durchschnittlichen Preis je kWh laut Eurostat in Portugal und in der EU, inklusive Steuern, damit beide vergleichbar sind.",
           "market": "Der regulierte Tarif ist nur eine Möglichkeit. Die meisten Haushalte sind im freien Markt, wo die Anbieter ihre Preise selbst festlegen und die Angebote günstiger oder teurer als der regulierte Tarif sein können. Der Schätzer ist ein Richtwert, keine Empfehlung."
@@ -4212,15 +4746,33 @@
           "title": "So wird gerechnet",
           "intro": "Für einen Monat mit 30 Tagen macht der Schätzer immer dieselben fünf Dinge:",
           "steps": {
-            "a": "Leistung: der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage.",
-            "b": "Energie: Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt.",
-            "c": "Rundfunkbeitrag (CAV): ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit.",
-            "d": "Stromverbrauchsteuer (IEC): ein fester Betrag je kWh mit normalem Mehrwertsteuersatz.",
-            "e": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis Ihrer vertraglich vereinbarten Leistung mal 30 Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Ihre kWh zum Preis des Eintarifs oder nach dem eingegebenen Anteil auf die zwei Preise des Zweitarifs verteilt."
+            },
+            "c": {
+              "term": "Rundfunkbeitrag (CAV)",
+              "body": "Ein fester Monatsbetrag mit ermäßigter Mehrwertsteuer. Haushalte mit weniger als 400 kWh Jahresverbrauch sind befreit."
+            },
+            "d": {
+              "term": "Stromverbrauchsteuer (IEC)",
+              "body": "Ein fester Betrag je kWh mit normalem Mehrwertsteuersatz."
+            },
+            "e": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer auf jeden Posten, dann die Summe. Das Ergebnis wird zum Schluss auf den Cent gerundet."
+            }
           },
-          "vat": "Mehrwertsteuerregeln, wie die ERSE sie erklärt: Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
-          "bi": "Zweitarif gegen Eintarif: Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
-          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst."
+          "vat": "Der ermäßigte Satz ({{reduced}}) gilt für die ersten {{allowance}} kWh Energie in 30 Tagen ({{allowanceLarge}} kWh für Haushalte mit fünf oder mehr Personen) bei vertraglich vereinbarter Leistung bis 6,9 kVA, für den Teil des Leistungspreises, der dem von der ERSE festgelegten Netzzugangstarif entspricht, bei vertraglich vereinbarter Leistung bis 3,45 kVA und für den Rundfunkbeitrag. Alles andere zahlt {{standard}}. Die Regel zum ermäßigten Satz gilt im regulierten und im freien Markt gleich.",
+          "bi": "Der Preis im Eintarif liegt bei {{energySimple}}, gegenüber {{energyPeak}} außerhalb der Schwachlastzeit und {{energyValley}} in der Schwachlastzeit. Allein bei der Energie kosten beide gleich viel, wenn {{breakEven}} % des Verbrauchs in der Schwachlastzeit liegen. Bei einem kleineren Anteil ist der Eintarif günstiger, bei einem größeren der Zweitarif.",
+          "days": "Die Grenze für den ermäßigten Satz gilt je 30 Tage, den hier verwendeten Zeitraum. Bei einer echten Rechnung für einen längeren oder kürzeren Zeitraum wird die Grenze nach der Zahl der Tage angepasst.",
+          "formulasLabel": "Formel",
+          "vatTerm": "Mehrwertsteuerregeln, wie die ERSE sie erklärt",
+          "biTerm": "Zweitarif gegen Eintarif"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -4660,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "So nutzen Sie den Vergleich",
+          "quickTerm": "Schnellmodus",
+          "fullTerm": "Ausführlicher Modus",
+          "diagramTerm": "E-REDES-Datei",
+          "optionsTerm": "Optionen und Filter",
           "quick": "Der Schnellmodus braucht nur Ihre vertraglich vereinbarte Leistung und Ihre Monatsrechnung oder Ihre kWh. Eine Rechnung in Euro wird in kWh umgerechnet, indem die Rechnung des regulierten Tarifs inklusive Steuern zurückgerechnet wird, wie bei der Schnellsimulation der ERSE.",
           "full": "Der vollständige Modus nimmt die kWh jedes Zeitraums von Ihrer Rechnung oder eine Summe für beliebig viele Tage, die nach dem E-REDES-Standardprofil für Ihre Leistung und Ihren Verbrauch auf die Zeiträume verteilt wird.",
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
@@ -4669,6 +5225,9 @@
         },
         "example": {
           "title": "Rechenbeispiel",
+          "regulatedLabel": "Regulierter Tarif",
+          "cheapestLabel": "Günstigstes Angebot",
+          "differenceLabel": "Differenz",
           "setup": "Ein Haushalt mit 3,45 kVA im Eintarif verbraucht {{kwh}} im Monat. Im ERSE-Export vom {{date}} gibt es dafür {{count}} Angebote, einschließlich des regulierten Tarifs.",
           "result": "Der regulierte Tarif kommt im ersten Jahr inklusive Steuern auf {{regulated}}. Das günstigste Angebot kommt auf {{cheapest}}, also {{difference}} weniger. {{cheaper}} Angebote kosten weniger als der regulierte Tarif.",
           "bill": "Im Schnellmodus ergibt eine Monatsrechnung von {{bill}} wieder dieselben {{kwh}}: Das ist die Rechnung des regulierten Tarifs für diesen Verbrauch."
@@ -4677,13 +5236,34 @@
           "title": "So wird gerechnet",
           "intro": "Jedes Angebot wird so berechnet wie im Simulator der ERSE (Manual do Simulador de Preços de Energia, Juni 2026):",
           "steps": {
-            "a": "Leistung: der Tagespreis mal die Anzahl der Tage.",
-            "b": "Energie: die kWh jedes Zeitraums mal dessen Preis.",
-            "c": "Sozialtarif: der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA.",
-            "d": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe.",
-            "e": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet.",
-            "f": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben.",
-            "g": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            "a": {
+              "term": "Leistung",
+              "body": "Der Tagespreis mal die Anzahl der Tage."
+            },
+            "b": {
+              "term": "Energie",
+              "body": "Die kWh jedes Zeitraums mal dessen Preis."
+            },
+            "c": {
+              "term": "Sozialtarif",
+              "body": "Der Nachlass der ERSE auf Leistung und Energie, bis 6,9 kVA."
+            },
+            "d": {
+              "term": "Abgaben",
+              "body": "Der Rundfunkbeitrag und die Stromverbrauchsteuer in ihrer gesetzlichen Höhe."
+            },
+            "e": {
+              "term": "Dienste und Rabatte",
+              "body": "Pflichtleistungen, Erstattungen und Rabatte für alle Kunden sowie der Neukundenrabatt im ersten Jahr, so wie jedes Angebot sie der ERSE meldet."
+            },
+            "f": {
+              "term": "Mehrwertsteuer",
+              "body": "Mehrwertsteuer zum ermäßigten und zum normalen Satz, wie unten beschrieben."
+            },
+            "g": {
+              "term": "Jahr",
+              "body": "Ein Jahr ist derselbe Verbrauch über 365 Tage; „Folgejahre“ lässt den Neukundenrabatt weg."
+            }
           },
           "vat": "Die Mehrwertsteuer beträgt {{reduced}} auf den Rundfunkbeitrag, auf den Netzzugangsanteil des Leistungspreises bis 3,45 kVA und auf die ersten {{allowance}} kWh alle 30 Tage bis 6,9 kVA ({{allowanceLarge}} kWh für einen Haushalt mit fünf oder mehr Personen). Für alles andere gilt {{standard}}.",
           "month": "Ein Monat ist ein Zwölftel eines Jahres, {{days}} Tage, wie im Simulator der ERSE, sodass ein Jahr genau zwölf Monate hat.",
@@ -4793,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "So lesen Sie diese Seite",
+          "calculatorTerm": "Kostenrechner",
+          "noForecastTerm": "Keine Prognose",
           "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
           "calculator": "Der Rechner macht aus Ihrem Fahren monatliche Tankkosten. Sie geben Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und Sie können ihn auf den Preis ändern, den Sie wirklich zahlen.",
           "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird.",
@@ -4807,13 +5389,26 @@
           "title": "So wird gerechnet",
           "intro": "Der Rechner macht vier Dinge:",
           "steps": {
-            "a": "Strecke pro Monat: die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat.",
-            "b": "Liter: Strecke mal Verbrauch geteilt durch 100.",
-            "c": "Kosten: Liter mal der eingegebene Literpreis, auf den Cent gerundet.",
-            "d": "Jahr: zwölf solche Monate."
+            "a": {
+              "term": "Strecke pro Monat",
+              "body": "Die angegebene Strecke, eine Woche gezählt als 52 geteilt durch 12 Wochen pro Monat, oder eine Fahrt mal Fahrten pro Monat."
+            },
+            "b": {
+              "term": "Liter",
+              "body": "Strecke mal Verbrauch geteilt durch 100."
+            },
+            "c": {
+              "term": "Kosten",
+              "body": "Liter mal der eingegebene Literpreis, auf den Cent gerundet."
+            },
+            "d": {
+              "term": "Jahr",
+              "body": "Zwölf solche Monate."
+            }
           },
           "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises.",
-          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter."
+          "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter.",
+          "formulasLabel": "Formeln"
         },
         "data": {
           "title": "Daten und Quellen",
@@ -4828,13 +5423,28 @@
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
           "items": {
-            "noForecast": "Keine Prognose: Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht.",
-            "average": "Nationaler Durchschnitt: Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten.",
-            "stations": "Tankstellen: Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule.",
-            "consumption": "Verbrauch: derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen.",
-            "scope": "Nur Kraftstoff: Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt.",
-            "education": "Nur zu Informationszwecken, keine Beratung."
-          }
+            "noForecast": {
+              "term": "Keine Prognose",
+              "body": "Nichts hier sagt künftige Preise voraus, und vergangene Bewegungen zeigen nicht, wohin der Preis als Nächstes geht."
+            },
+            "average": {
+              "term": "Nationaler Durchschnitt",
+              "body": "Er fasst alle Tankstellen in Festlandportugal zusammen und ist nach Verkäufen gewichtet. Der Preis an Ihrer Tankstelle kann höher oder niedriger sein; die Azoren und Madeira sind nicht enthalten."
+            },
+            "stations": {
+              "term": "Tankstellen",
+              "body": "Die Liste zeigt nur die wenigen günstigsten Tankstellen jeder Gegend, wie die DGEG sie veröffentlicht, und bewertet weder Service noch Qualität. Ein Preis kann sich nach der Momentaufnahme ändern, prüfen Sie ihn also an der Zapfsäule."
+            },
+            "consumption": {
+              "term": "Verbrauch",
+              "body": "Derselbe Wert für jede Fahrt. Der reale Verbrauch ändert sich mit Geschwindigkeit, Beladung, Verkehr und Jahreszeit und liegt meist über dem offiziellen."
+            },
+            "scope": {
+              "term": "Nur Kraftstoff",
+              "body": "Maut, Versicherung, Steuer, Wartung und Parken sind nicht enthalten. Elektrisches Laden ist nicht abgedeckt, andere Kraftstoffe werden nicht gezeigt."
+            }
+          },
+          "education": "Nur zu Informationszwecken, keine Beratung."
         },
         "related": {
           "title": "Weiter geht's",
@@ -5058,7 +5668,12 @@
           "title": "Rechenbeispiel",
           "setup": "Angenommen, Sie legen {{amount}} für 12 Monate bei {{bank}} auf {{product}} an, zu {{rate}} pro Jahr. Das bringt {{gross}}; die 28 % IRS nehmen {{tax}}, es bleiben {{net}}.",
           "capped": "Die Höchstgrenze zählt. {{product2}} bei {{bank2}} zahlt {{rate2}}, aber nur bis {{cap}}. Bei {{amount2}} betragen die Zinsen {{gross2}} vor Steuern und {{net2}} danach, als hätten Sie {{cap}} gespart.",
-          "plans": "Auch Gebühren zählen. {{product3}} bei {{bank3}} reicht je nach Tarif von {{low}} bis {{high}}. Bei {{amount}} bringt der Tarif Standard {{standardNet}} netto, der Tarif Ultra nach {{ultraFees}} Gebühren pro Jahr dagegen {{ultraNet}}."
+          "plans": "Auch Gebühren zählen. {{product3}} bei {{bank3}} reicht je nach Tarif von {{low}} bis {{high}}. Bei {{amount}} bringt der Tarif Standard {{standardNet}} netto, der Tarif Ultra nach {{ultraFees}} Gebühren pro Jahr dagegen {{ultraNet}}.",
+          "figures": {
+            "gross": "Bruttozinsen",
+            "tax": "IRS ({{tax}} %)",
+            "net": "Nettozinsen"
+          }
         },
         "method": {
           "title": "Methode",
@@ -5258,17 +5873,25 @@
           "setup": "Nehmen wir den gelegentlichen Aktienkäufer: {{count}} Käufe zu {{amount}} in US-Aktien im Jahr, {{portfolio}} investiert.",
           "bank": "Bei {{bank}} kostet jede Order {{bankFormula}}, die {{count}} Orders kosten also {{bankTrading}} mit Stempelsteuer. Der Tausch von {{converted}} in Dollar zu {{bankFx}} kostet {{bankFxTotal}}, die Depotgebühr ({{bankCustodyFormula}}) {{bankCustody}} mit Mehrwertsteuer. Das Jahr kostet {{bankTotal}}, davon {{bankStampDuty}} Stempelsteuer und {{bankVat}} Mehrwertsteuer.",
           "online": "Bei {{online}} kostet jede Order {{onlineFormula}}: {{onlineTrading}} im Jahr. Der Währungstausch zu {{onlineFx}} kostet {{onlineFxTotal}} und das Depot {{onlineCustody}}, zusammen {{onlineTotal}}.",
-          "takeaway": "Bei kleinen, seltenen Orders wiegen Mindestgebühren und feste Depotgebühren am schwersten; bei großen Orders oder einem großen Depot wiegen prozentuale Gebühren mehr. Wechseln Sie oben das Profil, um zu sehen, wie sich die Reihenfolge ändert."
+          "takeaway": "Bei kleinen, seltenen Orders wiegen Mindestgebühren und feste Depotgebühren am schwersten; bei großen Orders oder einem großen Depot wiegen prozentuale Gebühren mehr. Wechseln Sie oben das Profil, um zu sehen, wie sich die Reihenfolge ändert.",
+          "figures": {
+            "total": "Summe für das Jahr"
+          }
         },
         "method": {
           "title": "Methode",
           "intro": "Jede Gebühr stammt aus dem vom Broker selbst veröffentlichten Preisverzeichnis, an dem in ihrer Zeile genannten Datum; die ganze Tabelle wurde am {{date}} geprüft und wird jedes Quartal erneut geprüft. Gebühren, die ein Preisverzeichnis nicht nennt, sind als nicht veröffentlicht markiert und fehlen in den Summen, die dann als unvollständig erscheinen.",
           "steps": {
-            "a": "Orders: Die Provision jeder Order ist der feste Teil plus der Prozentsatz der Order, begrenzt durch Mindest- und Höchstbetrag je Order. Gebühren je Aktie zählen ganze Aktien zum angenommenen Kurs. Ein gebührenfreies Monatsvolumen gilt Monat für Monat.",
-            "b": "Sparplan: Bei ETF-Käufen ersetzt die Sparplangebühr die Ordergebühr, wenn die Option aktiv ist und der Broker einen Sparplan veröffentlicht.",
-            "c": "Währung: US-Orders zahlen die Währungsgebühr des Brokers auf den umgetauschten Betrag; Gebühren in Dollar werden zu {{rate}} Dollar je Euro umgerechnet.",
-            "d": "Depot: Die veröffentlichte Formel, je Periode mit Mindest- und Höchstbetrag, wird auf den Bestand so oft berechnet, wie das Jahr Perioden hat.",
-            "e": "Steuern auf Gebühren: Wenn das Preisverzeichnis angibt, dass seine Gebühren die portugiesische Stempelsteuer (4 % auf die Provision) oder die Mehrwertsteuer (23 % auf die Depotgebühr) nicht enthalten, werden sie auf die betreffenden Gebühren aufgeschlagen.",
+            "aTerm": "Orders",
+            "aBody": "Die Provision jeder Order ist der feste Teil plus der Prozentsatz der Order, begrenzt durch Mindest- und Höchstbetrag je Order. Gebühren je Aktie zählen ganze Aktien zum angenommenen Kurs. Ein gebührenfreies Monatsvolumen gilt Monat für Monat.",
+            "bTerm": "Sparplan",
+            "bBody": "Bei ETF-Käufen ersetzt die Sparplangebühr die Ordergebühr, wenn die Option aktiv ist und der Broker einen Sparplan veröffentlicht.",
+            "cTerm": "Währung",
+            "cBody": "US-Orders zahlen die Währungsgebühr des Brokers auf den umgetauschten Betrag; Gebühren in Dollar werden zu {{rate}} Dollar je Euro umgerechnet.",
+            "dTerm": "Depot",
+            "dBody": "Die veröffentlichte Formel, je Periode mit Mindest- und Höchstbetrag, wird auf den Bestand so oft berechnet, wie das Jahr Perioden hat.",
+            "eTerm": "Steuern auf Gebühren",
+            "eBody": "Wenn das Preisverzeichnis angibt, dass seine Gebühren die portugiesische Stempelsteuer (4 % auf die Provision) oder die Mehrwertsteuer (23 % auf die Depotgebühr) nicht enthalten, werden sie auf die betreffenden Gebühren aufgeschlagen.",
             "f": "Die Summe addiert die Orders des Jahres, den Währungstausch und das Depot; die Broker erscheinen vom günstigsten zum teuersten. Broker, denen eine für das Profil nötige Gebühr fehlt, stehen am Ende."
           }
         },
@@ -5456,7 +6079,8 @@
             "insuranceLinked": "fondsgebundene Versicherung",
             "insuranceGuaranteed": "nicht fondsgebundene Versicherung",
             "pensionFund": "Pensionsfonds"
-          }
+          },
+          "gapLabel": "Kostenunterschied auf {{invested}} pro Jahr"
         },
         "tax": {
           "title": "Der IRS-Abzug (EBF, Artikel 21)",
@@ -5468,7 +6092,8 @@
           },
           "example": "Maßgeblich ist das Alter am 1. Januar des Einzahlungsjahres (n.º 9). Mit {{age}} Jahren ergeben {{exampleContribution}} Einzahlung im Jahr {{exampleDeduction}}, den vollen Abzug.",
           "conditions": "Der Abzug fällt unter die Gesamtgrenze der Abzüge in Artikel 78, n.º 7, des IRS-Gesetzbuchs: keine Grenze für die niedrigsten steuerpflichtigen Einkommen, dann von {{capMax}} bis {{capMin}} je Haushalt. Er senkt die geschuldete Steuer und wird nicht ausgezahlt, und Einzahlungen nach dem Renteneintritt sind nicht abziehbar (n.º 10).",
-          "payout": "Zahlt der Plan in einem gesetzlich vorgesehenen Fall aus, wird eine Einmalzahlung auf den Gewinn mit {{legalRate}} auf zwei Fünftel davon besteuert, effektiv {{legalEffective}} des Gewinns (n.º 3); regelmäßige Zahlungen werden wie Renten besteuert."
+          "payout": "Zahlt der Plan in einem gesetzlich vorgesehenen Fall aus, wird eine Einmalzahlung auf den Gewinn mit {{legalRate}} auf zwei Fünftel davon besteuert, effektiv {{legalEffective}} des Gewinns (n.º 3); regelmäßige Zahlungen werden wie Renten besteuert.",
+          "deductionLabel": "Abzug von der IRS-Steuer"
         },
         "redemption": {
           "title": "Wann Sie auszahlen lassen können und was eine vorzeitige Auszahlung kostet",
@@ -5620,22 +6245,47 @@
           "title": "Karat und Feingehalt",
           "intro": "Die Reinheit von Gold wird in Karat angegeben, von 24, oder in Tausendsteln, der Zahl im Stempel. Das sind die sechs gesetzlichen Feingehalte für Gold in Portugal:",
           "items": {
-            "k24": "24 Karat, 999 Tausendstel: reines Gold, wie in Anlagebarren und -münzen.",
-            "k22": "22 Karat, 916: Goldmünzen wie der Sovereign und der Krugerrand und viel Schmuck aus Indien.",
-            "k19_2": "19,2 Karat, 800: portugiesisches Gold („ouro português“), der traditionelle Feingehalt portugiesischer Goldschmiedekunst.",
-            "k18": "18 Karat, 750: der häufigste Feingehalt bei Schmuck in Europa.",
-            "k14": "14 Karat, 585: härterer, günstigerer Schmuck.",
-            "k9": "9 Karat, 375: der niedrigste gesetzliche Feingehalt."
+            "k24Term": "24 Karat, 999 Tausendstel",
+            "k24Body": "Reines Gold, wie in Anlagebarren und -münzen.",
+            "k22Term": "22 Karat, 916",
+            "k22Body": "Goldmünzen wie der Sovereign und der Krugerrand und viel Schmuck aus Indien.",
+            "k19_2Term": "19,2 Karat, 800",
+            "k19_2Body": "Portugiesisches Gold („ouro português“), der traditionelle Feingehalt portugiesischer Goldschmiedekunst.",
+            "k18Term": "18 Karat, 750",
+            "k18Body": "Der häufigste Feingehalt bei Schmuck in Europa.",
+            "k14Term": "14 Karat, 585",
+            "k14Body": "Härterer, günstigerer Schmuck.",
+            "k9Term": "9 Karat, 375",
+            "k9Body": "Der niedrigste gesetzliche Feingehalt."
           }
         },
         "method": {
           "title": "So wird gerechnet",
           "intro": "Die Seite macht vier Dinge:",
           "steps": {
-            "a": "Preis: der NBP-Preis für ein Gramm reines Gold in Zloty, geteilt durch die Zloty pro Euro der EZB am selben Tag.",
-            "b": "Reines Gold: das Gewicht mal den Feingehalt geteilt durch 1.000. Ein 24-karätiges Stück zählt mit 999 Tausendsteln.",
-            "c": "Wert: die Gramm reines Gold mal den Preis für ein Gramm reines Gold, auf den Cent gerundet.",
-            "d": "Angebot: wenn Sie eines eingeben, das Angebot geteilt durch den Wert, in Prozent, und die Differenz in Euro."
+            "aTerm": "Preis",
+            "aBody": "Der NBP-Preis für ein Gramm reines Gold in Zloty, geteilt durch die Zloty pro Euro der EZB am selben Tag.",
+            "bTerm": "Reines Gold",
+            "bBody": "Das Gewicht mal den Feingehalt geteilt durch 1.000. Ein 24-karätiges Stück zählt mit 999 Tausendsteln.",
+            "cTerm": "Wert",
+            "cBody": "Die Gramm reines Gold mal den Preis für ein Gramm reines Gold, auf den Cent gerundet.",
+            "dTerm": "Angebot",
+            "dBody": "Wenn Sie eines eingeben, das Angebot geteilt durch den Wert, in Prozent, und die Differenz in Euro."
+          },
+          "formulasLabel": "Formeln",
+          "formula": {
+            "pureGold": "Reines Gold",
+            "pureGoldLower": "reines Gold",
+            "weight": "Gewicht",
+            "fineness": "Feingehalt",
+            "value": "Wert",
+            "valueLower": "Wert",
+            "price": "Preis pro Gramm",
+            "priceLower": "Preis pro Gramm",
+            "nbpPrice": "NBP-Preis in Zloty",
+            "zlotyPerEuro": "Zloty pro Euro",
+            "offerShare": "Angebot im Verhältnis zum Wert",
+            "offer": "Angebot"
           }
         },
         "buyers": {
@@ -5656,10 +6306,14 @@
         "limits": {
           "title": "Was dieser Wert nicht enthält",
           "items": {
-            "metal": "Nur das Metall: Der Wert ist der Goldgehalt zu einem Referenzpreis. Steine, andere Metalle, Verarbeitung und Marke zählen nicht.",
-            "buyers": "Kein Verkaufspreis: Ankäufer zahlen weniger, und ein Geschäft, das Gold verkauft, verlangt mehr.",
-            "purity": "Feingehalt: Der Rechner verlässt sich auf den Feingehalt, den Sie wählen. Ein ungestempeltes oder vergoldetes Stück kann viel weniger Gold enthalten oder gar keines.",
-            "reference": "Referenzpreis: der Tagespreis der NBP, kein Live-Kurs. Der Markt bewegt sich im Lauf des Tages.",
+            "metalTerm": "Nur das Metall",
+            "metalBody": "Der Wert ist der Goldgehalt zu einem Referenzpreis. Steine, andere Metalle, Verarbeitung und Marke zählen nicht.",
+            "buyersTerm": "Kein Verkaufspreis",
+            "buyersBody": "Ankäufer zahlen weniger, und ein Geschäft, das Gold verkauft, verlangt mehr.",
+            "purityTerm": "Feingehalt",
+            "purityBody": "Der Rechner verlässt sich auf den Feingehalt, den Sie wählen. Ein ungestempeltes oder vergoldetes Stück kann viel weniger Gold enthalten oder gar keines.",
+            "referenceTerm": "Referenzpreis",
+            "referenceBody": "Der Tagespreis der NBP, kein Live-Kurs. Der Markt bewegt sich im Lauf des Tages.",
             "education": "Nur zu Informationszwecken, keine Beratung."
           }
         },
@@ -6210,7 +6864,66 @@
       "historyPeriod": "Letzte 6 Monate",
       "chartTrend": "Nettovermögen, {{start}} bis {{end}}, gestiegen von {{from}} auf {{to}}"
     },
-    "perMonth": "/Monat"
+    "perMonth": "/Monat",
+    "household": {
+      "title": "Haushalt",
+      "roleOwner": "Inhaber",
+      "roleMember": "Mitglied",
+      "roleViewer": "Betrachter",
+      "jointAccount": "Gemeinsames Girokonto",
+      "privateAccount": "Anas Ersparnisse",
+      "shared": "Gemeinsam",
+      "private": "Privat"
+    },
+    "imports": {
+      "title": "Import prüfen",
+      "fileName": "kontoauszug-oktober.csv",
+      "rows": "{{count}} Zeilen",
+      "statusNew": "Neu",
+      "statusExisting": "Bereits im Konto",
+      "statusDuplicate": "Mögliches Duplikat",
+      "note": "Nichts wird importiert, bevor Sie bestätigen."
+    },
+    "recurring": {
+      "title": "Rechnungen und Abos",
+      "day": "Tag {{day}}",
+      "rent": "Miete",
+      "electricity": "Strom",
+      "internet": "Internet",
+      "gym": "Fitnessstudio",
+      "paid": "Bezahlt",
+      "due": "Fällig",
+      "projected": "Prognostiziert",
+      "stillToPay": "Diesen Monat noch zu zahlen"
+    },
+    "assistant": {
+      "title": "Assistent",
+      "question": "Wie viel habe ich diesen Monat für Restaurants ausgegeben?",
+      "answer": "{{amount}} in {{count}} Transaktionen, etwas weniger als im letzten Monat.",
+      "proposalLabel": "Vorgeschlagene Änderung",
+      "proposal": "3 Transaktionen als Lebensmittel kategorisieren",
+      "apply": "Übernehmen",
+      "dismiss": "Verwerfen"
+    },
+    "currencies": {
+      "title": "Konten",
+      "account1": "Girokonto",
+      "account2": "Depot-Verrechnungskonto",
+      "account3": "Ersparnisse in GB",
+      "estimated": "Geschätzt",
+      "total": "Summe in Euro",
+      "rateNote": "Umgerechnet zum EZB-Referenzkurs des jeweiligen Tages."
+    },
+    "selfHosting": {
+      "title": "Ihr Server",
+      "subtitle": "docker compose",
+      "database": "Postgres",
+      "api": "API",
+      "worker": "Hintergrund-Worker",
+      "web": "Web-App",
+      "running": "Läuft",
+      "note": "Ihre Daten bleiben in Ihrer eigenen Datenbank."
+    }
   },
   "lp": {
     "shared": {
@@ -6540,7 +7253,15 @@
       "feature5": "Transaktionen aufteilen: Teile verschiedenen Kategorien zuweisen",
       "feature6": "Kategorie-Ausgabendiagramme für die Budgetanalyse",
       "ctaHeadline": "Schluss mit dem manuellen Zuweisen von Transaktionen",
-      "ctaBody": "Bankumsätze importieren und WonderMoney übernimmt die Kategorisierung. Kostenlos und Open Source."
+      "ctaBody": "Bankumsätze importieren und WonderMoney übernimmt die Kategorisierung. Kostenlos und Open Source.",
+      "rulesTitle": "Regeln für die Transaktionen, die Sie kennen",
+      "rulesBody": "Eine Regel sagt WonderMoney, was mit Transaktionen eines bestimmten Musters geschehen soll: Wenn die Beschreibung NETFLIX enthält, wird die Kategorie Freizeit gesetzt. Regeln gehören zum Haushalt, sodass alle mit derselben Liste arbeiten.",
+      "rulesPoint1": "Bedingungen für Beschreibung, Händler, Betrag, Konto und mehr",
+      "rulesPoint2": "Kategorie oder Händler setzen, umbenennen, verschlagworten, als geprüft markieren oder ausblenden",
+      "rulesPoint3": "Eine Vorschau der Treffer einer Regel, bevor Sie sie speichern",
+      "rulesPoint4": "Eine Regel auf die Transaktionen anwenden, die Sie bereits haben",
+      "rulesPoint5": "Ein Regelvorschlag, sobald Sie dieselbe Art von Transaktion dreimal korrigieren",
+      "rulesPoint6": "Die Regeln als Datei exportieren und auf einem anderen Server importieren"
     },
     "featurePrivacy": {
       "eyebrow": "Datenschutz & Sicherheit",
@@ -6566,7 +7287,17 @@
       "ctaHeadline": "Finanzen verwalten mit einem Tool, dem Sie vertrauen können",
       "ctaBody": "WonderMoney verdient Ihr Vertrauen, indem es Ihre Daten privat, sicher und in Ihrem Besitz hält. Kostenlos und Open Source.",
       "principle6Title": "Ihre Zugangsdaten bleiben bei Ihrer Bank",
-      "principle6Body": "Sie authentifizieren sich direkt im Portal Ihrer Bank. Ihr Passwort gelangt nie zu WonderMoney."
+      "principle6Body": "Sie authentifizieren sich direkt im Portal Ihrer Bank. Ihr Passwort gelangt nie zu WonderMoney.",
+      "securityTitle": "Anmeldung und Bildschirm schützen",
+      "securityBody": "Der Nur-Lese-Zugriff auf die Bank lässt Ihr Geld, wo es ist. Diese Einstellungen schützen das WonderMoney-Konto selbst und das, was andere sehen können, wenn Sie es öffnen.",
+      "securityPoint1Title": "Passkeys",
+      "securityPoint1Body": "Melden Sie sich mit Fingerabdruck, Gesicht oder Geräte-PIN an, statt ein Passwort einzugeben.",
+      "securityPoint2Title": "Zwei-Faktor-Authentifizierung",
+      "securityPoint2Body": "Ein Code aus einer Authenticator-App nach Ihrem Passwort, mit Backup-Codes für den Fall, dass Sie Ihr Telefon verlieren.",
+      "securityPoint3Title": "App-Sperre",
+      "securityPoint3Body": "Die mobile App fragt bei jedem Öffnen nach Face ID, Touch ID oder dem Gerätecode.",
+      "securityPoint4Title": "Privatsphäremodus",
+      "securityPoint4Body": "Blenden Sie alle Beträge auf dem Bildschirm mit einem Tippen aus, im Web mit Shift+P, im Zug oder beim Teilen Ihres Bildschirms."
     },
     "pricing": {
       "metaTitle": "Preise — WonderMoney",
@@ -7150,6 +7881,239 @@
       "how3Body": "Jedes verbundene Konto fließt in ein einziges Dashboard ein — Kontostände, Ausgaben und Nettovermögen, stets synchron.",
       "ctaHeadline": "Nutzen Sie Ihr gesetzliches Recht",
       "ctaBody": "Verbinden Sie Ihre Konten und sehen Sie Ihr vollständiges finanzielles Bild — sicher, zu Ihren Bedingungen."
+    },
+    "featureHousehold": {
+      "eyebrow": "Haushalt",
+      "metaTitle": "Gemeinsame Haushaltsfinanzen mit privaten Konten | WonderMoney",
+      "metaDescription": "Verwalten Sie Geld mit Ihrem Partner oder Ihrer Familie: Jede Person meldet sich mit eigenem Login an, teilt die Konten, die sie auswählt, und behält den Rest für sich. Teilen Sie Kosten mit Freunden in Gruppen.",
+      "heroTitle": "Gemeinsam Geld verwalten, Eigenes privat halten",
+      "heroSubtitle": "Laden Sie die Menschen, mit denen Sie zusammenleben, in einen Haushalt ein. Jede Person meldet sich mit eigenem Login an, teilt die Konten, die sie auswählt, und sieht die Zahlen des Haushalts in ihrer eigenen Währung.",
+      "schemaName": "WonderMoney Haushaltsfinanzen",
+      "schemaDescription": "Gemeinsame Haushaltsfinanzen mit einem Login für jede Person, vier Rollen, privaten Konten, einem Filter nach Mitglied, Eigentumsanteilen und Gruppen für geteilte Ausgaben.",
+      "whatTitle": "Ein Haushalt, jede Person mit eigenem Login",
+      "whatBody": "Ein Haushalt umfasst die Konten, Budgets, Ziele und das Nettovermögen, die Sie gemeinsam verwalten. Bis zu sechs Personen können dazugehören, jede mit eigenem Login und einer Rolle, die festlegt, was sie ändern kann.",
+      "whatPoint1Title": "Vier Rollen",
+      "whatPoint1Body": "Inhaber, Admin, Mitglied oder Betrachter. Ein Betrachter sieht die gemeinsamen Daten, kann sie aber nicht ändern.",
+      "whatPoint2Title": "Private Konten",
+      "whatPoint2Body": "Behalten Sie ein Konto für sich, oder lassen Sie einzelne Personen es ansehen oder bearbeiten. Niemand sonst sieht es, auch nicht der Inhaber des Haushalts.",
+      "whatPoint3Title": "Wer was ausgegeben hat",
+      "whatPoint3Body": "Markieren Sie Gemeinschaftskonten, geben Sie an, wer eine Transaktion getätigt hat, und filtern Sie Transaktionen, Berichte, Budgets und Nettovermögen nach Person.",
+      "whatPoint4Title": "Eigentumsanteile",
+      "whatPoint4Body": "Teilen Sie ein Konto prozentual auf, etwa eine Hauskasse im Verhältnis 60/40, und im Nettovermögen jeder Person zählt ihr Anteil.",
+      "howTitle": "So funktioniert ein Haushalt",
+      "step1Title": "Registrieren",
+      "step1Body": "Ihr Haushalt wird mit Ihrem Konto angelegt, und Sie sind sein Inhaber. Sie können die Inhaberschaft später an jemand anderen übergeben.",
+      "step2Title": "Personen per E-Mail einladen",
+      "step2Body": "Wählen Sie die Rolle jeder Person. Der Link funktioniert nur für die Adresse, die Sie eingeladen haben, und läuft nach sieben Tagen ab.",
+      "step3Title": "Festlegen, was jedes Konto teilt",
+      "step3Body": "Konten werden standardmäßig mit dem Haushalt geteilt. Machen Sie eines privat und wählen Sie für jede Person: ausgeblendet, ansehen oder bearbeiten.",
+      "groupsTitle": "Kosten mit Freunden, Mitbewohnern und auf Reisen teilen",
+      "groupsBody": "Eine Gruppe ist ein Kreis von Personen, die Kosten teilen. Teilen Sie eine Transaktion mit ihr, und WonderMoney teilt sie auf, berechnet, wer wem was schuldet, und zählt nur den Anteil Ihres Haushalts zu Ihren Ausgaben.",
+      "groupsPoint1": "Personen per Namen hinzufügen, auch ohne WonderMoney-Konto",
+      "groupsPoint2": "Zu gleichen Teilen, nach Betrag oder nach Prozent aufteilen",
+      "groupsPoint3": "Ein Saldo für jede Person und möglichst wenige Zahlungen zum Ausgleich",
+      "groupsPoint4": "Einen Ausgleich erfassen und mit der Überweisung verknüpfen, die ihn bezahlt hat",
+      "faqTitle": "Fragen zum Haushalt",
+      "faq1Q": "Kann der Inhaber des Haushalts meine privaten Konten sehen?",
+      "faq1A": "Nein. Ein privates Konto ist nur für Sie und die Personen sichtbar, mit denen Sie es teilen. Inhaber und Admins sehen es nicht, es sei denn, Sie teilen es mit ihnen.",
+      "faq2Q": "Wie viele Personen können zu einem Haushalt gehören?",
+      "faq2A": "Bis zu sechs, einschließlich des Inhabers. Auf Ihrem eigenen Server können Sie diese Zahl ändern.",
+      "faq3Q": "Was passiert, wenn jemand den Haushalt verlässt?",
+      "faq3A": "Die privaten Konten dieser Person bleiben im Haushalt und sind geteilt wie zuvor: Wer Zugriff hatte, behält ihn, und niemand sonst erhält ihn. Was die Person ausgegeben hat, zählt als Gemeinsam.",
+      "ctaHeadline": "Den Haushalt an einem Ort zusammenbringen",
+      "ctaBody": "Laden Sie die Menschen ein, mit denen Sie zusammenleben, und legen Sie fest, was jedes Konto teilt."
+    },
+    "featureImports": {
+      "eyebrow": "Import",
+      "metaTitle": "Kontoauszüge importieren: CSV, Excel, OFX, QIF und CAMT.053 | WonderMoney",
+      "metaDescription": "Importieren Sie Transaktionen aus dem CSV-, Excel-, OFX-, QIF- oder CAMT.053-Export jeder Bank, oder übernehmen Sie Ihren Verlauf aus YNAB oder Actual Budget. Prüfen Sie jede Zeile, bevor etwas hinzugefügt wird.",
+      "heroTitle": "Jeden Kontoauszug übernehmen, nichts doppelt",
+      "heroSubtitle": "Wenn sich eine Bank nicht verbinden lässt oder Sie den Verlauf aus der Zeit davor möchten, importieren Sie die Datei, die Ihre Bank Ihnen gibt. Sie prüfen jede Zeile, bevor etwas hinzugefügt wird.",
+      "schemaName": "WonderMoney Transaktionsimport",
+      "schemaDescription": "Import von Kontoauszügen aus CSV-, Excel-, OFX-, QFX-, QIF- und CAMT.053-Dateien und des Transaktionsverlaufs aus YNAB und Actual Budget, mit Prüfschritt und Duplikaterkennung.",
+      "whatTitle": "Jede Datei, die Ihre Bank Ihnen gibt",
+      "whatBody": "Laden Sie den Kontoauszug herunter und lassen Sie ihn so, wie die Bank ihn erstellt hat. WonderMoney findet die Spalten für Datum, Beschreibung und Betrag und erkennt die Datums- und Zahlenformate, sodass es die Exporte der meisten Banken ohne Vorlage liest.",
+      "whatPoint1": "CSV mit beliebigem Trennzeichen und Excel (.xls, .xlsx)",
+      "whatPoint2": "OFX, QFX und QIF von Banken, Quicken, Microsoft Money und GnuCash",
+      "whatPoint3": "CAMT.053, der Kontoauszug nach ISO 20022 der SEPA-Banken",
+      "whatPoint4": "Dateien mit mehreren Konten, jedes einem Ihrer Konten zugeordnet",
+      "whatPoint5": "Ihr YNAB-Register, dessen Konten und Kategorien den Ihren zugeordnet werden",
+      "whatPoint6": "Der Transaktionsexport von Actual Budget, in dem Umbuchungen Umbuchungen bleiben",
+      "howTitle": "So funktioniert ein Import",
+      "step1Title": "Datei hinzufügen",
+      "step1Body": "Öffnen Sie das Konto und wählen Sie Transaktionen importieren. WonderMoney liest die Datei und zeigt, wie viele Transaktionen es gefunden hat und welchen Zeitraum sie abdecken.",
+      "step2Title": "Zeilen prüfen",
+      "step2Body": "Jede Zeile ist neu, bereits im Konto, ein mögliches Duplikat oder konnte nicht gelesen werden. Haken Sie beliebige Zeilen an oder ab.",
+      "step3Title": "Importieren",
+      "step3Body": "Der Import läuft im Hintergrund. Bricht er mittendrin ab, versuchen Sie es erneut: Er setzt dort fort, wo er aufgehört hat, und importiert nichts doppelt.",
+      "reviewTitle": "Nichts wird hinzugefügt, bevor Sie es prüfen",
+      "reviewBody": "Derselbe Kauf kommt oft doppelt an, einmal über die Banksynchronisierung und einmal aus einer Datei. Die Prüfung zeigt jede Zeile und was mit ihr geschieht, sodass Sie entscheiden.",
+      "reviewPoint1Title": "Mögliche Duplikate",
+      "reviewPoint1Body": "Eine Zeile mit demselben Betrag wie eine Transaktion, die bereits im Konto ist, mit bis zu drei Tagen Abstand, wird übersprungen, es sei denn, Sie nehmen sie auf.",
+      "reviewPoint2Title": "Bereits importiert",
+      "reviewPoint2Body": "Zeilen, die schon im Konto sind, werden übersprungen, sodass ein überlappender Export nur das Neue hinzufügt.",
+      "reviewPoint3Title": "Kategorisiert wie synchronisierte Transaktionen",
+      "reviewPoint3Body": "Importierte Zeilen werden genauso kategorisiert wie die Transaktionen aus der Banksynchronisierung, und die Regeln des Haushalts gelten auch für sie.",
+      "faqTitle": "Fragen zum Import",
+      "faq1Q": "Mit welchen Banken funktioniert das?",
+      "faq1A": "Mit jeder Bank, die einen Kontoauszug als CSV, Excel, OFX, QIF oder CAMT.053 exportiert. Für Millennium BCP, ActivoBank, Bankinter, Banco BPI und Montepio liest WonderMoney auch das bankeigene Format.",
+      "faq2Q": "Kann ich auf dem Smartphone importieren?",
+      "faq2A": "Ja, CSV-, OFX-, QIF- und CAMT.053-Dateien, mit derselben Prüfung, bevor etwas importiert wird. Exporte aus YNAB und Actual Budget werden im Web importiert.",
+      "faq3Q": "Kann ich von YNAB oder Actual Budget wechseln?",
+      "faq3A": "Ja, mit Ihrem Transaktionsverlauf: Jedes Konto und jede Kategorie wird einem Ihrer Konten bzw. einer Ihrer Kategorien zugeordnet, und Umbuchungen bleiben verknüpft. Budgetbeträge und Ziele werden nicht importiert.",
+      "ctaHeadline": "Nehmen Sie Ihren Verlauf mit",
+      "ctaBody": "Importieren Sie die Kontoauszüge, die Sie bereits haben, und beginnen Sie mit dem vollständigen Bild."
+    },
+    "featureRecurring": {
+      "eyebrow": "Rechnungen und Abos",
+      "metaTitle": "Rechnungen, Abos und wiederkehrende Zahlungen verfolgen | WonderMoney",
+      "metaDescription": "WonderMoney findet die Zahlungen, die sich wiederholen, von der Miete bis zu Abos, zeigt sie in einem Kalender, berechnet den Kontostand jedes Kontos für die nächsten 30 Tage voraus und kann Ihre Rechnungen in Ihre eigene Kalender-App bringen.",
+      "heroTitle": "Sehen, was kommt, bevor es Ihr Konto verlässt",
+      "heroSubtitle": "WonderMoney erkennt Miete, Gehalt, Abos und die anderen Zahlungen, die sich wiederholen, damit Sie wissen, was bezahlt ist, was fällig ist und wohin sich Ihr Kontostand entwickelt.",
+      "schemaName": "WonderMoney Rechnungen und Abos",
+      "schemaDescription": "Erkennung wiederkehrender Zahlungen mit einem Rechnungskalender, einer 30-Tage-Kontostandsprognose für jedes Konto und einem iCal-Feed der anstehenden Rechnungen.",
+      "whatTitle": "Ihre Rechnungen und Abos, für Sie gefunden",
+      "whatBody": "Die Erkennung läuft, sobald Transaktionen hinzugefügt, importiert oder synchronisiert werden. Zahlungen, bei denen sie sicher ist, werden direkt aufgelistet; die anderen warten auf Ihre Bestätigung.",
+      "whatPoint1": "Wiederkehrende Zahlungen und Einnahmen, in Ihren Transaktionen gefunden",
+      "whatPoint2": "Jede einzeln bestätigen oder verwerfen und später wiederherstellen",
+      "whatPoint3": "Ein Kalender, der jede Rechnung als bezahlt, fällig, überfällig oder prognostiziert markiert",
+      "whatPoint4": "Eine 30-Tage-Kontostandsprognose für jedes Konto, mit ihrem Tiefstwert",
+      "howTitle": "So funktioniert es",
+      "step1Title": "Transaktionen kommen herein",
+      "step1Body": "Über die Banksynchronisierung, einen Dateiimport oder manuell. WonderMoney sucht nach den Zahlungen, die sich wiederholen.",
+      "step2Title": "Gefundenes prüfen",
+      "step2Body": "Prüfen Sie für jede Zahlung Händler, üblichen Betrag und Häufigkeit, und bestätigen Sie sie oder markieren Sie sie als nicht wiederkehrend.",
+      "step3Title": "Damit planen",
+      "step3Body": "Lesen Sie den Monat im Kalender und die Prognose jedes Kontos ab. Eine bereits bezahlte Rechnung fällt aus der Prognose heraus und wird daher nie doppelt gezählt.",
+      "calendarTitle": "Ihre Rechnungen in dem Kalender, den Sie schon nutzen",
+      "calendarBody": "Veröffentlichen Sie Ihre bestätigten Rechnungen als schreibgeschützten Kalender-Feed, und abonnieren Sie ihn einmal in Google Calendar, Apple Calendar oder jeder App, die iCal liest.",
+      "calendarPoint1": "Ein ganztägiger Termin für jede Rechnung der nächsten 90 Tage",
+      "calendarPoint2": "Name und erwarteter Betrag der Rechnung, in Ihrer Sprache",
+      "calendarPoint3": "Keine Kontostände, Kontonamen oder Kontonummern",
+      "calendarPoint4": "Den Link jederzeit zurücksetzen oder widerrufen",
+      "faqTitle": "Fragen zu wiederkehrenden Zahlungen",
+      "faq1Q": "Zählen prognostizierte Zahlungen in meinen Berichten?",
+      "faq1A": "Nein. Eine Prognose ist keine Transaktion und bleibt außerhalb von Berichten, Budgets und Summen, bis die Zahlung erfasst ist.",
+      "faq2Q": "Braucht es eine Bankverbindung?",
+      "faq2A": "Nein. Die Erkennung läuft über jede hinzugefügte Transaktion, ob sie aus der Banksynchronisierung, aus einer Datei oder aus Ihrer eigenen Eingabe stammt.",
+      "faq3Q": "Wer sieht die Rechnungen eines privaten Kontos?",
+      "faq3A": "Nur die Personen, die dieses Konto sehen können. Wiederkehrende Zahlungen, Prognosen und der Kalender-Feed folgen der Freigabe des Kontos.",
+      "ctaHeadline": "Wissen, was fällig wird, bevor es fällig ist",
+      "ctaBody": "Lassen Sie WonderMoney Ihre wiederkehrenden Zahlungen finden, und planen Sie den Monat danach."
+    },
+    "featureAssistant": {
+      "eyebrow": "KI-Assistent",
+      "metaTitle": "KI-Assistent für Ihre persönlichen Finanzen | WonderMoney",
+      "metaDescription": "Fragen Sie in einfachen Worten nach Ihren Ausgaben, Budgets, Zielen und Ihrem Portfolio. Der Assistent liest Ihre Daten, schlägt Änderungen vor, die Sie übernehmen, und bleibt aus, bis Sie ihn einschalten. Verbinden Sie Claude Desktop oder Cursor über MCP.",
+      "heroTitle": "Stellen Sie Ihrem Geld eine Frage",
+      "heroSubtitle": "Wie viel ging diesen Monat für Restaurants drauf? Welches Budget wird überschritten? Der Assistent antwortet aus Ihren eigenen Konten und ändert nichts ohne Sie.",
+      "schemaName": "WonderMoney KI-Assistent",
+      "schemaDescription": "Ein KI-Assistent, der Fragen zu Ihren Konten, Ausgaben, Budgets, Zielen und Ihrem Portfolio beantwortet und Änderungen zur Bestätigung vorschlägt, sowie ein schreibgeschützter MCP-Server für KI-Clients.",
+      "whatTitle": "Ein Assistent, der liest und fragt, bevor er ändert",
+      "whatBody": "Der Assistent beantwortet Fragen zu Ihren Konten, Ausgaben, Budgets, Zielen und Ihrem Portfolio. Er kann eine Änderung entwerfen, etwa eine Kategorie für eine Reihe von Transaktionen, aber nichts passiert, bis Sie sie übernehmen.",
+      "whatPoint1": "Antworten aus Ihren eigenen Daten, nach denselben Freigaberegeln wie in der App",
+      "whatPoint2": "Aus, bis Sie ihn einschalten, und in den Einstellungen wieder abschaltbar",
+      "whatPoint3": "Schlägt Kategorien, Geprüft-Markierungen und Notizen vor, die Sie übernehmen oder verwerfen",
+      "whatPoint4": "Ein Schalter blendet alle KI-Funktionen aus, und auch der Server lehnt sie ab",
+      "howTitle": "So funktioniert der Assistent",
+      "step1Title": "Einschalten",
+      "step1Body": "Der Assistent bleibt aus, bis Sie in der Web-App auf seinem Einwilligungsbildschirm Assistent aktivieren wählen.",
+      "step2Title": "Fragen",
+      "step2Body": "Fragen Sie nach einem Monat, einer Kategorie, einem Budget oder einem Ziel. Er liest die Daten, die Sie in der App sehen, und nichts darüber hinaus.",
+      "step3Title": "Übernehmen oder verwerfen",
+      "step3Body": "Eine vorgeschlagene Änderung zeigt für jede Transaktion den aktuellen und den vorgeschlagenen Wert. Übernehmen Sie sie, verwerfen Sie sie, oder lassen Sie sie nach sieben Tagen ablaufen.",
+      "mcpTitle": "Ihren eigenen KI-Client nutzen",
+      "mcpBody": "WonderMoney betreibt einen schreibgeschützten MCP-Server. Verbinden Sie Claude Desktop, Cursor, VS Code oder einen anderen MCP-Client mit einem Token, und fragen Sie in dessen Chat nach Ihren Finanzen.",
+      "mcpPoint1": "Schreibgeschützte Tools für Kontostände, Ausgaben, Budgets, Ziele und Portfolio",
+      "mcpPoint2": "Der Client sieht genau das, was Sie sehen, und nie die Daten eines anderen Haushalts",
+      "mcpPoint3": "Optionale Vorschläge, die darauf warten, dass Sie sie in der App übernehmen",
+      "mcpPoint4": "Ein eigenes Token, das nach 90 Tagen abläuft und widerrufen werden kann",
+      "faqTitle": "Fragen zum Assistenten",
+      "faq1Q": "Kann der Assistent Geld bewegen?",
+      "faq1A": "Nein. Er kann kein Geld bewegen, keine Transaktionen auslösen und keine Bankdaten ändern. Er liest Ihre Daten und kann nur Änderungen vorschlagen, die Sie selbst übernehmen.",
+      "faq2Q": "Ist er standardmäßig eingeschaltet?",
+      "faq2A": "Nein. Er bleibt aus, bis Sie ihn einschalten. Um alle KI-Funktionen auf einmal abzuschalten, verwenden Sie KI-Funktionen ausblenden unter Einstellungen › Datenschutz.",
+      "faq3Q": "Sieht er die privaten Konten anderer in meinem Haushalt?",
+      "faq3A": "Nur die, die mit Ihnen geteilt sind. Ein privates Konto, das vor Ihnen verborgen ist, bleibt auch vor dem Assistenten und vor MCP-Clients verborgen, und Ihre Vorschläge sind nur für Sie sichtbar.",
+      "ctaHeadline": "Fragen Sie WonderMoney nach Ihrem Geld",
+      "ctaBody": "Schalten Sie den Assistenten ein, wenn Sie ihn möchten, und behalten Sie jede Änderung selbst in der Hand."
+    },
+    "featureMultiCurrency": {
+      "eyebrow": "Mehrere Währungen",
+      "metaTitle": "App für persönliche Finanzen in mehreren Währungen | WonderMoney",
+      "metaDescription": "Führen Sie Konten in Euro, Dollar, Pfund oder jeder anderen Währung und sehen Sie jede Summe in Ihrer Währung, umgerechnet zu den täglichen Kursen der Europäischen Zentralbank. Ein Betrag ohne Kurs wird markiert, nicht geraten.",
+      "heroTitle": "Jede Währung, eine ehrliche Summe",
+      "heroSubtitle": "Konten und Transaktionen können in jeder Währung geführt werden. WonderMoney zeigt jede Summe in Ihrer Währung und sagt klar, wenn ein Betrag nicht umgerechnet werden konnte.",
+      "schemaName": "WonderMoney Mehrere Währungen",
+      "schemaDescription": "Konten und Transaktionen in jeder Währung, mit Summen, die zu den täglichen Referenzkursen der Europäischen Zentralbank umgerechnet werden, und markierten Beträgen ohne Kurs.",
+      "whatTitle": "Umgerechnet zum Kurs des jeweiligen Tages",
+      "whatBody": "Jeder Betrag in einer anderen Währung wird zum Kurs der Europäischen Zentralbank für sein Datum umgerechnet, der die wichtigsten Währungen abdeckt. Die Kurse werden an Werktagen aktualisiert, ohne dass Sie etwas einrichten müssen.",
+      "whatPoint1": "Konten und Transaktionen in jeder Währung",
+      "whatPoint2": "Summen in Ihrer Währung zu den täglichen Referenzkursen der EZB",
+      "whatPoint3": "Der ursprüngliche Betrag unter dem umgerechneten",
+      "whatPoint4": "Ein Betrag ohne Kurs wird als Nicht umgerechnet markiert und aus den Summen herausgelassen",
+      "whatPoint5": "Als Geschätzt markiert, wenn der einzige Kurs älter als eine Woche ist, und erneut umgerechnet, sobald ein neuerer vorliegt",
+      "howTitle": "So funktioniert es",
+      "step1Title": "Konten in ihrer eigenen Währung hinzufügen",
+      "step1Body": "Ein Girokonto in Euro, ein Depotkonto in Dollar, Ersparnisse in Pfund: Jedes behält seine Währung.",
+      "step2Title": "Ihre Währung wählen",
+      "step2Body": "Nettovermögen, Cashflow, Berichte und Summen werden darin angezeigt.",
+      "step3Title": "Summen lesen, denen Sie vertrauen können",
+      "step3Body": "Wenn eine Summe einen Betrag auslässt, sagt sie, wie viele und in welchen Währungen, und zählt so nie zwei Währungen zusammen.",
+      "householdTitle": "Jede Person in ihrer eigenen Währung",
+      "householdBody": "In einem Haushalt wählt jede Person ihre eigene Währung und sieht jede Summe darin. Kontostände und Transaktionen der anderen Mitglieder werden umgerechnet, bevor sie addiert werden.",
+      "householdPoint1": "Nettovermögen, Cashflow und Ausgaben in der Währung jedes Mitglieds",
+      "householdPoint2": "Budgets behalten die Währung, in der sie erstellt wurden",
+      "householdPoint3": "Portfolioverlauf, umgerechnet zum Kurs des jeweiligen Tages",
+      "householdPoint4": "Salden in Gruppen für geteilte Ausgaben je Währung geführt, nie umgerechnet",
+      "faqTitle": "Fragen zu Währungen",
+      "faq1Q": "Welche Währungen kann ich verwenden?",
+      "faq1A": "Konten und Transaktionen können in jeder Währung geführt werden. Die Umrechnung nutzt die Referenzkurse der Europäischen Zentralbank, die die wichtigsten Währungen abdecken; ein Betrag in einer Währung ohne Kurs bleibt in seiner eigenen Währung und außerhalb Ihrer Summen.",
+      "faq2Q": "Muss ich Wechselkurse eingeben?",
+      "faq2A": "Nein. Die Kurse werden an Werktagen automatisch abgerufen, und geschätzte oder nicht umgerechnete Beträge werden nach jeder Aktualisierung erneut umgerechnet.",
+      "faq3Q": "Warum zeigt eine Summe an, dass sie unvollständig ist?",
+      "faq3A": "Weil ein Betrag darin keinen Wechselkurs hatte. WonderMoney lässt ihn aus, statt ihn zum Nennwert zu addieren, und sagt Ihnen, welche Währungen fehlten.",
+      "ctaHeadline": "Ihr ganzes Geld in einer Währung sehen",
+      "ctaBody": "Fügen Sie Konten in jeder Währung hinzu und lesen Sie eine Summe, der Sie vertrauen können."
+    },
+    "featureSelfHosting": {
+      "eyebrow": "Self-Hosting und API",
+      "metaTitle": "Selbst gehostete App für persönliche Finanzen mit API | WonderMoney",
+      "metaDescription": "WonderMoney ist Open Source unter der AGPL. Betreiben Sie es auf Ihrem eigenen Server mit einer einzigen Datei für Docker Compose, melden Sie sich über Ihren eigenen Identitätsanbieter an und binden Sie Skripte über die REST-API an.",
+      "heroTitle": "Betreiben Sie es auf Ihrem eigenen Server",
+      "heroSubtitle": "WonderMoney ist kostenlos und Open Source. Nutzen Sie es auf wonder.money, oder betreiben Sie dieselbe App auf einem Heimserver, einem NAS oder einem kleinen VPS, mit Ihren Daten in Ihrer eigenen Datenbank.",
+      "schemaName": "WonderMoney Self-Hosting",
+      "schemaDescription": "Open-Source-Software für persönliche Finanzen unter der AGPL, die mit Docker Compose oder Kubernetes auf Ihrem eigenen Server läuft, mit Single Sign-on und einer REST-API mit persönlichen Tokens.",
+      "whatTitle": "Dieselbe App, auf Ihrem Rechner",
+      "whatBody": "Ein selbst gehosteter Server bietet dieselbe App wie wonder.money: Konten, Banksynchronisierung, Budgets, Ziele, Kredite, Haushalte und Portfolios. Die optionalen Extras schalten sich ein, wenn Sie sie konfigurieren, und bleiben sonst ausgeblendet.",
+      "whatPoint1": "Eine Datei für Docker Compose betreibt Postgres, die API, einen Hintergrund-Worker und die Web-App",
+      "whatPoint2": "Rund 2 GB freier Arbeitsspeicher: ein kleiner VPS, ein Heimserver oder ein NAS",
+      "whatPoint3": "KI-Funktionen mit jedem OpenAI-kompatiblen Endpunkt, auch einem lokalen Ollama",
+      "whatPoint4": "Single Sign-on mit Ihrem eigenen Identitätsanbieter, etwa Authentik oder Keycloak",
+      "whatPoint5": "Banksynchronisierung mit Ihrem eigenen Schlüssel für Enable Banking, und SimpleFIN für Banken in den USA und Kanada",
+      "whatPoint6": "Ein Helm-Chart für Kubernetes",
+      "howTitle": "So fangen Sie an",
+      "step1Title": "Einen Rechner mit Docker bereitstellen",
+      "step1Body": "Docker mit dem Compose-Plugin und rund 2 GB freier Arbeitsspeicher reichen aus.",
+      "step2Title": "Die Installation ausführen",
+      "step2Body": "Das Installationsskript richtet die Container ein und erzeugt die Secrets. Fügen Sie eine Domain und HTTPS hinzu, um es außerhalb Ihres eigenen Netzwerks zu nutzen.",
+      "step3Title": "Einziehen",
+      "step3Body": "Erstellen Sie Ihr Konto, oder stellen Sie einen Export von wonder.money wieder her: Ein Export lässt sich in einen leeren Haushalt auf einem anderen Server laden.",
+      "apiTitle": "Eine API für Ihre eigenen Skripte",
+      "apiBody": "Geben Sie einem Skript, einer Tabelle oder einem Heim-Dashboard mit einem persönlichen API-Token Zugriff auf Ihre Finanzen, auf wonder.money oder auf Ihrem eigenen Server.",
+      "apiPoint1": "Eine REST-API mit öffentlicher Referenz",
+      "apiPoint2": "Lese- oder Schreibzugriff, der nie Löschungen, Bankverbindungen oder den Haushalt erreicht",
+      "apiPoint3": "Tokens, die nach 30, 90 oder 365 Tagen ablaufen",
+      "apiPoint4": "Von jedem Token wird nur ein Hash aufbewahrt, daher wird es nur einmal angezeigt",
+      "faqTitle": "Fragen zum Self-Hosting",
+      "faq1Q": "Ist es wirklich kostenlos?",
+      "faq1A": "Ja. Der Code ist Open Source unter der GNU AGPL v3, und auch der gehostete Dienst auf wonder.money ist kostenlos.",
+      "faq2Q": "Funktioniert die Banksynchronisierung auf meinem eigenen Server?",
+      "faq2A": "Ja. Auf dem Server ist nichts nötig: Jede Person hinterlegt ihren eigenen Schlüssel für Enable Banking in den Einstellungen. Sie können auch SimpleFIN für Banken in den USA und Kanada einschalten.",
+      "faq3Q": "Kann ich zwischen wonder.money und meinem eigenen Server wechseln?",
+      "faq3A": "Ja. Exportieren Sie Ihre Daten auf dem einen und stellen Sie sie in einem leeren Haushalt auf dem anderen wieder her.",
+      "ctaHeadline": "Ihr Server, Ihre Daten",
+      "ctaBody": "Beginnen Sie auf wonder.money und wechseln Sie jederzeit auf Ihren eigenen Server, oder umgekehrt."
     }
   },
   "article": {

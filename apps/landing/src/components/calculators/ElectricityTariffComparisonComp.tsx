@@ -66,6 +66,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 /** What the page shows of ELECTRICITY_OFFERS_SOURCE. */
 export interface OffersSource {
@@ -231,8 +232,6 @@ const summaryClass =
   "flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden";
 const chevronClass = "size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none";
 
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function ElectricityTariffComparison({
   loadOffers,
@@ -484,19 +483,18 @@ function ElectricityTariffComparison({
       <label htmlFor={id} className="block text-sm font-medium text-foreground">
         {label}
       </label>
-      <select
+      <Select
         id={id}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value as V)}
         aria-describedby={help ? `${id}-help` : undefined}
-        className={selectClass}
       >
         {choices.map((choice) => (
           <option key={choice.value} value={choice.value}>
             {choice.label}
           </option>
         ))}
-      </select>
+      </Select>
       {help && (
         <p id={`${id}-help`} className="text-xs text-muted-foreground">
           {help}
@@ -509,7 +507,7 @@ function ElectricityTariffComparison({
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
-      <form className="min-w-0 space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
+      <form className="min-w-0 space-y-6" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
         <ElectricityInvoiceUpload
           onApply={(reading) => {
             setEdited(true);

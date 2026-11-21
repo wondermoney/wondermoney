@@ -103,7 +103,7 @@ const AccountTransactionOcrContent: React.FC<
       localStorage.removeItem("terms_and_conditions_accept");
     }
 
-    posthog.capture("account_transaction_ocr", { data });
+    posthog.capture("account_transaction_ocr");
 
     await createTransactionOcrMutation.mutateAsync(
       { file: data.files[0] },

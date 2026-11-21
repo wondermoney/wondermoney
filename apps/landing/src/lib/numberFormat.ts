@@ -18,7 +18,7 @@ export function toIntlLocale(lang: Lang): string {
 }
 
 export type MoneyOptions = {
-	currency?: "EUR" | "USD"
+	currency?: "EUR" | "USD" | "GBP"
 	/** Fixed fraction digits (default 0). */
 	decimals?: number
 	/** "always" prefixes a plus on gains. */

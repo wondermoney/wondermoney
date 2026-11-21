@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { Check, GraduationCap } from "lucide-react";
+import { CirclePause, GraduationCap, Link2, Target, TrendingUp } from "lucide-react";
 
 import GoalsPreview from "@/components/homepage/previews/GoalsPreview";
 import CTABanner from "@/components/shared/CTABanner";
@@ -10,17 +10,9 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import ResearchNote from "@/components/landing/sections/ResearchNote";
 import { CTA_URL } from "@/hooks/useCtaUrl";
-
-function BenefitItem({ text }: { text: string }) {
-	return (
-		<div className="flex items-start gap-3">
-			<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-			<span className="text-foreground text-sm">{text}</span>
-		</div>
-	);
-}
 
 function StepCard({
 	number,
@@ -62,12 +54,12 @@ export default function FeatureGoals({ locale }: { locale: Lang }) {
 function FeatureGoalsContent({ locale }: { locale: Lang }) {
 	const { t } = useTranslations();
 
-	const benefitKeys = [
-		"lp.featureGoals.benefit1",
-		"lp.featureGoals.benefit2",
-		"lp.featureGoals.benefit3",
-		"lp.featureGoals.benefit4",
-	] as const;
+	const benefits = [
+		{ icon: Target, text: t("lp.featureGoals.benefit1") },
+		{ icon: TrendingUp, text: t("lp.featureGoals.benefit2") },
+		{ icon: CirclePause, text: t("lp.featureGoals.benefit3") },
+		{ icon: Link2, text: t("lp.featureGoals.benefit4") },
+	];
 
 	return (
 		<>
@@ -132,31 +124,21 @@ function FeatureGoalsContent({ locale }: { locale: Lang }) {
 
 			<MidCTA locale={locale} />
 
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-5xl px-6 lg:px-8">
-					<h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-foreground">
-						{t("lp.featureGoals.benefitsTitle")}
-					</h2>
-					<div className="grid gap-4 sm:grid-cols-2">
-						{benefitKeys.map((key) => (
-							<BenefitItem key={key} text={t(key)} />
-						))}
-					</div>
-					{/*
-						Sits under the benefits, not in the hero. The page's job is to
-						convince someone that setting goals is worth the effort at all,
-						and that is an argument the product cannot make about itself —
-						so it borrows one from research and names the source.
-					*/}
-					<div className="mt-10">
-						<ResearchNote
-							icon={GraduationCap}
-							noteKey="lp.featureGoals.researchNote"
-							sourceKey="lp.featureGoals.researchSource"
-						/>
-					</div>
+			<FeatureExplainer title={t("lp.featureGoals.benefitsTitle")} points={benefits}>
+				{/*
+					Sits beside the benefits, not in the hero. The page's job is to
+					convince someone that setting goals is worth the effort at all,
+					and that is an argument the product cannot make about itself —
+					so it borrows one from research and names the source.
+				*/}
+				<div className="mt-8">
+					<ResearchNote
+						icon={GraduationCap}
+						noteKey="lp.featureGoals.researchNote"
+						sourceKey="lp.featureGoals.researchSource"
+					/>
 				</div>
-			</section>
+			</FeatureExplainer>
 
 			<section className="bg-paper-2 py-16 md:py-20">
 				<div className="mx-auto max-w-4xl px-6 lg:px-8">

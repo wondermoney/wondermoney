@@ -1,0 +1,50 @@
+---
+/**
+ * A calculator guide's formulas, one per line in a readable form: the result, "=", then the
+ * expression, with each division drawn as a fraction. Each variable links to the note that
+ * explains it, so the method reads as formula first, details on demand.
+ *
+ *   const formulas = [
+ *     { result: variable(t(k("surplus")), "my-tool-surplus"),
+ *       expression: [variable(t(k("income")), "my-tool-note-income"), operator("−"),
+ *         variable(t(k("expenses")), "my-tool-note-expenses")] },
+ *     { result: variable(t(k("savingsRate")), "my-tool-note-shares"),
+ *       expression: [fraction([variable(t(k("surplus")), "my-tool-surplus")],
+ *         [variable(t(k("income")), "my-tool-note-income")]), operator("×"), number("100")] },
+ *   ];
+ *   <GuideFormula lines={formulas} label={t(k("methodFormulasLabel"))} />
+ *   <GuideTermList items={notes} />   // the notes, each with the id a variable links to
+ *
+ * The helpers and types are in guideBlocks.ts; `formulaHrefs` lists the links so a test can
+ * check every one lands on a note. Variables are words, not letters: the reader should not
+ * need a legend. Wraps on a phone; screen readers hear a fraction as "a ÷ b". Server-rendered,
+ * no script.
+ */
+import GuideFormulaParts from "./GuideFormulaParts.astro";
+import type { GuideFormulaLine } from "./guideBlocks";
+
+interface Props {
+  lines: GuideFormulaLine[];
+  /** The block's accessible name, such as "Formulas". */
+  label: string;
+  class?: string;
+}
+
+const { lines, label, class: className } = Astro.props;
+---
+
+<div role="group" aria-label={label} class:list={["guide-formula", className]}>
+  {
+    lines.map((line) => (
+      <p class="guide-formula__line">
+        <span class="guide-formula__result">
+          <GuideFormulaParts parts={[line.result]} />
+        </span>
+        <span class="guide-formula__operator">=</span>
+        <span class="guide-formula__expression">
+          <GuideFormulaParts parts={line.expression} />
+        </span>
+      </p>
+    ))
+  }
+</div>

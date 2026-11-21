@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import { remainingTerm } from "@/lib/calculators/earlyRepayment";
@@ -412,7 +412,7 @@ function Results({ result, money }: { result: MortgageTransferResult; money: Mon
       </div>
 
       {longerTerm && (
-        <p className="rounded-lg border border-warning-text/30 px-4 py-3 text-sm text-foreground" role="note">
+        <p className="rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground" role="note">
           {longerTerm.extraInterest > 0
             ? t(k("results.longerTerm"), {
                 extra: duration(longerTerm.extraMonths),

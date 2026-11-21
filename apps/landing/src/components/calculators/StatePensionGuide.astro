@@ -1,18 +1,13 @@
 ---
+// Prerendered worked example, method, limits and sources for the state pension calculator,
+// on the guide building blocks (guideBlocks.ts). The figures come from the same calculation
+// the calculator runs (statePensionGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  ACCRUAL_BANDS,
-  EARLY_PENALTY_PER_MONTH_BP,
-  IAS_2026_CENTS,
-  MINIMUM_PENSIONS_2026,
-  NORMAL_AGE_2026_MONTHS,
-  NORMAL_AGE_2027_MONTHS,
-  STATE_PENSION_EXAMPLE,
-  STATE_PENSION_SOURCES,
-  SUSTAINABILITY_FACTOR_2026_BP,
-  computeStatePension,
-} from "@/lib/calculators/statePension";
-import { formatMoney } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildStatePensionGuide } from "./statePensionGuide";
+import { STATE_PENSION_SOURCES } from "@/lib/calculators/statePension";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -23,39 +18,9 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.statePension.guide.${key}`;
-const example = computeStatePension(STATE_PENSION_EXAMPLE);
-if (!example.ok) throw new Error("Invalid state pension worked example");
 
-const money = (cents: number) => formatMoney(locale, cents / 100, { decimals: 2 });
-const number = (value: number, digits = 2) =>
-  new Intl.NumberFormat(locale, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
-const age = (months: number) => t("tools.statePension.ageValue", { years: String(Math.floor(months / 12)), months: String(months % 12) });
-const { result } = example;
-const values = {
-  gross: formatMoney(locale, STATE_PENSION_EXAMPLE.grossMonthly, { decimals: 0 }),
-  years: String(STATE_PENSION_EXAMPLE.years),
-  age: age(STATE_PENSION_EXAMPLE.ageYears * 12 + STATE_PENSION_EXAMPLE.ageMonths),
-  statutory: money(result.statutoryCents),
-  rate: `${number(result.globalRateBp / 100)}%`,
-  months: String(result.adjustmentMonths),
-  penalty: `${number(result.penaltyBp / 100)}%`,
-  monthly: money(result.monthlyCents),
-  replacement: `${number(result.replacementBp / 100, 1)}%`,
-  net: money(result.netPayCents),
-  netPension: money(result.netPensionCents),
-  gap: money(result.gapCents),
-};
-const limitValues = {
-  ias: money(IAS_2026_CENTS),
-  normal2026: age(NORMAL_AGE_2026_MONTHS),
-  normal2027: age(NORMAL_AGE_2027_MONTHS),
-  factor: number(SUSTAINABILITY_FACTOR_2026_BP / 10_000, 4),
-  penalty: `${number(EARLY_PENALTY_PER_MONTH_BP / 100, 1)}%`,
-  rates: ACCRUAL_BANDS.map((band) => `${number(band.rateBp / 100)}%`).join(", "),
-  min15: money(MINIMUM_PENSIONS_2026[2].cents),
-  min21: money(MINIMUM_PENSIONS_2026[1].cents),
-  min31: money(MINIMUM_PENSIONS_2026[0].cents),
-};
+const guide = buildStatePensionGuide(locale);
+
 const sources = [
   ["sourceGuide", STATE_PENSION_SOURCES.guide],
   ["sourceLaw", STATE_PENSION_SOURCES.law],
@@ -64,39 +29,38 @@ const sources = [
   ["sourceWithholding", STATE_PENSION_SOURCES.withholding],
   ["sourceSimulator", STATE_PENSION_SOURCES.simulator],
 ] as const;
-const methods = [
-  "methodReference", "methodRate", "methodAges", "methodEarly", "methodLate", "methodMinimum", "methodGap", "methodBudget",
-];
 ---
 
 <ToolGuide>
-  <section aria-labelledby="state-pension-example">
-    <h2 id="state-pension-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("example"), values)}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("example"), guide.values)}</p>
+    <GuideFigures items={guide.pensionFlow} operators={guide.pensionOperators} />
+    <GuideFigures items={guide.gapFlow} operators={guide.gapOperators} />
   </section>
-  <section aria-labelledby="state-pension-method">
-    <h2 id="state-pension-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {methods.map((key) => <li>{t(k(key), limitValues)}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("unsupportedTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+  </section>
+
+  <section>
+    <h2>{t(k("unsupportedTitle"))}</h2>
+    <ul class="list-disc space-y-2 pl-6">
       {["unsupportedMixed", "unsupportedSpecial", "unsupportedCga", "unsupportedOther"].map((key) => <li>{t(k(key))}</li>)}
     </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+  </section>
+
+  <section>
+    <h2>{t(k("sourcesTitle"))}</h2>
+    <ul class="list-disc space-y-2 pl-6">
       {sources.map(([key, href]) => (
         <li>
-          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
-            {t(k(key))}
-          </a>
+          <a href={href} rel="noopener">{t(k(key))}</a>
         </li>
       ))}
     </ul>
-    <p class="mt-4 text-sm">{t(k("reviewed"))}</p>
+    <p class="text-base text-muted-foreground">{t(k("reviewed"))}</p>
   </section>
 </ToolGuide>

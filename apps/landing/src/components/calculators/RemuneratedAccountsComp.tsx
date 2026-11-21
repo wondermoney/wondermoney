@@ -27,6 +27,7 @@ import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
 import { AsOfBanner, BankNotices, OriginalNotes, YesMark } from "./BankAccountsCommon";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.remuneratedAccounts.${key}`;
 const TYPES: readonly RemuneratedAccountType[] = ["ordem", "poupancaComIban", "poupancaSemIban", "dividaPublica", "seguro"];
@@ -83,8 +84,6 @@ function RemuneratedAccounts() {
   };
   const eur = (value: number, decimals = 0) => formatMoney(locale, value, { currency: "EUR", decimals });
 
-  const selectClass =
-    "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <>
@@ -112,9 +111,8 @@ function RemuneratedAccounts() {
           />
         </div>
         <Field id="remunerated-type" label={t(k("filters.type"))}>
-          <select
+          <Select
             id="remunerated-type"
-            className={selectClass}
             value={filters.type}
             onChange={(event) => setFilter("type", event.currentTarget.value as RemuneratedFilters["type"])}
           >
@@ -124,12 +122,11 @@ function RemuneratedAccounts() {
                 {t(k(`types.${type}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <Field id="remunerated-iban" label={t(k("filters.iban"))}>
-          <select
+          <Select
             id="remunerated-iban"
-            className={selectClass}
             value={filters.iban}
             onChange={(event) => setFilter("iban", event.currentTarget.value as IbanFilter)}
           >
@@ -138,12 +135,11 @@ function RemuneratedAccounts() {
                 {t(k(`iban.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <Field id="remunerated-tax" label={t(k("filters.tax"))}>
-          <select
+          <Select
             id="remunerated-tax"
-            className={selectClass}
             value={filters.tax}
             onChange={(event) => setFilter("tax", event.currentTarget.value as TaxFilter)}
           >
@@ -152,7 +148,7 @@ function RemuneratedAccounts() {
                 {t(k(`tax.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <label className="flex min-h-11 items-center gap-2 self-end text-sm font-medium text-foreground">
           <input
@@ -164,9 +160,8 @@ function RemuneratedAccounts() {
           {t(k("filters.twoHolders"))}
         </label>
         <Field id="remunerated-sort" label={t(k("sort.label"))}>
-          <select
+          <Select
             id="remunerated-sort"
-            className={selectClass}
             value={sort}
             onChange={(event) => {
               touch();
@@ -178,7 +173,7 @@ function RemuneratedAccounts() {
                 {t(k(`sort.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       </div>
       <p className="mt-4 text-sm text-muted-foreground" aria-live="polite">
@@ -186,9 +181,9 @@ function RemuneratedAccounts() {
       </p>
       <p className="mt-1 text-xs text-muted-foreground">{t(k("assumptions"), { tax: String(BANK_INTEREST_TAX_RATE) })}</p>
       {rows.length === 0 && <p className="mt-6 text-sm text-muted-foreground">{t(k("empty"))}</p>}
-      <ul className="mt-4 space-y-3 lg:hidden">
+      <ul className="mt-4 divide-y divide-border rounded-card border border-border bg-background lg:hidden">
         {rows.map((row) => (
-          <li key={row.account.id} className="rounded-card border border-border bg-background p-4 shadow-sm">
+          <li key={row.account.id} className={`p-4 ${row.account.highlighted ? "bg-paper-2" : ""}`}>
             <RowCard row={row} showNet={!amountError} />
           </li>
         ))}
@@ -351,7 +346,7 @@ function RowCard({ row, showNet }: { row: RowProjection; showNet: boolean }) {
           <p className="break-words text-base font-semibold text-foreground">{account.entity}</p>
           <p className="break-words text-sm text-muted-foreground">{account.product}</p>
         </div>
-        <p className="shrink-0 text-right font-mono text-xl font-bold text-primary">{rate(account)}</p>
+        <p className="shrink-0 text-right font-mono text-xl font-semibold text-foreground">{rate(account)}</p>
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
         {t(k(`types.${account.type}`))}
@@ -397,8 +392,8 @@ function RowTable({ row, showNet }: { row: RowProjection; showNet: boolean }) {
   const termLabel = term(account);
   return (
     <tr className={`border-t border-border-2 align-top ${account.highlighted ? "bg-paper-2" : ""}`}>
-      <td className="whitespace-nowrap px-3 py-3 text-right font-mono font-bold text-primary">{rate(account)}</td>
-      <th scope="row" className="px-3 py-3 text-left font-normal">
+      <td className="whitespace-nowrap px-3 py-3 text-right font-mono font-semibold text-foreground">{rate(account)}</td>
+      <th scope="row" className="min-w-[10rem] px-3 py-3 text-left font-normal">
         <span className="font-semibold text-foreground">{account.entity}</span>
         <span className="block text-muted-foreground">{account.product}</span>
         <span className="block text-xs text-muted-foreground">
@@ -408,8 +403,9 @@ function RowTable({ row, showNet }: { row: RowProjection; showNet: boolean }) {
         <ProductLink account={account} />
       </th>
       <td className="whitespace-nowrap px-3 py-3 font-mono text-xs">
-        <span className="block">{t(k("columns.minimum"))}: {min}</span>
-        <span className="block">{t(k("columns.maximum"))}: {max}</span>
+        {/* The labels in the body face; only the amounts are figures. */}
+        <span className="block"><span className="font-sans text-muted-foreground">{t(k("columns.minimum"))}:</span> {min}</span>
+        <span className="block"><span className="font-sans text-muted-foreground">{t(k("columns.maximum"))}:</span> {max}</span>
       </td>
       <td className="px-3 py-3 text-center"><YesMark value={account.instantTransfer} /></td>
       <td className="px-3 py-3 text-center"><HoldersCell account={account} /></td>

@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 
 type SearchableItem = {
   title: string;
@@ -41,29 +42,29 @@ function ContentSearchContent({ items, placeholder }: Props) {
 
   return (
     <div className="mt-8">
-      <div className="relative">
-        <svg
-          aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-          />
-        </svg>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder || t("global.search.placeholder")}
-          className="w-full rounded-lg border border-input py-2.5 pl-10 pr-4 text-sm focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </div>
+      <Input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={placeholder || t("global.search.placeholder")}
+        className="pl-10"
+        prefix={
+          <svg
+            aria-hidden="true"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+            />
+          </svg>
+        }
+      />
 
       {filtered !== null && (
         <div className="mt-6">

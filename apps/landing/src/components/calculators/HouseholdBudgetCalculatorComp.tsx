@@ -18,15 +18,10 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 type IncomeEntry = { id: string; label: string; amount: number };
 type ExpenseEntry = IncomeEntry & { category: BudgetCategory };
-
-const INPUT_CLASS = cn(
-  "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm",
-  "focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring",
-  "transition-colors",
-);
 
 const ICON_BUTTON_CLASS =
   "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -284,28 +279,24 @@ function AmountRow({
 
   return (
     <li className="flex items-center gap-2">
-      <input
+      <Input
         type="text"
         value={label}
         onChange={(e) => onLabel(e.target.value)}
         aria-label={t(k("rowNameLabel"))}
-        className={cn(INPUT_CLASS, "min-w-0 flex-1")}
+        className="min-w-0 flex-1"
       />
-      <div className="relative w-32 shrink-0 sm:w-36">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-          {"€"}
-        </span>
-        <NumericInput
-          min={0}
-          max={BUDGET_MAX_AMOUNT}
-          step={10}
-          value={amount}
-          // An empty field stays empty (NaN); the budget counts it as 0.
-          onChange={(value) => onAmount(Number.isNaN(value) ? value : toBudgetAmount(value))}
-          aria-label={t(k("rowAmountLabel"), { name })}
-          className={cn(INPUT_CLASS, "pl-8 font-mono")}
-        />
-      </div>
+      <NumericInput
+        min={0}
+        max={BUDGET_MAX_AMOUNT}
+        step={10}
+        value={amount}
+        // An empty field stays empty (NaN); the budget counts it as 0.
+        onChange={(value) => onAmount(Number.isNaN(value) ? value : toBudgetAmount(value))}
+        aria-label={t(k("rowAmountLabel"), { name })}
+        prefix="€"
+        wrapperClassName="w-32 shrink-0 sm:w-36"
+      />
       <button type="button" onClick={onRemove} aria-label={t(k("removeRow"), { name })} className={ICON_BUTTON_CLASS}>
         <X className="h-4 w-4" aria-hidden="true" />
       </button>
