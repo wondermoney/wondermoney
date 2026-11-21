@@ -103,8 +103,12 @@ function SavingsCertificatesCalculator() {
         <div aria-live="polite" aria-atomic="true">
           {result ? (
             <>
-              <p className="text-sm text-muted-foreground">{t(k("result.finalValue"))}</p>
-              <p id="savingsCertificates-finalValue" className="font-mono text-3xl font-bold text-primary">
+              {/* The answer heads the ledger below, as CalculatorResult sets a leading highlight. */}
+              <p className="text-sm font-medium text-foreground">{t(k("result.finalValue"))}</p>
+              <p
+                id="savingsCertificates-finalValue"
+                className="mt-1 font-mono text-2xl font-semibold leading-tight tracking-tight text-primary sm:text-3xl"
+              >
                 {money(result.finalValue)}
               </p>
             </>
@@ -114,6 +118,7 @@ function SavingsCertificatesCalculator() {
         </div>
         {result && (
           <>
+            <div className="-mt-2 border-t border-border">
             <CalculatorResult
               items={[
                 { label: t(k("result.invested")), value: money(result.invested) },
@@ -124,6 +129,7 @@ function SavingsCertificatesCalculator() {
                 { label: t(k("result.netYield")), value: formatPercent(locale, result.netAnnualYield, { decimals: 2 }) },
               ]}
             />
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <caption className="pb-2 text-left text-sm font-medium text-foreground">
