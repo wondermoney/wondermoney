@@ -11,6 +11,9 @@ vi.mock("@/lib/gtm", () => ({
 
 const { default: UnemploymentBenefitCalculatorComp } = await import("./UnemploymentBenefitCalculatorComp");
 
+/** The headline figure: the first value of the result ledger. */
+const headline = () => document.querySelector("#unemployment-result dd")?.textContent;
+
 afterEach(() => {
   cleanup();
   pushGtmEvent.mockClear();
@@ -23,7 +26,7 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(cents / 100);
 
   render(<UnemploymentBenefitCalculatorComp locale="en" />);
-  expect(document.getElementById("unemployment-monthly")?.textContent).toBe(euros(outcome.result.monthlyCents));
+  expect(headline()).toBe(euros(outcome.result.monthlyCents));
   expect(screen.getByText("Conditions to check (not a decision)")).toBeTruthy();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
@@ -31,12 +34,12 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
   fireEvent.change(months, { target: { value: "8" } });
   expect(months.getAttribute("aria-invalid")).toBe("true");
   expect(screen.getByText(/The duration table starts at 12 months/)).toBeTruthy();
-  expect(document.getElementById("unemployment-monthly")).toBeNull();
+  expect(headline()).toBeUndefined();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   fireEvent.change(months, { target: { value: "30" } });
   fireEvent.change(screen.getByRole("spinbutton", { name: "Gross monthly salary" }), { target: { value: "9000" } });
-  expect(document.getElementById("unemployment-monthly")?.textContent).toBe("€1,342.83");
+  expect(headline()).toBe("€1,342.83");
   fireEvent.change(screen.getByLabelText("Household"), { target: { value: "singleParent" } });
   expect(pushGtmEvent).toHaveBeenCalledExactlyOnceWith({
     event: "tool_used", tool: "unemployment_benefit", page_type: "tools/portugal-unemployment-benefit-calculator",

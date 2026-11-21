@@ -117,14 +117,8 @@ function InflationCalculator() {
         aria-live="polite"
       >
         {result ? (
-          <>
-            <div>
-              <p className="text-sm text-muted-foreground">{t(key("equivalent"), { year: input.to })}</p>
-              <p className="font-mono text-2xl font-bold text-primary sm:text-3xl">
-                {money(result.equivalent)}
-              </p>
-            </div>
-            <CalculatorResult items={[
+          <CalculatorResult items={[
+              { label: t(key("equivalent"), { year: input.to }), value: money(result.equivalent), highlight: true },
               { label: t(key("priceChange")), value: formatPercent(locale, result.priceChange, { decimals: 2, sign: "always" }) },
               { label: t(key("budgetChange")), value: moneyChange(result.budgetChange) },
               ...(result.realValue !== null && result.realChange !== null ? [
@@ -132,7 +126,6 @@ function InflationCalculator() {
                 { label: t(key("realChange")), value: moneyChange(result.realChange) },
               ] : []),
             ]} />
-          </>
         ) : <p className="text-sm text-muted-foreground">{t(key("invalid"))}</p>}
       </div>
     </CalculatorLayout>

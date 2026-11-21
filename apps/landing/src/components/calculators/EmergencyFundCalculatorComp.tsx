@@ -74,7 +74,9 @@ function EmergencyFundCalculatorContent() {
       ? t("tools.emergencyFund.monthsCountOne")
       : t("tools.emergencyFund.monthsCount", { count: formatNumber(locale, count) });
 
+  // The target is the answer, so it heads the ledger.
   const resultItems = [
+    { label: t("tools.emergencyFund.target"), value: money(result.target), highlight: true },
     result.status === "reached"
       ? { label: t("tools.emergencyFund.surplus"), value: money(result.surplus) }
       : { label: t("tools.emergencyFund.shortfall"), value: money(result.shortfall) },
@@ -170,13 +172,7 @@ function EmergencyFundCalculatorContent() {
       </div>
 
       <div className="space-y-6 rounded-card border border-border bg-background p-6 shadow-sm sticky top-20 lg:top-24">
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm text-muted-foreground">{t("tools.emergencyFund.target")}</p>
-            <p className="font-mono text-2xl font-bold text-primary">{money(result.target)}</p>
-          </div>
-          <CalculatorResult items={resultItems} />
-        </div>
+        <CalculatorResult items={resultItems} />
 
         <p
           aria-live="polite"

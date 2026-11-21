@@ -84,7 +84,7 @@ function FuelPrices() {
     return error ? t(k(`errors.${error}`), { max: maxLabel(field) }) : undefined;
   };
   const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+    "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const fuelName = (fuel: FuelType) => t(k(`fuels.${fuel}`));
   const priceDiffers = Number.isFinite(input.price) ? Math.abs(input.price - latest) > 0.0005 : true;
 
@@ -225,7 +225,7 @@ function LatestPrices() {
         {SUMMARIES.map((summary) => {
           const flat = Math.abs(summary.change) < 0.0005;
           return (
-            <li key={summary.fuel} className="rounded-card border border-border bg-background p-5 shadow-sm">
+            <li key={summary.fuel} className="rounded-card border border-border bg-background p-5">
               <p className="text-sm text-muted-foreground">{t(k(`fuels.${summary.fuel}`))}</p>
               <p className="font-mono text-2xl font-bold text-foreground">{euro(summary.price)}/L</p>
               <p className="mt-1 text-sm text-muted-foreground">

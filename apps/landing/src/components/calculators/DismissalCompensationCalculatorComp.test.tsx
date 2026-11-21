@@ -11,6 +11,9 @@ vi.mock("@/lib/gtm", () => ({
 
 const { default: DismissalCompensationCalculatorComp } = await import("./DismissalCompensationCalculatorComp");
 
+/** The headline figure: the first value of the result ledger. */
+const headline = () => document.querySelector("#dismissal-result dd")?.textContent;
+
 afterEach(() => {
   cleanup();
   pushGtmEvent.mockClear();
@@ -23,7 +26,7 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
     new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(cents / 100);
 
   render(<DismissalCompensationCalculatorComp locale="en" />);
-  expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros(outcome.result.compensationCents));
+  expect(headline()).toBe(euros(outcome.result.compensationCents));
   expect(screen.getByText("Payout split over upcoming months")).toBeTruthy();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
@@ -31,7 +34,7 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
   fireEvent.change(end, { target: { value: "2012-01-01" } });
   expect(end.getAttribute("aria-invalid")).toBe("true");
   expect(screen.getByText("The termination date cannot be before the start date.")).toBeTruthy();
-  expect(document.getElementById("dismissal-compensation")).toBeNull();
+  expect(headline()).toBeUndefined();
   expect(pushGtmEvent).not.toHaveBeenCalled();
 
   fireEvent.change(end, { target: { value: "2026-12-31" } });
@@ -39,7 +42,7 @@ it("shows the example, explains edge cases and tracks one edit with metadata onl
   fireEvent.change(base, { target: { value: "0" } });
   expect(screen.getByText(/Enter a value of at least/)).toBeTruthy();
   fireEvent.change(base, { target: { value: "2000" } });
-  expect(document.getElementById("dismissal-compensation")).not.toBeNull();
+  expect(headline()).toBeDefined();
   expect(pushGtmEvent).toHaveBeenCalledExactlyOnceWith({
     event: "tool_used", tool: "dismissal_compensation", page_type: "tools/portugal-dismissal-compensation-calculator",
   });
@@ -53,7 +56,7 @@ it("switches to fixed-term expiry: 24 days a year on the whole duration, with it
   fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly base pay (gross)" }), { target: { value: "3000" } });
   fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly seniority supplements (diuturnidades)" }), { target: { value: "0" } });
   const euros = new Intl.NumberFormat("en", { style: "currency", currency: "EUR" }).format(4800);
-  expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros);
+  expect(headline()).toBe(euros);
   expect(screen.getByText("Fixed-term contract expiry, 24 days a year")).toBeTruthy();
   expect(screen.getByText(/Covers the expiry of a fixed-term contract/)).toBeTruthy();
   expect(screen.getByText(/If it was renewed, count from the first day/)).toBeTruthy();
@@ -82,7 +85,7 @@ it("warns, without blocking the figure, when a fixed-term contract passes the ar
   expect(screen.getByText(/at most 2 years, renewals included \(art\. 148\(1\)/)).toBeTruthy();
   expect(screen.getByText(/December 31, 2025/)).toBeTruthy();
   expect(screen.getByText(/or the renewal limits converts into an open-ended contract \(art\. 147\(2\)\(a\) and \(b\)\)/)).toBeTruthy();
-  expect(document.getElementById("dismissal-compensation")?.textContent).toBe(euros(7200));
+  expect(headline()).toBe(euros(7200));
 
   // An uncertain term may last 4 years.
   fireEvent.change(kind, { target: { value: "uncertain" } });
@@ -108,7 +111,7 @@ it("asks a certain-term contract for its renewals and earlier contracts, and war
   fireEvent.change(screen.getByRole("spinbutton", { name: "Monthly seniority supplements (diuturnidades)" }), { target: { value: "0" } });
   fireEvent.change(screen.getByLabelText("Contract start date"), { target: { value: "2025-01-01" } });
   fireEvent.change(screen.getByLabelText("Termination date"), { target: { value: "2026-06-30" } });
-  const figure = () => document.getElementById("dismissal-compensation")?.textContent;
+  const figure = () => headline();
   const euros = figure();
   expect(euros).toMatch(/^€3,5\d\d\.\d\d$/);
   const warning = "This contract may count as open-ended";
