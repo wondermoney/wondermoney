@@ -51,7 +51,13 @@ export default function FeatureExplainer({
 	return (
 		<section data-feature-explainer="" className={cn("py-16 md:py-20", tone === "muted" && "bg-paper-2")}>
 			<div className="mx-auto max-w-6xl px-6 lg:px-8">
-				<div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:items-start lg:gap-16">
+				{/* The text column stays 5 parts wide on whichever side it sits. */}
+				<div
+					className={cn(
+						"grid gap-10 lg:items-start lg:gap-16",
+						reverse ? "lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)]" : "lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]",
+					)}
+				>
 					<div className={cn("min-w-0", reverse && "lg:order-2")}>
 						<h2 className="text-3xl font-semibold tracking-tight text-foreground [text-wrap:balance]">{title}</h2>
 						{paragraphs.map((paragraph) => (
@@ -66,7 +72,7 @@ export default function FeatureExplainer({
 							</div>
 						) : null}
 					</div>
-					<div className="min-w-0">
+					<div className={cn("min-w-0", reverse && "lg:order-1")}>
 						{visual ?? <FeaturePointList points={points} title={pointsTitle} columns={columns} />}
 					</div>
 				</div>
