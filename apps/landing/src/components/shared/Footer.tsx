@@ -12,6 +12,7 @@ import {
   toLocalizedPathname,
   toToolsHubPath,
 } from "@/lib/routes";
+import { FEATURE_MENU } from "@/lib/featureMenu";
 import { getTranslations } from "@/lib/translations";
 import { GITHUB_URL, selfHostingDocsUrl } from "@/lib/openSource";
 import type { Lang } from "@/lib/i18nLocale";
@@ -42,19 +43,10 @@ export default function Footer({ className, locale }: Props) {
     //   { name: "Commerce", href: "#" },
     //   { name: "Insights", href: "#" },
     // ],
-    // The same feature destinations the header's Features menu carries.
-    features: (
-      [
-        ["header.nav.accounts.name", "featureAccounts"],
-        ["header.nav.budgeting.name", "featureBudgeting"],
-        ["header.nav.categorization.name", "featureCategorization"],
-        ["header.nav.portfolio.name", "featurePortfolio"],
-        ["header.nav.reports.name", "featureReports"],
-        ["header.nav.privacy.name", "featurePrivacy"],
-      ] as const
-    ).map(([nameKey, routeId]) => ({
-      name: t(nameKey),
-      href: toLocalizedPath(routeId, locale),
+    // The same feature destinations, in the same order, as the header's Features menu.
+    features: FEATURE_MENU.map((item) => ({
+      name: t(`header.nav.${item.key}.name`),
+      href: toLocalizedPath(item.routeId, locale),
     })),
     resources: [
       { name: t("guidedStart.title"), href: toLocalizedPath("pageGuidedStart", locale) },

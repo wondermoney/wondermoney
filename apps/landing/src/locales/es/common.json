@@ -375,8 +375,31 @@
     "features": "Funciones",
     "about": "Sobre nosotros",
     "tools": "Herramientas",
+    "comparators": "Comparadores",
     "toolsMenu": {
-      "seeAll": "Ver todas las herramientas"
+      "seeAll": "Ver todas las herramientas",
+      "subgroups": {
+        "planAndSave": "Planificar y ahorrar",
+        "salaryAndBenefits": "Salario y prestaciones",
+        "pricesAndInflation": "Precios e inflación",
+        "homeLoan": "Hipotecas",
+        "buyingAndTaxes": "Compra de vivienda e impuestos",
+        "carAndPersonalLoans": "Coche y préstamos personales",
+        "investing": "Invertir",
+        "retirement": "Jubilación",
+        "depositsAndCertificates": "Depósitos y certificados de ahorro"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Ofertas de bancos, brókers, aseguradoras y comercializadoras de energía en Portugal, una junto a otra.",
+      "items": {
+        "electricityTariffComparison": "Todas las ofertas para el hogar, ordenadas por lo que te costarían al año",
+        "freeBankAccounts": "Cuentas corrientes gratuitas y las condiciones de cada una",
+        "termDepositOffers": "Ofertas de depósitos por plazo e importe, con el interés neto",
+        "remuneratedAccounts": "Cuentas remuneradas y de ahorro, con el interés neto de IRS",
+        "brokerFees": "Comisiones de custodia, operativa y cambio de los brókers en Portugal",
+        "pprComparison": "Fondos, seguros y fondos de pensiones PPR por riesgo, costes y rentabilidad"
+      }
     },
     "learn": "Aprender",
     "glossary": "Glosario",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Privacidad",
         "description": "Acceso bancario de solo lectura. Tus datos nunca se venden."
+      },
+      "netWorth": {
+        "name": "Patrimonio neto",
+        "description": "Cuentas, inversiones y deudas sumadas en un solo número"
+      },
+      "financialMarkets": {
+        "name": "Mercados financieros",
+        "description": "Acciones, ETFs y watchlists con datos actualizados, junto a tus cuentas"
+      },
+      "goals": {
+        "name": "Metas",
+        "description": "Define objetivos de ahorro y sigue tu progreso"
+      },
+      "credits": {
+        "name": "Préstamos",
+        "description": "Tu deuda total y cada pago, con un plan para amortizarla"
       },
       "learn": {
         "name": "Aprender",

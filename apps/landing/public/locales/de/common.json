@@ -375,8 +375,31 @@
     "features": "Funktionen",
     "about": "Über uns",
     "tools": "Tools",
+    "comparators": "Vergleichsrechner",
     "toolsMenu": {
-      "seeAll": "Alle Tools ansehen"
+      "seeAll": "Alle Tools ansehen",
+      "subgroups": {
+        "planAndSave": "Planen und sparen",
+        "salaryAndBenefits": "Gehalt und Sozialleistungen",
+        "pricesAndInflation": "Preise und Inflation",
+        "homeLoan": "Baufinanzierung",
+        "buyingAndTaxes": "Hauskauf und Steuern",
+        "carAndPersonalLoans": "Auto und Privatkredite",
+        "investing": "Investieren",
+        "retirement": "Ruhestand",
+        "depositsAndCertificates": "Einlagen und Sparzertifikate"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Angebote von Banken, Brokern, Versicherern und Energieversorgern in Portugal im direkten Vergleich.",
+      "items": {
+        "electricityTariffComparison": "Alle Haushaltsangebote, sortiert nach Ihren jährlichen Kosten",
+        "freeBankAccounts": "Kostenlose Girokonten und die Bedingungen jedes Kontos",
+        "termDepositOffers": "Festgeldangebote nach Laufzeit und Betrag, mit Zinsen nach Steuern",
+        "remuneratedAccounts": "Verzinste Konten und Sparkonten, mit Nettozinsen nach IRS",
+        "brokerFees": "Depot-, Handels- und Währungsgebühren der Broker in Portugal",
+        "pprComparison": "PPR-Fonds, -Versicherungen und -Pensionsfonds nach Risiko, Kosten und Rendite"
+      }
     },
     "learn": "Lernen",
     "glossary": "Glossar",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Datenschutz",
         "description": "Bankverbindungen nutzen Nur-Lese-Open-Banking über Enable Banking. WonderMoney kann keine Überweisungen veranlassen."
+      },
+      "netWorth": {
+        "name": "Vermögen",
+        "description": "Konten, Investitionen und Schulden in einer einzigen Zahl"
+      },
+      "financialMarkets": {
+        "name": "Finanzmärkte",
+        "description": "Aktien, ETFs und Watchlists mit aktuellen Daten, neben Ihren Konten"
+      },
+      "goals": {
+        "name": "Ziele",
+        "description": "Sparziele festlegen und den Fortschritt verfolgen"
+      },
+      "credits": {
+        "name": "Kredite",
+        "description": "Ihre Gesamtschuld und jede Rate, mit einem Tilgungsplan"
       },
       "learn": {
         "name": "Lernen",
