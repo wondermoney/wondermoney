@@ -84,4 +84,29 @@ describe("consent corner-card layout contract", () => {
       expect(className).not.toContain("w-full");
     }
   });
+
+  it("stacks the saved message above the privacy choices button, at the banner's width", () => {
+    // Given
+    const status = readFileSync(
+      "src/components/shared/ConsentBannerStatus.tsx",
+      "utf8",
+    );
+    const banner = readFileSync(
+      "src/components/shared/ConsentBanner.tsx",
+      "utf8",
+    );
+    const widthOf = (className: string) =>
+      className.split(/\s+/).filter((token) => /^(?:md:)?w-/.test(token));
+
+    // When
+    const saved = status.slice(status.indexOf("export function SavedConsentStatus"));
+    const savedSurface = saved.match(/<aside\s+className=\{`([^`]*)`\}/)?.[1] ?? "";
+    const bannerSurface = banner.match(/<aside\s+className=\{`([^`]*)`\}/)?.[1] ?? "";
+    const row = saved.match(/<div className="([^"]+)">/)?.[1] ?? "";
+
+    // Then: the message gets the card's full width instead of a column beside the button
+    expect(row.split(/\s+/)).toContain("flex-col");
+    expect(row).not.toContain("justify-between");
+    expect(widthOf(savedSurface)).toEqual(widthOf(bannerSurface));
+  });
 });

@@ -274,43 +274,58 @@ export default function Footer({ className, locale }: Props) {
               >
                 {t("footer.language")}
               </label>
-              <select
-                id="footer-language"
-                value={activeLanguage.code}
-                onChange={(event) => {
-                  const code = event.target.value;
-                  const nextLang = languages.find(
-                    (language) => language.code === code,
-                  )?.code;
+              <div className="relative">
+                <select
+                  id="footer-language"
+                  value={activeLanguage.code}
+                  onChange={(event) => {
+                    const code = event.target.value;
+                    const nextLang = languages.find(
+                      (language) => language.code === code,
+                    )?.code;
 
-                  if (!nextLang) {
-                    return;
-                  }
+                    if (!nextLang) {
+                      return;
+                    }
 
-                  const localizedPathname = toLocalizedPathname(
-                    window.location.pathname,
-                    nextLang,
-                  );
-                  const nextSearchParams = new URLSearchParams(
-                    window.location.search,
-                  );
-                  nextSearchParams.delete("market");
-                  const nextSearch = nextSearchParams.toString();
-                  const nextUrl =
-                    localizedPathname +
-                    (nextSearch ? `?${nextSearch}` : "") +
-                    window.location.hash;
+                    const localizedPathname = toLocalizedPathname(
+                      window.location.pathname,
+                      nextLang,
+                    );
+                    const nextSearchParams = new URLSearchParams(
+                      window.location.search,
+                    );
+                    nextSearchParams.delete("market");
+                    const nextSearch = nextSearchParams.toString();
+                    const nextUrl =
+                      localizedPathname +
+                      (nextSearch ? `?${nextSearch}` : "") +
+                      window.location.hash;
 
-                  window.location.assign(nextUrl);
-                }}
-                className="h-9 rounded-md border border-input bg-background px-3 py-1.5 text-sm text-foreground"
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.name}
-                  </option>
-                ))}
-              </select>
+                    window.location.assign(nextUrl);
+                  }}
+                  className="h-10 cursor-pointer appearance-none rounded-md border border-input bg-background pl-3 pr-9 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {languages.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                </select>
+                {/* The native arrow is drawn flush with the edge, so the select draws its own at the text's inset */}
+                <svg
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
