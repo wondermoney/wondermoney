@@ -1,0 +1,94 @@
+---
+// The parts of one side of a formula (GuideFormula.astro); draws fractions, groups, calls and
+// sums by calling itself for their parts. A group is drawn in parentheses, its exponent raised
+// after them; screen readers hear "(a + b) ^ n". The parts of a numerator, a denominator, a
+// call's argument or a sum's body sit in a row with the expression's gaps.
+import type { GuideFormulaPart } from "./guideBlocks";
+
+interface Props {
+  parts: GuideFormulaPart[];
+}
+
+const { parts } = Astro.props;
+const row = "inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1";
+---
+
+{
+  parts.map((part) => {
+    if (part.kind === "variable") {
+      return part.href ? (
+        <a href={part.href} class="guide-formula__variable">
+          {part.label}
+        </a>
+      ) : (
+        <span class="guide-formula__variable">{part.label}</span>
+      );
+    }
+    if (part.kind === "number") return <span class="font-mono text-foreground">{part.value}</span>;
+    if (part.kind === "operator") return <span class="guide-formula__operator">{part.symbol}</span>;
+    if (part.kind === "group") {
+      // Parentheses around a fraction grow to its height.
+      const paren = part.parts.some((inner) => inner.kind === "fraction") ? "text-[2.25em]" : "text-[1.25em]";
+      return (
+        <span class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+          <span class="inline-flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            <span class:list={["-mr-1.5 font-extralight leading-none text-muted-foreground", paren]}>(</span>
+            <Astro.self parts={part.parts} />
+            <span class:list={["-ml-1.5 font-extralight leading-none text-muted-foreground", paren]}>)</span>
+          </span>
+          {part.exponent && (
+            <span class="-ml-1.5 inline-flex flex-wrap items-center gap-x-1.5 self-start text-[0.8em] leading-tight">
+              <span class="sr-only"> ^ </span>
+              <Astro.self parts={part.exponent} />
+            </span>
+          )}
+        </span>
+      );
+    }
+    if (part.kind === "call") {
+      return (
+        <span class="inline-flex flex-wrap items-center">
+          <span class="text-foreground">{part.name}</span>
+          <span class="guide-formula__operator">(</span>
+          <span class={row}>
+            {part.args.map((arg, index) => (
+              <>
+                {index > 0 && <span class="guide-formula__operator -ml-1.5">;</span>}
+                <Astro.self parts={arg} />
+              </>
+            ))}
+          </span>
+          <span class="guide-formula__operator">)</span>
+        </span>
+      );
+    }
+    if (part.kind === "sum") {
+      return (
+        <span class={row}>
+          <span class="inline-flex flex-col items-center leading-none">
+            <span class={`${row} text-[0.75em]`}>
+              <Astro.self parts={part.to} />
+            </span>
+            <span class="text-[1.6em] leading-tight text-foreground" aria-hidden="true">Σ</span>
+            <span class={`${row} text-[0.75em]`}>
+              <Astro.self parts={part.from} />
+            </span>
+          </span>
+          <span class="sr-only"> Σ </span>
+          <Astro.self parts={part.body} />
+        </span>
+      );
+    }
+    return (
+      <span class="guide-formula__fraction">
+        <span class={`guide-formula__numerator ${row}`}>
+          <Astro.self parts={part.numerator} />
+        </span>
+        <span class="sr-only"> ÷ </span>
+        <span class={`guide-formula__denominator ${row}`}>
+          <Astro.self parts={part.denominator} />
+        </span>
+      </span>
+    );
+  })
+}

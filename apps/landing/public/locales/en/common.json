@@ -375,8 +375,31 @@
     "features": "Features",
     "about": "About",
     "tools": "Tools",
+    "comparators": "Compare",
     "toolsMenu": {
-      "seeAll": "See all tools"
+      "seeAll": "See all tools",
+      "subgroups": {
+        "planAndSave": "Plan and save",
+        "salaryAndBenefits": "Salary and benefits",
+        "pricesAndInflation": "Prices and inflation",
+        "homeLoan": "Home loans",
+        "buyingAndTaxes": "Buying and property taxes",
+        "carAndPersonalLoans": "Car and personal loans",
+        "investing": "Investing",
+        "retirement": "Retirement",
+        "depositsAndCertificates": "Deposits and savings certificates"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Offers from banks, brokers, insurers and energy suppliers in Portugal, side by side.",
+      "items": {
+        "electricityTariffComparison": "Every household offer, ranked by what it would cost you a year",
+        "freeBankAccounts": "Free current accounts and the conditions of each",
+        "termDepositOffers": "Term deposit offers by term and amount, with interest after tax",
+        "remuneratedAccounts": "Remunerated and savings accounts, with net interest after IRS",
+        "brokerFees": "Custody, trading and currency fees at brokers available in Portugal",
+        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns"
+      }
     },
     "learn": "Learn",
     "glossary": "Glossary",
@@ -409,6 +432,22 @@
         "name": "Privacy",
         "description": "Bank connections use read-only Open Banking through Enable Banking. WonderMoney cannot initiate transfers."
       },
+      "netWorth": {
+        "name": "Net worth",
+        "description": "Accounts, investments and debts added up into one number"
+      },
+      "financialMarkets": {
+        "name": "Financial markets",
+        "description": "Stocks, ETFs and watchlists with live data, beside your accounts"
+      },
+      "goals": {
+        "name": "Goals",
+        "description": "Set savings targets and track your progress toward them"
+      },
+      "credits": {
+        "name": "Loans",
+        "description": "Your total debt and every payment, with a plan to pay it off"
+      },
       "learn": {
         "name": "Learn",
         "description": "Guides and articles on personal finance"
@@ -416,6 +455,30 @@
       "glossary": {
         "name": "Glossary",
         "description": "Plain-language definitions for financial terms"
+      },
+      "household": {
+        "name": "Household",
+        "description": "Share finances with the people you live with, and keep private accounts private"
+      },
+      "imports": {
+        "name": "Import",
+        "description": "Bring in CSV, Excel, OFX, QIF and CAMT.053 statements, or your YNAB history"
+      },
+      "recurring": {
+        "name": "Bills and subscriptions",
+        "description": "Recurring payments found for you, on a calendar and in a 30-day forecast"
+      },
+      "assistant": {
+        "name": "AI assistant",
+        "description": "Ask about your money in plain words: it proposes, you decide"
+      },
+      "multiCurrency": {
+        "name": "Multi-currency",
+        "description": "Accounts in any currency, totals in yours at the ECB's daily rates"
+      },
+      "selfHosting": {
+        "name": "Self-hosting and API",
+        "description": "Run WonderMoney on your own server, and connect scripts through the API"
       }
     },
     "faq": "FAQ"
@@ -456,7 +519,14 @@
         "exampleBudget": "A {{amount}} budget in {{from}} needs {{equivalent}} in {{to}} to buy the same basket. Average prices changed by {{inflation}}.",
         "exampleInvestment": "If an investment rose from {{amount}} in {{from}} to {{finalValue}} in {{to}}, the final balance would be worth {{realValue}} in {{from}} euros.",
         "methodTitle": "How the inflation adjustment works",
-        "method": "We use the annual average of Portugal’s all-items consumer price index (CPI), with {{baseYear}} as the base year. Each year represents average prices from January to December. Divide the comparison-year CPI by the starting-year CPI, then multiply the starting amount by that ratio. Divide the final balance by the same ratio to express it in starting-year euros.",
+        "method": "We use the annual average of Portugal’s all-items consumer price index (CPI), with {{baseYear}} as the base year. Each year represents average prices from January to December.",
+        "methodFormulasLabel": "Formulas",
+        "formulaAmount": "Starting amount",
+        "formulaEquivalent": "Equivalent amount",
+        "formulaFinal": "Final balance",
+        "formulaReal": "Balance in starting-year euros",
+        "formulaCpiStart": "Starting-year CPI",
+        "formulaCpiComparison": "Comparison-year CPI",
         "limitations": "Your own spending can differ from the national basket. The investment comparison assumes a single starting and final balance with zero contributions or withdrawals. It uses the nominal balance you enter, so fees and taxes are reflected only if they are already included. Enter euro amounts throughout, converting any historical escudo figures first.",
         "coverage": "Coverage is {{first}}–{{last}}. The series includes complete years only.",
         "retrieved": "Data retrieved on {{date}}.",
@@ -534,7 +604,18 @@
         "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)",
+        "terms": {
+          "tax": "Annual IMI",
+          "family": "IMI Familiar",
+          "minimum": "Minimum amount",
+          "payment": "Instalments",
+          "budget": "Monthly provision",
+          "rate": "Municipal rate",
+          "scope": "Scope",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
@@ -612,13 +693,30 @@
         "exampleTarget": "At a {{rate}} withdrawal rate, your FIRE number is {{spending}} ÷ {{rate}} = {{target}}, so today's {{assets}} is {{progress}} of the way there.",
         "exampleTime": "Growing month by month with the contributions added, the investments pass {{target}} after {{time}}. Spend {{cut}} less, {{cutSpending}} a year, and the target falls to {{cutTarget}}, reached after {{cutTime}}. The calculator above starts from these figures, so you can replace them with yours.",
         "methodHeading": "Method",
-        "methodFormula": "FIRE number = annual spending ÷ withdrawal rate",
-        "methodMultiple": "At 4% the target is 25 times your annual spending; at 3% it is about 33 times. A lower rate gives a larger target and more room for bad years.",
-        "methodGrowth": "Each month your investments grow at the monthly rate that compounds to the annual return you enter, then that month's contribution is added. The time shown is the first month the total reaches your FIRE number.",
-        "methodRealMoney": "The return is real, after inflation, so every figure is in today's money. Your spending and contributions are assumed to rise with prices, which is why they stay the same in the calculation.",
-        "methodHorizon": "The projection stops after {{years}} years. If contributions and growth cannot reach the target, for example with no contribution and no return, the calculator says so instead of giving a date.",
-        "methodLeftOut": "Not included: taxes on gains and withdrawals, fund and platform fees, and sequence risk, the danger of poor returns in the first years you live off your investments. A withdrawal rate is a rule of thumb drawn from past market returns, not a guarantee.",
-        "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved."
+        "methodMultipleBody": "At 4% the target is 25 times your annual spending; at 3% it is about 33 times. A lower rate gives a larger target and more room for bad years.",
+        "methodGrowthBody": "Each month your investments grow at the monthly rate that compounds to the annual return you enter, then that month's contribution is added. The time shown is the first month the total reaches your FIRE number.",
+        "methodRealMoneyBody": "The return is real, after inflation, so every figure is in today's money. Your spending and contributions are assumed to rise with prices, which is why they stay the same in the calculation.",
+        "methodHorizonBody": "The projection stops after {{years}} years. If contributions and growth cannot reach the target, for example with no contribution and no return, the calculator says so instead of giving a date.",
+        "methodLeftOutBody": "Taxes on gains and withdrawals, fund and platform fees, and sequence risk, the danger of poor returns in the first years you live off your investments. A withdrawal rate is a rule of thumb drawn from past market returns, not a guarantee.",
+        "methodPrivacyBody": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
+        "methodMultipleTerm": "Withdrawal rate",
+        "methodGrowthTerm": "Monthly growth",
+        "methodRealMoneyTerm": "Today's money",
+        "methodHorizonTerm": "Horizon",
+        "methodLeftOutTerm": "Not included",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "fireNumber": "FIRE number",
+          "annualSpending": "annual spending",
+          "withdrawalRate": "withdrawal rate",
+          "monthlyRate": "Monthly rate",
+          "monthlyRateLower": "monthly rate",
+          "realReturn": "real annual return",
+          "assetsEnd": "Investments at the end of the month",
+          "assetsStart": "investments at the start of the month",
+          "contribution": "monthly contribution"
+        }
       }
     },
     "compoundInterest": {
@@ -693,13 +791,11 @@
         "exampleStep3": "In today's money the final value is {{realFinal}}: what you paid in is worth {{realContributed}} and the growth after inflation is {{realGrowth}}.",
         "exampleComparison": "Raising the contribution to {{comparisonMonthly}} a month adds {{extraContributed}} paid in over the period and {{extraFinal}} to the final value, which reaches {{comparisonFinal}}. In today's money the difference is {{extraReal}}.",
         "methodHeading": "How the calculator works",
-        "methodFormula": "Each month: balance = balance × (1 + annual return ÷ 12) + monthly contribution",
-        "methodRealFormula": "Value in today's money = value ÷ (1 + annual inflation) ^ years",
-        "methodMonthly": "The annual return is split into 12 equal monthly rates. Each month the balance grows by that rate, then the contribution is added at the end of the month. A {{rate}} return compounded monthly gives {{effectiveRate}} over a full year.",
-        "methodInflation": "Inflation is converted to an equivalent monthly rate that compounds to the annual rate. The final value is divided by the inflation built up over the whole period, and each contribution by the inflation built up until the month it is paid, so the amount paid in is shown in today's money too.",
-        "methodRounding": "Growth is rounded to the cent every month. Totals are shown in whole euros, and growth is always the final value minus what was paid in, so the figures add up.",
-        "methodRanges": "Amounts go from 0 to {{maxAmount}}, return and inflation from 0% to {{maxRate}}%, and the period from 0 to {{maxYears}} whole years. Values outside these ranges are adjusted, and the calculator tells you when that happens.",
-        "methodPrivacy": "The calculation runs in your browser. The amounts you enter are not sent anywhere.",
+        "methodMonthlyBody": "The annual return is split into 12 equal monthly rates. Each month the balance grows by that rate, then the contribution is added at the end of the month. A {{rate}} return compounded monthly gives {{effectiveRate}} over a full year.",
+        "methodInflationBody": "Inflation is converted to an equivalent monthly rate that compounds to the annual rate. The final value is divided by the inflation built up over the whole period, and each contribution by the inflation built up until the month it is paid, so the amount paid in is shown in today's money too.",
+        "methodRoundingBody": "Growth is rounded to the cent every month. Totals are shown in whole euros, and growth is always the final value minus what was paid in, so the figures add up.",
+        "methodRangesBody": "Amounts go from 0 to {{maxAmount}}, return and inflation from 0% to {{maxRate}}%, and the period from 0 to {{maxYears}} whole years. Values outside these ranges are adjusted, and the calculator tells you when that happens.",
+        "methodPrivacyBody": "The calculation runs in your browser. The amounts you enter are not sent anywhere.",
         "assumptionsHeading": "Assumptions",
         "assumption1": "The return is the same every year.",
         "assumption2": "Contributions go in at the end of each month and stay the same throughout.",
@@ -708,7 +804,21 @@
         "assumptionsNote": "Real investments move up and down, and taxes and fees lower what you keep. Treat the result as a projection to compare options, not a forecast.",
         "rateHeading": "Which return to use",
         "rateBody1": "Use the return you expect after costs and before inflation. A savings account or government bonds return less than a diversified stock fund, which can grow more over long periods but also loses value in some years.",
-        "rateBody2": "If you are unsure, try a cautious rate and a more optimistic one and compare the results. The gap between them shows how much of the outcome depends on the rate, which you do not control, and how much on the contribution and the period, which you do."
+        "rateBody2": "If you are unsure, try a cautious rate and a more optimistic one and compare the results. The gap between them shows how much of the outcome depends on the rate, which you do not control, and how much on the contribution and the period, which you do.",
+        "methodFormulasLabel": "Formulas",
+        "formulaBalanceEnd": "Balance at the end of the month",
+        "formulaBalanceStart": "balance at the start of the month",
+        "formulaAnnualReturn": "annual return",
+        "formulaContribution": "monthly contribution",
+        "formulaRealValue": "Value in today's money",
+        "formulaValue": "value",
+        "formulaInflation": "annual inflation",
+        "formulaYears": "years",
+        "methodMonthlyTerm": "Monthly compounding",
+        "methodInflationTerm": "Inflation",
+        "methodRoundingTerm": "Rounding",
+        "methodRangesTerm": "Ranges",
+        "methodPrivacyTerm": "Privacy"
       }
     },
     "netWorth": {
@@ -879,7 +989,21 @@
         "assumptions": "This model assumes a constant return and fee, reinvested distributions and month-end contributions. It excludes taxes, brokerage fees, currency movements and inflation. Rates are illustrative assumptions for an index such as the S&P 500. Actual returns vary and can be negative. The fee impact includes the growth those fees could have earned.",
         "ctaHeadline": "Track your actual investment performance",
         "ctaDescription": "Use WonderMoney to follow your holdings and compare their actual performance with the scenario you modelled.",
-        "ctaText": "Track actual investments against the scenario"
+        "ctaText": "Track actual investments against the scenario",
+        "methodTerm": "Growth and fees",
+        "assumptionsTerm": "Assumptions",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "netFactor": "Net annual growth factor",
+          "annualReturn": "annual return",
+          "annualFee": "annual fund fee",
+          "monthlyFactor": "Monthly factor",
+          "monthlyFactorLower": "monthly factor",
+          "netFactorLower": "net annual growth factor",
+          "balanceEnd": "Balance at the end of the month",
+          "balanceStart": "balance at the start of the month",
+          "contribution": "monthly contribution"
+        }
       }
     },
     "emergencyFund": {
@@ -926,15 +1050,13 @@
       "whatBody2": "Size it on essential expenses only, the costs that keep going if your income stops: housing, food, utilities, transport, insurance and minimum loan payments. Leave out spending you could pause. Keep the money somewhere safe that you can withdraw from quickly and without a penalty, such as a savings account, rather than invested.",
       "exampleTitle": "A worked example",
       "exampleIntro": "Say your essential costs come to {{expenses}} a month, you already have {{savings}} set aside and you can save {{contribution}} a month. You choose {{months}} months of cover.",
-      "exampleStep1": "Target: {{expenses}} × {{months}} = {{target}}.",
-      "exampleStep2": "Still to save: {{target}} − {{savings}} = {{shortfall}}.",
-      "exampleStep3": "Time to reach it: {{shortfall}} ÷ {{contribution}} = {{monthsToTarget}} months.",
       "exampleOutro": "With 3 months of cover instead, the target is {{lowTarget}} and you reach it in {{lowMonths}} months. Start smaller if a long goal is putting you off, then raise the target once the first months are covered.",
       "methodTitle": "How the calculator works",
-      "method1": "Target = essential monthly expenses × months of cover.",
-      "method2": "Still to save = target − emergency savings today. When your savings are higher, the difference is shown as the amount above your target.",
-      "method3": "Time to reach it = still to save ÷ monthly contribution, rounded up to a whole month. The target month counts that many months from this one, with one contribution a month starting next month.",
-      "method4": "Your savings earn no interest here, and your expenses and contribution stay the same every month. Interest would get you there a little sooner and rising prices a little later, so check the numbers again once or twice a year.",
+      "methodFormulasLabel": "Formulas",
+      "methodShortfallBody": "When your savings are higher, the difference is shown as the amount above your target.",
+      "methodTimeBody": "Rounded up to a whole month. The target month counts that many months from this one, with one contribution a month starting next month.",
+      "methodInterestTerm": "No interest",
+      "methodInterestBody": "Your savings earn no interest here, and your expenses and contribution stay the same every month. Interest would get you there a little sooner and rising prices a little later, so check the numbers again once or twice a year.",
       "nextStepHeadline": "Create and track your emergency-fund goal",
       "nextStepDescription": "Save this target as a goal in WonderMoney and follow your progress against your real account balances.",
       "nextStepCta": "Create your goal"
@@ -1005,15 +1127,20 @@
         "exampleBody": "A couple brings home {{income}} a month between them. They pay {{home}} on their mortgage, {{car}} on a car loan and {{cards}} towards a credit card, {{total}} in all. Divide the payments by the income and multiply by 100: their ratio is {{ratio}}, in the caution band.",
         "exampleScenario": "Their car loan ends soon. Without it, payments fall to {{scenarioTotal}} and the ratio to {{scenarioRatio}}, back in the healthy band. The calculator above starts from this household and this change, so you can swap in your own figures.",
         "methodHeading": "Method",
-        "methodFormula": "Debt-to-income ratio = total monthly credit payments ÷ net monthly household income × 100",
-        "methodCounts": "Counted as debt: every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
-        "methodExcludes": "Not counted: rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
-        "methodIncome": "Income is net: what reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
         "methodRounding": "The ratio is rounded to one decimal place, and the band follows the rounded figure. Payments above income give a ratio over 100%.",
         "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved.",
         "nextHeading": "Planning a new loan?",
         "nextBody": "A mortgage or another loan adds a payment. Work out what a new mortgage would cost each month, then enter that payment in the scenario panel to see the new ratio.",
-        "nextLink": "Open the mortgage calculator"
+        "nextLink": "Open the mortgage calculator",
+        "methodCountsTerm": "Counted as debt",
+        "methodCountsBody": "Every instalment due each month on home loans, personal and car loans, credit cards, leasing and any other credit. For a card, use the amount you actually pay each month.",
+        "methodExcludesTerm": "Not counted",
+        "methodExcludesBody": "Rent to a landlord, bills, groceries, insurance and savings. They matter to the budget but are not repayments of borrowed money.",
+        "methodIncomeTerm": "Income is net",
+        "methodIncomeBody": "What reaches your account after tax and social contributions, for everyone in the household who shares the repayments. If income varies, use a monthly average over the past year.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "householdBudget": {
@@ -1094,21 +1221,35 @@
         "whatHeading": "What a household budget shows",
         "whatBody": "A household budget puts a month's income next to a month's spending. Grouping the spending into a few categories turns a long list of payments into a short answer: how much is left at the end of the month, and which parts of life take the biggest slice.",
         "readHeading": "How to read the result",
-        "readSurplus": "Surplus: income minus expenses, when it is positive. It is the money you can save, invest or set aside for bills that don't arrive every month.",
-        "readDeficit": "Deficit: expenses above income. A month like this is paid for from savings or with credit, so it is worth finding where to cut before it happens again.",
-        "readShares": "Share of income: each category as a percentage of total income. It makes budgets of different sizes comparable and shows which category to look at first.",
-        "readDiagram": "The flow diagram draws the same figures. Each band is as wide as its amount, from income on the left to the categories and the surplus on the right.",
+        "readSurplusTerm": "Surplus",
+        "readSurplusBody": "Income minus expenses, when it is positive. It is the money you can save, invest or set aside for bills that don't arrive every month.",
+        "readDeficitTerm": "Deficit",
+        "readDeficitBody": "Expenses above income. A month like this is paid for from savings or with credit, so it is worth finding where to cut before it happens again.",
+        "readSharesTerm": "Share of income",
+        "readSharesBody": "Each category as a percentage of total income. It makes budgets of different sizes comparable and shows which category to look at first.",
+        "readDiagramTerm": "Flow diagram",
+        "readDiagramBody": "Draws the same figures. Each band is as wide as its amount, from income on the left to the categories and the surplus on the right.",
         "exampleHeading": "Worked example",
         "exampleBody": "A household earns {{salary}} in salary and {{other}} from other sources, {{income}} a month. Its expenses add up to {{expenses}}, which leaves a surplus of {{surplus}}. Divide the surplus by the income and multiply by 100: the savings rate is {{savingsRate}}.",
+        "exampleFlowCaption": "This household's month, from income to surplus",
         "exampleShares": "Housing is the largest category at {{housing}}, or {{housingShare}} of income, followed by food at {{food}} ({{foodShare}}). Utilities combine two rows, energy and telecoms, for {{utilities}}. The calculator above starts from this household, so you can swap in your own figures.",
+        "exampleSharesCaption": "Each category and the surplus as a share of income",
         "methodHeading": "Method",
-        "methodFormula": "Surplus = total income − total expenses. Savings rate = surplus ÷ total income × 100. Category share = category total ÷ total income × 100.",
-        "methodIncome": "Income is net: what reaches the household's accounts after tax and social contributions. If it varies, use the monthly average of the past year.",
-        "methodExpenses": "Expenses are what leaves those accounts each month, loan repayments included. Money you move into savings is not an expense: it is part of the surplus.",
-        "methodIrregular": "For yearly or occasional costs, such as insurance, car servicing or holidays, divide the yearly amount by 12 and add it as a row.",
-        "methodShares": "Every share is worked out on income, not on spending. With a surplus, the categories and the surplus add up to 100%; with a deficit, the categories go above 100%. Without income there are no shares and no savings rate.",
-        "methodRounding": "Amounts are added to the cent and percentages are rounded to one decimal place. Empty and negative amounts count as zero.",
-        "methodPrivacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere.",
+        "methodFormulasLabel": "Formulas",
+        "formulaCategoryShare": "Category share",
+        "formulaCategoryTotal": "Category total",
+        "methodIncomeTerm": "Income",
+        "methodIncomeBody": "Income is net: what reaches the household's accounts after tax and social contributions. If it varies, use the monthly average of the past year.",
+        "methodExpensesTerm": "Expenses",
+        "methodExpensesBody": "Expenses are what leaves those accounts each month, loan repayments included. Money you move into savings is not an expense: it is part of the surplus.",
+        "methodIrregularTerm": "Irregular costs",
+        "methodIrregularBody": "For yearly or occasional costs, such as insurance, car servicing or holidays, divide the yearly amount by 12 and add it as a row.",
+        "methodSharesTerm": "Shares",
+        "methodSharesBody": "Every share is worked out on income, not on spending. With a surplus, the categories and the surplus add up to 100%; with a deficit, the categories go above 100%. Without income there are no shares and no savings rate.",
+        "methodRoundingTerm": "Rounding",
+        "methodRoundingBody": "Amounts are added to the cent and percentages are rounded to one decimal place. Empty and negative amounts count as zero.",
+        "methodPrivacyTerm": "Privacy",
+        "methodPrivacyBody": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere.",
         "nextHeading": "From a one-off budget to a monthly habit",
         "nextBody": "A budget is most useful when you compare it with what you actually spent. WonderMoney's envelope budgets apply the same idea month after month.",
         "nextLink": "See how budgeting works in WonderMoney"
@@ -1204,7 +1345,6 @@
         "method": {
           "title": "How the payment is calculated",
           "intro": "Most fixed-rate mortgages are repaid in level payments: the same amount every month, set so the balance reaches zero with the last one. The payment comes from the annuity formula:",
-          "legend": "Here M is the monthly payment, P is the amount borrowed, r is the annual rate divided by 12, and n is the number of monthly payments. At 0% interest there is nothing to discount, so the payment is simply P divided by n.",
           "schedule": "Each month, interest is charged on the balance still owed and the rest of the payment repays principal. As the balance falls, the interest part shrinks and the principal part grows, which is why the balance falls slowly at first and faster towards the end. Insurance and fees are added on top of the payment and never reduce the balance.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1215,7 +1355,24 @@
             "rounding": "Amounts are in euros. Each month's payment is worked out from the balance still owed and the months left, then rounded to the cent, so a payment can differ from the others by a cent and the last one clears the balance exactly. On a very long loan at a high rate, the first payments may repay less than a cent of the loan.",
             "lenderFigures": "Your lender's figures can differ slightly, because of how they count days, round amounts or set the payment date. The pre-contract information they give you is the figure to rely on."
           },
-          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}."
+          "limits": "The calculator accepts loans from {{minAmount}} to {{maxAmount}}, terms up to {{maxYears}} years and rates up to {{maxRate}}.",
+          "formulasLabel": "Formulas",
+          "zeroRate": "At 0% interest there is nothing to discount, so the payment is simply the loan amount divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "monthly": "Monthly payments",
+            "nominalRate": "Nominal rate, not the APR",
+            "flatFees": "Insurance and fees",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits"
+          }
+        },
+        "labels": {
+          "firstInterest": "Interest in the first payment",
+          "firstPrincipal": "Principal in the first payment",
+          "monthlyRate": "Monthly rate",
+          "payments": "Number of payments"
         }
       },
       "cta": {
@@ -1338,11 +1495,26 @@
         "before": {
           "title": "Before you repay",
           "items": {
-            "fee": "Check the fee. A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving.",
-            "rate": "Variable and mixed rates are out of scope: the figures assume the rate you enter stays fixed for the rest of the loan.",
-            "reserves": "Keep a cash cushion. Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment.",
-            "otherDebts": "Repay the most expensive debt first. If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage.",
-            "lender": "Ask your lender how it applies the repayment. Some lower the payment by default, others shorten the term, and many let you choose."
+            "fee": {
+              "term": "Check the fee",
+              "body": "A lender may charge a percentage of the amount you repay early, and the rules and legal caps differ by country and by type of loan. Enter it in the calculator to see the net saving."
+            },
+            "rate": {
+              "term": "Variable and mixed rates are out of scope",
+              "body": "The figures assume the rate you enter stays fixed for the rest of the loan."
+            },
+            "reserves": {
+              "term": "Keep a cash cushion",
+              "body": "Money paid to the lender is hard to get back, so make sure your emergency fund is still there after the repayment."
+            },
+            "otherDebts": {
+              "term": "Repay the most expensive debt first",
+              "body": "If you have a credit card or a personal loan at a higher rate, repaying it usually saves more than repaying a cheaper mortgage."
+            },
+            "lender": {
+              "term": "Ask your lender how it applies the repayment",
+              "body": "Some lower the payment by default, others shorten the term, and many let you choose."
+            }
           }
         },
         "example": {
@@ -1355,9 +1527,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator first works out the loan as it stands, with the same fixed-rate engine as the mortgage calculator. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments left. At 0% there is no interest, so the payment is simply P divided by n.",
-          "lowerPayment": "Keep the term: the balance left after the repayment goes back into the formula with the same n, which gives the new, lower payment.",
-          "shorterTerm": "Keep the payment: you go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
           "fee": "The fee is the percentage you enter, applied to the amount repaid. Interest saved is the interest left on the loan as it is minus the interest in each outcome, and the net saving is that minus the fee. A repayment larger than the balance clears the loan, and only the balance counts towards the fee.",
           "assumptionsTitle": "Assumptions",
           "assumptions": {
@@ -1368,7 +1537,23 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly.",
             "lenderFigures": "Your lender's figures can differ slightly because of how it counts days and rounds. Ask for its own simulation before you repay."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, up to {{maxYears}} years left, rates up to {{maxRate}} and fees up to {{maxFee}} of the amount repaid.",
+          "lowerPaymentTerm": "Keep the term",
+          "lowerPaymentBody": "The balance left after the repayment goes back into the formula with the same number of payments, which gives the new, lower payment.",
+          "shorterTermTerm": "Keep the payment",
+          "shorterTermBody": "You go on paying what the original schedule asks for each month until the smaller balance is gone. The final payment covers only what is left, so it is usually smaller.",
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "terms": {
+            "fixedRate": "Fixed rate",
+            "timing": "Timing",
+            "oneOff": "One repayment",
+            "costs": "Costs",
+            "rounding": "Rounding",
+            "lenderFigures": "Your lender's figures",
+            "limits": "Limits",
+            "feeNote": "Fee and net saving"
+          },
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1543,10 +1728,22 @@
           "title": "What to compare before you switch",
           "intro": "Moving your mortgage to another lender, or onto new terms with your own, can lower what you pay. A lower rate is only part of the picture, so compare the whole offer:",
           "items": {
-            "rate": "The rate. A lower fixed rate cuts the interest charged on what you owe every month.",
-            "monthlyCosts": "The monthly extras. Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer.",
-            "term": "The term. A new loan over more years lowers the payment, but you pay interest for longer.",
-            "oneOff": "The one-off costs. Leaving one loan and taking out another has fees, and they come out of your savings."
+            "rate": {
+              "term": "The rate",
+              "body": "A lower fixed rate cuts the interest charged on what you owe every month."
+            },
+            "monthlyCosts": {
+              "term": "The monthly extras",
+              "body": "Lenders often ask you to take their life or home insurance, or to open an account with fees. Add them to the payment, or a cheaper rate can turn out dearer."
+            },
+            "term": {
+              "term": "The term",
+              "body": "A new loan over more years lowers the payment, but you pay interest for longer."
+            },
+            "oneOff": {
+              "term": "The one-off costs",
+              "body": "Leaving one loan and taking out another has fees, and they come out of your savings."
+            }
           },
           "outro": "The calculator puts these together: the payment with its extras, the total each loan still costs and the month the switching costs are paid back."
         },
@@ -1571,7 +1768,6 @@
         "method": {
           "title": "How it is calculated",
           "intro": "The calculator works out both loans with the same fixed-rate engine as the mortgage calculator, on the balance you still owe. Each month, interest is charged on the balance still owed and the rest of the payment repays the loan. The level payment comes from the annuity formula:",
-          "legend": "M is the monthly payment, P the balance, r the annual rate divided by 12 and n the number of payments. At 0% there is no interest, so the payment is simply P divided by n. Each month's insurance and fees are added on top.",
           "saving": "A month's saving is what the current loan would cost that month minus what the new one costs. Once a loan is paid off it costs nothing, so with a longer new term the months after your current loan would have ended count as a cost. The total cost of each option is its payments, insurance and fees, plus the switching costs for the new loan. The net saving is the difference.",
           "breakEven": "The break-even month is the first month in which the savings so far are at least the switching costs. If that never happens before both loans end, the switch does not pay for itself.",
           "longerTerm": "When the new term is longer than the time left, the calculator also works out the offer over the time left, so you can see how much of the lower payment comes from the rate and how much from paying for longer.",
@@ -1585,7 +1781,22 @@
             "rounding": "Amounts are in euros. Each month's interest and payment are rounded to the cent, so every total on the page adds up exactly. The payment shown is the first one; later ones stay within a cent of it.",
             "lenderFigures": "Lenders count days and round in their own ways, so their figures can differ slightly. Ask each one for its official offer before you decide."
           },
-          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance."
+          "limits": "The calculator accepts balances from {{minBalance}} to {{maxBalance}}, terms up to {{maxYears}} years, rates up to {{maxRate}} and exit fees up to {{maxExitFee}} of the balance.",
+          "terms": {
+            "saving": "Saving and total cost",
+            "breakEven": "Break-even month",
+            "longerTerm": "A longer term",
+            "fixedRate": "Fixed rates",
+            "sameBalance": "The same balance",
+            "timing": "Timing",
+            "fees": "Insurance and fees",
+            "noDiscounting": "No discounting",
+            "rounding": "Rounding",
+            "lenderFigures": "Lenders' figures",
+            "limits": "Limits"
+          },
+          "zeroRate": "At 0% there is no interest, so the payment is simply the balance divided by the number of payments.",
+          "formulasLabel": "Formulas"
         },
         "related": {
           "title": "Related calculators",
@@ -1595,6 +1806,13 @@
           "earlyRepaymentBody": "What a lump sum would save on your current loan instead of switching it.",
           "debtToIncomeLink": "Debt-to-income ratio calculator",
           "debtToIncomeBody": "The share of your income that goes on debt payments, now and with the new payment."
+        },
+        "labels": {
+          "monthlySaving": "Monthly saving",
+          "currentMonthTotal": "Current loan's cost that month",
+          "offerMonthTotal": "New loan's cost that month",
+          "currentTotalCost": "Total cost of the current loan",
+          "offerTotalCost": "Total cost of the new loan"
         }
       },
       "cta": {
@@ -1717,12 +1935,16 @@
         "exampleStep3": "The smallest monthly contribution that gets there is {{contribution}}. Over {{months}} months you pay in {{contributions}} and growth adds {{growth}}, for {{final}} at the end.",
         "exampleOutro": "Turn it around: put aside a round {{rounded}} a month instead and you reach the goal after {{timeMonths}} months, and by the end of the {{years}} years you have {{finalAmount}}.",
         "methodTitle": "How the calculator works",
-        "methodIntro": "Your balance grows once a month and your contribution is added at the end of each month. After n months it comes to:",
-        "methodLegend": "S is what you have already saved, C the monthly contribution, r the monthly rate and n the number of months. With a 0% return there is nothing to divide by r, and the balance is simply S + C × n.",
-        "methodRate": "The monthly rate r is the one that compounds to your annual return over twelve months: (1 + annual return)^(1/12) − 1. Dividing the annual return by 12 would overstate it slightly.",
-        "methodOrder": "Each month's growth is rounded to the cent before the contribution is added, so the year-by-year schedule adds up to the totals exactly.",
-        "methodContribution": "The contribution needed comes from solving the formula for C. It is rounded up to the cent and checked month by month, so it really does reach the goal.",
-        "methodTime": "The time needed is the first whole month in which the balance reaches the goal, searched up to {{maxYears}} years.",
+        "methodIntro": "Your balance grows once a month and your contribution is added at the end of each month. At the end of the period it comes to:",
+        "methodFormulasLabel": "Formulas",
+        "formulaMonthlyRate": "Monthly rate",
+        "methodRateBody": "The rate that compounds to your annual return over twelve months. Dividing the annual return by 12 would overstate it slightly.",
+        "methodZeroTerm": "A 0% return",
+        "methodZeroBody": "There is nothing to divide by the monthly rate, and the balance is simply what you have already saved plus the monthly contribution × the number of months.",
+        "methodOrderTerm": "Rounding",
+        "methodOrderBody": "Each month's growth is rounded to the cent before the contribution is added, so the year-by-year schedule adds up to the totals exactly.",
+        "methodContributionBody": "It comes from solving the formula for the monthly contribution. It is rounded up to the cent and checked month by month, so it really does reach the goal.",
+        "methodTimeBody": "The time needed is the first whole month in which the balance reaches the goal, searched up to {{maxYears}} years.",
         "assumptionsTitle": "Assumptions",
         "assumptionReturn": "The return is the same every year. Real returns vary, and investments can lose value.",
         "assumptionCosts": "No taxes, fees or other charges are taken from the growth.",
@@ -1864,16 +2086,12 @@
         "relatedDebtToIncome": "shows what share of your income your current payments take, with the same bands this tool uses.",
         "exampleTitle": "Worked example",
         "exampleIntro": "A couple brings home {{income}} a month and pays {{existing}} a month on a car loan. They have {{savings}} saved for a home, expect a fixed rate of {{rate}} over {{years}} years and plan for purchase costs of {{costsRate}} of the price. Their lender lends up to {{ltv}} of the price, and they allow {{share}} of their income for credit.",
-        "exampleStep1": "Monthly room: {{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
-        "exampleStep2": "Largest loan: a payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
-        "exampleStep3": "Cash: each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
         "exampleStep4": "The lower of the two is {{monthlyPrice}}, so the monthly budget sets the limit.",
         "exampleResult": "At {{price}} they would borrow {{loan}}, pay {{downPayment}} down and {{purchaseCosts}} in costs, using all of their {{savings}}. The mortgage calculator puts the payment at {{payment}} a month.",
         "exampleLift": "About {{extraIncome}} more net income a month would take them to {{liftPrice}}, where the savings limit takes over.",
         "exampleSavings": "With only {{lowSavings}} saved, the picture flips: the savings cover a price of {{lowSavingsPrice}}, with a loan of {{lowSavingsLoan}}, well within what their income could carry. Saving more, not earning more, is what would raise their limit. The calculator above starts from the first couple, so you can swap in your own figures.",
         "methodTitle": "Method",
         "methodIntro": "The calculation works out each limit on its own, then takes the lower price.",
-        "methodLegend": "I is net monthly income, d the share of it allowed for credit, E the existing payments and M the room for the new payment. r is the annual rate divided by 12, n the number of monthly payments and L the largest loan. S is the savings, c the purchase costs and v the loan-to-value, both as a share of the price. P₁ is the price the monthly budget allows and P₂ the one the savings allow.",
         "methodShare": "The starting share of {{share}} sits in the caution band of the debt-to-income calculator ({{caution}}% to {{high}}%). It is a rule of thumb, not a legal limit.",
         "methodCosts": "At the highest price every euro of savings goes into the purchase: the costs first, the rest as the down payment. The loan covers what is left, and never more than the loan-to-value allows.",
         "methodRounding": "Amounts are worked in cents. The loan is rounded down to the cent, so its first payment, worked out by the mortgage calculator, fits your room; later ones can differ by a cent. The price is exactly the loan plus the down payment, and the extra income or savings is rounded up to the euro.",
@@ -1885,11 +2103,33 @@
         "assumptionCostsShare": "Purchase costs are a flat share of the price. In practice taxes are often tiered and some fees are fixed amounts.",
         "lendersTitle": "What lenders check that this tool doesn't",
         "lendersIntro": "A lender's answer can be lower than this estimate, sometimes by a lot. Rules differ by lender and by country, and this calculator builds none of them in.",
-        "lenderStress": "Stress-tested rates: many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
-        "lenderIncome": "Income definitions: some count only part of bonuses, self-employed or rental income, or average it over several years.",
-        "lenderCountry": "Country limits: regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
-        "lenderProfile": "Your profile: your age at the end of the term, job security, credit history and the home itself all count.",
-        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you."
+        "lendersOutro": "Use the result to know roughly where you stand before you talk to a lender, then ask which limits apply to you.",
+        "exampleStep1Term": "Monthly room",
+        "exampleStep1Body": "{{share}} of {{income}} is {{allowed}}. Minus the {{existing}} car loan, {{room}} a month is left for the new loan.",
+        "exampleStep2Term": "Largest loan",
+        "exampleStep2Body": "A payment of {{room}} at {{rate}} over {{years}} years repays {{maxLoan}}. Add all of the savings, pay the purchase costs out of the total, and the monthly limit allows a price of {{monthlyPrice}}.",
+        "exampleStep3Term": "Cash",
+        "exampleStep3Body": "Each euro of the price needs {{deposit}} for the down payment and {{costsRate}} for the costs, {{cashShare}} in all. {{savings}} ÷ {{cashShare}} gives a price of {{cashPrice}}.",
+        "lenderStressTerm": "Stress-tested rates",
+        "lenderStressBody": "Many lenders check that you could still pay if the rate rose by a few points, above all on variable-rate loans.",
+        "lenderIncomeTerm": "Income definitions",
+        "lenderIncomeBody": "Some count only part of bonuses, self-employed or rental income, or average it over several years.",
+        "lenderCountryTerm": "Country limits",
+        "lenderCountryBody": "Regulators in many countries cap the loan-to-value, the share of income going to repayments, the loan relative to income or the term.",
+        "lenderProfileTerm": "Your profile",
+        "lenderProfileBody": "Your age at the end of the term, job security, credit history and the home itself all count.",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas",
+        "labels": {
+          "maxLoan": "Largest loan"
+        },
+        "methodShareTerm": "Share for credit",
+        "methodCostsTerm": "Where the savings go",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionSavingsTerm": "All of the savings",
+        "assumptionPaymentTerm": "What the payment leaves out",
+        "assumptionCostsShareTerm": "Purchase costs"
       }
     },
     "termDeposit": {
@@ -1978,11 +2218,16 @@
         "whatBody": "A term deposit locks an amount away with a bank for a set number of months at a fixed rate. What you earn depends on three things besides the rate: how long the money stays, whether the interest comes at the end or along the way, and how much tax is withheld from it. This calculator works through all three with the rate you enter, so you can compare offers on the same basis.",
         "readHeading": "How to read the result",
         "read": {
-          "gross": "Gross interest: everything the deposit earns before tax.",
-          "tax": "Tax withheld: the part of each interest payment kept back for tax at the rate you enter.",
-          "net": "Net interest: what reaches you, gross interest minus tax.",
-          "final": "Balance at maturity, or total received when interest is paid out: the amount deposited plus all the net interest.",
-          "yield": "Net annual yield: the net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
+          "grossTerm": "Gross interest",
+          "grossBody": "Everything the deposit earns before tax.",
+          "taxTerm": "Tax withheld",
+          "taxBody": "The part of each interest payment kept back for tax at the rate you enter.",
+          "netTerm": "Net interest",
+          "netBody": "What reaches you, gross interest minus tax.",
+          "finalTerm": "Balance at maturity, or total received when interest is paid out",
+          "finalBody": "The amount deposited plus all the net interest.",
+          "yieldTerm": "Net annual yield",
+          "yieldBody": "The net return expressed as a yearly rate, so deposits of different lengths and payment schedules can be compared side by side."
         },
         "exampleHeading": "Worked example",
         "exampleSetup": "Say you deposit {{amount}} for {{months}} months at a gross rate of {{rate}} a year, with the interest paid at maturity. The interest is simple: the amount times the rate times the share of a year the money stays.",
@@ -1990,15 +2235,21 @@
         "exampleTax": "Now suppose {{taxRate}} is withheld from the interest paid at maturity, a rate chosen only as an illustration, not taken from any country's rules: the calculator starts at 0% so you can enter your own. The bank keeps {{tax}}, you receive {{net}} and you end with {{taxedFinal}}, a net yield of {{taxedYield}} a year.",
         "methodHeading": "Method and assumptions",
         "methodIntro": "Interest is counted in whole months, without a day count. The rate you enter is a nominal annual rate: each period earns the rate times its months divided by 12.",
-        "methodFormula": "Interest for a period = balance × annual rate × months in the period ÷ 12. Net interest = interest − tax. Net annual yield = the yearly rate that turns the amount deposited into the net payments and the amount returned, each counted when it arrives. With all the interest at maturity, that is (balance at maturity ÷ amount deposited)^(12 ÷ term in months) − 1.",
         "method": {
-          "maturity": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
-          "periodic": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
-          "reinvest": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out leaves the deposit, so later interest is worked out on the amount deposited.",
-          "tax": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
-          "yield": "The net annual yield is the internal rate of return of the deposit: the yearly rate at which the amount you put in grows into everything you get back, counting each net payment in the month it is paid. Interest paid along the way therefore counts for more than the same interest at maturity. A deposit shorter than a year is assumed to be renewed on the same terms.",
-          "excluded": "Not included: early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
-          "privacy": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere."
+          "maturityBody": "Paid at maturity, interest is simple: one payment of the amount × rate × term in months ÷ 12.",
+          "periodicBody": "Paid monthly, quarterly or yearly, each payment comes at the end of its period. When the term is not a whole number of periods, the last period is shorter and its interest is paid pro rata at maturity. A term shorter than one period gets a single payment at maturity.",
+          "reinvestBody": "Interest added to the deposit is added after tax, so the deposit compounds at the payment frequency. Interest paid out leaves the deposit, so later interest is worked out on the amount deposited.",
+          "taxBody": "Tax is taken from each payment separately and rounded to the cent, as a bank withholds it. All amounts are worked in cents, so the payment rows add up to the totals.",
+          "yieldBody": "The net annual yield is the internal rate of return of the deposit: the yearly rate at which the amount you put in grows into everything you get back, counting each net payment in the month it is paid. Interest paid along the way therefore counts for more than the same interest at maturity. A deposit shorter than a year is assumed to be renewed on the same terms.",
+          "excludedTerm": "Not included",
+          "excludedBody": "Early withdrawal penalties, account fees, rate changes during the term, deposit guarantee limits and the effect of inflation.",
+          "privacyBody": "The calculation runs in your browser. The figures you enter stay on your device and are not saved or sent anywhere.",
+          "maturityTerm": "Paid at maturity",
+          "periodicTerm": "Periodic payments",
+          "reinvestTerm": "Interest added or paid out",
+          "taxTerm": "Tax",
+          "yieldTerm": "Net annual yield",
+          "privacyTerm": "Privacy"
         },
         "methodLimits": "Terms run from 1 to {{maxMonths}} months.",
         "nextHeading": "Related calculators",
@@ -2007,7 +2258,23 @@
         "nextEmergency": "A term deposit can hold savings you won't need soon, while your emergency fund stays within reach.",
         "nextEmergencyLink": "Work out your emergency fund",
         "nextSavingsGoal": "Saving up for the amount you will deposit, or planning what to do when it matures? The savings goal calculator works out the monthly amount or the time it takes.",
-        "nextSavingsGoalLink": "Open the savings goal calculator"
+        "nextSavingsGoalLink": "Open the savings goal calculator",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "interest": "Interest for a period",
+          "balance": "balance",
+          "annualRate": "annual rate",
+          "periodMonths": "months in the period",
+          "tax": "Tax",
+          "taxLower": "tax",
+          "taxRate": "tax rate",
+          "interestLower": "interest",
+          "netInterest": "Net interest",
+          "yield": "Net annual yield, with the interest at maturity",
+          "finalBalance": "balance at maturity",
+          "amount": "amount deposited",
+          "termMonths": "term in months"
+        }
       }
     },
     "buyVsRent": {
@@ -2113,10 +2380,22 @@
         "whatHeading": "What the comparison shows",
         "whatBody": "Buying swaps rent for mortgage payments, but it also ties up cash in the down payment and purchase costs and adds the costs of owning. Renting leaves that cash free to invest. The calculator follows both paths from the same starting cash and compares what each one leaves you with.",
         "read": {
-          "netWorth": "Net worth on each path: for buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments.",
-          "difference": "The difference: how far ahead one path is at the end of the period you chose.",
-          "breakEven": "The break-even year: the first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments.",
-          "chart": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          "netWorth": {
+            "term": "Net worth on each path",
+            "body": "For buying, what selling the home would leave after selling costs and repaying the loan, plus anything invested; for renting, the investments."
+          },
+          "difference": {
+            "term": "The difference",
+            "body": "How far ahead one path is at the end of the period you chose."
+          },
+          "breakEven": {
+            "term": "The break-even year",
+            "body": "The first year that ends with buying ahead. Buying starts behind whenever there are purchase or selling costs: the purchase costs are spent on day one, and selling straight away would cost the selling costs on top. Buying can also pull ahead and fall behind again, for example when the home's value grows more slowly than the renter's investments."
+          },
+          "chart": {
+            "term": "Chart and table",
+            "body": "The chart and the table show both paths every year, so you can see whether the gap is closing or widening."
+          }
         },
         "exampleHeading": "Worked example",
         "example": {
@@ -2136,10 +2415,7 @@
           "returns": "Investments grow each month at the monthly rate that compounds to the annual return over a year.",
           "netWorth": "At the end of each year the owner's net worth is the home's value less selling costs and the loan still owed, plus their investments. The renter's is their investments. The break-even year is the first year that ends with the owner ahead."
         },
-        "formulaOwner": "Buying = home value − selling costs − loan owed + investments",
-        "formulaRenter": "Renting = investments",
         "formulaReturn": "Monthly return",
-        "formulaLegend": "Here R is the annual investment return, so {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
         "leftOutHeading": "What it leaves out",
         "leftOut": {
           "gainsTax": "Tax on investment gains or on the profit from selling the home.",
@@ -2154,7 +2430,20 @@
         "relatedMortgage": "To see the loan on its own, with its schedule year by year, use the",
         "relatedMortgageLink": "mortgage calculator",
         "relatedNetWorth": "To add up the home, the loan and your savings as they stand today, use the",
-        "relatedNetWorthLink": "net worth calculator"
+        "relatedNetWorthLink": "net worth calculator",
+        "formulaExample": "A return of {{investmentReturn}} a year gives about {{monthlyReturn}} a month.",
+        "labels": {
+          "investments": "Investments"
+        },
+        "formulasLabel": "Formulas",
+        "methodTerms": {
+          "start": "Starting cash",
+          "loan": "The mortgage",
+          "monthly": "Each month",
+          "growth": "Growth and rent",
+          "returns": "Investment returns",
+          "netWorth": "Net worth and break-even"
+        }
       }
     },
     "rateRevision": {
@@ -2274,7 +2563,6 @@
         "exampleIncome": "On a net income of {{income}} a month, the payment takes {{currentShare}} of it today, {{newShare}} after the first rise and {{stressShare}} after the larger one, which the debt-to-income bands rate as “{{stressBand}}”.",
         "methodTitle": "How it is calculated",
         "methodIntro": "Each payment is the level payment that clears the balance over the months left, from the same fixed-rate engine as the mortgage calculator:",
-        "methodLegend": "i is the index and s the spread, both as yearly rates. r is the monthly rate, M the monthly payment, P the balance still owed and n the number of payments left. When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply P divided by n.",
         "methodItems": {
           "change": "The monthly change is the first payment at the new rate minus the first payment at today's rate, both on today's balance over the same months.",
           "year": "The yearly change compares the sum of the first 12 payments in each schedule, or all remaining payments if fewer are left. Payments are rounded individually, so the total can differ from the monthly change multiplied by the number of payments.",
@@ -2293,12 +2581,40 @@
         "contractTitle": "What your contract decides",
         "contractIntro": "How a real revision works depends on your contract and on the rules where you live. None of this is built into the calculator:",
         "contractItems": {
-          "resetDates": "Reset dates: how often the rate is revised, which day's index value counts and when the new payment starts.",
-          "capsFloors": "Caps and floors: some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%.",
-          "index": "The index: Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule.",
-          "mixed": "Mixed-rate loans: a fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          "resetDates": {
+            "term": "Reset dates",
+            "body": "How often the rate is revised, which day's index value counts and when the new payment starts."
+          },
+          "capsFloors": {
+            "term": "Caps and floors",
+            "body": "Some contracts limit how far the rate can rise or fall, or stop it going below a set level. The calculator only keeps the rate from going below 0%."
+          },
+          "index": {
+            "term": "The index",
+            "body": "Euribor, a central bank rate or a national reference rate, each with its own terms (for example 3, 6 or 12 months) and publication schedule."
+          },
+          "mixed": {
+            "term": "Mixed-rate loans",
+            "body": "A fixed period comes first and the variable rate after it. Enter the balance and the time left as they will be when the variable period starts."
+          }
         },
-        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's."
+        "contractOutro": "Your lender's own figures are the ones that count. Use this calculator to plan ahead of a revision, then check its figures against your lender's.",
+        "terms": {
+          "change": "Monthly change",
+          "year": "Yearly change",
+          "interest": "Change in interest",
+          "income": "Share of income",
+          "privacy": "Privacy",
+          "fromNextMonth": "From the next payment",
+          "sameTerm": "The same term",
+          "statement": "Today's payment",
+          "noFeed": "No index data",
+          "limits": "Limits",
+          "annualRate": "Annual rate",
+          "incomeShare": "Payment as a share of income"
+        },
+        "zeroRate": "When the index plus the spread is below 0%, the rate is taken as 0% and the payment is simply the balance divided by the number of payments.",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "carLoan": {
@@ -2361,7 +2677,16 @@
         "assumptionsTitle": "Assumptions",
         "assumptionLoan": "The estimate assumes a fixed-rate loan with monthly payments, no balloon payment and no lease. Enter the actual price and financing terms you were quoted for the new or used car. Enter zero for both price and deposit to estimate running costs for a car you already own.",
         "assumptionFees": "Upfront financing fees are paid at purchase with the deposit. Enter any financing-related insurance or fees only once. The calculator does not infer taxes or charges from your quote.",
-        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year."
+        "assumptionRunning": "The monthly budget covers the costs shown. It excludes depreciation, resale value, parking, tolls and unexpected repairs beyond your maintenance reserve. Annual bills can fall due in a single month even though the calculator spreads them across the year.",
+        "terms": {
+          "loan": "The loan payment",
+          "budget": "The monthly budget",
+          "apr": "The estimated APR",
+          "assumptionLoan": "Fixed-rate loan",
+          "assumptionFees": "Financing fees",
+          "assumptionRunning": "What the budget covers"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Budget for the full monthly cost of the car",
       "nextStepDescription": "Set money aside in WonderMoney for the payment, fuel and bills that come due during the year.",
@@ -2442,9 +2767,26 @@
         "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
         "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. The purchase stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit, so above it you pay 0.8% only on the excess. Mortgage stamp duty is still charged.",
         "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
-        "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
         "assumptionIslands": "For the Azores and Madeira the calculator uses the regional limits of tables IV to VI of Ofício Circulado 40129/2026, with the same rates as the mainland.",
-        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)"
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Stamp duty on the purchase",
+          "stampLoan": "Stamp duty on the mortgage"
+        },
+        "terms": {
+          "base": "Taxable value",
+          "imt": "IMT",
+          "stamp": "Stamp duty",
+          "rounding": "Rounding",
+          "scope": "Scope",
+          "young": "Young-buyer exemption",
+          "loan": "Mortgage",
+          "islands": "Azores and Madeira"
+        },
+        "formulasLabel": "Formulas",
+        "assumptionUnsupportedTerm": "Not supported",
+        "assumptionUnsupportedBody": "Non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT."
       },
       "nextStepHeadline": "Plan the cash you need to buy",
       "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
@@ -2538,7 +2880,28 @@
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
         "assumptionRate": "The rate is the one you enter. The guarantee does not change the interest rate.",
         "assumptionTaxes": "Taxes are for an own permanent home on mainland Portugal and assume you meet the IMT Jovem conditions in the with-exemption figures.",
-        "assumptionScope": "Educational only: not financial, tax or legal advice."
+        "assumptionScope": "Educational only: not financial, tax or legal advice.",
+        "labels": {
+          "cash": "Cash at signing",
+          "taxes": "IMT and stamp duty"
+        },
+        "terms": {
+          "payment": "Loan and payment",
+          "taxes": "Taxes",
+          "cash": "Cash at signing",
+          "guarantee": "The guarantee",
+          "banks": "The bank decides",
+          "rate": "Interest rate",
+          "assumptionTaxes": "Taxes covered",
+          "scope": "Scope",
+          "conditionAge": "Age",
+          "conditionHome": "Own permanent home",
+          "conditionProperty": "Other property",
+          "conditionPrice": "Price",
+          "conditionIncome": "Income",
+          "conditionDate": "Contract date"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Plan the deposit and the cost of living in your home",
       "nextStepDescription": "Set a deposit goal and budget the mortgage, taxes and running costs in WonderMoney.",
@@ -2638,15 +3001,29 @@
         "exampleOutro": "The calculator above starts from this loan without the fees, so you can enter your own offer.",
         "methodTitle": "How the calculator works it out",
         "methodIntro": "The monthly payment is the level payment that repays the amount over the term at the monthly rate, and the APR is the rate that balances what you receive against what you pay:",
-        "methodLegend": "M is the payment of principal and interest, P the amount borrowed, r the nominal annual rate divided by 12 and n the number of months. The monthly fees f are added to each payment.",
-        "methodApr": "The APR is the rate A that solves the second line: what you receive at the start, the amount P less the upfront fees F, equals each month's payment Mₖ plus the fees f, discounted by (1 + A) to the power of k ÷ 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
+        "methodApr": "The APR is the rate that solves the last line: what you receive at the start, the amount borrowed less the upfront fees, equals each month's payment plus the monthly fees, discounted by one plus the APR to the power of the month's number divided by 12, each month counting as a twelfth of a year. The calculator finds it by bisection.",
         "methodRounding": "Every figure is worked in whole cents. Each payment is worked out again from the balance still owed, so the payments stay within a cent of each other, the last one clears the balance exactly, and the schedule adds up to the totals.",
         "methodPrivacy": "The calculation runs in your browser. Nothing you enter is sent or stored.",
         "assumptionsTitle": "Assumptions",
         "assumptionFixedRate": "The rate is fixed for the whole term, and every payment is made on time.",
         "assumptionFees": "The upfront fees are paid, or taken off the amount, when the loan starts; the monthly fees are the same every month.",
         "assumptionOtherCosts": "Costs the calculator doesn't ask about, such as optional insurance, late-payment charges or an early repayment fee, are left out.",
-        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}."
+        "assumptionLimits": "Amounts from {{minAmount}} to {{maxAmount}}, terms from {{minMonths}} to {{maxMonths}} months and rates up to {{maxRate}}.",
+        "labels": {
+          "amountReceived": "Amount received",
+          "month": "Month",
+          "apr": "APR",
+          "aprNoFees": "APR without fees",
+          "aprFees": "APR with fees"
+        },
+        "methodAprTerm": "APR",
+        "assumptionFixedRateTerm": "Fixed rate",
+        "assumptionFeesTerm": "Fees",
+        "assumptionOtherCostsTerm": "Other costs",
+        "assumptionLimitsTerm": "Limits",
+        "methodRoundingTerm": "Rounding",
+        "methodPrivacyTerm": "Privacy",
+        "methodFormulasLabel": "Formulas"
       }
     },
     "savingsCertificates": {
@@ -2705,14 +3082,31 @@
         "exampleTitle": "Worked example",
         "exampleText": "Subscribe {{amount}} and hold for {{years}} years with a {{baseRate}} base rate. The certificates earn {{grossInterest}} in gross interest, of which {{irs}} goes to IRS, leaving {{netInterest}} net. The balance reaches {{finalValue}}, a net yield of {{netYield}} a year.",
         "methodTitle": "How the estimate works",
-        "methodQuarter": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
-        "methodTax": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
-        "methodYield": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
+        "methodQuarterBody": "Each quarter earns a quarter of the annual rate (base rate plus bonus) on the current balance. Amounts are rounded to the cent each quarter.",
+        "methodTaxBody": "{{irsRate}} of each quarter’s interest is withheld, and the net interest is added to the balance, so later quarters earn interest on it.",
+        "methodYieldBody": "The net annual yield is the yearly compound growth from the amount subscribed to the final balance. The gross figures show interest before IRS.",
         "assumptionsTitle": "Assumptions",
         "assumptionBase": "The base rate is the one you enter and stays fixed for the whole stay. It starts at the rate the IGCP set for {{referenceMonth}} ({{referenceRateNote}}), which it sets again every month, so actual interest will differ. Check the current rate on the IGCP website.",
         "assumptionRules": "The IRS rate is the general rate for this kind of income. Your own tax situation, and rule changes after {{rulesDate}}, are not modelled.",
         "assumptionScope": "This is general information, not a recommendation to buy or avoid any product, and it does not compare certificates with other savings.",
-        "referenceRateAtCeiling": "{{rate}}, the ceiling"
+        "referenceRateAtCeiling": "{{rate}}, the ceiling",
+        "methodQuarterTerm": "Quarterly interest",
+        "methodTaxTerm": "IRS",
+        "methodYieldTerm": "Net annual yield",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "quarterInterest": "Interest for the quarter",
+          "balance": "balance",
+          "baseRate": "base rate",
+          "bonus": "permanence bonus",
+          "irs": "IRS",
+          "interestLower": "interest",
+          "newBalance": "Balance at the end of the quarter",
+          "yield": "Net annual yield",
+          "finalValue": "final balance",
+          "amount": "amount subscribed",
+          "years": "years"
+        }
       },
       "nextStepHeadline": "See your certificates next to the rest of your savings",
       "nextStepDescription": "Add them in WonderMoney to follow what you have saved in one place.",
@@ -2831,12 +3225,25 @@
           "title": "How it is calculated",
           "intro": "The rates are published statistics. WonderMoney adds only these calculations:",
           "steps": {
-            "a": "Yearly rate: the plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
-            "b": "Inflation: the change in the annual average Portuguese consumer price index from the previous year to the year.",
-            "c": "Real rate: (1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
-            "d": "Calculator: simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
+            "aTerm": "Yearly rate",
+            "aBody": "The plain average of the twelve monthly averages of the year. It does not weight months by how much was deposited.",
+            "bTerm": "Inflation",
+            "bBody": "The change in the annual average Portuguese consumer price index from the previous year to the year.",
+            "cTerm": "Real rate",
+            "cBody": "(1 + rate) ÷ (1 + inflation) − 1. For the after-tax figure, 28% IRS is taken off the rate first.",
+            "dTerm": "Calculator",
+            "dBody": "Simple interest for the term in whole months, paid at maturity, with 28% withheld, at the average rate of the maturity group. What inflation takes is the amount × ((1 + inflation)^(months ÷ 12) − 1)."
           },
-          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages."
+          "realRate": "Dividing rather than subtracting matters when rates are high: it measures how much more the money can buy, not just the gap between two percentages.",
+          "formulasLabel": "Formulas",
+          "formula": {
+            "realRate": "Real rate",
+            "realRateAfterTax": "Real rate after tax",
+            "rate": "rate",
+            "inflation": "inflation",
+            "amount": "amount",
+            "months": "months"
+          }
         },
         "data": {
           "title": "Data and sources",
@@ -2965,10 +3372,14 @@
           "title": "How it is calculated",
           "intro": "Each figure comes from the same engine as the term deposit calculator:",
           "steps": {
-            "a": "Gross interest: amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
-            "b": "Tax: {{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
-            "c": "Net annual yield: the net interest annualised over the term.",
-            "d": "Filters: an offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
+            "aTerm": "Gross interest",
+            "aBody": "Amount × TANB × term in months ÷ 12, paid in one payment at maturity.",
+            "bTerm": "Tax",
+            "bBody": "{{taxRate}}% of the interest. Foreign banks do not withhold it in Portugal, so the figure assumes you declare it and pay the same rate.",
+            "cTerm": "Net annual yield",
+            "cBody": "The net interest annualised over the term.",
+            "dTerm": "Filters",
+            "dBody": "An offer is hidden if its minimum is above your amount or its maximum is below it. An offer with no stated limit stays."
           }
         },
         "data": {
@@ -3063,6 +3474,7 @@
         "methodMeal": "The meal allowance is exempt up to the daily limit, which depends on whether it is paid in cash or on a meal card. The calculator adds only the excess to the taxable pay.",
         "methodAllowances": "With 14 payments, the holiday and Christmas allowances are each taxed on their own, as the tables require. In twelfths, the extra pay is added to each month.",
         "methodBudget": "The net figures are what reaches your account, so they are the right starting point for a monthly budget.",
+        "methodBudgetTerm": "Budget",
         "finalTitle": "Withholding is not your final IRS",
         "final": "The amount withheld each month is an advance payment. The Tax Authority settles your real IRS in the annual return, using your whole year's income and your deductions. Withholding can be higher or lower than the tax you finally owe, which is why many people get a refund or a payment due.",
         "unsupportedTitle": "Not supported",
@@ -3140,6 +3552,9 @@
         "howTransition": "In the first rows the parcela a abater is a formula with the letter R, which is the monthly pay. It makes the withholding rise gently from zero, so a small raise never lowers net pay.",
         "howDependants": "Each dependant lowers the withholding by a fixed amount. With three or more dependants, the marginal rate of the row is one percentage point lower.",
         "howTables": "Table I serves unmarried people without dependants and married people with two earners. Table II serves unmarried people with dependants and table III married people with one earner.",
+        "methodFormulasLabel": "Formula",
+        "formulaPerDependant": "Amount per dependant",
+        "howTransitionTerm": "Parcela a abater with R",
         "finalTitle": "Withholding is not the final tax",
         "final": "The tables set how much your employer withholds each month. They do not calculate your final IRS, which the annual return settles with the brackets above, your whole income and your deductions.",
         "unsupportedTitle": "Not included",
@@ -3242,6 +3657,20 @@
         "methodNoReduction": "The old 10% cut after 180 days of payment is not applied: the 2026 Segurança Social guide does not list it.",
         "methodTax": "The Segurança Social guide says the benefit does not have to be declared for IRS. Confirm your own case with the Tax Authority.",
         "methodBudget": "The monthly benefit is the income to plan with. Compare it with your net pay to see the drop, then see how long your savings cover the gap.",
+        "methodFormulasLabel": "Formulas",
+        "formulaReference": "Reference remuneration",
+        "formulaPay": "Pay registered in the 12 months",
+        "formulaDaily": "Daily benefit",
+        "formulaMonthly": "Monthly benefit",
+        "methodReferenceTerm": "Reference remuneration",
+        "methodAmountTerm": "Amount",
+        "methodLimitsTerm": "Limits",
+        "methodNetTerm": "Net reference remuneration",
+        "methodIncreaseTerm": "10% increase",
+        "methodDurationTerm": "Duration",
+        "methodNoReductionTerm": "No cut after 180 days",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Not supported",
         "unsupportedTransitional": "The transitional table for people who already met the contribution requirement on 31 March 2012 and have not been unemployed since. The calculator uses only the general table.",
         "unsupportedSocial": "The social unemployment benefit (subsídio social de desemprego), which the guide says can only be requested until 30 December 2026.",
@@ -3340,6 +3769,20 @@
         "methodNetCap": "The daily benefit also cannot exceed the net value of the RR. The calculator estimates it with 11% Social Security and the 2026 mainland IRS withholding rate for a single holder.",
         "methodGap": "The income gap compares your normal net pay (14 or 12 payments averaged over 12 months) with what Segurança Social pays. Holiday and Christmas allowances are not recreated for the days on leave.",
         "methodBudget": "The gap is the income you have to cover from savings or by cutting spending while you are on leave. Use it to size your cushion.",
+        "methodFormulasLabel": "Formulas",
+        "formulaReference": "Reference pay",
+        "formulaPay": "Pay registered in the 6 months",
+        "formulaDaily": "Daily benefit",
+        "formulaPercent": "Band percentage",
+        "methodReferenceTerm": "Reference pay",
+        "methodBandsTerm": "Percentage by duration",
+        "methodWaitingTerm": "Waiting days",
+        "methodMinimumTerm": "Minimum",
+        "methodIncreaseTerm": "5-point increase",
+        "methodFloorTerm": "Floor above 500 euros",
+        "methodNetCapTerm": "Net cap",
+        "methodGapTerm": "Income gap",
+        "methodBudgetTerm": "Budget",
         "unsupportedTitle": "Not supported",
         "unsupportedTuberculosis": "Tuberculosis, paid at 80% or 100% of the RR depending on dependants, with no time limit.",
         "unsupportedSelfEmployed": "Self-employed workers (10 days of waiting, up to 365 days), voluntary social insurance and domestic workers.",
@@ -3422,8 +3865,6 @@
         "exampleTitle": "Worked example",
         "example": "A diesel car with a {{cc}} cm³ engine, official WLTP emissions of {{co2}} g/km and first registered in {{year}} owes {{tax}} of IUC a year. Setting aside {{monthly}} a month covers it.",
         "methodTitle": "How the estimate works",
-        "methodA": "Category A (cars registered from 1981 up to June 2007): the tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
-        "methodB": "Category B (cars registered from July 2007): the engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
         "methodAdditional": "Category B cars first registered after 1 January 2017 pay an additional rate when emissions are high: €31.77 above 205 g/km (WLTP) or 180 g/km (NEDC), and €63.74 above 260 g/km (WLTP) or 250 g/km (NEDC). The additional rate is also multiplied by the coefficient. The legal text does not limit it by fuel, so the calculator applies it to every fuel.",
         "methodDiesel": "Diesel cars also pay the diesel surcharge (adicional de IUC, article 216 of Lei n.º 82-B/2014, kept in force for 2026 by the State Budget). It depends on engine size, applies to categories A and B, and is added after the coefficient, not multiplied by it.",
         "methodPayment": "Until 2026 the IUC is paid in the month of the registration anniversary. Decreto-Lei n.º 161/2026 (4 August 2026) moves it to one yearly assessment per taxpayer, covering all vehicles. 2027 is a transitional year: one payment in October up to €500, otherwise two in July and October (or all in July). From 2028 it is settled by April and paid in April up to €100, in April and October from €100 up to €500, and in April, July and October above €500. The thresholds apply to the total for all your vehicles.",
@@ -3431,8 +3872,6 @@
         "exemptionTitle": "Electric cars",
         "exemption": "Fully electric cars in category B are exempt from IUC, and the calculator shows zero. Plug-in hybrids and other vehicles are taxed by their engine size and CO2 as shown on the registration document, so enter those values.",
         "scopeTitle": "What is covered",
-        "scopeSupported": "Light passenger cars: category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
-        "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
         "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. From 2027 the tax is assessed per taxpayer across all their vehicles: add each of your cars, and enter the IUC of any other vehicles as other IUC, so the instalment months follow your total (the law applies its thresholds to that total). The schedules for 2027 and 2028 give each month's amount for the cars you added; with one car, its share of each instalment. In the year of registration the tax is paid within 30 days of the registration deadline.",
@@ -3444,7 +3883,31 @@
         "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
-        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)",
+        "methodATerm": "Category A (cars registered from 1981 up to June 2007)",
+        "methodABody": "The tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
+        "methodBTerm": "Category B (cars registered from July 2007)",
+        "methodBBody": "The engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
+        "scopeSupportedTerm": "Light passenger cars",
+        "scopeSupportedBody": "Category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
+        "labels": {
+          "diesel": "Diesel surcharge",
+          "engineRate": "Engine size rate",
+          "co2Rate": "CO2 rate",
+          "provision": "Monthly provision"
+        },
+        "terms": {
+          "additional": "Additional rate",
+          "diesel": "Diesel surcharge",
+          "payment": "Payment",
+          "budget": "Monthly provision",
+          "year": "Tables",
+          "paymentRule": "When it is due",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
@@ -3551,7 +4014,6 @@
         "methodCash": "The proceeds left subtract the selling costs, the loan repaid and the estimated IRS from the sale value. It does not subtract what you spend on the next home.",
         "scopeTitle": "What is covered",
         "scopeSupported": "Individuals who are Portuguese tax residents selling a property held as a private asset, bought from {{firstYear}} on, in {{saleYear}}.",
-        "scopeUnsupported": "Not supported: non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
         "assumptionsTitle": "Assumptions",
         "assumptionBrackets": "The extra IRS uses the {{saleYear}} annual IRS brackets on the income you enter, as an estimate of the effect on the annual return. Joint taxation is modelled as splitting the income in two.",
         "assumptionNotModelled": "The calculator does not check the reinvestment conditions. The coefficients were checked against the table of {{portaria}} in the Diário da República.",
@@ -3566,7 +4028,29 @@
         "sourceAcquisition": "CIRS, article 46: acquisition value of a property bought for a price (consulted 20 November 2026)",
         "sourceCorrection": "CIRS, article 50: currency devaluation correction after 24 months (consulted 20 November 2026)",
         "sourceExpenses": "CIRS, article 51: works of the last 12 years and acquisition and sale expenses (consulted 20 November 2026)",
-        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)"
+        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
+        "labels": {
+          "included": "Added to income",
+          "irsWith": "IRS with the gain",
+          "irsWithout": "IRS without the gain",
+          "cashAfter": "Proceeds left"
+        },
+        "terms": {
+          "gain": "Gain",
+          "taxValue": "Sale value and VPT",
+          "coefficient": "Coefficient",
+          "expenses": "Expenses",
+          "half": "Half the gain",
+          "exemption": "Reinvestment",
+          "cash": "Proceeds left",
+          "brackets": "IRS brackets",
+          "notModelled": "What is not checked",
+          "educational": "Educational estimate",
+          "supported": "Covered"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Know how much of the sale you can really use",
       "nextStepDescription": "WonderMoney helps you set aside the tax and see what is left for your next home.",
@@ -3646,6 +4130,9 @@
         "methodWithholding": "Each payment is withheld on its own with the 2026 monthly table, never added to the month's salary: Despacho n.º 233-A/2026 (n.º 10) asks employers to show a separate effective rate for each remuneration, as in the months the holiday and Christmas allowances are paid.",
         "methodTwelfths": "Paid in twelfths, the allowance is split evenly over the months you work in the year (12 for a whole year). Each twelfth is withheld on its own at the effective rate of the whole allowance, the usual payroll practice since Lei n.º 11/2013, art. 3 (not stated in the Despacho). Your payroll may instead add the twelfth to the month's salary and withhold on the total, which usually withholds more: check your payslip.",
         "methodSocialSecurity": "Employee Social Security is 11% of the gross allowance.",
+        "hiringYearTerm": "Year you are hired",
+        "twelfthsTerm": "In twelfths",
+        "planTerm": "Plan",
         "unsupportedNovember": "The one-off adjustment for income paid in November 2026 (Despacho 12523-A/2026, mainland) is ignored. An allowance paid in November would be withheld at half.",
         "unsupportedOther": "Only the base salary counts. Seniority supplements, other pay components, a contract ending or suspended during the year, collective agreements that pay more and employer costs are outside this estimate.",
         "sourceCode": "Código do Trabalho, arts. 239, 263 and 264: holiday duration, Christmas allowance and holiday allowance",
@@ -3739,6 +4226,22 @@
         "methodFraction": "An incomplete year counts proportionally: the calculator counts whole anniversaries of the start date plus the days since the last one over the days of that year. The termination date counts as a day worked.",
         "methodTax": "Information only, not part of the figure: part of a termination payment can be excluded from IRS under art. 2(4) of the CIRS, up to a limit tied to your regular pay over the last 12 months and your years of seniority. The rest is taxable income. Ask the Tax Authority or an accountant for the exact limit in your case.",
         "methodBudget": "The compensation is a one-off amount. Spreading it over your upcoming months, together with any unemployment benefit you are entitled to, shows how long it covers your spending.",
+        "methodFormulasLabel": "Formulas",
+        "formulaDaily": "Daily amount",
+        "formulaBase": "Base pay",
+        "formulaSeniorityPay": "Diuturnidades",
+        "formulaDays": "Days per year",
+        "formulaYears": "Years of seniority",
+        "formulaCompensation": "Compensation",
+        "methodBaseTerm": "Base",
+        "methodRatesTerm": "Days per year",
+        "methodTransitionalTerm": "Older contracts",
+        "methodFixedTermTerm": "Fixed-term expiry",
+        "methodDurationLimitTerm": "Maximum duration",
+        "methodCapsTerm": "Caps",
+        "methodFractionTerm": "Incomplete year",
+        "methodTaxTerm": "IRS",
+        "methodBudgetTerm": "Budget",
         "supportedTitle": "Supported",
         "supported": "Collective dismissal, extinction of the post and unsuitability of the worker on a permanent contract, and the expiry of a fixed-term contract of certain or uncertain term, with termination in 2026.",
         "unsupportedTitle": "Not supported",
@@ -3851,14 +4354,14 @@
         "exampleTitle": "Worked example",
         "example": "Someone earning {{gross}} a month on average (today's euros, 14 payments), with {{years}} years of contributions, retiring at {{age}}. The statutory pension is {{statutory}} a month, a global formation rate of {{rate}}. Retiring {{months}} months before the normal age deducts {{penalty}} and applies the sustainability factor, leaving {{monthly}} a month gross, or {{replacement}} of the salary. After IRS the pension is {{netPension}} a month. Against an estimated net pay of {{net}}, the gap is {{gap}} a month.",
         "methodTitle": "How the estimate works",
-        "methodReference": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
-        "methodRate": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
-        "methodAges": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
-        "methodEarly": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
-        "methodLate": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
-        "methodMinimum": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
-        "methodGap": "The gap compares the net pension with your net pay today, both per payment over 14 payments. Net pay is the gross salary minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. The net pension is the estimated gross pension minus IRS withheld under the 2026 pension table VIII (Despacho n.º 233-A/2026, unmarried holder or married with two earners, without disability); pensions pay no Social Security and pensions up to 920 euros a month have no withholding. The final IRS depends on your whole income and deductions.",
-        "methodBudget": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
+        "methodReferenceBody": "The reference remuneration is the average of your yearly pay over the whole career, revalued with consumer-price coefficients and divided by 14. The calculator works in today's euros: you enter an average real monthly salary and the result is also in today's euros.",
+        "methodRateBody": "The annual rate depends on slices of the reference remuneration in multiples of the IAS ({{ias}} in 2026): {{rates}} for the slices up to 1.1, up to 2, up to 4, up to 8 and above 8 times the IAS. Careers of up to 20 years use a flat 2%. The rate is multiplied by the years of contributions, at most 40, to give the global formation rate.",
+        "methodAgesBody": "The normal age of access to the old-age pension is {{normal2026}} in 2026 and has been set at {{normal2027}} for 2027. The calculator uses the 2026 value.",
+        "methodEarlyBody": "Before the normal age, from age 60 with at least 15 years of contributions, each month of anticipation takes off {{penalty}}, and the 2026 sustainability factor ({{factor}}, a 17.63% cut) also applies. The two multiply. Exemptions, such as very long careers, are not modelled.",
+        "methodLateBody": "After the normal age, up to 70, each month adds a bonus that depends on the years of contributions: 0.33% from 15 years, 0.50% from 25, 0.65% from 35 and 1% from 40. The pension with the bonus cannot exceed 92% of the reference remuneration.",
+        "methodMinimumBody": "If the formula gives less than the 2026 minimum pension for your career, the minimum is shown instead: {{min15}} for 15 to 20 years, {{min21}} for 21 to 30 and {{min31}} for 31 or more. The minimum does not apply to early retirement.",
+        "methodGapBody": "The gap compares the net pension with your net pay today, both per payment over 14 payments. Net pay is the gross salary minus 11% Social Security and the 2026 IRS withholding for a single person without dependants on the mainland. The net pension is the estimated gross pension minus IRS withheld under the 2026 pension table VIII (Despacho n.º 233-A/2026, unmarried holder or married with two earners, without disability); pensions pay no Social Security and pensions up to 920 euros a month have no withholding. The final IRS depends on your whole income and deductions.",
+        "methodBudgetBody": "Read the gap as the monthly amount your savings and investments would have to cover. It moves with every assumption above.",
         "unsupportedTitle": "Not supported",
         "unsupportedMixed": "Careers that began before 2002 (mixed formula, with the older rules for the years up to 2001). This calculator only covers the whole-career formula for people who started contributing in 2002 or later.",
         "unsupportedSpecial": "Pay that varies a lot over the career, gaps in contributions and careers longer than 40 years.",
@@ -3871,7 +4374,31 @@
         "sourceMinimum": "Portaria n.º 480-B/2025/1: 2026 pension update and minimum pensions",
         "sourceSimulator": "Segurança Social Direta: official pension simulator",
         "reviewed": "Rules and 2026 values reviewed on 19 November 2026 against Decreto-Lei n.º 187/2007 and the 2026 portarias. The accrual rates, the bonus and the minimum pensions were cross-checked in secondary sources and the Segurança Social pages, not read in the consolidated law, and the simplifications above are ours. The pension withholding table VIII was checked row by row on 20 November 2026 against the annex of Despacho n.º 233-A/2026 as published in the Diário da República.",
-        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII"
+        "sourceWithholding": "Despacho n.º 233-A/2026 (Diário da República): the 2026 IRS withholding tables, including pension table VIII",
+        "methodReferenceTerm": "Reference remuneration",
+        "methodRateTerm": "Global formation rate",
+        "methodAgesTerm": "Normal age",
+        "methodEarlyTerm": "Early retirement",
+        "methodLateTerm": "Retiring after the normal age",
+        "methodMinimumTerm": "Minimum pension",
+        "methodGapTerm": "Gap",
+        "methodBudgetTerm": "Reading the gap",
+        "methodFormulasLabel": "Formulas",
+        "formula": {
+          "globalRate": "Global formation rate",
+          "globalRateLower": "global formation rate",
+          "annualRate": "annual rate",
+          "years": "years of contributions",
+          "statutory": "Statutory pension",
+          "statutoryLower": "statutory pension",
+          "reference": "reference remuneration",
+          "earlyPension": "Pension when retiring early",
+          "monthsEarly": "months early",
+          "factor": "sustainability factor",
+          "gap": "Gap",
+          "netPay": "net pay",
+          "netPension": "net pension"
+        }
       }
     },
     "sp500History": {
@@ -3979,10 +4506,14 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "fx": "Currency: returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
-            "fees": "Costs: fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
-            "taxes": "Taxes: tax on dividends and gains is not included, and it depends on where you live.",
-            "sequence": "Hindsight: this is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
+            "fxTerm": "Currency",
+            "fxBody": "Returns are in US dollars. If you invest from the euro area, the euro-dollar exchange rate adds to or takes away from these figures, sometimes by several points a year. Currency risk is separate from the market's.",
+            "feesTerm": "Costs",
+            "feesBody": "Fund fees, brokerage charges and spreads are not deducted. A fund that tracks the index returns the index minus its costs.",
+            "taxesTerm": "Taxes",
+            "taxesBody": "Tax on dividends and gains is not included, and it depends on where you live.",
+            "sequenceTerm": "Hindsight",
+            "sequenceBody": "This is one large US index in one country's history. Other markets and periods did far worse, and moving the start or end by a few years can change the result a lot.",
             "past": "Past performance does not predict future returns. This tool is educational and is not investment advice."
           }
         },
@@ -4198,6 +4729,9 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "estimatorTerm": "Bill estimator",
+          "indexTerm": "Price index",
+          "marketTerm": "Free market",
           "estimator": "The estimator prices one 30-day month on the regulated tariff: the contracted power charge, the energy you use, the audiovisual contribution and the electricity tax, then adds VAT line by line at the rate that applies to each.",
           "index": "The index view looks at all household bills, not just the regulated tariff: Eurostat's average price per kWh in Portugal and in the EU, taxes included, so the two are comparable.",
           "market": "The regulated tariff is one option. Most households are in the free market, where suppliers set their own prices and offers can be cheaper or dearer than the regulated tariff. The VAT rules are the same in both. The estimator is a reference point, not a recommendation."
@@ -4212,15 +4746,33 @@
           "title": "How it is calculated",
           "intro": "For one 30-day month the estimator does the same five things:",
           "steps": {
-            "a": "Power: the daily price for your contracted power, times 30 days.",
-            "b": "Energy: your kWh at the simple price, or split between the two bi-hourly prices by the share you enter.",
-            "c": "Audiovisual contribution (CAV): a fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt.",
-            "d": "Electricity consumption tax (IEC): a fixed amount per kWh, with the standard VAT rate.",
-            "e": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            "a": {
+              "term": "Power",
+              "body": "The daily price for your contracted power, times 30 days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "Your kWh at the simple price, or split between the two bi-hourly prices by the share you enter."
+            },
+            "c": {
+              "term": "Audiovisual contribution (CAV)",
+              "body": "A fixed monthly amount, with reduced VAT. Households that use less than 400 kWh a year are exempt."
+            },
+            "d": {
+              "term": "Electricity consumption tax (IEC)",
+              "body": "A fixed amount per kWh, with the standard VAT rate."
+            },
+            "e": {
+              "term": "VAT",
+              "body": "VAT on each line, then the sum. The result is rounded to the cent at the end."
+            }
           },
-          "vat": "VAT rules, as ERSE explains them: the reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
-          "bi": "Bi-hourly versus simple: the simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
-          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days."
+          "vat": "The reduced rate ({{reduced}}) applies to the first {{allowance}} kWh of energy in 30 days ({{allowanceLarge}} kWh for households of five or more) for contracted power up to 6.9 kVA, to the network-access part of the power term (the fixed term of the access tariff ERSE sets) for contracted power up to 3.45 kVA, and to the audiovisual contribution. Everything else pays {{standard}}.",
+          "bi": "The simple price is {{energySimple}}, against {{energyPeak}} outside off-peak and {{energyValley}} in off-peak hours. On energy alone the two cost the same when {{breakEven}}% of the consumption is in off-peak hours. With a lower share simple is cheaper, with a higher one bi-hourly is.",
+          "days": "The reduced-VAT allowance is per 30 days, the period used here. A real bill for a longer or shorter period scales the allowance by its number of days.",
+          "formulasLabel": "Formula",
+          "vatTerm": "VAT rules, as ERSE explains them",
+          "biTerm": "Bi-hourly versus simple"
         },
         "data": {
           "title": "Data and sources",
@@ -4660,6 +5212,10 @@
       "guide": {
         "use": {
           "title": "How to use the comparison",
+          "quickTerm": "Quick mode",
+          "fullTerm": "Full mode",
+          "diagramTerm": "E-REDES file",
+          "optionsTerm": "Options and filters",
           "quick": "Quick mode needs only your contracted power and your monthly bill or kWh. A bill in euro is turned into kWh by working back the regulated tariff's bill, taxes included, as ERSE's quick simulation does.",
           "full": "Full mode takes the kWh of each period from your invoice, or a total for any number of days split across the periods with the E-REDES standard profile for your power and consumption.",
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
@@ -4669,6 +5225,9 @@
         },
         "example": {
           "title": "Worked example",
+          "regulatedLabel": "Regulated tariff",
+          "cheapestLabel": "Cheapest offer",
+          "differenceLabel": "Difference",
           "setup": "A home with 3.45 kVA on the simple option uses {{kwh}} a month. On ERSE's export of {{date}} there are {{count}} offers for it, including the regulated tariff.",
           "result": "The regulated tariff comes to {{regulated}} in the first year, taxes included. The cheapest offer comes to {{cheapest}}, {{difference}} less. {{cheaper}} offers cost less than the regulated tariff.",
           "bill": "In quick mode, a monthly bill of {{bill}} gives back the same {{kwh}}: that is the regulated tariff's bill for that consumption."
@@ -4677,13 +5236,34 @@
           "title": "How it is calculated",
           "intro": "Each offer is priced the way ERSE's simulator does it (Manual do Simulador de Preços de Energia, June 2026):",
           "steps": {
-            "a": "Power: the price per day times the days.",
-            "b": "Energy: the kWh of each period times its price.",
-            "c": "Social tariff: ERSE's discount on power and energy, up to 6.9 kVA.",
-            "d": "The audiovisual contribution and the electricity tax, at their legal amounts.",
-            "e": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE.",
-            "f": "VAT at the reduced and standard rates, as set out below.",
-            "g": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            "a": {
+              "term": "Power",
+              "body": "The price per day times the days."
+            },
+            "b": {
+              "term": "Energy",
+              "body": "The kWh of each period times its price."
+            },
+            "c": {
+              "term": "Social tariff",
+              "body": "ERSE's discount on power and energy, up to 6.9 kVA."
+            },
+            "d": {
+              "term": "Taxes",
+              "body": "The audiovisual contribution and the electricity tax, at their legal amounts."
+            },
+            "e": {
+              "term": "Services and discounts",
+              "body": "Mandatory services, refunds and discounts any client gets, and the new-client discount in the first year, as each offer reports them to ERSE."
+            },
+            "f": {
+              "term": "VAT",
+              "body": "VAT at the reduced and standard rates, as set out below."
+            },
+            "g": {
+              "term": "Year",
+              "body": "A year is the same consumption over 365 days; \"later years\" leaves out the new-client discount."
+            }
           },
           "vat": "VAT is {{reduced}} on the audiovisual contribution, on the network-access part of the power price up to 3.45 kVA, and on the first {{allowance}} kWh every 30 days up to 6.9 kVA ({{allowanceLarge}} kWh for a household of five or more). Everything else pays {{standard}}.",
           "month": "A month is a twelfth of a year, {{days}} days, as in ERSE's simulator, so a year is exactly twelve months.",
@@ -4793,6 +5373,8 @@
       "guide": {
         "read": {
           "title": "How to read this page",
+          "calculatorTerm": "Cost calculator",
+          "noForecastTerm": "No forecast",
           "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
           "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
           "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week.",
@@ -4807,13 +5389,26 @@
           "title": "How it is calculated",
           "intro": "The calculator does four things:",
           "steps": {
-            "a": "Distance a month: the distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month.",
-            "b": "Litres: distance times consumption divided by 100.",
-            "c": "Cost: litres times the price per litre you enter, rounded to the cent.",
-            "d": "Year: twelve such months."
+            "a": {
+              "term": "Distance a month",
+              "body": "The distance you give, a week counted as 52 divided by 12 weeks a month, or a trip multiplied by trips a month."
+            },
+            "b": {
+              "term": "Litres",
+              "body": "Distance times consumption divided by 100."
+            },
+            "c": {
+              "term": "Cost",
+              "body": "Litres times the price per litre you enter, rounded to the cent."
+            },
+            "d": {
+              "term": "Year",
+              "body": "Twelve such months."
+            }
           },
           "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price.",
-          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres."
+          "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres.",
+          "formulasLabel": "Formulas"
         },
         "data": {
           "title": "Data and sources",
@@ -4828,13 +5423,28 @@
         "limits": {
           "title": "What these figures leave out",
           "items": {
-            "noForecast": "No forecast: nothing here predicts future prices, and past moves do not say where the price goes next.",
-            "average": "National average: it blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included.",
-            "stations": "Stations: the list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump.",
-            "consumption": "Consumption: the same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one.",
-            "scope": "Only fuel: tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown.",
-            "education": "Educational use only, not advice."
-          }
+            "noForecast": {
+              "term": "No forecast",
+              "body": "Nothing here predicts future prices, and past moves do not say where the price goes next."
+            },
+            "average": {
+              "term": "National average",
+              "body": "It blends all stations in mainland Portugal and is weighted by sales. The price at your station can be higher or lower, and the Azores and Madeira are not included."
+            },
+            "stations": {
+              "term": "Stations",
+              "body": "The list shows only the few cheapest stations of each area, as DGEG publishes them, and does not rate service or quality. A price can change after the snapshot, so confirm it at the pump."
+            },
+            "consumption": {
+              "term": "Consumption",
+              "body": "The same figure for every trip. Real consumption changes with speed, load, traffic and the season, and is usually above the official one."
+            },
+            "scope": {
+              "term": "Only fuel",
+              "body": "Tolls, insurance, tax, maintenance and parking are not included. Electric charging is not covered, and other fuels are not shown."
+            }
+          },
+          "education": "Educational use only, not advice."
         },
         "related": {
           "title": "Keep going",
@@ -4959,22 +5569,47 @@
           "title": "Karats and fineness",
           "intro": "The purity of gold is given in karats, out of 24, or in thousandths, the number stamped in the hallmark. These are the six legal finenesses of gold in Portugal:",
           "items": {
-            "k24": "24k, 999 thousandths: pure gold, as in investment bars and coins.",
-            "k22": "22k, 916: gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
-            "k19_2": "19.2k, 800: Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
-            "k18": "18k, 750: the most common fineness of jewellery in Europe.",
-            "k14": "14k, 585: harder, cheaper jewellery.",
-            "k9": "9k, 375: the lowest legal fineness."
+            "k24Term": "24k, 999 thousandths",
+            "k24Body": "Pure gold, as in investment bars and coins.",
+            "k22Term": "22k, 916",
+            "k22Body": "Gold coins such as the sovereign and the Krugerrand, and much jewellery from India.",
+            "k19_2Term": "19.2k, 800",
+            "k19_2Body": "Portuguese gold (ouro português), the traditional fineness of Portuguese jewellery.",
+            "k18Term": "18k, 750",
+            "k18Body": "The most common fineness of jewellery in Europe.",
+            "k14Term": "14k, 585",
+            "k14Body": "Harder, cheaper jewellery.",
+            "k9Term": "9k, 375",
+            "k9Body": "The lowest legal fineness."
           }
         },
         "method": {
           "title": "How it is calculated",
           "intro": "The page does four things:",
           "steps": {
-            "a": "Price: NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
-            "b": "Pure gold: the weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
-            "c": "Value: the grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
-            "d": "Offer: when you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+            "aTerm": "Price",
+            "aBody": "NBP's price of a gram of pure gold in zloty, divided by the ECB's zloty per euro of the same day.",
+            "bTerm": "Pure gold",
+            "bBody": "The weight times the fineness divided by 1,000. A 24k piece counts at 999 thousandths.",
+            "cTerm": "Value",
+            "cBody": "The grams of pure gold times the price of a gram of pure gold, rounded to the cent.",
+            "dTerm": "Offer",
+            "dBody": "When you enter one, the offer divided by the value, as a percentage, and the difference in euro."
+          },
+          "formulasLabel": "Formulas",
+          "formula": {
+            "pureGold": "Pure gold",
+            "pureGoldLower": "pure gold",
+            "weight": "weight",
+            "fineness": "fineness",
+            "value": "Value",
+            "valueLower": "value",
+            "price": "Price per gram",
+            "priceLower": "price per gram",
+            "nbpPrice": "NBP price in zloty",
+            "zlotyPerEuro": "zloty per euro",
+            "offerShare": "Offer against the value",
+            "offer": "offer"
           }
         },
         "buyers": {
@@ -4995,10 +5630,14 @@
         "limits": {
           "title": "What this value leaves out",
           "items": {
-            "metal": "Metal only: the value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
-            "buyers": "Not a selling price: buyers pay less, and a shop selling gold charges more.",
-            "purity": "Purity: the calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
-            "reference": "Reference price: NBP's daily price, not a live quote. The market moves during the day.",
+            "metalTerm": "Metal only",
+            "metalBody": "The value is the gold content at a reference price. Stones, other metals, the work and the brand are not counted.",
+            "buyersTerm": "Not a selling price",
+            "buyersBody": "Buyers pay less, and a shop selling gold charges more.",
+            "purityTerm": "Purity",
+            "purityBody": "The calculator trusts the fineness you choose. An unmarked or gold-plated piece can hold much less gold, or none.",
+            "referenceTerm": "Reference price",
+            "referenceBody": "NBP's daily price, not a live quote. The market moves during the day.",
             "education": "Educational use only, not advice."
           }
         },
@@ -5202,7 +5841,12 @@
           "title": "Worked example",
           "setup": "Say you keep {{amount}} for 12 months in {{product}} at {{bank}}, at {{rate}} a year. It earns {{gross}}; the 28% IRS takes {{tax}}, leaving {{net}}.",
           "capped": "The maximum matters. {{product2}} at {{bank2}} pays {{rate2}}, but only up to {{cap}}. With {{amount2}}, interest is {{gross2}} before tax and {{net2}} after, as if you had saved {{cap}}.",
-          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}."
+          "plans": "Fees matter too. {{product3}} at {{bank3}} ranges from {{low}} to {{high}} by plan. With {{amount}}, the Standard plan nets {{standardNet}}, while the Ultra plan, after {{ultraFees}} a year in fees, nets {{ultraNet}}.",
+          "figures": {
+            "gross": "Gross interest",
+            "tax": "IRS ({{tax}}%)",
+            "net": "Net interest"
+          }
         },
         "method": {
           "title": "Method",
@@ -5402,17 +6046,25 @@
           "setup": "Take the occasional stock buyer: {{count}} buys of {{amount}} of US shares in a year, {{portfolio}} held.",
           "bank": "At {{bank}}, each order costs {{bankFormula}}, so the {{count}} orders cost {{bankTrading}} with stamp duty. Converting {{converted}} to dollars at {{bankFx}} adds {{bankFxTotal}}, and custody ({{bankCustodyFormula}}) adds {{bankCustody}} with VAT. The year costs {{bankTotal}}, of which {{bankStampDuty}} is stamp duty and {{bankVat}} is VAT.",
           "online": "At {{online}}, each order costs {{onlineFormula}}: {{onlineTrading}} for the year. Currency conversion at {{onlineFx}} adds {{onlineFxTotal}} and custody {{onlineCustody}}, for {{onlineTotal}} in total.",
-          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes."
+          "takeaway": "With small, infrequent orders, minimum commissions and fixed custody fees weigh most; with large orders or a large portfolio, percentage fees weigh more. Change the profile above to see how the order changes.",
+          "figures": {
+            "total": "Total for the year"
+          }
         },
         "method": {
           "title": "Method",
           "intro": "Every fee was read from the broker's own published price list on the date shown in its row; the whole table was reviewed on {{date}} and is re-checked every quarter. Fees that a price list does not state are marked as not published and left out of the totals, which are then shown as incomplete.",
           "steps": {
-            "a": "Orders: each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
-            "b": "Savings plan: for ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
-            "c": "Currency: US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
-            "d": "Custody: the published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
-            "e": "Taxes on fees: where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
+            "aTerm": "Orders",
+            "aBody": "Each order's commission is the fixed part plus the percentage of the order, then the minimum and the maximum per order. Fees per share count whole shares at the assumed share price. A free monthly allowance is applied month by month.",
+            "bTerm": "Savings plan",
+            "bBody": "For ETF buys, when the option is on and the broker publishes a recurring plan, its fee replaces the order fee.",
+            "cTerm": "Currency",
+            "cBody": "US orders pay the broker's conversion fee on the amount converted; fees in dollars are converted at {{rate}} dollars per euro.",
+            "dTerm": "Custody",
+            "dBody": "The published formula, per period with its minimum and maximum, is charged on the value held, as many times as there are periods in a year.",
+            "eTerm": "Taxes on fees",
+            "eBody": "Where the price list says its fees exclude Portuguese stamp duty (4% on brokerage) or VAT (23% on custody), they are added to the fees they apply to.",
             "f": "The total adds the year's orders, currency conversion and custody, and the brokers are listed from cheapest to dearest. Brokers missing a fee the profile needs go last."
           }
         },
@@ -5600,7 +6252,8 @@
             "insuranceLinked": "insurance linked to funds",
             "insuranceGuaranteed": "insurance not linked to funds",
             "pensionFund": "pension fund"
-          }
+          },
+          "gapLabel": "Yearly cost gap on {{invested}}"
         },
         "tax": {
           "title": "The IRS deduction (EBF, article 21)",
@@ -5612,7 +6265,8 @@
           },
           "example": "The age that counts is the one on 1 January of the year of the contribution (n.º 9). At {{age}}, {{exampleContribution}} contributed in the year gives {{exampleDeduction}}, the full deduction.",
           "conditions": "The deduction is part of the overall cap on deductions in article 78, n.º 7 of the IRS code: no cap for the lowest taxable incomes, then from {{capMax}} down to {{capMin}} for the household. It lowers tax due and is not paid out, and contributions made after retirement are not deductible (n.º 10).",
-          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions."
+          "payout": "When the plan pays out in a case the law allows, a lump sum is taxed on the gain at {{legalRate}} on two fifths of it, an effective {{legalEffective}} of the gain (n.º 3); regular payments are taxed as pensions.",
+          "deductionLabel": "Deduction from IRS tax"
         },
         "redemption": {
           "title": "When you can redeem, and what an early redemption costs",
@@ -6210,7 +6864,66 @@
       "historyPeriod": "Last 6 months",
       "chartTrend": "Net worth, {{start}} to {{end}}, rising from {{from}} to {{to}}"
     },
-    "perMonth": "/mo"
+    "perMonth": "/mo",
+    "household": {
+      "title": "Household",
+      "roleOwner": "Owner",
+      "roleMember": "Member",
+      "roleViewer": "Viewer",
+      "jointAccount": "Joint current account",
+      "privateAccount": "Ana's savings",
+      "shared": "Shared",
+      "private": "Private"
+    },
+    "imports": {
+      "title": "Review import",
+      "fileName": "statement-october.csv",
+      "rows": "{{count}} rows",
+      "statusNew": "New",
+      "statusExisting": "Already in the account",
+      "statusDuplicate": "Possible duplicate",
+      "note": "Nothing is imported until you confirm."
+    },
+    "recurring": {
+      "title": "Bills and subscriptions",
+      "day": "Day {{day}}",
+      "rent": "Rent",
+      "electricity": "Electricity",
+      "internet": "Internet",
+      "gym": "Gym",
+      "paid": "Paid",
+      "due": "Due",
+      "projected": "Projected",
+      "stillToPay": "Still to pay this month"
+    },
+    "assistant": {
+      "title": "Assistant",
+      "question": "How much did I spend on restaurants this month?",
+      "answer": "{{amount}} across {{count}} transactions, a little less than last month.",
+      "proposalLabel": "Proposed change",
+      "proposal": "Categorise 3 transactions as Groceries",
+      "apply": "Apply",
+      "dismiss": "Dismiss"
+    },
+    "currencies": {
+      "title": "Accounts",
+      "account1": "Current account",
+      "account2": "Brokerage cash",
+      "account3": "UK savings",
+      "estimated": "Estimated",
+      "total": "Total in euros",
+      "rateNote": "Converted at the ECB reference rate of each day."
+    },
+    "selfHosting": {
+      "title": "Your server",
+      "subtitle": "docker compose",
+      "database": "Postgres",
+      "api": "API",
+      "worker": "Background worker",
+      "web": "Web app",
+      "running": "Running",
+      "note": "Your data stays in your own database."
+    }
   },
   "lp": {
     "shared": {
@@ -6540,7 +7253,15 @@
       "feature5": "Split transactions: assign parts to different categories",
       "feature6": "Category spending charts for budget analysis",
       "ctaHeadline": "Stop Tagging Transactions Manually",
-      "ctaBody": "Import your bank transactions and WonderMoney handles the categorisation. Free and open source."
+      "ctaBody": "Import your bank transactions and WonderMoney handles the categorisation. Free and open source.",
+      "rulesTitle": "Rules for the transactions you know",
+      "rulesBody": "A rule tells WonderMoney what to do with transactions that look a certain way: when the description contains NETFLIX, set the category to Entertainment. Rules belong to the household, so everyone works from the same list.",
+      "rulesPoint1": "Conditions on the description, merchant, amount, account and more",
+      "rulesPoint2": "Set the category or merchant, rename, tag, mark as reviewed or hide",
+      "rulesPoint3": "A preview of what a rule matches before you save it",
+      "rulesPoint4": "Apply a rule to the transactions you already have",
+      "rulesPoint5": "A suggested rule once you fix the same kind of transaction three times",
+      "rulesPoint6": "Export the rules as a file and import them on another server"
     },
     "featurePortfolio": {
       "eyebrow": "Portfolio tracking",
@@ -6646,7 +7367,17 @@
       "ctaHeadline": "Manage Your Finances With a Tool You Can Trust",
       "ctaBody": "WonderMoney earns your trust by keeping your data private, secure, and yours. Free and open source.",
       "principle6Title": "Your login stays at your bank",
-      "principle6Body": "You authenticate directly on your bank's portal. Your password never passes through WonderMoney."
+      "principle6Body": "You authenticate directly on your bank's portal. Your password never passes through WonderMoney.",
+      "securityTitle": "Protect the login and the screen",
+      "securityBody": "Read-only bank access keeps your money where it is. These settings protect the WonderMoney account itself, and what other people can see when you open it.",
+      "securityPoint1Title": "Passkeys",
+      "securityPoint1Body": "Sign in with your fingerprint, face or device PIN instead of typing a password.",
+      "securityPoint2Title": "Two-factor authentication",
+      "securityPoint2Body": "A code from an authenticator app after your password, with backup codes in case you lose your phone.",
+      "securityPoint3Title": "App lock",
+      "securityPoint3Body": "The mobile app asks for Face ID, Touch ID or your device passcode every time it opens.",
+      "securityPoint4Title": "Privacy mode",
+      "securityPoint4Body": "Hide every amount on screen with one tap, or with Shift+P on the web, on a train or while sharing your screen."
     },
     "pricing": {
       "metaTitle": "Pricing - WonderMoney",
@@ -7150,6 +7881,239 @@
       "how3Body": "Every connected account feeds into a single dashboard — balances, spending, and net worth, kept in sync.",
       "ctaHeadline": "Put your legal right to work",
       "ctaBody": "Connect your accounts and see your full financial picture — securely, on your terms."
+    },
+    "featureHousehold": {
+      "eyebrow": "Household",
+      "metaTitle": "Shared household finances with private accounts | WonderMoney",
+      "metaDescription": "Manage money with your partner or family: everyone signs in with their own login, shares the accounts they choose and keeps the rest private. Split costs with friends in groups.",
+      "heroTitle": "Manage money together, keep what's yours private",
+      "heroSubtitle": "Invite the people you live with to one household. Each signs in with their own login, shares the accounts they choose and sees the household's numbers in their own currency.",
+      "schemaName": "WonderMoney Household Finances",
+      "schemaDescription": "Shared household finances with a login for each person, four roles, private accounts, a filter by member, ownership shares and shared expense groups.",
+      "whatTitle": "One household, everyone with their own login",
+      "whatBody": "A household holds the accounts, budgets, goals and net worth you manage together. Up to six people can be in it, each with their own login and a role that decides what they can change.",
+      "whatPoint1Title": "Four roles",
+      "whatPoint1Body": "Owner, admin, member or viewer. A viewer sees the shared data but can't change it.",
+      "whatPoint2Title": "Private accounts",
+      "whatPoint2Body": "Keep an account to yourself, or let each person view it or edit it. Nobody else sees it, the household's owner included.",
+      "whatPoint3Title": "Who spent what",
+      "whatPoint3Body": "Mark joint accounts, say who spent a transaction, and filter transactions, reports, budgets and net worth by person.",
+      "whatPoint4Title": "Ownership shares",
+      "whatPoint4Body": "Split an account by percentage, such as a house fund held 60/40, and each person's net worth counts their part.",
+      "howTitle": "How a household works",
+      "step1Title": "Sign up",
+      "step1Body": "Your household is created with your account, and you are its owner. You can hand ownership to someone else later.",
+      "step2Title": "Invite people by email",
+      "step2Body": "Pick each person's role. The link works only for the address you invited, and expires after seven days.",
+      "step3Title": "Choose what each account shares",
+      "step3Body": "Accounts are shared with the household by default. Make one private and choose, for each person, hidden, view or edit.",
+      "groupsTitle": "Split costs with friends, flatmates and trips",
+      "groupsBody": "A group is a set of people who share costs. Share a transaction with it and WonderMoney splits it, works out who owes whom, and counts only your household's share in your spending.",
+      "groupsPoint1": "Add people by name: they don't need a WonderMoney account",
+      "groupsPoint2": "Split equally, by amount or by percentage",
+      "groupsPoint3": "A balance for each person, and the fewest payments to settle up",
+      "groupsPoint4": "Record a settlement and link it to the transfer that paid it",
+      "faqTitle": "Household questions",
+      "faq1Q": "Can the household's owner see my private accounts?",
+      "faq1A": "No. A private account is visible only to you and to the people you share it with. The owner and admins don't see it unless you share it with them.",
+      "faq2Q": "How many people can be in a household?",
+      "faq2A": "Up to six, the owner included. On your own server, you can change that number.",
+      "faq3Q": "What happens when someone leaves?",
+      "faq3A": "Their private accounts stay in the household, shared as they were: the people who had access keep it, and nobody else gains it. The money they spent counts as Shared.",
+      "ctaHeadline": "Bring the household into one place",
+      "ctaBody": "Invite the people you live with and choose what each account shares."
+    },
+    "featureImports": {
+      "eyebrow": "Import",
+      "metaTitle": "Import bank statements: CSV, Excel, OFX, QIF and CAMT.053 | WonderMoney",
+      "metaDescription": "Import transactions from any bank's CSV, Excel, OFX, QIF or CAMT.053 export, or move your history from YNAB or Actual Budget. Review every row before anything is added.",
+      "heroTitle": "Bring in any statement, and nothing twice",
+      "heroSubtitle": "When a bank can't be connected, or you want the history from before it was, import the file your bank gives you. You check every row before anything is added.",
+      "schemaName": "WonderMoney Transaction Import",
+      "schemaDescription": "Import bank statements from CSV, Excel, OFX, QFX, QIF and CAMT.053 files, and transaction history from YNAB and Actual Budget, with a review step and duplicate detection.",
+      "whatTitle": "Every file your bank gives you",
+      "whatBody": "Download the statement and leave it as the bank wrote it. WonderMoney finds the date, description and amount columns and works out the date and number formats, so it reads most banks' exports without a template.",
+      "whatPoint1": "CSV with any delimiter, and Excel (.xls, .xlsx)",
+      "whatPoint2": "OFX, QFX and QIF, from banks, Quicken, Microsoft Money and GnuCash",
+      "whatPoint3": "CAMT.053, the ISO 20022 statement of SEPA banks",
+      "whatPoint4": "Files with several accounts, each sent to one of yours",
+      "whatPoint5": "Your YNAB register, with its accounts and categories matched to yours",
+      "whatPoint6": "Actual Budget's transactions export, with transfers kept as transfers",
+      "howTitle": "How an import works",
+      "step1Title": "Add the file",
+      "step1Body": "Open the account and choose Import transactions. WonderMoney reads the file and shows how many transactions it found and the dates they cover.",
+      "step2Title": "Review the rows",
+      "step2Body": "Each row is new, already in the account, a possible duplicate, or couldn't be read. Tick or untick any of them.",
+      "step3Title": "Import",
+      "step3Body": "The import runs in the background. If it stops part way, try again: it carries on where it stopped and imports nothing twice.",
+      "reviewTitle": "Nothing is added until you check it",
+      "reviewBody": "The same purchase often arrives twice, once from bank sync and once from a file. The review shows every row and what will happen to it, so you decide.",
+      "reviewPoint1Title": "Possible duplicates",
+      "reviewPoint1Body": "A row with the same amount as a transaction already in the account, up to three days apart, is skipped unless you include it.",
+      "reviewPoint2Title": "Already imported",
+      "reviewPoint2Body": "Rows that are already in the account are skipped, so importing an overlapping export adds only what is new.",
+      "reviewPoint3Title": "Categorised like synced transactions",
+      "reviewPoint3Body": "Imported rows are categorised the same way as the transactions bank sync brings in, and the household's rules apply to them.",
+      "faqTitle": "Import questions",
+      "faq1Q": "Which banks does it work with?",
+      "faq1A": "Any bank that exports a statement as CSV, Excel, OFX, QIF or CAMT.053. For Millennium BCP, ActivoBank, Bankinter, Banco BPI and Montepio, WonderMoney also reads the bank's own format.",
+      "faq2Q": "Can I import on my phone?",
+      "faq2A": "Yes, CSV, OFX, QIF and CAMT.053 files, with the same review before anything is imported. YNAB and Actual Budget exports are imported on the web.",
+      "faq3Q": "Can I move from YNAB or Actual Budget?",
+      "faq3A": "Yes, with your transaction history: each account and category is matched to one of yours, and transfers stay linked. Budget amounts and goals are not imported.",
+      "ctaHeadline": "Bring your history with you",
+      "ctaBody": "Import the statements you already have and start from the full picture."
+    },
+    "featureRecurring": {
+      "eyebrow": "Bills and subscriptions",
+      "metaTitle": "Track bills, subscriptions and recurring payments | WonderMoney",
+      "metaDescription": "WonderMoney finds the payments that repeat, from rent to subscriptions, shows them on a calendar, projects each account's balance for the next 30 days and can put your bills in your own calendar app.",
+      "heroTitle": "See what's coming before it leaves your account",
+      "heroSubtitle": "WonderMoney spots rent, salary, subscriptions and the other payments that repeat, so you know what is paid, what is due and where your balance is heading.",
+      "schemaName": "WonderMoney Bills and Subscriptions",
+      "schemaDescription": "Recurring payment detection with a bills calendar, a 30-day balance forecast for each account and an iCal feed of upcoming bills.",
+      "whatTitle": "Your bills and subscriptions, found for you",
+      "whatBody": "Detection runs whenever transactions are added, imported or synced. The payments it is sure of are listed at once; the others wait for you to confirm them.",
+      "whatPoint1": "Repeating payments and income found in your transactions",
+      "whatPoint2": "Confirm or dismiss each one, and restore it later",
+      "whatPoint3": "A calendar that marks each bill paid, due, overdue or projected",
+      "whatPoint4": "A 30-day balance forecast on each account, with its lowest point",
+      "howTitle": "How it works",
+      "step1Title": "Transactions come in",
+      "step1Body": "From bank sync, a file import or by hand. WonderMoney looks for the payments that repeat.",
+      "step2Title": "Review what it found",
+      "step2Body": "Check each payment's merchant, usual amount and frequency, then confirm it or mark it as not recurring.",
+      "step3Title": "Plan with it",
+      "step3Body": "Read the month on the calendar and each account's forecast. A bill already paid drops out of the forecast, so it never counts twice.",
+      "calendarTitle": "Your bills in the calendar you already use",
+      "calendarBody": "Publish your confirmed bills as a read-only calendar feed, and subscribe to it once in Google Calendar, Apple Calendar or any app that reads iCal.",
+      "calendarPoint1": "An all-day event for each bill in the next 90 days",
+      "calendarPoint2": "The bill's name and expected amount, in your language",
+      "calendarPoint3": "No balances, account names or account numbers",
+      "calendarPoint4": "Reset or revoke the link whenever you want",
+      "faqTitle": "Recurring payment questions",
+      "faq1Q": "Do projected payments count in my reports?",
+      "faq1A": "No. A projection is not a transaction: it stays out of reports, budgets and totals until the payment is recorded.",
+      "faq2Q": "Does it need a bank connection?",
+      "faq2A": "No. Detection runs on every transaction that is added, whether it came from bank sync, a file or your own entry.",
+      "faq3Q": "Who sees the bills of a private account?",
+      "faq3A": "Only the people who can see that account. Recurring payments, forecasts and the calendar feed follow the account's sharing.",
+      "ctaHeadline": "Know what's due before it's due",
+      "ctaBody": "Let WonderMoney find your recurring payments and plan the month around them."
+    },
+    "featureAssistant": {
+      "eyebrow": "AI assistant",
+      "metaTitle": "AI assistant for your personal finances | WonderMoney",
+      "metaDescription": "Ask about your spending, budgets, goals and portfolio in plain words. The assistant reads your data, proposes changes for you to apply and stays off until you turn it on. Connect Claude Desktop or Cursor over MCP.",
+      "heroTitle": "Ask your money a question",
+      "heroSubtitle": "How much went on restaurants this month? Which budget is running over? The assistant answers from your own accounts, and changes nothing without you.",
+      "schemaName": "WonderMoney AI Assistant",
+      "schemaDescription": "An AI assistant that answers questions about your accounts, spending, budgets, goals and portfolio, proposes changes for you to confirm, and a read-only MCP server for AI clients.",
+      "whatTitle": "An assistant that reads, and asks before it changes",
+      "whatBody": "The assistant answers questions about your accounts, spending, budgets, goals and portfolio. It can draft a change, such as a category for a set of transactions, but nothing happens until you apply it.",
+      "whatPoint1": "Answers from your own data, under the same sharing rules as the app",
+      "whatPoint2": "Off until you turn it on, and you can turn it off again in settings",
+      "whatPoint3": "Proposes categories, reviewed marks and notes for you to apply or dismiss",
+      "whatPoint4": "One switch hides every AI feature, and the server refuses them too",
+      "howTitle": "How the assistant works",
+      "step1Title": "Turn it on",
+      "step1Body": "The assistant stays off until you choose Enable assistant on its consent screen in the web app.",
+      "step2Title": "Ask",
+      "step2Body": "Ask about a month, a category, a budget or a goal. It reads the data you can see in the app, and nothing more.",
+      "step3Title": "Apply or dismiss",
+      "step3Body": "A proposed change shows each transaction's current value and the proposed one. Apply it, dismiss it, or let it expire after seven days.",
+      "mcpTitle": "Use your own AI client",
+      "mcpBody": "WonderMoney runs a read-only MCP server. Connect Claude Desktop, Cursor, VS Code or another MCP client with a token, and ask about your finances from its chat.",
+      "mcpPoint1": "Read-only tools for balances, spending, budgets, goals and portfolio",
+      "mcpPoint2": "The client sees exactly what you see, and never another household's data",
+      "mcpPoint3": "Optional proposals that wait for you to apply them in the app",
+      "mcpPoint4": "Its own token, which expires after 90 days and can be revoked",
+      "faqTitle": "Assistant questions",
+      "faq1Q": "Can the assistant move money?",
+      "faq1A": "No. It can't move money, start transactions or change bank records. It reads your data and can only propose changes that you apply yourself.",
+      "faq2Q": "Is it on by default?",
+      "faq2A": "No. It stays off until you turn it on. To turn off every AI feature at once, use Hide AI features in Settings › Privacy.",
+      "faq3Q": "Does it see the private accounts of others in my household?",
+      "faq3A": "Only the ones shared with you. A private account hidden from you stays hidden from the assistant and from MCP clients too, and your proposals are visible only to you.",
+      "ctaHeadline": "Ask WonderMoney about your money",
+      "ctaBody": "Turn the assistant on when you want it, and keep every change in your hands."
+    },
+    "featureMultiCurrency": {
+      "eyebrow": "Multi-currency",
+      "metaTitle": "Multi-currency personal finance app | WonderMoney",
+      "metaDescription": "Keep accounts in euros, dollars, pounds or any other currency and see every total in yours, converted at the European Central Bank's daily rates. An amount without a rate is flagged, not guessed.",
+      "heroTitle": "Every currency, one honest total",
+      "heroSubtitle": "Accounts and transactions can be in any currency. WonderMoney shows every total in yours, and says plainly when an amount couldn't be converted.",
+      "schemaName": "WonderMoney Multi-Currency",
+      "schemaDescription": "Accounts and transactions in any currency, with totals converted at the European Central Bank's daily reference rates and amounts without a rate flagged.",
+      "whatTitle": "Converted at the rate of each day",
+      "whatBody": "Every amount in another currency is converted at the European Central Bank's rate for its date, which covers the main currencies. Rates update on working days, with nothing to set up.",
+      "whatPoint1": "Accounts and transactions in any currency",
+      "whatPoint2": "Totals in your currency at the ECB's daily reference rates",
+      "whatPoint3": "The original amount shown under the converted one",
+      "whatPoint4": "An amount with no rate marked Not converted and left out of totals",
+      "whatPoint5": "Marked Estimated when the only rate is more than a week old, and converted again when a newer one comes",
+      "howTitle": "How it works",
+      "step1Title": "Add accounts in their own currency",
+      "step1Body": "A current account in euros, a brokerage account in dollars, savings in pounds: each keeps its currency.",
+      "step2Title": "Choose your currency",
+      "step2Body": "Net worth, cash flow, reports and totals are shown in it.",
+      "step3Title": "Read totals you can trust",
+      "step3Body": "When a total leaves an amount out, it says how many and in which currencies, so it never adds two currencies together.",
+      "householdTitle": "Each person in their own currency",
+      "householdBody": "In a household, everyone picks their own currency and sees every total in it. The other members' balances and transactions are converted before they are added.",
+      "householdPoint1": "Net worth, cash flow and spending in each member's currency",
+      "householdPoint2": "Budgets keep the currency they were created in",
+      "householdPoint3": "Portfolio history converted at the rate of each day",
+      "householdPoint4": "Balances in shared expense groups kept per currency, never converted",
+      "faqTitle": "Currency questions",
+      "faq1Q": "Which currencies can I use?",
+      "faq1A": "Accounts and transactions can be in any currency. Conversion uses the European Central Bank's reference rates, which cover the main currencies; an amount in a currency without a rate stays in its own currency and out of your totals.",
+      "faq2Q": "Do I need to enter exchange rates?",
+      "faq2A": "No. Rates are fetched automatically on working days, and estimated or unconverted amounts are converted again after each update.",
+      "faq3Q": "Why does a total say it is incomplete?",
+      "faq3A": "Because an amount in it had no exchange rate. WonderMoney leaves it out rather than add it at face value, and tells you which currencies were missing.",
+      "ctaHeadline": "See all your money in one currency",
+      "ctaBody": "Add accounts in any currency and read one total you can trust."
+    },
+    "featureSelfHosting": {
+      "eyebrow": "Self-hosting and API",
+      "metaTitle": "Self-hosted personal finance app with an API | WonderMoney",
+      "metaDescription": "WonderMoney is open source under the AGPL. Run it on your own server with one Docker Compose file, sign in with your own identity provider and connect scripts through the REST API.",
+      "heroTitle": "Run it on your own server",
+      "heroSubtitle": "WonderMoney is free and open source. Use it at wonder.money, or run the same app on a home server, a NAS or a small VPS, with your data in your own database.",
+      "schemaName": "WonderMoney Self-Hosting",
+      "schemaDescription": "Open-source personal finance software under the AGPL that runs on your own server with Docker Compose or Kubernetes, with single sign-on and a REST API with personal tokens.",
+      "whatTitle": "The same app, on your machine",
+      "whatBody": "A self-hosted server has the same app as wonder.money: accounts, bank sync, budgets, goals, loans, households and portfolios. The optional extras switch on when you configure them, and stay hidden when you don't.",
+      "whatPoint1": "One Docker Compose file runs Postgres, the API, a background worker and the web app",
+      "whatPoint2": "About 2 GB of free memory: a small VPS, a home server or a NAS",
+      "whatPoint3": "AI features with any OpenAI-compatible endpoint, a local Ollama included",
+      "whatPoint4": "Single sign-on with your own identity provider, such as Authentik or Keycloak",
+      "whatPoint5": "Bank sync with your own Enable Banking key, and SimpleFIN for US and Canadian banks",
+      "whatPoint6": "A Helm chart for Kubernetes",
+      "howTitle": "How to start",
+      "step1Title": "Get a machine with Docker",
+      "step1Body": "Docker with the Compose plugin and about 2 GB of free memory is enough.",
+      "step2Title": "Run the install",
+      "step2Body": "The install script sets up the containers and generates the secrets. Add a domain and HTTPS to use it outside your own network.",
+      "step3Title": "Move in",
+      "step3Body": "Create your account, or restore an export from wonder.money: an export loads into an empty household on another server.",
+      "apiTitle": "An API for your own scripts",
+      "apiBody": "Give a script, a spreadsheet or a home dashboard access to your finances with a personal API token, on wonder.money or on your own server.",
+      "apiPoint1": "A REST API with a public reference",
+      "apiPoint2": "Read or write access, which never reaches deletes, bank connections or the household",
+      "apiPoint3": "Tokens that expire after 30, 90 or 365 days",
+      "apiPoint4": "Only a hash of each token is kept, so it is shown once",
+      "faqTitle": "Self-hosting questions",
+      "faq1Q": "Is it really free?",
+      "faq1A": "Yes. The code is open source under the GNU AGPL v3, and the hosted service at wonder.money is free too.",
+      "faq2Q": "Does bank sync work on my own server?",
+      "faq2A": "Yes. Nothing is needed on the server: each person adds their own Enable Banking key in Settings. You can also turn on SimpleFIN for banks in the United States and Canada.",
+      "faq3Q": "Can I move between wonder.money and my own server?",
+      "faq3A": "Yes. Export your data from one and restore it into an empty household on the other.",
+      "ctaHeadline": "Your server, your data",
+      "ctaBody": "Start at wonder.money and move to your own server whenever you want, or the other way round."
     }
   },
   "article": {

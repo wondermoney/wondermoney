@@ -1,16 +1,12 @@
 ---
-// Prerendered explanation, worked example and method for the buy versus rent calculator.
-// The figures come from the same calculation the calculator runs.
+// Prerendered explanation, worked example and method for the buy versus rent calculator, on
+// the guide building blocks. The figures come from the same calculation the calculator runs
+// (buyVsRentGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  BUY_VS_RENT_EXAMPLE,
-  BUY_VS_RENT_EXAMPLE_ALTERNATIVE_RENT,
-  BUY_VS_RENT_LIMITS,
-  computeBuyVsRent,
-  type BuyVsRentInput,
-  type BuyVsRentResult,
-} from "@/lib/calculators/buyVsRent";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildBuyVsRentGuide } from "./buyVsRentGuide";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -21,142 +17,52 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.buyVsRent.guide.${key}`;
+const guide = buildBuyVsRentGuide(locale);
+const { values } = guide;
 
-function calculate(input: BuyVsRentInput): BuyVsRentResult {
-  const calculation = computeBuyVsRent(input);
-  if (!calculation.ok) throw new Error("The buy versus rent worked example has invalid inputs");
-  return calculation.result;
-}
-
-const input = BUY_VS_RENT_EXAMPLE;
-const example = calculate(input);
-const alternative = calculate({ ...input, monthlyRent: BUY_VS_RENT_EXAMPLE_ALTERNATIVE_RENT });
-const [today] = example.years;
-const end = example.years[example.years.length - 1];
-
-const money = (value: number, decimals = 2) => formatMoney(locale, value, { decimals });
-const percent = (value: number) => formatPercent(locale, value, { decimals: 0 });
-const L = BUY_VS_RENT_LIMITS;
-
-const values = {
-  price: money(input.homePrice, 0),
-  downPayment: money(input.downPayment, 0),
-  downPaymentShare: percent((input.downPayment / input.homePrice) * 100),
-  loan: money(example.loanAmount, 0),
-  rate: formatPercent(locale, input.mortgageRate, { decimals: 1 }),
-  term: formatNumber(locale, input.mortgageTermYears),
-  purchaseCostsPct: percent(input.purchaseCostsPct),
-  purchaseCosts: money(example.purchaseCosts, 0),
-  upfront: money(example.upfrontCash, 0),
-  rent: money(input.monthlyRent, 0),
-  rentIncrease: percent(input.rentIncreasePct),
-  appreciation: percent(input.appreciationPct),
-  ownershipCostsPct: percent(input.ownershipCostsPct),
-  investmentReturn: percent(input.investmentReturnPct),
-  monthlyReturn: formatPercent(locale, ((1 + input.investmentReturnPct / 100) ** (1 / 12) - 1) * 100, {
-    decimals: 3,
-  }),
-  sellingCostsPct: percent(input.sellingCostsPct),
-  horizon: formatNumber(locale, input.horizonYears),
-  startSellingCosts: money(today.sellingCosts, 0),
-  startOwner: money(today.ownerNetWorth, 0),
-  startGap: money(Math.abs(today.difference), 0),
-  mortgagePayment: money(example.monthlyMortgagePayment),
-  ownershipMonthly: money(example.firstMonthOwnerCost - example.monthlyMortgagePayment),
-  owningMonthly: money(example.firstMonthOwnerCost),
-  rentMonthly: money(example.firstMonthRent),
-  monthlyGap: money(example.firstMonthOwnerCost - example.firstMonthRent),
-  homeValue: money(end.homeValue),
-  sellingCosts: money(end.sellingCosts),
-  loanBalance: money(end.loanBalance),
-  ownerNetWorth: money(example.ownerNetWorth),
-  renterNetWorth: money(example.renterNetWorth),
-  difference: money(Math.abs(example.difference)),
-  breakEvenYear: formatNumber(locale, example.breakEvenYear ?? 0),
-  altRent: money(BUY_VS_RENT_EXAMPLE_ALTERNATIVE_RENT, 0),
-  altDifference: money(Math.abs(alternative.difference)),
-  maxPrice: money(L.maxHomePrice, 0),
-  maxRent: money(L.maxMonthlyRent, 0),
-  maxHorizon: formatNumber(locale, L.maxHorizonYears),
-  minGrowth: percent(L.minGrowthPct),
-  maxGrowth: percent(L.maxGrowthPct),
-};
-
-const list = (key: string) =>
-  Object.values(t<Record<string, string>>(k(key), { returnObjects: true }));
-const readItems = list("read");
-const methodItems = list("method");
-const leftOutItems = list("leftOut");
-
-const linkClass =
-  "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+const leftOutItems = Object.values(t<Record<string, string>>(k("leftOut"), { returnObjects: true }));
 const mortgageHref = toLocalizedPath("toolMortgage", locale);
 const netWorthHref = toLocalizedPath("toolNetWorth", locale);
 ---
 
 <ToolGuide>
-  <section aria-labelledby="buy-vs-rent-what">
-    <h2 id="buy-vs-rent-what" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("whatHeading"))}
-    </h2>
-    <p class="mt-3 leading-7">{t(k("whatBody"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-5 leading-7">
-      {readItems.map((item) => <li>{item}</li>)}
-    </ul>
+  <section>
+    <h2>{t(k("whatHeading"))}</h2>
+    <p>{t(k("whatBody"))}</p>
+    <GuideTermList items={guide.read} />
   </section>
 
-  <section aria-labelledby="buy-vs-rent-example">
-    <h2 id="buy-vs-rent-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleHeading"))}
-    </h2>
-    <div class="mt-3 space-y-4 leading-7">
-      <p>{t(k("example.setup"), values)}</p>
-      <p>{t(k("example.start"), values)}</p>
-      <p>{t(k("example.monthly"), values)}</p>
-      <p>{t(k("example.result"), values)}</p>
-      <p class="rounded-lg border border-border bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-        {values.homeValue} − {values.sellingCosts} − {values.loanBalance} = {values.ownerNetWorth}
-        <br />
-        {values.ownerNetWorth} − {values.renterNetWorth} = {values.difference}
-      </p>
-      <p>{t(k("example.breakEven"), values)}</p>
-    </div>
+  <section>
+    <h2>{t(k("exampleHeading"))}</h2>
+    <p>{t(k("example.setup"), values)}</p>
+    <p>{t(k("example.start"), values)}</p>
+    <p>{t(k("example.monthly"), values)}</p>
+    <p>{t(k("example.result"), values)}</p>
+    <GuideFigures items={guide.owner} operators={["−", "−", "="]} />
+    <GuideFigures items={guide.paths} operators={["−", "="]} />
+    <p>{t(k("example.breakEven"), values)}</p>
   </section>
 
-  <section aria-labelledby="buy-vs-rent-method">
-    <h2 id="buy-vs-rent-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodHeading"))}
-    </h2>
-    <p class="mt-3 leading-7">{t(k("methodIntro"))}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-5 leading-7">
-      {methodItems.map((item) => <li>{item}</li>)}
-    </ul>
-    <p class="mt-4 rounded-lg bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      {t(k("formulaOwner"))}
-      <br />
-      {t(k("formulaRenter"))}
-      <br />
-      {t(k("formulaReturn"))} = (1 + R)<sup>1/12</sup> − 1
-    </p>
-    <p class="mt-3 leading-7">{t(k("formulaLegend"), values)}</p>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("leftOutHeading"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-5 leading-7">
+  <section>
+    <h2>{t(k("methodHeading"))}</h2>
+    <p>{t(k("methodIntro"))}</p>
+    <GuideFormula lines={guide.formulas} label={t(k("formulasLabel"))} />
+    <p>{t(k("formulaExample"), values)}</p>
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(k("leftOutHeading"))}</h3>
+    <ul class="list-disc space-y-2 pl-5">
       {leftOutItems.map((item) => <li>{item}</li>)}
       <li>{t(k("limits"), values)}</li>
     </ul>
   </section>
 
-  <section aria-labelledby="buy-vs-rent-related">
-    <h2 id="buy-vs-rent-related" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("relatedHeading"))}
-    </h2>
-    <p class="mt-3 leading-7">
-      {t(k("relatedMortgage"))}{" "}
-      <a href={mortgageHref} class={linkClass}>{t(k("relatedMortgageLink"))}</a>.
+  <section>
+    <h2>{t(k("relatedHeading"))}</h2>
+    <p>
+      {t(k("relatedMortgage"))} <a href={mortgageHref}>{t(k("relatedMortgageLink"))}</a>.
     </p>
-    <p class="mt-3 leading-7">
-      {t(k("relatedNetWorth"))}{" "}
-      <a href={netWorthHref} class={linkClass}>{t(k("relatedNetWorthLink"))}</a>.
+    <p>
+      {t(k("relatedNetWorth"))} <a href={netWorthHref}>{t(k("relatedNetWorthLink"))}</a>.
     </p>
   </section>
 </ToolGuide>

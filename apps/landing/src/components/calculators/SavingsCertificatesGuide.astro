@@ -1,12 +1,14 @@
 ---
+// Prerendered rules, worked example and method for the savings certificates calculator, on
+// the guide building blocks (guideBlocks.ts). The figures come from the same calculation the
+// calculator runs (savingsCertificatesGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  PERMANENCE_PREMIUM_STEPS,
-  SAVINGS_CERTIFICATES_EXAMPLE,
-  SAVINGS_CERTIFICATES_RULES,
-  computeSavingsCertificates,
-} from "@/lib/calculators/savingsCertificates";
-import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildSavingsCertificatesGuide } from "./savingsCertificatesGuide";
+import { PERMANENCE_PREMIUM_STEPS, SAVINGS_CERTIFICATES_RULES } from "@/lib/calculators/savingsCertificates";
+import { formatNumber } from "@/lib/numberFormat";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -17,89 +19,60 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.savingsCertificates.guide.${key}`;
-const example = computeSavingsCertificates(SAVINGS_CERTIFICATES_EXAMPLE);
-if (!example.ok) throw new Error("Invalid savings certificates worked example");
 
-const money = (value: number, decimals = 2) => formatMoney(locale, value, { decimals });
-const pct = (value: number) => formatPercent(locale, value, { decimals: 2 });
-const values = {
-  amount: money(SAVINGS_CERTIFICATES_EXAMPLE.amount, 0),
-  years: formatNumber(locale, SAVINGS_CERTIFICATES_EXAMPLE.years),
-  baseRate: pct(SAVINGS_CERTIFICATES_EXAMPLE.baseRate),
-  grossInterest: money(example.result.grossInterest),
-  irs: money(example.result.irs),
-  netInterest: money(example.result.netInterest),
-  finalValue: money(example.result.finalValue),
-  netYield: pct(example.result.netAnnualYield),
-  irsRate: formatPercent(locale, SAVINGS_CERTIFICATES_RULES.irsRate, { decimals: 0 }),
-  maxBase: pct(SAVINGS_CERTIFICATES_RULES.maxBaseRate),
-  termYears: formatNumber(locale, SAVINGS_CERTIFICATES_RULES.termYears),
-  minAmount: money(SAVINGS_CERTIFICATES_RULES.minAmount, 0),
-  maxAmount: money(SAVINGS_CERTIFICATES_RULES.maxAmount, 0),
-  rulesDate: t(k("rulesDateValue")),
-  referenceMonth: monthLabel(locale, SAVINGS_CERTIFICATES_RULES.referenceBaseRate.month),
-  referenceRate: pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate),
-  // The monthly refresh can move the rate off the ceiling, so the page says "the ceiling" only when it is.
-  referenceRateNote:
-    SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate === SAVINGS_CERTIFICATES_RULES.maxBaseRate
-      ? t(k("referenceRateAtCeiling"), { rate: pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate) })
-      : pct(SAVINGS_CERTIFICATES_RULES.referenceBaseRate.rate),
-};
-function monthLabel(lang: string, month: string) {
-  return new Intl.DateTimeFormat(lang, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${month}-01`));
-}
+const guide = buildSavingsCertificatesGuide(locale);
+const { values } = guide;
+
 const sheetSource = SAVINGS_CERTIFICATES_RULES.rulesSource;
 const igcpSource = SAVINGS_CERTIFICATES_RULES.referenceBaseRate.source;
-const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 ---
-
 <ToolGuide>
-  <section aria-labelledby="savings-certificates-rules">
-    <h2 id="savings-certificates-rules" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("rulesTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("rulesIntro"), values)}</p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
+  <section>
+    <h2>{t(k("rulesTitle"))}</h2>
+    <p>{t(k("rulesIntro"), values)}</p>
+    <ul class="list-disc space-y-2 pl-6">
       {["ruleTerm", "ruleRate", "ruleTax", "ruleRedeem"].map((key) => <li>{t(k(key), values)}</li>)}
     </ul>
-    <table class="mt-6 w-full max-w-md text-left text-sm">
-      <caption class="pb-2 text-left font-medium text-foreground">{t(k("premiumTitle"))}</caption>
-      <thead class="text-muted-foreground">
-        <tr>
-          <th scope="col" class="py-1 pr-3 font-medium">{t(k("premiumYears"))}</th>
-          <th scope="col" class="py-1 font-medium">{t(k("premiumPoints"))}</th>
-        </tr>
-      </thead>
-      <tbody class="font-mono">
-        {PERMANENCE_PREMIUM_STEPS.map((step) => (
-          <tr class="border-t border-border">
-            <td class="py-1 pr-3">{step.from === step.to ? formatNumber(locale, step.from) : `${formatNumber(locale, step.from)}–${formatNumber(locale, step.to)}`}</td>
-            <td class="py-1">{formatNumber(locale, step.premium, 2)}</td>
+    <div class="max-w-md overflow-x-auto rounded-card border border-border">
+      <table class="w-full text-left text-sm">
+        <caption class="border-b border-border bg-paper-2 px-4 py-2.5 text-left font-medium text-foreground">
+          {t(k("premiumTitle"))}
+        </caption>
+        <thead class="text-muted-foreground">
+          <tr>
+            <th scope="col" class="px-4 py-2 font-medium">{t(k("premiumYears"))}</th>
+            <th scope="col" class="px-4 py-2 text-right font-medium">{t(k("premiumPoints"))}</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-    <p class="mt-4">
-      <a href={sheetSource} class={linkClass} rel="noopener">{t(k("sourceSheet"))}</a>
+        </thead>
+        <tbody class="font-mono text-foreground">
+          {PERMANENCE_PREMIUM_STEPS.map((step) => (
+            <tr class="border-t border-border">
+              <td class="px-4 py-2">{step.from === step.to ? formatNumber(locale, step.from) : `${formatNumber(locale, step.from)}–${formatNumber(locale, step.to)}`}</td>
+              <td class="px-4 py-2 text-right">{formatNumber(locale, step.premium, 2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <a href={sheetSource} rel="noopener">{t(k("sourceSheet"))}</a>
       {" · "}
-      <a href={igcpSource} class={linkClass} rel="noopener">{t(k("sourceIgcp"), values)}</a>
+      <a href={igcpSource} rel="noopener">{t(k("sourceIgcp"), values)}</a>
     </p>
   </section>
-  <section aria-labelledby="savings-certificates-example">
-    <h2 id="savings-certificates-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("exampleText"), values)}</p>
+
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("exampleText"), values)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
   </section>
-  <section aria-labelledby="savings-certificates-method">
-    <h2 id="savings-certificates-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodQuarter", "methodTax", "methodYield"].map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} columns={1} />
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <ul class="list-disc space-y-2 pl-6">
       {["assumptionBase", "assumptionRules", "assumptionScope"].map((key) => <li>{t(k(key), values)}</li>)}
     </ul>
   </section>

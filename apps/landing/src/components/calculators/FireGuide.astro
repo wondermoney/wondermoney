@@ -1,17 +1,12 @@
 ---
-// Prerendered guide under the FIRE calculator: what FIRE is, a worked example,
-// the method and how to track the number in WonderMoney. The example's figures
-// come from the same calculation the calculator runs, at build time.
+// Prerendered guide under the FIRE calculator: what FIRE is, a worked example, the method
+// and how to track the number in WonderMoney, on the guide building blocks (guideBlocks.ts).
+// The example's figures come from the same calculation the calculator runs (fireGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  FIRE_MAX_YEARS,
-  FIRE_SPENDING_CUT,
-  FIRE_WORKED_EXAMPLE,
-  calculateFire,
-  withSpendingCut,
-} from "@/lib/calculators/fire";
-import { formatFireDuration, formatFireProgress, formatFireRate } from "@/lib/calculators/fireFormat";
-import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildFireGuide } from "./fireGuide";
 import type { Lang } from "@/lib/i18nLocale";
 import { getTranslations } from "@/lib/translations";
 
@@ -24,36 +19,8 @@ const t = getTranslations(locale);
 const k = (key: string) => `tools.fire.guide.${key}`;
 const page = (key: string) => `lp.fireCalculator.${key}`;
 
-const example = FIRE_WORKED_EXAMPLE;
-const result = calculateFire(example);
-const cut = calculateFire(withSpendingCut(example));
-
-// The worked example is fixed, so a change to the calculation that stops it
-// projecting a date has to fail the build rather than print an empty sentence.
-if (result.monthsToTarget === null || cut.monthsToTarget === null || result.progress === null) {
-  throw new Error("The FIRE worked example no longer reaches its target");
-}
-
-const money = (value: number) => formatMoney(locale, value);
-// The same formatters as the calculator, so the example reads exactly like its result.
-const rate = (value: number) => formatFireRate(locale, value);
-
-const values = {
-  spending: money(example.annualSpending),
-  assets: money(example.currentAssets),
-  contribution: money(example.monthlyContribution),
-  return: rate(example.realReturn),
-  rate: rate(example.withdrawalRate),
-  target: money(result.fireNumber),
-  progress: formatFireProgress(locale, result.progress),
-  time: formatFireDuration(locale, result.monthsToTarget),
-  cut: formatPercent(locale, FIRE_SPENDING_CUT, { decimals: 0 }),
-  cutSpending: money(cut.inputs.annualSpending),
-  cutTarget: money(cut.fireNumber),
-  cutTime: formatFireDuration(locale, cut.monthsToTarget),
-};
-
-const methodItems = ["methodMultiple", "methodGrowth", "methodRealMoney", "methodHorizon", "methodLeftOut", "methodPrivacy"];
+const guide = buildFireGuide(locale);
+const { values } = guide;
 
 const trackSteps = [1, 2, 3].map((number) => ({
   title: t(page(`track${number}Title`)),
@@ -63,35 +30,30 @@ const trackSteps = [1, 2, 3].map((number) => ({
 
 <ToolGuide>
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(page("whatTitle"))}</h2>
-    <p class="mt-4">{t(page("whatBody1"))}</p>
-    <p class="mt-4">{t(page("whatBody2"))}</p>
-    <p class="mt-4">{t(page("whatBody3"))}</p>
+    <h2>{t(page("whatTitle"))}</h2>
+    <p>{t(page("whatBody1"))}</p>
+    <p>{t(page("whatBody2"))}</p>
+    <p>{t(page("whatBody3"))}</p>
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("exampleHeading"))}</h2>
-    <p class="mt-4">{t(k("exampleBody"), values)}</p>
-    <p class="mt-4 rounded-lg border border-border bg-paper-2 px-4 py-3 font-mono text-sm text-foreground">
-      {values.spending} ÷ {values.rate} = {values.target}
-    </p>
-    <p class="mt-4">{t(k("exampleTarget"), values)}</p>
-    <p class="mt-4">{t(k("exampleTime"), values)}</p>
+    <h2>{t(k("exampleHeading"))}</h2>
+    <p>{t(k("exampleBody"), values)}</p>
+    <GuideFigures items={guide.flow} operators={guide.flowOperators} />
+    <p>{t(k("exampleTarget"), values)}</p>
+    <p>{t(k("exampleTime"), values)}</p>
+    <GuideFigures variant="grid" items={guide.outcome} />
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(k("methodHeading"))}</h2>
-    <p class="mt-4 rounded-lg border border-border bg-paper-2 px-4 py-3 text-sm text-foreground">
-      {t(k("methodFormula"))}
-    </p>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {methodItems.map((item) => <li>{t(k(item), { years: FIRE_MAX_YEARS })}</li>)}
-    </ul>
+    <h2>{t(k("methodHeading"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("methodFormulasLabel"))} />
+    <GuideTermList items={guide.notes} />
   </section>
 
   <section>
-    <h2 class="text-2xl font-semibold tracking-tight text-foreground">{t(page("trackTitle"))}</h2>
-    <ol class="mt-4 list-decimal space-y-4 pl-6">
+    <h2>{t(page("trackTitle"))}</h2>
+    <ol class="list-decimal space-y-4 pl-6">
       {trackSteps.map((step) => (
         <li>
           <h3 class="font-semibold text-foreground">{step.title}</h3>

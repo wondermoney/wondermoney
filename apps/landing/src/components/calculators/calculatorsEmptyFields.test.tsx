@@ -104,7 +104,7 @@ describe.each(CALCULATORS)("%s calculator", (_name, Calculator) => {
 
 /** The result figures (not the inputs, which are monospaced too). */
 const figures = () =>
-  Array.from(document.querySelectorAll("p.font-mono, td.font-mono"), (node) => node.textContent);
+  Array.from(document.querySelectorAll("p.font-mono, dd.font-mono, td.font-mono"), (node) => node.textContent);
 
 /**
  * The empty-state rule: an empty optional amount (a starting amount, a contribution, savings,
@@ -508,7 +508,7 @@ describe("rate revision calculator", () => {
     expect(screen.getByText(/of your net income/)).toBeTruthy();
     await user.clear(screen.getByRole("spinbutton", { name: "Net monthly income (optional)" }));
     expect(screen.queryByText(/of your net income/)).toBeNull();
-    expect(screen.getByText("New monthly payment")).toBeTruthy();
+    expect(screen.getByText(/^Payment after the revision/)).toBeTruthy();
     expect(figures().length).toBeGreaterThan(0);
   });
 

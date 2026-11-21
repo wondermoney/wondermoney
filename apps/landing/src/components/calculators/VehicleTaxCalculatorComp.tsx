@@ -17,12 +17,11 @@ import {
 } from "@/lib/calculators/vehicleTax";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
-import { formatMoney } from "@/lib/numberFormat";
+import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.vehicleTax.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const textInputClass =
   "w-full rounded-lg border border-input px-3 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring";
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -158,26 +157,18 @@ function VehicleTaxCalculator() {
         </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
-          {summary ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {t(k(multiple ? "result.annualTaxAll" : "result.annualTax"))}
-              </p>
-              <p id="vehicleTax-annualTax" className="font-mono text-3xl font-bold text-primary">
-                {money(summary.annualTax)}
-              </p>
-              {single?.exempt && <p className="mt-2 text-sm text-muted-foreground">{t(k("result.exempt"))}</p>}
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
+        {!summary && <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>}
         {summary && single && (
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.monthlyProvision")), value: money(single.monthlyProvision), highlight: true },
+                {
+                  label: t(k(multiple ? "result.annualTaxAll" : "result.annualTax")),
+                  value: money(summary.annualTax),
+                  highlight: true,
+                  id: "vehicleTax-annualTax",
+                },
+                { label: t(k("result.monthlyProvision")), value: money(single.monthlyProvision) },
                 { label: t(k("result.category")), value: single.category },
                 ...(!single.exempt && single.category === "B"
                   ? [
@@ -185,7 +176,7 @@ function VehicleTaxCalculator() {
                       ...(single.additionalTax > 0
                         ? [{ label: t(k("result.additionalTax")), value: money(single.additionalTax) }]
                         : []),
-                      { label: t(k("result.coefficient")), value: `×${single.coefficient.toFixed(2)}` },
+                      { label: t(k("result.coefficient")), value: `×${formatNumber(locale, single.coefficient, 2)}` },
                     ]
                   : []),
                 ...(single.dieselSurcharge > 0
@@ -196,6 +187,7 @@ function VehicleTaxCalculator() {
                   : []),
               ]}
             />
+            {single.exempt && <p className="text-sm text-muted-foreground">{t(k("result.exempt"))}</p>}
             {!single.exempt && (
               <div className="space-y-3 text-sm">
                 <p>
@@ -222,7 +214,13 @@ function VehicleTaxCalculator() {
           <>
             <CalculatorResult
               items={[
-                { label: t(k("result.monthlyProvision")), value: money(summary.monthlyProvision), highlight: true },
+                {
+                  label: t(k(multiple ? "result.annualTaxAll" : "result.annualTax")),
+                  value: money(summary.annualTax),
+                  highlight: true,
+                  id: "vehicleTax-annualTax",
+                },
+                { label: t(k("result.monthlyProvision")), value: money(summary.monthlyProvision) },
                 ...(otherIucEuros > 0
                   ? [{ label: t(k("result.totalAnnualTax")), value: money(summary.totalAnnualTax) }]
                   : []),
@@ -274,6 +272,9 @@ function VehicleTaxCalculator() {
             )}
           </>
         )}
+        <p className="sr-only" aria-live="polite" aria-atomic="true">
+          {summary ? `${t(k(multiple ? "result.annualTaxAll" : "result.annualTax"))}: ${money(summary.annualTax)}` : ""}
+        </p>
       </div>
     </CalculatorLayout>
   );
@@ -366,17 +367,16 @@ function VehicleFieldset({
           <label htmlFor={id("fuel")} className="block text-sm font-medium text-foreground">
             {t(k("fields.fuel"))}
           </label>
-          <select
+          <Select
             id={id("fuel")}
             value={input.fuel}
             onChange={(event) => onChange({ fuel: event.currentTarget.value as VehicleFuel })}
-            className={selectClass}
             aria-invalid={errors.fuel ? true : undefined}
           >
             {(["petrol", "diesel", "electric"] as const).map((fuel) => (
               <option key={fuel} value={fuel}>{t(k(`fuels.${fuel}`))}</option>
             ))}
-          </select>
+          </Select>
           {errors.fuel && <p role="alert" className="text-sm text-destructive">{err(errors.fuel)}</p>}
         </div>
         {electric ? (
@@ -408,16 +408,15 @@ function VehicleFieldset({
             <label htmlFor={id("month")} className="block text-sm font-medium text-foreground">
               {t(k("fields.month"))}
             </label>
-            <select
+            <Select
               id={id("month")}
               value={input.month}
               onChange={(event) => onChange({ month: Number(event.currentTarget.value) })}
-              className={selectClass}
             >
               {MONTHS.map((month) => (
                 <option key={month} value={month}>{monthName(month)}</option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">{t(k("registrationHelp"))}</p>
@@ -438,15 +437,14 @@ function VehicleFieldset({
               <label htmlFor={id("standard")} className="block text-sm font-medium text-foreground">
                 {t(k("fields.standard"))}
               </label>
-              <select
+              <Select
                 id={id("standard")}
                 value={input.standard}
                 onChange={(event) => onChange({ standard: event.currentTarget.value as Co2Standard })}
-                className={selectClass}
               >
                 <option value="wltp">{t(k("standards.wltp"))}</option>
                 <option value="nedc">{t(k("standards.nedc"))}</option>
-              </select>
+              </Select>
             </div>
           </>
         )}

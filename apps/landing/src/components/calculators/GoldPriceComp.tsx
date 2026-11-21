@@ -21,6 +21,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.goldPrice.${key}`;
 const SUMMARY = goldPriceSummary();
@@ -87,12 +88,11 @@ function GoldPrice() {
             <label htmlFor="gold-purity" className="block text-sm font-medium text-foreground">
               {t(k("fields.purity"))}
             </label>
-            <select
+            <Select
               id="gold-purity"
               value={input.purity}
               onChange={(event) => update("purity", event.currentTarget.value as GoldPurity)}
               aria-describedby="gold-purity-help"
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {GOLD_PURITIES.map((purity) => (
                 <option key={purity.id} value={purity.id}>
@@ -102,7 +102,7 @@ function GoldPrice() {
                   })}
                 </option>
               ))}
-            </select>
+            </Select>
             <p id="gold-purity-help" className="text-sm text-muted-foreground">
               {t(k("help.purity"))}
             </p>

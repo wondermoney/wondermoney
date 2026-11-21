@@ -18,6 +18,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.termDepositOffers.${key}`;
 const MAX_AMOUNT = 100_000_000;
@@ -74,8 +75,6 @@ function TermDepositOffers() {
       <span>{label}</span>
     </label>
   );
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <section aria-labelledby="offers-title" className="min-w-0 space-y-6">
@@ -106,11 +105,10 @@ function TermDepositOffers() {
           <label htmlFor="offers-term" className="block text-sm font-medium text-foreground">
             {t(k("filters.term"))}
           </label>
-          <select
+          <Select
             id="offers-term"
             value={filters.termMonths === null ? "" : String(filters.termMonths)}
             onChange={(event) => update("termMonths", event.currentTarget.value === "" ? null : Number(event.currentTarget.value))}
-            className={selectClass}
           >
             <option value="">{t(k("filters.termAll"))}</option>
             {terms.map((term) => (
@@ -118,22 +116,21 @@ function TermDepositOffers() {
                 {t(k("filters.termOption"), { months: String(term) })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="offers-irs" className="block text-sm font-medium text-foreground">
             {t(k("filters.irs"))}
           </label>
-          <select
+          <Select
             id="offers-irs"
             value={filters.irs}
             onChange={(event) => update("irs", event.currentTarget.value as OfferFilters["irs"])}
-            className={selectClass}
           >
             <option value="all">{t(k("filters.irsAll"))}</option>
             <option value="withheld">{t(k("filters.irsWithheld"))}</option>
             <option value="notWithheld">{t(k("filters.irsNotWithheld"))}</option>
-          </select>
+          </Select>
         </div>
         <fieldset className="space-y-3 sm:col-span-2 lg:col-span-3">
           <legend className="sr-only">{t(k("filters.conditions"))}</legend>
@@ -202,20 +199,23 @@ function Notes({ offer }: { offer: TermDepositOffer }) {
   );
 }
 
+/** "Not stated" reads as a note, in the body face, rather than as a figure. */
+const notStatedClass = "text-xs text-muted-foreground";
+
 function OfferCards({ offers, amount, eur, percent }: RowProps) {
   const { t, limit, flags } = useOfferText();
   return (
-    <ul className="space-y-3 md:hidden" aria-label={t(k("offers.title"))}>
+    <ul className="divide-y divide-border rounded-card border border-border bg-background md:hidden" aria-label={t(k("offers.title"))}>
       {offers.map((offer, index) => {
         const value = returnText(offer, amount, eur, percent);
         return (
-          <li key={index} className="rounded-card border border-border bg-background p-4 shadow-sm">
+          <li key={index} className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-semibold text-foreground">{offer.bank}</p>
                 <p className="text-sm text-muted-foreground">{offer.product}</p>
               </div>
-              <p className="shrink-0 font-mono text-xl font-bold text-primary">{percent(offer.tanb)}</p>
+              <p className="shrink-0 font-mono text-xl font-semibold text-foreground">{percent(offer.tanb)}</p>
             </div>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
               <div>
@@ -228,11 +228,11 @@ function OfferCards({ offers, amount, eur, percent }: RowProps) {
               </div>
               <div>
                 <dt className="text-muted-foreground">{t(k("columns.minimum"))}</dt>
-                <dd className="font-mono text-foreground">{limit(offer.minimum)}</dd>
+                <dd className={offer.minimum === null ? notStatedClass : "font-mono text-foreground"}>{limit(offer.minimum)}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">{t(k("columns.maximum"))}</dt>
-                <dd className="font-mono text-foreground">{limit(offer.maximum)}</dd>
+                <dd className={offer.maximum === null ? notStatedClass : "font-mono text-foreground"}>{limit(offer.maximum)}</dd>
               </div>
               <div className="col-span-2">
                 <dt className="text-muted-foreground">{t(k("columns.netYield"))}</dt>
@@ -274,14 +274,14 @@ function OfferTable({ offers, amount, eur, percent }: RowProps) {
             const value = returnText(offer, amount, eur, percent);
             return (
               <tr key={index} className="border-t border-border-2 align-top">
-                <td className="whitespace-nowrap px-3 py-2 text-right font-mono font-semibold text-primary">{percent(offer.tanb)}</td>
+                <td className="whitespace-nowrap px-3 py-2 text-right font-mono font-semibold text-foreground">{percent(offer.tanb)}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{offer.termMonths}</td>
                 <th scope="row" className="px-3 py-2 text-left font-normal text-foreground">
                   <span className="font-medium">{offer.bank}</span>
                   <span className="block text-xs text-muted-foreground">{offer.product}</span>
                 </th>
-                <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{limit(offer.minimum)}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{limit(offer.maximum)}</td>
+                <td className={`whitespace-nowrap px-3 py-2 text-right ${offer.minimum === null ? notStatedClass : "font-mono text-foreground"}`}>{limit(offer.minimum)}</td>
+                <td className={`whitespace-nowrap px-3 py-2 text-right ${offer.maximum === null ? notStatedClass : "font-mono text-foreground"}`}>{limit(offer.maximum)}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono font-semibold text-foreground">{value.net}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{value.yearly}</td>
                 <td className="min-w-[14rem] max-w-xs px-3 py-2 text-xs text-foreground">

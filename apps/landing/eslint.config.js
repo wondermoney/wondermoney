@@ -55,6 +55,24 @@ export default [
     },
   },
   {
+    // Recharts comes through src/components/shared/charts.tsx, whose series draw at once.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/shared/charts.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "recharts",
+              message: "Import Recharts from @/components/shared/charts, whose series draw without an entry animation.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       "dist",
       "node_modules",

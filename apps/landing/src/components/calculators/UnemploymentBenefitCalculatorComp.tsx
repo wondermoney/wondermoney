@@ -16,10 +16,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.unemploymentBenefit.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const CHECKLIST = ["involuntary", "contributions", "registration", "ready", "deadline"] as const;
 
 export default function UnemploymentBenefitCalculatorComp({ locale }: { locale: Lang }) {
@@ -43,15 +42,14 @@ function SelectField<T extends string>({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">{label}</label>
-      <select
+      <Select
         id={id}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value as T)}
-        className={selectClass}
         aria-describedby={help ? `${id}-help` : undefined}
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+      </Select>
       {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
     </div>
   );
@@ -151,22 +149,11 @@ function UnemploymentBenefitCalculator() {
         />
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
+        <div id="unemployment-result" aria-live="polite">
           {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.monthly"))}</p>
-              <p id="unemployment-monthly" className="font-mono text-3xl font-bold text-primary">
-                {money(result.monthlyCents)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
-        {result && (
-          <>
             <CalculatorResult
               items={[
+                { label: t(k("result.monthly")), value: money(result.monthlyCents), highlight: true },
                 { label: t(k("result.daily")), value: money(result.dailyCents) },
                 {
                   label: t(k("result.duration")),
@@ -174,29 +161,39 @@ function UnemploymentBenefitCalculator() {
                     days: String(result.duration.totalDays),
                     months: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(result.duration.totalDays / 30),
                   }),
+                  text: true,
                 },
                 {
                   label: t(k("result.durationParts")),
                   value: t(k("result.durationPartsValue"), {
                     base: String(result.duration.baseDays), extra: String(result.duration.extraDays),
                   }),
+                  text: true,
                 },
-                { label: t(k("result.total")), value: money(result.totalCents), highlight: true },
+                { label: t(k("result.total")), value: money(result.totalCents) },
                 { label: t(k("result.netBefore")), value: money(result.netReferenceMonthlyCents) },
                 { label: t(k("result.drop")), value: `−${money(result.monthlyDropCents)}` },
               ]}
             />
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-              {t(k(`result.limit.${result.limit}`), {
-                ias: money(IAS_2026_CENTS),
-                max: money(Math.round(IAS_2026_CENTS * 2.5)),
-              })}
-              {result.childrenIncrease ? ` ${t(k("result.increaseApplied"))}` : ""}
-            </p>
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">{t(k("result.estimate"))}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
+          )}
+        </div>
+        {result && (
+          <>
+            <div className="space-y-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+              <p>
+                {t(k(`result.limit.${result.limit}`), {
+                  ias: money(IAS_2026_CENTS),
+                  max: money(Math.round(IAS_2026_CENTS * 2.5)),
+                })}
+                {result.childrenIncrease ? ` ${t(k("result.increaseApplied"))}` : ""}
+              </p>
+              <p>{t(k("result.estimate"))}</p>
+            </div>
           </>
         )}
-        <div>
+        <div className="border-t border-border pt-4">
           <h3 className="text-sm font-semibold text-foreground">{t(k("checklist.title"))}</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
             {CHECKLIST.map((key) => <li key={key}>{t(k(`checklist.${key}`))}</li>)}

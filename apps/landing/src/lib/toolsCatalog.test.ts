@@ -7,6 +7,9 @@ import {
 	TOOLS_CATALOG,
 	TOOLS_IN_DISPLAY_ORDER,
 	TOOL_GROUPS,
+	TOOL_SUBGROUPS,
+	TOOLS_MENU_COLUMNS,
+	buildHeaderToolMenus,
 	buildToolsHub,
 	buildToolsHubItemList,
 	getToolCatalogEntry,
@@ -20,7 +23,13 @@ function readSource(relativePath: string): string {
 	return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8")
 }
 
-type Copy = { tools: Record<string, Record<string, unknown>> }
+type Copy = {
+	tools: Record<string, Record<string, unknown>>
+	header: {
+		toolsMenu: { subgroups: Record<string, unknown> }
+		comparatorsMenu: { description: unknown; items: Record<string, unknown> }
+	}
+}
 
 function readLocale(base: "src/locales" | "public/locales", lang: string): Copy {
 	return JSON.parse(readSource(`../../${base}/${lang}/common.json`)) as Copy
@@ -101,6 +110,109 @@ describe("tools catalog", () => {
 		expect(readSource("../components/calculators/HouseholdBudgetCalculatorComp.tsx")).toContain(
 			'tool: "household_budget"',
 		)
+	})
+})
+
+const COMPARATOR_ROUTE_IDS = [
+	"toolElectricityTariffComparison",
+	"toolFreeBankAccounts",
+	"toolTermDepositOffers",
+	"toolRemuneratedAccounts",
+	"toolBrokerFees",
+	"toolPprComparison",
+]
+
+describe("header tool menus", () => {
+	it("marks the pages that compare offers from providers as comparators", () => {
+		expect(TOOLS_CATALOG.filter((tool) => "comparator" in tool).map((tool) => tool.routeId).sort()).toEqual(
+			[...COMPARATOR_ROUTE_IDS].sort(),
+		)
+	})
+
+	it.each(TOOLS_CATALOG.map((tool) => [tool.key, tool] as const))("gives %s an icon", (_key, tool) => {
+		expect(tool.icon).toBeTruthy()
+	})
+
+	it.each(TOOLS_CATALOG.map((tool) => [tool.key, tool] as const))(
+		"puts %s under a subgroup of its own group, unless it is a comparator or its group has none",
+		(_key, tool) => {
+			const own = TOOL_SUBGROUPS.filter((subgroup) => subgroup.group === tool.group).map((subgroup) => subgroup.id)
+			const subgroup = "subgroup" in tool ? tool.subgroup : undefined
+
+			if ("comparator" in tool || own.length === 0) expect(subgroup).toBeUndefined()
+			else expect(own).toContain(subgroup)
+		},
+	)
+
+	it("splits the Tools menu into runs of at most eight links, in columns that hold every group once", () => {
+		const { columns } = buildHeaderToolMenus("en")
+		const sections = columns.flat().flatMap((group) => group.sections)
+
+		expect(TOOLS_MENU_COLUMNS.flat().sort()).toEqual(TOOL_GROUPS.map((group) => group.id).sort())
+		expect(columns.map((column) => column.map((group) => group.id))).toEqual(TOOLS_MENU_COLUMNS)
+		for (const section of sections) expect(section.tools.length).toBeLessThanOrEqual(8)
+		expect(new Set(TOOL_SUBGROUPS.map((subgroup) => subgroup.id)).size).toBe(TOOL_SUBGROUPS.length)
+		for (const subgroup of TOOL_SUBGROUPS) {
+			expect(sections.filter((section) => section.subgroup === subgroup.id), subgroup.id).toHaveLength(1)
+		}
+		// No column is near-empty: the longest holds at most half again as many links as the shortest.
+		const lengths = columns.map((column) => column.flatMap((group) => group.sections).flatMap((s) => s.tools).length)
+		expect(Math.max(...lengths)).toBeLessThanOrEqual(Math.min(...lengths) * 1.5)
+	})
+
+	it.each(SUPPORTED_LANGS)("lists every tool in %s once, comparators in their own menu only", (lang) => {
+		const { columns, comparators } = buildHeaderToolMenus(lang)
+		const hubTools = buildToolsHub(lang).flatMap((group) => group.tools)
+		const menuTools = columns.flat().flatMap((group) => group.sections.flatMap((section) => section.tools))
+
+		expect(comparators.map((tool) => tool.routeId)).toEqual(
+			hubTools.filter((tool) => COMPARATOR_ROUTE_IDS.includes(tool.routeId)).map((tool) => tool.routeId),
+		)
+		expect(menuTools.map((tool) => tool.routeId).sort()).toEqual(
+			hubTools
+				.map((tool) => tool.routeId)
+				.filter((routeId) => !COMPARATOR_ROUTE_IDS.includes(routeId))
+				.sort(),
+		)
+		for (const tool of [...menuTools, ...comparators]) expect(tool.href).toBe(toLocalizedPath(tool.routeId, lang))
+	})
+
+	it("lists a tool whose subgroup belongs to another group under its group heading, not nowhere", () => {
+		const catalog = [{ ...TOOLS_CATALOG[0], group: "trackWealth", subgroup: "homeLoan" }] as const
+		const { columns } = buildHeaderToolMenus("en", catalog)
+
+		expect(columns.flat()).toEqual([
+			expect.objectContaining({
+				id: "trackWealth",
+				sections: [{ subgroup: null, tools: [expect.objectContaining({ key: TOOLS_CATALOG[0].key })] }],
+			}),
+		])
+	})
+
+	it.each(SUPPORTED_LANGS)("has a heading for every subgroup and a line for every comparator in %s", (lang) => {
+		const copy = readLocale("src/locales", lang).header
+
+		for (const subgroup of TOOL_SUBGROUPS) {
+			expect(copy.toolsMenu.subgroups[subgroup.id], `${lang} header.toolsMenu.subgroups.${subgroup.id}`).toEqual(
+				expect.stringMatching(/^\S.{0,35}$/),
+			)
+		}
+		for (const tool of TOOLS_CATALOG.filter((entry) => "comparator" in entry)) {
+			expect(copy.comparatorsMenu.items[tool.key], `${lang} header.comparatorsMenu.items.${tool.key}`).toEqual(
+				expect.stringMatching(/^\S.{0,89}$/),
+			)
+		}
+		expect(Object.keys(copy.toolsMenu.subgroups).sort()).toEqual(TOOL_SUBGROUPS.map((subgroup) => subgroup.id).sort())
+		expect(copy.comparatorsMenu.description).toEqual(expect.stringMatching(/\S/))
+		const mirror = readLocale("public/locales", lang).header
+		expect(mirror.toolsMenu).toEqual(copy.toolsMenu)
+		expect(mirror.comparatorsMenu).toEqual(copy.comparatorsMenu)
+	})
+
+	it("addresses the pt reader as tu in the menus", () => {
+		const { toolsMenu, comparatorsMenu } = readLocale("src/locales", "pt").header
+
+		expect(JSON.stringify([toolsMenu, comparatorsMenu])).not.toMatch(/\bvocê\b|\bseu\b|\bsua\b|\bseus\b|\bsuas\b/iu)
 	})
 })
 

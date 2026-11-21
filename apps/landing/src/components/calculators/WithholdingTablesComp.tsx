@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
+import CalculatorResult from "./CalculatorResult";
 import {
   ANNUAL_IRS_BRACKETS_2026,
   PAYROLL_LIMITS,
@@ -17,10 +18,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.withholdingTables.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 interface TablesState {
   region: PayrollRegion;
@@ -90,27 +90,25 @@ function WithholdingTables() {
             <label htmlFor="withholding-region" className="block text-sm font-medium text-foreground">
               {t(k("fields.region"))}
             </label>
-            <select
+            <Select
               id="withholding-region"
               value={state.region}
               onChange={(event) => update("region", event.currentTarget.value as PayrollRegion)}
-              className={selectClass}
             >
               {PAYROLL_REGIONS.map((value) => <option key={value} value={value}>{t(k(`regions.${value}`))}</option>)}
-            </select>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="withholding-table" className="block text-sm font-medium text-foreground">
               {t(k("fields.table"))}
             </label>
-            <select
+            <Select
               id="withholding-table"
               value={state.table}
               onChange={(event) => update("table", event.currentTarget.value as WithholdingTableId)}
-              className={selectClass}
             >
               {WITHHOLDING_TABLE_IDS.map((value) => <option key={value} value={value}>{t(k(`tableOptions.${value}`))}</option>)}
-            </select>
+            </Select>
           </div>
           <CalculatorInput
             id="withholding-remuneration"
@@ -137,9 +135,8 @@ function WithholdingTables() {
           <div aria-live="polite" aria-atomic="true">
             {withholding !== null ? (
               <>
-                <p className="text-sm text-muted-foreground">{t(k("result.withholding"))}</p>
-                <p id="withholding-result" className="font-mono text-3xl font-bold text-primary">{money(withholding)}</p>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <CalculatorResult items={[{ label: t(k("result.withholding")), value: money(withholding), highlight: true }]} />
+                <p className="text-sm text-muted-foreground">
                   {t(k("result.row"), { rate: rate(table.rows[activeIndex].rateBp) })}
                 </p>
               </>

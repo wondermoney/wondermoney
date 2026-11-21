@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "@/components/shared/charts";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
@@ -20,6 +20,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.electricityIndex.${key}`;
 const SERIES = electricityIndexSeries();
@@ -61,8 +62,6 @@ function ElectricityIndex() {
       input.period === "month" ? ELECTRICITY_BILL_LIMITS.maxMonthlyKwh : ELECTRICITY_BILL_LIMITS.maxAnnualKwh;
     return t(k(`errors.${error}`), { max: `${formatNumber(locale, max)} kWh` });
   };
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const powerError = errorFor("contractedPower");
 
   return (
@@ -73,20 +72,19 @@ function ElectricityIndex() {
             <label htmlFor="electricity-power" className="block text-sm font-medium text-foreground">
               {t(k("fields.power"))}
             </label>
-            <select
+            <Select
               id="electricity-power"
               value={input.contractedPower}
               onChange={(event) => update("contractedPower", Number(event.currentTarget.value))}
               aria-invalid={powerError ? true : undefined}
               aria-describedby="electricity-power-help"
-              className={selectClass}
             >
               {CONTRACTED_POWERS_KVA.map((power) => (
                 <option key={power} value={power}>
                   {formatNumber(locale, power, 2)} kVA
                 </option>
               ))}
-            </select>
+            </Select>
             <p id="electricity-power-help" className="text-xs text-muted-foreground">
               {t(k("help.power"))}
             </p>
@@ -101,15 +99,14 @@ function ElectricityIndex() {
             <label htmlFor="electricity-period" className="block text-sm font-medium text-foreground">
               {t(k("fields.period"))}
             </label>
-            <select
+            <Select
               id="electricity-period"
               value={input.period}
               onChange={(event) => update("period", event.currentTarget.value as ElectricityBillInput["period"])}
-              className={selectClass}
             >
               <option value="month">{t(k("fields.periodMonth"))}</option>
               <option value="year">{t(k("fields.periodYear"))}</option>
-            </select>
+            </Select>
           </div>
           <CalculatorInput
             id="electricity-consumption"
@@ -128,15 +125,14 @@ function ElectricityIndex() {
             <label htmlFor="electricity-option" className="block text-sm font-medium text-foreground">
               {t(k("fields.option"))}
             </label>
-            <select
+            <Select
               id="electricity-option"
               value={input.option}
               onChange={(event) => update("option", event.currentTarget.value as ElectricityBillInput["option"])}
-              className={selectClass}
             >
               <option value="simple">{t(k("fields.optionSimple"))}</option>
               <option value="biHourly">{t(k("fields.optionBi"))}</option>
-            </select>
+            </Select>
           </div>
           {input.option === "biHourly" && (
             <CalculatorInput
@@ -176,24 +172,26 @@ function ElectricityIndex() {
           ) : (
             <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
           )}
-          <p className="text-xs text-muted-foreground">
-            {t(k("notes.tariffs"), {
-              date: ERSE_TARIFFS.effectiveFrom,
-              checked: ERSE_TARIFFS.checkedOn,
-            })}
-          </p>
-          <p className="text-xs text-muted-foreground">{t(k("notes.dgeg"))}</p>
-          <p className="text-xs text-muted-foreground">
-            {t(k("notes.freeMarket"))}{" "}
-            <a
-              href={ERSE_TARIFFS.sources.simulator.url}
-              rel="noopener"
-              target="_blank"
-              className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
-            >
-              {t(k("notes.simulatorLink"))}
-            </a>
-          </p>
+          <div className="space-y-2 border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+            <p>
+              {t(k("notes.tariffs"), {
+                date: ERSE_TARIFFS.effectiveFrom,
+                checked: ERSE_TARIFFS.checkedOn,
+              })}
+            </p>
+            <p>{t(k("notes.dgeg"))}</p>
+            <p>
+              {t(k("notes.freeMarket"))}{" "}
+              <a
+                href={ERSE_TARIFFS.sources.simulator.url}
+                rel="noopener"
+                target="_blank"
+                className="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80"
+              >
+                {t(k("notes.simulatorLink"))}
+              </a>
+            </p>
+          </div>
         </div>
       </CalculatorLayout>
 
@@ -254,31 +252,33 @@ function Bill({ result, input, euro }: { result: ElectricityBillResult; input: E
       {result.monthlyKwh === 0 && (
         <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">{t(k("result.noConsumption"))}</p>
       )}
-      <div className="overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[22rem] text-sm">
+      {/* A plain table under the ledger: the panel is the card, so no second border around it.
+          Its labels wrap, so it fits a phone without scrolling sideways. */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
           <caption className="sr-only">{t(k("result.breakdown"))}</caption>
-          <thead className="bg-paper-2 text-muted-foreground">
-            <tr>
-              <th scope="col" className="px-3 py-2 text-left font-medium">{t(k("result.item"))}</th>
+          <thead className="text-muted-foreground">
+            <tr className="border-b border-border">
+              <th scope="col" className="py-2 pr-3 text-left font-medium">{t(k("result.item"))}</th>
               <th scope="col" className="px-3 py-2 text-right font-medium">{t(k("result.beforeVat"))}</th>
-              <th scope="col" className="px-3 py-2 text-right font-medium">{t(k("result.vatRate"))}</th>
+              <th scope="col" className="py-2 pl-3 text-right font-medium">{t(k("result.vatRate"))}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.key} className="border-t border-border-2">
-                <th scope="row" className="px-3 py-2 text-left font-normal text-foreground">{row.label}</th>
+              <tr key={row.key} className="border-t border-border-2 first:border-t-0">
+                <th scope="row" className="py-2 pr-3 text-left font-normal text-foreground">{row.label}</th>
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{euro(row.line.net)}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-muted-foreground">{rate(row.line.vatRate)}</td>
+                <td className="whitespace-nowrap py-2 pl-3 text-right font-mono text-muted-foreground">{rate(row.line.vatRate)}</td>
               </tr>
             ))}
-            <tr className="border-t border-border-2">
-              <th scope="row" className="px-3 py-2 text-left font-normal text-foreground">{t(k("result.subtotal"))}</th>
+            <tr className="border-t border-border">
+              <th scope="row" className="py-2 pr-3 text-left font-normal text-foreground">{t(k("result.subtotal"))}</th>
               <td className="px-3 py-2 text-right font-mono text-foreground">{euro(result.subtotal)}</td>
               <td />
             </tr>
             <tr className="border-t border-border-2">
-              <th scope="row" className="px-3 py-2 text-left font-normal text-foreground">{t(k("result.vat"))}</th>
+              <th scope="row" className="py-2 pr-3 text-left font-normal text-foreground">{t(k("result.vat"))}</th>
               <td className="px-3 py-2 text-right font-mono text-foreground">{euro(result.vat)}</td>
               <td />
             </tr>

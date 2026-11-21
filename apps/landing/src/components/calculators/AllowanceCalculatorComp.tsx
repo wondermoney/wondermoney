@@ -21,6 +21,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 // Labels shared with the net salary page live under tools.netSalary; the rest under tools.allowance.
 const a = (key: string) => `tools.allowance.${key}`;
@@ -50,15 +51,14 @@ function SelectField<T extends string>({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">{label}</label>
-      <select
+      <Select
         id={id}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value as T)}
-        className={inputClass}
         aria-describedby={help ? `${id}-help` : undefined}
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+      </Select>
       {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
     </div>
   );
@@ -158,36 +158,33 @@ function AllowanceCalculator({ kind }: { kind: AllowanceKind }) {
         </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
+        <div aria-live="polite">
           {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {t(a(result.twelfth ? "result.netTwelfth" : "result.netAllowance"))}
-              </p>
-              <p id={`${kind}Allowance-net`} className="font-mono text-3xl font-bold text-primary">
-                {money(result.twelfth ? result.twelfth.netCents : result.total.netCents)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(a("errors.summary"))}</p>
-          )}
-        </div>
-        {result && (
-          <>
             <CalculatorResult
               items={[
+                {
+                  label: t(a(result.twelfth ? "result.netTwelfth" : "result.netAllowance")),
+                  value: money(result.twelfth ? result.twelfth.netCents : result.total.netCents),
+                  highlight: true,
+                },
                 { label: t(a("result.gross")), value: money(result.total.grossCents) },
                 { label: t(a("result.withholding")), value: `−${money(result.total.withholdingCents)}` },
                 { label: t(a("result.socialSecurity")), value: `−${money(result.total.socialSecurityCents)}` },
                 ...(result.twelfth
                   ? [
-                      { label: t(a("result.net")), value: money(result.total.netCents), highlight: true },
+                      { label: t(a("result.net")), value: money(result.total.netCents) },
                       { label: t(a("result.twelfthGross")), value: money(result.twelfth.grossCents) },
                       { label: t(a("result.twelfthCount")), value: String(result.twelfth.payments) },
                     ]
                   : []),
               ]}
             />
+          ) : (
+            <p className="text-sm text-muted-foreground">{t(a("errors.summary"))}</p>
+          )}
+        </div>
+        {result && (
+          <>
             <p className="text-sm text-muted-foreground">
               {kind === "holiday" && result.holidayDays !== null
                 ? t(a("result.holidayDays"), { days: String(result.holidayDays), percent })

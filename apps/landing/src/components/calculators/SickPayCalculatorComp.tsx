@@ -14,10 +14,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.sickPay.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const CHECKLIST = ["certificate", "guarantee", "professionalIndex", "waiting"] as const;
 
 export default function SickPayCalculatorComp({ locale }: { locale: Lang }) {
@@ -41,15 +40,14 @@ function SelectField<T extends string>({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">{label}</label>
-      <select
+      <Select
         id={id}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value as T)}
-        className={selectClass}
         aria-describedby={help ? `${id}-help` : undefined}
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+      </Select>
       {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
     </div>
   );
@@ -143,22 +141,11 @@ function SickPayCalculator() {
         />
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">
-        <div aria-live="polite" aria-atomic="true">
+        <div id="sick-result" aria-live="polite">
           {result ? (
-            <>
-              <p className="text-sm text-muted-foreground">{t(k("result.total"))}</p>
-              <p id="sick-total" className="font-mono text-3xl font-bold text-primary">
-                {money(result.totalCents)}
-              </p>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
-          )}
-        </div>
-        {result && (
-          <>
             <CalculatorResult
               items={[
+                { label: t(k("result.total")), value: money(result.totalCents), highlight: true },
                 { label: t(k("result.reference")), value: money(result.referenceDailyCents) },
                 { label: t(k("result.paidDays")), value: String(result.paidDays) },
                 {
@@ -166,12 +153,19 @@ function SickPayCalculator() {
                   value: result.waitingDays > 0
                     ? t(k("result.waitingValue"), { days: String(result.waitingDays), amount: money(result.waitingNetPayCents) })
                     : t(k("result.waitingNone")),
+                  text: true,
                 },
                 { label: t(k("result.netPay")), value: money(result.netMonthlyCents) },
                 { label: t(k("result.firstGap")), value: `−${money(result.firstMonthGapCents)}` },
-                { label: t(k("result.averageGap")), value: `−${money(result.averageMonthlyGapCents)}`, highlight: true },
+                { label: t(k("result.averageGap")), value: `−${money(result.averageMonthlyGapCents)}` },
               ]}
             />
+          ) : (
+            <p className="text-sm text-muted-foreground">{t(k("errors.summary"))}</p>
+          )}
+        </div>
+        {result && (
+          <>
             <div>
               <h3 className="text-sm font-semibold text-foreground">{t(k("result.bandsTitle"))}</h3>
               <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
@@ -191,17 +185,17 @@ function SickPayCalculator() {
             {result.paidDays === 0 && (
               <p role="status" className="rounded-md bg-muted p-3 text-sm text-foreground">{t(k("result.allWaiting"))}</p>
             )}
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-              {t(k(`result.limit.${result.limit}`), { min: money(MIN_DAILY_CENTS) })}
-              {result.increaseApplied ? ` ${t(k("result.increaseApplied"))}` : ""}
-            </p>
-            {result.waitingDays > 0 && (
-              <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">{t(k("result.waitingNote"))}</p>
-            )}
-            <p className="rounded-md bg-muted p-3 text-sm text-muted-foreground">{t(k("result.estimate"))}</p>
+            <div className="space-y-2 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+              <p>
+                {t(k(`result.limit.${result.limit}`), { min: money(MIN_DAILY_CENTS) })}
+                {result.increaseApplied ? ` ${t(k("result.increaseApplied"))}` : ""}
+              </p>
+              {result.waitingDays > 0 && <p>{t(k("result.waitingNote"))}</p>}
+              <p>{t(k("result.estimate"))}</p>
+            </div>
           </>
         )}
-        <div>
+        <div className="border-t border-border pt-4">
           <h3 className="text-sm font-semibold text-foreground">{t(k("checklist.title"))}</h3>
           <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
             {CHECKLIST.map((key) => <li key={key}>{t(k(`checklist.${key}`))}</li>)}

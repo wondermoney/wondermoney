@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "@/components/shared/charts";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
@@ -24,6 +24,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatMonthYear, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.fuelPrices.${key}`;
 const SERIES = fuelPriceSeries();
@@ -83,8 +84,6 @@ function FuelPrices() {
     const error = (errors as Partial<Record<FuelCostField, string>>)[field];
     return error ? t(k(`errors.${error}`), { max: maxLabel(field) }) : undefined;
   };
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const fuelName = (fuel: FuelType) => t(k(`fuels.${fuel}`));
   const priceDiffers = Number.isFinite(input.price) ? Math.abs(input.price - latest) > 0.0005 : true;
 
@@ -98,33 +97,31 @@ function FuelPrices() {
             <label htmlFor="fuel-type" className="block text-sm font-medium text-foreground">
               {t(k("fields.fuel"))}
             </label>
-            <select
+            <Select
               id="fuel-type"
               value={input.fuel}
               onChange={(event) => changeFuel(event.currentTarget.value as FuelType)}
-              className={selectClass}
             >
               {FUEL_TYPES.map((fuel) => (
                 <option key={fuel} value={fuel}>
                   {fuelName(fuel)}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <label htmlFor="fuel-period" className="block text-sm font-medium text-foreground">
               {t(k("fields.period"))}
             </label>
-            <select
+            <Select
               id="fuel-period"
               value={input.period}
               onChange={(event) => update("period", event.currentTarget.value as DistancePeriod)}
-              className={selectClass}
             >
               <option value="month">{t(k("fields.periodMonth"))}</option>
               <option value="week">{t(k("fields.periodWeek"))}</option>
               <option value="trip">{t(k("fields.periodTrip"))}</option>
-            </select>
+            </Select>
           </div>
           <CalculatorInput
             id="fuel-distance"
@@ -225,7 +222,7 @@ function LatestPrices() {
         {SUMMARIES.map((summary) => {
           const flat = Math.abs(summary.change) < 0.0005;
           return (
-            <li key={summary.fuel} className="rounded-card border border-border bg-background p-5 shadow-sm">
+            <li key={summary.fuel} className="rounded-card border border-border bg-background p-5">
               <p className="text-sm text-muted-foreground">{t(k(`fuels.${summary.fuel}`))}</p>
               <p className="font-mono text-2xl font-bold text-foreground">{euro(summary.price)}/L</p>
               <p className="mt-1 text-sm text-muted-foreground">

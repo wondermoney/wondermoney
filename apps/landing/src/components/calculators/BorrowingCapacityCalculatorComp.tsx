@@ -239,6 +239,7 @@ function ResultPanel({
   const { monthly, cash, mortgage, debtToIncome, lift } = result;
 
   const items = [
+    { label: t(k("result.price")), value: exact(result.price), highlight: true },
     { label: t(k("result.loan")), value: exact(result.loan) },
     { label: t(k("result.downPayment")), value: exact(result.downPayment) },
     { label: t(k("result.purchaseCosts")), value: exact(result.purchaseCosts) },
@@ -250,7 +251,6 @@ function ResultPanel({
               years: yearsLabel(t, locale, input.termYears),
             }),
             value: exact(mortgage.monthlyPayment),
-            highlight: true,
           },
         ]
       : []),
@@ -293,17 +293,13 @@ function ResultPanel({
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-sm text-muted-foreground">{t(k("result.price"))}</p>
-        <p className="font-mono text-3xl font-bold text-primary">{exact(result.price)}</p>
-      </div>
+      <CalculatorResult items={result.price > 0 ? items : items.slice(0, 1)} />
       <div aria-live="polite" className="space-y-2 rounded-md bg-muted px-4 py-3 text-sm leading-6">
         <p className={cn("font-medium", result.price === 0 ? "text-warning-text" : "text-foreground")}>
           {status}
         </p>
         {liftLine && <p className="text-foreground">{liftLine}</p>}
       </div>
-      {result.price > 0 && <CalculatorResult items={items} />}
       {mortgage && (
         <dl className="grid grid-cols-2 gap-4 border-t border-border pt-4 text-sm">
           <div>

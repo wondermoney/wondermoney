@@ -45,11 +45,12 @@ export function SavedConsentStatus({
 }: SavedConsentStatusProps) {
   return (
     <aside
-      className={`fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] ${LAYER.consent} w-[min(20rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-80`}
+      className={`fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] ${LAYER.consent} w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg md:right-6 md:bottom-6 md:w-96`}
       aria-label={title}
     >
-      <div className="flex items-center justify-between gap-4">
-        <p role="status" className="text-sm text-muted-foreground">
+      {/* The message takes the card's full width, the button under it: beside the button the long locales fold into four short lines */}
+      <div className="flex flex-col items-start gap-3">
+        <p role="status" className="text-sm leading-6 text-muted-foreground">
           {savedLabel}
         </p>
         <Button

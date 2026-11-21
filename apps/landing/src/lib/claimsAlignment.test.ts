@@ -21,6 +21,17 @@ describe("public claims alignment", () => {
     expect(classifyMatch("src/lib/hairline/articleFigures.ts")).toBe("claim");
   });
 
+  it("reads \"segundo plano\" as the background, not as seconds", () => {
+    const matches = scanContent("src/components/Claim.astro", [
+      "A importação corre em segundo plano.",
+      "La importación se ejecuta en segundo plano.",
+      "Liga o banco em 30 segundos.",
+      "Conecta en segundos.",
+    ].join("\n"));
+
+    expect(matches.map(({ text }) => text)).toEqual(["em 30 segundos", "en segundos"]);
+  });
+
   it("detects expanded timing, security, and crypto variants", () => {
     const matches = scanContent("src/components/Claim.astro", [
       "Connect in minutes.",

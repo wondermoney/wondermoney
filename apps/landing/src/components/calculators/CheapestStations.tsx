@@ -16,6 +16,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.fuelPrices.stations.${key}`;
 /** A snapshot older than this when the visitor looks at it means the daily refresh stopped. */
@@ -70,8 +71,6 @@ export default function CheapestStations() {
   const euro = (value: number, decimals = 3) => formatMoney(locale, value, { decimals });
   const fuelName = t(`tools.fuelPrices.fuels.${fuel}`);
   const fetchedAt = FUEL_STATIONS_SOURCE.fetchedAt;
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
   const linkClass =
     "text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
@@ -97,27 +96,26 @@ export default function CheapestStations() {
           <label htmlFor="stations-fuel" className="block text-sm font-medium text-foreground">
             {t(k("fuel"))}
           </label>
-          <select
+          <Select
             id="stations-fuel"
             value={fuel}
             onChange={(event) => {
               used();
               setFuel(event.currentTarget.value as FuelType);
             }}
-            className={selectClass}
           >
             {FUEL_TYPES.map((item) => (
               <option key={item} value={item}>
                 {t(`tools.fuelPrices.fuels.${item}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="stations-district" className="block text-sm font-medium text-foreground">
             {t(k("district"))}
           </label>
-          <select
+          <Select
             id="stations-district"
             value={districtSlug}
             onChange={(event) => {
@@ -125,7 +123,6 @@ export default function CheapestStations() {
               setDistrictSlug(event.currentTarget.value);
               setMunicipality("");
             }}
-            className={selectClass}
           >
             <option value="">{t(k("mainland"))}</option>
             {FUEL_STATION_DISTRICTS.map((item) => (
@@ -133,13 +130,13 @@ export default function CheapestStations() {
                 {item.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="stations-municipality" className="block text-sm font-medium text-foreground">
             {t(k("municipality"))}
           </label>
-          <select
+          <Select
             id="stations-municipality"
             value={municipality}
             disabled={!districtSlug}
@@ -147,7 +144,6 @@ export default function CheapestStations() {
               used();
               setMunicipality(event.currentTarget.value);
             }}
-            className={selectClass}
           >
             <option value="">{districtSlug ? t(k("allMunicipalities"), { district: districtName }) : t(k("pickDistrict"))}</option>
             {municipalitiesOf(districtSlug).map((name) => (
@@ -155,7 +151,7 @@ export default function CheapestStations() {
                 {name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       </div>
 

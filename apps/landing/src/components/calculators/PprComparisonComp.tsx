@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
+import CalculatorLayout from "./CalculatorLayout";
 import {
   DEDUCTION_INPUT_LIMITS,
   PPR_FUNDS_SOURCE,
@@ -26,6 +27,7 @@ import { createPprFormat } from "@/lib/calculators/pprFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.pprComparison.${key}`;
 /** Products shown at first, and added by each "show more". */
@@ -54,7 +56,7 @@ function useUsageEvent() {
   };
 }
 
-const selectClass =
+const searchClass =
   "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 
@@ -138,9 +140,9 @@ function Comparison({ onUse }: { onUse: () => void }) {
           <label htmlFor="ppr-kind" className="block text-sm font-medium text-foreground">
             {t(k("compare.kind"))}
           </label>
-          <select
+          <Select
             id="ppr-kind"
-            className={selectClass}
+            className="h-11"
             value={filters.kind}
             onChange={(event) => update({ kind: event.currentTarget.value as PprFilters["kind"] })}
           >
@@ -150,15 +152,15 @@ function Comparison({ onUse }: { onUse: () => void }) {
                 {t(k(`kinds.${kind}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-risk" className="block text-sm font-medium text-foreground">
             {t(k("compare.risk"))}
           </label>
-          <select
+          <Select
             id="ppr-risk"
-            className={selectClass}
+            className="h-11"
             value={String(filters.riskClass)}
             onChange={(event) => {
               const value = event.currentTarget.value;
@@ -172,15 +174,15 @@ function Comparison({ onUse }: { onUse: () => void }) {
               </option>
             ))}
             <option value="none">{t(k("compare.noRisk"))}</option>
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-sort" className="block text-sm font-medium text-foreground">
             {t(k("compare.sort"))}
           </label>
-          <select
+          <Select
             id="ppr-sort"
-            className={selectClass}
+            className="h-11"
             value={sort}
             onChange={(event) => {
               onUse();
@@ -193,7 +195,7 @@ function Comparison({ onUse }: { onUse: () => void }) {
                 {t(k(`sorts.${item}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-search" className="block text-sm font-medium text-foreground">
@@ -202,7 +204,7 @@ function Comparison({ onUse }: { onUse: () => void }) {
           <input
             id="ppr-search"
             type="search"
-            className={selectClass}
+            className={searchClass}
             value={filters.query}
             placeholder={t(k("compare.searchPlaceholder"))}
             onChange={(event) => update({ query: event.currentTarget.value })}
@@ -231,7 +233,8 @@ function Comparison({ onUse }: { onUse: () => void }) {
       </div>
 
       {results.length > 0 && (
-        <ol className="mt-3 space-y-3">
+        // One bordered list with a hairline between products, rather than a card per product.
+        <ol className="mt-3 divide-y divide-border rounded-card border border-border bg-background">
           {results.slice(0, shown).map((item) => (
             <ProductRow key={item.id} item={item} />
           ))}
@@ -275,7 +278,7 @@ function ProductRow({ item }: { item: PprProduct }) {
           .join(" · ");
 
   return (
-    <li className="rounded-card border border-border bg-background p-4 shadow-sm">
+    <li className="p-4 sm:p-5">
       <div className="lg:flex lg:items-start lg:justify-between lg:gap-6">
         <div className="min-w-0 lg:w-80 lg:shrink-0">
           <p className="break-words text-base font-semibold text-foreground">{productName(item)}</p>
@@ -344,7 +347,9 @@ function Deduction({ onUse }: { onUse: () => void }) {
       <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
         {t(k("deduction.intro"), { rate: rate(PPR_TAX_RULES.deductionRate) })}
       </p>
-      <div className="mt-5 grid gap-5 rounded-card border border-border bg-background p-5 shadow-sm sm:grid-cols-2 sm:p-6 lg:grid-cols-3">
+      <div className="mt-5">
+      <CalculatorLayout>
+      <div className="grid gap-5 rounded-card border border-border bg-background p-5 sm:grid-cols-2 sm:p-6 lg:grid-cols-1">
         <CalculatorInput
           id="ppr-age"
           label={t(k("deduction.age"))}
@@ -371,25 +376,25 @@ function Deduction({ onUse }: { onUse: () => void }) {
               : undefined
           }
         />
-        <label className="flex min-h-11 items-center gap-2 self-center text-sm font-medium text-foreground">
+        <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-foreground sm:col-span-2 lg:col-span-1">
           <input
             type="checkbox"
             checked={input.retired}
             onChange={(event) => update("retired", event.currentTarget.checked)}
-            className="h-5 w-5 rounded border-input accent-primary"
+            className="h-5 w-5 shrink-0 rounded border-input accent-primary"
           />
           {t(k("deduction.retired"))}
         </label>
       </div>
-      <div aria-live="polite" className="mt-4 rounded-card border border-border bg-paper-2 p-5 text-sm text-foreground">
+      <div aria-live="polite" className="rounded-card border border-border bg-background p-5 text-sm text-foreground sm:p-6">
         {result === null ? (
           <p className="text-muted-foreground">{t(k("deduction.invalid"))}</p>
         ) : input.retired ? (
           <p>{t(k("deduction.retiredResult"))}</p>
         ) : (
           <>
-            <p className="text-lg font-semibold">{t(k("deduction.result"), { amount: eur(result.deduction) })}</p>
-            <p className="mt-1">
+            <p className="text-lg font-semibold sm:text-xl">{t(k("deduction.result"), { amount: eur(result.deduction) })}</p>
+            <p className="mt-3 border-t border-border pt-3">
               {t(k("deduction.limit"), { limit: eur(result.limit), full: eur(result.fullDeductionAt), age: String(input.age) })}
             </p>
             {result.capped && <p className="mt-1">{t(k("deduction.capped"), { full: eur(result.fullDeductionAt) })}</p>}
@@ -398,6 +403,8 @@ function Deduction({ onUse }: { onUse: () => void }) {
             </p>
           </>
         )}
+      </div>
+      </CalculatorLayout>
       </div>
     </section>
   );

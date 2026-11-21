@@ -7,14 +7,14 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  Cell,
   ResponsiveContainer,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
 import type { Lang } from "@/lib/i18nLocale";
-import { toIntlLocale } from "@/lib/numberFormat";
+import { formatMoney, toIntlLocale } from "@/lib/numberFormat";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 
 export default function NetWorthCalculator({ locale }: { locale: Lang }) {
@@ -60,13 +60,16 @@ function NetWorthCalculatorContent() {
     const net = assets - liabilities;
 
     const data = [
+      // Each bar in its chart slot: what you own in violet, what you owe in vermillion.
       {
         name: t("tools.netWorth.assetsLabel"),
         value: assets,
+        fill: "oklch(var(--chart-1))",
       },
       {
         name: t("tools.netWorth.liabilitiesLabel"),
         value: liabilities,
+        fill: "oklch(var(--chart-4))",
       },
     ];
 
@@ -199,7 +202,7 @@ function NetWorthCalculatorContent() {
       </div>
 
       {/* Results */}
-      <div className="space-y-6 rounded-card border border-border bg-background p-6 shadow-sm sticky top-20 lg:top-24">
+      <div className="space-y-6 rounded-card border border-border bg-background p-6 shadow-sm lg:sticky lg:top-24">
         <CalculatorResult
           items={[
             {
@@ -231,20 +234,20 @@ function NetWorthCalculatorContent() {
               />
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis
-                tickFormatter={(v: number) => `\u20AC${Math.round(v / 1000)}k`}
+                tickFormatter={(v: number) => formatMoney(locale, v, { compact: true })}
                 tick={{ fontSize: 12 }}
+                width={64}
               />
               <Tooltip
                 // @ts-expect-error Recharts tooltip types are very broken
                 formatter={(value: number) => [eurFormatter.format(value)]}
               />
-              <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
-              <Bar
-                dataKey="value"
-                name={t("tools.netWorth.netWorth")}
-                fill="oklch(var(--primary))"
-                radius={[4, 4, 0, 0]}
-              />
+              {/* No legend: the axis names each bar. */}
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {chartData.map((entry) => (
+                  <Cell key={entry.name} fill={entry.fill} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
