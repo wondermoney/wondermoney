@@ -37,7 +37,7 @@ const AccountDeleteModal: React.FC<AccountDeleteModalProps> = ({
   const posthog = usePostHog();
 
   const onDeleteAccount = () => {
-    posthog.capture("account_delete", { accountKey });
+    posthog.capture("account_delete");
     deleteAccountMutation.mutate(
       { accountKey },
       {
