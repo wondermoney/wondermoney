@@ -203,6 +203,11 @@ The app's radius scale, from one `--radius: 0.5rem`: `sm` 4px (badges), `md` 6px
 - **States:** hover shifts the fill, `focus-visible` ring instant, `active` scales to 0.98 (off under reduced motion), `disabled` drops opacity with `cursor: not-allowed`.
 - **Rule:** exactly one primary-styled CTA per section/viewport — never two primary buttons side by side.
 
+### Selects
+- **One component:** every dropdown is `Select` (`src/components/ui/select.tsx`), a native `<select>` with the browser's arrow removed and its own chevron 12px from the right edge, the same inset as the text on the left. The native arrow sits flush with the border; `selectUsage.test.ts` fails on a raw `<select>` anywhere else.
+- **Shape:** the text field's: 40px tall, 6px radius, Input Stroke border, canvas fill, instant focus ring with a 2px offset; `disabled` dims the control and its chevron.
+- **Type:** the body face, also for a list of years — the component keeps Geist Mono out, since a choice is not a figure.
+
 ### Cards / Preview Frames
 - **Corner Style:** 8px radius, the app's card radius.
 - **Background:** identical value to the page canvas (`bg-card`, never `bg-white`).

@@ -19,6 +19,7 @@ import { formatPercent, toIntlLocale } from "@/lib/numberFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import { cn } from "@/lib/utils";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 type PaymentRow = {
   id: string;
@@ -288,18 +289,17 @@ function DebtToIncomeCalculatorContent() {
                 <label htmlFor="dtiScenarioRow" className="block text-sm font-medium text-foreground">
                   {t(k("scenarioPayment"))}
                 </label>
-                <select
+                <Select
                   id="dtiScenarioRow"
                   value={selectedChangeRow.id}
                   onChange={(e) => selectChangeRow(e.target.value)}
-                  className={cn(INPUT_CLASS, "bg-background")}
                 >
                   {rows.map((row) => (
                     <option key={row.id} value={row.id}>
                       {row.label.trim() || t(k("newRowLabel"))}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
               <CalculatorInput
                 id="dtiScenarioChangeAmount"

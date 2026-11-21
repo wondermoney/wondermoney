@@ -18,10 +18,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.netSalary.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export default function NetSalaryCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -44,15 +43,14 @@ function SelectField<T extends string>({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">{label}</label>
-      <select
+      <Select
         id={id}
         value={value}
         onChange={(event) => onChange(event.currentTarget.value as T)}
-        className={selectClass}
         aria-describedby={help ? `${id}-help` : undefined}
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-      </select>
+      </Select>
       {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
     </div>
   );

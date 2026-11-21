@@ -44,6 +44,7 @@ import { formatIsoDate } from "@/lib/calculators/electricityTariffComparator";
 import { supplierName } from "@/lib/calculators/electricitySuppliers";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 export interface SolarSettings {
   on: boolean;
@@ -223,8 +224,6 @@ export function useSolar(
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 const summaryClass =
   "flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden";
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 type Locating = "idle" | "locating" | "found" | "failed";
 
@@ -349,7 +348,7 @@ export function ElectricitySolarPanel({
                 <label htmlFor="tariff-solar-district" className="block text-sm font-medium text-foreground">
                   {t(k("solar.district"))}
                 </label>
-                <select
+                <Select
                   id="tariff-solar-district"
                   value={settings.district}
                   onChange={(event) => {
@@ -357,14 +356,13 @@ export function ElectricitySolarPanel({
                     set("district", event.currentTarget.value);
                   }}
                   aria-describedby="tariff-solar-district-help"
-                  className={selectClass}
                 >
                   {SOLAR_DISTRICTS.map((each) => (
                     <option key={each.slug} value={each.slug}>
                       {each.name}
                     </option>
                   ))}
-                </select>
+                </Select>
                 <p id="tariff-solar-district-help" className="text-xs text-muted-foreground">
                   {t(k("solar.districtHelp"), { slope: formatNumber(locale, district.slope, 0) })}
                 </p>
@@ -448,7 +446,7 @@ export function ElectricitySolarPanel({
                 <label htmlFor="tariff-solar-orientation" className="block text-sm font-medium text-foreground">
                   {t(k("solar.orientation"))}
                 </label>
-                <select
+                <Select
                   id="tariff-solar-orientation"
                   value={settings.orientation}
                   onChange={(event) => {
@@ -460,14 +458,13 @@ export function ElectricitySolarPanel({
                         : { ...settings, orientation },
                     );
                   }}
-                  className={selectClass}
                 >
                   {ORIENTATION_KEYS.map((key) => (
                     <option key={key} value={key}>
                       {t(k(`solar.orientations.${key}`))}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             </div>
             {settings.orientation === "custom" && (

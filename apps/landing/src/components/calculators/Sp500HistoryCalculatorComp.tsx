@@ -25,6 +25,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.sp500History.${key}`;
 const YEARS = Array.from(
@@ -82,20 +83,19 @@ function Sp500HistoryCalculator() {
         <label htmlFor={`sp500-${field}`} className="block text-sm font-medium text-foreground">
           {t(k(`fields.${field}`))}
         </label>
-        <select
+        <Select
           id={`sp500-${field}`}
           value={input[field]}
           onChange={(event) => update(field, Number(event.currentTarget.value))}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? `sp500-${field}-error` : undefined}
-          className="h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {YEARS.map((year) => (
             <option key={year} value={year}>
               {year}
             </option>
           ))}
-        </select>
+        </Select>
         {error && (
           <p id={`sp500-${field}-error`} role="alert" className="text-sm text-destructive-text">
             {error}

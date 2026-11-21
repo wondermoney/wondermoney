@@ -22,6 +22,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { createFeeFormat, formatCheckedDate } from "@/lib/calculators/brokerFeesFormat";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.brokerFees.${key}`;
 const MARKETS: readonly Market[] = ["etfEu", "usStock"];
@@ -75,8 +76,6 @@ function BrokerFees() {
 
   const eur = (value: number) => formatMoney(locale, value, { currency: "EUR", decimals: 0 });
   const reviewed = formatCheckedDate(locale, BROKER_FEES_REVIEWED);
-  const selectClass =
-    "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <>
@@ -133,9 +132,9 @@ function BrokerFees() {
                 <label htmlFor="broker-fees-market" className="block text-sm font-medium text-foreground">
                   {t(k("fields.market"))}
                 </label>
-                <select
+                <Select
                   id="broker-fees-market"
-                  className={selectClass}
+                  className="h-11"
                   value={scenario.market}
                   onChange={(event) => update("market", event.currentTarget.value as Market)}
                 >
@@ -144,7 +143,7 @@ function BrokerFees() {
                       {t(k(`markets.${market}`))}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
               <CalculatorInput
                 id="broker-fees-trades"

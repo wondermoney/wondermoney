@@ -20,6 +20,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.electricityIndex.${key}`;
 const SERIES = electricityIndexSeries();
@@ -61,8 +62,6 @@ function ElectricityIndex() {
       input.period === "month" ? ELECTRICITY_BILL_LIMITS.maxMonthlyKwh : ELECTRICITY_BILL_LIMITS.maxAnnualKwh;
     return t(k(`errors.${error}`), { max: `${formatNumber(locale, max)} kWh` });
   };
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
   const powerError = errorFor("contractedPower");
 
   return (
@@ -73,20 +72,19 @@ function ElectricityIndex() {
             <label htmlFor="electricity-power" className="block text-sm font-medium text-foreground">
               {t(k("fields.power"))}
             </label>
-            <select
+            <Select
               id="electricity-power"
               value={input.contractedPower}
               onChange={(event) => update("contractedPower", Number(event.currentTarget.value))}
               aria-invalid={powerError ? true : undefined}
               aria-describedby="electricity-power-help"
-              className={selectClass}
             >
               {CONTRACTED_POWERS_KVA.map((power) => (
                 <option key={power} value={power}>
                   {formatNumber(locale, power, 2)} kVA
                 </option>
               ))}
-            </select>
+            </Select>
             <p id="electricity-power-help" className="text-xs text-muted-foreground">
               {t(k("help.power"))}
             </p>
@@ -101,15 +99,14 @@ function ElectricityIndex() {
             <label htmlFor="electricity-period" className="block text-sm font-medium text-foreground">
               {t(k("fields.period"))}
             </label>
-            <select
+            <Select
               id="electricity-period"
               value={input.period}
               onChange={(event) => update("period", event.currentTarget.value as ElectricityBillInput["period"])}
-              className={selectClass}
             >
               <option value="month">{t(k("fields.periodMonth"))}</option>
               <option value="year">{t(k("fields.periodYear"))}</option>
-            </select>
+            </Select>
           </div>
           <CalculatorInput
             id="electricity-consumption"
@@ -128,15 +125,14 @@ function ElectricityIndex() {
             <label htmlFor="electricity-option" className="block text-sm font-medium text-foreground">
               {t(k("fields.option"))}
             </label>
-            <select
+            <Select
               id="electricity-option"
               value={input.option}
               onChange={(event) => update("option", event.currentTarget.value as ElectricityBillInput["option"])}
-              className={selectClass}
             >
               <option value="simple">{t(k("fields.optionSimple"))}</option>
               <option value="biHourly">{t(k("fields.optionBi"))}</option>
-            </select>
+            </Select>
           </div>
           {input.option === "biHourly" && (
             <CalculatorInput
