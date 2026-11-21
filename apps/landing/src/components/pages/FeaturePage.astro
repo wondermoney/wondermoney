@@ -14,6 +14,8 @@ import FeatureNetWorth from "@/components/landing/FeatureNetWorth";
 import FeaturePrivacy from "@/components/landing/FeaturePrivacy";
 import FeaturePortfolio from "@/components/landing/FeaturePortfolio";
 import FeatureReports from "@/components/landing/FeatureReports";
+import FeatureDetail from "@/components/landing/FeatureDetail";
+import { FEATURE_DETAILS, isFeatureDetailRouteId, type FeatureDetailRouteId } from "@/components/landing/featureDetails";
 import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 import type { FeatureRouteId } from "@/lib/pageStaticPaths";
@@ -27,7 +29,9 @@ interface Props {
 const { locale, routeId } = Astro.props;
 const t = getTranslations(locale);
 
-const pageMeta: Record<FeatureRouteId, { title: string; description: string }> = {
+type ClassicFeatureRouteId = Exclude<FeatureRouteId, FeatureDetailRouteId>;
+
+const pageMeta: Record<ClassicFeatureRouteId, { title: string; description: string }> = {
   featureAccounts: {
     title: t("lp.featureAccounts.metaTitle"),
     description: t("lp.featureAccounts.metaDescription"),
@@ -70,7 +74,11 @@ const pageMeta: Record<FeatureRouteId, { title: string; description: string }> =
   },
 };
 
-const pageMetaSelected = pageMeta[routeId];
+// The pages added in #600 share one shape and one set of keys under their namespace.
+const detailNs = isFeatureDetailRouteId(routeId) ? FEATURE_DETAILS[routeId].ns : null;
+const pageMetaSelected = detailNs
+  ? { title: t(`lp.${detailNs}.metaTitle`), description: t(`lp.${detailNs}.metaDescription`) }
+  : pageMeta[routeId as ClassicFeatureRouteId];
 const alternateLinks = buildAlternateLinks(routeId);
 const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<FeatureRouteId>([
   "featurePortfolio",
@@ -78,7 +86,28 @@ const FINANCIAL_DISCLAIMER_ROUTE_IDS = new Set<FeatureRouteId>([
 ]);
 const showFinancialDisclaimer = FINANCIAL_DISCLAIMER_ROUTE_IDS.has(routeId);
 
-const structuredDataByRouteId: Record<FeatureRouteId, Record<string, unknown>[]> = {
+const detailStructuredData = (ns: string): Record<string, unknown>[] => [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: t(`lp.${ns}.schemaName`),
+    url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    description: t(`lp.${ns}.schemaDescription`),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [1, 2, 3].map((n) => ({
+      "@type": "Question",
+      name: t(`lp.${ns}.faq${n}Q`),
+      acceptedAnswer: { "@type": "Answer", text: t(`lp.${ns}.faq${n}A`) },
+    })),
+  },
+];
+
+const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unknown>[]> = {
   featureAccounts: [
     {
       "@context": "https://schema.org",
@@ -387,6 +416,7 @@ const structuredDataByRouteId: Record<FeatureRouteId, Record<string, unknown>[]>
     {routeId === "featurePrivacy" && <FeaturePrivacy locale={locale} client:idle />}
     {routeId === "featurePortfolio" && <FeaturePortfolio locale={locale} />}
     {routeId === "featureReports" && <FeatureReports locale={locale} />}
+    {isFeatureDetailRouteId(routeId) && <FeatureDetail locale={locale} routeId={routeId} client:idle />}
     {showFinancialDisclaimer && (
       <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <FinancialDisclaimer locale={locale} client:idle />
@@ -394,5 +424,5 @@ const structuredDataByRouteId: Record<FeatureRouteId, Record<string, unknown>[]>
     )}
   </main>
   <Footer locale={locale} client:idle />
-  <StructuredData data={structuredDataByRouteId[routeId]} />
+  <StructuredData data={detailNs ? detailStructuredData(detailNs) : structuredDataByRouteId[routeId as ClassicFeatureRouteId]} />
 </Layout>

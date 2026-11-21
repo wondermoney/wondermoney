@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { Eye, Lock, ShieldCheck, Check } from "lucide-react";
+import { CreditCard, Eye, History, Landmark, Lock, ShieldCheck, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CTABanner from "@/components/shared/CTABanner";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
@@ -10,6 +10,7 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
 
 function SecurityCard({ icon: Icon, title, body }: { icon: React.ElementType; title: string; body: string }) {
@@ -68,17 +69,18 @@ function FeatureAccountsContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			{/* How Open Banking Works */}
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-3xl px-6 lg:px-8">
-					<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-6">
-						{t("lp.featureAccounts.whatTitle")}
-					</h2>
-					<p className="max-w-[60ch] text-muted-foreground leading-7">
-						{t("lp.featureAccounts.whatBody")}
-					</p>
-				</div>
-			</section>
+			{/* How open banking works, beside what it syncs */}
+			<FeatureExplainer
+				title={t("lp.featureAccounts.whatTitle")}
+				body={t("lp.featureAccounts.whatBody")}
+				pointsTitle={t("lp.featureAccounts.syncTitle")}
+				points={[
+					{ icon: Wallet, text: t("lp.featureAccounts.sync1") },
+					{ icon: History, text: t("lp.featureAccounts.sync2") },
+					{ icon: CreditCard, text: t("lp.featureAccounts.sync3") },
+					{ icon: Landmark, text: t("lp.featureAccounts.sync4") },
+				]}
+			/>
 
 			<MidCTA locale={locale} />
 
@@ -96,33 +98,17 @@ function FeatureAccountsContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			{/* Bank Coverage + What Syncs — with TransactionsPreview */}
+			{/* Bank coverage, with TransactionsPreview */}
 			<section className="py-16 md:py-20">
 				<div className="mx-auto max-w-6xl px-6 lg:px-8">
-					<div className="grid gap-12 lg:grid-cols-2 lg:items-start">
+					<div className="grid gap-12 lg:grid-cols-2 lg:items-center">
 						<div>
 							<h2 className="text-3xl font-semibold tracking-tight text-foreground mb-4">
 								{t("lp.featureAccounts.banksTitle")}
 							</h2>
-							<p className="text-muted-foreground leading-7 mb-10">
+							<p className="max-w-[65ch] text-ink-2 leading-7">
 								{t("lp.featureAccounts.banksBody")}
 							</p>
-							<h3 className="text-xl font-semibold text-foreground mb-6">
-								{t("lp.featureAccounts.syncTitle")}
-							</h3>
-							<div className="grid gap-3 sm:grid-cols-2">
-								{[
-									t("lp.featureAccounts.sync1"),
-									t("lp.featureAccounts.sync2"),
-									t("lp.featureAccounts.sync3"),
-									t("lp.featureAccounts.sync4"),
-								].map((item, i) => (
-									<div key={i} className="flex items-start gap-3">
-										<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-										<span className="text-foreground text-sm">{item}</span>
-									</div>
-								))}
-							</div>
 						</div>
 						<div>
 							<TransactionsPreview />

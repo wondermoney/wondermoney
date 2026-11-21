@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { Check } from "lucide-react";
+import { Activity, ArrowRightLeft, CalendarRange, ChartCandlestick, ChartColumn, ChartPie, HeartPulse, ListChecks, Tags, type LucideIcon } from "lucide-react";
 
 import ReportsPreview from "@/components/homepage/previews/ReportsPreview";
 import CTABanner from "@/components/shared/CTABanner";
@@ -10,20 +10,13 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
 
-function FeatureItem({ text }: { text: string }) {
-	return (
-		<div className="flex items-start gap-3">
-			<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-			<span className="text-foreground text-sm">{text}</span>
-		</div>
-	);
-}
-
-function PillarCard({ title, body }: { title: string; body: string }) {
+function PillarCard({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
 	return (
 		<div className="rounded-card border border-border bg-background p-6">
+			<Icon className="mb-3 h-8 w-8 text-primary" strokeWidth={1.75} aria-hidden="true" />
 			<h3 className="text-base font-semibold text-foreground">{title}</h3>
 			<p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
 		</div>
@@ -70,14 +63,14 @@ export default function FeatureReports({ locale }: { locale: Lang }) {
 function FeatureReportsContent({ locale }: { locale: Lang }) {
 	const { t } = useTranslations();
 
-	const featureKeys = [
-		"lp.featureReports.feature1",
-		"lp.featureReports.feature2",
-		"lp.featureReports.feature3",
-		"lp.featureReports.feature4",
-		"lp.featureReports.feature5",
-		"lp.featureReports.feature6",
-	] as const;
+	const features = [
+		{ icon: Tags, text: t("lp.featureReports.feature1") },
+		{ icon: ArrowRightLeft, text: t("lp.featureReports.feature2") },
+		{ icon: CalendarRange, text: t("lp.featureReports.feature3") },
+		{ icon: ChartCandlestick, text: t("lp.featureReports.feature4") },
+		{ icon: ChartColumn, text: t("lp.featureReports.feature5") },
+		{ icon: ListChecks, text: t("lp.featureReports.feature6") },
+	];
 
 	return (
 		<>
@@ -123,14 +116,17 @@ function FeatureReportsContent({ locale }: { locale: Lang }) {
 					</h2>
 					<div className="grid gap-6 md:grid-cols-3">
 						<PillarCard
+							icon={ChartPie}
 							title={t("lp.featureReports.pillar1Title")}
 							body={t("lp.featureReports.pillar1Body")}
 						/>
 						<PillarCard
+							icon={Activity}
 							title={t("lp.featureReports.pillar2Title")}
 							body={t("lp.featureReports.pillar2Body")}
 						/>
 						<PillarCard
+							icon={HeartPulse}
 							title={t("lp.featureReports.pillar3Title")}
 							body={t("lp.featureReports.pillar3Body")}
 						/>
@@ -165,18 +161,7 @@ function FeatureReportsContent({ locale }: { locale: Lang }) {
 				</div>
 			</section>
 
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-5xl px-6 lg:px-8">
-					<h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-foreground">
-						{t("lp.featureReports.featuresTitle")}
-					</h2>
-					<div className="grid gap-4 sm:grid-cols-2">
-						{featureKeys.map((featureKey) => (
-							<FeatureItem key={featureKey} text={t(featureKey)} />
-						))}
-					</div>
-				</div>
-			</section>
+			<FeatureExplainer title={t("lp.featureReports.featuresTitle")} points={features} />
 
 			<section className="bg-paper-2 py-16 md:py-20">
 				<div className="mx-auto max-w-4xl px-6 lg:px-8">

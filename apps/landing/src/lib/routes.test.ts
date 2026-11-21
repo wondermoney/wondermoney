@@ -46,6 +46,18 @@ describe("route localization", () => {
 		"lp.featurePortfolio.metaDescription",
 		"lp.featureReports.metaTitle",
 		"lp.featureReports.metaDescription",
+		"lp.featureHousehold.metaTitle",
+		"lp.featureHousehold.metaDescription",
+		"lp.featureImports.metaTitle",
+		"lp.featureImports.metaDescription",
+		"lp.featureRecurring.metaTitle",
+		"lp.featureRecurring.metaDescription",
+		"lp.featureAssistant.metaTitle",
+		"lp.featureAssistant.metaDescription",
+		"lp.featureMultiCurrency.metaTitle",
+		"lp.featureMultiCurrency.metaDescription",
+		"lp.featureSelfHosting.metaTitle",
+		"lp.featureSelfHosting.metaDescription",
 	] as const
 
 	function getByPath(value: unknown, path: string): unknown {

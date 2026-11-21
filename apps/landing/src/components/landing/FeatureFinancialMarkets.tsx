@@ -1,5 +1,5 @@
 import { useTranslations } from "@/lib/reactTranslations";
-import { Check } from "lucide-react";
+import { ChartLine, Search, SlidersHorizontal, Star } from "lucide-react";
 
 import FinancialMarketsPreview from "@/components/homepage/previews/FinancialMarketsPreview";
 import CTABanner from "@/components/shared/CTABanner";
@@ -10,16 +10,8 @@ import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
+import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
-
-function BenefitItem({ text }: { text: string }) {
-	return (
-		<div className="flex items-start gap-3">
-			<Check className="mt-0.5 h-5 w-5 shrink-0 text-success-text" aria-hidden="true" />
-			<span className="text-foreground text-sm">{text}</span>
-		</div>
-	);
-}
 
 function StepCard({
 	number,
@@ -61,12 +53,12 @@ export default function FeatureFinancialMarkets({ locale }: { locale: Lang }) {
 function FeatureFinancialMarketsContent({ locale }: { locale: Lang }) {
 	const { t } = useTranslations();
 
-	const benefitKeys = [
-		"lp.featureFinancialMarkets.benefit1",
-		"lp.featureFinancialMarkets.benefit2",
-		"lp.featureFinancialMarkets.benefit3",
-		"lp.featureFinancialMarkets.benefit4",
-	] as const;
+	const benefits = [
+		{ icon: Search, text: t("lp.featureFinancialMarkets.benefit1") },
+		{ icon: SlidersHorizontal, text: t("lp.featureFinancialMarkets.benefit2") },
+		{ icon: Star, text: t("lp.featureFinancialMarkets.benefit3") },
+		{ icon: ChartLine, text: t("lp.featureFinancialMarkets.benefit4") },
+	];
 
 	return (
 		<>
@@ -131,18 +123,7 @@ function FeatureFinancialMarketsContent({ locale }: { locale: Lang }) {
 
 			<MidCTA locale={locale} />
 
-			<section className="py-16 md:py-20">
-				<div className="mx-auto max-w-5xl px-6 lg:px-8">
-					<h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-foreground">
-						{t("lp.featureFinancialMarkets.benefitsTitle")}
-					</h2>
-					<div className="grid gap-4 sm:grid-cols-2">
-						{benefitKeys.map((key) => (
-							<BenefitItem key={key} text={t(key)} />
-						))}
-					</div>
-				</div>
-			</section>
+			<FeatureExplainer title={t("lp.featureFinancialMarkets.benefitsTitle")} points={benefits} />
 
 			<section className="bg-paper-2 py-16 md:py-20">
 				<div className="mx-auto max-w-4xl px-6 lg:px-8">

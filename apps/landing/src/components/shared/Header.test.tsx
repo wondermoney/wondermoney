@@ -5,7 +5,7 @@ import { act, cleanup, fireEvent, render, screen, within } from "@testing-librar
 import userEvent from "@testing-library/user-event";
 import { Calculator } from "lucide-react";
 import { createConsentDecision, writeConsentDecision } from "@/lib/consent";
-import { FEATURE_MENU } from "@/lib/featureMenu";
+import { FEATURE_MENU, FEATURE_MENU_GROUPS } from "@/lib/featureMenu";
 import { FEATURE_ROUTE_IDS, SUPPORTED_LANGS, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
 import { TOOLS_CATALOG, buildHeaderToolMenus, type ToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
@@ -193,7 +193,7 @@ describe("Header tools menu", () => {
 });
 
 describe("Header features menu", () => {
-  it("lists every feature page, in two columns, each with its icon, name and description", () => {
+  it("lists every feature page, one column per group, each with its icon, name and description", () => {
     render(<Header locale="en" />);
     const features = panel("features");
     const links = within(features).getAllByRole("link", { hidden: true });
@@ -207,7 +207,17 @@ describe("Header features menu", () => {
       expect(link.textContent).toContain(en(`header.nav.${item.key}.description`));
       expect(link.querySelector("svg[aria-hidden='true']")).not.toBeNull();
     }
-    expect(features.querySelector("ul")!.className).toContain("grid-cols-2");
+    const columns = [...features.querySelectorAll<HTMLElement>("ul[data-features-group]")];
+    expect(columns.map((column) => column.dataset.featuresGroup)).toEqual([...FEATURE_MENU_GROUPS]);
+    expect(columns[0].parentElement!.className).toContain(`grid-cols-${FEATURE_MENU_GROUPS.length}`);
+    for (const column of columns) {
+      const hrefs = [...column.querySelectorAll("a")].map((link) => link.getAttribute("href"));
+      expect(hrefs).toEqual(
+        FEATURE_MENU.filter((item) => item.group === column.dataset.featuresGroup).map((item) =>
+          toLocalizedPath(item.routeId, "en"),
+        ),
+      );
+    }
   });
 
   it("carries every feature page into the mobile drawer", async () => {
