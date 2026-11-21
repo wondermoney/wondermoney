@@ -32,7 +32,7 @@ const BankConnectionUnsyncModal: React.FC<BankConnectionUnsyncModalProps> = ({
     type: "conjunction",
   });
   const onUnsyncAccount = () => {
-    posthog.capture("unsync account", { requisitionKey: requisitionData.id });
+    posthog.capture("unsync account");
     deleteRequisitionMutation.mutate(
       { requisitionKey: requisitionData.id },
       {

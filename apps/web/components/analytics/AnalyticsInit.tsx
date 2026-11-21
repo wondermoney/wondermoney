@@ -8,6 +8,7 @@ import {
   getAnalyticsConsent,
   useAnalyticsConsent,
 } from "@/lib/analytics/consent";
+import { scrubEventProperties } from "@/lib/analytics/scrub-properties";
 import {
   getGtmId,
   isAnalyticsEnabled,
@@ -42,8 +43,13 @@ export function AnalyticsInit() {
         person_profiles: "never",
         // Ignore identity and traits persisted by earlier app versions.
         persistence: "memory",
-        before_send: (event) =>
-          getAnalyticsConsent() === "granted" ? event : null,
+        // Consent is re-read per event, and no event leaves with an identifier, an email
+        // or a whole object in it (`lib/analytics/scrub-properties.ts`).
+        before_send: (event) => {
+          if (!event || getAnalyticsConsent() !== "granted") return null;
+          event.properties = scrubEventProperties(event.properties);
+          return event;
+        },
       });
     }
     posthog.opt_in_capturing({ captureEventName: false });

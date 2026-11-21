@@ -44,7 +44,7 @@ const BudgetDeleteModal: React.FC<BudgetDeleteModalProps> = ({
       { budgetKey },
       {
         onSuccess: async () => {
-          posthog.capture("budget_deleted", { budget_key: budgetKey });
+          posthog.capture("budget_deleted");
           await invalidateBudgets(qc, { refresh: () => router.refresh() });
           closeModal();
         },
