@@ -101,7 +101,7 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
       },
       {
         onSuccess: () => {
-          posthog.capture("budget_edited", { budget_key: budgetKey });
+          posthog.capture("budget_edited");
         },
         onSettled: async () => {
           await invalidateBudgets(qc, { refresh: () => router.refresh() });

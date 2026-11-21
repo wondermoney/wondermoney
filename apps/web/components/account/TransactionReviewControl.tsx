@@ -152,11 +152,11 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
     successMessage: string,
   ) => {
     setIsSubmitting(true);
+    // Which fields changed, never the transactions, categories or tags themselves.
     posthog.capture(event, {
-      transactionIds: allMatching ? undefined : transactionIds,
       allMatching,
       count: selectedCount,
-      ...change,
+      changes: Object.keys(change).sort(),
     });
     try {
       const response = await mutateAsync({ ...scope, ...change });
