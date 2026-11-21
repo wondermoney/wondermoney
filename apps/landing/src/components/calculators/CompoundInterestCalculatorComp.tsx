@@ -9,7 +9,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import {
@@ -332,7 +332,6 @@ function GrowthChart({
               stackId="1"
               stroke="oklch(var(--chart-1))"
               fill="oklch(var(--chart-1) / 0.3)"
-              isAnimationActive={false}
             />
             <Area
               type="monotone"
@@ -341,7 +340,6 @@ function GrowthChart({
               stackId="1"
               stroke="oklch(var(--chart-3))"
               fill="oklch(var(--chart-3) / 0.3)"
-              isAnimationActive={false}
             />
             <Line
               type="monotone"
@@ -351,7 +349,6 @@ function GrowthChart({
               strokeWidth={2}
               strokeDasharray="6 4"
               dot={false}
-              isAnimationActive={false}
             />
           </ComposedChart>
         </ResponsiveContainer>

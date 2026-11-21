@@ -8,7 +8,7 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
@@ -243,7 +243,6 @@ function BuyVsRentCalculatorContent() {
                       formatter={(value) => <span className="text-foreground">{value}</span>}
                     />
                     <Line
-                      isAnimationActive={false}
                       type="monotone"
                       dataKey="buy"
                       name={t(k("chartBuy"))}
@@ -252,7 +251,6 @@ function BuyVsRentCalculatorContent() {
                       dot={false}
                     />
                     <Line
-                      isAnimationActive={false}
                       type="monotone"
                       dataKey="rent"
                       name={t(k("chartRent"))}

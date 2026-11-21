@@ -9,7 +9,7 @@ import {
   Tooltip,
   Cell,
   ResponsiveContainer,
-} from "recharts";
+} from "@/components/shared/charts";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorInput from "./CalculatorInput";
 import CalculatorResult from "./CalculatorResult";
