@@ -27,6 +27,7 @@ import { createPprFormat } from "@/lib/calculators/pprFormat";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.pprComparison.${key}`;
 /** Products shown at first, and added by each "show more". */
@@ -55,7 +56,7 @@ function useUsageEvent() {
   };
 }
 
-const selectClass =
+const searchClass =
   "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const linkClass = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
 
@@ -139,9 +140,9 @@ function Comparison({ onUse }: { onUse: () => void }) {
           <label htmlFor="ppr-kind" className="block text-sm font-medium text-foreground">
             {t(k("compare.kind"))}
           </label>
-          <select
+          <Select
             id="ppr-kind"
-            className={selectClass}
+            className="h-11"
             value={filters.kind}
             onChange={(event) => update({ kind: event.currentTarget.value as PprFilters["kind"] })}
           >
@@ -151,15 +152,15 @@ function Comparison({ onUse }: { onUse: () => void }) {
                 {t(k(`kinds.${kind}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-risk" className="block text-sm font-medium text-foreground">
             {t(k("compare.risk"))}
           </label>
-          <select
+          <Select
             id="ppr-risk"
-            className={selectClass}
+            className="h-11"
             value={String(filters.riskClass)}
             onChange={(event) => {
               const value = event.currentTarget.value;
@@ -173,15 +174,15 @@ function Comparison({ onUse }: { onUse: () => void }) {
               </option>
             ))}
             <option value="none">{t(k("compare.noRisk"))}</option>
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-sort" className="block text-sm font-medium text-foreground">
             {t(k("compare.sort"))}
           </label>
-          <select
+          <Select
             id="ppr-sort"
-            className={selectClass}
+            className="h-11"
             value={sort}
             onChange={(event) => {
               onUse();
@@ -194,7 +195,7 @@ function Comparison({ onUse }: { onUse: () => void }) {
                 {t(k(`sorts.${item}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="ppr-search" className="block text-sm font-medium text-foreground">
@@ -203,7 +204,7 @@ function Comparison({ onUse }: { onUse: () => void }) {
           <input
             id="ppr-search"
             type="search"
-            className={selectClass}
+            className={searchClass}
             value={filters.query}
             placeholder={t(k("compare.searchPlaceholder"))}
             onChange={(event) => update({ query: event.currentTarget.value })}

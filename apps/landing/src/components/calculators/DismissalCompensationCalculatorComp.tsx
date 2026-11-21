@@ -20,10 +20,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.dismissalCompensation.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const dateClass =
   "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive";
 const PAYOUT_MONTHS = [6, 12] as const;
@@ -125,17 +124,16 @@ function DismissalCompensationCalculator() {
           <label htmlFor="dismissal-contract-type" className="block text-sm font-medium text-foreground">
             {t(k("fields.contractType"))}
           </label>
-          <select
+          <Select
             id="dismissal-contract-type"
             value={input.contractType}
             onChange={(event) => update("contractType", event.currentTarget.value as ContractType)}
-            className={selectClass}
             aria-describedby="dismissal-contract-type-help"
           >
             {CONTRACT_TYPES.map((type) => (
               <option key={type} value={type}>{t(k(`contractTypes.${type}`))}</option>
             ))}
-          </select>
+          </Select>
           <p id="dismissal-contract-type-help" className="text-sm text-muted-foreground">{t(k("help.contractType"))}</p>
         </div>
         {fixedTerm && (
@@ -143,17 +141,16 @@ function DismissalCompensationCalculator() {
             <label htmlFor="dismissal-term-kind" className="block text-sm font-medium text-foreground">
               {t(k("fields.fixedTermKind"))}
             </label>
-            <select
+            <Select
               id="dismissal-term-kind"
               value={input.fixedTermKind}
               onChange={(event) => update("fixedTermKind", event.currentTarget.value as FixedTermKind)}
-              className={selectClass}
               aria-describedby="dismissal-term-kind-help"
             >
               {FIXED_TERM_KINDS.map((kind) => (
                 <option key={kind} value={kind}>{t(k(`fixedTermKinds.${kind}`))}</option>
               ))}
-            </select>
+            </Select>
             <p id="dismissal-term-kind-help" className="text-sm text-muted-foreground">{t(k("help.fixedTermKind"))}</p>
           </div>
         )}

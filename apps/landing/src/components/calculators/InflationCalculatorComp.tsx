@@ -13,6 +13,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 export default function InflationCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -59,14 +60,13 @@ function InflationCalculator() {
       <label htmlFor={`inflation-${field}`} className="block text-sm font-medium">
         {t(key(field))}
       </label>
-      <select
+      <Select
         id={`inflation-${field}`}
         value={input[field]}
         onChange={(event) => edit(field, Number(event.currentTarget.value))}
-        className="h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {CPI_YEARS.map((year) => <option key={year} value={year}>{year}</option>)}
-      </select>
+      </Select>
     </div>
   );
 

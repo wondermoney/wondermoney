@@ -14,10 +14,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.propertyTax.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export default function PropertyTaxCalculatorComp({ locale }: { locale: Lang }) {
   return (
@@ -53,18 +52,17 @@ function PropertyTaxCalculator() {
           <label htmlFor="propertyTax-kind" className="block text-sm font-medium text-foreground">
             {t(k("fields.kind"))}
           </label>
-          <select
+          <Select
             id="propertyTax-kind"
             value={input.kind}
             onChange={(event) => {
               const kind = event.currentTarget.value as PropertyKind;
               setInput((current) => ({ ...current, kind }));
             }}
-            className={selectClass}
           >
             <option value="urban">{t(k("kinds.urban"))}</option>
             <option value="rustic">{t(k("kinds.rustic"))}</option>
-          </select>
+          </Select>
         </div>
         <CalculatorInput
           id="propertyTax-vpt"
@@ -101,20 +99,19 @@ function PropertyTaxCalculator() {
               <label htmlFor="propertyTax-dependants" className="block text-sm font-medium text-foreground">
                 {t(k("fields.dependants"))}
               </label>
-              <select
+              <Select
                 id="propertyTax-dependants"
                 value={input.dependants}
                 onChange={(event) => {
                   const dependants = Number(event.currentTarget.value);
                   setInput((current) => ({ ...current, dependants }));
                 }}
-                className={selectClass}
                 aria-describedby="propertyTax-dependants-help"
               >
                 {[0, 1, 2, 3].map((value) => (
                   <option key={value} value={value}>{t(k(`dependantsOptions.${value}`))}</option>
                 ))}
-              </select>
+              </Select>
               <p id="propertyTax-dependants-help" className="text-sm text-muted-foreground">
                 {t(k("dependantsHelp"))}
               </p>

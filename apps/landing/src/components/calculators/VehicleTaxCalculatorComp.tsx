@@ -19,10 +19,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.vehicleTax.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const textInputClass =
   "w-full rounded-lg border border-input px-3 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring";
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -368,17 +367,16 @@ function VehicleFieldset({
           <label htmlFor={id("fuel")} className="block text-sm font-medium text-foreground">
             {t(k("fields.fuel"))}
           </label>
-          <select
+          <Select
             id={id("fuel")}
             value={input.fuel}
             onChange={(event) => onChange({ fuel: event.currentTarget.value as VehicleFuel })}
-            className={selectClass}
             aria-invalid={errors.fuel ? true : undefined}
           >
             {(["petrol", "diesel", "electric"] as const).map((fuel) => (
               <option key={fuel} value={fuel}>{t(k(`fuels.${fuel}`))}</option>
             ))}
-          </select>
+          </Select>
           {errors.fuel && <p role="alert" className="text-sm text-destructive">{err(errors.fuel)}</p>}
         </div>
         {electric ? (
@@ -410,16 +408,15 @@ function VehicleFieldset({
             <label htmlFor={id("month")} className="block text-sm font-medium text-foreground">
               {t(k("fields.month"))}
             </label>
-            <select
+            <Select
               id={id("month")}
               value={input.month}
               onChange={(event) => onChange({ month: Number(event.currentTarget.value) })}
-              className={selectClass}
             >
               {MONTHS.map((month) => (
                 <option key={month} value={month}>{monthName(month)}</option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">{t(k("registrationHelp"))}</p>
@@ -440,15 +437,14 @@ function VehicleFieldset({
               <label htmlFor={id("standard")} className="block text-sm font-medium text-foreground">
                 {t(k("fields.standard"))}
               </label>
-              <select
+              <Select
                 id={id("standard")}
                 value={input.standard}
                 onChange={(event) => onChange({ standard: event.currentTarget.value as Co2Standard })}
-                className={selectClass}
               >
                 <option value="wltp">{t(k("standards.wltp"))}</option>
                 <option value="nedc">{t(k("standards.nedc"))}</option>
-              </select>
+              </Select>
             </div>
           </>
         )}

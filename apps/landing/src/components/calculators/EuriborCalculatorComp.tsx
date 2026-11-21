@@ -28,6 +28,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent, toIntlLocale } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.euribor.${key}`;
 const LATEST = getLatestEuribor();
@@ -172,18 +173,17 @@ function EuriborContent() {
             <label htmlFor="euribor-tenor" className="block text-sm font-medium text-foreground">
               {t(k("fields.tenor"))}
             </label>
-            <select
+            <Select
               id="euribor-tenor"
               value={input.tenor}
               onChange={(event) => update("tenor", Number(event.currentTarget.value) as EuriborTenor)}
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {EURIBOR_TENORS.map((tenor) => (
                 <option key={tenor} value={tenor}>
                   {t(k(`tenor.${tenor}`))}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
           <CalculatorInput
             id="euribor-change"
@@ -258,18 +258,17 @@ function EuriborContent() {
           <label htmlFor="euribor-from" className="block text-sm font-medium text-foreground">
             {t(k("history.from"))}
           </label>
-          <select
+          <Select
             id="euribor-from"
             value={fromYear}
             onChange={(event) => setFromYear(Number(event.currentTarget.value))}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {YEARS.map((year) => (
               <option key={year} value={year}>
                 {year}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="h-72 w-full min-w-0" role="img" aria-label={t(k("history.label"))}>
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>

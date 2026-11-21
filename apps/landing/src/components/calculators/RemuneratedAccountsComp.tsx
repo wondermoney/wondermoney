@@ -27,6 +27,7 @@ import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
 import { AsOfBanner, BankNotices, OriginalNotes, YesMark } from "./BankAccountsCommon";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.remuneratedAccounts.${key}`;
 const TYPES: readonly RemuneratedAccountType[] = ["ordem", "poupancaComIban", "poupancaSemIban", "dividaPublica", "seguro"];
@@ -83,8 +84,6 @@ function RemuneratedAccounts() {
   };
   const eur = (value: number, decimals = 0) => formatMoney(locale, value, { currency: "EUR", decimals });
 
-  const selectClass =
-    "h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <>
@@ -112,9 +111,9 @@ function RemuneratedAccounts() {
           />
         </div>
         <Field id="remunerated-type" label={t(k("filters.type"))}>
-          <select
+          <Select
             id="remunerated-type"
-            className={selectClass}
+            className="h-11"
             value={filters.type}
             onChange={(event) => setFilter("type", event.currentTarget.value as RemuneratedFilters["type"])}
           >
@@ -124,12 +123,12 @@ function RemuneratedAccounts() {
                 {t(k(`types.${type}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <Field id="remunerated-iban" label={t(k("filters.iban"))}>
-          <select
+          <Select
             id="remunerated-iban"
-            className={selectClass}
+            className="h-11"
             value={filters.iban}
             onChange={(event) => setFilter("iban", event.currentTarget.value as IbanFilter)}
           >
@@ -138,12 +137,12 @@ function RemuneratedAccounts() {
                 {t(k(`iban.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <Field id="remunerated-tax" label={t(k("filters.tax"))}>
-          <select
+          <Select
             id="remunerated-tax"
-            className={selectClass}
+            className="h-11"
             value={filters.tax}
             onChange={(event) => setFilter("tax", event.currentTarget.value as TaxFilter)}
           >
@@ -152,7 +151,7 @@ function RemuneratedAccounts() {
                 {t(k(`tax.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
         <label className="flex min-h-11 items-center gap-2 self-end text-sm font-medium text-foreground">
           <input
@@ -164,9 +163,9 @@ function RemuneratedAccounts() {
           {t(k("filters.twoHolders"))}
         </label>
         <Field id="remunerated-sort" label={t(k("sort.label"))}>
-          <select
+          <Select
             id="remunerated-sort"
-            className={selectClass}
+            className="h-11"
             value={sort}
             onChange={(event) => {
               touch();
@@ -178,7 +177,7 @@ function RemuneratedAccounts() {
                 {t(k(`sort.${option}`))}
               </option>
             ))}
-          </select>
+          </Select>
         </Field>
       </div>
       <p className="mt-4 text-sm text-muted-foreground" aria-live="polite">

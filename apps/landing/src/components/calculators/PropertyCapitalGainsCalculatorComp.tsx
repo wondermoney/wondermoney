@@ -14,10 +14,9 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.propertyCapitalGains.${key}`;
-const selectClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const CHECKLIST = ["domicile", "reinvest", "declare", "occupy", "register"] as const;
 
@@ -76,20 +75,19 @@ function PropertyCapitalGainsCalculator() {
       <label htmlFor={`capitalGains-${field}`} className="block text-sm font-medium text-foreground">
         {t(k(`fields.${field}`), { saleYear: String(CAPITAL_GAINS_TABLES.saleYear) })}
       </label>
-      <select
+      <Select
         id={`capitalGains-${field}`}
         value={input[field]}
         onChange={(event) => {
           const month = Number(event.currentTarget.value);
           setInput((current) => ({ ...current, [field]: month }));
         }}
-        className={selectClass}
         aria-invalid={errors[field] ? true : undefined}
       >
         {MONTHS.map((month) => (
           <option key={month} value={month}>{monthName(month)}</option>
         ))}
-      </select>
+      </Select>
       {errors[field] && <p role="alert" className="text-sm text-destructive">{err(field)}</p>}
     </div>
   );

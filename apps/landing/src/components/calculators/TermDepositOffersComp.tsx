@@ -18,6 +18,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.termDepositOffers.${key}`;
 const MAX_AMOUNT = 100_000_000;
@@ -74,8 +75,6 @@ function TermDepositOffers() {
       <span>{label}</span>
     </label>
   );
-  const selectClass =
-    "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <section aria-labelledby="offers-title" className="min-w-0 space-y-6">
@@ -106,11 +105,10 @@ function TermDepositOffers() {
           <label htmlFor="offers-term" className="block text-sm font-medium text-foreground">
             {t(k("filters.term"))}
           </label>
-          <select
+          <Select
             id="offers-term"
             value={filters.termMonths === null ? "" : String(filters.termMonths)}
             onChange={(event) => update("termMonths", event.currentTarget.value === "" ? null : Number(event.currentTarget.value))}
-            className={selectClass}
           >
             <option value="">{t(k("filters.termAll"))}</option>
             {terms.map((term) => (
@@ -118,22 +116,21 @@ function TermDepositOffers() {
                 {t(k("filters.termOption"), { months: String(term) })}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="offers-irs" className="block text-sm font-medium text-foreground">
             {t(k("filters.irs"))}
           </label>
-          <select
+          <Select
             id="offers-irs"
             value={filters.irs}
             onChange={(event) => update("irs", event.currentTarget.value as OfferFilters["irs"])}
-            className={selectClass}
           >
             <option value="all">{t(k("filters.irsAll"))}</option>
             <option value="withheld">{t(k("filters.irsWithheld"))}</option>
             <option value="notWithheld">{t(k("filters.irsNotWithheld"))}</option>
-          </select>
+          </Select>
         </div>
         <fieldset className="space-y-3 sm:col-span-2 lg:col-span-3">
           <legend className="sr-only">{t(k("filters.conditions"))}</legend>

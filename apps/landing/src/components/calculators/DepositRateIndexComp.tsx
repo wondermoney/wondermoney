@@ -26,6 +26,7 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.depositRateIndex.${key}`;
 
@@ -285,18 +286,17 @@ function History() {
         <label htmlFor="deposit-bucket" className="block text-sm font-medium text-foreground">
           {t(k("history.bucket"))}
         </label>
-        <select
+        <Select
           id="deposit-bucket"
           value={bucket}
           onChange={(event) => setBucket(event.currentTarget.value as DepositBucket)}
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {DEPOSIT_BUCKETS.map((option) => (
             <option key={option} value={option}>
               {bucketLabel(t, option)}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       <div className="h-72 w-full min-w-0" role="img" aria-label={t(k("history.chartLabel"))}>
         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
