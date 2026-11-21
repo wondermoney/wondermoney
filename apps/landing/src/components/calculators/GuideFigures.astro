@@ -12,6 +12,9 @@
  *   `shareLabel` beside it. Use it for a breakdown.
  *
  * A value stays on one line: when a row's values do not fit, cards wrap to the next row.
+ * Values, details and share labels are figures in the financial face; one that is words
+ * ("4 anos e 10 meses", a band name) sets `text`, `detailText` or `shareLabelText` for the
+ * body face.
  *
  *   <GuideFigures items={flow} operators={["−", "=", "→"]} caption={t(k("exampleFlowCaption"))} />
  *
@@ -20,7 +23,7 @@
  * always agree. Icons are lucide-react components, drawn on the server. Server-rendered,
  * no script.
  */
-import type { GuideFigure, GuideFlowOperator } from "./guideBlocks";
+import { guideFigureFaces, type GuideFigure, type GuideFlowOperator } from "./guideBlocks";
 
 interface Props {
   items: GuideFigure[];
@@ -53,6 +56,7 @@ const valueTone = (figure: GuideFigure) =>
       items.map((figure, index) => {
         const Icon = figure.icon;
         const symbol = variant === "flow" && index > 0 ? operators[index - 1] : undefined;
+        const faces = guideFigureFaces(figure);
         return (
           <li class="guide-figures__item">
             {symbol && (
@@ -65,10 +69,10 @@ const valueTone = (figure: GuideFigure) =>
                 {Icon && <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" strokeWidth={1.75} />}
                 <span>{figure.label}</span>
               </p>
-              <p class:list={["guide-figures__value mt-2 font-mono font-semibold leading-tight tracking-tight", valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
+              <p class:list={["guide-figures__value mt-2 font-semibold leading-tight tracking-tight", faces.value, valueTone(figure), variant === "flow" ? "text-2xl" : "text-xl"]}>
                 {figure.value}
               </p>
-              {figure.detail && <p class="mt-1 font-mono text-sm text-muted-foreground">{figure.detail}</p>}
+              {figure.detail && <p class:list={["mt-1 text-sm text-muted-foreground", faces.detail]}>{figure.detail}</p>}
               {typeof figure.share === "number" && (
                 <div class="mt-3 flex items-center gap-3">
                   <span class="guide-figures__track" aria-hidden="true">
@@ -78,7 +82,7 @@ const valueTone = (figure: GuideFigure) =>
                     />
                   </span>
                   {figure.shareLabel && (
-                    <span class="shrink-0 font-mono text-sm text-ink-2">{figure.shareLabel}</span>
+                    <span class:list={["shrink-0 text-sm text-ink-2", faces.shareLabel]}>{figure.shareLabel}</span>
                   )}
                 </div>
               )}

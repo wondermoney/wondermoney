@@ -32,15 +32,34 @@ export type GuideFigure = {
   label: string;
   /** The formatted value, from the calculator's own result. */
   value: string;
+  /**
+   * The value is words rather than a figure ("4 anos e 10 meses", a status), so it is set in
+   * the body face; a figure, with or without its unit ("24 meses", "10 g"), keeps the mono
+   * financial face.
+   */
+  text?: boolean;
   icon?: LucideIcon;
   /** A short line under the value, such as how it is worked out ("640 € ÷ 2850 €"). */
   detail?: string;
+  /** The detail is words ("Atenção", "Primeiro ano"), set in the body face like `text`. */
+  detailText?: boolean;
   /** A share from 0 to 100, drawn as a bar under the value (grid variant). */
   share?: number | null;
   /** The share as text, such as "29,8%"; shown beside the bar. */
   shareLabel?: string;
+  /** The share label is words (a band name such as "Saudável"), set in the body face. */
+  shareLabelText?: boolean;
   tone?: GuideFigureTone;
 };
+
+/** The typeface of a part of a figure card: the body face for words, the financial face for figures. */
+export type GuideFigureFace = "font-sans" | "font-mono";
+
+/** The typeface of each part of a figure card, from its `text` flags. */
+export function guideFigureFaces(figure: GuideFigure): { value: GuideFigureFace; detail: GuideFigureFace; shareLabel: GuideFigureFace } {
+  const face = (text: boolean | undefined): GuideFigureFace => (text ? "font-sans" : "font-mono");
+  return { value: face(figure.text), detail: face(figure.detailText), shareLabel: face(figure.shareLabelText) };
+}
 
 /** The operator printed between two cards of a flow, such as "−", "=" or "→". */
 export type GuideFlowOperator = "+" | "−" | "×" | "÷" | "=" | "→";

@@ -100,7 +100,7 @@ export function buildFireGuide(locale: Lang): FireGuideContent {
       share: result.progress,
       detail: `${values.assets} ÷ ${values.target}`,
     },
-    { label: tool("timeToFire"), value: values.time, icon: CalendarClock },
+    { label: tool("timeToFire"), value: values.time, text: true, icon: CalendarClock },
   ];
 
   const f = (key: string) => guide(`formula.${key}`);

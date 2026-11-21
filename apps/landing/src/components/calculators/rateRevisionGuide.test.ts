@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { RATE_REVISION_EXAMPLE, computeRateRevision } from "@/lib/calculators/rateRevision"
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
-import { formulaHrefs } from "./guideBlocks"
+import { formulaHrefs, guideFigureFaces } from "./guideBlocks"
 import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { RATE_REVISION_GUIDE_IDS, buildRateRevisionGuide } from "./rateRevisionGuide"
 
@@ -45,6 +45,14 @@ describe("rate revision guide content", () => {
 			income.current.ratio,
 			income.revised.ratio,
 		])
+	})
+
+	it.each(SUPPORTED_LANGS)("sets the band names in the body face and the shares as figures in %s", (lang) => {
+		const guide = buildRateRevisionGuide(lang)
+
+		for (const figure of guide.incomeShares) {
+			expect(guideFigureFaces(figure)).toEqual({ value: "font-mono", detail: "font-mono", shareLabel: "font-sans" })
+		}
 	})
 
 	it("adds today's payment and the change up to the new payment", () => {

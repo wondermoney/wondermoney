@@ -4,6 +4,7 @@ import { computeFuelCost, fuelCostExample } from "@/lib/calculators/fuelCost"
 import { formatMoney, formatNumber } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { buildElectricityIndexGuide, buildFuelPricesGuide, buildTariffComparisonGuide } from "./energyGuides"
+import { guideFigureFaces } from "./guideBlocks"
 import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
 // The strings' own values are the pages' business; these builders only pass them through.
@@ -50,6 +51,9 @@ describe("electricity tariff comparison guide content", () => {
 		expectFigures(guide.flow)
 		expect(guide.flow[2].value).toBe(formatMoney(lang, 600.5 - 511.73, { decimals: 2 }))
 		expect(guide.flowOperators).toHaveLength(guide.flow.length - 1)
+		// "First year" is words; the amounts are figures.
+		expect(guide.flow.slice(0, 2).map((figure) => guideFigureFaces(figure).detail)).toEqual(["font-sans", "font-sans"])
+		for (const figure of guide.flow) expect(guideFigureFaces(figure).value).toBe("font-mono")
 	})
 })
 

@@ -148,8 +148,8 @@ export function buildTariffComparisonGuide(
       { term: t(k("use.optionsTerm")), body: t(k("use.options")) },
     ],
     flow: [
-      { label: t(k("example.regulatedLabel")), value: euro(example.regulated), icon: Landmark, detail: firstYear },
-      { label: t(k("example.cheapestLabel")), value: euro(example.cheapest), icon: Zap, detail: firstYear },
+      { label: t(k("example.regulatedLabel")), value: euro(example.regulated), icon: Landmark, detail: firstYear, detailText: true },
+      { label: t(k("example.cheapestLabel")), value: euro(example.cheapest), icon: Zap, detail: firstYear, detailText: true },
       {
         label: t(k("example.differenceLabel")),
         value: euro(example.regulated - example.cheapest),

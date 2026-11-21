@@ -93,7 +93,7 @@ export function buildDebtToIncomeGuide(locale: Lang) {
   const flow: GuideFigure[] = [
     { label: tool("totalPayments"), value: exampleValues.total, icon: CalendarClock },
     { label: tool("income"), value: exampleValues.income, icon: Wallet },
-    { label: tool("ratio"), value: exampleValues.ratio, icon: Percent, detail: bandName(current.band) },
+    { label: tool("ratio"), value: exampleValues.ratio, icon: Percent, detail: bandName(current.band), detailText: true },
   ];
 
   // The ratio now and after the change, each a share of income in its band.
@@ -106,6 +106,7 @@ export function buildDebtToIncomeGuide(locale: Lang) {
     detail: money(result.totalPayments),
     share: result.ratio,
     shareLabel: bandName(result.band),
+    shareLabelText: true,
     tone: BAND_TONE[result.band],
   }));
 

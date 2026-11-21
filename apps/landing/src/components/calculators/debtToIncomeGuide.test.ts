@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { DEBT_TO_INCOME_WORKED_EXAMPLE, compareDebtScenario } from "@/lib/calculators/debtToIncome"
 import { formatMoney, formatPercent } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
-import { formulaHrefs } from "./guideBlocks"
+import { formulaHrefs, guideFigureFaces } from "./guideBlocks"
 import { DEBT_TO_INCOME_GUIDE_IDS, buildDebtToIncomeGuide } from "./debtToIncomeGuide"
 
 const example = DEBT_TO_INCOME_WORKED_EXAMPLE
@@ -54,6 +54,15 @@ describe("debt-to-income guide content", () => {
 			formatPercent(lang, current.ratio as number),
 			formatPercent(lang, scenario.ratio as number),
 		])
+	})
+
+	it.each(SUPPORTED_LANGS)("sets the band names in the body face and the ratios as figures in %s", (lang) => {
+		const guide = buildDebtToIncomeGuide(lang)
+
+		expect(guideFigureFaces(guide.flow[2])).toEqual({ value: "font-mono", detail: "font-sans", shareLabel: "font-mono" })
+		for (const figure of guide.comparison) {
+			expect(guideFigureFaces(figure)).toEqual({ value: "font-mono", detail: "font-mono", shareLabel: "font-sans" })
+		}
 	})
 
 	it("tells the story the copy describes: caution now, healthy after the change", () => {
