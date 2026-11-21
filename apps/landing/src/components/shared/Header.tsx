@@ -1,24 +1,19 @@
-import { useState } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import { Dialog, DialogPanel, Disclosure } from "@headlessui/react";
-import {
-  BookOpen,
-  ChartPie,
-  ChevronDown,
-  FileText,
-  Landmark,
-  Menu,
-  Shield,
-  Tag,
-  X,
-} from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { LAYER } from "@/lib/layers";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import logo from "../../assets/logo.png";
-import { type RouteId, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
+import { toLocalizedPath, toToolsHubPath } from "@/lib/routes";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
-import { buildToolsHub, type ToolsHubTool } from "@/lib/toolsCatalog";
-import { toolsMenuClickEvent } from "@/lib/toolsMenuTracking";
+import { FEATURE_MENU } from "@/lib/featureMenu";
+import {
+  buildHeaderToolMenus,
+  type ToolsHubTool,
+  type ToolsMenuGroup,
+} from "@/lib/toolsCatalog";
+import { toolsMenuClickEvent, type ToolsNavMenu } from "@/lib/toolsMenuTracking";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { useCtaUrl } from "@/hooks/useCtaUrl";
@@ -28,73 +23,103 @@ export type Props = {
   locale: Lang;
 };
 
+type MenuId = "features" | "tools" | "comparators";
+
 const triggerClassName =
-  "flex items-center gap-x-1 rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground aria-expanded:text-foreground";
+  "flex items-center gap-x-1 whitespace-nowrap rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground aria-expanded:text-foreground";
 const chevronClassName =
   "h-4 w-4 flex-none text-muted-foreground transition-transform duration-150 motion-reduce:transition-none";
+/** A panel row with an icon tile, a name and one line under it: features and comparators. */
+const tileLinkClassName =
+  "group flex items-start gap-x-3 rounded-md p-3 transition-colors hover:bg-accent motion-reduce:transition-none";
+const tileClassName =
+  "flex h-9 w-9 flex-none items-center justify-center rounded-md border border-border bg-background";
+const tileIconClassName =
+  "h-[18px] w-[18px] text-muted-foreground transition-colors group-hover:text-primary motion-reduce:transition-none";
+/** The thin outline icon before a tool's name, in the Tools menu and the drawer. */
+const toolIconClassName =
+  "h-4 w-4 flex-none text-muted-foreground transition-colors group-hover:text-primary motion-reduce:transition-none";
+const drawerAccordionClassName =
+  "flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-foreground hover:bg-accent";
+const drawerRowClassName =
+  "group flex items-center gap-x-3 rounded-lg py-2 pl-6 pr-3 text-sm font-medium leading-6 text-foreground hover:bg-accent";
+const drawerHeadingClassName = "pb-1 pl-6 pr-3 text-sm font-medium text-foreground";
+const drawerSubheadingClassName = "pb-0.5 pl-6 pr-3 pt-2 text-xs text-muted-foreground";
+
+function DrawerAccordion({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <Disclosure as="div" className="-mx-3">
+      {({ open }) => (
+        <>
+          <Disclosure.Button className={drawerAccordionClassName}>
+            {label}
+            <ChevronDown
+              className={cn(
+                open ? "rotate-180" : "",
+                "h-5 w-5 flex-none transition-transform motion-reduce:transition-none",
+              )}
+              aria-hidden="true"
+            />
+          </Disclosure.Button>
+          {children}
+        </>
+      )}
+    </Disclosure>
+  );
+}
 
 export default function Header({ locale }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const menus = useNavMenus<"features" | "tools">("header-menu");
+  const menus = useNavMenus<MenuId>("header-menu");
   const t = getTranslations(locale);
   const homeHref = `/${locale}`;
   const toolsHubHref = toToolsHubPath(locale);
-  // The catalog's task groups: a tool added to the catalog appears here and in the drawer.
-  const toolGroups = buildToolsHub(locale);
+  // The catalog's task groups, split under their subgroups, and its comparators: a tool added
+  // to the catalog appears in its menu here and in the drawer.
+  const { columns: toolColumns, comparators } = buildHeaderToolMenus(locale);
+  const toolGroups = toolColumns.flat();
   const ctaUrl = useCtaUrl();
 
-  const trackToolClick = (tool: ToolsHubTool, position: "header" | "drawer") =>
-    pushGtmEvent(toolsMenuClickEvent(tool, position));
+  const trackToolClick = (
+    tool: ToolsHubTool,
+    position: "header" | "drawer",
+    menu: ToolsNavMenu,
+  ) => pushGtmEvent(toolsMenuClickEvent(tool, position, menu));
   // The short name, or the full title for a tool whose short name is still missing in this
   // locale, so one missing key never fails every page (toolsCatalog.test.ts requires it).
   const toolName = (tool: ToolsHubTool) =>
     t(`tools.${tool.key}.shortName`, {
       defaultValue: t(`tools.${tool.key}.title`),
     });
-
-  const featureItems: Array<{
-    nameKey: string;
-    descKey: string;
-    routeId: RouteId;
-    icon: typeof Landmark;
-  }> = [
-    {
-      nameKey: "header.nav.accounts.name",
-      descKey: "header.nav.accounts.description",
-      routeId: "featureAccounts",
-      icon: Landmark,
+  const toolLinkProps = (
+    tool: ToolsHubTool,
+    position: "header" | "drawer",
+    menu: ToolsNavMenu,
+  ) => ({
+    href: tool.href,
+    onClick: () => {
+      trackToolClick(tool, position, menu);
+      if (position === "header") menus.close();
     },
-    {
-      nameKey: "header.nav.budgeting.name",
-      descKey: "header.nav.budgeting.description",
-      routeId: "featureBudgeting",
-      icon: BookOpen,
+    onAuxClick: (event: MouseEvent) => {
+      if (event.button === 1) trackToolClick(tool, position, menu);
     },
-    {
-      nameKey: "header.nav.categorization.name",
-      descKey: "header.nav.categorization.description",
-      routeId: "featureCategorization",
-      icon: Tag,
-    },
-    {
-      nameKey: "header.nav.portfolio.name",
-      descKey: "header.nav.portfolio.description",
-      routeId: "featurePortfolio",
-      icon: ChartPie,
-    },
-    {
-      nameKey: "header.nav.reports.name",
-      descKey: "header.nav.reports.description",
-      routeId: "featureReports",
-      icon: FileText,
-    },
-    {
-      nameKey: "header.nav.privacy.name",
-      descKey: "header.nav.privacy.description",
-      routeId: "featurePrivacy",
-      icon: Shield,
-    },
-  ];
+  });
+  const sectionHeadingId = (
+    where: "header" | "drawer",
+    group: ToolsMenuGroup,
+    subgroup: string | null,
+  ) => `${where}-tools-${group.anchor}${subgroup ? `-${subgroup}` : ""}`;
+  const sectionHeading = (group: ToolsMenuGroup, subgroup: string | null) =>
+    subgroup
+      ? t(`header.toolsMenu.subgroups.${subgroup}`)
+      : t(`tools.hub.groups.${group.id}.title`);
 
   return (
     <header
@@ -104,11 +129,11 @@ export default function Header({ locale }: Props) {
       )}
     >
       <nav
-        className="relative mx-auto flex h-16 max-w-7xl items-center gap-x-6 px-6 lg:gap-x-10 lg:px-8"
+        className="relative mx-auto flex h-16 max-w-7xl items-center gap-x-6 px-6 lg:gap-x-8 lg:px-8 xl:gap-x-10"
         aria-label="Global"
       >
         {/* Logo */}
-        <div className="flex">
+        <div className="flex flex-none">
           <a href={homeHref} className="flex items-center">
             <img src={logo.src} alt="WonderMoney" className="h-7 lg:h-8" />
           </a>
@@ -127,8 +152,8 @@ export default function Header({ locale }: Props) {
         </div>
 
         {/* Desktop nav */}
-        <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-x-7 lg:self-stretch">
-          {/* Features dropdown */}
+        <div className="hidden lg:flex lg:flex-1 lg:items-center lg:gap-x-6 lg:self-stretch xl:gap-x-7">
+          {/* Features dropdown: two columns, starting under its trigger */}
           <div
             {...menus.rootProps("features")}
             className="relative flex items-center self-stretch"
@@ -149,33 +174,36 @@ export default function Header({ locale }: Props) {
             {/* The top padding bridges the gap to the trigger, so the pointer can cross it. */}
             <div
               {...menus.panelProps("features")}
-              className="absolute left-1/2 top-full z-50 w-72 -translate-x-1/2 pt-1"
+              data-features-menu
+              className="absolute -left-4 top-full z-50 w-[40rem] pt-1"
             >
-              <div className="overflow-hidden rounded-card border border-border bg-card py-2 shadow-lg">
-                {featureItems.map((item) => (
-                  <a
-                    key={item.nameKey}
-                    href={toLocalizedPath(item.routeId, locale)}
-                    className="group flex items-center gap-x-4 px-4 py-3 text-sm leading-6 hover:bg-accent"
-                    onClick={menus.close}
-                  >
-                    <div className="flex h-9 w-9 flex-none items-center justify-center rounded-md bg-paper-2 group-hover:bg-background">
-                      <item.icon
-                        className="h-5 w-5 text-muted-foreground group-hover:text-primary"
-                        aria-hidden="true"
-                      />
-                    </div>
-                    <div>
-                      <span className="block font-semibold text-foreground">
-                        {t(item.nameKey)}
+              <ul className="grid grid-cols-2 gap-1 rounded-card border border-border bg-card p-2 shadow-lg">
+                {FEATURE_MENU.map((item) => (
+                  <li key={item.routeId}>
+                    <a
+                      href={toLocalizedPath(item.routeId, locale)}
+                      className={tileLinkClassName}
+                      onClick={menus.close}
+                    >
+                      <span className={tileClassName}>
+                        <item.icon
+                          className={tileIconClassName}
+                          strokeWidth={1.5}
+                          aria-hidden="true"
+                        />
                       </span>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {t(item.descKey)}
-                      </p>
-                    </div>
-                  </a>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium leading-5 text-foreground">
+                          {t(`header.nav.${item.key}.name`)}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                          {t(`header.nav.${item.key}.description`)}
+                        </span>
+                      </span>
+                    </a>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
 
@@ -213,43 +241,118 @@ export default function Header({ locale }: Props) {
                     {t("header.toolsMenu.seeAll")}
                   </a>
                 </div>
-                <div className="grid auto-cols-fr grid-flow-col gap-x-8 px-6 py-6">
-                  {toolGroups.map((group) => (
-                    <div key={group.id}>
-                      <p
-                        id={`header-tools-${group.anchor}`}
-                        className="text-sm text-muted-foreground"
-                      >
-                        {t(`tools.hub.groups.${group.id}.title`)}
-                      </p>
-                      <ul
-                        aria-labelledby={`header-tools-${group.anchor}`}
-                        className="mt-3 space-y-1"
-                      >
-                        {group.tools.map((tool) => (
-                          <li key={tool.key}>
-                            <a
-                              href={tool.href}
-                              className="-mx-2 block rounded-md px-2 py-1.5 text-sm font-medium leading-6 text-foreground transition-colors hover:bg-accent hover:text-primary motion-reduce:transition-none"
-                              onClick={() => {
-                                trackToolClick(tool, "header");
-                                menus.close();
-                              }}
-                              onAuxClick={(event) => {
-                                if (event.button === 1)
-                                  trackToolClick(tool, "header");
-                              }}
-                            >
-                              {toolName(tool)}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
+                <div className="grid grid-cols-3 gap-x-8 px-6 py-5">
+                  {toolColumns.map((column) => (
+                    <div key={column[0].id} className="min-w-0 space-y-6">
+                      {column.map((group) => (
+                        <div key={group.id}>
+                          <p
+                            id={sectionHeadingId("header", group, null)}
+                            className="border-b border-border pb-2 text-sm font-medium text-foreground"
+                          >
+                            {t(`tools.hub.groups.${group.id}.title`)}
+                          </p>
+                          {group.sections.map((section) => (
+                            <div key={section.subgroup ?? "group"} className="mt-3">
+                              {section.subgroup && (
+                                <p
+                                  id={sectionHeadingId("header", group, section.subgroup)}
+                                  className="mb-1 text-xs leading-5 text-muted-foreground"
+                                >
+                                  {sectionHeading(group, section.subgroup)}
+                                </p>
+                              )}
+                              <ul
+                                aria-labelledby={sectionHeadingId(
+                                  "header",
+                                  group,
+                                  section.subgroup,
+                                )}
+                              >
+                                {section.tools.map((tool) => (
+                                  <li key={tool.key}>
+                                    <a
+                                      {...toolLinkProps(tool, "header", "tools")}
+                                      className="group -mx-2 flex items-center gap-x-2.5 rounded-md px-2 py-1 text-sm leading-6 text-foreground transition-colors hover:bg-accent hover:text-primary motion-reduce:transition-none"
+                                    >
+                                      <tool.icon
+                                        className={toolIconClassName}
+                                        strokeWidth={1.5}
+                                        aria-hidden="true"
+                                      />
+                                      <span className="min-w-0">{toolName(tool)}</span>
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
-                <p className="border-t border-border px-6 py-4 text-sm text-muted-foreground">
+                <p className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
                   {t("tools.hub.description")}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Comparators dropdown: the pages comparing offers from providers */}
+          <div
+            {...menus.rootProps("comparators")}
+            className="relative flex items-center self-stretch"
+          >
+            <button
+              {...menus.triggerProps("comparators")}
+              className={triggerClassName}
+            >
+              {t("header.comparators")}
+              <ChevronDown
+                className={cn(
+                  chevronClassName,
+                  menus.openId === "comparators" && "rotate-180",
+                )}
+                aria-hidden="true"
+              />
+            </button>
+            <div
+              {...menus.panelProps("comparators")}
+              data-comparators-menu
+              className="absolute left-1/2 top-full z-50 w-[38rem] -translate-x-1/2 pt-1"
+            >
+              <div className="overflow-hidden rounded-card border border-border bg-card shadow-lg">
+                <ul className="grid grid-cols-2 gap-1 p-2">
+                  {comparators.map((tool) => (
+                    <li key={tool.key}>
+                      <a
+                        {...toolLinkProps(tool, "header", "comparators")}
+                        className={tileLinkClassName}
+                      >
+                        <span className={tileClassName}>
+                          <tool.icon
+                            className={tileIconClassName}
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                          />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium leading-5 text-foreground">
+                            {toolName(tool)}
+                          </span>
+                          <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                            {t(`header.comparatorsMenu.items.${tool.key}`, {
+                              defaultValue: "",
+                            })}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+                <p className="border-t border-border px-5 py-3 text-xs leading-5 text-muted-foreground">
+                  {t("header.comparatorsMenu.description")}
                 </p>
               </div>
             </div>
@@ -257,20 +360,20 @@ export default function Header({ locale }: Props) {
 
           <a
             href="https://app.wonder.money/faq"
-            className="rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground"
+            className="whitespace-nowrap rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground"
           >
             {t("header.faq")}
           </a>
           <a
             href={toLocalizedPath("pageAbout", locale)}
-            className="rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground"
+            className="whitespace-nowrap rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground"
           >
             {t("header.about")}
           </a>
         </div>
 
         {/* Desktop CTAs */}
-        <div className="hidden lg:flex lg:items-center lg:gap-x-3">
+        <div className="hidden lg:flex lg:flex-none lg:items-center lg:gap-x-3">
           <Button asChild variant="link" className="text-foreground">
             <a href="https://app.wonder.money/auth/login">
               {t("header.login")}
@@ -324,77 +427,71 @@ export default function Header({ locale }: Props) {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-border">
               <div className="space-y-2 py-6">
-                {/* Features accordion */}
-                <Disclosure as="div" className="-mx-3">
-                  {({ open }) => (
-                    <>
-                      <Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-foreground hover:bg-accent">
-                        {t("header.features")}
-                        <ChevronDown
-                          className={cn(
-                            open ? "rotate-180" : "",
-                            "h-5 w-5 flex-none transition-transform",
-                          )}
-                          aria-hidden="true"
-                        />
-                      </Disclosure.Button>
-                      <Disclosure.Panel className="mt-2 space-y-1">
-                        {featureItems.map((item) => (
-                          <Disclosure.Button
-                            key={item.nameKey}
-                            as="a"
-                            href={toLocalizedPath(item.routeId, locale)}
-                            className="flex items-center gap-x-3 rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-foreground hover:bg-accent"
-                          >
-                            <item.icon
-                              className="h-4 w-4 text-muted-foreground"
-                              aria-hidden="true"
-                            />
-                            {t(item.nameKey)}
-                          </Disclosure.Button>
-                        ))}
-                      </Disclosure.Panel>
-                    </>
-                  )}
-                </Disclosure>
+                <DrawerAccordion label={t("header.features")}>
+                  <Disclosure.Panel
+                    as="ul"
+                    className="mt-2 space-y-1"
+                    data-features-drawer
+                  >
+                    {FEATURE_MENU.map((item) => (
+                      <li key={item.routeId}>
+                        <a
+                          href={toLocalizedPath(item.routeId, locale)}
+                          className={drawerRowClassName}
+                        >
+                          <item.icon
+                            className={toolIconClassName}
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                          />
+                          {t(`header.nav.${item.key}.name`)}
+                        </a>
+                      </li>
+                    ))}
+                  </Disclosure.Panel>
+                </DrawerAccordion>
 
-                {/* Tools accordion */}
-                <Disclosure as="div" className="-mx-3">
-                  {({ open }) => (
-                    <>
-                      <Disclosure.Button className="flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-foreground hover:bg-accent">
-                        {t("header.tools")}
-                        <ChevronDown
-                          className={cn(
-                            open ? "rotate-180" : "",
-                            "h-5 w-5 flex-none transition-transform",
-                          )}
-                          aria-hidden="true"
-                        />
-                      </Disclosure.Button>
-                      <Disclosure.Panel
-                        className="mt-2 space-y-3"
-                        data-tools-drawer
-                      >
-                        {toolGroups.map((group) => (
-                          <div key={group.id}>
-                            <p
-                              id={`drawer-tools-${group.anchor}`}
-                              className="py-1 pl-6 pr-3 text-sm text-muted-foreground"
-                            >
-                              {t(`tools.hub.groups.${group.id}.title`)}
-                            </p>
+                <DrawerAccordion label={t("header.tools")}>
+                  <Disclosure.Panel
+                    className="mt-2 space-y-4"
+                    data-tools-drawer
+                  >
+                    {toolGroups.map((group) => (
+                      <div key={group.id}>
+                        <p
+                          id={sectionHeadingId("drawer", group, null)}
+                          className={drawerHeadingClassName}
+                        >
+                          {t(`tools.hub.groups.${group.id}.title`)}
+                        </p>
+                        {group.sections.map((section) => (
+                          <div key={section.subgroup ?? "group"}>
+                            {section.subgroup && (
+                              <p
+                                id={sectionHeadingId("drawer", group, section.subgroup)}
+                                className={drawerSubheadingClassName}
+                              >
+                                {sectionHeading(group, section.subgroup)}
+                              </p>
+                            )}
                             <ul
-                              aria-labelledby={`drawer-tools-${group.anchor}`}
-                              className="space-y-1"
+                              aria-labelledby={sectionHeadingId(
+                                "drawer",
+                                group,
+                                section.subgroup,
+                              )}
                             >
-                              {group.tools.map((tool) => (
+                              {section.tools.map((tool) => (
                                 <li key={tool.key}>
                                   <a
-                                    href={tool.href}
-                                    className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-foreground hover:bg-accent"
-                                    onClick={() => trackToolClick(tool, "drawer")}
+                                    {...toolLinkProps(tool, "drawer", "tools")}
+                                    className={drawerRowClassName}
                                   >
+                                    <tool.icon
+                                      className={toolIconClassName}
+                                      strokeWidth={1.5}
+                                      aria-hidden="true"
+                                    />
                                     {toolName(tool)}
                                   </a>
                                 </li>
@@ -402,16 +499,40 @@ export default function Header({ locale }: Props) {
                             </ul>
                           </div>
                         ))}
+                      </div>
+                    ))}
+                    <a
+                      href={toolsHubHref}
+                      className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-6 text-primary hover:bg-accent"
+                    >
+                      {t("header.toolsMenu.seeAll")}
+                    </a>
+                  </Disclosure.Panel>
+                </DrawerAccordion>
+
+                <DrawerAccordion label={t("header.comparators")}>
+                  <Disclosure.Panel
+                    as="ul"
+                    className="mt-2 space-y-1"
+                    data-comparators-drawer
+                  >
+                    {comparators.map((tool) => (
+                      <li key={tool.key}>
                         <a
-                          href={toolsHubHref}
-                          className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-primary hover:bg-accent"
+                          {...toolLinkProps(tool, "drawer", "comparators")}
+                          className={drawerRowClassName}
                         >
-                          {t("header.toolsMenu.seeAll")}
+                          <tool.icon
+                            className={toolIconClassName}
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                          />
+                          {toolName(tool)}
                         </a>
-                      </Disclosure.Panel>
-                    </>
-                  )}
-                </Disclosure>
+                      </li>
+                    ))}
+                  </Disclosure.Panel>
+                </DrawerAccordion>
 
                 <a
                   href="https://app.wonder.money/faq"

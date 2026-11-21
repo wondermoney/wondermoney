@@ -3,9 +3,11 @@ import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Calculator } from "lucide-react";
 import { createConsentDecision, writeConsentDecision } from "@/lib/consent";
-import { SUPPORTED_LANGS, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
-import { TOOLS_CATALOG, buildToolsHub, type ToolCatalogEntry } from "@/lib/toolsCatalog";
+import { FEATURE_MENU } from "@/lib/featureMenu";
+import { FEATURE_ROUTE_IDS, SUPPORTED_LANGS, toLocalizedPath, toToolsHubPath } from "@/lib/routes";
+import { TOOLS_CATALOG, buildHeaderToolMenus, type ToolCatalogEntry } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
 import { ConsentBanner } from "./ConsentBanner";
 import Header from "./Header";
@@ -20,8 +22,8 @@ vi.mock("@/lib/toolsCatalog", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/toolsCatalog")>();
   return {
     ...actual,
-    buildToolsHub: (lang: Parameters<typeof actual.buildToolsHub>[0]) =>
-      actual.buildToolsHub(lang, [...actual.TOOLS_CATALOG, ...added.entries]),
+    buildHeaderToolMenus: (lang: Parameters<typeof actual.buildHeaderToolMenus>[0]) =>
+      actual.buildHeaderToolMenus(lang, [...actual.TOOLS_CATALOG, ...added.entries]),
   };
 });
 
@@ -63,20 +65,22 @@ function preventNavigation(event: Event) {
   if ((event.target as Element | null)?.closest?.("a[href]")) event.preventDefault();
 }
 
-function trigger(name: "features" | "tools") {
+type MenuName = "features" | "tools" | "comparators";
+
+function trigger(name: MenuName) {
   return screen.getByRole("button", { name: en(`header.${name}`) });
 }
 
 /** The element hover is measured on: the trigger's wrapper, which also holds the panel. */
-function menuRoot(name: "features" | "tools") {
+function menuRoot(name: MenuName) {
   return trigger(name).parentElement!;
 }
 
-function panel(name: "features" | "tools") {
+function panel(name: MenuName) {
   return document.getElementById(trigger(name).getAttribute("aria-controls")!)!;
 }
 
-function expanded(name: "features" | "tools") {
+function expanded(name: MenuName) {
   return trigger(name).getAttribute("aria-expanded") === "true";
 }
 
@@ -89,30 +93,40 @@ function advance(ms: number) {
 }
 
 describe("Header tools menu", () => {
-  it("lists every catalog tool under its group, with its short name and link, after the hub link", () => {
+  it("lists every tool but the comparators under its group and subgroup, with an icon, after the hub link", () => {
     render(<Header locale="en" />);
     const tools = panel("tools");
+    const { columns } = buildHeaderToolMenus("en");
+    const groups = columns.flat();
 
-    for (const group of buildToolsHub("en")) {
-      const list = within(tools).getByRole("list", {
-        name: en(`tools.hub.groups.${group.id}.title`),
-        hidden: true,
-      });
-      const links = within(list).getAllByRole("link", { hidden: true });
-      expect(links.map((link) => link.getAttribute("href"))).toEqual(group.tools.map((tool) => tool.href));
-      expect(links.map((link) => link.textContent)).toEqual(
-        group.tools.map((tool) => en(`tools.${tool.key}.shortName`)),
-      );
+    for (const group of groups) {
+      expect(within(tools).getByText(en(`tools.hub.groups.${group.id}.title`))).toBeTruthy();
+      for (const section of group.sections) {
+        const list = within(tools).getByRole("list", {
+          name: section.subgroup
+            ? en(`header.toolsMenu.subgroups.${section.subgroup}`)
+            : en(`tools.hub.groups.${group.id}.title`),
+          hidden: true,
+        });
+        const links = within(list).getAllByRole("link", { hidden: true });
+        expect(links.map((link) => link.getAttribute("href"))).toEqual(section.tools.map((tool) => tool.href));
+        expect(links.map((link) => link.textContent)).toEqual(
+          section.tools.map((tool) => en(`tools.${tool.key}.shortName`)),
+        );
+        for (const link of links) expect(link.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+      }
     }
+    // Three columns, the last holding the two short groups.
+    expect(groups.map((group) => group.id)).toEqual(["budgetAndSave", "borrowAndBuyHome", "investAndGrow", "trackWealth"]);
     const all = within(tools).getAllByRole("link", { hidden: true });
     // At the top, where the consent card fixed to the viewport's foot can't cover it.
     expect(all[0]).toHaveProperty("textContent", en("header.toolsMenu.seeAll"));
     expect(all[0].getAttribute("href")).toBe(toToolsHubPath("en"));
-    expect(all).toHaveLength(TOOLS_CATALOG.length + 1);
+    expect(all).toHaveLength(TOOLS_CATALOG.filter((tool) => !("comparator" in tool)).length + 1);
   });
 
   it("shows a tool added to the catalog in the desktop menu and the mobile drawer", async () => {
-    added.entries = [{ key: "testOnlyPlanner", routeId: "toolMortgage", group: "trackWealth" }];
+    added.entries = [{ key: "testOnlyPlanner", routeId: "toolMortgage", group: "trackWealth", icon: Calculator }];
     const user = userEvent.setup();
     render(<Header locale="en" />);
     const href = toLocalizedPath("toolMortgage", "en");
@@ -136,7 +150,7 @@ describe("Header tools menu", () => {
   });
 
   it("names a tool by its title while its short name is missing, instead of failing the page", () => {
-    added.entries = [{ key: "testUnnamedPlanner", routeId: "toolMortgage", group: "trackWealth" }];
+    added.entries = [{ key: "testUnnamedPlanner", routeId: "toolMortgage", group: "trackWealth", icon: Calculator }];
     render(<Header locale="en" />);
 
     const desktopGroup = within(panel("tools")).getByRole("list", {
@@ -155,6 +169,7 @@ describe("Header tools menu", () => {
       en("header.openMainMenu"),
       en("header.features"),
       en("header.tools"),
+      en("header.comparators"),
     ]);
   });
 
@@ -162,13 +177,126 @@ describe("Header tools menu", () => {
     const html = renderToString(<Header locale={lang} />);
     const t = getTranslations(lang);
 
-    for (const tool of buildToolsHub(lang).flatMap((group) => group.tools)) {
+    const { columns, comparators } = buildHeaderToolMenus(lang);
+    const menuTools = columns.flat().flatMap((group) => group.sections.flatMap((section) => section.tools));
+    for (const tool of [...menuTools, ...comparators]) {
       expect(html).toContain(`href="${tool.href}"`);
-      expect(html).toContain(`>${escapeHtml(t(`tools.${tool.key}.shortName`))}</a>`);
+      expect(html).toContain(`>${escapeHtml(t(`tools.${tool.key}.shortName`))}</span>`);
     }
+    for (const routeId of FEATURE_ROUTE_IDS) expect(html).toContain(`href="${toLocalizedPath(routeId, lang)}"`);
     expect(html).toContain(`href="${toToolsHubPath(lang)}"`);
-    expect(html).toMatch(/id="header-menu-tools"[^>]*hidden=""/);
-    expect(html).toMatch(/aria-expanded="false" aria-controls="header-menu-tools"/);
+    for (const name of ["features", "tools", "comparators"]) {
+      expect(html).toMatch(new RegExp(`id="header-menu-${name}"[^>]*hidden=""`));
+      expect(html).toMatch(new RegExp(`aria-expanded="false" aria-controls="header-menu-${name}"`));
+    }
+  });
+});
+
+describe("Header features menu", () => {
+  it("lists every feature page, in two columns, each with its icon, name and description", () => {
+    render(<Header locale="en" />);
+    const features = panel("features");
+    const links = within(features).getAllByRole("link", { hidden: true });
+
+    expect(links.map((link) => link.getAttribute("href")).sort()).toEqual(
+      FEATURE_ROUTE_IDS.map((routeId) => toLocalizedPath(routeId, "en")).sort(),
+    );
+    for (const item of FEATURE_MENU) {
+      const link = within(features).getByRole("link", { name: new RegExp(`^${en(`header.nav.${item.key}.name`)}`), hidden: true });
+      expect(link.getAttribute("href")).toBe(toLocalizedPath(item.routeId, "en"));
+      expect(link.textContent).toContain(en(`header.nav.${item.key}.description`));
+      expect(link.querySelector("svg[aria-hidden='true']")).not.toBeNull();
+    }
+    expect(features.querySelector("ul")!.className).toContain("grid-cols-2");
+  });
+
+  it("carries every feature page into the mobile drawer", async () => {
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+    await user.click(screen.getByRole("button", { name: en("header.features") }));
+
+    const drawer = document.querySelector<HTMLElement>("[data-features-drawer]")!;
+    expect(within(drawer).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(
+      FEATURE_MENU.map((item) => toLocalizedPath(item.routeId, "en")),
+    );
+  });
+});
+
+describe("Header comparators menu", () => {
+  it("lists every comparator with its icon and line, and the Tools menu leaves them out", () => {
+    render(<Header locale="en" />);
+    const { comparators } = buildHeaderToolMenus("en");
+    const links = within(panel("comparators")).getAllByRole("link", { hidden: true });
+
+    expect(comparators.map((tool) => tool.key)).toEqual([
+      "electricityTariffComparison",
+      "freeBankAccounts",
+      "termDepositOffers",
+      "remuneratedAccounts",
+      "brokerFees",
+      "pprComparison",
+    ]);
+    expect(links.map((link) => link.getAttribute("href"))).toEqual(comparators.map((tool) => tool.href));
+    for (const [index, tool] of comparators.entries()) {
+      expect(links[index].textContent).toBe(
+        en(`tools.${tool.key}.shortName`) + en(`header.comparatorsMenu.items.${tool.key}`),
+      );
+      expect(links[index].querySelector("svg[aria-hidden='true']")).not.toBeNull();
+    }
+    const toolHrefs = within(panel("tools"))
+      .getAllByRole("link", { hidden: true })
+      .map((link) => link.getAttribute("href"));
+    for (const tool of comparators) expect(toolHrefs).not.toContain(tool.href);
+  });
+
+  it("shows a comparator added to the catalog in its menu and drawer, not in Tools", async () => {
+    added.entries = [
+      { key: "testOnlyPlanner", routeId: "toolMortgage", group: "budgetAndSave", icon: Calculator, comparator: true },
+    ];
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+
+    expect(within(panel("comparators")).getByRole("link", { name: /^Test-only planner/, hidden: true })).toBeTruthy();
+    expect(within(panel("tools")).queryByRole("link", { name: /Test-only planner/, hidden: true })).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+    await user.click(screen.getByRole("button", { name: en("header.comparators") }));
+    const drawer = document.querySelector<HTMLElement>("[data-comparators-drawer]")!;
+    expect(within(drawer).getByRole("link", { name: "Test-only planner" })).toHaveProperty(
+      "pathname",
+      toLocalizedPath("toolMortgage", "en"),
+    );
+    await user.click(screen.getByRole("button", { name: en("header.tools") }));
+    const toolsDrawer = document.querySelector<HTMLElement>("[data-tools-drawer]")!;
+    expect(within(toolsDrawer).queryByRole("link", { name: "Test-only planner" })).toBeNull();
+  });
+
+  it("opens on hover, switches with the other menus and closes with Escape, back to its trigger", async () => {
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+
+    trigger("comparators").focus();
+    await user.keyboard("{ArrowDown}");
+    expect(expanded("comparators")).toBe(true);
+    expect(document.activeElement).toBe(within(panel("comparators")).getAllByRole("link")[0]);
+    await user.keyboard("{End}");
+    expect(document.activeElement).toBe(within(panel("comparators")).getAllByRole("link").at(-1));
+    await user.keyboard("{Escape}");
+    expect(expanded("comparators")).toBe(false);
+    expect(document.activeElement).toBe(trigger("comparators"));
+
+    vi.useFakeTimers();
+    fireEvent.pointerEnter(menuRoot("tools"), mouse);
+    advance(HOVER_OPEN_DELAY_MS);
+    expect(expanded("tools")).toBe(true);
+    fireEvent.pointerLeave(menuRoot("tools"), mouse);
+    fireEvent.pointerEnter(menuRoot("comparators"), mouse);
+    expect(expanded("comparators")).toBe(true);
+    expect(expanded("tools")).toBe(false);
+    fireEvent.pointerLeave(menuRoot("comparators"), mouse);
+    advance(HOVER_CLOSE_DELAY_MS);
+    expect(expanded("comparators")).toBe(false);
   });
 });
 
@@ -323,14 +451,15 @@ describe("Header menus from the keyboard", () => {
     render(<Header locale="en" />);
 
     const reached: Element[] = [];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       await user.tab();
       reached.push(document.activeElement!);
     }
 
     expect(reached).toContain(trigger("features"));
     expect(reached).toContain(trigger("tools"));
-    for (const name of ["features", "tools"] as const) {
+    expect(reached).toContain(trigger("comparators"));
+    for (const name of ["features", "tools", "comparators"] as const) {
       expect(trigger(name).getAttribute("aria-expanded")).toBe("false");
       expect(panel(name)).not.toBeNull();
       expect(panel(name).hidden).toBe(true);
@@ -422,6 +551,42 @@ describe("Header tools menu analytics", () => {
         tool: "compound_interest",
         group: "investAndGrow",
         nav_position: "header",
+        nav_menu: "tools",
+        page_type: "homepage",
+      },
+    ]);
+  });
+
+  it("names the Comparators menu in the event, from the panel and from the drawer", async () => {
+    grantAnalytics(true);
+    const user = userEvent.setup();
+    render(<Header locale="en" />);
+    trigger("comparators").focus();
+    await user.keyboard("{Enter}");
+    await user.click(
+      within(panel("comparators")).getByRole("link", { name: new RegExp(`^${en("tools.brokerFees.shortName")}`) }),
+    );
+
+    await user.click(screen.getByRole("button", { name: en("header.openMainMenu") }));
+    await user.click(screen.getByRole("button", { name: en("header.comparators") }));
+    const drawer = document.querySelector<HTMLElement>("[data-comparators-drawer]")!;
+    await user.click(within(drawer).getByRole("link", { name: en("tools.pprComparison.shortName") }));
+
+    expect(navClicks()).toEqual([
+      {
+        event: "nav_click",
+        tool: "broker_fees",
+        group: "investAndGrow",
+        nav_position: "header",
+        nav_menu: "comparators",
+        page_type: "homepage",
+      },
+      {
+        event: "nav_click",
+        tool: "ppr_comparison",
+        group: "investAndGrow",
+        nav_position: "drawer",
+        nav_menu: "comparators",
         page_type: "homepage",
       },
     ]);
@@ -438,7 +603,14 @@ describe("Header tools menu analytics", () => {
     await user.click(within(drawer).getByRole("link", { name: en("tools.fire.shortName") }));
 
     expect(navClicks()).toEqual([
-      { event: "nav_click", tool: "fire", group: "investAndGrow", nav_position: "drawer", page_type: "homepage" },
+      {
+        event: "nav_click",
+        tool: "fire",
+        group: "investAndGrow",
+        nav_position: "drawer",
+        nav_menu: "tools",
+        page_type: "homepage",
+      },
     ]);
   });
 

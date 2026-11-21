@@ -375,8 +375,31 @@
     "features": "Funzionalità",
     "about": "Chi siamo",
     "tools": "Strumenti",
+    "comparators": "Comparatori",
     "toolsMenu": {
-      "seeAll": "Vedi tutti gli strumenti"
+      "seeAll": "Vedi tutti gli strumenti",
+      "subgroups": {
+        "planAndSave": "Pianificare e risparmiare",
+        "salaryAndBenefits": "Stipendio e sussidi",
+        "pricesAndInflation": "Prezzi e inflazione",
+        "homeLoan": "Mutui",
+        "buyingAndTaxes": "Acquisto casa e imposte",
+        "carAndPersonalLoans": "Auto e prestiti personali",
+        "investing": "Investire",
+        "retirement": "Pensione",
+        "depositsAndCertificates": "Depositi e certificati di risparmio"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Offerte di banche, broker, assicuratori e fornitori di energia in Portogallo, a confronto.",
+      "items": {
+        "electricityTariffComparison": "Tutte le offerte per la casa, ordinate per quanto ti costerebbero in un anno",
+        "freeBankAccounts": "Conti correnti gratuiti e le condizioni di ciascuno",
+        "termDepositOffers": "Offerte di depositi vincolati per durata e importo, con interessi netti",
+        "remuneratedAccounts": "Conti remunerati e di risparmio, con interessi netti di IRS",
+        "brokerFees": "Commissioni di custodia, negoziazione e cambio dei broker in Portogallo",
+        "pprComparison": "Fondi, assicurazioni e fondi pensione PPR per rischio, costi e rendimenti"
+      }
     },
     "learn": "Impara",
     "glossary": "Glossario",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Privacy",
         "description": "Accesso bancario solo in lettura. I tuoi dati non vengono mai venduti."
+      },
+      "netWorth": {
+        "name": "Patrimonio netto",
+        "description": "Conti, investimenti e debiti riuniti in un unico numero"
+      },
+      "financialMarkets": {
+        "name": "Mercati finanziari",
+        "description": "Azioni, ETF e watchlist con dati aggiornati, accanto ai tuoi conti"
+      },
+      "goals": {
+        "name": "Obiettivi",
+        "description": "Imposta obiettivi di risparmio e segui i tuoi progressi"
+      },
+      "credits": {
+        "name": "Prestiti",
+        "description": "Il tuo debito totale e ogni rata, con un piano per estinguerlo"
       },
       "learn": {
         "name": "Impara",

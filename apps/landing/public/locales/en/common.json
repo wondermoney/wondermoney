@@ -375,8 +375,31 @@
     "features": "Features",
     "about": "About",
     "tools": "Tools",
+    "comparators": "Compare",
     "toolsMenu": {
-      "seeAll": "See all tools"
+      "seeAll": "See all tools",
+      "subgroups": {
+        "planAndSave": "Plan and save",
+        "salaryAndBenefits": "Salary and benefits",
+        "pricesAndInflation": "Prices and inflation",
+        "homeLoan": "Home loans",
+        "buyingAndTaxes": "Buying and property taxes",
+        "carAndPersonalLoans": "Car and personal loans",
+        "investing": "Investing",
+        "retirement": "Retirement",
+        "depositsAndCertificates": "Deposits and savings certificates"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Offers from banks, brokers, insurers and energy suppliers in Portugal, side by side.",
+      "items": {
+        "electricityTariffComparison": "Every household offer, ranked by what it would cost you a year",
+        "freeBankAccounts": "Free current accounts and the conditions of each",
+        "termDepositOffers": "Term deposit offers by term and amount, with interest after tax",
+        "remuneratedAccounts": "Remunerated and savings accounts, with net interest after IRS",
+        "brokerFees": "Custody, trading and currency fees at brokers available in Portugal",
+        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns"
+      }
     },
     "learn": "Learn",
     "glossary": "Glossary",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Privacy",
         "description": "Bank connections use read-only Open Banking through Enable Banking. WonderMoney cannot initiate transfers."
+      },
+      "netWorth": {
+        "name": "Net worth",
+        "description": "Accounts, investments and debts added up into one number"
+      },
+      "financialMarkets": {
+        "name": "Financial markets",
+        "description": "Stocks, ETFs and watchlists with live data, beside your accounts"
+      },
+      "goals": {
+        "name": "Goals",
+        "description": "Set savings targets and track your progress toward them"
+      },
+      "credits": {
+        "name": "Loans",
+        "description": "Your total debt and every payment, with a plan to pay it off"
       },
       "learn": {
         "name": "Learn",

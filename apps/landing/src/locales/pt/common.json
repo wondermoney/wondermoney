@@ -375,8 +375,31 @@
     "features": "Funcionalidades",
     "about": "Sobre",
     "tools": "Ferramentas",
+    "comparators": "Comparadores",
     "toolsMenu": {
-      "seeAll": "Ver todas as ferramentas"
+      "seeAll": "Ver todas as ferramentas",
+      "subgroups": {
+        "planAndSave": "Planear e poupar",
+        "salaryAndBenefits": "Salário e subsídios",
+        "pricesAndInflation": "Preços e inflação",
+        "homeLoan": "Crédito habitação",
+        "buyingAndTaxes": "Compra de casa e impostos",
+        "carAndPersonalLoans": "Automóvel e crédito pessoal",
+        "investing": "Investir",
+        "retirement": "Reforma",
+        "depositsAndCertificates": "Depósitos e certificados de aforro"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Ofertas de bancos, corretoras, seguradoras e comercializadores de energia em Portugal, lado a lado.",
+      "items": {
+        "electricityTariffComparison": "Todas as ofertas para casa, ordenadas pelo custo anual para ti",
+        "freeBankAccounts": "Contas à ordem gratuitas e as condições de cada uma",
+        "termDepositOffers": "Ofertas de depósitos por prazo e montante, com juro líquido",
+        "remuneratedAccounts": "Contas remuneradas e de poupança, com juro líquido de IRS",
+        "brokerFees": "Comissões de custódia, negociação e câmbio das corretoras em Portugal",
+        "pprComparison": "Fundos, seguros e fundos de pensões PPR por risco, custos e rentabilidade"
+      }
     },
     "learn": "Aprender",
     "glossary": "Glossário",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Privacidade",
         "description": "Acesso só de leitura. Os teus dados nunca são vendidos."
+      },
+      "netWorth": {
+        "name": "Património líquido",
+        "description": "Contas, investimentos e dívidas somados num só número"
+      },
+      "financialMarkets": {
+        "name": "Mercados financeiros",
+        "description": "Ações, ETFs e watchlists com dados atualizados, junto às tuas contas"
+      },
+      "goals": {
+        "name": "Objetivos",
+        "description": "Define metas de poupança e acompanha o teu progresso"
+      },
+      "credits": {
+        "name": "Empréstimos",
+        "description": "A tua dívida total e cada pagamento, com um plano para a quitar"
       },
       "learn": {
         "name": "Aprender",

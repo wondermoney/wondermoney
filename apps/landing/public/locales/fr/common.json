@@ -375,8 +375,31 @@
     "features": "Fonctionnalités",
     "about": "À propos",
     "tools": "Outils",
+    "comparators": "Comparateurs",
     "toolsMenu": {
-      "seeAll": "Voir tous les outils"
+      "seeAll": "Voir tous les outils",
+      "subgroups": {
+        "planAndSave": "Planifier et épargner",
+        "salaryAndBenefits": "Salaire et prestations",
+        "pricesAndInflation": "Prix et inflation",
+        "homeLoan": "Crédit immobilier",
+        "buyingAndTaxes": "Achat immobilier et impôts",
+        "carAndPersonalLoans": "Auto et prêts personnels",
+        "investing": "Investir",
+        "retirement": "Retraite",
+        "depositsAndCertificates": "Dépôts et certificats d’épargne"
+      }
+    },
+    "comparatorsMenu": {
+      "description": "Les offres des banques, courtiers, assureurs et fournisseurs d’énergie au Portugal, côte à côte.",
+      "items": {
+        "electricityTariffComparison": "Toutes les offres pour les ménages, classées selon leur coût annuel pour vous",
+        "freeBankAccounts": "Comptes courants gratuits et les conditions de chacun",
+        "termDepositOffers": "Offres de dépôts à terme par durée et montant, intérêts nets d’impôt",
+        "remuneratedAccounts": "Comptes rémunérés et d’épargne, avec l’intérêt net d’IRS",
+        "brokerFees": "Frais de garde, de courtage et de change des courtiers au Portugal",
+        "pprComparison": "Fonds, assurances et fonds de pension PPR par risque, frais et rendement"
+      }
     },
     "learn": "Apprendre",
     "glossary": "Glossaire",
@@ -408,6 +431,22 @@
       "privacy": {
         "name": "Confidentialité",
         "description": "Les connexions bancaires utilisent l’Open Banking en lecture seule via Enable Banking. WonderMoney ne peut pas initier de virements."
+      },
+      "netWorth": {
+        "name": "Patrimoine net",
+        "description": "Comptes, investissements et dettes réunis en un seul chiffre"
+      },
+      "financialMarkets": {
+        "name": "Marchés financiers",
+        "description": "Actions, ETF et watchlists avec des données actualisées, à côté de vos comptes"
+      },
+      "goals": {
+        "name": "Objectifs",
+        "description": "Fixez des objectifs d’épargne et suivez vos progrès"
+      },
+      "credits": {
+        "name": "Prêts",
+        "description": "Votre dette totale et chaque paiement, avec un plan de remboursement"
       },
       "learn": {
         "name": "Apprendre",
