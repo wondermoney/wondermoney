@@ -21,13 +21,12 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 // Labels shared with the net salary page live under tools.netSalary; the rest under tools.allowance.
 const a = (key: string) => `tools.allowance.${key}`;
 const n = (key: string) => `tools.netSalary.${key}`;
-const inputClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 const TOOL_BY_KIND = { christmas: "christmas_allowance", holiday: "holiday_allowance" } as const;
 
 export default function AllowanceCalculatorComp({ locale, kind }: { locale: Lang; kind: AllowanceKind }) {
@@ -143,16 +142,15 @@ function AllowanceCalculator({ kind }: { kind: AllowanceKind }) {
           <label htmlFor={`${kind}Allowance-start`} className="block text-sm font-medium text-foreground">
             {t(a("fields.startDate"))}
           </label>
-          <input
+          <Input
             id={`${kind}Allowance-start`}
             type="date"
             value={input.startDate}
             onChange={(event) => update("startDate", event.currentTarget.value)}
-            className={inputClass}
             aria-invalid={startDateError ? true : undefined}
             aria-describedby={`${kind}Allowance-start-help`}
           />
-          <p id={`${kind}Allowance-start-help`} className={startDateError ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
+          <p id={`${kind}Allowance-start-help`} className={startDateError ? "text-sm text-destructive-text" : "text-sm text-muted-foreground"}>
             {startDateError ?? t(a(`help.startDate.${kind}`), { year: String(ALLOWANCE_YEAR) })}
           </p>
         </div>

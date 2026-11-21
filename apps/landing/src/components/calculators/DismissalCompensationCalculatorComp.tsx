@@ -20,11 +20,10 @@ import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 
 const k = (key: string) => `tools.dismissalCompensation.${key}`;
-const dateClass =
-  "h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:border-destructive";
 const PAYOUT_MONTHS = [6, 12] as const;
 const CONTRACT_TYPES: readonly ContractType[] = ["permanent", "fixedTerm"];
 const FIXED_TERM_KINDS: readonly FixedTermKind[] = ["certain", "uncertain"];
@@ -51,16 +50,15 @@ function DateField({
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="block text-sm font-medium text-foreground">{label}</label>
-      <input
+      <Input
         id={id}
         type="date"
         value={value}
         onChange={(event) => onChange(event.currentTarget.value)}
-        className={dateClass}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
       />
-      {error && <p id={`${id}-error`} className="text-sm text-destructive">{error}</p>}
+      {error && <p id={`${id}-error`} className="text-sm text-destructive-text">{error}</p>}
       <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>
     </div>
   );
