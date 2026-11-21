@@ -3,7 +3,7 @@ import { CAPITAL_GAINS_EXAMPLE, computeCapitalGains } from "@/lib/calculators/pr
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { PROPERTY_CAPITAL_GAINS_GUIDE_IDS, buildPropertyCapitalGainsGuide } from "./propertyCapitalGainsGuide"
 
 const calculation = computeCapitalGains(CAPITAL_GAINS_EXAMPLE)
@@ -13,18 +13,16 @@ const result = calculation.result
 describe("property capital gains guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildPropertyCapitalGainsGuide(lang)
-		expectGuideParts({
-			terms: [...guide.notes, ...guide.scope, ...guide.assumptions],
-			figures: [...guide.update, ...guide.gain, ...guide.tax],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.notes, ...guide.scope, ...guide.assumptions])
+		expectFigures([...guide.update, ...guide.gain, ...guide.tax])
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.scope, ...guide.assumptions])
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(15)
 	})
 
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildPropertyCapitalGainsGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "capital-gains")
 		const guide = buildPropertyCapitalGainsGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(

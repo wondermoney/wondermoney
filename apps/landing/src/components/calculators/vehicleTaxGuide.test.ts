@@ -3,7 +3,7 @@ import { VEHICLE_TAX_EXAMPLE, computeVehicleTax } from "@/lib/calculators/vehicl
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { VEHICLE_TAX_GUIDE_IDS, buildVehicleTaxGuide } from "./vehicleTaxGuide"
 
 const calculation = computeVehicleTax(VEHICLE_TAX_EXAMPLE)
@@ -13,18 +13,16 @@ const result = calculation.result
 describe("IUC guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildVehicleTaxGuide(lang)
-		expectGuideParts({
-			terms: [...guide.notes, ...guide.scope, ...guide.assumptions],
-			figures: guide.tax,
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.notes, ...guide.scope, ...guide.assumptions])
+		expectFigures(guide.tax)
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.scope, ...guide.assumptions])
 		expect(formulaHrefs(guide.formulas)).toHaveLength(8)
 	})
 
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildVehicleTaxGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "vehicle-tax")
 		const guide = buildVehicleTaxGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(Object.values(VEHICLE_TAX_GUIDE_IDS))

@@ -3,7 +3,7 @@ import { EURIBOR_EXAMPLE, computeEuriborImpact } from "@/lib/calculators/euribor
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { buildEuriborGuide } from "./euriborGuide"
-import { expectGuideParts } from "./guideTestKit"
+import { expectFigures } from "./guideTestUtils"
 
 const outcome = computeEuriborImpact(EURIBOR_EXAMPLE)
 if (!outcome.ok) throw new Error("invalid example")
@@ -13,7 +13,7 @@ describe("Euribor guide content", () => {
 	it.each(SUPPORTED_LANGS)("takes the example's figures from the calculator in %s", (lang) => {
 		const guide = buildEuriborGuide(lang)
 		const money = (value: number) => formatMoney(lang, value, { decimals: 2 })
-		expectGuideParts({ terms: [], figures: guide.payment, formulas: [] })
+		expectFigures(guide.payment)
 
 		expect(guide.payment[0].value).toBe(money(revision.current.monthlyPayment))
 		expect(guide.payment[1].value).toContain(money(revision.monthlyChange))

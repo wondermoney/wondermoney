@@ -3,7 +3,7 @@ import { MORTGAGE_TRANSFER_EXAMPLE, computeMortgageTransfer } from "@/lib/calcul
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { MORTGAGE_TRANSFER_GUIDE_IDS, buildMortgageTransferGuide } from "./mortgageTransferGuide"
 
 const { exampleCosts, ...example } = MORTGAGE_TRANSFER_EXAMPLE
@@ -14,11 +14,9 @@ const result = calculation.result
 describe("mortgage transfer guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildMortgageTransferGuide(lang)
-		expectGuideParts({
-			terms: [...guide.compare, ...guide.notes, ...guide.assumptions],
-			figures: [...guide.monthly, ...guide.costs, ...guide.totals],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.compare, ...guide.notes, ...guide.assumptions])
+		expectFigures([...guide.monthly, ...guide.costs, ...guide.totals])
+		expectFormulaLinks(guide.formulas, [...guide.compare, ...guide.notes, ...guide.assumptions])
 		expect(guide.compare).toHaveLength(4)
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(15)
 	})
@@ -26,7 +24,7 @@ describe("mortgage transfer guide content", () => {
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildMortgageTransferGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "mortgage-transfer")
 		const guide = buildMortgageTransferGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(

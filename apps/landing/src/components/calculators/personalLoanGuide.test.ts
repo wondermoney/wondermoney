@@ -3,7 +3,7 @@ import { PERSONAL_LOAN_EXAMPLE, computePersonalLoan } from "@/lib/calculators/pe
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { PERSONAL_LOAN_GUIDE_IDS, buildPersonalLoanGuide } from "./personalLoanGuide"
 
 const run = (upfrontFees: number, monthlyFees: number) => {
@@ -17,11 +17,9 @@ const withFees = run(PERSONAL_LOAN_EXAMPLE.exampleUpfrontFees, PERSONAL_LOAN_EXA
 describe("personal loan guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildPersonalLoanGuide(lang)
-		expectGuideParts({
-			terms: [...guide.notes, ...guide.assumptions],
-			figures: [...guide.noFees, ...guide.fees, ...guide.rates],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.notes, ...guide.assumptions])
+		expectFigures([...guide.noFees, ...guide.fees, ...guide.rates])
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.assumptions])
 		expect(guide.formulas).toHaveLength(4)
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(15)
 		// The APR note reads the formula in words, not the old letters.
@@ -31,7 +29,7 @@ describe("personal loan guide content", () => {
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildPersonalLoanGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "personal-loan")
 		const guide = buildPersonalLoanGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(Object.values(PERSONAL_LOAN_GUIDE_IDS))

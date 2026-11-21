@@ -4,7 +4,7 @@ import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
 import { EARLY_REPAYMENT_GUIDE_IDS, buildEarlyRepaymentGuide } from "./earlyRepaymentGuide"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
 const run = (feePercent: number) => {
 	const calculation = computeEarlyRepayment({ ...EARLY_REPAYMENT_EXAMPLE, feePercent })
@@ -17,11 +17,9 @@ const withFee = run(EARLY_REPAYMENT_EXAMPLE.exampleFeePercent)
 describe("early repayment guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildEarlyRepaymentGuide(lang)
-		expectGuideParts({
-			terms: [...guide.choices, ...guide.checks, ...guide.notes, ...guide.assumptions],
-			figures: [...guide.repayment, ...guide.outcomes, ...guide.interestSaved, ...guide.netSaving],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.choices, ...guide.checks, ...guide.notes, ...guide.assumptions])
+		expectFigures([...guide.repayment, ...guide.outcomes, ...guide.interestSaved, ...guide.netSaving])
+		expectFormulaLinks(guide.formulas, [...guide.choices, ...guide.checks, ...guide.notes, ...guide.assumptions])
 		expect(guide.checks).toHaveLength(5)
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(14)
 	})
@@ -29,7 +27,7 @@ describe("early repayment guide content", () => {
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildEarlyRepaymentGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "early-repayment")
 		const guide = buildEarlyRepaymentGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(

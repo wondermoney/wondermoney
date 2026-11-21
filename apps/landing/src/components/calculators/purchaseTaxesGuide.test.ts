@@ -3,7 +3,7 @@ import { PURCHASE_TAXES_EXAMPLE, computePurchaseTaxes, imtBands } from "@/lib/ca
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectTerms } from "./guideTestUtils"
 import { PURCHASE_TAXES_GUIDE_IDS, buildPurchaseTaxesGuide } from "./purchaseTaxesGuide"
 
 const calculation = computePurchaseTaxes(PURCHASE_TAXES_EXAMPLE)
@@ -15,7 +15,9 @@ describe("IMT and stamp duty guide content", () => {
 		const guide = buildPurchaseTaxesGuide(lang)
 		// The formulas link to the notes and to the IMT table, which carries its own id.
 		const table = { term: "table", body: "table", id: PURCHASE_TAXES_GUIDE_IDS.table }
-		expectGuideParts({ terms: [...guide.notes, ...guide.assumptions, table], figures: guide.taxes, formulas: guide.formulas })
+		expectTerms([...guide.notes, ...guide.assumptions, table])
+		expectFigures(guide.taxes)
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.assumptions, table])
 		expect(formulaHrefs(guide.formulas)).toContain(`#${PURCHASE_TAXES_GUIDE_IDS.table}`)
 	})
 

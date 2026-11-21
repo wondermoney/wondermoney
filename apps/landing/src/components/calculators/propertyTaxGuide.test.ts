@@ -3,7 +3,7 @@ import { PROPERTY_TAX_EXAMPLE, computePropertyTax } from "@/lib/calculators/prop
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { PROPERTY_TAX_GUIDE_IDS, buildPropertyTaxGuide } from "./propertyTaxGuide"
 
 const calculation = computePropertyTax(PROPERTY_TAX_EXAMPLE)
@@ -13,18 +13,16 @@ const result = calculation.result
 describe("IMI guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildPropertyTaxGuide(lang)
-		expectGuideParts({
-			terms: [...guide.notes, ...guide.assumptions],
-			figures: [...guide.tax, ...guide.instalments],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.notes, ...guide.assumptions])
+		expectFigures([...guide.tax, ...guide.instalments])
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.assumptions])
 		expect(formulaHrefs(guide.formulas)).toHaveLength(6)
 	})
 
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildPropertyTaxGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "property-tax")
 		const guide = buildPropertyTaxGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(Object.values(PROPERTY_TAX_GUIDE_IDS))

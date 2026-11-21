@@ -4,7 +4,7 @@ import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
 import { BORROWING_CAPACITY_GUIDE_IDS, buildBorrowingCapacityGuide } from "./borrowingCapacityGuide"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 
 const calculation = computeBorrowingCapacity(BORROWING_CAPACITY_EXAMPLE)
 if (!calculation.ok || calculation.result.status !== "ok") throw new Error("invalid example")
@@ -13,11 +13,9 @@ const result = calculation.result
 describe("borrowing capacity guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildBorrowingCapacityGuide(lang)
-		expectGuideParts({
-			terms: [...guide.steps, ...guide.notes, ...guide.assumptions, ...guide.lenderRules],
-			figures: [...guide.limits, ...guide.purchase],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.steps, ...guide.notes, ...guide.assumptions, ...guide.lenderRules])
+		expectFigures([...guide.limits, ...guide.purchase])
+		expectFormulaLinks(guide.formulas, [...guide.steps, ...guide.notes, ...guide.assumptions, ...guide.lenderRules])
 		expect(guide.formulas).toHaveLength(5)
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(15)
 	})
@@ -25,7 +23,7 @@ describe("borrowing capacity guide content", () => {
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildBorrowingCapacityGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "borrowing-capacity")
 		const ids = [...buildBorrowingCapacityGuide("en").notes, ...buildBorrowingCapacityGuide("en").assumptions].map(
 			(note) => note.id,

@@ -3,7 +3,7 @@ import { RATE_REVISION_EXAMPLE, computeRateRevision } from "@/lib/calculators/ra
 import { formatMoney } from "@/lib/numberFormat"
 import { SUPPORTED_LANGS } from "@/lib/routes"
 import { formulaHrefs } from "./guideBlocks"
-import { expectGuideParts, expectStableIds } from "./guideTestKit"
+import { expectFigures, expectFormulaLinks, expectStableIds, expectTerms } from "./guideTestUtils"
 import { RATE_REVISION_GUIDE_IDS, buildRateRevisionGuide } from "./rateRevisionGuide"
 
 const input = RATE_REVISION_EXAMPLE
@@ -14,11 +14,9 @@ const result = calculation.result
 describe("rate revision guide content", () => {
 	it.each(SUPPORTED_LANGS)("builds every term, figure and formula in %s", (lang) => {
 		const guide = buildRateRevisionGuide(lang)
-		expectGuideParts({
-			terms: [...guide.notes, ...guide.assumptions, ...guide.contract],
-			figures: [...guide.rise, ...guide.incomeShares],
-			formulas: guide.formulas,
-		})
+		expectTerms([...guide.notes, ...guide.assumptions, ...guide.contract])
+		expectFigures([...guide.rise, ...guide.incomeShares])
+		expectFormulaLinks(guide.formulas, [...guide.notes, ...guide.assumptions, ...guide.contract])
 		expect(guide.contract).toHaveLength(4)
 		expect(formulaHrefs(guide.formulas).length).toBeGreaterThanOrEqual(14)
 	})
@@ -26,7 +24,7 @@ describe("rate revision guide content", () => {
 	it("keeps the same note ids in every locale", () => {
 		expectStableIds((lang) => {
 			const guide = buildRateRevisionGuide(lang)
-			return [...guide.notes, ...guide.assumptions].map((note) => note.id)
+			return [...guide.notes, ...guide.assumptions]
 		}, "rate-revision")
 		const guide = buildRateRevisionGuide("en")
 		expect([...guide.notes, ...guide.assumptions].map((note) => note.id)).toEqual(Object.values(RATE_REVISION_GUIDE_IDS))
