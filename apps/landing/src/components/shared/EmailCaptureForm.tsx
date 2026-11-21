@@ -19,6 +19,7 @@ import { emailCaptureSchema, type EmailCaptureValues } from "@/lib/emailCapture"
 import { toLocalizedPath } from "@/lib/routes";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 export type EmailCaptureVariant = "footer" | "inline";
 
@@ -199,9 +200,9 @@ function EmailCaptureFormContent({
       )}
 
       {submissionError ? (
-        <p role="alert" className="mt-2 text-sm text-destructive">
+        <FieldMessage tone="error" role="alert" className="mt-2">
           {submissionError}
-        </p>
+        </FieldMessage>
       ) : null}
 
       {!isSubmitSuccessful && (

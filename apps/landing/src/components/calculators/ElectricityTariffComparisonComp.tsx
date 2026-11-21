@@ -67,6 +67,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 /** What the page shows of ELECTRICITY_OFFERS_SOURCE. */
 export interface OffersSource {
@@ -472,9 +473,9 @@ function ElectricityTariffComparison({
         <span>{label}</span>
       </label>
       {help && (
-        <p id={`${id}-help`} className="pl-6 text-xs text-muted-foreground">
+        <FieldMessage id={`${id}-help`} className="pl-6">
           {help}
-        </p>
+        </FieldMessage>
       )}
     </div>
   );
@@ -496,9 +497,9 @@ function ElectricityTariffComparison({
         ))}
       </Select>
       {help && (
-        <p id={`${id}-help`} className="text-xs text-muted-foreground">
+        <FieldMessage id={`${id}-help`}>
           {help}
-        </p>
+        </FieldMessage>
       )}
     </div>
   );
@@ -870,34 +871,34 @@ function IndexedChoiceField({
           <span>{choice.label}</span>
         </label>
       ))}
-      <p id="tariff-indexed-help" className="pl-6 text-xs text-muted-foreground">
+      <FieldMessage id="tariff-indexed-help" className="pl-6">
         {t(k("indexed.help"))}
-      </p>
+      </FieldMessage>
       {value === "market" && (market === "loading" || quarterHours === "loading") && (
-        <p role="status" className="pl-6 text-xs text-foreground">
+        <FieldMessage tone="status" role="status" className="pl-6">
           {t(k("indexed.loading"))}
-        </p>
+        </FieldMessage>
       )}
       {value === "market" && (market === "error" || (diagram && quarterHours === "error")) && (
-        <p role="alert" className="pl-6 text-xs text-destructive-text">
+        <FieldMessage tone="error" role="alert" className="pl-6">
           {t(k(market === "error" ? "indexed.loadError" : "indexed.diagramLoadError"))}
-        </p>
+        </FieldMessage>
       )}
       {value === "market" && view?.diagramFallback === "outOfRange" && (
-        <p className="pl-6 text-xs text-muted-foreground">{t(k("indexed.diagramOutOfRange"))}</p>
+        <FieldMessage className="pl-6">{t(k("indexed.diagramOutOfRange"))}</FieldMessage>
       )}
       {value === "market" && view?.diagramFallback === "short" && (
-        <p className="pl-6 text-xs text-muted-foreground">
+        <FieldMessage className="pl-6">
           {t(k("indexed.diagramShort"), { months: String(view.diagramMonths ?? 0), minimum: String(MIN_DIAGRAM_MONTHS) })}
-        </p>
+        </FieldMessage>
       )}
       {value === "market" && view && coverage !== undefined && coverage < 0.995 && (
-        <p className="pl-6 text-xs text-muted-foreground">
+        <FieldMessage className="pl-6">
           {t(k("indexed.coverage"), {
             percent: formatNumber(locale, coverage * 100, 0),
             period: monthRange(t, locale, view.basis.from, view.basis.to),
           })}
-        </p>
+        </FieldMessage>
       )}
     </fieldset>
   );
@@ -920,19 +921,19 @@ function DiagramUpload({ diagram, onFile, onClear }: { diagram: Diagram; onFile:
         onChange={(event) => onFile(event.currentTarget.files?.[0])}
         className="block w-full text-sm text-foreground file:mr-3 file:h-10 file:rounded-md file:border file:border-input file:bg-secondary file:px-4 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-paper-3"
       />
-      <p id="tariff-diagram-help" className="text-xs text-muted-foreground">
+      <FieldMessage id="tariff-diagram-help">
         {t(k("diagram.help"))}
-      </p>
-      <p className="text-xs text-muted-foreground">{t(k("diagram.privacy"))}</p>
+      </FieldMessage>
+      <FieldMessage>{t(k("diagram.privacy"))}</FieldMessage>
       {diagram.state === "reading" && (
-        <p role="status" className="text-sm text-foreground">
+        <FieldMessage tone="status" role="status">
           {t(k("diagram.reading"))}
-        </p>
+        </FieldMessage>
       )}
       {diagram.state === "error" && (
-        <p role="alert" className="text-sm text-destructive-text">
+        <FieldMessage tone="error" role="alert">
           {diagram.message}
-        </p>
+        </FieldMessage>
       )}
       {diagram.state === "ready" && (
         <div role="status" className="space-y-1 rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">

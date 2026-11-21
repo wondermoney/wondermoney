@@ -1,4 +1,5 @@
 import NumericInput from "./NumericInput";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 interface Props {
   label: string;
@@ -52,12 +53,12 @@ export default function CalculatorInput({
         aria-describedby={describedBy}
       />
       {error && (
-        <p id={errorId} className="text-xs text-destructive-text">
+        <FieldMessage tone="error" id={errorId}>
           {error}
-        </p>
+        </FieldMessage>
       )}
       {helpText && (
-        <p id={helpId} className="text-xs text-muted-foreground">{helpText}</p>
+        <FieldMessage id={helpId}>{helpText}</FieldMessage>
       )}
     </div>
   );

@@ -15,6 +15,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.propertyTax.${key}`;
 
@@ -112,9 +113,9 @@ function PropertyTaxCalculator() {
                   <option key={value} value={value}>{t(k(`dependantsOptions.${value}`))}</option>
                 ))}
               </Select>
-              <p id="propertyTax-dependants-help" className="text-sm text-muted-foreground">
+              <FieldMessage id="propertyTax-dependants-help">
                 {t(k("dependantsHelp"))}
-              </p>
+              </FieldMessage>
             </div>
           </>
         ) : (

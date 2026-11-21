@@ -21,6 +21,7 @@ import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.vehicleTax.${key}`;
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -375,7 +376,7 @@ function VehicleFieldset({
               <option key={fuel} value={fuel}>{t(k(`fuels.${fuel}`))}</option>
             ))}
           </Select>
-          {errors.fuel && <p role="alert" className="text-sm text-destructive">{err(errors.fuel)}</p>}
+          {errors.fuel && <FieldMessage tone="error" role="alert">{err(errors.fuel)}</FieldMessage>}
         </div>
         {electric ? (
           <p className="text-sm text-muted-foreground">{t(k("electricNote"))}</p>

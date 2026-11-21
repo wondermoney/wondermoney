@@ -23,6 +23,7 @@ import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 // Labels shared with the net salary page live under tools.netSalary; the rest under tools.allowance.
 const a = (key: string) => `tools.allowance.${key}`;
@@ -58,7 +59,7 @@ function SelectField<T extends string>({
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </Select>
-      {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
+      {help && <FieldMessage id={`${id}-help`}>{help}</FieldMessage>}
     </div>
   );
 }
@@ -150,9 +151,9 @@ function AllowanceCalculator({ kind }: { kind: AllowanceKind }) {
             aria-invalid={startDateError ? true : undefined}
             aria-describedby={`${kind}Allowance-start-help`}
           />
-          <p id={`${kind}Allowance-start-help`} className={startDateError ? "text-sm text-destructive-text" : "text-sm text-muted-foreground"}>
+          <FieldMessage id={`${kind}Allowance-start-help`} tone={startDateError ? "error" : "help"}>
             {startDateError ?? t(a(`help.startDate.${kind}`), { year: String(ALLOWANCE_YEAR) })}
-          </p>
+          </FieldMessage>
         </div>
       </div>
       <div className="space-y-5 rounded-card border border-border bg-background p-6 lg:sticky lg:top-24">

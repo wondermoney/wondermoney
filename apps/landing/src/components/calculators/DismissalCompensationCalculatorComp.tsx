@@ -22,6 +22,7 @@ import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.dismissalCompensation.${key}`;
 const PAYOUT_MONTHS = [6, 12] as const;
@@ -58,8 +59,8 @@ function DateField({
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
       />
-      {error && <p id={`${id}-error`} className="text-sm text-destructive-text">{error}</p>}
-      <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>
+      {error && <FieldMessage tone="error" id={`${id}-error`}>{error}</FieldMessage>}
+      <FieldMessage id={`${id}-help`}>{help}</FieldMessage>
     </div>
   );
 }
@@ -132,7 +133,7 @@ function DismissalCompensationCalculator() {
               <option key={type} value={type}>{t(k(`contractTypes.${type}`))}</option>
             ))}
           </Select>
-          <p id="dismissal-contract-type-help" className="text-sm text-muted-foreground">{t(k("help.contractType"))}</p>
+          <FieldMessage id="dismissal-contract-type-help">{t(k("help.contractType"))}</FieldMessage>
         </div>
         {fixedTerm && (
           <div className="space-y-1.5">
@@ -149,7 +150,7 @@ function DismissalCompensationCalculator() {
                 <option key={kind} value={kind}>{t(k(`fixedTermKinds.${kind}`))}</option>
               ))}
             </Select>
-            <p id="dismissal-term-kind-help" className="text-sm text-muted-foreground">{t(k("help.fixedTermKind"))}</p>
+            <FieldMessage id="dismissal-term-kind-help">{t(k("help.fixedTermKind"))}</FieldMessage>
           </div>
         )}
         <CalculatorInput

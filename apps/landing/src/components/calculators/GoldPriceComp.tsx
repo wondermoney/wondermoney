@@ -22,6 +22,7 @@ import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.goldPrice.${key}`;
 const SUMMARY = goldPriceSummary();
@@ -103,9 +104,9 @@ function GoldPrice() {
                 </option>
               ))}
             </Select>
-            <p id="gold-purity-help" className="text-sm text-muted-foreground">
+            <FieldMessage id="gold-purity-help">
               {t(k("help.purity"))}
-            </p>
+            </FieldMessage>
           </div>
           <div className="space-y-2">
             <CalculatorInput
