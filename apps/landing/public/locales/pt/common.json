@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Pesquisar...",
+      "label": "Pesquisar",
       "noResults": "Nenhum resultado encontrado. Tenta outro termo de pesquisa."
     },
     "relatedContent": {
@@ -391,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Ofertas de bancos, corretoras, seguradoras e comercializadores de energia em Portugal, lado a lado.",
+      "description": "Ofertas de bancos, corretoras, seguradoras e comercializadores de energia e postos de combustível em Portugal, lado a lado.",
       "items": {
         "electricityTariffComparison": "Todas as ofertas para casa, ordenadas pelo custo anual para ti",
         "freeBankAccounts": "Contas à ordem gratuitas e as condições de cada uma",
         "termDepositOffers": "Ofertas de depósitos por prazo e montante, com juro líquido",
         "remuneratedAccounts": "Contas remuneradas e de poupança, com juro líquido de IRS",
         "brokerFees": "Comissões de custódia, negociação e câmbio das corretoras em Portugal",
-        "pprComparison": "Fundos, seguros e fundos de pensões PPR por risco, custos e rentabilidade"
+        "pprComparison": "Fundos, seguros e fundos de pensões PPR por risco, custos e rentabilidade",
+        "fuelPrices": "Preço médio oficial e os postos mais baratos no teu distrito e concelho"
       }
     },
     "learn": "Aprender",
@@ -6642,6 +6644,7 @@
       "title": "Guias de finanças pessoais",
       "description": "Artigos e guias aprofundados para te ajudar a tomar melhores decisões financeiras.",
       "searchPlaceholder": "Pesquisar guias...",
+      "searchLabel": "Pesquisar guias",
       "comingSoon": "Guias em breve disponíveis.",
       "defaultCategory": "Geral",
       "readGuide": "Ler guia"
@@ -6687,6 +6690,7 @@
       "schemaDescription": "Glossário completo de termos financeiros e de investimento.",
       "description": "Todos os termos financeiros e de investimento explicados de forma simples.",
       "searchPlaceholder": "Pesquisar termos...",
+      "searchLabel": "Pesquisar termos do glossário",
       "comingSoon": "Glossário em breve disponível.",
       "letterNav": "Termos por letra"
     },

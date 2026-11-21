@@ -19,6 +19,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.netSalary.${key}`;
 
@@ -51,7 +52,7 @@ function SelectField<T extends string>({
       >
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </Select>
-      {help && <p id={`${id}-help`} className="text-sm text-muted-foreground">{help}</p>}
+      {help && <FieldMessage id={`${id}-help`}>{help}</FieldMessage>}
     </div>
   );
 }

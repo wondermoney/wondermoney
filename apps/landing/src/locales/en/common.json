@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Search...",
+      "label": "Search",
       "noResults": "No results found. Try a different search term."
     },
     "relatedContent": {
@@ -391,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Offers from banks, brokers, insurers and energy suppliers in Portugal, side by side.",
+      "description": "Offers from banks, brokers, insurers, energy suppliers and fuel stations in Portugal, side by side.",
       "items": {
         "electricityTariffComparison": "Every household offer, ranked by what it would cost you a year",
         "freeBankAccounts": "Free current accounts and the conditions of each",
         "termDepositOffers": "Term deposit offers by term and amount, with interest after tax",
         "remuneratedAccounts": "Remunerated and savings accounts, with net interest after IRS",
         "brokerFees": "Custody, trading and currency fees at brokers available in Portugal",
-        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns"
+        "pprComparison": "PPR funds, insurance and pension funds by risk, costs and returns",
+        "fuelPrices": "Official average prices and the cheapest stations in your district and municipality"
       }
     },
     "learn": "Learn",
@@ -6642,6 +6644,7 @@
       "title": "Personal Finance Guides",
       "description": "In-depth articles and guides to help you make better financial decisions.",
       "searchPlaceholder": "Search guides...",
+      "searchLabel": "Search guides",
       "comingSoon": "Guides coming soon.",
       "defaultCategory": "General",
       "readGuide": "Read guide"
@@ -6687,6 +6690,7 @@
       "schemaDescription": "A comprehensive glossary of financial and investing terms.",
       "description": "Every financial and investing term explained in plain language. Browse by letter or search for a specific concept.",
       "searchPlaceholder": "Search terms...",
+      "searchLabel": "Search glossary terms",
       "comingSoon": "Glossary terms coming soon.",
       "letterNav": "Terms by letter"
     },

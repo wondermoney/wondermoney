@@ -12,6 +12,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const Form = FormProvider;
 
@@ -93,7 +94,7 @@ const FormLabel = React.forwardRef<
   return (
     <Label
       ref={ref}
-      className={cn(error && "text-destructive", className)}
+      className={cn(error && "text-destructive-text", className)}
       htmlFor={formItemId}
       {...props}
     />
@@ -131,10 +132,10 @@ const FormDescription = React.forwardRef<
   const { formDescriptionId } = useFormField();
 
   return (
-    <p
+    <FieldMessage
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-sm text-muted-foreground", className)}
+      className={className}
       {...props}
     />
   );
@@ -153,14 +154,15 @@ const FormMessage = React.forwardRef<
   }
 
   return (
-    <p
+    <FieldMessage
       ref={ref}
       id={formMessageId}
-      className={cn("text-sm font-medium text-destructive", className)}
+      tone="error"
+      className={className}
       {...props}
     >
       {body}
-    </p>
+    </FieldMessage>
   );
 });
 FormMessage.displayName = "FormMessage";

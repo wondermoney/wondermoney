@@ -26,6 +26,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.sp500History.${key}`;
 const YEARS = Array.from(
@@ -97,9 +98,9 @@ function Sp500HistoryCalculator() {
           ))}
         </Select>
         {error && (
-          <p id={`sp500-${field}-error`} role="alert" className="text-sm text-destructive-text">
+          <FieldMessage tone="error" id={`sp500-${field}-error`} role="alert">
             {error}
-          </p>
+          </FieldMessage>
         )}
       </div>
     );
@@ -117,9 +118,9 @@ function Sp500HistoryCalculator() {
         />
         {label}
       </label>
-      <p id={`sp500-${field}-help`} className="pl-6 text-xs text-muted-foreground">
+      <FieldMessage id={`sp500-${field}-help`} className="pl-6">
         {help}
-      </p>
+      </FieldMessage>
     </div>
   );
 

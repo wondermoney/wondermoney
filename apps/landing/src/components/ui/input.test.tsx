@@ -82,21 +82,59 @@ describe("Input", () => {
     expect(onChange).toHaveBeenCalledTimes(1);
   });
 
-  it("draws a prefix and a suffix inside the field, with the text clearing them", () => {
-    // Given
-    render(<Input aria-label="Price" prefix="€" suffix="%" wrapperClassName="w-36" />);
+  it("draws a prefix and a suffix in the field's flow, so the text stops before them", () => {
+    // Given a long unit, which a fixed right padding would let the value run under
+    render(<Input aria-label="Consumption" prefix="€" suffix="L/100 km" wrapperClassName="w-36" />);
 
     // When
-    const input = screen.getByLabelText("Price");
+    const input = screen.getByLabelText("Consumption");
     const wrapper = input.parentElement as HTMLElement;
     const prefix = screen.getByText("€");
-    const suffix = screen.getByText("%");
+    const suffix = screen.getByText("L/100 km");
+
+    // Then the wrapper draws the shared box and lays the three out in a row: the input takes
+    // what the adornments leave, with no padding sized for a guessed unit width
+    expect(classesOf(wrapper)).toEqual(expect.arrayContaining([...BOX, "flex", "items-center", "gap-2", "px-3", "w-36"]));
+    expect([...wrapper.children]).toEqual([prefix, input, suffix]);
+    expect(classesOf(input)).toEqual(expect.arrayContaining(["min-w-0", "flex-1", "border-0", "bg-transparent"]));
+    expect(classesOf(input).filter((name) => /^p[lrx]-/.test(name))).toEqual([]);
+    for (const adornment of [prefix, suffix]) {
+      expect(classesOf(adornment)).toEqual(expect.arrayContaining(["shrink-0", "whitespace-nowrap", "pointer-events-none"]));
+      expect(classesOf(adornment)).not.toContain("absolute");
+    }
+  });
+
+  it("draws the focus ring, the error border and the disabled state on the adorned field's box", () => {
+    // Given
+    render(<Input aria-label="Rate" suffix="%" aria-invalid disabled />);
+
+    // When
+    const box = classesOf(screen.getByLabelText("Rate").parentElement as HTMLElement);
+
+    // Then the box keys each state on the input inside it
+    expect(box).toEqual(
+      expect.arrayContaining([
+        "has-[input:focus-visible]:ring-2",
+        "has-[input:focus-visible]:ring-ring",
+        "has-[input:focus-visible]:ring-offset-2",
+        "has-[[aria-invalid=true]]:border-destructive-text",
+        "has-[input:disabled]:opacity-50",
+      ]),
+    );
+    expect(classesOf(screen.getByLabelText("Rate"))).toContain("focus-visible:outline-none");
+  });
+
+  it("focuses the input when the visitor presses on its unit", () => {
+    // Given
+    render(<Input aria-label="Distance" suffix="km" />);
+    const input = screen.getByLabelText("Distance");
+
+    // When
+    const event = fireEvent.mouseDown(screen.getByText("km"));
 
     // Then
-    expect(classesOf(wrapper)).toEqual(expect.arrayContaining(["relative", "w-36"]));
-    expect(classesOf(input)).toEqual(expect.arrayContaining(["pl-8", "pr-12"]));
-    expect(classesOf(prefix)).toEqual(expect.arrayContaining(["absolute", "left-0", "pl-3", "pointer-events-none"]));
-    expect(classesOf(suffix)).toEqual(expect.arrayContaining(["absolute", "right-0", "pr-3", "pointer-events-none"]));
+    expect(document.activeElement).toBe(input);
+    expect(event).toBe(false);
   });
 
   it("renders the bare input without a wrapper when there is no adornment", () => {

@@ -13,12 +13,12 @@ Con el Postgres incluido:
 
 ```sh
 helm install wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.6.0 \
+  --version 1.7.0 \
   --namespace wondermoney --create-namespace \
   --set postgresql.enabled=true
 ```
 
-El chart 1.6.0 usa las imágenes 1.6.0; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
+El chart 1.7.0 usa las imágenes 1.7.0; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
 
 ```sh
 kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
@@ -30,7 +30,7 @@ Después abre http://localhost:3000 y crea tu cuenta. La primera cuenta siempre 
 Para ver todos los ajustes:
 
 ```sh
-helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.6.0
+helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.7.0
 ```
 
 ## Tu propio Postgres
@@ -131,7 +131,7 @@ helm test wondermoney -n wondermoney --logs
 
 ```sh
 helm upgrade wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.6.0 -n wondermoney --reuse-values
+  --version 1.7.0 -n wondermoney --reuse-values
 ```
 
 La API aplica las nuevas migraciones de la base de datos al arrancar, y los secretos generados se quedan como están.

@@ -8,6 +8,7 @@ import {
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { getTranslations } from "@/lib/translations";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
   const id = useId();
@@ -151,9 +152,9 @@ export default function InvestorProfileQuiz({ locale }: { locale: Lang }) {
             </div>
           </fieldset>
           {showError && (
-            <p id={`${id}-error`} role="alert" className="mt-3 text-sm text-destructive-text">
+            <FieldMessage tone="error" id={`${id}-error`} role="alert" className="mt-3">
               {copy("required")}
-            </p>
+            </FieldMessage>
           )}
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Button type="button" onClick={advance}>{copy(isLast ? "finish" : "next")}</Button>

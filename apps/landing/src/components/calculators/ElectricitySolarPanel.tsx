@@ -45,6 +45,7 @@ import { supplierName } from "@/lib/calculators/electricitySuppliers";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 export interface SolarSettings {
   on: boolean;
@@ -319,9 +320,9 @@ export function ElectricitySolarPanel({
           />
           <span>{t(k("solar.toggle"))}</span>
         </label>
-        <p id="tariff-solar-help" className="pl-6 text-xs text-muted-foreground">
+        <FieldMessage id="tariff-solar-help" className="pl-6">
           {t(k("solar.alreadyHave"))}
-        </p>
+        </FieldMessage>
         {settings.on && (
           <fieldset className="space-y-4">
             <legend className="sr-only">{t(k("solar.legend"))}</legend>
@@ -363,9 +364,9 @@ export function ElectricitySolarPanel({
                     </option>
                   ))}
                 </Select>
-                <p id="tariff-solar-district-help" className="text-xs text-muted-foreground">
+                <FieldMessage id="tariff-solar-district-help">
                   {t(k("solar.districtHelp"), { slope: formatNumber(locale, district.slope, 0) })}
-                </p>
+                </FieldMessage>
                 {canLocate && (
                   <div className="space-y-1">
                     <button
@@ -539,9 +540,9 @@ export function ElectricitySolarPanel({
               </div>
             )}
             {production.state === "error" && (
-              <p role="alert" className="text-sm text-destructive-text">
+              <FieldMessage tone="error" role="alert">
                 {t(k("solar.loadError"))}
-              </p>
+              </FieldMessage>
             )}
           </fieldset>
         )}

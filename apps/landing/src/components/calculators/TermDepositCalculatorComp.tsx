@@ -16,6 +16,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { cn } from "@/lib/utils";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 /** Rows the payment table shows before the visitor asks for the rest. */
 const SCHEDULE_PREVIEW_ROWS = 12;
@@ -256,9 +257,9 @@ function ChoiceGroup<T extends string>({
         ))}
       </div>
       {helpText && (
-        <p id={helpId} className="text-xs text-muted-foreground">
+        <FieldMessage id={helpId}>
           {helpText}
-        </p>
+        </FieldMessage>
       )}
     </fieldset>
   );

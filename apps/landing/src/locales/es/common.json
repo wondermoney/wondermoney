@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Buscar...",
+      "label": "Buscar",
       "noResults": "No se encontraron resultados. Prueba con otro término."
     },
     "relatedContent": {
@@ -391,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Ofertas de bancos, brókers, aseguradoras y comercializadoras de energía en Portugal, una junto a otra.",
+      "description": "Ofertas de bancos, brókers, aseguradoras, comercializadoras de energía y gasolineras en Portugal, una junto a otra.",
       "items": {
         "electricityTariffComparison": "Todas las ofertas para el hogar, ordenadas por lo que te costarían al año",
         "freeBankAccounts": "Cuentas corrientes gratuitas y las condiciones de cada una",
         "termDepositOffers": "Ofertas de depósitos por plazo e importe, con el interés neto",
         "remuneratedAccounts": "Cuentas remuneradas y de ahorro, con el interés neto de IRS",
         "brokerFees": "Comisiones de custodia, operativa y cambio de los brókers en Portugal",
-        "pprComparison": "Fondos, seguros y fondos de pensiones PPR por riesgo, costes y rentabilidad"
+        "pprComparison": "Fondos, seguros y fondos de pensiones PPR por riesgo, costes y rentabilidad",
+        "fuelPrices": "Precios medios oficiales y las gasolineras más baratas de tu distrito y municipio"
       }
     },
     "learn": "Aprender",
@@ -6642,6 +6644,7 @@
       "title": "Guías de finanzas personales",
       "description": "Artículos y guías en profundidad para ayudarte a tomar mejores decisiones financieras.",
       "searchPlaceholder": "Buscar guías...",
+      "searchLabel": "Buscar guías",
       "comingSoon": "Guías próximamente.",
       "defaultCategory": "General",
       "readGuide": "Leer guía"
@@ -6687,6 +6690,7 @@
       "schemaDescription": "Un glosario completo de términos financieros y de inversión.",
       "description": "Todos los términos financieros y de inversión explicados en lenguaje sencillo. Navega por letra o busca un concepto específico.",
       "searchPlaceholder": "Buscar términos...",
+      "searchLabel": "Buscar términos del glosario",
       "comingSoon": "Términos del glosario próximamente.",
       "letterNav": "Términos por letra"
     },
@@ -7912,7 +7916,7 @@
       "groupsPoint1": "Añade personas por su nombre: no necesitan una cuenta de WonderMoney",
       "groupsPoint2": "Divide a partes iguales, por importe o por porcentaje",
       "groupsPoint3": "Un saldo para cada persona y el mínimo de pagos para saldar cuentas",
-      "groupsPoint4": "Registra una liquidación y vincúlala a la transferencia con la que se pagó",
+      "groupsPoint4": "Registra un pago de saldo y vincúlalo a la transferencia con la que se pagó",
       "faqTitle": "Preguntas sobre el hogar",
       "faq1Q": "¿Puede el titular del hogar ver mis cuentas privadas?",
       "faq1A": "No. Una cuenta privada solo la ves tú y las personas con las que la compartes. El titular y los administradores no la ven a menos que la compartas con ellos.",

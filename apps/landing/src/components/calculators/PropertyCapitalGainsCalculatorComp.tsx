@@ -15,6 +15,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { Select } from "@/components/ui/select";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 const k = (key: string) => `tools.propertyCapitalGains.${key}`;
 const MONTHS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -88,7 +89,7 @@ function PropertyCapitalGainsCalculator() {
           <option key={month} value={month}>{monthName(month)}</option>
         ))}
       </Select>
-      {errors[field] && <p role="alert" className="text-sm text-destructive">{err(field)}</p>}
+      {errors[field] && <FieldMessage tone="error" role="alert">{err(field)}</FieldMessage>}
     </div>
   );
 

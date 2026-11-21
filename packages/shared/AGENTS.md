@@ -12,7 +12,7 @@ it exports.
   root) before running or testing the API.
 - **Web and mobile import source**, and only through the subpath entries in `package.json`
   `exports` (`/decimal`, `/amount-expression`, `/bank-sync`, `/crypto-wallet`,
-  `/dashboard-layout`, `/name-match`). Those entries run in a browser and in React Native, so
+  `/dashboard-layout`, `/name-match`, `/analytics`). Those entries run in a browser and in React Native, so
   they must stay dependency-free: no Node built-ins, no `big.js`, `csv-parse`, `xlsx` or
   `eodhd`, and no import from the rest of `lib/`. A new client entry needs its own line in
   `exports`.
@@ -26,6 +26,10 @@ it exports.
   fails when that page is stale: after changing a preset, run
   `pnpm --filter @wondermoney/docs rule-presets`.
 - `lib/services/eodhd/`: the EODHD client. It has no cache; the API caches responses.
+- `lib/analytics/`: the product analytics event catalogue every surface is typed by; its
+  `README.md` has the rules. `docs/analytics-events.md` is generated from it and the tests fail
+  when it is stale: after changing the catalogue, run
+  `pnpm --filter @wondermoney/shared analytics-events`.
 - `tests/`: vitest suites and fixtures.
 
 ## Commands

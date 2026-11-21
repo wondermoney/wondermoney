@@ -90,6 +90,7 @@
     },
     "search": {
       "placeholder": "Cerca...",
+      "label": "Cerca",
       "noResults": "Nessun risultato trovato. Prova con un termine di ricerca diverso."
     },
     "relatedContent": {
@@ -391,14 +392,15 @@
       }
     },
     "comparatorsMenu": {
-      "description": "Offerte di banche, broker, assicuratori e fornitori di energia in Portogallo, a confronto.",
+      "description": "Offerte di banche, broker, assicuratori, fornitori di energia e distributori di carburante in Portogallo, a confronto.",
       "items": {
         "electricityTariffComparison": "Tutte le offerte per la casa, ordinate per quanto ti costerebbero in un anno",
         "freeBankAccounts": "Conti correnti gratuiti e le condizioni di ciascuno",
         "termDepositOffers": "Offerte di depositi vincolati per durata e importo, con interessi netti",
         "remuneratedAccounts": "Conti remunerati e di risparmio, con interessi netti di IRS",
         "brokerFees": "Commissioni di custodia, negoziazione e cambio dei broker in Portogallo",
-        "pprComparison": "Fondi, assicurazioni e fondi pensione PPR per rischio, costi e rendimenti"
+        "pprComparison": "Fondi, assicurazioni e fondi pensione PPR per rischio, costi e rendimenti",
+        "fuelPrices": "Prezzi medi ufficiali e i distributori più economici del tuo distretto e comune"
       }
     },
     "learn": "Impara",
@@ -6642,6 +6644,7 @@
       "title": "Guide alla finanza personale",
       "description": "Articoli e guide approfonditi per aiutarti a prendere decisioni finanziarie più consapevoli.",
       "searchPlaceholder": "Cerca guide...",
+      "searchLabel": "Cerca nelle guide",
       "comingSoon": "Guide in arrivo.",
       "defaultCategory": "Generale",
       "readGuide": "Leggi la guida"
@@ -6687,6 +6690,7 @@
       "schemaDescription": "Un glossario completo di termini finanziari e di investimento.",
       "description": "Ogni termine finanziario e di investimento spiegato in linguaggio semplice. Sfoglia per lettera o cerca un concetto specifico.",
       "searchPlaceholder": "Cerca termini...",
+      "searchLabel": "Cerca termini del glossario",
       "comingSoon": "Termini del glossario in arrivo.",
       "letterNav": "Termini per lettera"
     },
@@ -7912,7 +7916,7 @@
       "groupsPoint1": "Aggiungi le persone per nome: non serve che abbiano un account WonderMoney",
       "groupsPoint2": "Dividi in parti uguali, per importo o in percentuale",
       "groupsPoint3": "Un saldo per ogni persona e il minor numero di pagamenti per pareggiare i conti",
-      "groupsPoint4": "Registra un rimborso e collegalo al trasferimento con cui è stato pagato",
+      "groupsPoint4": "Registra un saldo e collegalo al trasferimento con cui è stato pagato",
       "faqTitle": "Domande sulla famiglia",
       "faq1Q": "Il proprietario della famiglia può vedere i miei conti privati?",
       "faq1A": "No. Un conto privato è visibile solo a te e alle persone con cui lo condividi. Il proprietario e gli amministratori lo vedono solo se lo condividi con loro.",

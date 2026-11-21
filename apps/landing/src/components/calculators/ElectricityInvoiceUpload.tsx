@@ -16,6 +16,7 @@ import { supplierName } from "@/lib/calculators/electricitySuppliers";
 import { InvoicePdfError, readInvoicePdfLines, type InvoicePdfErrorCode } from "@/lib/calculators/invoicePdf";
 import { formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
+import { FieldMessage } from "@/components/ui/fieldMessage";
 
 /** Larger than any invoice; a bigger file is not read. */
 const MAX_FILE_MB = 15;
@@ -90,12 +91,12 @@ export default function ElectricityInvoiceUpload({
           onChange={(event) => readFile(event.currentTarget.files?.[0])}
           className="block w-full text-sm text-foreground file:mr-3 file:h-10 file:rounded-md file:border file:border-input file:bg-secondary file:px-4 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-paper-3"
         />
-        <p id="tariff-invoice-help" className="text-xs text-muted-foreground">
+        <FieldMessage id="tariff-invoice-help">
           {t(i("supported"), { suppliers })}
-        </p>
-        <p id="tariff-invoice-privacy" className="text-xs text-muted-foreground">
+        </FieldMessage>
+        <FieldMessage id="tariff-invoice-privacy">
           {t(i("privacy"))}
-        </p>
+        </FieldMessage>
       </div>
       {status.state === "reading" && (
         <p role="status" className="text-sm text-foreground">
