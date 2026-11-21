@@ -1,11 +1,13 @@
 ---
+// Prerendered worked example, method and the State guarantee's conditions for the youth
+// mortgage calculator, on the guide building blocks. The figures come from the same function
+// the calculator runs (youthMortgageGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import {
-  YOUTH_GUARANTEE,
-  YOUTH_MORTGAGE_EXAMPLE,
-  computeYouthMortgage,
-} from "@/lib/calculators/youthMortgage";
-import { formatMoney, formatPercent } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildYouthMortgageGuide } from "./youthMortgageGuide";
+import { YOUTH_GUARANTEE } from "@/lib/calculators/youthMortgage";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -16,63 +18,36 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.youthMortgage.guide.${key}`;
-const example = computeYouthMortgage(YOUTH_MORTGAGE_EXAMPLE);
-if (!example.ok) throw new Error("Invalid youth mortgage worked example");
-const money = (value: number, decimals = 0) => formatMoney(locale, value, { decimals });
-const { price, annualRate, termYears } = YOUTH_MORTGAGE_EXAMPLE;
-const values = {
-  price: money(price),
-  rate: formatPercent(locale, annualRate, { decimals: 2 }),
-  years: String(termYears),
-  loan: money(example.result.loan),
-  monthly: money(example.result.monthlyPayment, 2),
-  taxesWithout: money(example.result.taxesWithout, 2),
-  taxesWith: money(example.result.taxesWithYoung, 2),
-  cash: money(example.result.cashWithYoung, 2),
-  date: YOUTH_GUARANTEE.reviewedOn,
-  maxAge: String(YOUTH_GUARANTEE.maxAge),
-  minAge: String(YOUTH_GUARANTEE.minAge),
-  maxPrice: money(YOUTH_GUARANTEE.maxPrice),
-  maxIncome: money(YOUTH_GUARANTEE.maxIncome),
-  percent: String(YOUTH_GUARANTEE.guaranteePercent),
-};
-const link = "font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80";
+const guide = buildYouthMortgageGuide(locale);
+const { values } = guide;
 ---
 
 <ToolGuide>
-  <p role="note" class="rounded-lg border border-warning-text/30 bg-warning/10 px-4 py-3 text-sm text-foreground">
+  <p role="note" class="rounded-card border border-warning-text/30 bg-warning/10 px-4 py-3 text-base text-foreground">
     {t("tools.youthMortgage.deadlineNotice")}
   </p>
-  <section aria-labelledby="youth-mortgage-example">
-    <h2 id="youth-mortgage-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("example"), values)}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("example"), values)}</p>
+    <GuideFigures variant="grid" items={guide.loan} />
+    <GuideFigures variant="grid" items={guide.taxes} />
   </section>
-  <section aria-labelledby="youth-mortgage-method">
-    <h2 id="youth-mortgage-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodPayment", "methodTaxes", "methodCash", "methodGuarantee"].map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("conditionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {["conditionAge", "conditionHome", "conditionProperty", "conditionPrice", "conditionIncome", "conditionDate"]
-        .map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
-    <p class="mt-4">
-      <a href={YOUTH_GUARANTEE.sources.government} class={link}>{t(k("sourceGovernment"))}</a>
+
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("formulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(k("conditionsTitle"))}</h3>
+    <GuideTermList items={guide.conditions} />
+    <p>
+      <a href={YOUTH_GUARANTEE.sources.government}>{t(k("sourceGovernment"))}</a>
       {" · "}
-      <a href={YOUTH_GUARANTEE.sources.literacia} class={link}>{t(k("sourceLiteracia"))}</a>
+      <a href={YOUTH_GUARANTEE.sources.literacia}>{t(k("sourceLiteracia"))}</a>
       {" · "}
-      <a href={YOUTH_GUARANTEE.sources.portaria} rel="noopener" class={link}>{t(k("sourcePortaria"))}</a>
+      <a href={YOUTH_GUARANTEE.sources.portaria} rel="noopener">{t(k("sourcePortaria"))}</a>
     </p>
-    <p class="mt-4 text-sm">{t(k("review"), values)}</p>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {["assumptionBanks", "assumptionRate", "assumptionTaxes", "assumptionScope"]
-        .map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
+    <p class="text-sm">{t(k("review"), values)}</p>
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <GuideTermList items={guide.assumptions} />
   </section>
 </ToolGuide>

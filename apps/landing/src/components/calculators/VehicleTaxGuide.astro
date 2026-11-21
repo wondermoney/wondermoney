@@ -1,7 +1,12 @@
 ---
+// Prerendered worked example and method for the IUC calculator, on the guide building blocks.
+// The figures come from the same function the calculator runs (vehicleTaxGuide.ts).
 import ToolGuide from "./ToolGuide.astro";
-import { IUC_TABLES, VEHICLE_TAX_EXAMPLE, computeVehicleTax } from "@/lib/calculators/vehicleTax";
-import { formatMoney } from "@/lib/numberFormat";
+import GuideFigures from "./GuideFigures.astro";
+import GuideFormula from "./GuideFormula.astro";
+import GuideTermList from "./GuideTermList.astro";
+import { buildVehicleTaxGuide } from "./vehicleTaxGuide";
+import { IUC_TABLES } from "@/lib/calculators/vehicleTax";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
 
@@ -12,20 +17,8 @@ interface Props {
 const { locale } = Astro.props;
 const t = getTranslations(locale);
 const k = (key: string) => `tools.vehicleTax.guide.${key}`;
-const example = computeVehicleTax(VEHICLE_TAX_EXAMPLE);
-if (!example.ok) throw new Error("Invalid vehicle tax worked example");
-
-const money = (value: number) => formatMoney(locale, value, { decimals: 2 });
-const values = {
-  cc: String(VEHICLE_TAX_EXAMPLE.cc),
-  co2: String(VEHICLE_TAX_EXAMPLE.co2),
-  year: String(VEHICLE_TAX_EXAMPLE.year),
-  tax: money(example.result.annualTax),
-  monthly: money(example.result.monthlyProvision),
-  taxYear: String(IUC_TABLES.taxYear),
-  reviewed: new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "UTC" }).format(new Date(IUC_TABLES.reviewed)),
-  law: IUC_TABLES.law,
-};
+const guide = buildVehicleTaxGuide(locale);
+const { values } = guide;
 const base = "https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/codigos_tributarios/iuc/Pages/";
 const sources = [
   ["sourceCategoryA", `${base}iuc9.aspx`],
@@ -38,39 +31,30 @@ const sources = [
 ---
 
 <ToolGuide>
-  <section aria-labelledby="vehicle-tax-example">
-    <h2 id="vehicle-tax-example" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("exampleTitle"))}
-    </h2>
-    <p class="mt-4">{t(k("example"), values)}</p>
+  <section>
+    <h2>{t(k("exampleTitle"))}</h2>
+    <p>{t(k("example"), values)}</p>
+    <GuideFigures items={guide.tax} operators={["×", "+", "="]} />
   </section>
-  <section aria-labelledby="vehicle-tax-method">
-    <h2 id="vehicle-tax-method" class="text-2xl font-semibold tracking-tight text-foreground">
-      {t(k("methodTitle"))}
-    </h2>
-    <ul class="mt-4 list-disc space-y-2 pl-6">
-      {["methodA", "methodB", "methodAdditional", "methodDiesel", "methodPayment", "methodBudget"].map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
-    <p class="mt-3">{t(k("exemption"))}</p>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("scopeTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {["scopeSupported", "scopeUnsupported"].map((key) => <li>{t(k(key))}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
-      {["assumptionYear", "assumptionPayment", "assumptionEducational"].map((key) => <li>{t(k(key), values)}</li>)}
-    </ul>
-    <h3 class="mt-8 font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
-    <ul class="mt-3 list-disc space-y-2 pl-6">
+
+  <section>
+    <h2>{t(k("methodTitle"))}</h2>
+    <GuideFormula lines={guide.formulas} label={t(k("formulasLabel"))} />
+    <GuideTermList items={guide.notes} />
+    <h3 class="font-semibold text-foreground">{t(k("exemptionTitle"))}</h3>
+    <p>{t(k("exemption"))}</p>
+    <h3 class="font-semibold text-foreground">{t(k("scopeTitle"))}</h3>
+    <GuideTermList items={guide.scope} />
+    <h3 class="font-semibold text-foreground">{t(k("assumptionsTitle"))}</h3>
+    <GuideTermList items={guide.assumptions} />
+    <h3 class="font-semibold text-foreground">{t(k("sourcesTitle"))}</h3>
+    <ul class="list-disc space-y-2 pl-6">
       {sources.map(([key, href]) => (
         <li>
-          <a href={href} rel="noopener" class="font-medium text-primary underline decoration-primary/40 underline-offset-4 hover:opacity-80">
-            {t(k(key), values)}
-          </a>
+          <a href={href} rel="noopener">{t(k(key), values)}</a>
         </li>
       ))}
     </ul>
-    <p class="mt-4 text-sm">{t(k("reviewed"), values)}</p>
+    <p class="text-sm">{t(k("reviewed"), values)}</p>
   </section>
 </ToolGuide>

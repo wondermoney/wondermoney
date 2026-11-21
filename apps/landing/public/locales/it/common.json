@@ -597,7 +597,18 @@
         "reviewed": "Regole verificate il 20 novembre 2026 per l'IMI dovuta nel 2026 e nel 2027. Gli importi dell'IMI Familiar provengono dall'articolo 112-A del Código do IMI (Portal das Finanças).",
         "methodMinimum": "Se l'imposta da riscuotere, dopo l'eventuale riduzione dell'IMI Familiar, è inferiore a 10 €, non viene liquidata alcuna IMI e il calcolatore mostra 0 € con una nota (articolo 113, n.º 6, del Código do IMI).",
         "sourceMinimum": "Código do IMI, articolo 113: liquidazione, nessuna IMI sotto i 10 € (consultato il 19 novembre 2026)",
-        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)"
+        "sourceEbf": "Statuto dei benefici fiscali (EBF), articolo 46: esenzione per l'abitazione principale, nel testo della Lei n.º 82/2023, uguale al testo consolidato del Diário da República (consultato il 20 novembre 2026)",
+        "terms": {
+          "tax": "IMI annuale",
+          "family": "IMI Familiar",
+          "minimum": "Importo minimo",
+          "payment": "Rate",
+          "budget": "Accantonamento mensile",
+          "rate": "Aliquota comunale",
+          "scope": "Ambito",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dall'IMI",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo dell'IMI ogni mese, così le rate sono già coperte.",
@@ -2747,9 +2758,26 @@
         "assumptionScope": "Questo calcolo segue la legge fiscale portoghese e vale solo per immobili situati in Portogallo, qualunque sia il tuo paese di residenza. È solo a scopo informativo e non è consulenza fiscale.",
         "assumptionYoung": "L'esenzione per i giovani (fino a 35 anni, prima abitazione propria e permanente, condizioni soddisfatte alla data dell'atto, casa mantenuta come residenza permanente) è una scelta separata e conta solo se la spunti. È totale fino a {{youngFull}} e parziale fino a {{youngPartial}}. L'esenzione del bollo sull'acquisto è una deduzione limitata allo 0,8% del limite dell'esenzione totale, quindi oltre paghi lo 0,8% solo sulla parte eccedente. Il bollo sul mutuo resta dovuto.",
         "assumptionLoan": "Il bollo sul mutuo presuppone un finanziamento di cinque anni o più e si paga sempre. Commissioni del mutuo, perizia e costi di notaio o registro non sono inclusi.",
-        "assumptionUnsupported": "Non supportati: non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT.",
         "assumptionIslands": "Per le Azzorre e Madeira il calcolatore usa i limiti regionali delle tabelle da IV a VI dell'Ofício Circulado 40129/2026, con le stesse aliquote del continente.",
-        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)"
+        "sourceCircular": "Ofício Circulado 40129/2026: tabelle IMT (Autorità tributaria)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Imposta di bollo sull'acquisto",
+          "stampLoan": "Imposta di bollo sul mutuo"
+        },
+        "terms": {
+          "base": "Valore imponibile",
+          "imt": "IMT",
+          "stamp": "Imposta di bollo",
+          "rounding": "Arrotondamento",
+          "scope": "Ambito",
+          "young": "Esenzione per i giovani",
+          "loan": "Mutuo",
+          "islands": "Azzorre e Madeira"
+        },
+        "formulasLabel": "Formule",
+        "assumptionUnsupportedTerm": "Non supportati",
+        "assumptionUnsupportedBody": "Non residenti, acquirenti residenti in giurisdizioni a fiscalità privilegiata, società, altre esenzioni e agevolazioni IMT e abitazioni che rientrano nell'articolo 9 del CIMT."
       },
       "nextStepHeadline": "Pianifica il contante che ti serve per comprare",
       "nextStepDescription": "Aggiungi IMT e bollo al risparmio che ti serve prima di comprare e segui i progressi in WonderMoney.",
@@ -2843,7 +2871,28 @@
         "assumptionBanks": "Le banche valutano il tuo rischio di credito e possono rifiutare il mutuo o proporre condizioni diverse, a prescindere dall'elenco. In un mutuo cointestato entrambi devono rispettare le condizioni.",
         "assumptionRate": "Il tasso è quello che inserisci. La garanzia non cambia il tasso di interesse.",
         "assumptionTaxes": "Le imposte riguardano un'abitazione principale e permanente nel Portogallo continentale e, nei valori con esenzione, presuppongono che tu rispetti le condizioni dell'IMT Jovem.",
-        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale."
+        "assumptionScope": "Solo a scopo informativo: non è consulenza finanziaria, fiscale o legale.",
+        "labels": {
+          "cash": "Denaro al rogito",
+          "taxes": "IMT e imposta di bollo"
+        },
+        "terms": {
+          "payment": "Mutuo e rata",
+          "taxes": "Imposte",
+          "cash": "Denaro al rogito",
+          "guarantee": "La garanzia",
+          "banks": "Decide la banca",
+          "rate": "Tasso di interesse",
+          "assumptionTaxes": "Imposte considerate",
+          "scope": "Ambito",
+          "conditionAge": "Età",
+          "conditionHome": "Abitazione principale",
+          "conditionProperty": "Altro immobile",
+          "conditionPrice": "Prezzo",
+          "conditionIncome": "Reddito",
+          "conditionDate": "Data del contratto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Pianifica l'anticipo e quanto costa vivere nella tua casa",
       "nextStepDescription": "Fissa un obiettivo per l'anticipo e preventiva rata, imposte e spese correnti della casa in WonderMoney.",
@@ -3775,8 +3824,6 @@
         "exampleTitle": "Esempio pratico",
         "example": "Un'auto diesel da {{cc}} cm³, con emissioni ufficiali WLTP di {{co2}} g/km e immatricolata nel {{year}}, paga {{tax}} di IUC all'anno. Accantonando {{monthly}} al mese copri la spesa.",
         "methodTitle": "Come funziona la stima",
-        "methodA": "Categoria A (auto immatricolate dal 1981 a giugno 2007): l'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
-        "methodB": "Categoria B (auto immatricolate da luglio 2007): si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
         "methodAdditional": "Le auto di categoria B immatricolate dopo il 1° gennaio 2017 pagano un'aliquota aggiuntiva se le emissioni sono alte: 31,77 € sopra 205 g/km (WLTP) o 180 g/km (NEDC) e 63,74 € sopra 260 g/km (WLTP) o 250 g/km (NEDC). Anche l'aliquota aggiuntiva è moltiplicata per il coefficiente. Il testo di legge non la limita per carburante, quindi il calcolo la applica a tutti.",
         "methodDiesel": "Le auto diesel pagano anche il supplemento diesel (adicional de IUC, articolo 216 della legge n.º 82-B/2014, mantenuto per il 2026 dalla legge di bilancio). Dipende dalla cilindrata, vale per le categorie A e B e si somma dopo il coefficiente, senza essere moltiplicato per esso.",
         "methodPayment": "Fino al 2026 l'IUC si paga nel mese dell'anniversario dell'immatricolazione. Il Decreto-Lei n.º 161/2026 (4 agosto 2026) introduce una liquidazione annuale per contribuente, che comprende tutti i veicoli. Il 2027 è un anno transitorio: un pagamento a ottobre fino a 500 €, altrimenti due a luglio e ottobre (o tutto a luglio). Dal 2028 viene liquidata entro aprile e pagata ad aprile fino a 100 €, ad aprile e ottobre da 100 € a 500 €, e ad aprile, luglio e ottobre oltre 500 €. Le soglie valgono per il totale di tutti i tuoi veicoli.",
@@ -3784,8 +3831,6 @@
         "exemptionTitle": "Auto elettriche",
         "exemption": "Le auto interamente elettriche della categoria B sono esenti dall'IUC e il calcolo mostra zero. Gli ibridi plug-in e gli altri veicoli sono tassati secondo cilindrata e CO2 del libretto: inserisci quei valori.",
         "scopeTitle": "Cosa è coperto",
-        "scopeSupported": "Autovetture leggere: categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
-        "scopeUnsupported": "Non supportati: veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
         "assumptionsTitle": "Ipotesi",
         "assumptionYear": "Le aliquote sono le tabelle {{taxYear}} del Código do IUC (articoli 9 e 10), nella versione della {{law}}. Il Portal das Finanças non indica modifiche successive a queste aliquote.",
         "assumptionPayment": "Il mese di pagamento del 2026 segue la regola dell'anniversario dell'immatricolazione, che il preambolo del Decreto-Lei n.º 161/2026 conferma essere la regola oggi in vigore. Dal 2027 l'imposta è liquidata per contribuente, su tutti i suoi veicoli: aggiungi ognuna delle tue auto e inserisci l'IUC degli altri veicoli come altra IUC, così i mesi delle rate seguono il tuo totale (la legge applica le soglie a quel totale). I calendari 2027 e 2028 mostrano l'importo di ogni mese per le auto che hai aggiunto; con una sola auto, la sua quota di ogni rata. Nell'anno di immatricolazione l'imposta si paga entro 30 giorni dal termine legale di registrazione.",
@@ -3797,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: articolo 216 della legge n.º 82-B/2014, tabelle I e II del supplemento diesel (consultato il 20 novembre 2026)",
         "reviewed": "Aliquote {{taxYear}} verificate il {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026 del 4 agosto: nuove regole di pagamento dell'IUC, con la transizione 2027 (Portal das Finanças, consultato il 19 novembre 2026)",
-        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)"
+        "sourceBudget": "Diário da República: articolo 94 della legge n.º 73-A/2025 (legge di bilancio per il 2026), che mantiene il supplemento diesel senza modificarne gli importi (consultato il 20 novembre 2026)",
+        "methodATerm": "Categoria A (auto immatricolate dal 1981 a giugno 2007)",
+        "methodABody": "L'imposta deriva da una tabella per carburante, cilindrata e periodo di immatricolazione (dopo il 1995, dal 1990 al 1995, dal 1981 al 1989).",
+        "methodBTerm": "Categoria B (auto immatricolate da luglio 2007)",
+        "methodBBody": "Si sommano l'aliquota di cilindrata e quella di CO2 e si moltiplica per un coefficiente che dipende dall'anno di immatricolazione (1,00 nel 2007, 1,05 nel 2008, 1,10 nel 2009, 1,15 dal 2010). La CO2 si legge nella colonna WLTP o NEDC, secondo il ciclo di prova del libretto.",
+        "scopeSupportedTerm": "Autovetture leggere",
+        "scopeSupportedBody": "Categoria A (immatricolate dal 1981 a giugno 2007) e categoria B (immatricolate da luglio 2007).",
+        "scopeUnsupportedTerm": "Non supportati",
+        "scopeUnsupportedBody": "Veicoli merci e più pesanti (categorie C e D), motocicli (E), imbarcazioni da diporto (F), aeromobili (G) e auto immatricolate prima del 1981.",
+        "labels": {
+          "diesel": "Supplemento diesel",
+          "engineRate": "Aliquota per cilindrata",
+          "co2Rate": "Aliquota per CO2",
+          "provision": "Accantonamento mensile"
+        },
+        "terms": {
+          "additional": "Aliquota aggiuntiva",
+          "diesel": "Supplemento diesel",
+          "payment": "Pagamento",
+          "budget": "Accantonamento mensile",
+          "year": "Tabelle",
+          "paymentRule": "Scadenza",
+          "educational": "Stima educativa"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Non farti sorprendere dal bollo auto",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare un dodicesimo del bollo auto ogni mese, così alla scadenza l'importo è già coperto.",
@@ -3904,7 +3973,6 @@
         "methodCash": "Il ricavato che resta sottrae dal prezzo di vendita le spese di vendita, il mutuo estinto e l'IRS stimato. Non sottrae ciò che spendi per la casa successiva.",
         "scopeTitle": "Cosa è coperto",
         "scopeSupported": "Persone fisiche residenti fiscali in Portogallo che vendono nel {{saleYear}} un immobile del patrimonio privato acquistato dal {{firstYear}}.",
-        "scopeUnsupported": "Non coperto: non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
         "assumptionsTitle": "Ipotesi",
         "assumptionBrackets": "L'IRS aggiuntivo usa gli scaglioni annuali dell'IRS del {{saleYear}} sul reddito indicato, come stima dell'effetto sulla dichiarazione annuale. La tassazione congiunta è modellata dividendo il reddito per due.",
         "assumptionNotModelled": "Il calcolatore non verifica le condizioni del reinvestimento. I coefficienti sono stati confrontati con la tabella della {{portaria}} nel Diário da República.",
@@ -3919,7 +3987,29 @@
         "sourceAcquisition": "CIRS, articolo 46: valore di acquisto degli immobili acquistati a titolo oneroso (consultato il 20 novembre 2026)",
         "sourceCorrection": "CIRS, articolo 50: correzione monetaria dopo 24 mesi (consultato il 20 novembre 2026)",
         "sourceExpenses": "CIRS, articolo 51: lavori degli ultimi 12 anni e spese di acquisto e di vendita (consultato il 20 novembre 2026)",
-        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)"
+        "sourceImt": "CIMT, articolo 12: l'IMT si paga sul maggiore tra il prezzo e il VPT (consultato il 20 novembre 2026)",
+        "scopeUnsupportedTerm": "Non coperto",
+        "scopeUnsupportedBody": "Non residenti, immobili acquistati prima del {{firstYear}}, società e immobili destinati a un'attività d'impresa, successioni e donazioni, case che hanno beneficiato di aiuti pubblici superiori al 30% del valore fiscale, la sovrattassa di solidarietà e le detrazioni d'imposta.",
+        "labels": {
+          "included": "Sommato al reddito",
+          "irsWith": "IRS con la plusvalenza",
+          "irsWithout": "IRS senza la plusvalenza",
+          "cashAfter": "Ricavato che resta"
+        },
+        "terms": {
+          "gain": "Plusvalenza",
+          "taxValue": "Valore di vendita e VPT",
+          "coefficient": "Coefficiente",
+          "expenses": "Spese",
+          "half": "Metà della plusvalenza",
+          "exemption": "Reinvestimento",
+          "cash": "Ricavato che resta",
+          "brackets": "Scaglioni IRS",
+          "notModelled": "Cosa non viene verificato",
+          "educational": "Stima educativa",
+          "supported": "Coperto"
+        },
+        "formulasLabel": "Formule"
       },
       "nextStepHeadline": "Scopri quanto del ricavato puoi davvero usare",
       "nextStepDescription": "WonderMoney ti aiuta ad accantonare l'imposta e a vedere cosa resta per la prossima casa.",

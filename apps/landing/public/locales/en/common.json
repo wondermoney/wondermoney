@@ -597,7 +597,18 @@
         "reviewed": "Rules reviewed on 20 November 2026 for the IMI payable in 2026 and 2027. The IMI Familiar amounts come from article 112-A of the Código do IMI (Portal das Finanças).",
         "methodMinimum": "If the tax to collect, after any IMI Familiar reduction, is below €10, no IMI is assessed and the calculator shows €0 with a note (article 113(6) of the Código do IMI).",
         "sourceMinimum": "Código do IMI, article 113: assessment, no IMI below €10 (consulted 19 November 2026)",
-        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)"
+        "sourceEbf": "Tax benefits statute (EBF), article 46: own-home exemption, in the wording of Lei n.º 82/2023, the same as the Diário da República consolidated text (consulted 20 November 2026)",
+        "terms": {
+          "tax": "Annual IMI",
+          "family": "IMI Familiar",
+          "minimum": "Minimum amount",
+          "payment": "Instalments",
+          "budget": "Monthly provision",
+          "rate": "Municipal rate",
+          "scope": "Scope",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the IMI bill",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your IMI every month, so the instalments are already covered.",
@@ -2747,9 +2758,26 @@
         "assumptionScope": "This calculator follows Portuguese tax law and only applies to property located in Portugal, whatever your country of residence. It is educational and not tax advice.",
         "assumptionYoung": "The young-buyer exemption (35 or younger, first own permanent home, conditions met on the deed date, home kept as permanent residence) is a separate choice and not included unless you tick it. It is full up to {{youngFull}} and partial up to {{youngPartial}}. The purchase stamp duty exemption is a deduction capped at 0.8% of the full-exemption limit, so above it you pay 0.8% only on the excess. Mortgage stamp duty is still charged.",
         "assumptionLoan": "Mortgage stamp duty assumes a loan of five years or more and is always charged. Mortgage fees, valuation and notary or registry costs are not included.",
-        "assumptionUnsupported": "Not supported: non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT.",
         "assumptionIslands": "For the Azores and Madeira the calculator uses the regional limits of tables IV to VI of Ofício Circulado 40129/2026, with the same rates as the mainland.",
-        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)"
+        "sourceCircular": "Ofício Circulado 40129/2026: IMT tables (Tax Authority)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Stamp duty on the purchase",
+          "stampLoan": "Stamp duty on the mortgage"
+        },
+        "terms": {
+          "base": "Taxable value",
+          "imt": "IMT",
+          "stamp": "Stamp duty",
+          "rounding": "Rounding",
+          "scope": "Scope",
+          "young": "Young-buyer exemption",
+          "loan": "Mortgage",
+          "islands": "Azores and Madeira"
+        },
+        "formulasLabel": "Formulas",
+        "assumptionUnsupportedTerm": "Not supported",
+        "assumptionUnsupportedBody": "Non-residents, buyers resident in listed low-tax jurisdictions, companies, other IMT exemptions and reliefs, and own homes under article 9 of the CIMT."
       },
       "nextStepHeadline": "Plan the cash you need to buy",
       "nextStepDescription": "Add IMT and stamp duty to the savings you need before you buy, then follow your progress in WonderMoney.",
@@ -2843,7 +2871,28 @@
         "assumptionBanks": "Banks assess your credit risk and can refuse a loan or offer different terms, whatever the checklist says. Both buyers of a joint loan must meet the conditions.",
         "assumptionRate": "The rate is the one you enter. The guarantee does not change the interest rate.",
         "assumptionTaxes": "Taxes are for an own permanent home on mainland Portugal and assume you meet the IMT Jovem conditions in the with-exemption figures.",
-        "assumptionScope": "Educational only: not financial, tax or legal advice."
+        "assumptionScope": "Educational only: not financial, tax or legal advice.",
+        "labels": {
+          "cash": "Cash at signing",
+          "taxes": "IMT and stamp duty"
+        },
+        "terms": {
+          "payment": "Loan and payment",
+          "taxes": "Taxes",
+          "cash": "Cash at signing",
+          "guarantee": "The guarantee",
+          "banks": "The bank decides",
+          "rate": "Interest rate",
+          "assumptionTaxes": "Taxes covered",
+          "scope": "Scope",
+          "conditionAge": "Age",
+          "conditionHome": "Own permanent home",
+          "conditionProperty": "Other property",
+          "conditionPrice": "Price",
+          "conditionIncome": "Income",
+          "conditionDate": "Contract date"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Plan the deposit and the cost of living in your home",
       "nextStepDescription": "Set a deposit goal and budget the mortgage, taxes and running costs in WonderMoney.",
@@ -3775,8 +3824,6 @@
         "exampleTitle": "Worked example",
         "example": "A diesel car with a {{cc}} cm³ engine, official WLTP emissions of {{co2}} g/km and first registered in {{year}} owes {{tax}} of IUC a year. Setting aside {{monthly}} a month covers it.",
         "methodTitle": "How the estimate works",
-        "methodA": "Category A (cars registered from 1981 up to June 2007): the tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
-        "methodB": "Category B (cars registered from July 2007): the engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
         "methodAdditional": "Category B cars first registered after 1 January 2017 pay an additional rate when emissions are high: €31.77 above 205 g/km (WLTP) or 180 g/km (NEDC), and €63.74 above 260 g/km (WLTP) or 250 g/km (NEDC). The additional rate is also multiplied by the coefficient. The legal text does not limit it by fuel, so the calculator applies it to every fuel.",
         "methodDiesel": "Diesel cars also pay the diesel surcharge (adicional de IUC, article 216 of Lei n.º 82-B/2014, kept in force for 2026 by the State Budget). It depends on engine size, applies to categories A and B, and is added after the coefficient, not multiplied by it.",
         "methodPayment": "Until 2026 the IUC is paid in the month of the registration anniversary. Decreto-Lei n.º 161/2026 (4 August 2026) moves it to one yearly assessment per taxpayer, covering all vehicles. 2027 is a transitional year: one payment in October up to €500, otherwise two in July and October (or all in July). From 2028 it is settled by April and paid in April up to €100, in April and October from €100 up to €500, and in April, July and October above €500. The thresholds apply to the total for all your vehicles.",
@@ -3784,8 +3831,6 @@
         "exemptionTitle": "Electric cars",
         "exemption": "Fully electric cars in category B are exempt from IUC, and the calculator shows zero. Plug-in hybrids and other vehicles are taxed by their engine size and CO2 as shown on the registration document, so enter those values.",
         "scopeTitle": "What is covered",
-        "scopeSupported": "Light passenger cars: category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
-        "scopeUnsupported": "Not supported: goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
         "assumptionsTitle": "Assumptions",
         "assumptionYear": "The rates are the {{taxYear}} tables of the Código do IUC (articles 9 and 10), in the wording of {{law}}. The Portal das Finanças lists no later change to these rates.",
         "assumptionPayment": "The 2026 due month follows the registration anniversary rule, which the explanatory preamble of Decreto-Lei n.º 161/2026 confirms is the rule in force today. From 2027 the tax is assessed per taxpayer across all their vehicles: add each of your cars, and enter the IUC of any other vehicles as other IUC, so the instalment months follow your total (the law applies its thresholds to that total). The schedules for 2027 and 2028 give each month's amount for the cars you added; with one car, its share of each instalment. In the year of registration the tax is paid within 30 days of the registration deadline.",
@@ -3797,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: article 216 of Lei n.º 82-B/2014, tables I and II of the diesel surcharge (consulted 20 November 2026)",
         "reviewed": "Rates for {{taxYear}} reviewed on {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026, of 4 August: new IUC payment rules, with the 2027 transition (Portal das Finanças, consulted 19 November 2026)",
-        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)"
+        "sourceBudget": "Diário da República: article 94 of Lei n.º 73-A/2025 (State Budget for 2026), which keeps the diesel surcharge in force without changing the amounts (consulted 20 November 2026)",
+        "methodATerm": "Category A (cars registered from 1981 up to June 2007)",
+        "methodABody": "The tax comes from a table by fuel, engine size and registration period (after 1995, 1990 to 1995, 1981 to 1989).",
+        "methodBTerm": "Category B (cars registered from July 2007)",
+        "methodBBody": "The engine size rate and the CO2 rate are added, then multiplied by a coefficient that depends on the registration year (1.00 for 2007, 1.05 for 2008, 1.10 for 2009, 1.15 from 2010). CO2 is read against the WLTP or the NEDC column, depending on the test cycle on your registration document.",
+        "scopeSupportedTerm": "Light passenger cars",
+        "scopeSupportedBody": "Category A (registered from 1981 to June 2007) and category B (registered from July 2007).",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Goods vehicles and heavier vehicles (categories C and D), motorcycles (E), recreational boats (F), aircraft (G), and cars registered before 1981.",
+        "labels": {
+          "diesel": "Diesel surcharge",
+          "engineRate": "Engine size rate",
+          "co2Rate": "CO2 rate",
+          "provision": "Monthly provision"
+        },
+        "terms": {
+          "additional": "Additional rate",
+          "diesel": "Diesel surcharge",
+          "payment": "Payment",
+          "budget": "Monthly provision",
+          "year": "Tables",
+          "paymentRule": "When it is due",
+          "educational": "Educational estimate"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Never be caught out by the car tax",
       "nextStepDescription": "WonderMoney helps you set aside a twelfth of your car tax every month, so the bill is already covered.",
@@ -3904,7 +3973,6 @@
         "methodCash": "The proceeds left subtract the selling costs, the loan repaid and the estimated IRS from the sale value. It does not subtract what you spend on the next home.",
         "scopeTitle": "What is covered",
         "scopeSupported": "Individuals who are Portuguese tax residents selling a property held as a private asset, bought from {{firstYear}} on, in {{saleYear}}.",
-        "scopeUnsupported": "Not supported: non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
         "assumptionsTitle": "Assumptions",
         "assumptionBrackets": "The extra IRS uses the {{saleYear}} annual IRS brackets on the income you enter, as an estimate of the effect on the annual return. Joint taxation is modelled as splitting the income in two.",
         "assumptionNotModelled": "The calculator does not check the reinvestment conditions. The coefficients were checked against the table of {{portaria}} in the Diário da República.",
@@ -3919,7 +3987,29 @@
         "sourceAcquisition": "CIRS, article 46: acquisition value of a property bought for a price (consulted 20 November 2026)",
         "sourceCorrection": "CIRS, article 50: currency devaluation correction after 24 months (consulted 20 November 2026)",
         "sourceExpenses": "CIRS, article 51: works of the last 12 years and acquisition and sale expenses (consulted 20 November 2026)",
-        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)"
+        "sourceImt": "CIMT, article 12: IMT is paid on the higher of the price and the VPT (consulted 20 November 2026)",
+        "scopeUnsupportedTerm": "Not supported",
+        "scopeUnsupportedBody": "Non-residents, properties bought before {{firstYear}}, companies and self-employed property in a business, inheritances and gifts, homes that received public support above 30% of their tax value, the solidarity surcharge and deductions from tax.",
+        "labels": {
+          "included": "Added to income",
+          "irsWith": "IRS with the gain",
+          "irsWithout": "IRS without the gain",
+          "cashAfter": "Proceeds left"
+        },
+        "terms": {
+          "gain": "Gain",
+          "taxValue": "Sale value and VPT",
+          "coefficient": "Coefficient",
+          "expenses": "Expenses",
+          "half": "Half the gain",
+          "exemption": "Reinvestment",
+          "cash": "Proceeds left",
+          "brackets": "IRS brackets",
+          "notModelled": "What is not checked",
+          "educational": "Educational estimate",
+          "supported": "Covered"
+        },
+        "formulasLabel": "Formulas"
       },
       "nextStepHeadline": "Know how much of the sale you can really use",
       "nextStepDescription": "WonderMoney helps you set aside the tax and see what is left for your next home.",

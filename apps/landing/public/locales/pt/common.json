@@ -597,7 +597,18 @@
         "reviewed": "Regras revistas a 20 de novembro de 2026 para o IMI a pagar em 2026 e 2027. Os montantes do IMI Familiar vêm do artigo 112.º-A do Código do IMI (Portal das Finanças).",
         "methodMinimum": "Se o imposto a cobrar, depois de qualquer redução do IMI Familiar, for inferior a 10 €, não é liquidado IMI e o simulador mostra 0 € com uma nota (artigo 113.º, n.º 6, do Código do IMI).",
         "sourceMinimum": "Código do IMI, artigo 113.º: liquidação, sem IMI abaixo de 10 € (consultado a 19 de novembro de 2026)",
-        "sourceEbf": "Estatuto dos Benefícios Fiscais, artigo 46.º: isenção para habitação própria e permanente, na redação da Lei n.º 82/2023, igual à do texto consolidado no Diário da República (consultado a 20 de novembro de 2026)"
+        "sourceEbf": "Estatuto dos Benefícios Fiscais, artigo 46.º: isenção para habitação própria e permanente, na redação da Lei n.º 82/2023, igual à do texto consolidado no Diário da República (consultado a 20 de novembro de 2026)",
+        "terms": {
+          "tax": "IMI anual",
+          "family": "IMI Familiar",
+          "minimum": "Valor mínimo",
+          "payment": "Prestações",
+          "budget": "Reserva mensal",
+          "rate": "Taxa municipal",
+          "scope": "Âmbito",
+          "educational": "Estimativa educativa"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IMI",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IMI todos os meses, para as prestações já estarem cobertas.",
@@ -2747,9 +2758,26 @@
         "assumptionScope": "Este simulador segue a lei fiscal portuguesa e só se aplica a imóveis situados em Portugal, seja qual for o teu país de residência. É educativo e não constitui aconselhamento fiscal.",
         "assumptionYoung": "A isenção para jovens (até 35 anos, primeira habitação própria e permanente, condições cumpridas na data da escritura, casa mantida como residência permanente) é uma escolha separada e só entra na conta se a marcares. É total até {{youngFull}} e parcial até {{youngPartial}}. A isenção do selo da compra é uma dedução limitada a 0,8% do limite da isenção total, por isso acima dele pagas 0,8% apenas sobre o excedente. O selo do crédito continua a ser cobrado.",
         "assumptionLoan": "O selo do crédito pressupõe um empréstimo de cinco anos ou mais e é sempre cobrado. Comissões do crédito, avaliação e custos de notário ou registo não estão incluídos.",
-        "assumptionUnsupported": "Não suportado: não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT.",
         "assumptionIslands": "Para os Açores e a Madeira, a calculadora usa os limites regionais das tabelas IV a VI do Ofício Circulado 40129/2026, com as mesmas taxas do continente.",
-        "sourceCircular": "Ofício Circulado 40129/2026: tabelas de IMT (Autoridade Tributária)"
+        "sourceCircular": "Ofício Circulado 40129/2026: tabelas de IMT (Autoridade Tributária)",
+        "labels": {
+          "vpt": "VPT",
+          "stampPurchase": "Imposto do Selo da compra",
+          "stampLoan": "Imposto do Selo do crédito"
+        },
+        "terms": {
+          "base": "Valor tributável",
+          "imt": "IMT",
+          "stamp": "Imposto do Selo",
+          "rounding": "Arredondamento",
+          "scope": "Âmbito",
+          "young": "Isenção para jovens",
+          "loan": "Crédito",
+          "islands": "Açores e Madeira"
+        },
+        "formulasLabel": "Fórmulas",
+        "assumptionUnsupportedTerm": "Não suportado",
+        "assumptionUnsupportedBody": "Não residentes, compradores residentes em jurisdições de tributação privilegiada, empresas, outras isenções e benefícios de IMT e habitações abrangidas pelo artigo 9.º do CIMT."
       },
       "nextStepHeadline": "Planeia o dinheiro de que precisas para comprar",
       "nextStepDescription": "Soma o IMT e o Imposto do Selo à poupança de que precisas antes de comprar e acompanha o progresso no WonderMoney.",
@@ -2758,19 +2786,19 @@
     "youthMortgage": {
       "title": "Simulador de crédito habitação jovem",
       "shortName": "Crédito habitação jovem",
-      "subtitle": "Veja que condições da garantia pública as suas respostas cumprem e estime a prestação, os impostos da compra e o dinheiro necessário na escritura.",
-      "description": "Estime um crédito habitação jovem: prestação, impostos e dinheiro na escritura.",
+      "subtitle": "Vê que condições da garantia pública as tuas respostas cumprem e estima a prestação, os impostos da compra e o dinheiro necessário na escritura.",
+      "description": "Estima um crédito habitação jovem: prestação, impostos e dinheiro na escritura.",
       "pageTitle": "Simulador de Crédito Habitação Jovem: Garantia Pública e Prestação",
-      "pageDescription": "Veja as condições da garantia pública para jovens em 2026 e estime a prestação, o IMT e o Imposto do Selo com e sem isenção jovem, e o dinheiro necessário na escritura.",
-      "checkTitle": "1. Garantia pública: que condições as suas respostas cumprem",
-      "checkIntro": "Apenas informativo. Esta lista mostra que condições as respostas abaixo cumprem; não diz se tem direito à garantia. Quem decide são o banco e o Estado.",
-      "checkSummary": "{{met}} de {{total}} condições cumpridas pelas suas respostas.",
+      "pageDescription": "Vê as condições da garantia pública para jovens em 2026 e estima a prestação, o IMT e o Imposto do Selo com e sem isenção jovem, e o dinheiro necessário na escritura.",
+      "checkTitle": "1. Garantia pública: que condições as tuas respostas cumprem",
+      "checkIntro": "Apenas informativo. Esta lista mostra que condições as respostas abaixo cumprem; não diz se tens direito à garantia. Quem decide são o banco e o Estado.",
+      "checkSummary": "{{met}} de {{total}} condições cumpridas pelas tuas respostas.",
       "checkNote": "Condições revistas em {{date}}. A garantia cobre até {{percent}}% do valor da transação, pelo que o financiamento pode chegar a 100%. Não altera a taxa de juro.",
       "deadlineNotice": "A garantia do Estado para compradores até aos 35 anos só cobre contratos de crédito celebrados até 31 de dezembro de 2026. Vamos atualizar esta página quando forem conhecidas as regras para 2027.",
-      "estimateTitle": "2. Estime o crédito e o dinheiro necessário",
+      "estimateTitle": "2. Estima o crédito e o dinheiro necessário",
       "years": "anos",
       "fields": {
-        "age": "A sua idade na data do contrato",
+        "age": "A tua idade na data do contrato",
         "income": "Rendimento coletável anual, opcional",
         "ownHome": "A casa será a minha habitação própria e permanente",
         "otherProperty": "Sou proprietário, total ou parcial, de outro imóvel para habitação",
@@ -2782,7 +2810,7 @@
       "help": {
         "income": "Usado apenas na lista de condições. O limite é o topo do 8.º escalão de IRS.",
         "price": "O preço da escritura. A lista de condições também usa este valor.",
-        "deposit": "O dinheiro que entra de seu bolso. Pode ser zero.",
+        "deposit": "O dinheiro que sai do teu bolso. Pode ser zero.",
         "annualRate": "Taxa anual nominal. A garantia não a reduz.",
         "termYears": "Até 40 anos."
       },
@@ -2799,13 +2827,13 @@
         "income": "Rendimento coletável anual até ao 8.º escalão de IRS ({{maxIncome}} em 2026)."
       },
       "errors": {
-        "required": "Introduza um número válido.",
-        "zero": "Introduza um preço superior a zero.",
-        "negative": "Introduza zero ou um valor positivo.",
-        "tooLarge": "Introduza um valor até {{max}}.",
+        "required": "Introduz um número válido.",
+        "zero": "Introduz um preço superior a zero.",
+        "negative": "Introduz zero ou um valor positivo.",
+        "tooLarge": "Introduz um valor até {{max}}.",
         "depositTooLarge": "A entrada não pode ser superior ao preço.",
-        "loanTooSmall": "O crédito seria inferior a 100 euros. Reduza a entrada ou trate-o como compra a pronto.",
-        "summary": "Verifique os campos assinalados para ver a estimativa."
+        "loanTooSmall": "O crédito seria inferior a 100 euros. Reduz a entrada ou trata-o como compra a pronto.",
+        "summary": "Verifica os campos assinalados para veres a estimativa."
       },
       "result": {
         "monthly": "Prestação mensal (capital e juros)",
@@ -2840,14 +2868,35 @@
         "sourcePortaria": "Portaria n.º 236-A/2024/1, n.º 4 do art. 5.º, versão consolidada no Diário da República: contratos celebrados até 31 de dezembro de 2026",
         "review": "Condições revistas pela última vez em {{date}}. O limite de rendimento de 2026 é o limite superior do 8.º escalão de IRS do artigo 68.º do Código do IRS, atualizado em 3,51% pela Lei n.º 73-A/2025 (Orçamento do Estado para 2026). Os bancos decidem cada pedido.",
         "assumptionsTitle": "Pressupostos e limites",
-        "assumptionBanks": "Os bancos avaliam o seu risco de crédito e podem recusar o crédito ou propor outras condições, independentemente da lista. Num crédito com dois titulares, ambos têm de cumprir as condições.",
-        "assumptionRate": "A taxa é a que introduzir. A garantia não altera a taxa de juro.",
-        "assumptionTaxes": "Os impostos são para habitação própria e permanente no continente e, nos valores com isenção, assumem que cumpre as condições do IMT Jovem.",
-        "assumptionScope": "Apenas educativo: não é aconselhamento financeiro, fiscal ou jurídico."
+        "assumptionBanks": "Os bancos avaliam o teu risco de crédito e podem recusar o crédito ou propor outras condições, independentemente da lista. Num crédito com dois titulares, ambos têm de cumprir as condições.",
+        "assumptionRate": "A taxa é a que introduzires. A garantia não altera a taxa de juro.",
+        "assumptionTaxes": "Os impostos são para habitação própria e permanente no continente e, nos valores com isenção, assumem que cumpres as condições do IMT Jovem.",
+        "assumptionScope": "Apenas educativo: não é aconselhamento financeiro, fiscal ou jurídico.",
+        "labels": {
+          "cash": "Dinheiro na escritura",
+          "taxes": "IMT e Imposto do Selo"
+        },
+        "terms": {
+          "payment": "Crédito e prestação",
+          "taxes": "Impostos",
+          "cash": "Dinheiro na escritura",
+          "guarantee": "A garantia",
+          "banks": "Decisão do banco",
+          "rate": "Taxa de juro",
+          "assumptionTaxes": "Impostos considerados",
+          "scope": "Âmbito",
+          "conditionAge": "Idade",
+          "conditionHome": "Habitação própria e permanente",
+          "conditionProperty": "Outro imóvel",
+          "conditionPrice": "Preço",
+          "conditionIncome": "Rendimento",
+          "conditionDate": "Data do contrato"
+        },
+        "formulasLabel": "Fórmulas"
       },
-      "nextStepHeadline": "Planeie a entrada e o custo de viver na sua casa",
-      "nextStepDescription": "Defina um objetivo para a entrada e orce a prestação, os impostos e as despesas da casa no WonderMoney.",
-      "nextStepCta": "Planeie a sua entrada e os custos de habitação"
+      "nextStepHeadline": "Planeia a entrada e o custo de viver na tua casa",
+      "nextStepDescription": "Define um objetivo para a entrada e orça a prestação, os impostos e as despesas da casa no WonderMoney.",
+      "nextStepCta": "Planeia a tua entrada e os custos de habitação"
     },
     "personalLoan": {
       "title": "Simulador de crédito pessoal",
@@ -3775,8 +3824,6 @@
         "exampleTitle": "Exemplo prático",
         "example": "Um automóvel a gasóleo com {{cc}} cm³, emissões oficiais WLTP de {{co2}} g/km e matriculado em {{year}} paga {{tax}} de IUC por ano. Reservar {{monthly}} por mês cobre o valor.",
         "methodTitle": "Como funciona a estimativa",
-        "methodA": "Categoria A (carros matriculados de 1981 até junho de 2007): o imposto vem de uma tabela por combustível, cilindrada e período de matrícula (depois de 1995, de 1990 a 1995, de 1981 a 1989).",
-        "methodB": "Categoria B (carros matriculados a partir de julho de 2007): somam-se a taxa da cilindrada e a taxa do CO2 e multiplica-se por um coeficiente que depende do ano da matrícula (1,00 em 2007, 1,05 em 2008, 1,10 em 2009, 1,15 a partir de 2010). O CO2 lê-se na coluna WLTP ou NEDC, conforme o ciclo de ensaio do documento único automóvel.",
         "methodAdditional": "Os carros da categoria B matriculados depois de 1 de janeiro de 2017 pagam uma taxa adicional quando as emissões são elevadas: 31,77 € acima de 205 g/km (WLTP) ou 180 g/km (NEDC) e 63,74 € acima de 260 g/km (WLTP) ou 250 g/km (NEDC). A taxa adicional também é multiplicada pelo coeficiente. O texto legal não a limita por combustível, por isso o simulador aplica-a a todos.",
         "methodDiesel": "Os automóveis a gasóleo pagam também o adicional de IUC (artigo 216.º da Lei n.º 82-B/2014, mantido em vigor em 2026 pelo Orçamento do Estado). Depende da cilindrada, aplica-se às categorias A e B e soma-se depois do coeficiente, sem ser multiplicado por ele.",
         "methodPayment": "Até 2026 o IUC paga-se no mês do aniversário da matrícula. O Decreto-Lei n.º 161/2026 (4 de agosto de 2026) passa-o para uma liquidação anual por sujeito passivo, que abrange todos os veículos. 2027 é um ano transitório: uma prestação em outubro até 500 €, ou duas em julho e outubro (ou tudo em julho). A partir de 2028 é liquidado até abril e pago em abril até 100 €, em abril e outubro de 100 € até 500 €, e em abril, julho e outubro acima de 500 €. Os limites aplicam-se ao total de todos os teus veículos.",
@@ -3784,8 +3831,6 @@
         "exemptionTitle": "Automóveis elétricos",
         "exemption": "Os automóveis totalmente elétricos da categoria B estão isentos de IUC e o simulador mostra zero. Os híbridos plug-in e outros veículos pagam conforme a cilindrada e o CO2 do documento único automóvel, por isso introduz esses valores.",
         "scopeTitle": "O que está coberto",
-        "scopeSupported": "Automóveis ligeiros de passageiros: categoria A (matriculados de 1981 a junho de 2007) e categoria B (matriculados a partir de julho de 2007).",
-        "scopeUnsupported": "Não suportado: veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
         "assumptionsTitle": "Pressupostos",
         "assumptionYear": "As taxas são as tabelas de {{taxYear}} do Código do IUC (artigos 9.º e 10.º), na redação da {{law}}. O Portal das Finanças não indica alterações posteriores a estas taxas.",
         "assumptionPayment": "O mês de pagamento de 2026 segue a regra do aniversário da matrícula, que o preâmbulo do Decreto-Lei n.º 161/2026 confirma ser a regra atualmente em vigor. A partir de 2027 o imposto é liquidado por contribuinte, sobre todos os seus veículos: adiciona cada um dos teus carros e indica o IUC dos outros veículos como outro IUC, para que os meses das prestações sigam o teu total (a lei aplica os limites a esse total). Os calendários de 2027 e 2028 mostram o valor de cada mês para os carros que adicionaste; com um só carro, a parte dele em cada prestação. No ano da matrícula o imposto paga-se em 30 dias após o fim do prazo legal de registo.",
@@ -3797,7 +3842,31 @@
         "sourceDiesel": "Portal das Finanças: artigo 216.º da Lei n.º 82-B/2014, tabelas I e II do adicional de gasóleo (consultado a 20 de novembro de 2026)",
         "reviewed": "Taxas de {{taxYear}} revistas a {{reviewed}}.",
         "sourceSchedule": "Decreto-Lei n.º 161/2026, de 4 de agosto: novas regras de pagamento do IUC, com a transição de 2027 (Portal das Finanças, consultado a 19 de novembro de 2026)",
-        "sourceBudget": "Diário da República: artigo 94.º da Lei n.º 73-A/2025 (Orçamento do Estado para 2026), que mantém em vigor o adicional de IUC sem alterar os montantes (consultado a 20 de novembro de 2026)"
+        "sourceBudget": "Diário da República: artigo 94.º da Lei n.º 73-A/2025 (Orçamento do Estado para 2026), que mantém em vigor o adicional de IUC sem alterar os montantes (consultado a 20 de novembro de 2026)",
+        "methodATerm": "Categoria A (carros matriculados de 1981 até junho de 2007)",
+        "methodABody": "O imposto vem de uma tabela por combustível, cilindrada e período de matrícula (depois de 1995, de 1990 a 1995, de 1981 a 1989).",
+        "methodBTerm": "Categoria B (carros matriculados a partir de julho de 2007)",
+        "methodBBody": "Somam-se a taxa da cilindrada e a taxa do CO2 e multiplica-se por um coeficiente que depende do ano da matrícula (1,00 em 2007, 1,05 em 2008, 1,10 em 2009, 1,15 a partir de 2010). O CO2 lê-se na coluna WLTP ou NEDC, conforme o ciclo de ensaio do documento único automóvel.",
+        "scopeSupportedTerm": "Automóveis ligeiros de passageiros",
+        "scopeSupportedBody": "Categoria A (matriculados de 1981 a junho de 2007) e categoria B (matriculados a partir de julho de 2007).",
+        "scopeUnsupportedTerm": "Não suportado",
+        "scopeUnsupportedBody": "Veículos de mercadorias e mais pesados (categorias C e D), motociclos (E), embarcações de recreio (F), aeronaves (G) e automóveis matriculados antes de 1981.",
+        "labels": {
+          "diesel": "Adicional de gasóleo",
+          "engineRate": "Taxa de cilindrada",
+          "co2Rate": "Taxa de CO2",
+          "provision": "Reserva mensal"
+        },
+        "terms": {
+          "additional": "Taxa adicional",
+          "diesel": "Adicional de gasóleo",
+          "payment": "Pagamento",
+          "budget": "Reserva mensal",
+          "year": "Tabelas",
+          "paymentRule": "Mês de pagamento",
+          "educational": "Estimativa educativa"
+        },
+        "formulasLabel": "Fórmulas"
       },
       "nextStepHeadline": "Nunca sejas apanhado de surpresa pelo IUC",
       "nextStepDescription": "O WonderMoney ajuda-te a reservar um duodécimo do IUC todos os meses, para a cobrança já estar coberta.",
@@ -3816,14 +3885,14 @@
     "propertyCapitalGains": {
       "title": "Simulador de mais-valias na venda de casa",
       "shortName": "Mais-valias na venda de casa",
-      "subtitle": "Estime a mais-valia da venda de um imóvel em Portugal, o IRS adicional que pode gerar e quanto do valor da venda fica disponível.",
-      "description": "Estime o IRS das mais-valias imobiliárias, com a exclusão por reinvestimento.",
+      "subtitle": "Estima a mais-valia da venda de um imóvel em Portugal, o IRS adicional que pode gerar e quanto do valor da venda fica disponível.",
+      "description": "Estima o IRS das mais-valias imobiliárias, com a exclusão por reinvestimento.",
       "pageTitle": "Simulador de Mais-valias Imobiliárias 2026: IRS na Venda de Casa",
-      "pageDescription": "Estime a mais-valia da venda de um imóvel em 2026 com o coeficiente de desvalorização da moeda, despesas e reinvestimento na habitação própria, e veja o IRS adicional e o valor que fica.",
+      "pageDescription": "Estima a mais-valia da venda de um imóvel em 2026 com o coeficiente de desvalorização da moeda, despesas e reinvestimento na habitação própria, e vê o IRS adicional e o valor que fica.",
       "sections": {
         "property": "O imóvel",
         "expenses": "Despesas",
-        "income": "O seu rendimento",
+        "income": "O teu rendimento",
         "reinvestment": "Habitação própria e permanente"
       },
       "fields": {
@@ -3847,28 +3916,28 @@
         "purchaseExpenses": "IMT e Imposto do Selo pagos na compra, mais custos de notário e registo e a comissão da mediadora.",
         "worksExpenses": "Apenas obras com fatura, nos últimos 12 anos, que valorizaram o imóvel.",
         "saleExpenses": "A comissão da mediadora e outros custos da venda, como o certificado energético.",
-        "otherIncome": "Os outros rendimentos do agregado sujeitos a IRS no ano, depois das deduções específicas e antes das deduções à coleta. Indique 0 se não houver.",
-        "joint": "Divide o rendimento por dois, como na tributação conjunta. Deixe desligado para uma declaração individual.",
+        "otherIncome": "Os outros rendimentos do agregado sujeitos a IRS no ano, depois das deduções específicas e antes das deduções à coleta. Indica 0 se não houver.",
+        "joint": "Divide o rendimento por dois, como na tributação conjunta. Deixa desligado para uma declaração individual.",
         "reinvested": "Conta compras desde 24 meses antes até 36 meses depois da venda, em Portugal ou na UE/EEE.",
         "loanRepaid": "A parte do valor da venda que paga o crédito habitação do imóvel vendido.",
         "taxValue": "O valor patrimonial tributário que consta da caderneta predial na data da venda. Se for superior ao preço, a mais-valia é calculada sobre ele. Deixa vazio se não o souberes.",
         "purchaseValue": "O valor sobre o qual pagaste o IMT na compra: o preço, ou o VPT à data se era superior (art. 46.º, n.º 1, do CIRS)."
       },
       "errors": {
-        "required": "Indique um número válido.",
-        "zero": "Indique um valor superior a zero.",
-        "negative": "Indique um valor positivo.",
-        "tooLarge": "Indique um valor até {{max}}.",
+        "required": "Indica um número válido.",
+        "zero": "Indica um valor superior a zero.",
+        "negative": "Indica um valor positivo.",
+        "tooLarge": "Indica um valor até {{max}}.",
         "yearTooOld": "Os imóveis comprados antes de {{year}} têm regime próprio e não estão incluídos.",
-        "yearTooNew": "Indique um ano de compra até {{saleYear}}.",
-        "month": "Escolha um mês da lista.",
+        "yearTooNew": "Indica um ano de compra até {{saleYear}}.",
+        "month": "Escolhe um mês da lista.",
         "afterSale": "A compra não pode ser depois da venda.",
         "loanTooLarge": "O empréstimo amortizado não pode exceder o valor de venda.",
-        "summary": "Verifique os campos assinalados para ver a estimativa."
+        "summary": "Verifica os campos assinalados para veres a estimativa."
       },
       "result": {
         "extraTax": "IRS adicional estimado sobre a mais-valia",
-        "estimateNote": "Imposto com a mais-valia menos imposto sem ela, para a declaração anual. Ignora deduções à coleta e a sua declaração final pode diferir.",
+        "estimateNote": "Imposto com a mais-valia menos imposto sem ela, para a declaração anual. Ignora deduções à coleta e a tua declaração final pode diferir.",
         "loss": "A venda resultou em menos-valia, por isso nenhum ganho é somado ao teu rendimento.",
         "zero": "Não há mais-valia, por isso não há IRS adicional.",
         "cashAfter": "Valor que fica após despesas de venda, empréstimo amortizado e IRS estimado",
@@ -3885,10 +3954,10 @@
       },
       "checklist": {
         "title": "Condições a verificar para a exclusão por reinvestimento",
-        "domicile": "A casa vendida era a sua habitação própria e permanente, com domicílio fiscal nela, nos 12 meses anteriores à venda.",
+        "domicile": "A casa vendida era a tua habitação própria e permanente, com domicílio fiscal nela, nos 12 meses anteriores à venda.",
         "reinvest": "O valor da venda, líquido do empréstimo amortizado, é reinvestido noutra habitação própria e permanente, em terreno para a construir ou em obras nela, em Portugal ou na UE/EEE, entre 24 meses antes e 36 meses depois da venda.",
         "declare": "Declara a intenção de reinvestir, e o valor, na declaração de IRS do ano da venda.",
-        "occupy": "A nova casa passa a ser a sua habitação própria e permanente, com domicílio fiscal nela, no prazo de 12 meses após o reinvestimento.",
+        "occupy": "A nova casa passa a ser a tua habitação própria e permanente, com domicílio fiscal nela, no prazo de 12 meses após o reinvestimento.",
         "register": "Para terreno ou construção, o registo é pedido nos 48 meses após a venda e a casa é usada como residência até ao fim do quinto ano seguinte.",
         "note": "Esta lista é um lembrete, não um veredito. É a Autoridade Tributária que decide se as condições estão cumpridas."
       },
@@ -3901,10 +3970,9 @@
         "methodExpenses": "As despesas têm de ser necessárias, efetivamente pagas e comprovadas: IMT e Imposto do Selo da compra, comissões de mediação e obras dos últimos 12 anos com fatura.",
         "methodHalf": "Só 50% de uma mais-valia positiva se soma aos outros rendimentos do ano e é tributada nos escalões progressivos de IRS de {{saleYear}}. O IRS adicional mostrado é o imposto com a mais-valia menos o imposto sem ela.",
         "methodExemption": "A mais-valia da habitação própria e permanente é excluída de tributação quando o valor da venda, líquido do empréstimo amortizado, é reinvestido noutra nos prazos legais. Se só parte for reinvestida, exclui-se a mesma proporção da mais-valia.",
-        "methodCash": "O valor que fica subtrai ao valor de venda as despesas de venda, o empréstimo amortizado e o IRS estimado. Não subtrai o que gasta na casa seguinte.",
+        "methodCash": "O valor que fica subtrai ao valor de venda as despesas de venda, o empréstimo amortizado e o IRS estimado. Não subtrai o que gastas na casa seguinte.",
         "scopeTitle": "O que está coberto",
         "scopeSupported": "Pessoas singulares residentes fiscais em Portugal que vendem um imóvel do património privado, comprado desde {{firstYear}}, em {{saleYear}}.",
-        "scopeUnsupported": "Não suportado: não residentes, imóveis comprados antes de {{firstYear}}, empresas e imóveis afetos a atividade empresarial, heranças e doações, casas com apoio público superior a 30% do valor patrimonial tributário, a sobretaxa de solidariedade e as deduções à coleta.",
         "assumptionsTitle": "Pressupostos",
         "assumptionBrackets": "O IRS adicional usa os escalões anuais de IRS de {{saleYear}} sobre o rendimento que indicar, como estimativa do efeito na declaração anual. A tributação conjunta é modelada dividindo o rendimento por dois.",
         "assumptionNotModelled": "O simulador não verifica as condições do reinvestimento. Os coeficientes foram conferidos com a tabela da {{portaria}} no Diário da República.",
@@ -3919,11 +3987,33 @@
         "sourceAcquisition": "CIRS, artigo 46.º: valor de aquisição a título oneroso de imóveis (consultado a 20 de novembro de 2026)",
         "sourceCorrection": "CIRS, artigo 50.º: correção monetária após 24 meses (consultado a 20 de novembro de 2026)",
         "sourceExpenses": "CIRS, artigo 51.º: obras dos últimos 12 anos e despesas de aquisição e de venda (consultado a 20 de novembro de 2026)",
-        "sourceImt": "CIMT, artigo 12.º: o IMT incide sobre o maior entre o preço e o VPT (consultado a 20 de novembro de 2026)"
+        "sourceImt": "CIMT, artigo 12.º: o IMT incide sobre o maior entre o preço e o VPT (consultado a 20 de novembro de 2026)",
+        "scopeUnsupportedTerm": "Não suportado",
+        "scopeUnsupportedBody": "Não residentes, imóveis comprados antes de {{firstYear}}, empresas e imóveis afetos a atividade empresarial, heranças e doações, casas com apoio público superior a 30% do valor patrimonial tributário, a sobretaxa de solidariedade e as deduções à coleta.",
+        "labels": {
+          "included": "Somado ao rendimento",
+          "irsWith": "IRS com a mais-valia",
+          "irsWithout": "IRS sem a mais-valia",
+          "cashAfter": "Valor que fica"
+        },
+        "terms": {
+          "gain": "Mais-valia",
+          "taxValue": "Valor de venda e VPT",
+          "coefficient": "Coeficiente",
+          "expenses": "Despesas",
+          "half": "Metade da mais-valia",
+          "exemption": "Reinvestimento",
+          "cash": "Valor que fica",
+          "brackets": "Escalões de IRS",
+          "notModelled": "O que não é verificado",
+          "educational": "Estimativa educativa",
+          "supported": "Abrangido"
+        },
+        "formulasLabel": "Fórmulas"
       },
-      "nextStepHeadline": "Saiba quanto da venda pode realmente usar",
+      "nextStepHeadline": "Sabe quanto da venda podes realmente usar",
       "nextStepDescription": "A WonderMoney ajuda a reservar o imposto e a ver o que sobra para a próxima casa.",
-      "nextStepCta": "Planeie quanto do valor da venda fica disponível"
+      "nextStepCta": "Planeia quanto do valor da venda fica disponível"
     },
     "christmasAllowance": {
       "title": "Simulador do subsídio de Natal 2026",
