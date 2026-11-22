@@ -171,6 +171,14 @@ describe('startBankConnection (Enable Banking)', () => {
       ]);
     });
 
+    it('records nothing for its own refusal of the request: a bank that is not listed is not a bank failing', async () => {
+      listInstitutions.mockResolvedValueOnce([{ country: 'PT', maximum_consent_validity: 1000, name: 'A Different Bank' }]);
+
+      await expect(startBankConnection(createReq(bankId), createRes())).rejects.toBeInstanceOf(NotFoundError);
+
+      expect(outboxEvents()).toEqual([]);
+    });
+
     it('records nothing when the connection starts: the client sends bank_connection_started', async () => {
       await startBankConnection(createReq(bankId), createRes());
 

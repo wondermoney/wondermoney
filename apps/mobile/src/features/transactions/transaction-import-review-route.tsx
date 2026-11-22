@@ -88,13 +88,17 @@ export function TransactionImportReviewRoute({ sessionId, expiresAt, accounts, o
   const cancel = async () => {
     if (await actions.run({ type: 'cancel' })) onImportAnother()
   }
+  // Matching the file's accounts to the person's is a review choice, as web's category step is.
   const analytics = { kind: 'transactions', format: analyticsImportFormat(session?.format) } as const
+  const recordFailure = (outcome: Awaited<ReturnType<typeof actions.attempt>>, step: 'commit' | 'review') => {
+    if ('failure' in outcome && outcome.failure !== 'cancelled') captureAnalyticsEvent('import_failed', { ...analytics, step })
+  }
   const commit = async () => {
     captureAnalyticsEvent('import_reviewed', analytics)
-    if (!(await actions.run({ type: 'commit' }))) captureAnalyticsEvent('import_failed', { ...analytics, step: 'commit' })
+    recordFailure(await actions.attempt({ type: 'commit' }), 'commit')
   }
   const saveMapping = async (mapping: Readonly<Record<string, number>>) => {
-    if (!(await actions.run({ type: 'map', mapping }))) captureAnalyticsEvent('import_failed', { ...analytics, step: 'mapping' })
+    recordFailure(await actions.attempt({ type: 'map', mapping }), 'review')
   }
 
   return (

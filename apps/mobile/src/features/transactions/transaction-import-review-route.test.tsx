@@ -4,6 +4,7 @@ import { I18nextProvider } from 'react-i18next'
 
 import { ApiError } from '@/lib/api/errors'
 import { initMobileI18n } from '@/lib/i18n'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import { TransactionImportReviewRoute, type TransactionImportReviewRouteProps } from './transaction-import-review-route'
 
@@ -14,6 +15,9 @@ const mockBlockAccess = jest.fn()
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ runtime: { epochId: 9, principalId: 'person-1', apiClient: { read: mockRead, write: mockWrite } }, blockAccess: mockBlockAccess }),
 }))
+
+jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
+const captured = jest.mocked(captureAnalyticsEvent)
 
 const SESSION_ID = '0b3c9a52-7d3e-4c4e-9d55-6f1b2a3c4d5e'
 const BASE = `/v1/transaction-import-sessions/${SESSION_ID}`
@@ -103,7 +107,7 @@ async function renderReview(overrides: Partial<TransactionImportReviewRouteProps
 const transactionInvalidations = (invalidate: jest.SpyInstance) => invalidate.mock.calls.filter(([filters]) => typeof (filters as { predicate?: unknown } | undefined)?.predicate === 'function')
 
 describe('TransactionImportReviewRoute', () => {
-  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset() })
+  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset(); captured.mockReset() })
 
   it('writes nothing until the person taps the commit, then commits the rows they chose', async () => {
     const server = fakeServer()
@@ -205,6 +209,24 @@ describe('TransactionImportReviewRoute', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Import 2 transactions' }))
     expect(await view.findByRole('progressbar')).toBeOnTheScreen()
     expect(view.queryByTestId('transaction-import-review-failure')).not.toBeOnTheScreen()
+    // Each tap is a review confirmed; the first one failed at the commit.
+    const statement = { kind: 'transactions', format: 'statement' }
+    expect(captured.mock.calls).toEqual([
+      ['import_reviewed', statement],
+      ['import_failed', { ...statement, step: 'commit' }],
+      ['import_reviewed', statement],
+    ])
+    client.clear()
+  })
+
+  it('does not count a commit the person cancelled as a failed import', async () => {
+    fakeServer()
+    const { view, client } = await renderReview()
+    const commit = await view.findByRole('button', { name: 'Import 2 transactions' })
+    mockWrite.mockRejectedValueOnce(new ApiError('cancelled'))
+    await fireEvent.press(commit)
+    await waitFor(() => expect(captured).toHaveBeenCalledTimes(1))
+    expect(captured.mock.calls).toEqual([['import_reviewed', { kind: 'transactions', format: 'statement' }]])
     client.clear()
   })
 

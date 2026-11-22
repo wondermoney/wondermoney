@@ -1,4 +1,4 @@
-import { fireEvent, render } from '@testing-library/react-native'
+import { fireEvent, render, waitFor } from '@testing-library/react-native'
 
 import { ApiError } from '@/lib/api/errors'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
@@ -137,6 +137,22 @@ describe('ConnectionsRoute', () => {
       expect(mockOpenAuthSessionAsync).toHaveBeenCalledWith('https://bank.example/consent', 'wondermoney://more/banking')
       expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'success' } })
       expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'enable_banking' }]])
+    })
+
+    it('records an abandoned reconnect when the consent page is closed', async () => {
+      mockOpenAuthSessionAsync.mockResolvedValue({ type: 'cancel' })
+      mockStartMutate.mockImplementation((_bankId: string, options: { onSuccess: (data: { redirectUrl: string }) => void }) => {
+        options.onSuccess({ redirectUrl: 'https://bank.example/consent' })
+      })
+      const view = await render(<ConnectionsRoute />)
+
+      await fireEvent.press(view.getByRole('button', { name: 'Reconnect' }))
+      await waitFor(() => expect(captured).toHaveBeenCalledTimes(2))
+
+      expect(captured.mock.calls).toEqual([
+        ['bank_connection_started', { provider: 'enable_banking' }],
+        ['bank_connection_abandoned', { provider: 'enable_banking' }],
+      ])
     })
 
     it('shows a classified failure on the row when the connection cannot start', async () => {
