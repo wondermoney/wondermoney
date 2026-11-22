@@ -2,7 +2,6 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
@@ -25,14 +24,12 @@ const BankConnectionUnsyncModal: React.FC<BankConnectionUnsyncModalProps> = ({
 }) => {
   const t = useTranslations();
   const locale = useLocale();
-  const posthog = usePostHog();
   const deleteRequisitionMutation = useDeleteRequisition();
   const formatter = new Intl.ListFormat(locale, {
     style: "long",
     type: "conjunction",
   });
   const onUnsyncAccount = () => {
-    posthog.capture("unsync account");
     deleteRequisitionMutation.mutate(
       { requisitionKey: requisitionData.id },
       {

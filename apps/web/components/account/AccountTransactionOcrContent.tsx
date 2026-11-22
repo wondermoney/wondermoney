@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -67,7 +66,6 @@ const AccountTransactionOcrContent: React.FC<
 > = ({ termsAndConditionsAccept, onOcrSubmitting, onOcrComplete }) => {
   const t = useTranslations();
   const notifyIfRateLimited = useRateLimitToast();
-  const posthog = usePostHog();
   const formSchema = useMemo(() => createFormSchema(t), [t]);
   const methods = useForm({
     resolver: zodResolver(formSchema),
@@ -103,8 +101,6 @@ const AccountTransactionOcrContent: React.FC<
       localStorage.removeItem("terms_and_conditions_accept");
     }
 
-    posthog.capture("account_transaction_ocr");
-
     await createTransactionOcrMutation.mutateAsync(
       { file: data.files[0] },
       {
@@ -115,7 +111,6 @@ const AccountTransactionOcrContent: React.FC<
           setIsSubmitLoading(false);
           onOcrSubmitting(false);
           reset();
-          posthog.capture("account_transaction_orc_success");
         },
         onError: (error) => {
           if (notifyIfRateLimited(error)) return;

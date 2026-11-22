@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -107,7 +106,6 @@ export function BudgetCategoryEditSheet({
 }: Props) {
   const t = useTranslations();
   const locale = useLocale();
-  const posthog = usePostHog();
   const formSchema = createFormSchema(t, locale);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -154,13 +152,6 @@ export function BudgetCategoryEditSheet({
         recurrency: values.recurrency,
         rolloverEnabled: values.rolloverEnabled,
         applyToFollowingMonths: values.applyToFollowingMonths,
-      });
-      posthog.capture("budget_category_edited", {
-        budget_key: budgetKey,
-        category_key: category.key,
-        recurrency: values.recurrency,
-        apply_to_following_months: Boolean(values.applyToFollowingMonths),
-        rollover_enabled: values.rolloverEnabled,
       });
       await Promise.all([
         queryClient.invalidateQueries({

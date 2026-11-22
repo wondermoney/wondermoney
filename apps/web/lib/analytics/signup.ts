@@ -1,15 +1,16 @@
-import {
-  type ActivationEventProperties,
-  sanitizeActivationProperties,
-} from "./activation";
 import { getAnalyticsConsent } from "./consent";
-import { ACTIVATION_EVENTS } from "./events";
+import { track } from "./track";
 
+/**
+ * The signup funnel's steps, under the names Google Tag Manager's tags read from the
+ * `dataLayer`. PostHog receives only the steps the server can't see, as catalogue events:
+ * `signup_started` and `signup_failed`. A signup that succeeds is the server's `signup`.
+ */
 export const SIGNUP_FUNNEL_EVENTS = {
   started: "signup_started",
-  submitClicked: ACTIVATION_EVENTS.signupSubmitClicked,
-  submitFailed: ACTIVATION_EVENTS.signupSubmitFailed,
-  submitSucceeded: ACTIVATION_EVENTS.signupSubmitSucceeded,
+  submitClicked: "signup_submit_clicked",
+  submitFailed: "signup_submit_failed",
+  submitSucceeded: "signup_submit_succeeded",
   completed: "signup_completed",
 } as const;
 
@@ -30,29 +31,38 @@ export type SignupFunnelEventName =
 export type SignupFailureCategory =
   "app_callback" | "auth_provider" | "missing_user" | "recaptcha" | "unknown";
 
-interface SignupFunnelCaptureClient {
-  capture: (eventName: string, properties?: Record<string, unknown>) => void;
+interface SignupFunnelProperties {
+  failure_category?: SignupFailureCategory;
+  locale?: string;
+  method?: string;
+  source?: string;
 }
 
 export function captureSignupFunnelEvent(
-  client: SignupFunnelCaptureClient | null | undefined,
   eventName: SignupFunnelEventName,
-  properties?: ActivationEventProperties,
+  properties: SignupFunnelProperties = {},
 ) {
   if (!isSignupFunnelAnalyticsEnabled()) return;
 
   try {
-    const safeProperties = sanitizeActivationProperties(properties);
-
-    client?.capture(eventName, safeProperties);
-
-    if (typeof window === "undefined") return;
+    if (eventName === SIGNUP_FUNNEL_EVENTS.started) track("signup_started");
+    if (eventName === SIGNUP_FUNNEL_EVENTS.submitFailed) {
+      track("signup_failed", {
+        reason: properties.failure_category ?? "unknown",
+      });
+    }
 
     window.dataLayer = window.dataLayer ?? [];
-    window.dataLayer.push({ ...safeProperties, event: eventName });
+    window.dataLayer.push({ ...withoutUndefined(properties), event: eventName });
   } catch {
     // no-excuse-ok: catch -- analytics must never block authentication
   }
+}
+
+function withoutUndefined(properties: SignupFunnelProperties) {
+  return Object.fromEntries(
+    Object.entries(properties).filter(([, value]) => value !== undefined),
+  );
 }
 
 function isSignupFunnelAnalyticsEnabled() {

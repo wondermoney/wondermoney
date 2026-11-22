@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -79,7 +78,6 @@ export function RecordSettlementForm({
   const t = useTranslations("expenseGroups.settlement");
   const tRoot = useTranslations();
   const locale = useLocale();
-  const posthog = usePostHog();
   const errorMessage = useGroupErrorMessage();
   const record = useRecordSettlement(group.expenseGroupKey);
   const currencies = useCurrencies();
@@ -170,10 +168,6 @@ export function RecordSettlementForm({
       setRefusal(errorMessage(error));
       return;
     }
-    posthog.capture("expense_group_settlement_recorded", {
-      linked: Boolean(linkable && linked),
-      suggested: Boolean(prefill),
-    });
     toast.success(t("recorded"));
     onDone();
   };

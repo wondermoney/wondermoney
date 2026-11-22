@@ -38,7 +38,7 @@ export function SimplefinConnectRoute() {
         setFailure(null)
         connect.mutate(setupToken, {
           onSuccess: () => {
-            captureAnalyticsEvent('bank_connection_started')
+            captureAnalyticsEvent('bank_connection_started', { provider: 'simplefin' })
             router.replace(bankConnectionsHref('success') as Href)
           },
           onError: (error) => {

@@ -31,15 +31,26 @@ describe("web analytics property scrub", () => {
     });
   });
 
-  it("leaves PostHog's own properties alone", () => {
+  it("leaves PostHog's own properties alone, but for the page's address", () => {
     const posthogOwn = {
-      $current_url: "https://app.example.com/en",
+      $host: "app.example.com",
       $session_id: "s1",
       $device_id: "d1",
       distinct_id: "anon-1",
       token: "phc_public",
     };
 
-    assert.deepEqual(scrubEventProperties(posthogOwn), posthogOwn);
+    assert.deepEqual(
+      scrubEventProperties({
+        ...posthogOwn,
+        $current_url: "https://app.example.com/en/accounts/123",
+        $pathname: "/en/accounts/123",
+        $referrer: "https://app.example.com/en/budgets?code=abc",
+        $initial_current_url: "https://app.example.com/en/accounts/123",
+        $initial_pathname: "/en/accounts/123",
+        $initial_referrer: "$direct",
+      }),
+      posthogOwn,
+    );
   });
 });

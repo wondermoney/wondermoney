@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Undo2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -107,7 +106,6 @@ function ReimbursementPicker({
 }: PickerProps) {
   const t = useTranslations("transactionReimbursement");
   const locale = useLocale();
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
   const formatCurrency = useFormatCurrency();
   const notifyWriteError = useNotifyWriteError();
@@ -178,10 +176,6 @@ function ReimbursementPicker({
       setRefusal(key ? t(`errors.${key}`) : t("errors.link"));
       return;
     }
-    posthog.capture("transaction_reimbursement_linked", {
-      from: role,
-      reason: selected.reason,
-    });
     await invalidateTransactionReimbursements(queryClient, [
       transactionKey,
       selected.transactionKey,
@@ -346,7 +340,6 @@ interface SectionProps {
 
 function ReimbursementSection({ transaction, role, disabled }: SectionProps) {
   const t = useTranslations("transactionReimbursement");
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
   const notifyWriteError = useNotifyWriteError();
   const transactionKey = transaction.transactionKey;
@@ -375,7 +368,6 @@ function ReimbursementSection({ transaction, role, disabled }: SectionProps) {
       });
       return;
     }
-    posthog.capture("transaction_reimbursement_unlinked", { from: role });
     await invalidateTransactionReimbursements(queryClient, [
       link.expense.transactionKey,
       link.reimbursement.transactionKey,

@@ -2,7 +2,6 @@
 
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -420,7 +419,6 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
   const t = useTranslations("expenseGroups");
   const tRoot = useTranslations();
   const router = useRouter();
-  const posthog = usePostHog();
   const readOnly = useIsHouseholdViewer();
   const notifyError = useGroupErrorToast();
   const query = useExpenseGroup(groupId);
@@ -480,7 +478,6 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
     } finally {
       setDeleting(null);
     }
-    posthog.capture("expense_group_archived", { archived });
     toast.success(archived ? t("detail.archived") : t("detail.unarchived"));
   };
 
@@ -496,7 +493,6 @@ export function ExpenseGroupDetail({ groupId }: { groupId: number }) {
       notifyError(error);
       return;
     }
-    posthog.capture("expense_group_deleted");
     toast.success(t("detail.deleted"));
     router.push("/groups");
   };

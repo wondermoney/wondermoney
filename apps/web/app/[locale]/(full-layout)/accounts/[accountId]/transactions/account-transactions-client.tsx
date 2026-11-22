@@ -2,7 +2,6 @@
 
 import { Download, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useState } from "react";
 import { DateRange } from "react-day-picker";
 
@@ -54,7 +53,6 @@ export default function AccountTransactionsClient({
 }: AccountTransactionsClientProps) {
   const hydrated = useHydrated();
   const t = useTranslations();
-  const posthog = usePostHog();
 
   const { data: accountsData, isLoading: isLoadingAccountsData } = useAccount(
     accountId,
@@ -70,30 +68,18 @@ export default function AccountTransactionsClient({
     useState(false);
   const openAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(true);
-    posthog.capture("account_transaction_table_add_manual_transaction", {
-      action: "open",
-    });
   };
   const closeAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(false);
-    posthog.capture("account_transaction_table_add_manual_transaction", {
-      action: "close",
-    });
   };
 
   const [isImportTransactionModalOpen, setIsImportTransactionModalOpen] =
     useState(false);
   const openImportTransactionModal = () => {
     setIsImportTransactionModalOpen(true);
-    posthog.capture("account_transaction_table_import_transaction", {
-      action: "open",
-    });
   };
   const closeImportTransactionModal = () => {
     setIsImportTransactionModalOpen(false);
-    posthog.capture("account_transaction_table_import_transaction", {
-      action: "close",
-    });
   };
 
   const [hasUsedDateFilter, setHasUsedDateFilter] = useState(false);

@@ -88,7 +88,7 @@ export function ConnectionsRoute() {
         setReconnectFailure(null)
         start.mutate(bankId, {
           onSuccess: ({ redirectUrl }) => {
-            captureAnalyticsEvent('bank_connection_started')
+            captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)

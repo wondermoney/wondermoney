@@ -2,7 +2,6 @@
 
 import { KeyRound, Link as LinkIcon, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import BankList from "@/components/account/BankList";
@@ -17,6 +16,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
+import { track } from "@/lib/analytics/track";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
@@ -25,15 +25,10 @@ import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { useUser } from "@/lib/auth/user-context";
 import { buildOnboardingConnectRedirectPage } from "@/lib/onboarding/first-run/connect-redirect";
 import {
-  FIRST_RUN_EVENTS,
   getFirstRunState,
   getFirstRunStepRoute,
   patchFirstRunState,
 } from "@/lib/onboarding/firstRunOnboarding";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 import { getCountryCodeClient } from "@/lib/utils/countries";
 import { SUPPORTED_BANK_COUNTRY_CODES } from "@/lib/utils/countries/bank-countries";
 import { countryFlags } from "@/lib/utils/countries/country-flag";
@@ -55,9 +50,7 @@ export default function FirstRunAccountStep() {
   const locale = useLocale();
   const router = useRouter();
   const user = useUser();
-  const posthog = usePostHog();
   const setFooter = useFirstRunOnboardingFooter();
-  const state = getFirstRunState(user?.id);
 
   const [mode, setMode] = useState<Mode>("list");
   const [bankId, setBankId] = useState<string | null>(null);
@@ -106,12 +99,9 @@ export default function FirstRunAccountStep() {
   // effect runs once per URL; going back to the list clears it.
   const redirectUrl = mode === "handoff" ? requisition?.redirectUrl : undefined;
   const leaveForBank = useEffectEvent((url: string) => {
-    // The last thing we can observe before the user leaves for the
-    // bank. Without it, "picked a bank" and "came back" have nothing between
-    // them, so a requisition that never produced a redirect is invisible.
-    posthog?.capture(FIRST_RUN_EVENTS.accountBeforeRedirect, {
-      bank_id: bankId,
-    });
+    // The last thing we can observe before the person leaves for the bank;
+    // how it ends is the server's bank_connection_completed or _failed.
+    track("bank_connection_started", { provider: "enable_banking" });
     saveBankAccountSyncReturnMarker(returnPage);
     window.location.href = url;
   });
@@ -119,42 +109,8 @@ export default function FirstRunAccountStep() {
     if (redirectUrl) leaveForBank(redirectUrl);
   }, [redirectUrl]);
 
-  // A requisition either materialises or fails, and the failure has a
-  // retry button — so without these a user could sit here retrying forever
-  // and produce no telemetry at all. Both outcomes are recorded.
-  useEffect(() => {
-    if (mode !== "handoff" || !requisition?.redirectUrl) return;
-    posthog?.capture(FIRST_RUN_EVENTS.accountRequisitionCreated, {
-      bank_id: bankId,
-    });
-  }, [mode, requisition?.redirectUrl, posthog, bankId]);
-
-  useEffect(() => {
-    if (mode !== "handoff" || !requisitionError) return;
-    posthog?.capture(FIRST_RUN_EVENTS.accountRequisitionFailed, {
-      bank_id: bankId,
-    });
-  }, [mode, requisitionError, posthog, bankId]);
-
-  // Back from the bank without a connection. The banner alone leaves no
-  // event, so record it.
-  useEffect(() => {
-    if (!returnedError) return;
-    posthog?.capture(FIRST_RUN_EVENTS.accountConnectReturned, {
-      outcome: "error",
-    });
-  }, [returnedError, posthog]);
-
   // The token is claimed and the first sync queued: the sync step shows its progress.
   const onSimplefinConnected = () => {
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
-      account_step_status: "connected",
-      step: "account",
-    });
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
-      method: "simplefin",
-      source: "first_run",
-    });
     if (user?.id)
       patchFirstRunState(
         { accountStep: "connected", currentStep: "sync_value" },
@@ -166,10 +122,6 @@ export default function FirstRunAccountStep() {
   const startConnect = (id: string) => {
     setBankId(id);
     setMode("handoff");
-    posthog?.capture(FIRST_RUN_EVENTS.accountConnectClicked, {
-      bank_id: id,
-      selected_goals: state.selectedGoals,
-    });
   };
 
   // Keep the skip control in the shell footer (empty while handing off).
@@ -221,22 +173,7 @@ export default function FirstRunAccountStep() {
         onAddAccount={() => setSkipDialogOpen(false)}
         onConfirmSkip={() => {
           setSkipDialogOpen(false);
-          posthog?.capture(FIRST_RUN_EVENTS.accountSkipConfirmed, {
-            selected_goals: state.selectedGoals,
-          });
-          posthog?.capture(FIRST_RUN_EVENTS.stepSkipped, {
-            step: "account",
-            selected_goals: state.selectedGoals,
-          });
-          captureActivationEvent(
-            posthog,
-            ACTIVATION_EVENTS.onboardingStepCompleted,
-            {
-              account_step_status: "skipped",
-              skipped: true,
-              step: "account",
-            },
-          );
+          track("onboarding_step_skipped", { step: "account" });
           if (user?.id)
             patchFirstRunState(
               { accountStep: "skipped", currentStep: "sync_value" },
@@ -397,8 +334,6 @@ export default function FirstRunAccountStep() {
 function AccountStepSkipButton({ onSkip }: { onSkip: () => void }) {
   const t = useTranslations("onboarding.firstRun");
   const user = useUser();
-  const posthog = usePostHog();
-  const state = getFirstRunState(user?.id);
 
   return (
     <Button
@@ -407,9 +342,6 @@ function AccountStepSkipButton({ onSkip }: { onSkip: () => void }) {
       className="text-muted-foreground min-h-11"
       onClick={() => {
         onSkip();
-        posthog?.capture(FIRST_RUN_EVENTS.accountSkipWarningViewed, {
-          selected_goals: state.selectedGoals,
-        });
       }}
     >
       {t("skipStep")}
@@ -476,7 +408,6 @@ function ManualPanel({
   const tCommon = useTranslations();
   const locale = useLocale();
   const user = useUser();
-  const posthog = usePostHog();
   const createOffline = useCreateOfflineAccount();
   const [name, setName] = useState("");
   const [balance, setBalance] = useState("");
@@ -503,17 +434,6 @@ function ManualPanel({
       },
       {
         onSuccess: () => {
-          posthog?.capture(FIRST_RUN_EVENTS.manualAccountClicked, {
-            selected_goals: getFirstRunState(user?.id).selectedGoals,
-          });
-          captureActivationEvent(
-            posthog,
-            ACTIVATION_EVENTS.onboardingStepCompleted,
-            {
-              account_step_status: "manual_added",
-              step: "account",
-            },
-          );
           if (user?.id)
             patchFirstRunState(
               { accountStep: "manual_added", currentStep: "sync_value" },

@@ -56,26 +56,3 @@ export interface FirstRunOnboardingState {
   startedAt?: string;
   completedAt?: string;
 }
-
-export const FIRST_RUN_EVENTS = {
-  started: "first_run_onboarding_started",
-  stepViewed: "first_run_onboarding_step_viewed",
-  goalsSelected: "first_run_goals_selected",
-  accountConnectClicked: "first_run_account_connect_clicked",
-  // Everything between picking a bank and the server-side sync on this path.
-  // The Accounts-page flow emits `account_add_sync_modal` /
-  // `account_add_sync_before_redirect` / `first_account_added`; first-run is
-  // the dominant route for new users, so without these the activation funnel
-  // goes dark.
-  accountRequisitionCreated: "first_run_account_requisition_created",
-  accountRequisitionFailed: "first_run_account_requisition_failed",
-  accountBeforeRedirect: "first_run_account_before_redirect",
-  accountConnectReturned: "first_run_account_connect_returned",
-  manualAccountClicked: "first_run_manual_account_clicked",
-  stepSkipped: "first_run_step_skipped",
-  accountSkipWarningViewed: "first_run_account_skip_warning_viewed",
-  accountSkipConfirmed: "first_run_account_skip_confirmed",
-  budgetCtaClicked: "first_run_budget_cta_clicked",
-  portfolioCtaClicked: "first_run_portfolio_cta_clicked",
-  completed: "first_run_onboarding_completed",
-} as const;

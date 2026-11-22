@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/Form";
 import { Textarea } from "@/components/ui/textarea";
 import { Text } from "@/components/ui/Typography";
+import { track } from "@/lib/analytics/track";
 import useBankConnections, {
   simplefinConnections,
 } from "@/lib/api/banking/useBankConnections";
@@ -91,6 +92,12 @@ export default function SimplefinConnectDialog({
     }
     onOpenChange(next);
   };
+
+  // Opening the setup is SimpleFIN's start; how it ends is the server's
+  // bank_connection_completed or _failed.
+  useEffect(() => {
+    if (open) track("bank_connection_started", { provider: "simplefin" });
+  }, [open]);
 
   const onSubmit = form.handleSubmit(({ setupToken }) => {
     setError(null);

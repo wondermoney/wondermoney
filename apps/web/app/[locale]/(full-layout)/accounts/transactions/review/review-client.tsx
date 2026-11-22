@@ -1,6 +1,5 @@
 "use client";
 
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 import AccountAddModal from "@/components/account/AccountCreateModal";
@@ -31,8 +30,6 @@ export default function ReviewTransactionsClient({
   initialTransactionsData,
   initialConfigsData,
 }: ReviewTransactionsClientProps) {
-  const posthog = usePostHog();
-
   const [accountAddModalIsOpen, setAccountAddModalIsOpen] = useState(false);
   const [accountAddSyncModalIsOpen, setAccountAddSyncModalIsOpen] =
     useState(false);
@@ -41,20 +38,16 @@ export default function ReviewTransactionsClient({
   const onAddSyncAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddSyncModalIsOpen(true);
-    posthog.capture("account_add_sync_modal", { action: "open" });
   };
   const closeAccountAddSyncModal = () => {
     setAccountAddSyncModalIsOpen(false);
-    posthog.capture("account_add_sync_modal", { action: "close" });
   };
   const onAddOfflineAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddOfflineModalIsOpen(true);
-    posthog.capture("account_add_offline_modal", { action: "open" });
   };
   const closeAccountAddOfflineModal = () => {
     setAccountAddOfflineModalIsOpen(false);
-    posthog.capture("account_add_offline_modal", { action: "close" });
   };
 
   const { data: accountsData, isLoading: isLoadingAccountsData } = useAccounts(

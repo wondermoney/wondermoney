@@ -45,9 +45,6 @@ const api = vi.hoisted(() => ({
 vi.mock("sonner", () => ({
   toast: { error: api.toastError, success: () => {} },
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ invalidateQueries: () => Promise.resolve() }),
 }));

@@ -25,7 +25,7 @@ describe('analytics allowlist boundary', () => {
     analytics.capture('sign_up_completed', { provider: 'email' })
     analytics.capture('sign_in_completed', { provider: 'apple' })
     analytics.capture('onboarding_completed')
-    analytics.capture('bank_connection_started')
+    analytics.capture('bank_connection_started', { provider: 'simplefin' })
     analytics.capture('feedback_submitted', { category: 'bug' })
     analytics.capture('feature_screen_viewed', { screen: 'portfolio_detail' })
 
@@ -33,7 +33,7 @@ describe('analytics allowlist boundary', () => {
       ['sign_up_completed', { provider: 'email' }],
       ['sign_in_completed', { provider: 'apple' }],
       ['onboarding_completed', undefined],
-      ['bank_connection_started', undefined],
+      ['bank_connection_started', { provider: 'simplefin' }],
       ['feedback_submitted', { category: 'bug' }],
       ['feature_screen_viewed', { screen: 'portfolio_detail' }],
     ])
@@ -116,7 +116,7 @@ describe('createAnalytics', () => {
 
   it('is inert without a client', () => {
     const analytics = createAnalytics({ environment: 'local', client: null })
-    expect(analytics.capture('bank_connection_started')).toBeUndefined()
+    expect(analytics.capture('onboarding_completed')).toBeUndefined()
   })
 })
 

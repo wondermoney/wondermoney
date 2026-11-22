@@ -136,7 +136,7 @@ describe('ConnectionsRoute', () => {
       expect(mockStartMutate).toHaveBeenCalledWith('UFQ6OlJldm9sdXQ', expect.anything())
       expect(mockOpenAuthSessionAsync).toHaveBeenCalledWith('https://bank.example/consent', 'wondermoney://more/banking')
       expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'success' } })
-      expect(captured.mock.calls).toEqual([['bank_connection_started']])
+      expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'enable_banking' }]])
     })
 
     it('shows a classified failure on the row when the connection cannot start', async () => {

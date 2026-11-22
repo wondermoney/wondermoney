@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -69,7 +68,6 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
   periodStartDay = 1,
 }) => {
   const t = useTranslations();
-  const posthog = usePostHog();
   const methods = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -100,9 +98,6 @@ const BudgetEditModal: React.FC<BudgetEditModalProps> = ({
           : {}),
       },
       {
-        onSuccess: () => {
-          posthog.capture("budget_edited");
-        },
         onSettled: async () => {
           await invalidateBudgets(qc, { refresh: () => router.refresh() });
           onOpenChange(false);

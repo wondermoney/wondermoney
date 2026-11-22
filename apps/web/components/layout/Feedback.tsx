@@ -8,13 +8,13 @@ import {
   MessageSquareIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Textarea } from "@/components/ui/textarea";
 import { usePathname } from "@/i18n/navigation";
 import { useAnalyticsConsent } from "@/lib/analytics/consent";
+import { track } from "@/lib/analytics/track";
 import useSubmitFeedback, {
   type FeedbackType,
 } from "@/lib/api/feedback/useSubmitFeedback";
@@ -44,18 +44,16 @@ const categories: {
 ];
 
 /**
- * The "Share Feedback" panel. Feedback goes to PostHog where analytics are configured and
- * consented to, otherwise to `POST /v1/feedback`, which emails the instance's support
- * inbox. With neither, the form is not offered: it would thank the user for a message that
- * nobody receives.
+ * The "Share Feedback" panel. Feedback goes to `POST /v1/feedback`, which emails the
+ * instance's support inbox; without it the form is not offered, as it would thank the user
+ * for a message that nobody receives. With analytics consent, `feedback_submitted` records
+ * its category, never the message.
  */
 const Feedback = () => {
   const t = useTranslations();
-  const posthog = usePostHog();
   const pathname = usePathname();
   const supportEmail = useSupportEmail();
   const consent = useAnalyticsConsent();
-  const sendsToAnalytics = isAnalyticsEnabled() && consent === "granted";
   const sendsToApi = useConfirmedFeature(
     (features) => features.feedback === true,
   );
@@ -87,22 +85,21 @@ const Feedback = () => {
       message: message.trim(),
       page: pathname,
     };
-    if (sendsToAnalytics) {
-      posthog.capture("feedback_submitted", feedback);
-    } else {
-      try {
-        await submitFeedback.mutateAsync(feedback);
-      } catch {
-        // Shown below from the mutation's error state; the message stays for a retry.
-        return;
-      }
+    try {
+      await submitFeedback.mutateAsync(feedback);
+    } catch {
+      // Shown below from the mutation's error state; the message stays for a retry.
+      return;
+    }
+    if (isAnalyticsEnabled() && consent === "granted") {
+      track("feedback_submitted", { category: selected });
     }
 
     setSubmitted(true);
     setTimeout(() => handleOpenChange(false), 2000);
   };
 
-  const canShare = sendsToAnalytics || sendsToApi;
+  const canShare = sendsToApi;
   const canSubmit =
     selected !== null && message.trim().length > 0 && !submitFeedback.isPending;
 

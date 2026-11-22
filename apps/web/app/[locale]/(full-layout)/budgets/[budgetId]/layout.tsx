@@ -2,7 +2,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +17,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/Typography";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
-import { safePostHogCapture } from "@/lib/analytics/safe-diagnostics";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useBudget from "@/lib/api/budget/useBudget";
 import useBudgetAccounts from "@/lib/api/budget/useBudgetAccounts";
@@ -29,7 +27,6 @@ import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 export default function BudgetLayout({ children }: { children: ReactNode }) {
   const t = useTranslations();
   const router = useRouter();
-  const posthog = usePostHog();
   const pathname = usePathname();
   const params = useParams<{
     budgetId: string;
@@ -82,11 +79,8 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
     void (async () => {
       await invalidateAccounts(queryClient);
       setAccountSelectModalIsOpen(true);
-      safePostHogCapture(posthog, "account_add_sync_success", {
-        source: "budget_callback",
-      });
     })();
-  }, [bankConnection, posthog, queryClient]);
+  }, [bankConnection, queryClient]);
 
   const navigateToYearView = () => {
     router.push(`/budgets/${budgetKey}/${year}`, undefined);
@@ -131,9 +125,6 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
           setAccountSelectModalIsOpen(false);
           toast.success(t("toast-link-budget-accounts-success"));
         },
-        onSettled: () => {
-          safePostHogCapture(posthog, "link_existing_budget_accounts_success");
-        },
         onError: () => {
           toast.success(t("toast-link-budget-accounts-error"));
         },
@@ -148,27 +139,19 @@ export default function BudgetLayout({ children }: { children: ReactNode }) {
   const onAddSyncAccountClick = () => {
     setAccountAddSyncModalIsOpen(true);
     setAccountSelectModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_sync_modal", { action: "open" });
   };
 
   const onAddOfflineAccountClick = () => {
     setAccountAddOfflineModalIsOpen(true);
     setAccountSelectModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_offline_modal", {
-      action: "open",
-    });
   };
 
   const closeAccountAddOfflineModal = () => {
     setAccountAddOfflineModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_offline_modal", {
-      action: "close",
-    });
   };
 
   const closeAccountAddSyncModal = () => {
     setAccountAddSyncModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_sync_modal", { action: "close" });
   };
 
   return (

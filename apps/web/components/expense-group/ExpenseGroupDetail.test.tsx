@@ -19,9 +19,6 @@ const apiMock = vi.hoisted(() => ({
   patch: vi.fn(),
 }));
 vi.mock("@/lib/api/api", () => ({ default: apiMock }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),

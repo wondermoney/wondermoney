@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -13,10 +12,7 @@ import {
 } from "@/components/ui/accordion";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/button";
-import {
-  capturePortfolioImportFunnelEvent,
-  PORTFOLIO_IMPORT_FUNNEL_EVENTS,
-} from "@/lib/analytics/portfolio-import";
+import { track } from "@/lib/analytics/track";
 import type {
   PortfolioImportAssetGroupPreview,
   PortfolioImportPreviewRow,
@@ -98,7 +94,6 @@ export function PortfolioImportAssetReviewStep({
   preview,
 }: PortfolioImportAssetReviewStepProps) {
   const t = useTranslations();
-  const posthog = usePostHog();
   const confirmAssetMappings = useConfirmPortfolioImportAssetMappings();
   const [decisions, setDecisions] = useState<
     Record<number, PortfolioImportAssetGroupDecision>
@@ -159,29 +154,15 @@ export function PortfolioImportAssetReviewStep({
         decisions: payload,
       });
 
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.assetReviewSaved,
-        {
-          decision_count: payload.length,
-          outcome: "succeeded",
-          stage: "asset_review",
-        },
-      );
       setDecisions({});
       setRecoveryState(undefined);
       await onPreviewRefetch();
     } catch {
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.assetReviewSaved,
-        {
-          decision_count: payload.length,
-          outcome: "failed",
-          stage: "asset_review",
-          error_category: "asset_review",
-        },
-      );
+      track("import_failed", {
+        kind: "portfolio",
+        format: "broker_csv",
+        step: "review",
+      });
       setRecoveryState({
         descriptionKey: "portfolio-import-asset-review-error-description",
         onDiscard: () => {

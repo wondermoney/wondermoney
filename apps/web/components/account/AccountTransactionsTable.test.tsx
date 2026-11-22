@@ -19,9 +19,6 @@ import commonMessages from "../../messages/en/common.json";
 import transactionsMessages from "../../messages/en/transactions.json";
 import AccountTransactionsTable from "./AccountTransactionsTable";
 
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>

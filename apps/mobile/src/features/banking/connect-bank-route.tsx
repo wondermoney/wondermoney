@@ -58,9 +58,9 @@ export function ConnectBankRoute() {
         start.mutate(row.id, {
           onSuccess: ({ redirectUrl }) => {
             // An authorization exists and consent is about to open.
-            // No institution name and no redirect URL: the ADR approves no
-            // properties here, and the redirect URL is a credential-bearing URL.
-            captureAnalyticsEvent('bank_connection_started')
+            // The provider only: no institution name, and no redirect URL, which
+            // is a credential-bearing URL.
+            captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)

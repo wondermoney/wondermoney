@@ -40,9 +40,7 @@ vi.mock("@/components/ui/Link", () => ({
     </a>
   ),
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: mocked.capture }),
-}));
+vi.mock("@/lib/analytics/track", () => ({ track: mocked.capture }));
 vi.mock("@/lib/utils/analytics-enabled", () => ({
   isAnalyticsEnabled: () => mocked.analytics,
 }));
@@ -155,20 +153,28 @@ test("says the feedback was not sent when the API fails, and keeps the message",
   );
 });
 
-test("sends feedback to configured analytics after explicit opt-in", async () => {
+test("records only the category, after explicit opt-in, and still emails the message", async () => {
   mocked.analytics = true;
   window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
-  renderFeedback(
-    queryClientWithInstance(instanceFeatures({ feedback: false })),
-  );
+  renderFeedback(queryClientWithInstance(instanceFeatures({ feedback: true })));
   await sendFeedback();
 
-  await waitFor(() => assert.equal(mocked.capture.mock.calls.length, 1));
-  assert.deepEqual(mocked.capture.mock.calls[0], [
-    "feedback_submitted",
-    { message: "The chart is wrong", page: "/budgets", type: "bug" },
+  await screen.findByText(enMessages["feedback-thank-you"]);
+  assert.equal(mocked.post.mock.calls.length, 1);
+  assert.deepEqual(mocked.capture.mock.calls, [
+    ["feedback_submitted", { category: "bug" }],
   ]);
-  assert.equal(mocked.post.mock.calls.length, 0);
+});
+
+test("records nothing when the API fails", async () => {
+  mocked.analytics = true;
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
+  mocked.post.mockRejectedValue(new Error("502"));
+  renderFeedback(queryClientWithInstance(instanceFeatures({ feedback: true })));
+  await sendFeedback();
+
+  await screen.findByRole("alert");
+  assert.equal(mocked.capture.mock.calls.length, 0);
 });
 
 test.each([null, "denied"])(
@@ -187,9 +193,9 @@ test.each([null, "denied"])(
   },
 );
 
-test("hides analytics-only feedback when the user has declined analytics", () => {
+test("offers no form on an instance that cannot email feedback, even with analytics consent", () => {
   mocked.analytics = true;
-  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "denied");
+  window.localStorage.setItem(ANALYTICS_CONSENT_KEY, "granted");
   renderFeedback(
     queryClientWithInstance(instanceFeatures({ feedback: false })),
   );

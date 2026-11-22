@@ -2,7 +2,6 @@
 
 import { Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -184,7 +183,6 @@ function GroupShareEditor({
 }: EditorProps) {
   const t = useTranslations("expenseGroups.share");
   const locale = useLocale();
-  const posthog = usePostHog();
   const errorMessage = useGroupErrorMessage();
   const shareStatus = useShareStatus();
   const formatAmount = useFormatCurrency();
@@ -260,11 +258,6 @@ function GroupShareEditor({
       setRefusal(errorMessage(error));
       return;
     }
-    posthog.capture("expense_group_expense_shared", {
-      method,
-      people: people.length,
-      edited: editing,
-    });
     toast.success(editing ? t("updated") : t("shared", { group: group.name }));
     onSaved();
   };
@@ -515,7 +508,6 @@ function SharedSummary({
   const t = useTranslations("expenseGroups.share");
   const tRoot = useTranslations();
   const locale = useLocale();
-  const posthog = usePostHog();
   const notifyError = useGroupErrorToast();
   const expense = useExpenseGroupExpense(groupKey, transaction.transactionKey);
   const unshare = useUnshareExpense(groupKey);
@@ -541,7 +533,6 @@ function SharedSummary({
     } finally {
       setConfirmingStop(false);
     }
-    posthog.capture("expense_group_expense_unshared");
     toast.success(t("stopped"));
     onChanged();
   };

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -97,7 +96,6 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   onOpenChange,
 }) => {
   const t = useTranslations();
-  const posthog = usePostHog();
   const { members } = useHouseholdMembers();
   // Attribution only means something with someone to attribute to; the API also refuses it
   // (403 `account_owner_required`) from anyone but the owner.
@@ -201,7 +199,6 @@ const AccountEditSheet: React.FC<AccountEditSheetProps> = ({
   };
 
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
-    posthog.capture("account_edited");
     if (isCreditCard) {
       const saved = await saveCreditCard();
       if (!saved) return;

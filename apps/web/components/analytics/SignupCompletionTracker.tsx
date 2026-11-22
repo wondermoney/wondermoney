@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { usePostHog } from "posthog-js/react";
 import { useEffect } from "react";
 
 import { useUser } from "@/lib/auth/user-context";
@@ -79,7 +78,6 @@ interface SignupCompletionTrackerProps {
 export function SignupCompletionTracker({
   analyticsEnabled,
 }: SignupCompletionTrackerProps) {
-  const posthog = usePostHog();
   const user = useUser();
   const pathname = usePathname();
 
@@ -156,19 +154,15 @@ export function SignupCompletionTracker({
       source: pendingSource,
     };
 
-    captureSignupFunnelEvent(
-      posthog,
-      SIGNUP_FUNNEL_EVENTS.submitSucceeded,
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitSucceeded,
       properties,
     );
-    captureSignupFunnelEvent(
-      posthog,
-      SIGNUP_FUNNEL_EVENTS.completed,
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.completed,
       properties,
     );
 
     removePendingSignupCompletion();
-  }, [analyticsEnabled, pathname, posthog, user?.id]);
+  }, [analyticsEnabled, pathname, user?.id]);
 
   return null;
 }

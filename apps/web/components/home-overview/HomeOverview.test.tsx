@@ -28,9 +28,6 @@ vi.mock("@/components/household/MemberFilterSelect", () => ({
 }));
 vi.mock("./BankAlertsBanner", () => ({ BankAlertsBanner: () => null }));
 vi.mock("./CustomizeHomeSheet", () => ({ CustomizeHomeSheet: () => null }));
-vi.mock("@/components/dashboard/NetWorthViewedEvent", () => ({
-  NetWorthViewedEvent: () => null,
-}));
 vi.mock("@/components/activation/SetupChecklistCard", () => ({
   SetupChecklistCard: () => null,
 }));

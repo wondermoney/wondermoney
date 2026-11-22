@@ -15,9 +15,6 @@ import {
 import messages from "../../messages/en/common.json";
 import PortfolioHoldingsTable from "./PortfolioHoldingsTable";
 
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("next/navigation", () => ({
   usePathname: () => "/en/portfolio",
