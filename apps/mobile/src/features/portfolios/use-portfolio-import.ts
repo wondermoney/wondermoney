@@ -3,6 +3,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import { decisionBatches, type PortfolioImportExistingAsset } from './portfolio-import-asset-review-view-model'
 import {
@@ -68,12 +69,22 @@ export type UsePortfolioImportOptions = Readonly<{
 
 const defaultWait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
+type ImportStep = 'commit' | 'mapping' | 'read' | 'review' | 'upload'
+
+/** `import_failed`, unless the person cancelled the request. */
+function recordImportFailed(step: ImportStep, reason: PortfolioImportFailure) {
+  if (reason !== 'cancelled') captureAnalyticsEvent('import_failed', { kind: 'portfolio', format: 'broker_csv', step })
+}
+
 /**
  * Mirrors web's create-session -> presigned-upload -> parse -> column-mapping -> asset review ->
  * confirm flow (the API's PortfolioImportSession state machine). Deliberately auto-accepts the
  * server's suggested column mapping rather than offering manual remapping — a real,
  * separately-scoped follow-up. Confirming the mapping and the asset mappings is synchronous
  * server-side (asset matching included), so only parsing and the final import need polling.
+ *
+ * Analytics follow web's funnel: `import_started` when the file is chosen, `import_mapped` once
+ * its columns are known, `import_reviewed` on confirm, and `import_failed` with the step.
  */
 export function usePortfolioImport(portfolioId: number, options: UsePortfolioImportOptions = {}) {
   const { runtime, blockAccess } = useProductRuntime()
@@ -119,6 +130,8 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
   }, [blockAccess])
 
   const start = useCallback(async (file: PortfolioImportFile) => {
+    let step: ImportStep = 'upload'
+    captureAnalyticsEvent('import_started', { kind: 'portfolio', format: 'broker_csv' })
     setState({ phase: 'uploading' })
     try {
       const session = await runtime.apiClient.write(createPortfolioImportSessionEndpoint(portfolioId), {
@@ -130,25 +143,31 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
         await uploadPortfolioImportFile(file.uri, session.uploadUrl, session.uploadHeaders)
       } catch {
         setState({ phase: 'failed', reason: 'upload-failed' })
+        recordImportFailed('upload', 'upload-failed')
         return
       }
 
+      step = 'read'
       setState({ phase: 'parsing' })
       await runtime.apiClient.write(createTriggerPortfolioImportParseEndpoint(session.importSessionId), { commit: () => undefined })
       const parsed = await pollUntil(session.importSessionId, (preview) => !PARSE_IN_FLIGHT_STATUSES.has(preview.status))
       if (REVIEWABLE_STATUSES.has(parsed.status)) {
+        captureAnalyticsEvent('import_mapped', { kind: 'portfolio', format: 'broker_csv' })
         setState({ phase: 'review', preview: parsed })
         return
       }
       if (parsed.status !== 'needs_column_mapping') {
         setState({ phase: 'failed', reason: 'processing-failed' })
+        recordImportFailed('read', 'processing-failed')
         return
       }
 
+      step = 'mapping'
       setState({ phase: 'mapping' })
       const suggestion = await suggestColumnMapping(session.importSessionId)
       if (!suggestion?.columnMapping) {
         setState({ phase: 'failed', reason: 'unmapped-columns' })
+        recordImportFailed('mapping', 'unmapped-columns')
         return
       }
       await runtime.apiClient.write(createConfirmPortfolioImportColumnMappingEndpoint(session.importSessionId), {
@@ -158,17 +177,21 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
       const preview = await runtime.apiClient.read(createPortfolioImportPreviewEndpoint(session.importSessionId))
       if (TERMINAL_FAILURE_STATUSES.has(preview.status)) {
         setState({ phase: 'failed', reason: 'processing-failed' })
+        recordImportFailed('mapping', 'processing-failed')
         return
       }
+      captureAnalyticsEvent('import_mapped', { kind: 'portfolio', format: 'broker_csv' })
       setState({ phase: 'review', preview })
     } catch (error) {
       fail(error)
+      recordImportFailed(step, classifyFailure(error))
     }
   }, [fail, pollUntil, portfolioId, runtime, suggestColumnMapping])
 
   const confirm = useCallback(async () => {
     const importSessionId = sessionIdRef.current
     if (importSessionId === null || state.phase !== 'review') return
+    captureAnalyticsEvent('import_reviewed', { kind: 'portfolio', format: 'broker_csv' })
     setState({ phase: 'confirming', preview: state.preview })
     try {
       await runtime.apiClient.write(createConfirmPortfolioImportSessionEndpoint(importSessionId), { commit: () => undefined })
@@ -180,9 +203,11 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
         setState({ phase: 'succeeded', preview: final })
       } else {
         setState({ phase: 'failed', reason: 'processing-failed' })
+        recordImportFailed('commit', 'processing-failed')
       }
     } catch (error) {
       fail(error)
+      recordImportFailed('commit', classifyFailure(error))
     }
   }, [fail, pollUntil, queryClient, runtime, state])
 
@@ -206,11 +231,13 @@ export function usePortfolioImport(portfolioId: number, options: UsePortfolioImp
       const preview = await runtime.apiClient.read(createPortfolioImportPreviewEndpoint(importSessionId))
       if (TERMINAL_FAILURE_STATUSES.has(preview.status)) {
         setState({ phase: 'failed', reason: 'processing-failed' })
+        recordImportFailed('review', 'processing-failed')
         return
       }
       setState({ phase: 'review', preview })
     } catch (error) {
       fail(error)
+      recordImportFailed('review', classifyFailure(error))
     } finally {
       setResolvingAssetGroups(false)
     }

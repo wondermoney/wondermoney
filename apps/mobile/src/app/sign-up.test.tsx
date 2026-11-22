@@ -82,15 +82,14 @@ describe('SignUpRoute', () => {
     captured.mockClear()
   })
 
-  it('captures sign_up_completed with the channel only, and only on acceptance', async () => {
+  it('sends no analytics for an accepted sign-up: the server records it as signup', async () => {
     mockSignUp.mockResolvedValue({ status: 'accepted' })
     await renderRoute()
     const onSubmit = capturedSignUpProps?.onSubmit as (email: string, password: string) => Promise<string>
 
     await onSubmit('person@example.com', 'pw12345678')
 
-    expect(captured.mock.calls).toEqual([['sign_up_completed', { provider: 'email' }]])
-    expect(JSON.stringify(captured.mock.calls)).not.toContain('person@example.com')
+    expect(captured).not.toHaveBeenCalled()
   })
 
   it('captures nothing when sign-up is refused, and never reports an invite', async () => {
@@ -108,16 +107,6 @@ describe('SignUpRoute', () => {
 
     expect(captured).not.toHaveBeenCalled()
     takePendingInviteToken()
-  })
-
-  it('tells the native provider block it is rendering the sign-up funnel', async () => {
-    await renderRoute()
-    const i18n = await initMobileI18n('en')
-    await render(
-      <I18nextProvider i18n={i18n}>{capturedSignUpProps?.footer as React.ReactElement}</I18nextProvider>,
-    )
-
-    expect(capturedSocialProps?.flow).toBe('sign_up')
   })
 
   it('renders a normal, unlocked sign-up form when there is no pending invite', async () => {

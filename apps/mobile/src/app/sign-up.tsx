@@ -12,7 +12,6 @@ import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import type { InviteValidationDto } from '@/lib/auth/household-invite-validation'
 import { setPendingInviteToken, takePendingInviteToken } from '@/lib/auth/invite-token-store'
 import { usePasswordSignIn } from '@/lib/server/use-instance'
-import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 type InviteState =
   | { status: 'none' }
@@ -70,9 +69,6 @@ export default function SignUpRoute() {
       onSubmit={async (email, password) => {
         if (invite.status === 'valid') setPendingInviteToken(invite.token)
         const outcome = await signUp(email, password)
-        // The channel only. Never the address, and never whether an
-        // invite was involved, which would leak household membership.
-        if (outcome.status === 'accepted') captureAnalyticsEvent('sign_up_completed', { provider: 'email' })
         return outcome.status
       }}
       lead={(
@@ -90,7 +86,6 @@ export default function SignUpRoute() {
             primary={!passwordSignIn}
           />
           <SocialSignIn
-            flow="sign_up"
             onBeforeSignIn={() => {
               if (invite.status === 'valid') setPendingInviteToken(invite.token)
             }}

@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import { useTransactionImport } from './use-transaction-import'
 
@@ -14,6 +15,9 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ runtime: { epochId: 9, apiClient: { write: mockWrite } }, blockAccess: mockBlockAccess }),
 }))
 jest.mock('./transaction-import-upload', () => ({ uploadTransactionImportFile: (...args: unknown[]) => mockUpload(...args) }))
+jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
+
+const captured = jest.mocked(captureAnalyticsEvent)
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -47,7 +51,44 @@ const session = {
 }
 
 describe('useTransactionImport', () => {
-  beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset() })
+  beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset(); captured.mockReset() })
+
+  describe('analytics', () => {
+    const run = async () => {
+      const { client, wrapper } = setup()
+      const hook = await renderHook(() => useTransactionImport(), { wrapper })
+      await act(async () => { await hook.result.current.start(7, file) })
+      await hook.unmount(); client.clear()
+    }
+
+    it('records the file chosen, then staged for review, with the format the session read', async () => {
+      mockWrite.mockResolvedValueOnce(genericUpload).mockResolvedValueOnce({ session: { ...session, format: 'generic-csv' } })
+      mockUpload.mockResolvedValue(undefined)
+      await run()
+      expect(captured.mock.calls).toEqual([
+        ['import_started', { kind: 'transactions', format: 'statement' }],
+        ['import_mapped', { kind: 'transactions', format: 'generic-csv' }],
+      ])
+    })
+
+    it.each([
+      ['the upload', 'upload', () => { mockWrite.mockResolvedValueOnce(supportedUpload); mockUpload.mockRejectedValue(new Error('network blip')) }],
+      ['staging', 'read', () => { mockWrite.mockResolvedValueOnce(supportedUpload).mockRejectedValueOnce(new ApiError('network')); mockUpload.mockResolvedValue(undefined) }],
+    ])('records a failure in %s with its step', async (_case, step, given) => {
+      given()
+      await run()
+      expect(captured.mock.calls).toEqual([
+        ['import_started', { kind: 'transactions', format: 'statement' }],
+        ['import_failed', { kind: 'transactions', format: 'statement', step }],
+      ])
+    })
+
+    it('does not count a request the person cancelled as a failure', async () => {
+      mockWrite.mockRejectedValueOnce(new ApiError('cancelled'))
+      await run()
+      expect(captured.mock.calls).toEqual([['import_started', { kind: 'transactions', format: 'statement' }]])
+    })
+  })
 
   it('uploads the file and stages it as a session for review, without committing anything', async () => {
     mockWrite.mockResolvedValueOnce(supportedUpload).mockResolvedValueOnce({ session })

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, isBankConsentAbandoned, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
 import { ConnectionsScreen, type ConnectionDisconnectFailureState, type ConnectionReconnectFailureState } from './connections-screen'
 import { mapBankConnections } from './connection-status-view-model'
 import { classifyBankConnectionDisconnectFailure, useBankConnectionDisconnectMutation } from './use-bank-connection-disconnect-mutation'
@@ -91,6 +91,7 @@ export function ConnectionsRoute() {
             captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
+                if (isBankConsentAbandoned(result)) captureAnalyticsEvent('bank_connection_abandoned', { provider: 'enable_banking' })
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
                 void query.refetch()
               },

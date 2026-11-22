@@ -36,7 +36,6 @@ export const POSTHOG_HOST = 'https://eu.posthog.com'
  */
 export { featureScreens, type FeatureScreen }
 
-export type AnalyticsAuthProvider = AnalyticsEventProperties<'sign_in_completed'>['provider']
 export type AnalyticsFeedbackCategory = AnalyticsEventProperties<'feedback_submitted'>['category']
 
 export type AnalyticsEvent = AnalyticsEventNameFor<'mobile'>

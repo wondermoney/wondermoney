@@ -1,12 +1,16 @@
 import { useCallback, useState } from 'react'
 
+import { analyticsImportFormat } from '@wondermoney/shared/analytics'
+
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import {
   buildCreateTransactionImportSessionBody,
   createTransactionImportSessionEndpoint,
   createTransactionImportUploadEndpoint,
+  importFormatForFileName,
   type TransactionImportSessionDto,
 } from './transaction-import-contract'
 import { decideUpload, isCamtFileName, isCsvFileName, isOfxFileName, isQifFileName } from './generic-csv-format'
@@ -56,36 +60,52 @@ export function useTransactionImport() {
     setState({ phase: 'error', reason: classifyTransactionImportFailure(error) })
   }, [blockAccess])
 
-  /** Resolves with the staged session, or `null` when the import stopped (the state says why). */
+  /**
+   * Resolves with the staged session, or `null` when the import stopped (the state says why).
+   * Analytics: `import_started` once the file is chosen, `import_mapped` once it is staged for
+   * review, `import_failed` with the step that stopped it. A cancelled request is not a failure.
+   */
   const start = useCallback(async (accountId: number, file: TransactionImportFile): Promise<TransactionImportSessionDto | null> => {
+    const format = importFormatForFileName(file.name)
+    let step: 'read' | 'upload' = 'upload'
+    const stop = (reason: TransactionImportFailure) => {
+      if (reason !== 'cancelled') captureAnalyticsEvent('import_failed', { kind: 'transactions', format, step })
+    }
+    captureAnalyticsEvent('import_started', { kind: 'transactions', format })
     setState({ phase: 'uploading' })
     try {
       const upload = await runtime.apiClient.write(createTransactionImportUploadEndpoint(accountId), { commit: () => undefined })
       const decision = decideUpload(upload)
       if (decision.action === 'stop') {
         setState({ phase: 'error', reason: decision.reason })
+        stop(decision.reason)
         return null
       }
       if (decision.format === 'generic' && !isCsvFileName(file.name) && !isOfxFileName(file.name) && !isQifFileName(file.name) && !isCamtFileName(file.name)) {
         setState({ phase: 'error', reason: 'csv-only' })
+        stop('csv-only')
         return null
       }
       try {
         await uploadTransactionImportFile(file.uri, upload.presignedUrl)
       } catch {
         setState({ phase: 'error', reason: 'upload-failed' })
+        stop('upload-failed')
         return null
       }
 
       setState({ phase: 'starting' })
+      step = 'read'
       const { session } = await runtime.apiClient.write(createTransactionImportSessionEndpoint, {
         body: buildCreateTransactionImportSessionBody({ accountId, fileName: file.name, key: upload.key }),
         commit: () => undefined,
       })
       setState({ phase: 'staged', session })
+      captureAnalyticsEvent('import_mapped', { kind: 'transactions', format: analyticsImportFormat(session.format) ?? format })
       return session
     } catch (error) {
       fail(error)
+      stop(classifyTransactionImportFailure(error))
       return null
     }
   }, [fail, runtime])

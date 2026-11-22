@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { accountKey, accountsKey } from '@/features/accounts/query-keys'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError, isPostDispatchCancellation } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import {
   createStatementImportSessionEndpoint,
@@ -84,7 +85,14 @@ export function useStatementImport(options: UseStatementImportOptions = {}) {
     setState({ phase: 'failed', reason: classifyFailure(error) })
   }, [blockAccess])
 
+  // Analytics: `import_started`, then `import_failed` with the step that stopped it; a statement
+  // is read and imported in one job, so a success is the server's `import_committed`.
   const start = useCallback(async (accountId: number, file: StatementImportFile) => {
+    let step: 'read' | 'upload' = 'upload'
+    const stop = (reason: StatementImportFailure) => {
+      if (reason !== 'cancelled') captureAnalyticsEvent('import_failed', { kind: 'transactions', format: 'statement', step })
+    }
+    captureAnalyticsEvent('import_started', { kind: 'transactions', format: 'statement' })
     setState({ phase: 'uploading' })
     try {
       const session = await runtime.apiClient.write(createStatementImportSessionEndpoint(accountId), { commit: () => undefined })
@@ -92,14 +100,17 @@ export function useStatementImport(options: UseStatementImportOptions = {}) {
         await uploadStatementImportFile(file.uri, session.uploadUrl, session.uploadHeaders)
       } catch {
         setState({ phase: 'failed', reason: 'upload-failed' })
+        stop('upload-failed')
         return
       }
 
+      step = 'read'
       setState({ phase: 'processing' })
       await runtime.apiClient.write(createTriggerStatementImportEndpoint(session.importSessionId), { commit: () => undefined })
       const final = await pollUntil(session.importSessionId, (status) => !IN_FLIGHT_STATUSES.has(status.status))
       if (TERMINAL_FAILURE_STATUSES.has(final.status) || !SUCCESS_STATUSES.has(final.status)) {
         setState({ phase: 'failed', reason: 'processing-failed' })
+        stop('processing-failed')
         return
       }
 
@@ -110,6 +121,7 @@ export function useStatementImport(options: UseStatementImportOptions = {}) {
       setState({ phase: 'succeeded', summary: final.summary })
     } catch (error) {
       fail(error)
+      stop(classifyFailure(error))
     }
   }, [fail, pollUntil, queryClient, runtime])
 

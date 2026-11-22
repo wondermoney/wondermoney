@@ -37,7 +37,7 @@ export async function connectSimplefinBank(req: Request, res: Response) {
   try {
     connected = await connectSimplefin(DI.em, { appuser: user, setupToken, tenant });
   } catch (error) {
-    await recordServiceEvent(DI.em, user, 'bank_connection_failed', { platform, provider: 'simplefin', reason: bankConnectionFailureReason(error) });
+    await recordServiceEvent(DI.em, user, 'bank_connection_failed', { platform, provider: 'simplefin', reason: bankConnectionFailureReason(error), step: 'link' });
     throw error;
   }
   const { bankConnection, connection } = connected;

@@ -7,8 +7,6 @@ import type {
   CatalogueEventProperties,
 } from './types';
 
-const AUTH_PROVIDERS = ['email', 'apple', 'google'] as const;
-
 /** The sign-in methods the API knows; `other` covers any provider added later. */
 const SIGN_IN_METHODS = ['email', 'google', 'apple', 'oidc', 'other'] as const;
 
@@ -31,6 +29,15 @@ export const ANALYTICS_IMPORT_FORMATS = [
   'pdf',
   'broker_csv',
 ] as const;
+
+export type AnalyticsImportFormat = (typeof ANALYTICS_IMPORT_FORMATS)[number];
+
+/** A format a client read from the API, as the catalogue's `format`, or `undefined` for one it does not list. */
+export function analyticsImportFormat(value: unknown): AnalyticsImportFormat | undefined {
+  return (ANALYTICS_IMPORT_FORMATS as readonly unknown[]).includes(value)
+    ? (value as AnalyticsImportFormat)
+    : undefined;
+}
 
 const BANK_PROVIDERS = ['enable_banking', 'simplefin'] as const;
 
@@ -325,7 +332,7 @@ export const ANALYTICS_EVENTS = {
   },
   bank_connection_failed: {
     description:
-      'Linking a bank connection failed before any sync ran (a refused consent, a bad token, a provider error).',
+      'Connecting a bank failed before any sync ran: the provider refused to start it (before the person reached the bank), or linking it failed afterwards (a refused consent, a bad token, a provider error).',
     surfaces: ['server'],
     tier: 'service',
     question: 'bank_connections',
@@ -354,6 +361,13 @@ export const ANALYTICS_EVENTS = {
           'unknown',
         ],
         description: "Why, as a fixed code: never the provider's own message.",
+      },
+      step: {
+        type: 'enum',
+        values: ['start', 'link'],
+        description:
+          "Where it failed: asking the provider to start the connection, so the person never reached the bank (and the app sent no `bank_connection_started`), or linking it after the bank's consent or with SimpleFIN's token. Absent on events recorded before it existed.",
+        optional: true,
       },
       platform,
     },
@@ -410,32 +424,6 @@ export const ANALYTICS_EVENTS = {
       },
     },
   },
-  sign_up_completed: {
-    description: 'A new account finished signing up in the app.',
-    surfaces: ['mobile'],
-    tier: 'behavioural',
-    question: 'activation',
-    properties: {
-      provider: {
-        type: 'enum',
-        values: AUTH_PROVIDERS,
-        description: 'How the person signed up.',
-      },
-    },
-  },
-  sign_in_completed: {
-    description: 'An existing account signed in to the app.',
-    surfaces: ['mobile'],
-    tier: 'behavioural',
-    question: 'retention',
-    properties: {
-      provider: {
-        type: 'enum',
-        values: AUTH_PROVIDERS,
-        description: 'How the person signed in.',
-      },
-    },
-  },
   onboarding_started: {
     description:
       'The person began onboarding, once per browser (the progress is kept in browser storage).',
@@ -480,9 +468,24 @@ export const ANALYTICS_EVENTS = {
       },
     },
   },
+  bank_connection_abandoned: {
+    description:
+      "The person closed the bank's consent page before it returned to the app. The connection may still complete, if the bank had already given consent.",
+    surfaces: ['mobile'],
+    tier: 'behavioural',
+    question: 'bank_connections',
+    properties: {
+      provider: {
+        type: 'enum',
+        values: ['enable_banking'],
+        description: 'The bank data provider: only Enable Banking sends the person to the bank.',
+      },
+    },
+  },
   import_started: {
-    description: 'A file was chosen to import.',
-    surfaces: ['web'],
+    description:
+      'A file was chosen to import. A bank statement CSV imported from the mobile app is read and imported in one go, so it goes from here to `import_committed` (or `import_failed`).',
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'imports',
     properties: importProperties,
@@ -490,7 +493,7 @@ export const ANALYTICS_EVENTS = {
   import_mapped: {
     description:
       "The file was read and its columns matched, so the import is ready for review. A file whose columns the format fixes (OFX, QIF, CAMT.053, YNAB, Actual, a PDF) reaches this step as soon as it is read.",
-    surfaces: ['web'],
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'imports',
     properties: importProperties,
@@ -498,14 +501,14 @@ export const ANALYTICS_EVENTS = {
   import_reviewed: {
     description:
       'The person confirmed the review and asked to import. The rows written are the service event `import_committed`.',
-    surfaces: ['web'],
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'imports',
     properties: importProperties,
   },
   import_failed: {
     description: 'An import stopped on an error the person saw.',
-    surfaces: ['web'],
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'imports',
     properties: {

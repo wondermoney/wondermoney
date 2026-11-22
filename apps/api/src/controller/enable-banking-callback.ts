@@ -48,6 +48,7 @@ export async function enableBankingCallback(req: Request, res: Response) {
       platform: enableBankingPlatform(returnTo),
       provider: 'enable_banking',
       reason,
+      step: 'link',
     }, { eventId: outcomeEventId });
   };
 

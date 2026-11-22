@@ -6,7 +6,7 @@ import { nativeIdentityProviders } from '@/lib/auth/native-identity-providers'
 import { useConfirmedFeature } from '@/lib/server/use-instance'
 
 import { SocialSignInButtons } from './social-sign-in-buttons'
-import { useSocialSignIn, type SocialSignInFlow } from './use-social-sign-in'
+import { useSocialSignIn } from './use-social-sign-in'
 
 /**
  * Drop-in native sign-in block for the sign-in and sign-up routes.
@@ -19,12 +19,7 @@ import { useSocialSignIn, type SocialSignInFlow } from './use-social-sign-in'
  * without Google OAuth credentials would reject the token exchange. Apple is not reported by the
  * server and is left to the device check.
  */
-export function SocialSignIn({ flow = 'sign_in', onBeforeSignIn }: Readonly<{
-  /**
-   * Which funnel this block was rendered in, so a completed provider exchange
-   * reports `sign_up_completed` or `sign_in_completed` accordingly.
-   */
-  flow?: SocialSignInFlow
+export function SocialSignIn({ onBeforeSignIn }: Readonly<{
   /**
    * Runs immediately before the native sheet opens, mirroring where the password paths
    * arm one-shot state (the sign-up route re-arms a pending household invite here, so
@@ -33,7 +28,7 @@ export function SocialSignIn({ flow = 'sign_in', onBeforeSignIn }: Readonly<{
   onBeforeSignIn?: () => void
 }> = {}) {
   const colorScheme = useColorScheme() === 'dark' ? 'dark' : 'light'
-  const { available, pending, failure, submit } = useSocialSignIn(nativeIdentityProviders, flow)
+  const { available, pending, failure, submit } = useSocialSignIn(nativeIdentityProviders)
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn)
   const providers = googleSignIn ? available : available.filter((provider) => provider !== 'google')
 

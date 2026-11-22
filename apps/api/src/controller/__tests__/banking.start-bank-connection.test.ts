@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const createConnection = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
-const em = vi.hoisted(() => ({ findOne: vi.fn(), findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ createConnection })) }));
+const em = vi.hoisted(() => ({ findOne: vi.fn(), findOneOrFail: vi.fn(), getRepository: vi.fn(() => ({ createConnection })), upsert: vi.fn() }));
 const resolveForNewLink = vi.hoisted(() => vi.fn());
 const createEnableBankingClient = vi.hoisted(() => vi.fn());
 const listInstitutions = vi.hoisted(() => vi.fn());
@@ -25,7 +25,10 @@ const credentialEntity = { enableBankingCredentialKey: 7 };
 const decryptedCredential = { applicationId: 'app-1', privateKeyPem: 'pem' };
 
 const createReq = (bankId: string, tenant: null | { tenantKey: number } = { tenantKey: 113 }, query: Record<string, string> = {}) =>
-  Object.assign(mockReq({ params: { bankId }, query }), { tenant: tenant ?? undefined, user: { appuserKey: 1 } });
+  Object.assign(mockReq({ params: { bankId }, query }), {
+    tenant: tenant ?? undefined,
+    user: { appuserKey: 1, externalUserId: '6b1d5f0e-8f4a-4c55-9d2e-3a7b9c0d1e2f' },
+  });
 const createRes = () => mockRes();
 
 describe('startBankConnection (Enable Banking)', () => {
@@ -38,6 +41,7 @@ describe('startBankConnection (Enable Banking)', () => {
     createEnableBankingClient.mockReset().mockReturnValue({ listInstitutions, startAuthorization });
     listInstitutions.mockReset();
     startAuthorization.mockReset().mockResolvedValue({ authorizationId: 'auth-1', psuIdHash: 'hash', url: 'https://bank.example/consent' });
+    em.upsert.mockReset().mockResolvedValue({});
   });
 
   it('fails closed when the request is missing a resolved tenant', async () => {
@@ -142,6 +146,36 @@ describe('startBankConnection (Enable Banking)', () => {
       null,
     );
     expect(res.json).toHaveBeenCalledWith({ redirectUrl: 'https://bank.example/consent' });
+  });
+
+  describe('analytics', () => {
+    const bankId = encodeEnableBankingInstitutionId({ country: 'PT', name: 'Bank A' });
+    const outboxEvents = () => em.upsert.mock.calls.map(([, row]) => row as { eventName: string; properties: Record<string, unknown> });
+
+    beforeEach(() => {
+      vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'live');
+      listInstitutions.mockResolvedValue([{ country: 'PT', maximum_consent_validity: 7_776_000, name: 'Bank A' }]);
+    });
+    afterEach(() => { vi.unstubAllEnvs(); });
+
+    it('records a connection the provider refused to start, which no client can see', async () => {
+      startAuthorization.mockRejectedValueOnce(new Error('provider down'));
+
+      await expect(startBankConnection(createReq(bankId), createRes())).rejects.toBeDefined();
+
+      expect(outboxEvents()).toEqual([
+        expect.objectContaining({
+          eventName: 'bank_connection_failed',
+          properties: expect.objectContaining({ platform: 'web', provider: 'enable_banking', reason: 'provider_unavailable', step: 'start' }),
+        }),
+      ]);
+    });
+
+    it('records nothing when the connection starts: the client sends bank_connection_started', async () => {
+      await startBankConnection(createReq(bankId), createRes());
+
+      expect(outboxEvents()).toEqual([]);
+    });
   });
 
   it('generates a fresh, unique state per call', async () => {

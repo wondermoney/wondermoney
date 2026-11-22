@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import { useStatementImport } from '../use-statement-import'
 
@@ -15,6 +16,10 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ runtime: { epochId: 9, apiClient: { read: mockRead, write: mockWrite } }, blockAccess: mockBlockAccess }),
 }))
 jest.mock('../statement-import-upload', () => ({ uploadStatementImportFile: (...args: unknown[]) => mockUpload(...args) }))
+jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
+
+const captured = jest.mocked(captureAnalyticsEvent)
+const statement = { kind: 'transactions', format: 'statement' }
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -33,7 +38,7 @@ const file = { uri: 'file:///picked.csv', name: 'picked.csv' }
 const noWait = { wait: async () => undefined }
 
 describe('useStatementImport', () => {
-  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset() })
+  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset(); captured.mockReset() })
 
   it('runs the full upload -> parse -> poll flow through to succeeded', async () => {
     mockWrite.mockResolvedValueOnce(session).mockResolvedValueOnce(parseTrigger)
@@ -78,6 +83,7 @@ describe('useStatementImport', () => {
 
     expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'upload-failed' })
     expect(mockWrite).toHaveBeenCalledTimes(1)
+    expect(captured.mock.calls).toEqual([['import_started', statement], ['import_failed', { ...statement, step: 'upload' }]])
     await hook.unmount(); client.clear()
   })
 
@@ -91,6 +97,7 @@ describe('useStatementImport', () => {
     await act(async () => { await hook.result.current.start(12, file) })
 
     expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'processing-failed' })
+    expect(captured.mock.calls).toEqual([['import_started', statement], ['import_failed', { ...statement, step: 'read' }]])
     await hook.unmount(); client.clear()
   })
 

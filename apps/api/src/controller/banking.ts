@@ -9,6 +9,8 @@ import {
 import { zParse } from '@app/validators/parser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { authedUser } from '@middleware/authed-context';
+import { bankConnectionFailureReason } from '@service/analytics/bank-connection-events';
+import { recordServiceEvent, requestPlatform } from '@service/analytics/service-events.service';
 import { toHttpError } from '@service/bank-providers/http-errors';
 import { ENABLE_BANKING_PROVIDER_ID, requireBankProvider } from '@service/bank-providers/registry';
 import { BankSyncStatusService } from '@service/bank-sync/bank-sync-status.service';
@@ -65,6 +67,13 @@ export async function startBankConnection(req: Request, res: Response) {
       tenantId: req.tenant.tenantKey,
     }));
   } catch (error) {
+    // The person never reached the bank, so no client sent bank_connection_started.
+    await recordServiceEvent(DI.em, user, 'bank_connection_failed', {
+      platform: requestPlatform(req),
+      provider: 'enable_banking',
+      reason: bankConnectionFailureReason(error),
+      step: 'start',
+    });
     throw toHttpError(error);
   }
 

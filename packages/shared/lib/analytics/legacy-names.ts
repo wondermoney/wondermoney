@@ -180,3 +180,31 @@ export const LEGACY_WEB_EVENT_NAMES: Readonly<Record<string, LegacyEventName>> =
   transaction_split_removed: { now: null },
   'unsync account': { now: null },
 };
+
+/**
+ * Mobile's names before the catalogue's server events (#624, #626). Store builds that predate a
+ * change keep sending the old name until they update; PostHog tells them from the server's by
+ * `$lib` (`posthog-react-native` against `posthog-node`).
+ */
+export const LEGACY_MOBILE_EVENT_NAMES: Readonly<Record<string, LegacyEventName>> = {
+  sign_up_completed: {
+    now: 'signup',
+    note: '`provider` is now `method`.',
+  },
+  sign_in_completed: {
+    now: 'login',
+    note: '`provider` is now `method`; `login` is once per session.',
+  },
+  first_account_created: {
+    now: 'first_account_created',
+    note: 'The same name, recorded by the server since #624.',
+  },
+  bank_connection_completed: {
+    now: 'bank_connection_completed',
+    note: 'The same name, recorded by the server since #624.',
+  },
+  bank_connection_failed: {
+    now: 'bank_connection_failed',
+    note: 'The same name, recorded by the server since #624.',
+  },
+};
