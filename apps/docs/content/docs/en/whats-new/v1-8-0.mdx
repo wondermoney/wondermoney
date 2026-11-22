@@ -1,0 +1,24 @@
+---
+title: WonderMoney 1.8.0
+description: A switch to object to service analytics, server-side service events from one fixed list, and fewer identifiers in analytics.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.8.0)
+
+## Upgrading
+
+One migration adds a nullable column (`analytics_objected_at` on `appuser`). It applies when the API starts, and no backup is required. There are no new settings: service events are recorded only with `ANALYTICS_OUTBOX_MODE=live`, which a self-hosted server leaves off (see [Analytics](/en/docs/self-hosting/configure#analytics)).
+
+## New
+
+- **Object to service analytics:** a switch in **Settings → Privacy** on the web, and in **Preferences** in the mobile app (1.0.5), stops the server's service events for your account and removes any not yet sent. It appears only on servers that record them. See [Data Privacy](/en/docs/settings-security-privacy/data-privacy).
+
+## Privacy
+
+- **Service events come from one fixed list.** The server records signing in, daily activity, a new account, budget or goal, an import, and a bank connection. They are keyed by a random identifier, never with amounts, names or content, and anything outside the list is refused.
+- **Fewer identifiers.** Sign-up, sign-in and bank-sync events no longer carry account keys or bank identifiers.
+- The privacy policy and the Data Privacy page describe both kinds of analytics and how to object.
+
+## Thanks to
+
+- @nip10

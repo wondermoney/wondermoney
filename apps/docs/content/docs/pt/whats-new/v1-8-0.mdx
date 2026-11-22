@@ -1,0 +1,24 @@
+---
+title: WonderMoney 1.8.0
+description: Um interruptor para te opores à análise do serviço, eventos de serviço registados no servidor a partir de uma lista fixa e menos identificadores na análise.
+---
+
+[Notas da versão no GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.8.0)
+
+## Atualizar
+
+Uma migração acrescenta uma coluna opcional (`analytics_objected_at` em `appuser`). É aplicada quando a API arranca e não é preciso fazer cópia de segurança. Não há novas definições: os eventos de serviço só são registados com `ANALYTICS_OUTBOX_MODE=live`, que um servidor alojado por ti deixa desligado (vê [Analytics](/pt/docs/self-hosting/configure#analytics)).
+
+## Novo
+
+- **Opor-te à análise do serviço:** um interruptor em **Definições → Privacidade** na web, e em **Preferências** na aplicação móvel (1.0.5), para os eventos de serviço do servidor sobre a tua conta e apaga os que ainda não foram enviados. Só aparece nos servidores que os registam. Vê [Privacidade dos dados](/pt/docs/settings-security-privacy/data-privacy).
+
+## Privacidade
+
+- **Os eventos de serviço vêm de uma lista fixa.** O servidor regista o início de sessão, a atividade diária, uma nova conta, orçamento ou objetivo, uma importação e uma ligação bancária. Usam um identificador aleatório, nunca montantes, nomes ou conteúdo, e tudo o que esteja fora da lista é recusado.
+- **Menos identificadores.** Os eventos de registo, de início de sessão e de sincronização bancária já não levam chaves de conta nem identificadores do banco.
+- A política de privacidade e a página Privacidade dos dados descrevem os dois tipos de análise e como te podes opor.
+
+## Agradecimentos
+
+- @nip10
