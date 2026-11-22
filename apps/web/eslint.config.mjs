@@ -143,65 +143,6 @@ const CHART_TOOLTIPS = [
   "components/portfolio/PortfolioAllocationChart.tsx",
 ];
 
-/*
- * Product analytics go through `track` (lib/analytics/track.ts), typed by the event catalogue in
- * `@wondermoney/shared/analytics`. These files call PostHog directly from before the catalogue;
- * #625 moves them onto `track` and empties the list. Never add a file to it. (Brackets and
- * parentheses are escaped: these are globs.)
- */
-const LEGACY_POSTHOG_CAPTURE = [
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/\\[accountId\\]/account-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/\\[accountId\\]/transactions/account-transactions-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/accounts-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/recurring/recurring-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/transactions/review/review-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/accounts/transactions/transactions-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/financial-markets/explorer/explorer-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/portfolio/\\[portfolioId\\]/transactions/portfolio-transactions-client.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/portfolio/page.tsx",
-  "app/\\[locale\\]/\\(full-layout\\)/portfolio/transactions/portfolio-transactions-client.tsx",
-  "app/AnalyticsPageView.tsx",
-  "components/account/AccountCreateSyncModal.tsx",
-  "components/account/AccountDeleteModal.tsx",
-  "components/account/AccountEditSheet.tsx",
-  "components/account/AccountsList.tsx",
-  "components/account/AccountTransactionAddModal.tsx",
-  "components/account/AccountTransactionDeleteModal.tsx",
-  "components/account/AccountTransactionEditSheet.tsx",
-  "components/account/AccountTransactionImportModal.tsx",
-  "components/account/AccountTransactionOcrContent.tsx",
-  "components/account/AccountTransactionsTable.tsx",
-  "components/account/TransactionReimbursementField.tsx",
-  "components/account/TransactionReviewControl.tsx",
-  "components/account/TransactionSpentByField.tsx",
-  "components/account/TransactionSplitField.tsx",
-  "components/account/useTransactionReviewActions.ts",
-  "components/activation/SetupChecklistCard.tsx",
-  "components/budget/BudgetCategoryEditSheet.tsx",
-  "components/budget/BudgetDeleteModal.tsx",
-  "components/budget/BudgetEditModal.tsx",
-  "components/budget/BudgetsTable.tsx",
-  "components/CategorySelect.tsx",
-  "components/dashboard/NetWorthViewedEvent.tsx",
-  "components/expense-group/CreateExpenseGroupDialog.tsx",
-  "components/expense-group/EditExpenseGroupForm.tsx",
-  "components/expense-group/ExpenseGroupDetail.tsx",
-  "components/expense-group/RecordSettlementForm.tsx",
-  "components/expense-group/TransactionExpenseGroupField.tsx",
-  "components/financial-market/FinancialMarketsTickerPrice.tsx",
-  "components/layout/Feedback.tsx",
-  "components/onboarding/first-run/FirstRunAccountStep.tsx",
-  "components/onboarding/first-run/FirstRunCompleteStep.tsx",
-  "components/onboarding/first-run/FirstRunGoalsStep.tsx",
-  "components/onboarding/first-run/FirstRunOnboardingRouteShell.tsx",
-  "components/onboarding/first-run/FirstRunSyncStep.tsx",
-  "components/portfolio/PortfolioCreateDialog.tsx",
-  "components/portfolio/PortfolioHoldingsTable.tsx",
-  "components/portfolio/PortfolioTransactionAddModal.tsx",
-  "components/portfolio/PortfolioTransactionsTable.tsx",
-  "components/user/BankConnectionUnsyncModal.tsx",
-];
-
 const TESTS = ["**/*.test.ts", "**/*.test.tsx"];
 
 /** `no-restricted-syntax` does not merge across config objects, so each scope restates its list. */
@@ -294,9 +235,11 @@ const config = [
       ],
     },
   },
+  // Product analytics go through `track` (lib/analytics/track.ts), typed by the event catalogue
+  // in `@wondermoney/shared/analytics`.
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: [...TESTS, "lib/analytics/**", ...LEGACY_POSTHOG_CAPTURE],
+    ignores: [...TESTS, "lib/analytics/**"],
     rules: {
       "no-restricted-properties": [
         "error",

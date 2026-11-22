@@ -38,6 +38,11 @@ the app no longer sends them and they left its allowlist; the catalogue keeps th
 Builds already in the stores still send the three until they update; PostHog tells the two apart
 by `$lib` (`posthog-node` for the server, `posthog-react-native` for the app).
 
+**Record (2026-11-22, #625):** `bank_connection_started` gained one property, `provider`
+(`enable_banking` or `simplefin`), shared with web, so the bank connection funnel splits by
+provider; still no institution. The app's screen identifiers are `mobileFeatureScreens`; web keeps
+its own list beside it, with the same identifier for a screen both apps have.
+
 ## Why this exists
 
 Earlier mobile tickets, and this document's own companion Sentry work, all cite the same

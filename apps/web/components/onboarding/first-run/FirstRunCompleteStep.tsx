@@ -2,25 +2,20 @@
 
 import { Check, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
 
 import { RulePresetOffer } from "@/components/rules/RulePresetOffer";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/track";
 import useCompleteVersionedOnboarding from "@/lib/api/user/useCompleteVersionedOnboarding";
 import { useUser } from "@/lib/auth/user-context";
 import {
-  FIRST_RUN_EVENTS,
   getFirstRunState,
   getFirstRunStepRoute,
   markFirstRunCompleted,
 } from "@/lib/onboarding/firstRunOnboarding";
 import { cn } from "@/lib/utils";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { EXAMPLE_FIGURES } from "./exampleFigures";
@@ -160,39 +155,16 @@ export default function FirstRunCompleteStep() {
 function FirstRunCompleteFooter() {
   const t = useTranslations("onboarding.firstRun");
   const router = useRouter();
-  const posthog = usePostHog();
   const user = useUser();
   const state = getFirstRunState(user?.id);
   const completeVersionedOnboarding = useCompleteVersionedOnboarding();
 
   const handleComplete = () => {
-    const next = markFirstRunCompleted(user?.id);
+    markFirstRunCompleted(user?.id);
     // Idempotent server-side: safe to call again even though the
     // mount effect above already reported completion once.
     completeVersionedOnboarding.mutate();
-    posthog?.capture(FIRST_RUN_EVENTS.completed, {
-      selected_goals: next.selectedGoals,
-      account_step: next.accountStep,
-      budget_step: next.budgetStep,
-      portfolio_step: next.portfolioStep,
-      duration_seconds: next.startedAt
-        ? Math.max(
-            0,
-            Math.round(
-              (Date.now() - new Date(next.startedAt).getTime()) / 1000,
-            ),
-          )
-        : undefined,
-    });
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
-      account_step_status: next.accountStep,
-      goal_count: next.selectedGoals.length,
-      step: "completion",
-    });
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingCompleted, {
-      account_step_status: next.accountStep,
-      goal_count: next.selectedGoals.length,
-    });
+    track("onboarding_completed");
     router.replace("/");
   };
 

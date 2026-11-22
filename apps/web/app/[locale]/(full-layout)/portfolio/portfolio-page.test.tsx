@@ -47,9 +47,6 @@ vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ replace: state.replace }),
   Link: ({ children }: { children: unknown }) => children,
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
 vi.mock("@/lib/auth/user-context", () => ({
   useUser: () => ({ id: "user-1" }),
 }));

@@ -1,3 +1,4 @@
+import type { LegacyEventName } from './legacy-names';
 import type { AnalyticsCatalogue, AnalyticsPropertySpec } from './types';
 
 /** Above this many values, a property's list moves below the table. */
@@ -42,6 +43,7 @@ function describeProperty(
  */
 export function renderAnalyticsEventsMarkdown(
   catalogue: AnalyticsCatalogue,
+  legacyWebNames: Readonly<Record<string, LegacyEventName>> = {},
 ): string {
   const names = Object.keys(catalogue).sort();
   const lines = [
@@ -96,5 +98,27 @@ export function renderAnalyticsEventsMarkdown(
   }
 
   if (longLists.length > 0) lines.push('', '## Value lists', ...longLists);
+
+  const legacy = Object.entries(legacyWebNames).sort(([a], [b]) =>
+    a.localeCompare(b),
+  );
+  if (legacy.length > 0) {
+    lines.push(
+      '',
+      '## Legacy web names',
+      '',
+      'The names web sent before the catalogue, and the event that carries the same step now. They',
+      'changed in one release, with no period of sending both, so an insight across the change',
+      'combines the two. An event now sent by the server counts every client, where the old web',
+      'event counted only browsers with analytics consent.',
+      '',
+      '| Before | Now | Note |',
+      '|---|---|---|',
+      ...legacy.map(
+        ([before, { note, now }]) =>
+          `| ${code(before)} | ${now ? code(now) : 'removed'} | ${note ?? ''} |`,
+      ),
+    );
+  }
   return `${lines.join('\n')}\n`;
 }

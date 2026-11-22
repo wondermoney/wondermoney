@@ -2,7 +2,6 @@
 
 import { AlertTriangle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React, { useCallback, useMemo, useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
@@ -42,7 +41,6 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
     const formatPercentage = useFormatPercentage();
     const formatCurrency = useFormatCurrency();
     const formatQuantity = useFormatQuantity();
-    const posthog = usePostHog();
 
     const missingPricing = transactions.some((transaction) => {
       const assetType = transaction.financialAssetType.toLowerCase();
@@ -71,28 +69,14 @@ const PortfolioHoldingsTable: React.FC<PortfolioHoldingsTableProps> =
       useState<PortfolioHolding | null>(null);
 
     const onClosePortfolioTransactionDetailsModal = () => {
-      posthog.capture("portfolio_holding_details_opened", {
-        action: "close",
-        ticker: selectedHolding?.financialAssetSymbol,
-      });
       setIsPortfolioTransactionDetailsModalOpen(false);
       setSelectedHolding(null);
     };
 
-    const onRowClick = useCallback(
-      (row: Row<PortfolioHolding>) => {
-        posthog.capture("portfolio_holdings_table_row_clicked", {
-          ticker: row.original.financialAssetSymbol,
-        });
-        posthog.capture("portfolio_holding_details_opened", {
-          action: "open",
-          ticker: row.original.financialAssetSymbol,
-        });
-        setSelectedHolding(row.original);
-        setIsPortfolioTransactionDetailsModalOpen(true);
-      },
-      [posthog],
-    );
+    const onRowClick = useCallback((row: Row<PortfolioHolding>) => {
+      setSelectedHolding(row.original);
+      setIsPortfolioTransactionDetailsModalOpen(true);
+    }, []);
 
     const columnHelper = useMemo(
       () => createColumnHelper<PortfolioHolding>(),

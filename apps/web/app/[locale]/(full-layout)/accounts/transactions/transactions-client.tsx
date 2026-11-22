@@ -2,7 +2,6 @@
 
 import { Download, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useState } from "react";
 import { DateRange } from "react-day-picker";
 
@@ -57,7 +56,6 @@ export default function AccountsTransactionsClient({
   reportScope = null,
 }: AccountsTransactionsClientProps) {
   const t = useTranslations();
-  const posthog = usePostHog();
 
   // Add account modal (when no transactions)
   const [accountAddModalIsOpen, setAccountAddModalIsOpen] = useState(false);
@@ -68,20 +66,16 @@ export default function AccountsTransactionsClient({
   const onAddSyncAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddSyncModalIsOpen(true);
-    posthog.capture("account_add_sync_modal", { action: "open" });
   };
   const closeAccountAddSyncModal = () => {
     setAccountAddSyncModalIsOpen(false);
-    posthog.capture("account_add_sync_modal", { action: "close" });
   };
   const onAddOfflineAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddOfflineModalIsOpen(true);
-    posthog.capture("account_add_offline_modal", { action: "open" });
   };
   const closeAccountAddOfflineModal = () => {
     setAccountAddOfflineModalIsOpen(false);
-    posthog.capture("account_add_offline_modal", { action: "close" });
   };
 
   // Add manual transaction modal
@@ -89,15 +83,9 @@ export default function AccountsTransactionsClient({
     useState(false);
   const openAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(true);
-    posthog.capture("account_transaction_table_add_manual_transaction", {
-      action: "open",
-    });
   };
   const closeAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(false);
-    posthog.capture("account_transaction_table_add_manual_transaction", {
-      action: "close",
-    });
   };
 
   // Import transaction modal
@@ -105,15 +93,9 @@ export default function AccountsTransactionsClient({
     useState(false);
   const openImportTransactionModal = () => {
     setIsImportTransactionModalOpen(true);
-    posthog.capture("account_transaction_table_import_transaction", {
-      action: "open",
-    });
   };
   const closeImportTransactionModal = () => {
     setIsImportTransactionModalOpen(false);
-    posthog.capture("account_transaction_table_import_transaction", {
-      action: "close",
-    });
   };
 
   // Table stuff

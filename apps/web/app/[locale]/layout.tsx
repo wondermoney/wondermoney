@@ -15,7 +15,7 @@ import { routing } from "@/i18n/routing";
 import { getInstanceName } from "@/lib/instance-name.server";
 import { cn } from "@/lib/utils";
 
-import AnalyticsPageView from "../AnalyticsPageView";
+import FeatureScreenView from "../FeatureScreenView";
 import { Providers } from "../providers";
 
 const reactDevToolsEnabled =
@@ -68,7 +68,7 @@ export default async function RootLayout(props: {
         <NextIntlClientProvider>
           <InstanceNameProvider name={instanceName}>
             <Providers>
-              <AnalyticsPageView />
+              <FeatureScreenView />
               <PivotBanner />
               {props.children}
             </Providers>

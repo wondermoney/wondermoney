@@ -10,17 +10,14 @@ import { Fragment, type ReactNode, useState } from "react";
 
 import AccountsFreshness from "@/components/account/AccountsFreshness";
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
-import { NetWorthViewedEvent } from "@/components/dashboard/NetWorthViewedEvent";
 import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { Button } from "@/components/ui/button";
-import useAccounts, { type Account } from "@/lib/api/account/useAccounts";
+import useAccounts from "@/lib/api/account/useAccounts";
 import useTransactions from "@/lib/api/account/useTransactions";
 import useBudgetsFull from "@/lib/api/budget/useBudgetsFull";
-import useNetWorth from "@/lib/api/net-worth/useNetWorth";
 import usePortfolios from "@/lib/api/portfolio/usePortfolios";
 import useUserPreferences from "@/lib/api/user-preferences/useUserPreferences";
 import { useMemberFilter } from "@/lib/household/useMemberFilter";
-import { isValidFirstNetWorthState } from "@/lib/utils/analytics";
 import { useHydrated } from "@/lib/utils/useHydrated";
 
 import { BalanceSheetSection } from "./BalanceSheetSection";
@@ -40,55 +37,20 @@ const ANY_UNREVIEWED = {
   unreviewedOnly: true,
 } as const;
 
-function accountSource(accounts: Account[]): "manual" | "sync" | undefined {
-  if (!accounts.length) return undefined;
-  return accounts.some((account) => account.source === "open_banking")
-    ? "sync"
-    : "manual";
-}
-
-/**
- * The activation checklist and the `net_worth_viewed` / first-dashboard-view
- * analytics the previous home sent, carried over unchanged.
- */
+/** The activation checklist. */
 function HomeActivation() {
   const { data: accountsData, isSuccess: accountsLoaded } = useAccounts();
-  const { data: portfoliosData, isSuccess: portfoliosLoaded } = usePortfolios();
+  const { data: portfoliosData } = usePortfolios();
   const { data: budgetsData } = useBudgetsFull();
   const { data: anyTransaction } = useTransactions(ANY_TRANSACTION);
   const { data: anyUnreviewed } = useTransactions(ANY_UNREVIEWED);
-  const netWorth = useNetWorth();
 
-  const accounts = accountsData?.accounts ?? [];
-  const accountCount = accounts.length;
+  const accountCount = accountsData?.accounts?.length ?? 0;
   const portfolioCount = portfoliosData?.portfolios?.length ?? 0;
   const hasTransactions = Boolean(anyTransaction?.transactions?.length);
-  const totalNetWorth = netWorth.data?.netWorth.netWorth;
-  const netWorthLoaded =
-    typeof totalNetWorth === "number" &&
-    Number.isFinite(totalNetWorth) &&
-    !netWorth.isLoading &&
-    !netWorth.isError;
-  const hasFinancialData = accountCount > 0 || portfolioCount > 0;
 
   return (
     <>
-      {accountsLoaded && portfoliosLoaded ? (
-        <NetWorthViewedEvent
-          accountCount={accountCount}
-          accountSource={accountSource(accounts)}
-          portfolioCount={portfolioCount}
-          isLoaded={
-            hasFinancialData &&
-            isValidFirstNetWorthState({
-              accountCount,
-              isLoaded: netWorthLoaded,
-              portfolioCount,
-            })
-          }
-          captureLegacyNetWorthViewed={hasFinancialData}
-        />
-      ) : null}
       {accountsLoaded ? (
         <SetupChecklistCard
           hasAccount={accountCount > 0}

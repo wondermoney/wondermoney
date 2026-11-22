@@ -7,10 +7,9 @@ import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, beforeEach, test, vi } from "vitest";
 
-import { ACTIVATION_EVENTS } from "@/lib/analytics";
 import type { BankConnection } from "@/lib/api/banking/useBankConnections";
 import { queryClientWithInstance } from "@/lib/api/instance/instance-fixture";
-import { FIRST_RUN_EVENTS, getFirstRunState } from "@/lib/onboarding/firstRunOnboarding";
+import { getFirstRunState } from "@/lib/onboarding/firstRunOnboarding";
 
 import commonMessages from "../../../messages/en/common.json";
 import onboardingMessages from "../../../messages/en/onboarding.json";
@@ -18,9 +17,11 @@ import FirstRunAccountStep from "./FirstRunAccountStep";
 import FirstRunSyncStep from "./FirstRunSyncStep";
 
 /*
- * The first-run connect funnel can go dark without anything failing: if the
- * steps stop emitting, nothing breaks and the activation funnel just loses
- * its middle. So these drive the real steps and check what reaches PostHog.
+ * The bank connection funnel can go dark without anything failing: if the
+ * step stops emitting, nothing breaks and the funnel just loses its start. So
+ * these drive the real steps and check what reaches analytics. How a
+ * connection ends is the server's to record (bank_connection_completed or
+ * _failed), so coming back sends nothing.
  */
 
 const messages = { ...commonMessages, ...onboardingMessages };
@@ -34,7 +35,7 @@ const h = vi.hoisted(() => ({
   connections: undefined as undefined | { connections: BankConnection[] },
 }));
 
-vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: h.capture }) }));
+vi.mock("@/lib/analytics/track", () => ({ track: h.capture }));
 vi.mock("next/navigation", () => ({ useSearchParams: () => h.params }));
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/onboarding/sync",
@@ -130,11 +131,10 @@ function renderStep(step: React.ReactNode) {
   );
 }
 
-test("picking a bank, getting a requisition and leaving for the bank are each recorded", async () => {
+test("leaving for the bank records the start of the connection, and nothing before it", async () => {
   const { rerender } = renderStep(<FirstRunAccountStep />);
-
   await userEvent.click(screen.getByRole("button", { name: "Test Bank" }));
-  assert.deepEqual(captured(), [FIRST_RUN_EVENTS.accountConnectClicked]);
+  assert.deepEqual(h.capture.mock.calls, []);
 
   h.requisition = { ...h.requisition, data: { redirectUrl: "https://bank.example/auth" } };
   rerender(
@@ -144,30 +144,11 @@ test("picking a bank, getting a requisition and leaving for the bank are each re
   );
 
   await vi.waitFor(() =>
-    assert.deepEqual(
-      [...captured()].sort(),
-      [
-        FIRST_RUN_EVENTS.accountBeforeRedirect,
-        FIRST_RUN_EVENTS.accountConnectClicked,
-        FIRST_RUN_EVENTS.accountRequisitionCreated,
-      ].sort(),
-    ),
+    assert.deepEqual(h.capture.mock.calls, [
+      ["bank_connection_started", { provider: "enable_banking" }],
+    ]),
   );
   assert.equal(window.location.href, "https://bank.example/auth");
-});
-
-test("a requisition that fails is recorded, so retrying it is not silent", async () => {
-  const { rerender } = renderStep(<FirstRunAccountStep />);
-  await userEvent.click(screen.getByRole("button", { name: "Test Bank" }));
-
-  h.requisition = { ...h.requisition, isError: true };
-  rerender(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <FirstRunAccountStep />
-    </NextIntlClientProvider>,
-  );
-
-  await vi.waitFor(() => assert.ok(captured().includes(FIRST_RUN_EVENTS.accountRequisitionFailed)));
 });
 
 function connection(status: BankConnection["status"]): { connections: BankConnection[] } {
@@ -187,16 +168,13 @@ function connection(status: BankConnection["status"]): { connections: BankConnec
 
 const syncing = messages.onboarding.firstRun.connect.syncing;
 
-test("coming back from the bank connected records the return and the first account", async () => {
+test("coming back from the bank connected moves onboarding on, and sends nothing", async () => {
   h.params = new URLSearchParams({ bankConnection: "success" });
   renderStep(<FirstRunSyncStep />);
 
-  await vi.waitFor(() => assert.ok(captured().includes(ACTIVATION_EVENTS.firstAccountAdded)));
-  assert.deepEqual(h.capture.mock.calls.find(([name]) => name === FIRST_RUN_EVENTS.accountConnectReturned)?.[1], {
-    outcome: "connected",
-  });
-  assert.equal(getFirstRunState("user-1").accountStep, "connected");
-  // The result leaves the URL so a refresh does not record it again.
+  await vi.waitFor(() => assert.equal(getFirstRunState("user-1").accountStep, "connected"));
+  assert.deepEqual(h.capture.mock.calls, []);
+  // The result leaves the URL so a refresh does not apply it again.
   assert.deepEqual(h.replace.mock.calls, [["/onboarding/sync", { scroll: false }]]);
 });
 
@@ -223,14 +201,10 @@ test("a connection that broke after linking is shown as trouble, not success", (
   screen.getByText(syncing.trouble);
 });
 
-test("coming back from the bank without a link shows the error on the account step and records it", async () => {
+test("coming back from the bank without a link shows the error on the account step", () => {
   h.params = new URLSearchParams({ bankConnection: "error" });
   renderStep(<FirstRunAccountStep />);
 
   screen.getByText(messages.onboarding.firstRun.connect.connectErrorBanner);
-  await vi.waitFor(() => assert.ok(captured().includes(FIRST_RUN_EVENTS.accountConnectReturned)));
-  assert.deepEqual(h.capture.mock.calls.find(([name]) => name === FIRST_RUN_EVENTS.accountConnectReturned)?.[1], {
-    outcome: "error",
-  });
-  assert.equal(captured().includes(ACTIVATION_EVENTS.firstAccountAdded), false);
+  assert.deepEqual(h.capture.mock.calls, []);
 });

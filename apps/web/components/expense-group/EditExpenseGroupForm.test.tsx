@@ -18,10 +18,6 @@ const apiMock = vi.hoisted(() => ({
   patch: vi.fn(),
 }));
 vi.mock("@/lib/api/api", () => ({ default: apiMock }));
-const captureMock = vi.hoisted(() => vi.fn());
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: captureMock }),
-}));
 const toastMock = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("sonner", () => ({ toast: toastMock }));
 
@@ -111,10 +107,6 @@ test("starts from the group's name and currency, and saves a new name and curren
   ]);
   await waitFor(() => assert.equal(onDone.mock.calls.length, 1));
   assert.deepEqual(toastMock.success.mock.calls[0], ["Group updated"]);
-  assert.deepEqual(captureMock.mock.calls[0], [
-    "expense_group_updated",
-    { renamed: true, currency_changed: true },
-  ]);
 });
 
 test("a rename alone sends only the name", async () => {

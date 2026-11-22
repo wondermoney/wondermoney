@@ -62,10 +62,17 @@ test("explicit opt-in starts usage analytics without replay or identification, a
   assert.equal(options.before_send(event), event);
   const leaky = {
     event: "account_delete",
-    properties: { $current_url: "https://app.example.com/en", accountKey: 12, data: { amount: 5 } },
+    properties: {
+      $current_url: "https://app.example.com/en/accounts/12",
+      $session_entry_url: "https://app.example.com/en/join?token=abc",
+      $session_entry_pathname: "/en/join",
+      $session_id: "s1",
+      accountKey: 12,
+      data: { amount: 5 },
+    },
   };
   assert.deepEqual(options.before_send(leaky).properties, {
-    $current_url: "https://app.example.com/en",
+    $session_id: "s1",
   });
 
   act(() => setAnalyticsConsent("denied"));

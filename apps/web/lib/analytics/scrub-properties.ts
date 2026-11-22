@@ -10,13 +10,20 @@
  *   and booleans (a submitted form, a file);
  * - a string value that holds an email address.
  *
- * PostHog's own properties (`$`-prefixed, `distinct_id`, `token`) are left alone.
+ * PostHog's own properties (`$`-prefixed, `distinct_id`, `token`) are left alone, except the
+ * addresses PostHog adds to every event: the page's (`$current_url`, `$pathname`), where the
+ * person came from (`$referrer`, `$referring_domain`), and the copies kept for the session's
+ * first page and the previous one (`$initial_*`, `$session_entry_*`, `$prev_pageview_*`). They
+ * name records (`/accounts/123`) and can carry an invite token or a bank's callback query. The
+ * screen is `feature_screen_viewed`'s `screen` instead.
  */
 const IDENTIFIER_KEY = /(?:^|_)(?:id|ids|key|keys)$|[a-z0-9](?:Id|Ids|Key|Keys)$/u;
 const SENSITIVE_KEY =
   /(account_name|balance|email|error_detail|error_message|merchant|password|raw|token)/iu;
 const EMAIL_VALUE = /[^\s@]+@[^\s@]+\.[^\s@]+/u;
 const POSTHOG_KEYS = new Set(["distinct_id", "token"]);
+const POSTHOG_ADDRESS_KEY =
+  /^\$(?:(?:initial_|session_entry_|prev_pageview_)(?:url|current_url|pathname|referrer|referring_domain|host)|current_url|pathname|referrer|referring_domain)$/u;
 
 function isPlainValue(value: unknown): boolean {
   if (value === null) return true;
@@ -35,6 +42,7 @@ export function scrubEventProperties<T extends Record<string, unknown>>(
 ): T {
   const kept: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(properties)) {
+    if (POSTHOG_ADDRESS_KEY.test(key)) continue;
     if (key.startsWith("$") || POSTHOG_KEYS.has(key)) {
       kept[key] = value;
       continue;

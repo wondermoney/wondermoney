@@ -7,6 +7,10 @@ import {
   ANALYTICS_SURFACES,
   ANALYTICS_TIERS,
   type AnalyticsCatalogue,
+  featureScreens,
+  LEGACY_WEB_EVENT_NAMES,
+  mobileFeatureScreens,
+  webFeatureScreens,
 } from '../../lib/analytics';
 import { IMPORT_FORMATS } from '../../lib/import/types';
 
@@ -116,7 +120,7 @@ describe('the analytics event catalogue', () => {
         mobile.map(([name, spec]) => [name, Object.keys(spec.properties)]),
       ),
     ).toEqual({
-      bank_connection_started: [],
+      bank_connection_started: ['provider'],
       feature_screen_viewed: ['screen'],
       feedback_submitted: ['category'],
       onboarding_completed: [],
@@ -125,7 +129,47 @@ describe('the analytics event catalogue', () => {
     });
   });
 
+  it("sends from web only the steps the server can't see (#625)", () => {
+    const web = entries.filter(([, spec]) => spec.surfaces.includes('web'));
+    expect(web.map(([name]) => name).sort()).toEqual([
+      'bank_connection_started',
+      'feature_screen_viewed',
+      'feedback_submitted',
+      'import_failed',
+      'import_mapped',
+      'import_reviewed',
+      'import_started',
+      'onboarding_completed',
+      'onboarding_started',
+      'onboarding_step_skipped',
+      'onboarding_step_viewed',
+      'signup_failed',
+      'signup_started',
+    ]);
+  });
+
+  it('keeps one identifier for a screen both apps have', () => {
+    expect(new Set(featureScreens).size).toBe(featureScreens.length);
+    expect([...featureScreens].sort()).toEqual(
+      [...new Set([...mobileFeatureScreens, ...webFeatureScreens])].sort(),
+    );
+  });
+
   it('lists every transaction import format, and the broker export', () => {
     expect(ANALYTICS_IMPORT_FORMATS).toEqual([...IMPORT_FORMATS, 'broker_csv']);
   });
+});
+
+describe('the legacy web names', () => {
+  it.each(Object.entries(LEGACY_WEB_EVENT_NAMES))(
+    '%s is not a name web sends now, unless it kept it',
+    (before, { now }) => {
+      const kept = now === before;
+      if (!kept && before in ANALYTICS_EVENTS) {
+        // A name reused by a server event: the web event of that name is gone.
+        expect(ANALYTICS_EVENTS[before as keyof typeof ANALYTICS_EVENTS].surfaces).not.toContain('web');
+      }
+      if (now) expect(ANALYTICS_EVENTS).toHaveProperty(now);
+    },
+  );
 });

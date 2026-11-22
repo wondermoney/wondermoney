@@ -60,7 +60,7 @@ describe('SimplefinConnectRoute', () => {
     await fireEvent.press(view.getByRole('button', { name: 'Submit' }))
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'success' } })
     expect(mockReset).toHaveBeenCalledTimes(1)
-    expect(captured.mock.calls).toEqual([['bank_connection_started']])
+    expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'simplefin' }]])
     expect(JSON.stringify(captured.mock.calls)).not.toContain('secret-setup-token')
   })
 

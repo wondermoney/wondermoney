@@ -2,23 +2,18 @@
 
 import { Info } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/track";
 import { useUser } from "@/lib/auth/user-context";
 import {
-  FIRST_RUN_EVENTS,
   type FirstRunGoal,
   getFirstRunState,
   getFirstRunStepRoute,
   patchFirstRunState,
 } from "@/lib/onboarding/firstRunOnboarding";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 
 import FirstRunGoalSelector from "./FirstRunGoalSelector";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
@@ -82,25 +77,11 @@ function FirstRunGoalsFooter({
   selectedGoals: FirstRunGoal[];
 }) {
   const t = useTranslations("onboarding.firstRun");
-  const posthog = usePostHog();
   const router = useRouter();
   const user = useUser();
 
   const handleSkip = () => {
-    posthog?.capture(FIRST_RUN_EVENTS.goalsSelected, {
-      selected_goals: [],
-      goal_count: 0,
-      skipped: true,
-    });
-    posthog?.capture(FIRST_RUN_EVENTS.stepSkipped, {
-      step: "goals",
-      selected_goals: [],
-    });
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
-      goal_count: 0,
-      skipped: true,
-      step: "goals",
-    });
+    track("onboarding_step_skipped", { step: "goals" });
     if (user?.id) {
       patchFirstRunState(
         { selectedGoals: [], currentStep: "privacy" },
@@ -111,16 +92,6 @@ function FirstRunGoalsFooter({
   };
 
   const handleContinue = () => {
-    posthog?.capture(FIRST_RUN_EVENTS.goalsSelected, {
-      selected_goals: selectedGoals,
-      goal_count: selectedGoals.length,
-      skipped: false,
-    });
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
-      goal_count: selectedGoals.length,
-      skipped: false,
-      step: "goals",
-    });
     if (user?.id) {
       patchFirstRunState({ selectedGoals, currentStep: "privacy" }, user.id);
     }

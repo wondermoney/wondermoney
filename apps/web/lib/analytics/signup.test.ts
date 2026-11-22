@@ -1,18 +1,30 @@
 import assert from "node:assert/strict";
 
-import { afterEach, beforeEach, describe, it } from "vitest";
+import { afterEach, beforeEach, describe, it, vi } from "vitest";
 
 import { captureSignupFunnelEvent, SIGNUP_FUNNEL_EVENTS } from "./signup";
+import { track } from "./track";
 
+vi.mock("./track", () => ({ track: vi.fn() }));
+
+const tracked = vi.mocked(track);
 const consentValue = "granted";
 
 let originalAnalyticsFlag: string | undefined;
 let originalWindow: PropertyDescriptor | undefined;
 
+function givenWindow(dataLayer: unknown[], consent: null | string) {
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: { dataLayer, localStorage: { getItem: () => consent } },
+  });
+}
+
 beforeEach(() => {
   originalAnalyticsFlag = process.env.NEXT_PUBLIC_ENABLE_ANALYTICS;
   originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
   process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = "1";
+  tracked.mockReset();
 });
 
 afterEach(() => {
@@ -29,82 +41,60 @@ afterEach(() => {
   }
 });
 
-describe("signup analytics isolation", () => {
+describe("signup analytics", () => {
   it("sends neither an event nor a tag-manager event without opt-in", () => {
     const dataLayer: unknown[] = [];
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: { dataLayer, localStorage: { getItem: () => null } },
-    });
-    const events: string[] = [];
-    captureSignupFunnelEvent(
-      {
-        capture: (event) => {
-          events.push(event);
-        },
-      },
-      SIGNUP_FUNNEL_EVENTS.submitClicked,
-    );
-    assert.deepEqual(events, []);
+    givenWindow(dataLayer, null);
+
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.started);
+
+    assert.equal(tracked.mock.calls.length, 0);
     assert.deepEqual(dataLayer, []);
   });
 
-  it("sends an opted-in signup event", () => {
+  it("sends PostHog only the catalogue's steps, and every step to the tag manager", () => {
     const dataLayer: unknown[] = [];
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: { dataLayer, localStorage: { getItem: () => consentValue } },
-    });
-    const events: string[] = [];
-    captureSignupFunnelEvent(
-      {
-        capture: (event) => {
-          events.push(event);
-        },
-      },
-      SIGNUP_FUNNEL_EVENTS.submitClicked,
-    );
-    assert.deepEqual(events, [SIGNUP_FUNNEL_EVENTS.submitClicked]);
-    assert.equal(dataLayer.length, 1);
-  });
-  it("does not block auth when the analytics client throws", () => {
-    // Given
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: {
-        dataLayer: [],
-        localStorage: { getItem: () => consentValue },
-      },
-    });
-    const throwingClient = {
-      capture() {
-        throw new DOMException("Unavailable", "NetworkError");
-      },
-    };
+    givenWindow(dataLayer, consentValue);
 
-    // When / Then
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.started, { locale: "pt" });
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitClicked);
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitFailed, {
+      failure_category: "recaptcha",
+      locale: "pt",
+    });
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.completed, {
+      method: "email",
+      source: "signup_form",
+    });
+
+    assert.deepEqual(tracked.mock.calls, [
+      ["signup_started"],
+      ["signup_failed", { reason: "recaptcha" }],
+    ]);
+    assert.deepEqual(dataLayer, [
+      { event: "signup_started", locale: "pt" },
+      { event: "signup_submit_clicked" },
+      { event: "signup_submit_failed", failure_category: "recaptcha", locale: "pt" },
+      { event: "signup_completed", method: "email", source: "signup_form" },
+    ]);
+  });
+
+  it("does not block auth when the analytics client throws", () => {
+    givenWindow([], consentValue);
+    tracked.mockImplementation(() => {
+      throw new DOMException("Unavailable", "NetworkError");
+    });
+
     assert.doesNotThrow(() =>
-      captureSignupFunnelEvent(
-        throwingClient,
-        SIGNUP_FUNNEL_EVENTS.submitClicked,
-        { locale: "pt", method: "email" },
-      ),
+      captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.started, { locale: "pt" }),
     );
   });
 
   it("does not block auth when the analytics queue is unavailable", () => {
-    // Given
-    Object.defineProperty(globalThis, "window", {
-      configurable: true,
-      value: {
-        dataLayer: Object.freeze([]),
-        localStorage: { getItem: () => consentValue },
-      },
-    });
+    givenWindow(Object.freeze([]) as unknown as unknown[], consentValue);
 
-    // When / Then
     assert.doesNotThrow(() =>
-      captureSignupFunnelEvent(null, SIGNUP_FUNNEL_EVENTS.submitClicked, {
+      captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitClicked, {
         locale: "en",
         method: "email",
       }),

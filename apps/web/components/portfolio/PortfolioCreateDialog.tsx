@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -71,7 +70,6 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
 }) => {
   const t = useTranslations();
   const notifyIfRateLimited = useRateLimitToast();
-  const posthog = usePostHog();
   const formSchema = z.object({
     name: z.string().min(1, t("portfolio-name-required")),
     currencyId: z.string().min(1, t("invalid-currency")),
@@ -132,7 +130,6 @@ const PortfolioCreateDialog: React.FC<PortfolioCreateDialogProps> = ({
     await mutation.mutateAsync({ ...data, accountLink }, {
       onSuccess: async (res) => {
         const createdPortfolioKey = res.data.portfolio.portfolioKey;
-        posthog.capture("portfolio_created");
         await queryClient.invalidateQueries({
           queryKey: ["portfolios"],
           exact: true,

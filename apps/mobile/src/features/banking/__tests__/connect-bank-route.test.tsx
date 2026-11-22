@@ -104,7 +104,7 @@ describe('ConnectBankRoute', () => {
     expect(view.getByTestId('state').props.children).toBe('loading')
   })
 
-  it('captures bank_connection_started with no institution and no consent redirect URL', async () => {
+  it('captures bank_connection_started with the provider, no institution and no consent redirect URL', async () => {
     mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
       onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
     })
@@ -113,7 +113,7 @@ describe('ConnectBankRoute', () => {
 
     await fireEvent.press(view.getByRole('button', { name: 'Select' }))
 
-    expect(captured.mock.calls).toEqual([['bank_connection_started']])
+    expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'enable_banking' }]])
     const serialized = JSON.stringify(captured.mock.calls)
     expect(serialized).not.toContain('Revolut')
     expect(serialized).not.toContain('enablebanking')

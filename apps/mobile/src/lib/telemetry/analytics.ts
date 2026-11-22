@@ -22,8 +22,8 @@ import {
   type AnalyticsEventNameFor,
   type AnalyticsEventProperties,
   type AnalyticsPropertyValue,
-  featureScreens,
-  type FeatureScreen,
+  type MobileFeatureScreen as FeatureScreen,
+  mobileFeatureScreens as featureScreens,
 } from '@wondermoney/shared/analytics'
 
 /** Fixed by decision, not configuration: this app's only approved ingest host. */

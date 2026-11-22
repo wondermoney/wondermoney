@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,10 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Form } from "@/components/ui/Form";
-import {
-  capturePortfolioImportFunnelEvent,
-  PORTFOLIO_IMPORT_FUNNEL_EVENTS,
-} from "@/lib/analytics/portfolio-import";
+import { track } from "@/lib/analytics/track";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import type {
   PortfolioColumnMapping,
@@ -250,7 +246,6 @@ const PortfolioTransactionImportModal: React.FC<
 > = ({ defaultPortfolioId, isOpen, setOpen, trigger }) => {
   const t = useTranslations();
   const canImportFiles = useFeature((features) => features.fileStorage);
-  const posthog = usePostHog();
   const methods = useForm<FormProps>({
     resolver: zodResolver(formSchema),
     defaultValues: { portfolioId: defaultPortfolioId },
@@ -273,9 +268,6 @@ const PortfolioTransactionImportModal: React.FC<
   const [pendingFinalizationSessionId, setPendingFinalizationSessionId] =
     useState<number | undefined>();
   const [maxUploadSizeBytes, setMaxUploadSizeBytes] = useState<number | undefined>();
-  const [mappingSource, setMappingSource] = useState<
-    "saved_spec" | "local_heuristic" | "llm" | "disabled" | undefined
-  >();
   const [stepRecovery, setStepRecovery] = useState<
     | {
         descriptionKey: string;
@@ -384,8 +376,6 @@ const PortfolioTransactionImportModal: React.FC<
   const initialLayout = getPortfolioImportInitialLayout(preview);
   const initialTransformations =
     getPortfolioImportInitialTransformations(preview);
-  const currentMappingSource =
-    mappingSource ?? previewColumnMapping?.suggestion?.mappingSource;
   const currentStep =
     sessionPhase !== "idle" && !preview?.status
       ? "analyzing"
@@ -448,7 +438,6 @@ const PortfolioTransactionImportModal: React.FC<
     setStepRecovery(undefined);
     lastSuggestedImportSessionIdRef.current = undefined;
     setMaxUploadSizeBytes(undefined);
-    setMappingSource(undefined);
     setFiles([]);
     setActiveImportSessionId(undefined);
     setActiveFileName(undefined);
@@ -504,11 +493,7 @@ const PortfolioTransactionImportModal: React.FC<
           setStepRecovery(undefined);
           setSessionPhase("creating");
           setActiveFileName(file.name);
-          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.sessionStarted, {
-            outcome: "started",
-            stage: "upload",
-            used_ai_mapping: false,
-          });
+          track("import_started", { kind: "portfolio", format: "broker_csv" });
 
           const createResponse =
             await useCreatePortfolioImportSessionMutation.mutateAsync({
@@ -538,10 +523,10 @@ const PortfolioTransactionImportModal: React.FC<
               step: "upload",
               titleKey: "portfolio-import-upload-error-title",
             });
-            capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadFailed, {
-              outcome: "failed",
-              stage: "upload",
-              error_category: "upload",
+            track("import_failed", {
+              kind: "portfolio",
+              format: "broker_csv",
+              step: "upload",
             });
             return;
           }
@@ -565,10 +550,10 @@ const PortfolioTransactionImportModal: React.FC<
               step: "upload",
               titleKey: "portfolio-import-parse-error-title",
             });
-            capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseFailed, {
-              outcome: "failed",
-              stage: "parse",
-              error_category: "parse",
+            track("import_failed", {
+              kind: "portfolio",
+              format: "broker_csv",
+              step: "read",
             });
             return;
           }
@@ -576,14 +561,6 @@ const PortfolioTransactionImportModal: React.FC<
           if (activeRunTokenRef.current !== runToken) return;
 
           setSessionPhase("idle");
-          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.uploadSucceeded, {
-            outcome: "succeeded",
-            stage: "upload",
-          });
-          capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.parseSucceeded, {
-            outcome: "succeeded",
-            stage: "parse",
-          });
         } catch {
           setSessionPhase("idle");
           setStepRecovery({
@@ -623,48 +600,15 @@ const PortfolioTransactionImportModal: React.FC<
     setStepRecovery(undefined);
 
     try {
-      const response = await suggestPortfolioImportColumnMapping({
+      await suggestPortfolioImportColumnMapping({
         importSessionId: activeImportSessionId,
       });
-
-      setMappingSource(response.data.mappingSource ?? response.data.columnMapping?.mappingSource);
-
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSuggestionRequested,
-        {
-          mapping_source:
-            response.data.mappingSource ??
-            response.data.columnMapping?.mappingSource ??
-            "local_heuristic",
-          outcome: "succeeded",
-          stage: "column_mapping",
-        },
-      );
 
       await refetchPreview().catch(() => undefined);
     } catch (error) {
       if (isSuggestionRefusedWithoutAi(error)) {
-        capturePortfolioImportFunnelEvent(
-          posthog,
-          PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSuggestionRequested,
-          {
-            mapping_source: "disabled",
-            outcome: "succeeded",
-            stage: "column_mapping",
-          },
-        );
         return;
       }
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSaved,
-        {
-          error_category: "save",
-          outcome: "failed",
-          stage: "column_mapping",
-        },
-      );
       setStepRecovery({
         descriptionKey: "portfolio-import-column-mapping-error-description",
         onDiscard: clearTransientState,
@@ -674,15 +618,6 @@ const PortfolioTransactionImportModal: React.FC<
         step: "columnMapping",
         titleKey: "portfolio-import-column-mapping-error-title",
       });
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSuggestionRequested,
-        {
-          outcome: "failed",
-          stage: "column_mapping",
-          error_category: "suggestion",
-        },
-      );
     }
   };
   const requestColumnMappingSuggestion = useEffectEvent(
@@ -752,6 +687,11 @@ const PortfolioTransactionImportModal: React.FC<
         transformations,
       });
     } catch {
+      track("import_failed", {
+        kind: "portfolio",
+        format: "broker_csv",
+        step: "mapping",
+      });
       setStepRecovery({
         descriptionKey: "portfolio-import-column-mapping-error-description",
         onDiscard: clearTransientState,
@@ -770,15 +710,25 @@ const PortfolioTransactionImportModal: React.FC<
       return;
     }
 
-    capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.mappingSaved, {
-      outcome: "succeeded",
-      stage: "column_mapping",
-      used_ai_mapping: Boolean(currentMappingSource === "llm"),
-    });
 
     setStepRecovery(undefined);
     await refetchPreview().catch(() => undefined);
   };
+
+  // Read, and its columns known (matched by hand or by the broker's layout): `import_mapped`,
+  // once per import.
+  const mappedImportSessionIdsRef = useRef(new Set<number>());
+  useEffect(() => {
+    if (!activeImportSessionId) return;
+    if (
+      preview?.status !== "needs_asset_review" &&
+      preview?.status !== "ready_to_import"
+    )
+      return;
+    if (mappedImportSessionIdsRef.current.has(activeImportSessionId)) return;
+    mappedImportSessionIdsRef.current.add(activeImportSessionId);
+    track("import_mapped", { kind: "portfolio", format: "broker_csv" });
+  }, [activeImportSessionId, preview?.status]);
 
   useEffect(() => {
     if (pendingFinalizationSessionId !== activeImportSessionId) return;
@@ -827,23 +777,12 @@ const PortfolioTransactionImportModal: React.FC<
     if (!activeImportSessionId) return;
 
     setStepRecovery(undefined);
-    capturePortfolioImportFunnelEvent(posthog, PORTFOLIO_IMPORT_FUNNEL_EVENTS.confirmClicked, {
-      outcome: "started",
-      stage: "confirm",
-    });
+    track("import_reviewed", { kind: "portfolio", format: "broker_csv" });
 
     setPendingFinalizationSessionId(activeImportSessionId);
     setInvalidatedFinalizationSessionId(undefined);
     try {
       await refetchPreview();
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.confirmSucceeded,
-        {
-          outcome: "succeeded",
-          stage: "confirm",
-        },
-      );
     } catch {
       setPendingFinalizationSessionId(undefined);
       setStepRecovery({
@@ -855,15 +794,11 @@ const PortfolioTransactionImportModal: React.FC<
         step: "confirm",
         titleKey: "portfolio-import-confirm-error-title",
       });
-      capturePortfolioImportFunnelEvent(
-        posthog,
-        PORTFOLIO_IMPORT_FUNNEL_EVENTS.confirmFailed,
-        {
-          outcome: "failed",
-          stage: "confirm",
-          error_category: "confirm",
-        },
-      );
+      track("import_failed", {
+        kind: "portfolio",
+        format: "broker_csv",
+        step: "commit",
+      });
     }
   };
 

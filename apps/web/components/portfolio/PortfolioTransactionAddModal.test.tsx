@@ -40,9 +40,6 @@ vi.mock("@/lib/api/portfolio/useCreatePortfolioTransaction", () => ({
 vi.mock("@/lib/api/useRateLimitToast", () => ({
   useRateLimitToast: () => () => false,
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("../ui/TickerAutoComplete", () => ({
   default: ({

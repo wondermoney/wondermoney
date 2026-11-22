@@ -13,6 +13,8 @@ pnpm --filter @wondermoney/shared analytics-events
 ```
 
 `tests/analytics/` checks every entry against the rules below, and fails when the page is stale.
+Renaming or removing an event adds its old name to `legacy-names.ts`, which the page lists, so
+an insight across the change can combine the two.
 
 ## The rules
 

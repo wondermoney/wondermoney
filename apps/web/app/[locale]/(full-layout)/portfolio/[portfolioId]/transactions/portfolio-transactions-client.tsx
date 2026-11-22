@@ -3,7 +3,6 @@
 import { endOfDay, startOfDay, subDays } from "date-fns";
 import { Download, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
 
@@ -36,37 +35,15 @@ export default function PortfolioTransactionsClient({
   initialImportOpen = false,
 }: PortfolioTransactionsClientProps) {
   const t = useTranslations();
-  const posthog = usePostHog();
 
   const [isAddManualTransactionModalOpen, setIsAddManualTransactionOpen] =
     useState(false);
   const openAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(true);
-    posthog.capture("portfolio_transaction_table_add_manual_transaction", {
-      action: "open",
-    });
-  };
-  const closeAddManualTransactionModal = () => {
-    setIsAddManualTransactionOpen(false);
-    posthog.capture("portfolio_transaction_table_add_manual_transaction", {
-      action: "close",
-    });
   };
 
   const [isImportTransactionModalOpen, setImportTransactionModalOpen] =
     useState(initialImportOpen);
-  const openImportTransactionModal = () => {
-    setImportTransactionModalOpen(true);
-    posthog.capture("portfolio_transaction_table_import_transaction", {
-      action: "open",
-    });
-  };
-  const closeImportTransactionModal = () => {
-    setImportTransactionModalOpen(false);
-    posthog.capture("portfolio_transaction_table_import_transaction", {
-      action: "close",
-    });
-  };
 
   // Table stuff
   // We track this to distinguish between the user filtering the table and the initial load
@@ -110,13 +87,7 @@ export default function PortfolioTransactionsClient({
         />
         <PortfolioTransactionAddModal
           isOpen={isAddManualTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeAddManualTransactionModal();
-            } else {
-              openAddManualTransactionModal();
-            }
-          }}
+          setOpen={setIsAddManualTransactionOpen}
           defaultPortfolioId={portfolioId}
           onImportTransactions={createPortfolioImportHandoff(
             setIsAddManualTransactionOpen,
@@ -127,13 +98,7 @@ export default function PortfolioTransactionsClient({
         <PortfolioTransactionImportModal
           defaultPortfolioId={portfolioId}
           isOpen={isImportTransactionModalOpen}
-          setOpen={(open) => {
-            if (!open) {
-              closeImportTransactionModal();
-            } else {
-              openImportTransactionModal();
-            }
-          }}
+          setOpen={setImportTransactionModalOpen}
           trigger={null}
         />
       </>
@@ -149,13 +114,7 @@ export default function PortfolioTransactionsClient({
         <div className="flex items-center gap-2">
           <PortfolioTransactionAddModal
             isOpen={isAddManualTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeAddManualTransactionModal();
-              } else {
-                openAddManualTransactionModal();
-              }
-            }}
+            setOpen={setIsAddManualTransactionOpen}
             trigger={
               <Button
                 aria-label={t("add-transaction")}
@@ -190,13 +149,7 @@ export default function PortfolioTransactionsClient({
             }
             defaultPortfolioId={portfolioId}
             isOpen={isImportTransactionModalOpen}
-            setOpen={(open) => {
-              if (!open) {
-                closeImportTransactionModal();
-              } else {
-                openImportTransactionModal();
-              }
-            }}
+            setOpen={setImportTransactionModalOpen}
           />
         </div>
       </div>

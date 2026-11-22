@@ -2,7 +2,6 @@
 
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { memo, useCallback, useMemo, useState } from "react";
 
 import { Amount } from "@/components/ui/Amount";
@@ -65,7 +64,6 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   const formatCurrency = useFormatCurrency();
   const locale = useLocale();
   const router = useRouter();
-  const posthog = usePostHog();
   const isDesktop = useBreakpoint("md");
 
   const [budgetData, setBudgetData] = useState<{
@@ -79,7 +77,6 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   const editBudgetCloseModal = () => {
     setEditBudgetModalIsOpen(false);
     setBudgetData({ name: null, key: null });
-    posthog.capture("edit_budget_modal", { action: "closed" });
   };
   const editBudgetOpenModal = useCallback(
     (rowIndex: number) => {
@@ -92,25 +89,22 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
         periodStartDay,
       });
       setEditBudgetModalIsOpen(true);
-      posthog.capture("edit_budget_modal", { action: "opened" });
     },
-    [budgets, posthog],
+    [budgets],
   );
 
   const [deleteBudgetModalIsOpen, setDeleteBudgetModalIsOpen] = useState(false);
   const deleteBudgetCloseModal = () => {
     setDeleteBudgetModalIsOpen(false);
     setBudgetData({ name: null, key: null });
-    posthog.capture("delete_budget_modal", { action: "closed" });
   };
   const deleteBudgetOpenModal = useCallback(
     (rowIndex: number) => {
       const { name, budgetKey } = budgets[rowIndex];
       setBudgetData({ name, key: budgetKey });
       setDeleteBudgetModalIsOpen(true);
-      posthog.capture("delete_budget_modal", { action: "opened" });
     },
-    [budgets, posthog],
+    [budgets],
   );
 
   const columnHelper = useMemo(() => createColumnHelper<BudgetFull>(), []);
@@ -373,7 +367,6 @@ const BudgetsTable: React.FC<BudgetsTableProps> = memo(({ budgets }) => {
   );
 
   const onRowClick = (row: Row<BudgetFull>) => {
-    posthog.capture("budgets_table_row_clicked");
     // The budget month today is in, which the budget's start day decides: the
     // API lists each budget in it.
     const { budgetKey, year, month } = row.original;

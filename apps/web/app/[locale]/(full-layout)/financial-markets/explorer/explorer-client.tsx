@@ -3,7 +3,6 @@
 import { Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 import FinancialMarketsExplorerEmptyState from "@/components/financial-market/FinancialMarketsExplorerEmptyState";
@@ -28,7 +27,6 @@ interface ExplorerClientProps {
 
 export default function ExplorerClient({ initialTicker }: ExplorerClientProps) {
   const t = useTranslations();
-  const posthog = usePostHog();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: watchlistSymbols = [] } = useWatchlist();
@@ -50,7 +48,6 @@ export default function ExplorerClient({ initialTicker }: ExplorerClientProps) {
 
   const onTickerSelected = (ticker: string) => {
     setSelectedTicker(ticker);
-    posthog.capture("financial_markets_ticker_selected", { ticker });
     const params = new URLSearchParams(searchParams.toString());
     params.set("ticker", ticker);
     router.replace(`?${params.toString()}`, { scroll: false });

@@ -4,17 +4,10 @@ import { test } from "vitest";
 
 import { completeOfflineAccountCreation } from "./offline-account-success";
 
-test("manual account success refetches and opens CSV import when analytics throws", async () => {
+test("manual account success refetches, closes, resets, notifies and opens CSV import in order", async () => {
   const calls: string[] = [];
 
   await completeOfflineAccountCreation({
-    analytics: {
-      capture: () => {
-        calls.push("capture");
-        throw new Error("analytics unavailable");
-      },
-    },
-    analyticsProperties: { connection_type: "manual" },
     invalidateAccounts: async () => {
       calls.push("refetch");
     },
@@ -27,7 +20,6 @@ test("manual account success refetches and opens CSV import when analytics throw
   });
 
   assert.deepEqual(calls, [
-    "capture",
     "refetch",
     "close",
     "reset",

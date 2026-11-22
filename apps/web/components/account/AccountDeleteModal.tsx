@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React from "react";
 
 import useDeleteAccount from "@/lib/api/account/useDeleteAccount";
@@ -34,10 +33,8 @@ const AccountDeleteModal: React.FC<AccountDeleteModalProps> = ({
   const t = useTranslations();
   const deleteAccountMutation = useDeleteAccount();
   const qc = useQueryClient();
-  const posthog = usePostHog();
 
   const onDeleteAccount = () => {
-    posthog.capture("account_delete");
     deleteAccountMutation.mutate(
       { accountKey },
       {

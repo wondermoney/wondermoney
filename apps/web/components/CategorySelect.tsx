@@ -2,7 +2,6 @@
 
 import { Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React, {
   useCallback,
   useEffect,
@@ -95,7 +94,6 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
     const [open, setOpen] = useState(false);
     const isDesktop = useMediaQuery("(min-width: 768px)");
     const t = useTranslations();
-    const posthog = usePostHog();
     const router = useRouter();
     const triggerButtonProps = {
       ...triggerProps,
@@ -114,15 +112,6 @@ const CategorySelect: React.FC<CategorySelectProps> = React.memo(
       disabled: loading || triggerProps?.disabled,
       loading: triggerProps?.loading ?? loading,
     };
-    const onOpenChange = useCallback(
-      (open: boolean) => {
-        posthog.capture("account_transaction_review_category_menu", {
-          action: open ? "open" : "close",
-        });
-      },
-      [posthog],
-    );
-
     const [value, setValue] = useState<string | undefined>(initialValue);
 
     const onSelectInternalHandler = useCallback(

@@ -22,9 +22,6 @@ import PortfolioDashboardSummary from "./PortfolioDashboardSummary";
 import PortfolioHoldingsTable from "./PortfolioHoldingsTable";
 
 vi.mock("next/image", () => ({ default: () => null }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("next/navigation", () => ({
   usePathname: () => "/en/portfolio",
   useRouter: () => ({ push: () => {}, replace: () => {} }),
