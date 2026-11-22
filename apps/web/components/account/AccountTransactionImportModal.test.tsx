@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => ({
   startRead: vi.fn(async () => ({ id: "pdf-1", status: "parsing" })),
   cancelImport: vi.fn(async () => ({})),
   toastError: vi.fn(),
+  track: vi.fn(),
   aiHidden: false,
   statementImport: null as null | {
     maxBytes: number;
@@ -87,9 +88,7 @@ vi.mock("@/lib/api/useRateLimitToast", () => ({
 vi.mock("@/lib/api/user-preferences/useAiHidden", () => ({
   default: () => mocks.aiHidden,
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
+vi.mock("@/lib/analytics/track", () => ({ track: mocks.track }));
 
 beforeAll(() => {
   globalThis.ResizeObserver ??= class {
@@ -118,6 +117,7 @@ beforeEach(() => {
   mocks.startRead.mockClear();
   mocks.cancelImport.mockClear();
   mocks.toastError.mockClear();
+  mocks.track.mockClear();
   mocks.aiHidden = false;
   mocks.statementImport = null;
   mocks.provider = { kind: "anthropic", name: "Anthropic" };
@@ -263,6 +263,11 @@ test("a file from any bank is read as soon as it is picked, and is staged for re
   // Nothing is imported yet: the dialog moves on to the review.
   assert.equal((await screen.findByTestId("review")).textContent, "import-1");
   assert.equal(mocks.toastError.mock.calls.length, 0);
+  // The funnel's first two steps: the file chosen, then staged for review.
+  assert.deepEqual(mocks.track.mock.calls, [
+    ["import_started", { kind: "transactions", format: "statement" }],
+    ["import_mapped", { kind: "transactions", format: "statement" }],
+  ]);
 });
 
 test("a supported bank's own export is staged without columns", async () => {
@@ -595,6 +600,10 @@ test("a PDF statement the upload fails for closes its import and says so", async
   ]);
   assert.equal(mocks.startRead.mock.calls.length, 0);
   assert.equal(screen.queryByTestId("review"), null);
+  assert.deepEqual(mocks.track.mock.calls, [
+    ["import_started", { kind: "transactions", format: "pdf" }],
+    ["import_failed", { kind: "transactions", format: "pdf", step: "upload" }],
+  ]);
 });
 
 test("a household that used today's statement imports is told when they come back", async () => {

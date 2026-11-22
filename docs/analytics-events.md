@@ -35,7 +35,7 @@ follow are in `packages/shared/lib/analytics/README.md`.
 | `import_started` | web | behavioural | Imports | A file was chosen to import.<br>`kind`: `transactions`, `portfolio`. Transactions into accounts, or a portfolio from a broker export.<br>`format` (optional): one of 9 values, [listed below](#import_started-format). The file format, once known (`statement` is a bank CSV, `pdf` the AI statement import). |
 | `login` | server | service | Retention | An existing account signed in, once per session.<br>`method`: `email`, `google`, `apple`, `oidc`, `other`. How the person signed in.<br>`locale`: `EN`, `PT`, `ES`. The language of the account. |
 | `onboarding_completed` | web, mobile | behavioural | Activation | The person finished onboarding.<br>none |
-| `onboarding_started` | web | behavioural | Activation | The person began onboarding, once per account.<br>none |
+| `onboarding_started` | web | behavioural | Activation | The person began onboarding, once per browser (the progress is kept in browser storage).<br>none |
 | `onboarding_step_skipped` | web | behavioural | Activation | The person skipped a step of onboarding.<br>`step`: `welcome`, `goals`, `privacy`, `account`, `sync_value`, `completion`. The onboarding step. |
 | `onboarding_step_viewed` | web | behavioural | Activation | A step of onboarding was shown, once per step and visit.<br>`step`: `welcome`, `goals`, `privacy`, `account`, `sync_value`, `completion`. The onboarding step. |
 | `sign_in_completed` | mobile | behavioural | Retention | An existing account signed in to the app.<br>`provider`: `email`, `apple`, `google`. How the person signed in. |
@@ -349,7 +349,7 @@ event counted only browsers with analytics consent.
 | `$pageview` | `feature_screen_viewed` | The screen identifier replaces the URL. |
 | `account_add_modal` | removed |  |
 | `account_add_offline_modal` | removed |  |
-| `account_add_sync_before_redirect` | `bank_connection_started` | Also sent when the SimpleFIN setup opens, with `provider`. |
+| `account_add_sync_before_redirect` | `bank_connection_started` | Also sent when a SimpleFIN token is sent, with `provider`. |
 | `account_add_sync_modal` | removed |  |
 | `account_add_sync_success` | `bank_connection_completed` |  |
 | `account_added_manual` | `account_created` |  |
@@ -402,13 +402,13 @@ event counted only browsers with analytics consent.
 | `first_run_account_connect_returned` | removed | How a connection ends is `bank_connection_completed` or `bank_connection_failed`. |
 | `first_run_account_requisition_created` | removed |  |
 | `first_run_account_requisition_failed` | removed |  |
-| `first_run_account_skip_confirmed` | `onboarding_step_skipped` | With `step: account`. |
+| `first_run_account_skip_confirmed` | `onboarding_step_skipped` | Sent with `first_run_step_skipped` for the account step: count one of the two. |
 | `first_run_account_skip_warning_viewed` | removed |  |
 | `first_run_goals_selected` | removed |  |
 | `first_run_manual_account_clicked` | removed | The account is `account_created` with `method: manual`. |
-| `first_run_onboarding_completed` | `onboarding_completed` |  |
-| `first_run_onboarding_started` | `onboarding_started` |  |
-| `first_run_onboarding_step_viewed` | `onboarding_step_viewed` |  |
+| `first_run_onboarding_completed` | `onboarding_completed` | Sent with `onboarding_completed`: count one of the two. |
+| `first_run_onboarding_started` | `onboarding_started` | Sent with `onboarding_started`: count one of the two. |
+| `first_run_onboarding_step_viewed` | `onboarding_step_viewed` | Once per step and visit, as now. |
 | `first_run_step_skipped` | `onboarding_step_skipped` |  |
 | `goal_created` | `goal_created` |  |
 | `link_existing_budget_accounts_success` | removed |  |
@@ -416,7 +416,7 @@ event counted only browsers with analytics consent.
 | `onboarding_completed` | `onboarding_completed` |  |
 | `onboarding_started` | `onboarding_started` |  |
 | `onboarding_step_completed` | removed | The next `onboarding_step_viewed` shows the step was passed. |
-| `onboarding_step_viewed` | `onboarding_step_viewed` |  |
+| `onboarding_step_viewed` | `onboarding_step_viewed` | Repeated on every render of a step; count `first_run_onboarding_step_viewed` instead. |
 | `portfolio_create_modal` | removed |  |
 | `portfolio_created` | removed |  |
 | `portfolio_holding_details_opened` | removed |  |
@@ -443,7 +443,7 @@ event counted only browsers with analytics consent.
 | `signup_started` | `signup_started` |  |
 | `signup_submit_clicked` | removed |  |
 | `signup_submit_failed` | `signup_failed` | `failure_category` is now `reason`. |
-| `signup_submit_succeeded` | `signup` |  |
+| `signup_submit_succeeded` | `signup` | Sent with `signup_completed`: count one of the two. |
 | `transaction_added` | removed |  |
 | `transaction_categorized` | removed |  |
 | `transaction_edited` | removed |  |

@@ -11,16 +11,19 @@
  * - a string value that holds an email address.
  *
  * PostHog's own properties (`$`-prefixed, `distinct_id`, `token`) are left alone, except the
- * page's address, which PostHog adds to every event: `$current_url`, `$pathname` and
- * `$referrer` (and their `$initial_` copies) name records (`/accounts/123`) and can carry a
- * bank's callback query. The screen is `feature_screen_viewed`'s `screen` instead.
+ * addresses PostHog adds to every event: the page's (`$current_url`, `$pathname`), where the
+ * person came from (`$referrer`, `$referring_domain`), and the copies kept for the session's
+ * first page and the previous one (`$initial_*`, `$session_entry_*`, `$prev_pageview_*`). They
+ * name records (`/accounts/123`) and can carry an invite token or a bank's callback query. The
+ * screen is `feature_screen_viewed`'s `screen` instead.
  */
 const IDENTIFIER_KEY = /(?:^|_)(?:id|ids|key|keys)$|[a-z0-9](?:Id|Ids|Key|Keys)$/u;
 const SENSITIVE_KEY =
   /(account_name|balance|email|error_detail|error_message|merchant|password|raw|token)/iu;
 const EMAIL_VALUE = /[^\s@]+@[^\s@]+\.[^\s@]+/u;
 const POSTHOG_KEYS = new Set(["distinct_id", "token"]);
-const POSTHOG_ADDRESS_KEY = /^\$(?:initial_)?(?:current_url|pathname|referrer)$/u;
+const POSTHOG_ADDRESS_KEY =
+  /^\$(?:(?:initial_|session_entry_|prev_pageview_)(?:url|current_url|pathname|referrer|referring_domain|host)|current_url|pathname|referrer|referring_domain)$/u;
 
 function isPlainValue(value: unknown): boolean {
   if (value === null) return true;

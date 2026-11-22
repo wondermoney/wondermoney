@@ -215,14 +215,13 @@ const AccountTransactionImportModal: React.FC<
       if (!nextMapping) setMapping(response.data.mapping);
     } catch (error) {
       if (sequence !== readSequenceRef.current) return;
-      if (!notifyIfRateLimited(error)) {
+      track("import_failed", {
+        kind: "transactions",
+        format: "statement",
+        step: "read",
+      });
+      if (!notifyIfRateLimited(error))
         setReadError(t("import-statement-unreadable"));
-        track("import_failed", {
-          kind: "transactions",
-          format: "statement",
-          step: "read",
-        });
-      }
       setPreview(undefined);
     } finally {
       if (sequence === readSequenceRef.current) setIsReading(false);
@@ -355,6 +354,11 @@ const AccountTransactionImportModal: React.FC<
         fileName: file.name,
       });
     } catch (error) {
+      track("import_failed", {
+        kind: "transactions",
+        format: "pdf",
+        step: "upload",
+      });
       if (notifyIfRateLimited(error)) return;
       if (isEmailVerificationRequiredError(error)) setBlockedBy("verification");
       else if (isAiAllowanceExhaustedError(error)) setBlockedBy("allowance");

@@ -78,10 +78,8 @@ export default function FirstRunOnboardingRouteShell({
       previousState.status === "not_started"
         ? markFirstRunStarted(user.id)
         : previousState;
-    const nextState =
-      startedState.currentStep === currentStep
-        ? startedState
-        : patchFirstRunState({ currentStep }, user.id);
+    if (startedState.currentStep !== currentStep)
+      patchFirstRunState({ currentStep }, user.id);
 
     if (previousState.status === "not_started") track("onboarding_started");
 

@@ -49,6 +49,13 @@ describe("web analytics property scrub", () => {
         $initial_current_url: "https://app.example.com/en/accounts/123",
         $initial_pathname: "/en/accounts/123",
         $initial_referrer: "$direct",
+        $referring_domain: "bank.example",
+        $session_entry_url: "https://app.example.com/en/join?token=abc",
+        $session_entry_pathname: "/en/join",
+        $session_entry_referrer: "https://bank.example/consent?code=abc",
+        $session_entry_referring_domain: "bank.example",
+        $session_entry_host: "app.example.com",
+        $prev_pageview_pathname: "/en/accounts/123",
       }),
       posthogOwn,
     );

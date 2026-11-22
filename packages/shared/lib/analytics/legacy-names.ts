@@ -29,19 +29,31 @@ export const LEGACY_WEB_EVENT_NAMES: Readonly<Record<string, LegacyEventName>> =
     note: '`failure_category` is now `reason`.',
   },
   onboarding_started: { now: 'onboarding_started' },
-  first_run_onboarding_started: { now: 'onboarding_started' },
-  onboarding_step_viewed: { now: 'onboarding_step_viewed' },
-  first_run_onboarding_step_viewed: { now: 'onboarding_step_viewed' },
+  first_run_onboarding_started: {
+    now: 'onboarding_started',
+    note: 'Sent with `onboarding_started`: count one of the two.',
+  },
+  onboarding_step_viewed: {
+    now: 'onboarding_step_viewed',
+    note: 'Repeated on every render of a step; count `first_run_onboarding_step_viewed` instead.',
+  },
+  first_run_onboarding_step_viewed: {
+    now: 'onboarding_step_viewed',
+    note: 'Once per step and visit, as now.',
+  },
   first_run_step_skipped: { now: 'onboarding_step_skipped' },
   first_run_account_skip_confirmed: {
     now: 'onboarding_step_skipped',
-    note: 'With `step: account`.',
+    note: 'Sent with `first_run_step_skipped` for the account step: count one of the two.',
   },
   onboarding_completed: { now: 'onboarding_completed' },
-  first_run_onboarding_completed: { now: 'onboarding_completed' },
+  first_run_onboarding_completed: {
+    now: 'onboarding_completed',
+    note: 'Sent with `onboarding_completed`: count one of the two.',
+  },
   account_add_sync_before_redirect: {
     now: 'bank_connection_started',
-    note: 'Also sent when the SimpleFIN setup opens, with `provider`.',
+    note: 'Also sent when a SimpleFIN token is sent, with `provider`.',
   },
   first_run_account_before_redirect: { now: 'bank_connection_started' },
   'account-transactions-import-started': {
@@ -60,7 +72,10 @@ export const LEGACY_WEB_EVENT_NAMES: Readonly<Record<string, LegacyEventName>> =
   portfolio_import_confirm_failed: { now: 'import_failed' },
 
   // Recorded on the server now (service events)
-  signup_submit_succeeded: { now: 'signup' },
+  signup_submit_succeeded: {
+    now: 'signup',
+    note: 'Sent with `signup_completed`: count one of the two.',
+  },
   signup_completed: { now: 'signup' },
   first_account_added: { now: 'first_account_created' },
   account_added_manual: { now: 'account_created' },

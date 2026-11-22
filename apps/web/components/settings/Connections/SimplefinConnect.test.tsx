@@ -17,7 +17,10 @@ const state = vi.hoisted(() => ({
   features: {} as InstanceDescription["features"],
   get: vi.fn(),
   post: vi.fn(),
+  track: vi.fn(),
 }));
+
+vi.mock("@/lib/analytics/track", () => ({ track: state.track }));
 
 vi.mock("@/lib/api/api", () => ({
   default: { delete: vi.fn(), get: state.get, post: state.post },
@@ -51,6 +54,7 @@ afterEach(() => {
   cleanup();
   state.get.mockReset();
   state.post.mockReset();
+  state.track.mockReset();
   vi.restoreAllMocks();
 });
 
@@ -117,7 +121,12 @@ test("posts the setup token once, clears the field as it is sent and stores it n
 
   const { field, user } = await openAndPaste(TOKEN);
   assert.equal(field.value, TOKEN);
+  // Opening the setup is not a start; sending the token is.
+  assert.deepEqual(state.track.mock.calls, []);
   await user.click(screen.getByRole("button", { name: m.submit }));
+  assert.deepEqual(state.track.mock.calls, [
+    ["bank_connection_started", { provider: "simplefin" }],
+  ]);
 
   await waitFor(() => assert.equal(state.post.mock.calls.length, 1));
   assert.deepEqual(state.post.mock.calls[0], [

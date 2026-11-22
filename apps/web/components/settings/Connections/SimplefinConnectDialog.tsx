@@ -93,15 +93,12 @@ export default function SimplefinConnectDialog({
     onOpenChange(next);
   };
 
-  // Opening the setup is SimpleFIN's start; how it ends is the server's
-  // bank_connection_completed or _failed.
-  useEffect(() => {
-    if (open) track("bank_connection_started", { provider: "simplefin" });
-  }, [open]);
-
   const onSubmit = form.handleSubmit(({ setupToken }) => {
     setError(null);
     form.reset(emptyValues);
+    // Sending the token is SimpleFIN's start, as on mobile; how it ends is the
+    // server's bank_connection_completed or _failed.
+    track("bank_connection_started", { provider: "simplefin" });
     connect.mutate(setupToken.trim(), {
       onSuccess: ({ connectionId }) => {
         toast.success(t("success"));

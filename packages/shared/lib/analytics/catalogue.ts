@@ -437,7 +437,8 @@ export const ANALYTICS_EVENTS = {
     },
   },
   onboarding_started: {
-    description: 'The person began onboarding, once per account.',
+    description:
+      'The person began onboarding, once per browser (the progress is kept in browser storage).',
     surfaces: ['web'],
     tier: 'behavioural',
     question: 'activation',

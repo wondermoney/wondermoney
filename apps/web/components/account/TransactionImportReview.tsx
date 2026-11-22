@@ -237,8 +237,8 @@ export default function TransactionImportReview({
   const commitWithCategories = async () => {
     const analytics = { kind: "transactions", format: session.format } as const;
     track("import_reviewed", analytics);
-    try {
-      if (sourceCategories.length > 0) {
+    if (sourceCategories.length > 0) {
+      try {
         await mapCategories.mutateAsync({
           id: importId,
           input: Object.fromEntries(
@@ -251,7 +251,12 @@ export default function TransactionImportReview({
             }),
           ),
         });
+      } catch (error) {
+        track("import_failed", { ...analytics, step: "review" });
+        throw error;
       }
+    }
+    try {
       await commit.mutateAsync({
         id: importId,
         input: { acknowledgeMismatch: mismatch && mismatchAcknowledged },
