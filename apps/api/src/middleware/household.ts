@@ -72,6 +72,7 @@ export const VIEWER_PERSONAL_WRITES: readonly PersonalWrite[] = [
   { method: 'POST', mount: '/v1/user', path: '/pairing-codes' },
   { method: 'DELETE', mount: '/v1/user', path: '/devices/:sessionId' },
   { method: 'PATCH', mount: '/v1/user', path: '/me/email-notification-preferences' },
+  { method: 'PUT', mount: '/v1/user', path: '/me/service-analytics' },
   { method: 'PATCH', mount: '/v1/user', path: '/me/push-preferences' },
   { method: 'POST', mount: '/v1/user', path: '/me/push-devices' },
   { method: 'DELETE', mount: '/v1/user', path: '/me/push-devices/:token' },

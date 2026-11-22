@@ -10,6 +10,7 @@ import { listMcpCalls } from '@controller/mcp';
 import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
 import { getPushPreferences, patchPushPreferences, registerPushDevice, sendTestPush, unregisterPushDevice } from '@controller/push';
+import { getServiceAnalytics, putServiceAnalytics } from '@controller/service-analytics';
 import {
   completeOnboardingStep,
   deleteCurrentUserAccount,
@@ -57,6 +58,8 @@ router.post('/me/push-devices', registerPushDevice);
 router.delete('/me/push-devices/:token', unregisterPushDevice);
 router.post('/me/push-test', pushTestRateLimit(), sendTestPush);
 router.get('/me/preferences', getPreferences);
+router.get('/me/service-analytics', getServiceAnalytics);
+router.put('/me/service-analytics', putServiceAnalytics);
 router.patch('/me/preferences', patchPreferences);
 router.get('/me/onboarding', getOnboardingBootstrap);
 router.get('/me/exports', listDataExports);

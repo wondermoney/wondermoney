@@ -34,8 +34,12 @@ interface RecordOptions {
   eventId?: string;
 }
 
-/** The person the event is about; a missing one (an unloaded relation) records nothing. */
-type Subject = null | Pick<Appuser, 'externalUserId'> | undefined;
+/**
+ * The person the event is about; a missing one (an unloaded relation) records nothing, and nor
+ * does one who objected to service analytics (`analyticsObjectedAt`, Settings → Privacy). The
+ * outbox worker checks the objection again before delivering.
+ */
+type Subject = null | (Partial<Pick<Appuser, 'accountType' | 'analyticsObjectedAt'>> & Pick<Appuser, 'externalUserId'>) | undefined;
 
 export async function recordServiceEvent<E extends ServiceEventName>(
   em: EventEm,
@@ -47,6 +51,7 @@ export async function recordServiceEvent<E extends ServiceEventName>(
   // Accounts from before the current sign-in may have no canonical identity to send.
   const distinctId = subject?.externalUserId;
   if (typeof distinctId !== 'string' || !isCanonicalExternalUserId(distinctId)) return;
+  if (subject?.analyticsObjectedAt) return;
   try {
     await recordAnalyticsOutboxEvent(em, {
       distinctId,
@@ -143,7 +148,7 @@ let recordedActiveDay = '';
  */
 export async function recordUserActive(
   em: EventEm,
-  subject: null | (Partial<Pick<Appuser, 'accountType'>> & Pick<Appuser, 'externalUserId'>) | undefined,
+  subject: Subject,
   platform: AnalyticsPlatform,
   now: Date = new Date(),
   env: NodeJS.ProcessEnv = process.env,

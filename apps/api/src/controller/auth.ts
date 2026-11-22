@@ -41,7 +41,7 @@ export async function authCallback(req: Request, res: Response) {
       // confirming on the /join screen (`POST /v1/household/invites/:token/accept`).
       const sessionId = getAuthSessionId(authUser);
       if (sessionId) {
-        await recordServiceEvent(DI.em, { externalUserId }, 'login', getBaseAnalyticsProperties(existingUserByExternalId, method), {
+        await recordServiceEvent(DI.em, { analyticsObjectedAt: existingUserByExternalId.analyticsObjectedAt, externalUserId }, 'login', getBaseAnalyticsProperties(existingUserByExternalId, method), {
           eventId: loginEventId(sessionId),
         });
       } else {

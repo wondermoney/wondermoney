@@ -17,6 +17,7 @@ import { SettingsField, SettingsPage, SettingsSection } from '@/features/more/se
 import { useAccountLanguageSync } from './account-language'
 import { AiHiddenSection } from './ai-hidden-section'
 import { PreviewFeaturesSection } from './preview-features-section'
+import { ServiceAnalyticsSection } from './service-analytics-section'
 
 const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
 const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
@@ -77,6 +78,8 @@ export function PreferencesScreen() {
       <PreviewFeaturesSection />
 
       <AiHiddenSection />
+
+      <ServiceAnalyticsSection />
     </SettingsPage>
   )
 }

@@ -40,6 +40,7 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack }) }))
 jest.mock('@/features/preferences/preview-features-section', () => ({ PreviewFeaturesSection: () => null }))
 // The AI-hidden section reads the account through the product runtime; same treatment as above.
 jest.mock('@/features/preferences/ai-hidden-section', () => ({ AiHiddenSection: () => null }))
+jest.mock('@/features/preferences/service-analytics-section', () => ({ ServiceAnalyticsSection: () => null }))
 
 function useTestColorScheme() {
   return useSyncExternalStore(
