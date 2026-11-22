@@ -19,9 +19,9 @@ function liveEnv() {
   return { ANALYTICS_OUTBOX_MODE: 'live', POSTHOG_API_KEY: 'test-key' } as NodeJS.ProcessEnv;
 }
 
-function makeHarness(options: { row?: AnalyticsOutbox } = {}) {
+function makeHarness(options: { analyticsObjectedAt?: Date; row?: AnalyticsOutbox } = {}) {
   const row = options.row ?? makeRow();
-  const appuser = { appuserKey: 42, externalUserId: EXTERNAL_USER_ID };
+  const appuser = { analyticsObjectedAt: options.analyticsObjectedAt, appuserKey: 42, externalUserId: EXTERNAL_USER_ID };
   const execute = vi.fn().mockResolvedValue([{ analyticsOutboxKey: row.analyticsOutboxKey }]);
   const tx = {
     find: vi.fn().mockResolvedValue([row]),
@@ -49,7 +49,7 @@ function makeRow(overrides: Partial<AnalyticsOutbox> = {}) {
     distinctId: EXTERNAL_USER_ID,
     eventId: `signup.v1:${EXTERNAL_USER_ID}`,
     eventName: 'signup',
-    properties: { appuser_key: '42', locale: 'EN' },
+    properties: { locale: 'EN', method: 'email' },
     ...overrides,
   });
 }
@@ -210,6 +210,39 @@ describe('analytics outbox worker', () => {
 
   it('never delivers properties containing an email address', async () => {
     const harness = makeHarness({ row: makeRow({ properties: { email: 'ada@example.com' } }) });
+
+    const result = await deliverAnalyticsOutboxBatch({
+      em: harness.em as unknown as NonNullable<AnalyticsOutboxDeps>['em'],
+      env: liveEnv(),
+      logger: harness.logger,
+      posthogClient: harness.posthog,
+    });
+
+    expect(result).toEqual({ blocked: 1, delivered: 0, scanned: 1 });
+    expect(harness.posthog.captureBatch).not.toHaveBeenCalled();
+    expect(harness.row.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it.each([
+    ['a database key written by an older API', makeRow({ properties: { appuser_key: '42', locale: 'EN', method: 'email' } })],
+    ['an event that is not a catalogued service event', makeRow({ eventName: 'account_delete', properties: {} })],
+  ])('never delivers %s', async (_case, row) => {
+    const harness = makeHarness({ row });
+
+    const result = await deliverAnalyticsOutboxBatch({
+      em: harness.em as unknown as NonNullable<AnalyticsOutboxDeps>['em'],
+      env: liveEnv(),
+      logger: harness.logger,
+      posthogClient: harness.posthog,
+    });
+
+    expect(result).toEqual({ blocked: 1, delivered: 0, scanned: 1 });
+    expect(harness.posthog.captureBatch).not.toHaveBeenCalled();
+    expect(harness.row.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it('never delivers a row of someone who objected after it was written', async () => {
+    const harness = makeHarness({ analyticsObjectedAt: new Date('2026-11-21T10:00:00Z') });
 
     const result = await deliverAnalyticsOutboxBatch({
       em: harness.em as unknown as NonNullable<AnalyticsOutboxDeps>['em'],

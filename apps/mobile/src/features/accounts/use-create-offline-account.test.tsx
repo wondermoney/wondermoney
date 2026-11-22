@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { ApiError } from '@/lib/api/errors'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { classifyOfflineAccountCreateFailure, isFirstAccountCreation, useCreateOfflineAccount } from './use-create-offline-account'
+import { classifyOfflineAccountCreateFailure, useCreateOfflineAccount } from './use-create-offline-account'
 
 const mockWrite = jest.fn()
 const mockBlockAccess = jest.fn()
@@ -22,67 +22,17 @@ const payload = { name: 'Cash', currentBalance: 25.5, currencyId: 151, financial
 describe('manual account creation safety', () => {
   beforeEach(() => { mockWrite.mockReset(); mockBlockAccess.mockReset(); captured.mockClear() })
 
-  describe('first_account_created', () => {
-    const succeed = () => mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(undefined); return undefined })
+  // `account_created` and `first_account_created` are recorded by the API.
+  it('sends no analytics when it creates an account', async () => {
+    const { client, wrapper } = setup()
+    client.setQueryData(['accounts', 8], { accounts: [] })
+    mockWrite.mockImplementation(async (_endpoint, options) => { options.commit(undefined); return undefined })
+    const hook = await renderHook(() => useCreateOfflineAccount(), { wrapper })
 
-    it('reports the account that took an onboarding user from zero to one, with the method alone', async () => {
-      const { client, wrapper } = setup()
-      succeed()
-      const hook = await renderHook(() => useCreateOfflineAccount('onboarding'), { wrapper })
+    await act(async () => { await hook.result.current.mutateAsync(payload) })
 
-      await act(async () => { await hook.result.current.mutateAsync(payload) })
-
-      expect(captured.mock.calls).toEqual([['first_account_created', { method: 'manual' }]])
-      // Nothing about the account itself: no name, balance, currency or institution.
-      expect(JSON.stringify(captured.mock.calls)).not.toContain('Cash')
-      expect(JSON.stringify(captured.mock.calls)).not.toContain('25.5')
-      await hook.unmount(); client.clear()
-    })
-
-    it('reports an accounts-tab creation only when the list was read back as empty', async () => {
-      const { client, wrapper } = setup()
-      client.setQueryData(['accounts', 8], { accounts: [] })
-      succeed()
-      const hook = await renderHook(() => useCreateOfflineAccount(), { wrapper })
-
-      await act(async () => { await hook.result.current.mutateAsync(payload) })
-
-      expect(captured.mock.calls).toEqual([['first_account_created', { method: 'manual' }]])
-      await hook.unmount(); client.clear()
-    })
-
-    it('stays silent for a second account and for an unknown list, rather than guessing', async () => {
-      const { client, wrapper } = setup()
-      client.setQueryData(['accounts', 8], { accounts: [{ id: 1 }] })
-      succeed()
-      const hook = await renderHook(() => useCreateOfflineAccount(), { wrapper })
-      await act(async () => { await hook.result.current.mutateAsync(payload) })
-      expect(captured).not.toHaveBeenCalled()
-
-      const unknown = setup()
-      const blind = await renderHook(() => useCreateOfflineAccount(), { wrapper: unknown.wrapper })
-      await act(async () => { await blind.result.current.mutateAsync(payload) })
-      expect(captured).not.toHaveBeenCalled()
-
-      await hook.unmount(); await blind.unmount(); client.clear(); unknown.client.clear()
-    })
-
-    it('captures nothing when the create fails', async () => {
-      const { client, wrapper } = setup()
-      mockWrite.mockRejectedValue(new ApiError('http', 422))
-      const hook = await renderHook(() => useCreateOfflineAccount('onboarding'), { wrapper })
-
-      await act(async () => { await expect(hook.result.current.mutateAsync(payload)).rejects.toBeInstanceOf(ApiError) })
-
-      expect(captured).not.toHaveBeenCalled()
-      await hook.unmount(); client.clear()
-    })
-
-    it('treats an absent list as unknown, not as zero', () => {
-      expect(isFirstAccountCreation('accounts', undefined)).toBe(false)
-      expect(isFirstAccountCreation('accounts', { accounts: [] })).toBe(true)
-      expect(isFirstAccountCreation('onboarding', undefined)).toBe(true)
-    })
+    expect(captured).not.toHaveBeenCalled()
+    await hook.unmount(); client.clear()
   })
 
   it('freezes the exact body, runs once, and awaits current-epoch reconciliation before success', async () => {

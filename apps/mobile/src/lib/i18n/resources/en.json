@@ -4999,6 +4999,14 @@
       "saveError": "Could not save. Try again.",
       "loadError": "Could not load your preferences."
     },
+    "serviceAnalytics": {
+      "heading": "Service analytics",
+      "description": "Counts that tell us whether WonderMoney works and which parts people use.",
+      "label": "Share service analytics",
+      "hint": "The server records a short, fixed list of events about your account, such as signing in, adding an account, a budget or a goal, an import, or a bank connection, keyed by a random identifier and never with amounts, names or other content. Turning this off stops them for every app you use, and removes any not yet sent.",
+      "saving": "Saving…",
+      "saveError": "Could not save. Try again."
+    },
     "appearance": {
       "heading": "Appearance",
       "description": "Change the appearance of the app.",

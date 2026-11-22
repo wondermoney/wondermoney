@@ -28,12 +28,17 @@ export type AnalyticsQuestion = (typeof ANALYTICS_QUESTIONS)[number];
 /**
  * A property is one of a fixed list of values, a boolean, or a count (a whole number of things,
  * never an amount). There is deliberately no free-form string, number or object.
+ *
+ * `code` is the one exception, for a value from a closed list kept outside this package (a
+ * public page's route id, kept by the website): a short code matching `pattern`. Only the
+ * properties listed in `CODE_PROPERTIES` (`catalogue.test.ts`) may use it.
  */
 export type AnalyticsPropertySpec = Readonly<
   { description: string; optional?: true } & (
     | { type: 'enum'; values: readonly [string, ...string[]] }
     | { type: 'boolean' }
     | { type: 'count' }
+    | { type: 'code'; pattern: RegExp }
   )
 >;
 
@@ -56,7 +61,9 @@ type PropertyValue<P> = P extends { type: 'enum'; values: readonly (infer V)[] }
   ? V
   : P extends { type: 'boolean' }
     ? boolean
-    : number;
+    : P extends { type: 'code' }
+      ? string
+      : number;
 
 type RequiredKeys<Props> = {
   [K in keyof Props]: Props[K] extends { optional: true } ? never : K;

@@ -14,6 +14,7 @@ import UserAccountDelete from "../user/UserAccountDelete";
 import AiFeatures from "./AiFeatures";
 import DataExport from "./DataExport";
 import DataRestore, { shouldOfferRestore } from "./DataRestore";
+import ServiceAnalytics from "./ServiceAnalytics";
 
 export default function Privacy() {
   const t = useTranslations();
@@ -27,6 +28,7 @@ export default function Privacy() {
   return (
     <div className="divide-border divide-y">
       <AnalyticsConsent settings />
+      <ServiceAnalytics />
       <AiFeatures />
 
       <div className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-10 py-10 md:grid-cols-3">

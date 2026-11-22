@@ -14,7 +14,7 @@ describe('analytics outbox producer', () => {
       distinctId: EXTERNAL_USER_ID,
       eventId: 'login.v1:session-1',
       eventName: 'login',
-      properties: { $insert_id: 'untrusted', appuser_key: '42' },
+      properties: { $insert_id: 'untrusted', locale: 'EN', method: 'email' },
     };
 
     await recordAnalyticsOutboxEvent({ upsert }, input, LIVE);
@@ -27,7 +27,7 @@ describe('analytics outbox producer', () => {
         distinctId: EXTERNAL_USER_ID,
         eventId: 'login.v1:session-1',
         eventName: 'login',
-        properties: { $insert_id: 'login.v1:session-1', appuser_key: '42' },
+        properties: { $insert_id: 'login.v1:session-1', locale: 'EN', method: 'email' },
       });
       expect(data.createdAt).toBeInstanceOf(Date);
       expect(data.updatedAt).toBe(data.createdAt);
@@ -47,7 +47,7 @@ describe('analytics outbox producer', () => {
       distinctId: EXTERNAL_USER_ID,
       eventId: 'login.v1:session-1',
       eventName: 'login',
-      properties: {},
+      properties: { locale: 'EN', method: 'email' },
     }, env);
 
     expect(upsert).not.toHaveBeenCalled();
@@ -86,5 +86,18 @@ describe('analytics outbox producer', () => {
     }, LIVE)).rejects.toThrow('sensitive data');
 
     expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an event that is not catalogued', 'account_delete', {}, 'account_delete is not in the event catalogue'],
+    ['a behavioural event of the apps', 'feature_screen_viewed', { screen: 'dashboard' }, 'feature_screen_viewed is not sent from server'],
+    ['a property the event does not have', 'login', { appuser_key: '42', locale: 'EN', method: 'email' }, 'login has no property appuser_key'],
+    ['a value outside its list', 'login', { locale: 'EN', method: 'facebook' }, 'login.method is not a valid enum'],
+  ])('refuses %s, whether or not delivery is on', async (_case, eventName, properties, problem) => {
+    for (const env of [LIVE, {}]) {
+      const upsert = vi.fn();
+      await expect(recordAnalyticsOutboxEvent({ upsert }, { distinctId: EXTERNAL_USER_ID, eventId: 'event-1', eventName, properties }, env)).rejects.toThrow(problem);
+      expect(upsert).not.toHaveBeenCalled();
+    }
   });
 });

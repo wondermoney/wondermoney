@@ -37,7 +37,10 @@ vi.mock('@service/household/household-invite.service', () => ({
   consumeInvite: mocked.consumeInvite,
   validateInviteForEmail: mocked.validateInviteForEmail,
 }));
-vi.mock('@service/analytics/analytics-outbox.service', () => ({ recordAnalyticsOutboxEvent: mocked.recordAnalyticsOutboxEvent }));
+vi.mock('@service/analytics/analytics-outbox.service', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@service/analytics/analytics-outbox.service')>(),
+  recordAnalyticsOutboxEvent: mocked.recordAnalyticsOutboxEvent,
+}));
 vi.mock('@service/auth/signup-record.service', () => ({ recordSignup: mocked.recordSignup }));
 vi.mock('@utils/logger', () => ({
   default: { error: mocked.loggerError, info: vi.fn(), warn: vi.fn() },

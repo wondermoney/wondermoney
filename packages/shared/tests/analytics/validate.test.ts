@@ -35,6 +35,20 @@ const FIXTURE = {
     question: 'imports',
     properties: { rows: { type: 'count', description: 'Rows in the file.' } },
   },
+  signup_completed: {
+    description: 'A signup finished.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'activation',
+    properties: {
+      landing_source: {
+        type: 'code',
+        pattern: /^[a-z][A-Za-z0-9]{1,63}$/u,
+        description: 'A page id.',
+        optional: true,
+      },
+    },
+  },
   onboarding_started: {
     description: 'Onboarding began.',
     surfaces: ['mobile'],
@@ -110,6 +124,29 @@ describe('analyticsEventProblems', () => {
     ).toEqual(['report_viewed.filtered is not a valid boolean']);
   });
 
+  it('takes a code only when it matches its pattern and is short', () => {
+    expect(
+      analyticsEventProblems(FIXTURE, 'web', 'signup_completed', {
+        landing_source: 'toolMortgage',
+      }),
+    ).toEqual([]);
+    expect(
+      analyticsEventProblems(FIXTURE, 'web', 'signup_completed', {}),
+    ).toEqual([]);
+    for (const landing_source of [
+      'person@example.com',
+      'tool mortgage',
+      `t${'a'.repeat(70)}`,
+      12,
+    ]) {
+      expect(
+        analyticsEventProblems(FIXTURE, 'web', 'signup_completed', {
+          landing_source,
+        }),
+      ).toEqual(['signup_completed.landing_source is not a valid code']);
+    }
+  });
+
   it('takes a count only as a whole number from zero, never an amount', () => {
     for (const rows of [-1, 12.5, Number.NaN, Number.POSITIVE_INFINITY, '3']) {
       expect(
@@ -180,12 +217,9 @@ describe('createCatalogueCapture', () => {
 
   it('types the real catalogue per surface', () => {
     expectTypeOf<AnalyticsCaptureArgs<'mobile'>[0]>().toEqualTypeOf<
-      | 'bank_connection_completed'
-      | 'bank_connection_failed'
       | 'bank_connection_started'
       | 'feature_screen_viewed'
       | 'feedback_submitted'
-      | 'first_account_created'
       | 'onboarding_completed'
       | 'sign_in_completed'
       | 'sign_up_completed'

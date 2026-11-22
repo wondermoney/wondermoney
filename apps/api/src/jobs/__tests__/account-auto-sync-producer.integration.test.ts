@@ -51,8 +51,10 @@ it.each([
   expect(h.outbox).toHaveBeenCalledTimes(1);
   const event = h.outbox.mock.calls[0]?.[1] as { eventId: string; eventName: string; properties: Record<string, unknown> };
   expect(event.eventName).toBe(eventName);
-  expect(event.eventId).toBe(event.properties['event_id']);
-  expect(h.tx.upsert).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ eventId: event.eventId, properties: expect.objectContaining({ $insert_id: event.eventId, event_id: event.eventId }) }), expect.anything());
-  expect(event.properties).toMatchObject({ account_count: 2, institution_id: 'safe-bank', requisition_context: expect.stringMatching(/^reqctx\.v1:/) });
+  expect(event.eventId).toMatch(/^bank-sync\.v1:[a-f0-9]{64}$/);
+  expect(h.tx.upsert).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ eventId: event.eventId, properties: expect.objectContaining({ $insert_id: event.eventId }) }), expect.anything());
+  expect(event.properties).toMatchObject({ account_count: 2 });
+  // The incident, requisition and institution identify a connection and a person's bank.
+  for (const key of ['incident_id', 'institution_id', 'requisition_context', 'event_id']) expect(event.properties).not.toHaveProperty(key);
   expect(JSON.stringify(event)).not.toContain('raw-connection-secret');
 });

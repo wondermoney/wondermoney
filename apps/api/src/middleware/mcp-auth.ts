@@ -5,6 +5,7 @@ import { setTenantContext } from '@app/database/filters/tenant-filter';
 import { isMcpEnabled } from '@config/mcp';
 import { MCP_SCOPES } from '@middleware/api-token-policy';
 import { getBearerToken } from '@middleware/auth-helpers';
+import { recordUserActive } from '@service/analytics/service-events.service';
 import { authenticateApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
 import { ERROR_CODE, ForbiddenError, NotFoundError, UnauthorizedError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -77,5 +78,6 @@ export async function requireMcpToken(req: Request, _res: Response, next: NextFu
   // Arm the tenant filter and its per-account privacy carve-out on the request EM, exactly as
   // `resolveTenantForRequest` does for a session.
   setTenantContext(DI.em, { appuserKey: appuser.appuserKey, tenantKey: tenant.tenantKey });
+  await recordUserActive(DI.em, appuser, 'api');
   next();
 }

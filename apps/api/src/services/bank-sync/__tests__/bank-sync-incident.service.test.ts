@@ -1,4 +1,5 @@
 import type { EntityManager } from '@mikro-orm/core';
+import { ANALYTICS_EVENTS, analyticsEventProblems } from '@wondermoney/shared';
 import { describe, expect, it, vi } from 'vitest';
 
 import { deterministicRequisitionContext } from '@app/analytics/bank-sync-contract';
@@ -258,7 +259,8 @@ describe('BankSyncIncidentService', () => {
 
     const result = await h.service.finalizeAttempt({ attempt: attempt.attempt, final: true, incidentId: incident.incidentId, result: 'full_success', treatmentEligible: false });
     expect(result.attempt.institutionId).toBeUndefined();
-    expect(h.outbox).toHaveBeenCalledWith(h.tx, expect.objectContaining({ properties: expect.objectContaining({ institution_id: undefined }) }));
+    const sent = h.outbox.mock.calls[0]?.[1] as { properties: Record<string, unknown> };
+    expect(sent.properties).not.toHaveProperty('institution_id');
   });
 
   it('replays a completed attempt when PostgreSQL hydrates omitted optional fields as null', async () => {
@@ -365,9 +367,11 @@ describe('BankSyncIncidentService', () => {
     const attempt = await h.service.startAttempt({ incidentId: incident.incidentId, queueAttempt: 1, queueJobId: `scheduled-${result}` });
     await h.service.finalizeAttempt({ attempt: attempt.attempt, errorCode: result === 'failed' ? 'provider_unavailable' : undefined, final: result === 'full_success', incidentId: incident.incidentId, result, treatmentEligible: false });
     expect(h.outbox).toHaveBeenCalledTimes(1);
-    expect(h.outbox).toHaveBeenCalledWith(h.tx, expect.objectContaining({ eventId: expect.stringMatching(/^bank-sync\.v1:/), eventName, properties: expect.objectContaining({ event_id: expect.stringMatching(/^bank-sync\.v1:/) }) }));
-    const outbox = h.outbox.mock.calls[0]?.[1] as { eventId: string; properties: { event_id: string } };
-    expect(outbox.eventId).toBe(outbox.properties.event_id);
+    expect(h.outbox).toHaveBeenCalledWith(h.tx, expect.objectContaining({ eventId: expect.stringMatching(/^bank-sync\.v1:/), eventName }));
+    // Only catalogued properties: the incident, requisition and institution identify a connection.
+    const outbox = h.outbox.mock.calls[0]?.[1] as { eventName: string; properties: Record<string, unknown> };
+    expect(analyticsEventProblems(ANALYTICS_EVENTS, 'server', outbox.eventName, outbox.properties)).toEqual([]);
+    for (const key of ['incident_id', 'requisition_context', 'institution_id', 'distinct_id', 'event_id']) expect(outbox.properties).not.toHaveProperty(key);
   });
 
   it('propagates persistence/outbox failure through the transaction', async () => {

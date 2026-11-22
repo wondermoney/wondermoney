@@ -4999,6 +4999,14 @@
       "saveError": "Não foi possível guardar. Tenta novamente.",
       "loadError": "Não foi possível carregar as tuas preferências."
     },
+    "serviceAnalytics": {
+      "heading": "Estatísticas do serviço",
+      "description": "Contagens que nos mostram se o WonderMoney funciona e que partes as pessoas usam.",
+      "label": "Partilhar estatísticas do serviço",
+      "hint": "O servidor regista uma lista curta e fixa de eventos sobre a tua conta, como iniciar sessão, adicionar uma conta, um orçamento ou um objetivo, uma importação ou uma ligação bancária, associados a um identificador aleatório e nunca com montantes, nomes ou outro conteúdo. Se desligares, deixam de ser registados em todas as aplicações que usas e os que ainda não foram enviados são apagados.",
+      "saving": "A guardar…",
+      "saveError": "Não foi possível guardar. Tenta novamente."
+    },
     "appearance": {
       "heading": "Aparência",
       "description": "Altera a aparência da aplicação.",

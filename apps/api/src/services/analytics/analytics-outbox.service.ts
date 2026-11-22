@@ -1,4 +1,5 @@
 import type { EntityManager } from '@mikro-orm/core';
+import { ANALYTICS_EVENTS, analyticsEventProblems } from '@wondermoney/shared';
 
 import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 
@@ -37,6 +38,34 @@ export function isCanonicalExternalUserId(externalUserId: string): boolean {
 }
 
 /**
+ * Throws unless the event may be written: a canonical identity, a valid id and name, nothing
+ * sensitive, and a catalogued service event with exactly its properties. Checked whether or not
+ * delivery is on, so a drift fails in tests and on every server alike.
+ */
+export function assertAnalyticsOutboxEvent(input: AnalyticsOutboxEventInput): void {
+  if (!isCanonicalExternalUserId(input.distinctId)) {
+    throw new Error('Analytics outbox distinctId must be a canonical lowercase external UUID');
+  }
+  if (input.eventId.length === 0 || input.eventId.length > EVENT_ID_MAX_LENGTH) {
+    throw new Error('Analytics outbox eventId is invalid');
+  }
+  if (!EVENT_NAME_PATTERN.test(input.eventName)) {
+    throw new Error('Analytics outbox eventName is invalid');
+  }
+  if (hasSensitiveAnalyticsProperties(input.properties)) {
+    throw new Error('Analytics outbox properties contain sensitive data');
+  }
+  // Only a catalogued service event, with exactly its properties (`@wondermoney/shared`'s
+  // ANALYTICS_EVENTS). The problems name keys, never values.
+  // `$insert_id` is the outbox's own, set from the event id on write.
+  const { $insert_id: _insertId, ...properties } = input.properties;
+  const problems = analyticsEventProblems(ANALYTICS_EVENTS, 'server', input.eventName, properties);
+  if (problems.length > 0) {
+    throw new Error(`Analytics outbox event refused: ${problems.join('; ')}`);
+  }
+}
+
+/**
  * Product analytics are opt-in: the worker delivers only with ANALYTICS_OUTBOX_MODE=live (and a
  * POSTHOG_API_KEY). Anything else, including an unset mode, is off, and then no outbox rows are
  * written either, so a self-hosted instance never accumulates events it will not send. Set the
@@ -66,21 +95,6 @@ export async function recordAnalyticsOutboxEvent(
     },
     { onConflictAction: 'ignore', onConflictFields: ['eventId'] },
   );
-}
-
-function assertAnalyticsOutboxEvent(input: AnalyticsOutboxEventInput): void {
-  if (!isCanonicalExternalUserId(input.distinctId)) {
-    throw new Error('Analytics outbox distinctId must be a canonical lowercase external UUID');
-  }
-  if (input.eventId.length === 0 || input.eventId.length > EVENT_ID_MAX_LENGTH) {
-    throw new Error('Analytics outbox eventId is invalid');
-  }
-  if (!EVENT_NAME_PATTERN.test(input.eventName)) {
-    throw new Error('Analytics outbox eventName is invalid');
-  }
-  if (hasSensitiveAnalyticsProperties(input.properties)) {
-    throw new Error('Analytics outbox properties contain sensitive data');
-  }
 }
 
 function containsSensitiveValue(value: unknown, seen: WeakSet<object>): boolean {

@@ -137,7 +137,7 @@ describe('recordSignup', () => {
       distinctId: signupInput.externalUserId,
       eventId: `signup.v1:${signupInput.externalUserId}`,
       eventName: 'signup',
-      properties: { appuser_key: String(result.appuser.appuserKey), locale: 'EN', method: 'email' },
+      properties: { locale: 'EN', method: 'email' },
     });
   });
 

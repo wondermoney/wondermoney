@@ -40,7 +40,7 @@ export function OnboardingCreateAccountRoute() {
   // The activation path: reaching this screen means onboarding is
   // still required, so a successful creation here is a first account by
   // construction rather than by guessing at a cached list.
-  const create = useCreateOfflineAccount('onboarding')
+  const create = useCreateOfflineAccount()
   const completion = useCompleteOnboarding()
   const router = useRouter()
   const [navigationUnlocked, setNavigationUnlocked] = useState(false)

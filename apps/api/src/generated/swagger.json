@@ -5491,6 +5491,24 @@
         }
       }
     },
+    "/v1/user/me/service-analytics": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/user/me/onboarding": {
       "get": {
         "description": "",

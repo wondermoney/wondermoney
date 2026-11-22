@@ -6,6 +6,8 @@ import { zParse } from '@app/validators/parser';
 import type { Tenant } from '@entity/Tenant';
 import { authedUser } from '@middleware/authed-context';
 import accountInitialSyncEnqueueService from '@service/account/account-initial-sync-enqueue.service';
+import { bankConnectionFailureReason } from '@service/analytics/bank-connection-events';
+import { recordServiceEvent, requestPlatform } from '@service/analytics/service-events.service';
 import { BankSyncHistoryService } from '@service/bank-sync/bank-sync-history.service';
 import { connectSimplefin, disconnectSimplefin } from '@service/simplefin/simplefin-connection.service';
 import { InternalServerError } from '@utils/errors';
@@ -30,7 +32,16 @@ export async function connectSimplefinBank(req: Request, res: Response) {
   const tenant = requireTenant(req);
   const { body: { setupToken } } = await zParse(connectSimplefinRequestSchema, req);
 
-  const { bankConnection, connection } = await connectSimplefin(DI.em, { appuser: user, setupToken, tenant });
+  const platform = requestPlatform(req);
+  let connected;
+  try {
+    connected = await connectSimplefin(DI.em, { appuser: user, setupToken, tenant });
+  } catch (error) {
+    await recordServiceEvent(DI.em, user, 'bank_connection_failed', { platform, provider: 'simplefin', reason: bankConnectionFailureReason(error) });
+    throw error;
+  }
+  const { bankConnection, connection } = connected;
+  await recordServiceEvent(DI.em, user, 'bank_connection_completed', { platform, provider: 'simplefin' });
 
   // The connection exists either way; a failed enqueue leaves it to the scheduler's next pass.
   let incidentId: null | string = null;

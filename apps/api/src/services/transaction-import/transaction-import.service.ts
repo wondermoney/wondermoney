@@ -24,6 +24,7 @@ import { resolveAccountCsvImportFormat } from '@service/account/account-csv-impo
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
+import { importCommittedEventId, recordAccountCreated, recordServiceEvent } from '@service/analytics/service-events.service';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
@@ -759,6 +760,7 @@ export class TransactionImportService {
       account.fxStatus = converted.fxStatus;
       this.em.persist(account);
       await this.em.flush();
+      await recordAccountCreated(this.em, owner, { method: 'import' });
       created[label] = account.accountKey;
     }
     return created;
@@ -863,12 +865,24 @@ export class TransactionImportService {
     return this.keptAlive(correlationId, queueJobId, async () => {
       const settled = await this.settle(sessionKey, correlationId);
       if (!settled) return null;
+      if (settled.committed) await this.recordImportCommitted(settled.committed);
       await this.em.refresh(session);
       for (const { account, dates } of settled.accounts) {
         await followUpStatementImport(this.em.fork(), account, dates, { enqueue: this.deps.enqueue }).catch((error: unknown) => { logger.warn({ correlationId, error }, 'Transaction import follow-up failed'); });
       }
       return settled.totals;
     });
+  }
+
+  /** `import_committed` for an import that wrote rows. Never fails the import. */
+  private async recordImportCommitted(committed: { format: transactionImport.ImportFormat; importer: null | number; importId: string; partial: boolean }): Promise<void> {
+    if (committed.importer === null) return;
+    const importer = await this.em.fork().findOne(Appuser, { appuserKey: committed.importer }, { filters: false }).catch(() => null);
+    await recordServiceEvent(this.em, importer, 'import_committed', {
+      format: committed.format,
+      kind: 'transactions',
+      result: committed.partial ? 'partial' : 'succeeded',
+    }, { eventId: importCommittedEventId(committed.importId) });
   }
 
   /**
@@ -978,7 +992,7 @@ export class TransactionImportService {
    * categories over the rows this session wrote, the undecided-to-import rows marked `skipped`,
    * and the session's outcome. Null when another job has taken the session over.
    */
-  private async settle(sessionKey: number, correlationId: string): Promise<null | { accounts: { account: Account; dates: Date[] }[]; totals: CommitTotals }> {
+  private async settle(sessionKey: number, correlationId: string): Promise<null | { accounts: { account: Account; dates: Date[] }[]; committed?: { format: transactionImport.ImportFormat; importer: null | number; importId: string; partial: boolean }; totals: CommitTotals }> {
     return this.em.fork().transactional(async (tx) => {
       const locked = await tx.findOne(TransactionImportSession, { transactionImportSessionKey: sessionKey }, { filters: false, lockMode: LockMode.PESSIMISTIC_WRITE });
       if (locked?.status !== SESSION_STATUS.IMPORTING || locked.correlationId !== correlationId) return null;
@@ -998,10 +1012,15 @@ export class TransactionImportService {
       await tx.nativeUpdate(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { status: ROW_STATUS.SKIPPED, updatedAt: this.now });
       const counts = await this.countRows(tx, sessionKey);
       const totals: CommitTotals = { failed: counts.statuses.failed + counts.statuses.invalid, imported: counts.statuses.imported, skipped: counts.statuses.skipped, totalRows: Object.values(counts.statuses).reduce((sum, count) => sum + count, 0) };
-      locked.status = OUTCOME_OF[transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported })];
+      const outcome = transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported });
+      locked.status = OUTCOME_OF[outcome];
       locked.committedAt = this.now;
       await tx.flush();
-      return { accounts, totals };
+      // Recorded by the caller once this transaction commits, so analytics can never abort it.
+      const committed = counts.statuses.imported > 0
+        ? { format: locked.format, importer: keyOf(locked.appuserKey, 'appuserKey'), importId: locked.publicId, partial: counts.statuses.failed + counts.statuses.invalid > 0 }
+        : undefined;
+      return { accounts, committed, totals };
     });
   }
 

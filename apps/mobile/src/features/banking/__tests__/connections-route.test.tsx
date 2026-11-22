@@ -159,63 +159,16 @@ describe('ConnectionsRoute', () => {
     })
   })
 
-  describe('bank connection outcomes', () => {
-    it('captures nothing for a list that already contains settled connections when the screen opens', async () => {
-      mockConnections = [connection('connected'), connection('error')]
+  // A connection's outcome is recorded by the API (`bank_connection_completed`,
+  // `bank_connection_failed`), so the screen sends nothing as it settles.
+  it('sends no analytics when a connection settles, completes or fails while polling', async () => {
+    mockConnections = [connection('processing')]
+    const view = await render(<ConnectionsRoute />)
+    mockConnections = [connection('connected'), connection('expired')]
+    await view.rerender(<ConnectionsRoute />)
 
-      const view = await render(<ConnectionsRoute />)
-
-      expect(captured).not.toHaveBeenCalled()
-      await view.unmount()
-    })
-
-    it('captures a completion, and a first bank-connection account, when a connection settles while polling', async () => {
-      mockConnections = [connection('processing')]
-      const view = await render(<ConnectionsRoute />)
-      expect(captured).not.toHaveBeenCalled()
-
-      mockConnections = [connection('connected')]
-      await view.rerender(<ConnectionsRoute />)
-
-      expect(captured.mock.calls).toEqual([
-        ['first_account_created', { method: 'bank_connection' }],
-        ['bank_connection_completed'],
-      ])
-      expect(JSON.stringify(captured.mock.calls)).not.toContain('Revolut')
-      await view.unmount()
-    })
-
-    it('captures a failure with no error text when a connection errors or expires', async () => {
-      mockConnections = [connection('processing')]
-      const view = await render(<ConnectionsRoute />)
-
-      mockConnections = [connection('expired')]
-      await view.rerender(<ConnectionsRoute />)
-
-      expect(captured.mock.calls).toEqual([['bank_connection_failed']])
-      await view.unmount()
-    })
-
-    it('does not report a second connection as a first account', async () => {
-      mockConnections = [connection('connected')]
-      const view = await render(<ConnectionsRoute />)
-
-      mockConnections = [connection('connected'), connection('connected')]
-      await view.rerender(<ConnectionsRoute />)
-
-      expect(captured.mock.calls).toEqual([['bank_connection_completed']])
-      await view.unmount()
-    })
-
-    it('stays silent while the list is unchanged', async () => {
-      mockConnections = [connection('connected')]
-      const view = await render(<ConnectionsRoute />)
-      await view.rerender(<ConnectionsRoute />)
-      await view.rerender(<ConnectionsRoute />)
-
-      expect(captured).not.toHaveBeenCalled()
-      await view.unmount()
-    })
+    expect(captured).not.toHaveBeenCalled()
+    await view.unmount()
   })
 
   it('navigates to the institution picker when connecting a bank', async () => {

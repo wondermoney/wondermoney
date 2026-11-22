@@ -30,6 +30,14 @@ export class Appuser extends Base {
   @Enum(() => AppuserAccountType)
   accountType: AppuserAccountType = AppuserAccountType.REGULAR;
 
+  /**
+   * When the person objected to service analytics (Settings → Privacy): from then on the API
+   * records and delivers no service event of theirs (`services/analytics/service-events.service.ts`).
+   * Null while they have not.
+   */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  analyticsObjectedAt?: Date | null;
+
   @PrimaryKey()
   @Unique({ name: 'appuser_appuserkey_uindex' })
   appuserKey!: number;

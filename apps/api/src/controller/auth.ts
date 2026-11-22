@@ -2,7 +2,7 @@ import { type Request, type Response } from 'express';
 
 import { DI } from '@app/app';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
-import { recordAnalyticsOutboxEvent } from '@service/analytics/analytics-outbox.service';
+import { analyticsSignInMethod, loginEventId, recordServiceEvent } from '@service/analytics/service-events.service';
 import { isAppError, provisionHomeTenant } from '@service/auth/auth-callback.service';
 import { getAuthUserFullName } from '@service/auth/auth-callback.utils';
 import { type AuthContext, betterAuthUserExists, getPrimaryAuthProvider, sendReconnectVerificationEmail } from '@service/auth/better-auth';
@@ -41,11 +41,8 @@ export async function authCallback(req: Request, res: Response) {
       // confirming on the /join screen (`POST /v1/household/invites/:token/accept`).
       const sessionId = getAuthSessionId(authUser);
       if (sessionId) {
-        await recordAnalyticsOutboxEvent(DI.em, {
-          distinctId: externalUserId,
-          eventId: `login.v1:${sessionId}`,
-          eventName: 'login',
-          properties: getBaseAnalyticsProperties(existingUserByExternalId, method),
+        await recordServiceEvent(DI.em, { analyticsObjectedAt: existingUserByExternalId.analyticsObjectedAt, externalUserId }, 'login', getBaseAnalyticsProperties(existingUserByExternalId, method), {
+          eventId: loginEventId(sessionId),
         });
       } else {
         logger.warn({ appuserKey: existingUserByExternalId.appuserKey }, 'Skipping login analytics because the auth session id is missing');
@@ -193,13 +190,8 @@ function getAuthSessionId(authUser: AuthContext | undefined): string | undefined
   return authUser?.session.id;
 }
 
-function getBaseAnalyticsProperties(appUser: Appuser, method: string, extraProperties: Record<string, boolean | number | string> = {}) {
-  return {
-    appuser_key: appUser.appuserKey.toString(),
-    locale: appUser.language,
-    method,
-    ...extraProperties,
-  };
+function getBaseAnalyticsProperties(appUser: Appuser, method: string) {
+  return { locale: appUser.language, method: analyticsSignInMethod(method) };
 }
 
 function isDemoAccount(appuser: Appuser) {
