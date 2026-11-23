@@ -1,0 +1,24 @@
+---
+title: WonderMoney 1.9.0
+description: Estatísticas da web e da app móvel a partir da mesma lista publicada de eventos, e a importação de extratos na app móvel volta a funcionar quando uma sincronização falha.
+---
+
+[Notas da versão no GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.9.0)
+
+## Atualizar
+
+Nada a fazer. Não há migrações nem definições novas. Se ligaste o PostHog na aplicação web, passa a registar o ecrã aberto pelo nome em vez das visualizações de página (consulta [Analytics](/pt/docs/self-hosting/configure#analytics)).
+
+## Correções
+
+- **Importar um extrato** numa ligação bancária cuja sincronização falhou, na app móvel (1.0.6), abre agora a importação de transações, onde escolhes a conta. Antes abria um ecrã que falhava sempre.
+
+## Privacidade
+
+- **As estatísticas da web seguem a lista publicada.** Com as estatísticas autorizadas, a aplicação web regista o ecrã que abres pelo nome, nunca pelo endereço, e os passos do registo, da configuração inicial, das importações e das ligações bancárias. Os endereços das páginas, os identificadores da base de dados e o que escreves nos formulários deixam de ser enviados. A política de privacidade descreve-o.
+- **O feedback fica com o suporte.** A mensagem que envias a partir da aplicação web vai só para o suporte; as estatísticas registam apenas a categoria.
+- **A app móvel** regista as importações e as ligações bancárias da mesma forma, de acordo com a tua escolha, e deixa de enviar ela própria os registos e os inícios de sessão.
+
+## Agradecimentos
+
+- @nip10
