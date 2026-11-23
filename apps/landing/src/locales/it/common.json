@@ -5388,6 +5388,11 @@
         "gasoline95": "Benzina 95 (gasolina simples 95)",
         "lpg": "GPL auto"
       },
+      "fuelsShort": {
+        "diesel": "Gasolio",
+        "gasoline95": "Benzina 95",
+        "lpg": "GPL"
+      },
       "fields": {
         "fuel": "Carburante",
         "period": "La distanza che inserisci è",
@@ -5483,6 +5488,7 @@
           },
           "change": "La variazione settimanale è l'ultima media della DGEG meno quella di sette giorni prima, in euro al litro e in percentuale del prezzo precedente.",
           "stations": "I distributori più economici sono i prezzi per distributore della DGEG ordinati dal più basso al più alto; a parità di prezzo viene prima quello aggiornato più di recente. Restano fuori i prezzi non aggiornati da 30 giorni e quelli molto al di fuori dell'intervallo abituale (molto probabilmente un errore di battitura). La mediana è il prezzo centrale di tutti i distributori della zona, e il risparmio su un pieno è la mediana meno il prezzo più basso, per 50 litri.",
+          "near": "Vicino a me usa la posizione del tuo browser, solo quando tocchi il pulsante. La distanza è in linea d'aria (formula dell'haversine), dalla tua posizione alle coordinate che la DGEG indica per ogni distributore, quindi su strada può essere maggiore. L'elenco mostra i {{nearLimit}} distributori più economici entro la distanza che scegli; a parità di prezzo viene prima il più vicino. I distributori senza coordinate restano fuori.",
           "formulasLabel": "Formule"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "La pagina legge un file di dati salvato e non interroga mai la DGEG mentre la usi. Il file è aggiornato da uno script che rifiuta dati obsoleti o inverosimili, quindi un aggiornamento fallito conserva gli ultimi dati validi e la loro data ({{asOf}}).",
           "stations": "Distributori: i prezzi per distributore della DGEG, come li comunicano i distributori, per gli stessi tre carburanti. L'istantanea è stata presa il {{stationsDate}} alle {{stationsTime}} UTC, e ogni prezzo conserva la data e l'ora in cui il distributore lo ha aggiornato l'ultima volta.",
           "stationsLink": "DGEG, prezzi dei carburanti per distributore",
-          "stationsRefresh": "L'elenco dei distributori è un'istantanea presa una volta al giorno, quando il sito viene ricostruito, e non segue i cambiamenti durante il giorno. Se la DGEG non risponde o i suoi dati non superano i controlli, la pagina mantiene l'istantanea precedente e ne mostra la data ({{stationsDate}})."
+          "stationsRefresh": "L'elenco dei distributori è un'istantanea presa una volta al giorno, quando il sito viene ricostruito, e non segue i cambiamenti durante il giorno. Se la DGEG non risponde o i suoi dati non superano i controlli, la pagina mantiene l'istantanea precedente e ne mostra la data ({{stationsDate}}).",
+          "near": "La tua posizione non lascia mai il browser: la pagina calcola le distanze dai file dei distributori di questo sito, e la posizione non finisce in nessun indirizzo, registro o evento statistico.",
+          "map": "La mappa usa le tessere di OpenFreeMap, con dati OpenStreetMap, e si apre solo quando tocchi Mappa. Come per ogni mappa web, il server delle tessere riceve il tuo indirizzo IP e la zona che stai guardando."
         },
         "limits": {
           "title": "Cosa non includono questi valori",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Distributori più economici",
-        "intro": "I distributori più economici per ogni carburante nel Portogallo continentale, in un distretto o in un comune, in base ai prezzi che i distributori comunicano alla DGEG.",
+        "intro": "I distributori più economici per ogni carburante vicino a te, o in un distretto o comune del Portogallo continentale, dai prezzi che i distributori comunicano alla DGEG.",
         "asOf": "Istantanea dei prezzi per distributore della DGEG presa il {{date}} alle {{time}} UTC. Ogni prezzo indica quando il distributore lo ha aggiornato l'ultima volta.",
         "stale": "Questo elenco ha {{days}} giorni: l'aggiornamento quotidiano non viene eseguito dal {{date}}. I prezzi potrebbero essere cambiati, quindi verificali al distributore prima di andare.",
         "fuel": "Tipo di carburante",
@@ -5551,7 +5559,34 @@
         "saving": "Il più economico qui è {{perLitre}} sotto la mediana: {{perTank}} in meno per un pieno da {{litres}} L.",
         "noSaving": "Qui il distributore più economico applica il prezzo mediano.",
         "nextStepCta": "Risparmia la differenza mensile per un obiettivo",
-        "note": "Prezzi come i distributori li comunicano alla DGEG, che li pubblica; ogni distributore è responsabile del proprio prezzo. I prezzi possono cambiare nel corso della giornata e non includono gli sconti di carte carburante o app."
+        "note": "Prezzi come i distributori li comunicano alla DGEG, che li pubblica; ogni distributore è responsabile del proprio prezzo. I prezzi possono cambiare nel corso della giornata e non includono gli sconti di carte carburante o app.",
+        "nearMe": "Vicino a me",
+        "nearClear": "Scegli distretto e comune",
+        "radius": "Distanza massima",
+        "locating": "Sto cercando dove sei…",
+        "denied": "Nessun accesso alla tua posizione. Scegli un distretto.",
+        "timeout": "La posizione ha richiesto troppo tempo. Riprova o scegli un distretto.",
+        "unsupported": "Questo browser non fornisce la posizione. Scegli un distretto.",
+        "locationError": "Non è stato possibile trovare la tua posizione. Scegli un distretto.",
+        "nearLoading": "Caricamento dei distributori vicino a te…",
+        "nearNone": "Nessun distributore con un prezzo per {{fuel}} entro {{radius}} km da te.",
+        "nearSummary": "Distributori con un prezzo per {{fuel}} entro {{radius}} km: {{count}}. Prezzo mediano: {{median}}. I più economici:",
+        "distanceLabel": "Distanza",
+        "mapShow": "Mappa",
+        "mapLabel": "Mappa dei distributori dell'elenco",
+        "mapLoading": "Apertura della mappa…",
+        "mapUnavailable": "La mappa non si apre in questo browser. Usa il link di ogni distributore.",
+        "directions": "Indicazioni",
+        "you": "La tua posizione",
+        "mapUi": {
+          "zoomIn": "Ingrandisci",
+          "zoomOut": "Riduci",
+          "gesturesWindows": "Usa Ctrl + rotellina per lo zoom della mappa",
+          "gesturesMac": "Usa ⌘ + rotellina per lo zoom della mappa",
+          "gesturesMobile": "Usa due dita per spostare la mappa",
+          "attribution": "Mostra o nascondi le attribuzioni",
+          "popupClose": "Chiudi"
+        }
       }
     },
     "bankAccountsShared": {

@@ -5388,6 +5388,11 @@
         "gasoline95": "Petrol 95 (gasolina simples 95)",
         "lpg": "Autogas (GPL auto)"
       },
+      "fuelsShort": {
+        "diesel": "Diesel",
+        "gasoline95": "Petrol 95",
+        "lpg": "LPG"
+      },
       "fields": {
         "fuel": "Fuel",
         "period": "The distance you enter is",
@@ -5483,6 +5488,7 @@
           },
           "change": "The week-on-week change is the latest DGEG average minus the one seven days earlier, in euro per litre and as a percentage of the earlier price.",
           "stations": "The cheapest stations are DGEG's station prices sorted from lowest to highest; on a tie the more recently updated price comes first. Prices not updated for 30 days, and prices far outside the usual range (most likely a typing error), are left out. The median is the middle price of all stations in the area, and the saving on a tank is the median minus the cheapest price, times 50 litres.",
+          "near": "Near me uses your browser's location, only when you tap the button. The distance is a straight line (the haversine formula) from your position to the coordinates DGEG gives for each station, so by road it can be longer. The list shows the {{nearLimit}} cheapest stations within the distance you pick; at the same price the nearer one comes first. Stations without coordinates are left out.",
           "formulasLabel": "Formulas"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "The page reads one saved data file and never calls DGEG while you use it. The file is refreshed by a script that refuses data that is stale or implausible, so a failed refresh keeps the last good numbers and their date ({{asOf}}).",
           "stations": "Stations: DGEG's prices per station, as the stations report them, for the same three fuels. The snapshot was taken on {{stationsDate}} at {{stationsTime}} UTC, and each price keeps the date and time the station last updated it.",
           "stationsLink": "DGEG, fuel prices by station",
-          "stationsRefresh": "The station list is a snapshot taken once a day, when the site is rebuilt, not a live feed. If DGEG does not answer or its data fails the checks, the page keeps the previous snapshot and shows its date ({{stationsDate}})."
+          "stationsRefresh": "The station list is a snapshot taken once a day, when the site is rebuilt, not a live feed. If DGEG does not answer or its data fails the checks, the page keeps the previous snapshot and shows its date ({{stationsDate}}).",
+          "near": "Your location never leaves the browser: the page computes the distances from this site's own station files, and the location goes into no address, log or analytics event.",
+          "map": "The map uses OpenFreeMap tiles, with OpenStreetMap data, and opens only when you tap Map. As with any web map, the tile server receives your IP address and the area you are looking at."
         },
         "limits": {
           "title": "What these figures leave out",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Cheapest stations",
-        "intro": "The cheapest stations for each fuel in mainland Portugal, in a district or in a municipality, from the prices the stations report to DGEG.",
+        "intro": "The cheapest stations for each fuel near you, or in a district or municipality of mainland Portugal, from the prices the stations report to DGEG.",
         "asOf": "Snapshot of DGEG's station prices taken on {{date}} at {{time}} UTC. Each price shows when the station last updated it.",
         "stale": "This list is {{days}} days old: the daily refresh has not run since {{date}}. Prices may have changed, so check at the station before you go.",
         "fuel": "Fuel type",
@@ -5551,7 +5559,34 @@
         "saving": "The cheapest here is {{perLitre}} below the median: {{perTank}} less on a {{litres}} L tank.",
         "noSaving": "Here the cheapest station charges the median price.",
         "nextStepCta": "Save the monthly difference toward a goal",
-        "note": "Prices as the stations report them to DGEG, which publishes them; each station is responsible for its price. Prices can change during the day, and discounts from fuel cards and apps are not included."
+        "note": "Prices as the stations report them to DGEG, which publishes them; each station is responsible for its price. Prices can change during the day, and discounts from fuel cards and apps are not included.",
+        "nearMe": "Near me",
+        "nearClear": "Pick a district and municipality",
+        "radius": "Maximum distance",
+        "locating": "Finding where you are…",
+        "denied": "No access to your location. Pick a district.",
+        "timeout": "Finding your location took too long. Try again or pick a district.",
+        "unsupported": "This browser does not share a location. Pick a district.",
+        "locationError": "Your location could not be found. Pick a district.",
+        "nearLoading": "Loading the stations near you…",
+        "nearNone": "No station with a price for {{fuel}} within {{radius}} km of you.",
+        "nearSummary": "Stations with a price for {{fuel}} within {{radius}} km: {{count}}. Median price: {{median}}. The cheapest:",
+        "distanceLabel": "Distance",
+        "mapShow": "Map",
+        "mapLabel": "Map of the listed stations",
+        "mapLoading": "Opening the map…",
+        "mapUnavailable": "The map does not open in this browser. Use each station's link.",
+        "directions": "Directions",
+        "you": "Your location",
+        "mapUi": {
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out",
+          "gesturesWindows": "Use Ctrl + scroll to zoom the map",
+          "gesturesMac": "Use ⌘ + scroll to zoom the map",
+          "gesturesMobile": "Use two fingers to move the map",
+          "attribution": "Show or hide the attribution",
+          "popupClose": "Close"
+        }
       }
     },
     "goldPrice": {

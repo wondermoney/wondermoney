@@ -168,11 +168,16 @@ describe("fuel prices tool page", () => {
 		})
 	})
 
-	it("lists stations without asking where the visitor is or sending anything about them", () => {
+	it("asks where the visitor is only once, on the near-me tap, and sends nothing about them", () => {
 		const source = readSource("../../components/calculators/CheapestStations.tsx")
 		expect(source).toContain('pushGtmEvent({ event: "tool_used", tool: "fuel_stations", page_type: getPageType() })')
 		expect(source).toContain('toLocalizedPath("featureGoals", locale)')
-		expect(source).not.toMatch(/geolocation|localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest/)
+		// One position request, in the near-me button's handler; never a watch, never stored or sent.
+		expect(source.match(/getCurrentPosition/g)).toHaveLength(1)
+		expect(source).toContain("onClick={locate}")
+		expect(source).not.toMatch(/watchPosition|localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|history\.|location\.(href|search|hash)/)
+		const map = readSource("../../components/calculators/StationsMap.tsx")
+		expect(map).not.toMatch(/geolocation|localStorage|sessionStorage|indexedDB|fetch\(|XMLHttpRequest|pushGtmEvent/)
 		expect(readSource("../../components/calculators/FuelPricesComp.tsx")).toContain("<CheapestStations />")
 	})
 

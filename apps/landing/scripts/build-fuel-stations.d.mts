@@ -42,6 +42,8 @@ export interface SnapshotList {
 export interface SnapshotArea {
   stations: Record<string, SnapshotStation>;
   areas: Record<string, Partial<Record<"diesel" | "gasoline95" | "lpg", SnapshotList>>>;
+  /** A district's every located station, per fuel, cheapest first: [station id, euro per litre, DGEG's update time]. */
+  all?: Partial<Record<"diesel" | "gasoline95" | "lpg", Array<[number, number, string]>>>;
 }
 export interface FuelStationSnapshot {
   fetchedAt: string;
@@ -50,13 +52,22 @@ export interface FuelStationSnapshot {
   dropped: number;
   redacted: boolean;
   national: SnapshotArea;
-  districts: Array<{ slug: string; name: string; municipalities: string[]; data: SnapshotArea }>;
+  districts: Array<{
+    slug: string;
+    name: string;
+    municipalities: string[];
+    /** [south, west, north, east] of the district's located stations. */
+    bounds: [number, number, number, number];
+    data: SnapshotArea;
+  }>;
 }
 
 export function parsePrice(text: string): number;
+/** LEAK_PATTERNS' entries (blank lines and # comments skipped) as regular expressions. */
+export function privatePatterns(text?: string): RegExp[];
 export function deriveSnapshot(
   apiRows: readonly DgegStationRow[],
-  options: { fetchedAt: string; redact?: boolean },
+  options: { fetchedAt: string; redact?: boolean; patterns?: readonly RegExp[] },
 ): FuelStationSnapshot;
 export function renderIndex(snapshot: FuelStationSnapshot): string;
 export function renderDistrict(data: SnapshotArea): string;

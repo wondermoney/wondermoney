@@ -34,6 +34,9 @@ colors:
   chart-3-teal: "oklch(50% 0.13 170)"
   chart-4-vermillion: "oklch(58% 0.19 30)"
   chart-5-sky: "oklch(54% 0.13 235)"
+  fuel-diesel: "oklch(52% 0.11 65)"
+  fuel-gasoline95: "oklch(50% 0.1 165)"
+  fuel-lpg: "oklch(52% 0.13 245)"
   paper-2: "oklch(97% 0.007 290)"
   paper-3: "oklch(92.5% 0.008 290)"
   ink-2: "oklch(37% 0 0)"
@@ -142,6 +145,9 @@ Utilities: `bg-success`, `bg-success/10`, `text-success-text`, `border-destructi
 
 ### Chart palette
 Same five slots as the app, hue fixed per slot, assigned in order and never cycled: `chart-1` violet `oklch(52% 0.17 290)` (single-series and net-worth lines take slot 1), `chart-2` amber `oklch(62% 0.14 70)`, `chart-3` bluish-green `oklch(50% 0.13 170)`, `chart-4` vermillion `oklch(58% 0.19 30)`, `chart-5` sky `oklch(54% 0.13 235)`. Recharts series take `oklch(var(--chart-n))`; legends render their text in `foreground`, never in the series colour. A reference line under the main series (the total invested under a portfolio's value) takes the next slot, dashed.
+
+### Fuel colours
+The fuel prices page gives each fuel one hue, used everywhere the fuel is drawn on that page: the fuel chips, the price badges in the station list, the map markers, the dot on each latest-price card and the price chart's lines. Tokens `--fuel-diesel` `oklch(52% 0.11 65)` (amber), `--fuel-gasoline95` `oklch(50% 0.1 165)` (bluish green) and `--fuel-lpg` `oklch(52% 0.13 245)` (blue); utilities `bg-fuel-diesel`, `text-fuel-lpg`, `bg-fuel-gasoline95/10` and so on, through `FUEL_COLOR_CLASSES` and `fuelColor()` (`components/calculators/fuelColors.ts`), never a chart slot. The hues are the colour-blind-safe orange, bluish green and blue pairing, apart from the brand violet. Each holds white text at 5.4:1 or more as a fill (the selected chip, the cheapest station's badge, a marker), reads as text at 4.8:1 or more on the canvas, `paper-2` and a 10% tint of itself (the other badges), and stands at 3.3:1 against a dark surface, so a badge or marker carries its own contrast whatever it sits on. Colour is never the only cue: the chips and badges carry the fuel's short name (`tools.fuelPrices.fuelsShort`), and a map shows one fuel at a time, named in the chip above it and in each popup.
 
 ## Typography
 

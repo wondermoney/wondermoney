@@ -10,6 +10,7 @@ import {
   deriveSnapshot,
   fetchRows,
   parsePrice,
+  privatePatterns,
   refresh,
   renderDistrict,
   writeSnapshot,
@@ -89,7 +90,70 @@ describe("build-fuel-stations", () => {
     const station = aveiro.data.stations[String(municipality.diesel!.top[0][0])];
     expect(snapshot.redacted).toBe(true);
     expect(station).toEqual([null, "MARCA", null, "Vila", "1000-001", "Aveiro 3", 38.7, -9.1]);
-    expect(Object.keys(aveiro.data.stations).length).toBeLessThan(15 * 8);
+  });
+
+  it("keeps every located station of a district with its prices, cheapest first, and the district's bounds", () => {
+    const snapshot = deriveSnapshot(
+      apiRows((row) => (row.Municipio === "Aveiro 2" ? { ...row, Latitude: 40.1 + (row.Id % 8) * 0.01, Longitude: -8.5 } : row)),
+      { fetchedAt: FETCHED_AT },
+    );
+    const aveiro = snapshot.districts[0];
+    expect(Object.keys(aveiro.data.stations)).toHaveLength(15 * 8);
+    const all = aveiro.data.all!;
+    expect(all.diesel).toHaveLength(15 * 8);
+    expect(all.lpg).toHaveLength(15);
+    const prices = all.gasoline95!.map(([, price]) => price);
+    expect([...prices].sort((a, b) => a - b)).toEqual(prices);
+    for (const [id, , updated] of all.diesel!) {
+      expect(aveiro.data.stations[String(id)]).toBeDefined();
+      expect(updated).toMatch(/^2026-11-(19|20) /);
+    }
+    expect(aveiro.bounds).toEqual([38.7, -9.1, 40.17, -8.5]);
+    // The national list stays a short list: the near-me search reads the district files.
+    expect(snapshot.national.all).toBeUndefined();
+  });
+
+  it("leaves a station without coordinates out of the near-me lists but keeps it in the cheapest lists", () => {
+    const snapshot = deriveSnapshot(
+      apiRows((row) => (row.Municipio === "Beja 0" ? { ...row, Latitude: 0, Longitude: 0 } : row)),
+      { fetchedAt: FETCHED_AT },
+    );
+    const beja = snapshot.districts[1];
+    const unlocated = new Set(beja.data.areas["Beja 0"].diesel!.top.map(([id]) => id));
+    expect(beja.data.all!.diesel!.some(([id]) => unlocated.has(id))).toBe(false);
+    expect(beja.data.all!.diesel).toHaveLength(14 * 8);
+  });
+
+  it("reads LEAK_PATTERNS as leak-check.sh does: one pattern a line, no blanks or comments, Perl's inline flags", () => {
+    const patterns = privatePatterns("# private names\r\nExemplolandia\r\n\n  \n(?i)fictopolis\n");
+    expect(patterns.map(String)).toEqual(["/Exemplolandia/", "/fictopolis/i"]);
+    expect(privatePatterns("")).toEqual([]);
+    expect(() => privatePatterns("ok\n(unclosed")).toThrow(/^LEAK_PATTERNS entry 2 is not a valid regular expression$/);
+  });
+
+  it("empties a locality a private pattern matches, and keeps the station", () => {
+    const rows = apiRows((row) => (row.Municipio === "Aveiro 1" ? { ...row, Localidade: "Vila de Exemplolandia" } : row));
+    const snapshot = deriveSnapshot(rows, { fetchedAt: FETCHED_AT, patterns: privatePatterns("Exemplolandia") });
+    const aveiro = snapshot.districts[0];
+    const [id] = aveiro.data.areas["Aveiro 1"].diesel!.top[0];
+    expect(aveiro.data.stations[String(id)]).toEqual([null, "MARCA", null, "", "1000-001", "Aveiro 1", 38.7, -9.1]);
+    expect(JSON.stringify(snapshot)).not.toContain("Exemplolandia");
+    // Other localities stay, and without patterns nothing changes.
+    expect(Object.values(aveiro.data.stations).filter((station) => station[3] === "Vila").length).toBeGreaterThan(100);
+    const plain = deriveSnapshot(rows, { fetchedAt: FETCHED_AT, patterns: [] });
+    expect(plain.districts[0].data.stations[String(id)][3]).toBe("Vila de Exemplolandia");
+  });
+
+  it("takes the patterns from LEAK_PATTERNS by default", () => {
+    const rows = apiRows((row) => (row.Municipio === "Aveiro 1" ? { ...row, Localidade: "Exemplolandia" } : row));
+    const previous = process.env.LEAK_PATTERNS;
+    process.env.LEAK_PATTERNS = "Exemplolandia";
+    try {
+      expect(JSON.stringify(deriveSnapshot(rows, { fetchedAt: FETCHED_AT }))).not.toContain("Exemplolandia");
+    } finally {
+      if (previous === undefined) delete process.env.LEAK_PATTERNS;
+      else process.env.LEAK_PATTERNS = previous;
+    }
   });
 
   it("keeps names and streets, trimmed, only when asked not to redact", () => {
@@ -207,6 +271,8 @@ describe("writing the station snapshot", () => {
     expect(index).toContain('asOf: "2026-11-20"');
     const lisboa = JSON.parse(readFileSync(join(target, "lisboa.json"), "utf8"));
     expect(lisboa.areas["Lisboa 0"].diesel.top).toHaveLength(3);
+    expect(lisboa.all.diesel).toHaveLength(15 * 8);
+    expect(index).toContain('"bounds": [');
   });
 
   it("writes one station per line", () => {

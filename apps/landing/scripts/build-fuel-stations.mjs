@@ -15,10 +15,10 @@
 // and the information is reproduced faithfully. So every price keeps DGEG's own update time and
 // is copied untouched; the page names DGEG.
 //
-// The page shows only a short list per area, so the snapshot keeps only that: per fuel, the 5
-// cheapest stations of mainland Portugal and of each district and the 3 cheapest of each
-// municipality, with how many stations the area has and their median price. About 1,100 stations
-// in all, 200 KB of JSON split by district so the page loads one district at a time.
+// Per fuel, the snapshot keeps the 5 cheapest stations of mainland Portugal and of each district
+// and the 3 cheapest of each municipality, with how many stations the area has and their median
+// price; and, for the near-me search, every station with coordinates and its prices (about 3,200
+// stations, 500 KB of JSON split by district so the page loads only the districts it needs).
 //
 // Refused (the old files stay): a failed or truncated response, fewer stations or municipalities
 // than a sane floor, an unknown district, a feed whose newest price is days old, or more than 2%
@@ -39,6 +39,12 @@
 // locality, postcode, municipality and coordinates kept) unless the caller passes
 // `redact: false`, which only the build step does, inside a Vercel build whose files are never
 // committed. The page then shows the brand and locality in place of the name.
+//
+// A locality can hold a surname too (villages are often named after a family). When
+// LEAK_PATTERNS is set (the repository's private leak patterns, newline-separated, as
+// .github/scripts/leak-check.sh reads them; the data refresh workflow passes the secret), a
+// locality one of them matches is left empty, and the page shows the brand and municipality.
+// Neither the patterns nor a dropped locality is ever printed.
 
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -114,15 +120,40 @@ function parseUpdated(text) {
 
 const clean = (text) => String(text ?? "").replace(/\s+/g, " ").trim();
 
-/** [name, brand, street, locality, postcode, municipality]; name and street null when redacted. */
-function describe(row, municipality, redact) {
+/**
+ * LEAK_PATTERNS' entries as regular expressions: one per line, blank lines and # comments
+ * skipped, as leak-check.sh reads them. A pattern JavaScript cannot compile stops the refresh
+ * (the old files stay), named by its position only.
+ */
+export function privatePatterns(text = process.env.LEAK_PATTERNS ?? "") {
+  return String(text)
+    .split("\n")
+    .map((line) => line.replace(/\r$/, ""))
+    .filter((line) => !/^\s*(#|$)/.test(line))
+    .map((line, index) => {
+      // Perl's leading inline flags, "(?i)name", are JavaScript's flags argument.
+      const inline = /^\(\?([ims]+)\)/.exec(line);
+      try {
+        return inline ? new RegExp(line.slice(inline[0].length), inline[1]) : new RegExp(line);
+      } catch {
+        throw new Error(`LEAK_PATTERNS entry ${index + 1} is not a valid regular expression`);
+      }
+    });
+}
+
+/**
+ * [name, brand, street, locality, postcode, municipality]; name and street null when redacted,
+ * the locality empty when a private pattern matches it.
+ */
+function describe(row, municipality, redact, patterns) {
   const name = clean(row.Nome);
   const street = clean(row.Morada);
+  const locality = clean(row.Localidade);
   return [
     redact || !name ? null : name,
     clean(row.Marca),
     redact || !street ? null : street,
-    clean(row.Localidade),
+    patterns.some((pattern) => pattern.test(locality)) ? "" : locality,
     clean(row.CodPostal),
     municipality,
   ];
@@ -139,7 +170,7 @@ function coordinates(row) {
  * DGEG's rows to the snapshot: { fetchedAt, newestUpdate, counts, national, districts }.
  * `fetchedAt` is an ISO time ("2026-11-20T05:00Z"). Throws when the response must not be shown.
  */
-export function deriveSnapshot(apiRows, { fetchedAt, redact = true }) {
+export function deriveSnapshot(apiRows, { fetchedAt, redact = true, patterns = privatePatterns() }) {
   if (!Array.isArray(apiRows)) throw new Error("Not a list of stations");
   const fetchedMs = Date.parse(fetchedAt);
   if (!Number.isFinite(fetchedMs)) throw new Error(`Bad fetch time ${fetchedAt}`);
@@ -218,7 +249,7 @@ export function deriveSnapshot(apiRows, { fetchedAt, redact = true }) {
       const chosen = ofFuel.slice(0, top);
       for (const item of chosen) {
         const [lat, lon] = coordinates(item.row);
-        stations[item.row.Id] = [...describe(item.row, item.municipality, redact), lat, lon];
+        stations[item.row.Id] = [...describe(item.row, item.municipality, redact, patterns), lat, lon];
       }
       out[fuel.key] = {
         count: ofFuel.length,
@@ -227,6 +258,31 @@ export function deriveSnapshot(apiRows, { fetchedAt, redact = true }) {
       };
     }
     return out;
+  };
+
+  /**
+   * Every priced station of a district that has coordinates, per fuel, cheapest first: what the
+   * near-me search measures distances against. Also the district's bounding box, so the page loads
+   * only the districts that can reach the visitor's radius.
+   */
+  const everyStation = (items, stations) => {
+    const out = {};
+    let bounds = null;
+    for (const fuel of FUELS) {
+      const located = [];
+      for (const item of items) {
+        if (item.fuel !== fuel.key) continue;
+        const [lat, lon] = coordinates(item.row);
+        if (lat === null || lon === null) continue;
+        stations[item.row.Id] ??= [...describe(item.row, item.municipality, redact, patterns), lat, lon];
+        located.push([item.row.Id, item.price, item.updated]);
+        bounds = bounds
+          ? [Math.min(bounds[0], lat), Math.min(bounds[1], lon), Math.max(bounds[2], lat), Math.max(bounds[3], lon)]
+          : [lat, lon, lat, lon];
+      }
+      if (located.length > 0) out[fuel.key] = located;
+    }
+    return { all: out, bounds };
   };
 
   const nationalStations = {};
@@ -239,7 +295,9 @@ export function deriveSnapshot(apiRows, { fetchedAt, redact = true }) {
     for (const name of names) {
       areas[name] = area(inDistrict.filter((item) => item.municipality === name), TOP.municipality, stations);
     }
-    return { slug: district.slug, name: district.name, municipalities: names, data: { stations, areas } };
+    const { all, bounds } = everyStation(inDistrict, stations);
+    if (!bounds) throw new Error(`No located stations in ${district.name}`);
+    return { slug: district.slug, name: district.name, municipalities: names, bounds, data: { stations, areas, all } };
   });
   const counts = Object.fromEntries(FUELS.map((fuel) => [fuel.key, kept.filter((item) => item.fuel === fuel.key).length]));
 
@@ -250,13 +308,16 @@ export function renderIndex(snapshot) {
   const districts = snapshot.districts.map((district) => ({
     slug: district.slug,
     name: district.name,
+    bounds: district.bounds,
     municipalities: district.municipalities,
   }));
   return `// Generated by scripts/build-fuel-stations.mjs. Do not edit by hand: rerun the script.
 //
 // DGEG's station prices of gasoleo simples, gasolina simples 95 and GPL auto in mainland
-// Portugal, reduced to the cheapest stations the page lists. Each district's lists are in
-// ./<slug>.json, loaded when the visitor picks the district. The page never calls DGEG.
+// Portugal: the cheapest lists per area, and in each district's ./<slug>.json every located
+// station's prices for the near-me search. A district's file is loaded when the visitor picks the
+// district or searches near a point it reaches; [south, west, north, east] is its bounding box.
+// The page never calls DGEG.
 
 export const FUEL_STATIONS_SOURCE = {
   name: ${JSON.stringify(SOURCE.name)},
@@ -272,7 +333,7 @@ export const FUEL_STATIONS_SOURCE = {
   counts: ${JSON.stringify(snapshot.counts)},
   top: ${JSON.stringify(TOP)},
   /** Bump when the shape or the derivation changes. */
-  version: 2,
+  version: 3,
 } as const;
 
 export const FUEL_STATION_DISTRICTS = ${JSON.stringify(districts, null, 2)} as const;
@@ -290,7 +351,10 @@ export function renderDistrict(data) {
   const areas = Object.entries(data.areas)
     .map(([name, lists]) => `    ${JSON.stringify(name)}: ${JSON.stringify(lists)}`)
     .join(",\n");
-  return `{\n  "stations": {\n${stations}\n  },\n  "areas": {\n${areas}\n  }\n}\n`;
+  const all = Object.entries(data.all)
+    .map(([fuel, prices]) => `    ${JSON.stringify(fuel)}: ${JSON.stringify(prices)}`)
+    .join(",\n");
+  return `{\n  "stations": {\n${stations}\n  },\n  "areas": {\n${areas}\n  },\n  "all": {\n${all}\n  }\n}\n`;
 }
 
 /** Asks DGEG once for the three fuels. */

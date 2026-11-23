@@ -1,7 +1,8 @@
 ---
 // Prerendered explanation for the fuel price page: how to read the averages and the cost estimate,
 // a worked example computed from the same function the calculator runs, the method, DGEG as the
-// source with its terms and dates, what the figures leave out (including that nothing is
+// source with its terms and dates, how the near-me search measures distance and what the map's
+// tile server receives, what the figures leave out (including that nothing is
 // forecast), and the tools to go on with. The figures, the formulas and the term lists are
 // built in energyGuides.ts.
 import ToolGuide from "./ToolGuide.astro";
@@ -15,7 +16,7 @@ import {
   fuelCostExample,
   fuelPriceSummaries,
 } from "@/lib/calculators/fuelCost";
-import { FUEL_STATIONS_SOURCE } from "@/lib/calculators/fuelStations";
+import { FUEL_STATIONS_SOURCE, NEAR_LIMIT } from "@/lib/calculators/fuelStations";
 import { formatMoney, formatNumber, formatPercent } from "@/lib/numberFormat";
 import { toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
@@ -56,6 +57,7 @@ const values = {
   stationsTime: FUEL_STATIONS_SOURCE.fetchedAt.slice(11, 16),
   stationsDistrict: FUEL_STATIONS_SOURCE.top.district,
   stationsMunicipality: FUEL_STATIONS_SOURCE.top.municipality,
+  nearLimit: NEAR_LIMIT,
 };
 
 const guide = buildFuelPricesGuide(locale, values);
@@ -88,6 +90,7 @@ const related = [
     <GuideTermList items={guide.notes} />
     <p>{t(k("method.change"), values)}</p>
     <p>{t(k("method.stations"), values)}</p>
+    <p>{t(k("method.near"), values)}</p>
   </section>
 
   <section>
@@ -101,6 +104,8 @@ const related = [
     </ul>
     <p>{t(k("data.refresh"), values)}</p>
     <p>{t(k("data.stationsRefresh"), values)}</p>
+    <p>{t(k("data.near"))}</p>
+    <p>{t(k("data.map"))}</p>
   </section>
 
   <section>

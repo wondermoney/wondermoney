@@ -87,6 +87,14 @@
       "location": "European Union (European Commission, Joint Research Centre)"
     },
     {
+      "id": "openfreemap",
+      "heading": { "en": "OpenFreeMap", "pt": "OpenFreeMap", "es": "OpenFreeMap" },
+      "purpose": "Map tiles for the station map on the marketing site's fuel prices page.",
+      "evidence": "landing src/components/calculators/StationsMap.tsx loads the style and tiles from tiles.openfreemap.org in the visitor's browser, only after the visitor opens the map.",
+      "personalData": "The visitor's IP address, browser details and the map area on screen, received with each tile request. The near-me search's location is not sent: it stays in the browser.",
+      "location": "European Union (Hyperknot Software Kft., Hungary; may be served through Cloudflare's CDN)"
+    },
+    {
       "id": "llm-providers",
       "heading": { "en": "LLM Models", "pt": "Modelos LLM", "es": "Modelos de Lenguaje (LLM)" },
       "purpose": "Receipt OCR, CSV column mapping, the assistant, and transaction enrichment.",

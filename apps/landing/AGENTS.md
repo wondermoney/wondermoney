@@ -32,7 +32,7 @@ public/                # Static assets
 | Learn content | `src/content/`, "Learn content" below | Guides, glossary terms, monthly items; read through `src/lib/contentCollections.ts` |
 | Curated resource lists | `src/lib/resources/curatedLists/`, "Curated resource lists" below | Podcasts, newsletters, YouTube channels, books, courses, forums, events |
 | Calculators and the tools hub | `src/lib/toolsCatalog.ts` | One entry per tool: its task group on `/tools` and its related tools |
-| Brand logos | `src/lib/brandLogos/`, `src/assets/brands/<category>/`, `src/components/shared/BrandLogo.tsx` | A 72 px WebP tile per brand from its own site, an entry with the source URL in the category's module (`banks.ts`, `brokers.ts`); names match without case, accents or spaces |
+| Brand logos | `src/lib/brandLogos/`, `src/assets/brands/<category>/`, `src/components/shared/BrandLogo.tsx` | A 72 px WebP tile per brand from its own site, an entry with the source URL in the category's module (`banks.ts`, `brokers.ts`, `fuel.ts`); a brand in two categories (GALP, a fuel brand and an electricity supplier) has one entry, in one of them; names match without case, accents or spaces |
 | Charts | `src/components/shared/charts.tsx` | Recharts with series that draw at once; import chart parts from here, never from `recharts` |
 | Calculator guides | `src/components/calculators/ToolGuide.astro`, `guideBlocks.ts` | The guide column and its blocks (term list, worked-example figures, formula block); `HouseholdBudgetGuide.astro` uses all three |
 | Feature pages | `src/components/landing/Feature*.tsx`, `featureDetails.ts` | One per `FEATURE_ROUTE_IDS` entry. Explanatory sections use `sections/FeatureExplainer.tsx`; a new page is an entry in `featureDetails.ts` (rendered by `FeatureDetail.tsx`) with `lp.<namespace>.*` copy in all six locales, and every claim checked against the user docs and the app |
@@ -260,7 +260,7 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
 | `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
 | `data/electricityOffers.ts` | ERSE price simulator export (`csvPath` in its `Settings.json`): every supplier's household electricity offer. Types in `calculators/electricityOfferTypes.ts`; loaded only with a dynamic `import()` | weekly, automated (Mondays) | `node scripts/build-electricity-offers.mjs` (`--from-file <zip>` for a saved export) |
-| `data/fuelStations/` (`index.ts` and a JSON file per district) | DGEG station prices, the cheapest per district and municipality | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
+| `data/fuelStations/` (`index.ts` with each district's bounding box, and a JSON file per district) | DGEG station prices: the cheapest per district and municipality, and every located station's prices for the near-me search (the page loads only the districts the visitor's radius reaches and measures distances in the browser) | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
 | `data/goldPrice.ts` | NBP gold price per gram, converted with the ECB euro reference rate | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-gold-price.mjs` |
 | `data/omiePrices.ts` and `public/data/omie-pt-quarter-hours.json` | OMIE's Portuguese day-ahead prices (daily `marginalpdbcpt` files), weighted by the E-REDES BTN C profile, with the E-REDES and REN loss profiles: monthly averages by period for the last 12 months, and their quarter-hours (with the profile) for the load-diagram mode | monthly (the 8th), automated, its own set | `node scripts/build-omie-prices.mjs` (`--to YYYY-MM`, `--cache <dir>`) |
 | `data/indexedFormulas.ts` | Each indexed offer's energy formula, from the supplier's own ficha, terms or tariff page (URL and date read per formula; never third-party simulators) | quarterly, and when the offers refresh shows an indexed supplier's documents or prices changed | Edit by hand, update each `readOn` and `INDEXED_FORMULAS_REVIEWED`, run `indexedPricing.test.ts` |
@@ -325,6 +325,10 @@ fetches it:
   Only a Vercel build (`VERCEL=1`), whose files are never committed, writes them; the page shows
   the brand and locality ("GALP · Colmeias") when the name is missing. `fuelStations.test.ts` fails
   if a committed file carries either.
+- A locality can carry a surname too. With `LEAK_PATTERNS` set (the private leak patterns; the data
+  refresh workflow passes the secret to the fuel stations script only), the script leaves a locality
+  one of them matches empty, and the page shows the brand and municipality. To refresh by hand, set
+  it in your shell from the secret; the script never prints a pattern or a dropped locality.
 
 **One-time setup (a maintainer, in Vercel and GitHub).** Until it is done the workflow logs a
 notice and does nothing, and the pages show the committed snapshots.

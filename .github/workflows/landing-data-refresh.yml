@@ -139,13 +139,21 @@ jobs:
         working-directory: apps/landing
         env:
           SCRIPTS: ${{ steps.set.outputs.scripts }}
+          # The private leak patterns, for the fuel stations script only: it empties a locality
+          # that one matches, so the committed snapshot passes the leak check.
+          STATION_LEAK_PATTERNS: ${{ secrets.LEAK_PATTERNS }}
         run: |
           set -euo pipefail
           # Each script writes its module only after the fetch and the parse succeed, and a
           # failure stops the job here, so a failed run leaves the data as it was.
           for script in $SCRIPTS; do
             echo "::group::$script"
-            node "scripts/$script.mjs" || { echo "::error::scripts/$script.mjs failed: the source did not answer or its format changed. The data was left as it was."; exit 1; }
+            if [ "$script" = build-fuel-stations ]; then
+              run=(env -u STATION_LEAK_PATTERNS LEAK_PATTERNS="$STATION_LEAK_PATTERNS" node "scripts/$script.mjs")
+            else
+              run=(env -u STATION_LEAK_PATTERNS node "scripts/$script.mjs")
+            fi
+            "${run[@]}" || { echo "::error::scripts/$script.mjs failed: the source did not answer or its format changed. The data was left as it was."; exit 1; }
             echo "::endgroup::"
           done
       - name: Check for new figures
