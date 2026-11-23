@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
 import { ApiError } from '@/lib/api/errors'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import {
   confirmColumnMapping,
@@ -23,6 +24,10 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ runtime: { epochId: 9, apiClient: { read: mockRead, write: mockWrite } }, blockAccess: mockBlockAccess }),
 }))
 jest.mock('./portfolio-import-upload', () => ({ uploadPortfolioImportFile: (...args: unknown[]) => mockUpload(...args) }))
+jest.mock('@/lib/telemetry/analytics', () => ({ captureAnalyticsEvent: jest.fn() }))
+
+const captured = jest.mocked(captureAnalyticsEvent)
+const broker = { kind: 'portfolio', format: 'broker_csv' }
 
 function setup() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -44,7 +49,7 @@ const file = { uri: 'file:///picked.csv', name: 'picked.csv' }
 const noWait = { wait: async () => undefined }
 
 describe('usePortfolioImport', () => {
-  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset() })
+  beforeEach(() => { mockRead.mockReset(); mockWrite.mockReset(); mockBlockAccess.mockReset(); mockUpload.mockReset(); captured.mockReset() })
 
   it('runs the full auto-mapped upload flow through to a reviewable preview', async () => {
     mockWrite
@@ -102,6 +107,12 @@ describe('usePortfolioImport', () => {
     expect(mockWrite.mock.calls[4]?.[0].path).toBe('/v1/portfolio-import-sessions/1/confirm')
     expect(hook.result.current.state).toEqual({ phase: 'succeeded', preview: succeededPreview })
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ predicate: expect.any(Function) }))
+    // The funnel web sends; the rows written are the server's import_committed.
+    expect(captured.mock.calls).toEqual([
+      ['import_started', broker],
+      ['import_mapped', broker],
+      ['import_reviewed', broker],
+    ])
     await hook.unmount(); client.clear()
   })
 
@@ -183,6 +194,10 @@ describe('usePortfolioImport', () => {
 
     expect(hook.result.current.state).toEqual({ phase: 'failed', reason: 'unmapped-columns' })
     expect(mockWrite).toHaveBeenCalledTimes(3)
+    expect(captured.mock.calls).toEqual([
+      ['import_started', broker],
+      ['import_failed', { ...broker, step: 'mapping' }],
+    ])
     await hook.unmount(); client.clear()
   })
 

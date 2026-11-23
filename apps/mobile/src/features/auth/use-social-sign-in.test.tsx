@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react-native'
 import type { NativeIdentityProviders } from '@/lib/auth/native-identity'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { useSocialSignIn, type SocialSignInFlow } from './use-social-sign-in'
+import { useSocialSignIn } from './use-social-sign-in'
 
 const mockSignInWithIdToken = jest.fn()
 jest.mock('@/components/providers/product-runtime-provider', () => ({
@@ -26,8 +26,8 @@ const providers = () => ({
   google: { isAvailable: jest.Mock; requestIdentity: jest.Mock }
 }
 
-const renderSocialSignIn = async (fakes: ReturnType<typeof providers>, flow?: SocialSignInFlow) => {
-  const hook = await renderHook(() => useSocialSignIn(fakes, flow))
+const renderSocialSignIn = async (fakes: ReturnType<typeof providers>) => {
+  const hook = await renderHook(() => useSocialSignIn(fakes))
   await waitFor(() => expect(hook.result.current.available.length).toBeGreaterThan(0))
   return hook
 }
@@ -95,21 +95,14 @@ describe('useSocialSignIn', () => {
     expect(hook.result.current.failure).toBe('unavailable')
   })
 
-  it.each([
-    ['apple', 'sign_in' as const, 'sign_in_completed'],
-    ['google', 'sign_in' as const, 'sign_in_completed'],
-    ['apple', 'sign_up' as const, 'sign_up_completed'],
-    ['google', 'sign_up' as const, 'sign_up_completed'],
-  ])('captures %s in the %s funnel as %s with the provider alone', async (provider, flow, event) => {
+  it.each(['apple', 'google'] as const)('sends no analytics for an accepted %s exchange: the server records the sign-in', async (provider) => {
     mockSignInWithIdToken.mockResolvedValue({ status: 'accepted' })
-    const hook = await renderSocialSignIn(providers(), flow)
+    const hook = await renderSocialSignIn(providers())
 
-    await act(async () => { await hook.result.current.submit(provider as 'apple' | 'google') })
+    await act(async () => { await hook.result.current.submit(provider) })
 
-    expect(captured.mock.calls).toEqual([[event, { provider }]])
-    const serialized = JSON.stringify(captured.mock.calls)
-    expect(serialized).not.toContain('token')
-    expect(serialized).not.toContain('nonce')
+    expect(mockSignInWithIdToken).toHaveBeenCalledTimes(1)
+    expect(captured).not.toHaveBeenCalled()
   })
 
   it('captures nothing when the sheet is cancelled or the exchange is refused', async () => {

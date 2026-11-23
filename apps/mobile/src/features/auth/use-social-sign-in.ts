@@ -3,17 +3,8 @@ import { useEffect, useState } from 'react'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import type { NativeIdentityProviderId, NativeIdentityProviders } from '@/lib/auth/native-identity'
 import { nativeIdentityProviders } from '@/lib/auth/native-identity-providers'
-import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 export type SocialSignInFailure = 'unavailable'
-
-/**
- * Which funnel the block was rendered in. The auth server's token exchange is one
- * operation for both — a first-time Apple/Google user is signed up and signed in
- * by the same call — so the only honest way to tell `sign_up_completed` from
- * `sign_in_completed` is which screen the user pressed the button on.
- */
-export type SocialSignInFlow = 'sign_in' | 'sign_up'
 
 /**
  * Apple first, always. App Store Guideline 4.8 requires Sign in with Apple to be at
@@ -29,12 +20,10 @@ const PROVIDER_ORDER: readonly NativeIdentityProviderId[] = ['apple', 'google']
  * activates exactly like a password sign-in.
  *
  * A user backing out of the native sheet is not a failure and shows no error. Tokens
- * and nonces are never logged, and provider error text is never surfaced.
+ * and nonces are never logged, and provider error text is never surfaced. The server records the
+ * sign-up or sign-in (`signup`, `login`), so the app sends no analytics event for it.
  */
-export function useSocialSignIn(
-  providers: NativeIdentityProviders = nativeIdentityProviders,
-  flow: SocialSignInFlow = 'sign_in',
-) {
+export function useSocialSignIn(providers: NativeIdentityProviders = nativeIdentityProviders) {
   const { signInWithIdToken } = useProductRuntime()
   const [available, setAvailable] = useState<readonly NativeIdentityProviderId[]>([])
   const [pending, setPending] = useState<NativeIdentityProviderId | null>(null)
@@ -72,10 +61,6 @@ export function useSocialSignIn(
         setFailure('unavailable')
         return
       }
-      // The provider name is the whole payload. The ID token, the
-      // nonce and anything the provider returned about the person stay here.
-      if (flow === 'sign_up') captureAnalyticsEvent('sign_up_completed', { provider })
-      else captureAnalyticsEvent('sign_in_completed', { provider })
     } catch {
       setFailure('unavailable')
     } finally {

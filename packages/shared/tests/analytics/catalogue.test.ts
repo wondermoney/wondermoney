@@ -8,6 +8,7 @@ import {
   ANALYTICS_TIERS,
   type AnalyticsCatalogue,
   featureScreens,
+  LEGACY_MOBILE_EVENT_NAMES,
   LEGACY_WEB_EVENT_NAMES,
   mobileFeatureScreens,
   webFeatureScreens,
@@ -111,7 +112,7 @@ describe('the analytics event catalogue', () => {
     },
   );
 
-  it("keeps mobile's events from its telemetry ADR, less the facts the server now records", () => {
+  it("sends from mobile its ADR's events, less the facts the server records, and the import and bank steps (#626)", () => {
     const mobile = entries.filter(([, spec]) =>
       spec.surfaces.includes('mobile'),
     );
@@ -120,12 +121,15 @@ describe('the analytics event catalogue', () => {
         mobile.map(([name, spec]) => [name, Object.keys(spec.properties)]),
       ),
     ).toEqual({
+      bank_connection_abandoned: ['provider'],
       bank_connection_started: ['provider'],
       feature_screen_viewed: ['screen'],
       feedback_submitted: ['category'],
+      import_failed: ['kind', 'format', 'step'],
+      import_mapped: ['kind', 'format'],
+      import_reviewed: ['kind', 'format'],
+      import_started: ['kind', 'format'],
       onboarding_completed: [],
-      sign_in_completed: ['provider'],
-      sign_up_completed: ['provider'],
     });
   });
 
@@ -160,16 +164,20 @@ describe('the analytics event catalogue', () => {
   });
 });
 
-describe('the legacy web names', () => {
-  it.each(Object.entries(LEGACY_WEB_EVENT_NAMES))(
-    '%s is not a name web sends now, unless it kept it',
-    (before, { now }) => {
-      const kept = now === before;
-      if (!kept && before in ANALYTICS_EVENTS) {
-        // A name reused by a server event: the web event of that name is gone.
-        expect(ANALYTICS_EVENTS[before as keyof typeof ANALYTICS_EVENTS].surfaces).not.toContain('web');
-      }
+describe('the legacy names', () => {
+  const tables = [
+    ['web', LEGACY_WEB_EVENT_NAMES],
+    ['mobile', LEGACY_MOBILE_EVENT_NAMES],
+  ] as const;
+
+  it.each(tables.flatMap(([surface, names]) => Object.entries(names).map(([before, { now }]) => [surface, before, now] as const)))(
+    '%s %s is replaced by a catalogue event, or is still sent by that client, or by the server alone',
+    (surface, before, now) => {
       if (now) expect(ANALYTICS_EVENTS).toHaveProperty(now);
+      if (!(before in ANALYTICS_EVENTS)) return;
+      const surfaces: readonly string[] = ANALYTICS_EVENTS[before as keyof typeof ANALYTICS_EVENTS].surfaces;
+      if (now === before && surfaces.includes(surface)) return;
+      expect(surfaces).toEqual(['server']);
     },
   );
 });

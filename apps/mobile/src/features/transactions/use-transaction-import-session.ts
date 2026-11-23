@@ -111,10 +111,19 @@ export function useTransactionImportSessionActions(id: string) {
       return null
     }
   }, [mutateAsync])
+  /** As `run`, but resolves with why the write failed instead of `null`. */
+  const attempt = useCallback(async (action: TransactionImportReviewAction): Promise<Readonly<{ failure: TransactionImportFailure }> | Readonly<{ session: TransactionImportSessionDto }>> => {
+    try {
+      return { session: await mutateAsync(action) }
+    } catch (error) {
+      return { failure: classifyTransactionImportFailure(error) }
+    }
+  }, [mutateAsync])
 
   const failure: TransactionImportFailure | null = mutation.isError ? classifyTransactionImportFailure(mutation.error) : null
   return {
     run,
+    attempt,
     pending: mutation.isPending,
     /** The write in flight, by kind ('commit' shows the commit button busy). */
     pendingAction: mutation.isPending ? mutation.variables?.type ?? null : null,

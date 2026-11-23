@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, readBankConnectionResult } from './bank-connection-return'
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, isBankConsentAbandoned, readBankConnectionResult } from './bank-connection-return'
 import type { ConnectBankScreenState } from './connect-bank-screen'
 import { ConnectBankScreen } from './connect-bank-screen'
 import type { BankLinkCredentialState } from './bank-link-credential-policy'
@@ -63,6 +63,7 @@ export function ConnectBankRoute() {
             captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
+                if (isBankConsentAbandoned(result)) captureAnalyticsEvent('bank_connection_abandoned', { provider: 'enable_banking' })
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
               },
               () => {

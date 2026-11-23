@@ -217,12 +217,15 @@ describe('createCatalogueCapture', () => {
 
   it('types the real catalogue per surface', () => {
     expectTypeOf<AnalyticsCaptureArgs<'mobile'>[0]>().toEqualTypeOf<
+      | 'bank_connection_abandoned'
       | 'bank_connection_started'
       | 'feature_screen_viewed'
       | 'feedback_submitted'
+      | 'import_failed'
+      | 'import_mapped'
+      | 'import_reviewed'
+      | 'import_started'
       | 'onboarding_completed'
-      | 'sign_in_completed'
-      | 'sign_up_completed'
     >();
   });
 });
