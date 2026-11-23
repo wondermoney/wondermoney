@@ -5576,7 +5576,7 @@
         "mapLabel": "Mapa dos postos da lista",
         "mapLoading": "A abrir o mapa…",
         "mapUnavailable": "O mapa não abre neste navegador. Usa a ligação de cada posto.",
-        "directions": "Direções",
+        "directions": "Como chegar",
         "you": "A tua localização",
         "mapUi": {
           "zoomIn": "Aproximar",
