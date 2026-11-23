@@ -113,7 +113,7 @@ const PASSKEY_DOMAINS = [...new Set((process.env.WONDERMONEY_PASSKEY_DOMAINS ?? 
 const config: ExpoConfig = {
   name: 'WonderMoney',
   slug: 'wondermoney',
-  version: '1.0.5',
+  version: '1.0.6',
   orientation: 'default',
   icon: './assets/images/icon.png',
   scheme: 'wondermoney',
