@@ -260,7 +260,7 @@ is refreshed by hand, on the calendar below. Run the commands from `apps/landing
 | `data/electricityPrices.ts` | Eurostat `nrg_pc_204` | half-yearly (new half-year around Oct and Apr), automated monthly | `node scripts/build-electricity-prices.mjs` |
 | `data/fuelPrices.ts` | DGEG daily national average prices (weekly samples) | weekly prices; refreshed monthly, automated | `node scripts/build-fuel-prices.mjs` |
 | `data/electricityOffers.ts` | ERSE price simulator export (`csvPath` in its `Settings.json`): every supplier's household electricity offer. Types in `calculators/electricityOfferTypes.ts`; loaded only with a dynamic `import()` | weekly, automated (Mondays) | `node scripts/build-electricity-offers.mjs` (`--from-file <zip>` for a saved export) |
-| `data/fuelStations/` (`index.ts` and a JSON file per district) | DGEG station prices, the cheapest per district and municipality | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
+| `data/fuelStations/` (`index.ts` with each district's bounding box, and a JSON file per district) | DGEG station prices: the cheapest per district and municipality, and every located station's prices for the near-me search (the page loads only the districts the visitor's radius reaches and measures distances in the browser) | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-fuel-stations.mjs` |
 | `data/goldPrice.ts` | NBP gold price per gram, converted with the ECB euro reference rate | daily in production builds; fallback refreshed monthly, automated | `node scripts/build-gold-price.mjs` |
 | `data/omiePrices.ts` and `public/data/omie-pt-quarter-hours.json` | OMIE's Portuguese day-ahead prices (daily `marginalpdbcpt` files), weighted by the E-REDES BTN C profile, with the E-REDES and REN loss profiles: monthly averages by period for the last 12 months, and their quarter-hours (with the profile) for the load-diagram mode | monthly (the 8th), automated, its own set | `node scripts/build-omie-prices.mjs` (`--to YYYY-MM`, `--cache <dir>`) |
 | `data/indexedFormulas.ts` | Each indexed offer's energy formula, from the supplier's own ficha, terms or tariff page (URL and date read per formula; never third-party simulators) | quarterly, and when the offers refresh shows an indexed supplier's documents or prices changed | Edit by hand, update each `readOn` and `INDEXED_FORMULAS_REVIEWED`, run `indexedPricing.test.ts` |
@@ -325,6 +325,10 @@ fetches it:
   Only a Vercel build (`VERCEL=1`), whose files are never committed, writes them; the page shows
   the brand and locality ("GALP · Colmeias") when the name is missing. `fuelStations.test.ts` fails
   if a committed file carries either.
+- A locality can carry a surname too. With `LEAK_PATTERNS` set (the private leak patterns; the data
+  refresh workflow passes the secret to the fuel stations script only), the script leaves a locality
+  one of them matches empty, and the page shows the brand and municipality. To refresh by hand, set
+  it in your shell from the secret; the script never prints a pattern or a dropped locality.
 
 **One-time setup (a maintainer, in Vercel and GitHub).** Until it is done the workflow logs a
 notice and does nothing, and the pages show the committed snapshots.
