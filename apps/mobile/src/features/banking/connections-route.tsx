@@ -60,7 +60,8 @@ export function ConnectionsRoute() {
       }}
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onConnectSimplefin={offersSimplefin ? () => router.push('/more/banking/simplefin/connect' as Href) : undefined}
-      onImportStatement={() => router.push('/more/banking/import' as Href)}
+      // A failed sync's fallback is the staged import every account has: the person picks the account there.
+      onImportStatement={() => router.push('/accounts/transactions/import' as Href)}
       onViewHistory={({ connectionId, provider }, institutionName) => {
         router.push({
           pathname: '/more/banking/history',

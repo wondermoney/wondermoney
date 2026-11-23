@@ -4358,41 +4358,6 @@
         "network": "Não conseguimos confirmar a ligação. Verifica as tuas ligações bancárias antes de tentares novamente: um token de configuração só funciona uma vez.",
         "general": "Algo correu mal ao ligar o SimpleFIN. Tenta novamente."
       }
-    },
-    "statementImport": {
-      "back": "Voltar",
-      "title": "Importar um extrato bancário",
-      "helper": "Carrega um extrato CSV para uma conta quando a sincronização do banco tiver falhado. Isto adiciona transações a uma conta que já tens — não cria uma nova ligação.",
-      "chooseFile": "Escolher um ficheiro CSV",
-      "phases": {
-        "uploading": "A carregar o teu extrato…",
-        "processing": "A ler e a importar o teu extrato…"
-      },
-      "succeeded": "{{count}} transações importadas.",
-      "succeededUnknownCount": "O teu extrato foi importado.",
-      "done": "Concluído",
-      "tryAgain": "Tentar novamente",
-      "accounts": {
-        "pick": "Para que conta é este extrato?",
-        "loading": "A carregar as tuas contas",
-        "empty": "Ainda não tens contas para importar.",
-        "emptyTitle": "Não existe uma conta para importar",
-        "unnamed": "Conta sem nome",
-        "error": "Não foi possível carregar as tuas contas. Verifica a tua ligação e tenta novamente.",
-        "invalid-response": "Não foi possível verificar as tuas contas. Tenta novamente para obter uma versão atualizada."
-      },
-      "failures": {
-        "demo": "Esta ação não está disponível no modo de demonstração.",
-        "read-only": "$t(common.householdReadOnly)",
-        "account-read-only": "$t(common.accountReadOnly)",
-        "access": "Não tens acesso para importar um extrato.",
-        "mfa": "É necessária verificação adicional antes de poderes importar um extrato.",
-        "cancelled": "A importação foi cancelada.",
-        "network": "Verifica a tua ligação e tenta novamente.",
-        "upload-failed": "Não foi possível carregar o ficheiro. Verifica a tua ligação e tenta novamente.",
-        "processing-failed": "Não foi possível importar esse extrato. Verifica o ficheiro e tenta novamente.",
-        "general": "Ocorreu um problema ao importar esse extrato. Tenta novamente."
-      }
     }
   },
   "marketsSearch": {

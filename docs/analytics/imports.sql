@@ -1,7 +1,7 @@
 -- Imports: each step per kind and format, over the last 12 weeks. Started, mapped, reviewed and
 -- failed come from the apps, only with the person's analytics opt-in; `committed` comes from the
--- server for everyone, so it can exceed `reviewed`. A mobile bank statement CSV goes from
--- `started` straight to `committed`. A step's format is `unknown` until the file is read.
+-- server for everyone, so it can exceed `reviewed`. A step's format is `unknown` until the file
+-- is read.
 SELECT
   properties.kind AS kind,
   coalesce(properties.format, 'unknown') AS format,

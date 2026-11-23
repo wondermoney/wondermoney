@@ -484,7 +484,7 @@ export const ANALYTICS_EVENTS = {
   },
   import_started: {
     description:
-      'A file was chosen to import. A bank statement CSV imported from the mobile app is read and imported in one go, so it goes from here to `import_committed` (or `import_failed`).',
+      'A file was chosen to import.',
     surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'imports',

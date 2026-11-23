@@ -4358,41 +4358,6 @@
         "network": "We couldn't confirm the connection. Check your bank connections before trying again: a setup token works only once.",
         "general": "Something went wrong connecting SimpleFIN. Please try again."
       }
-    },
-    "statementImport": {
-      "back": "Back",
-      "title": "Import a bank statement",
-      "helper": "Upload a CSV statement for an account when its bank sync has failed. This adds transactions to an account you already have — it does not create a new connection.",
-      "chooseFile": "Choose a CSV file",
-      "phases": {
-        "uploading": "Uploading your statement…",
-        "processing": "Reading and importing your statement…"
-      },
-      "succeeded": "Imported {{count}} transactions.",
-      "succeededUnknownCount": "Your statement was imported.",
-      "done": "Done",
-      "tryAgain": "Try again",
-      "accounts": {
-        "pick": "Which account is this statement for?",
-        "loading": "Loading your accounts",
-        "empty": "You don't have any accounts to import into yet.",
-        "emptyTitle": "No importable account",
-        "unnamed": "Unnamed account",
-        "error": "Could not load your accounts. Check your connection and try again.",
-        "invalid-response": "Your accounts could not be verified. Try again to load a fresh copy."
-      },
-      "failures": {
-        "demo": "This action is unavailable in demo mode.",
-        "read-only": "$t(common.householdReadOnly)",
-        "account-read-only": "$t(common.accountReadOnly)",
-        "access": "You don't have access to import a statement.",
-        "mfa": "Additional verification is required before you can import a statement.",
-        "cancelled": "The import was cancelled.",
-        "network": "Check your connection and try again.",
-        "upload-failed": "The file could not be uploaded. Check your connection and try again.",
-        "processing-failed": "That statement could not be imported. Check the file and try again.",
-        "general": "Something went wrong importing that statement. Please try again."
-      }
     }
   },
   "marketsSearch": {
