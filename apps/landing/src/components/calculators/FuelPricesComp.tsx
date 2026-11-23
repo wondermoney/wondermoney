@@ -4,6 +4,7 @@ import CalculatorInput from "./CalculatorInput";
 import CalculatorLayout from "./CalculatorLayout";
 import CalculatorResult from "./CalculatorResult";
 import CheapestStations from "./CheapestStations";
+import { FUEL_COLOR_CLASSES, fuelColor } from "./fuelColors";
 import {
   FUEL_COST_LIMITS,
   FUEL_PRICES_SOURCE,
@@ -29,11 +30,6 @@ import { Select } from "@/components/ui/select";
 const k = (key: string) => `tools.fuelPrices.${key}`;
 const SERIES = fuelPriceSeries();
 const SUMMARIES = fuelPriceSummaries();
-const COLORS: Record<FuelType, string> = {
-  diesel: "oklch(var(--chart-2))",
-  gasoline95: "oklch(var(--chart-1))",
-  lpg: "oklch(var(--chart-3))",
-};
 
 export default function FuelPricesComp({ locale }: { locale: Lang }) {
   return (
@@ -223,7 +219,10 @@ function LatestPrices() {
           const flat = Math.abs(summary.change) < 0.0005;
           return (
             <li key={summary.fuel} className="rounded-card border border-border bg-background p-5">
-              <p className="text-sm text-muted-foreground">{t(k(`fuels.${summary.fuel}`))}</p>
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span aria-hidden="true" className={`size-2.5 shrink-0 rounded-full ${FUEL_COLOR_CLASSES[summary.fuel].fill}`} />
+                {t(k(`fuels.${summary.fuel}`))}
+              </p>
               <p className="font-mono text-2xl font-bold text-foreground">{euro(summary.price)}/L</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {flat
@@ -312,7 +311,7 @@ function History() {
                 type="monotone"
                 dataKey={fuel}
                 name={t(k(`fuels.${fuel}`))}
-                stroke={COLORS[fuel]}
+                stroke={fuelColor(fuel)}
                 strokeWidth={2}
                 dot={false}
               />

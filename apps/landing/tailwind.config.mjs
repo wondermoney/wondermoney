@@ -79,6 +79,11 @@ export default {
           4: "oklch(var(--chart-4))",
           5: "oklch(var(--chart-5))",
         },
+        fuel: {
+          diesel: "oklch(var(--fuel-diesel))",
+          gasoline95: "oklch(var(--fuel-gasoline95))",
+          lpg: "oklch(var(--fuel-lpg))",
+        },
       },
       fontFamily: {
         sans: ["Geist Variable", "Geist", ...defaultTheme.fontFamily.sans],

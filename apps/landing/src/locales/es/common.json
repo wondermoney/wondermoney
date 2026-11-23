@@ -5388,6 +5388,11 @@
         "gasoline95": "Gasolina 95 (gasolina simples 95)",
         "lpg": "GLP de automoción (GPL auto)"
       },
+      "fuelsShort": {
+        "diesel": "Gasóleo",
+        "gasoline95": "Gasolina 95",
+        "lpg": "GLP"
+      },
       "fields": {
         "fuel": "Combustible",
         "period": "La distancia que indicas es",
@@ -5483,6 +5488,7 @@
           },
           "change": "La variación semanal es la última media de la DGEG menos la de siete días antes, en euros por litro y como porcentaje del precio anterior.",
           "stations": "Las gasolineras más baratas son los precios por estación de la DGEG ordenados de menor a mayor; en caso de empate va primero el precio actualizado más recientemente. Se dejan fuera los precios sin actualizar desde hace 30 días y los que están muy fuera del rango habitual (lo más probable, un error al teclear). La mediana es el precio central de todas las estaciones de la zona, y el ahorro en un depósito es la mediana menos el precio más barato, por 50 litros.",
+          "near": "Cerca de mí usa la ubicación de tu navegador, solo cuando tocas el botón. La distancia es en línea recta (fórmula del haversine), desde tu posición hasta las coordenadas que la DGEG indica para cada estación, así que por carretera puede ser mayor. La lista muestra las {{nearLimit}} estaciones más baratas dentro de la distancia que eliges; con el mismo precio va primero la más cercana. Las estaciones sin coordenadas quedan fuera.",
           "formulasLabel": "Fórmulas"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "La página lee un archivo de datos guardado y nunca llama a la DGEG mientras la usas. El archivo lo actualiza un script que rechaza datos obsoletos o inverosímiles, de modo que una actualización fallida conserva los últimos números buenos y su fecha ({{asOf}}).",
           "stations": "Estaciones: los precios por estación de la DGEG, tal como las estaciones los comunican, para los mismos tres combustibles. La instantánea se tomó el {{stationsDate}} a las {{stationsTime}} UTC, y cada precio conserva la fecha y la hora en que la estación lo actualizó por última vez.",
           "stationsLink": "DGEG, precios del combustible por estación",
-          "stationsRefresh": "La lista de estaciones es una instantánea tomada una vez al día, cuando se reconstruye el sitio, y no sigue los cambios a lo largo del día. Si la DGEG no responde o sus datos no superan las comprobaciones, la página mantiene la instantánea anterior y muestra su fecha ({{stationsDate}})."
+          "stationsRefresh": "La lista de estaciones es una instantánea tomada una vez al día, cuando se reconstruye el sitio, y no sigue los cambios a lo largo del día. Si la DGEG no responde o sus datos no superan las comprobaciones, la página mantiene la instantánea anterior y muestra su fecha ({{stationsDate}}).",
+          "near": "Tu ubicación nunca sale del navegador: la página calcula las distancias con los archivos de estaciones de este sitio, y la ubicación no va a ninguna dirección, registro ni evento de estadística.",
+          "map": "El mapa usa teselas de OpenFreeMap, con datos de OpenStreetMap, y solo se abre cuando tocas Mapa. Como en cualquier mapa web, el servidor de teselas recibe tu dirección IP y la zona que estás viendo."
         },
         "limits": {
           "title": "Qué no incluyen estas cifras",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Gasolineras más baratas",
-        "intro": "Las gasolineras más baratas de cada combustible en Portugal continental, en un distrito o en un municipio, a partir de los precios que las estaciones comunican a la DGEG.",
+        "intro": "Las estaciones más baratas de cada combustible cerca de ti, o en un distrito o municipio de Portugal continental, a partir de los precios que las estaciones comunican a la DGEG.",
         "asOf": "Instantánea de los precios por estación de la DGEG tomada el {{date}} a las {{time}} UTC. Cada precio indica cuándo lo actualizó la estación por última vez.",
         "stale": "Esta lista tiene {{days}} días: la actualización diaria no se ejecuta desde el {{date}}. Los precios pueden haber cambiado, así que compruébalos en la estación antes de ir.",
         "fuel": "Tipo de combustible",
@@ -5551,7 +5559,34 @@
         "saving": "La más barata de aquí está {{perLitre}} por debajo de la mediana: {{perTank}} menos en un depósito de {{litres}} L.",
         "noSaving": "Aquí la estación más barata cobra el precio mediano.",
         "nextStepCta": "Ahorra la diferencia mensual para un objetivo",
-        "note": "Precios tal como las estaciones los comunican a la DGEG, que los publica; cada estación es responsable de su precio. Los precios pueden cambiar a lo largo del día y no incluyen descuentos de tarjetas ni aplicaciones."
+        "note": "Precios tal como las estaciones los comunican a la DGEG, que los publica; cada estación es responsable de su precio. Los precios pueden cambiar a lo largo del día y no incluyen descuentos de tarjetas ni aplicaciones.",
+        "nearMe": "Cerca de mí",
+        "nearClear": "Elegir distrito y municipio",
+        "radius": "Distancia máxima",
+        "locating": "Buscando dónde estás…",
+        "denied": "Sin acceso a tu ubicación. Elige un distrito.",
+        "timeout": "La ubicación ha tardado demasiado. Inténtalo de nuevo o elige un distrito.",
+        "unsupported": "Este navegador no comparte la ubicación. Elige un distrito.",
+        "locationError": "No se ha podido saber dónde estás. Elige un distrito.",
+        "nearLoading": "Cargando las estaciones cerca de ti…",
+        "nearNone": "Ninguna estación con precio de {{fuel}} a menos de {{radius}} km de ti.",
+        "nearSummary": "Estaciones con precio de {{fuel}} a menos de {{radius}} km: {{count}}. Precio mediano: {{median}}. Las más baratas:",
+        "distanceLabel": "Distancia",
+        "mapShow": "Mapa",
+        "mapLabel": "Mapa de las estaciones de la lista",
+        "mapLoading": "Abriendo el mapa…",
+        "mapUnavailable": "El mapa no se abre en este navegador. Usa el enlace de cada estación.",
+        "directions": "Cómo llegar",
+        "you": "Tu ubicación",
+        "mapUi": {
+          "zoomIn": "Acercar",
+          "zoomOut": "Alejar",
+          "gesturesWindows": "Usa Ctrl + rueda del ratón para hacer zoom en el mapa",
+          "gesturesMac": "Usa ⌘ + rueda del ratón para hacer zoom en el mapa",
+          "gesturesMobile": "Usa dos dedos para mover el mapa",
+          "attribution": "Mostrar u ocultar las atribuciones",
+          "popupClose": "Cerrar"
+        }
       }
     },
     "goldPrice": {

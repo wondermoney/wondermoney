@@ -5388,6 +5388,11 @@
         "gasoline95": "Essence 95 (gasolina simples 95)",
         "lpg": "GPL carburant (GPL auto)"
       },
+      "fuelsShort": {
+        "diesel": "Gazole",
+        "gasoline95": "Essence 95",
+        "lpg": "GPL"
+      },
       "fields": {
         "fuel": "Carburant",
         "period": "La distance saisie est",
@@ -5483,6 +5488,7 @@
           },
           "change": "La variation hebdomadaire est la dernière moyenne de la DGEG moins celle d'il y a sept jours, en euros par litre et en pourcentage du prix précédent.",
           "stations": "Les stations les moins chères sont les prix par station de la DGEG classés du plus bas au plus élevé ; à égalité, le prix mis à jour le plus récemment passe en premier. Les prix non mis à jour depuis 30 jours et ceux très éloignés de la fourchette habituelle (très probablement une erreur de saisie) sont écartés. La médiane est le prix du milieu de toutes les stations de la zone, et l'économie sur un plein est la médiane moins le prix le plus bas, multipliée par 50 litres.",
+          "near": "Près de moi utilise la position de votre navigateur, seulement quand vous touchez le bouton. La distance est à vol d'oiseau (formule de haversine), de votre position aux coordonnées que la DGEG indique pour chaque station : par la route, elle peut être plus longue. La liste montre les {{nearLimit}} stations les moins chères dans la distance choisie ; à prix égal, la plus proche passe en premier. Les stations sans coordonnées sont exclues.",
           "formulasLabel": "Formules"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "La page lit un fichier de données enregistré et n'appelle jamais la DGEG pendant que vous l'utilisez. Le fichier est mis à jour par un script qui refuse les données périmées ou invraisemblables ; une mise à jour qui échoue conserve donc les derniers bons chiffres et leur date ({{asOf}}).",
           "stations": "Stations : les prix par station de la DGEG, tels que les stations les déclarent, pour les trois mêmes carburants. Le relevé a été pris le {{stationsDate}} à {{stationsTime}} UTC, et chaque prix garde la date et l'heure de sa dernière mise à jour par la station.",
           "stationsLink": "DGEG, prix des carburants par station",
-          "stationsRefresh": "La liste des stations est un relevé pris une fois par jour, lors de la reconstruction du site, et non un flux en direct. Si la DGEG ne répond pas ou si ses données échouent aux contrôles, la page garde le relevé précédent et affiche sa date ({{stationsDate}})."
+          "stationsRefresh": "La liste des stations est un relevé pris une fois par jour, lors de la reconstruction du site, et non un flux en direct. Si la DGEG ne répond pas ou si ses données échouent aux contrôles, la page garde le relevé précédent et affiche sa date ({{stationsDate}}).",
+          "near": "Votre position ne quitte jamais le navigateur : la page calcule les distances à partir des fichiers de stations de ce site, et la position ne va dans aucune adresse, aucun journal ni aucun événement de statistiques.",
+          "map": "La carte utilise les tuiles d'OpenFreeMap, avec les données d'OpenStreetMap, et ne s'ouvre que lorsque vous touchez Carte. Comme pour toute carte en ligne, le serveur des tuiles reçoit votre adresse IP et la zone que vous regardez."
         },
         "limits": {
           "title": "Ce que ces chiffres ne comprennent pas",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Stations les moins chères",
-        "intro": "Les stations les moins chères pour chaque carburant au Portugal continental, dans un district ou dans une commune, d'après les prix que les stations déclarent à la DGEG.",
+        "intro": "Les stations les moins chères pour chaque carburant près de vous, ou dans un district ou une commune du Portugal continental, d'après les prix que les stations déclarent à la DGEG.",
         "asOf": "Relevé des prix par station de la DGEG pris le {{date}} à {{time}} UTC. Chaque prix indique quand la station l'a mis à jour pour la dernière fois.",
         "stale": "Cette liste date de {{days}} jours : la mise à jour quotidienne ne s'est pas faite depuis le {{date}}. Les prix ont pu changer, vérifiez donc à la station avant de vous déplacer.",
         "fuel": "Type de carburant",
@@ -5551,7 +5559,34 @@
         "saving": "La moins chère ici est {{perLitre}} sous la médiane : {{perTank}} de moins pour un plein de {{litres}} L.",
         "noSaving": "Ici, la station la moins chère pratique le prix médian.",
         "nextStepCta": "Épargnez la différence mensuelle pour un objectif",
-        "note": "Prix tels que les stations les déclarent à la DGEG, qui les publie ; chaque station est responsable de son prix. Les prix peuvent changer dans la journée et n'incluent pas les remises des cartes carburant ou des applications."
+        "note": "Prix tels que les stations les déclarent à la DGEG, qui les publie ; chaque station est responsable de son prix. Les prix peuvent changer dans la journée et n'incluent pas les remises des cartes carburant ou des applications.",
+        "nearMe": "Près de moi",
+        "nearClear": "Choisir un district et une commune",
+        "radius": "Distance maximale",
+        "locating": "Recherche de votre position…",
+        "denied": "Pas d'accès à votre position. Choisissez un district.",
+        "timeout": "La localisation a pris trop de temps. Réessayez ou choisissez un district.",
+        "unsupported": "Ce navigateur ne partage pas la position. Choisissez un district.",
+        "locationError": "Votre position n'a pas pu être trouvée. Choisissez un district.",
+        "nearLoading": "Chargement des stations près de vous…",
+        "nearNone": "Aucune station avec un prix pour {{fuel}} à moins de {{radius}} km de vous.",
+        "nearSummary": "Stations avec un prix pour {{fuel}} à moins de {{radius}} km : {{count}}. Prix médian : {{median}}. Les moins chères :",
+        "distanceLabel": "Distance",
+        "mapShow": "Carte",
+        "mapLabel": "Carte des stations de la liste",
+        "mapLoading": "Ouverture de la carte…",
+        "mapUnavailable": "La carte ne s'ouvre pas dans ce navigateur. Utilisez le lien de chaque station.",
+        "directions": "Itinéraire",
+        "you": "Votre position",
+        "mapUi": {
+          "zoomIn": "Zoom avant",
+          "zoomOut": "Zoom arrière",
+          "gesturesWindows": "Utilisez Ctrl + molette pour zoomer sur la carte",
+          "gesturesMac": "Utilisez ⌘ + molette pour zoomer sur la carte",
+          "gesturesMobile": "Utilisez deux doigts pour déplacer la carte",
+          "attribution": "Afficher ou masquer les attributions",
+          "popupClose": "Fermer"
+        }
       }
     },
     "bankAccountsShared": {

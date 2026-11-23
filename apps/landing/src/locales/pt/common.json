@@ -5388,6 +5388,11 @@
         "gasoline95": "Gasolina simples 95",
         "lpg": "GPL auto"
       },
+      "fuelsShort": {
+        "diesel": "Gasóleo",
+        "gasoline95": "Gasolina 95",
+        "lpg": "GPL"
+      },
       "fields": {
         "fuel": "Combustível",
         "period": "A distância que indicas é",
@@ -5483,6 +5488,7 @@
           },
           "change": "A variação semanal é a média mais recente da DGEG menos a de há sete dias, em euros por litro e em percentagem do preço anterior.",
           "stations": "Os postos mais baratos são os preços por posto da DGEG ordenados do mais baixo para o mais alto; em caso de empate, fica primeiro o preço atualizado mais recentemente. Ficam de fora os preços sem atualização há 30 dias e os que estão muito fora do intervalo habitual (muito provavelmente um erro de digitação). A mediana é o preço do meio de todos os postos da zona, e a poupança num depósito é a mediana menos o preço mais barato, vezes 50 litros.",
+          "near": "Perto de mim usa a localização do teu navegador, só quando tocas no botão. A distância é em linha reta (fórmula de haversine), do teu ponto às coordenadas que a DGEG indica para cada posto, por isso pela estrada pode ser maior. A lista mostra os {{nearLimit}} postos mais baratos dentro da distância que escolhes; com o mesmo preço, fica primeiro o mais perto. Os postos sem coordenadas ficam de fora.",
           "formulasLabel": "Fórmulas"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "A página lê um ficheiro de dados guardado e nunca chama a DGEG enquanto a usas. O ficheiro é atualizado por um script que recusa dados desatualizados ou implausíveis, por isso uma atualização falhada mantém os últimos números bons e a respetiva data ({{asOf}}).",
           "stations": "Postos: os preços por posto da DGEG, tal como os postos os comunicam, para os mesmos três combustíveis. O retrato foi tirado a {{stationsDate}} às {{stationsTime}} UTC, e cada preço mantém a data e a hora em que o posto o atualizou pela última vez.",
           "stationsLink": "DGEG, preços dos combustíveis por posto",
-          "stationsRefresh": "A lista de postos é um retrato tirado uma vez por dia, quando o site é reconstruído, e não acompanha as mudanças ao longo do dia. Se a DGEG não responder ou os dados falharem as verificações, a página mantém o retrato anterior e mostra a respetiva data ({{stationsDate}})."
+          "stationsRefresh": "A lista de postos é um retrato tirado uma vez por dia, quando o site é reconstruído, e não acompanha as mudanças ao longo do dia. Se a DGEG não responder ou os dados falharem as verificações, a página mantém o retrato anterior e mostra a respetiva data ({{stationsDate}}).",
+          "near": "A tua localização nunca sai do navegador: a página calcula as distâncias a partir dos ficheiros de postos deste site, e a localização não vai para nenhum endereço, registo ou evento de estatística.",
+          "map": "O mapa usa mosaicos da OpenFreeMap, com dados do OpenStreetMap, e só abre quando tocas em Mapa. Como em qualquer mapa na web, o servidor dos mosaicos recebe o teu endereço IP e a zona que estás a ver."
         },
         "limits": {
           "title": "O que estes valores não incluem",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Postos mais baratos",
-        "intro": "Os postos mais baratos de cada combustível em Portugal continental, num distrito ou num concelho, a partir dos preços que os postos comunicam à DGEG.",
+        "intro": "Os postos mais baratos de cada combustível perto de ti, ou num distrito ou concelho de Portugal continental, a partir dos preços que os postos comunicam à DGEG.",
         "asOf": "Retrato dos preços por posto da DGEG tirado a {{date}} às {{time}} UTC. Cada preço mostra quando o posto o atualizou pela última vez.",
         "stale": "Esta lista tem {{days}} dias: a atualização diária não corre desde {{date}}. Os preços podem ter mudado, por isso confirma no posto antes de ires.",
         "fuel": "Tipo de combustível",
@@ -5551,7 +5559,34 @@
         "saving": "O mais barato daqui está {{perLitre}} abaixo da mediana: menos {{perTank}} num depósito de {{litres}} L.",
         "noSaving": "Aqui o posto mais barato cobra o preço mediano.",
         "nextStepCta": "Poupa a diferença mensal para um objetivo",
-        "note": "Preços tal como os postos os comunicam à DGEG, que os publica; cada posto responde pelo preço que indica. Os preços podem mudar ao longo do dia e não incluem descontos de cartões ou aplicações."
+        "note": "Preços tal como os postos os comunicam à DGEG, que os publica; cada posto responde pelo preço que indica. Os preços podem mudar ao longo do dia e não incluem descontos de cartões ou aplicações.",
+        "nearMe": "Perto de mim",
+        "nearClear": "Escolher distrito e concelho",
+        "radius": "Distância máxima",
+        "locating": "A procurar onde estás…",
+        "denied": "Sem acesso à tua localização. Escolhe um distrito.",
+        "timeout": "A localização demorou demasiado. Tenta de novo ou escolhe um distrito.",
+        "unsupported": "Este navegador não indica a localização. Escolhe um distrito.",
+        "locationError": "Não foi possível saber onde estás. Escolhe um distrito.",
+        "nearLoading": "A carregar os postos perto de ti…",
+        "nearNone": "Nenhum posto com preço de {{fuel}} a menos de {{radius}} km de ti.",
+        "nearSummary": "Postos com preço de {{fuel}} a menos de {{radius}} km: {{count}}. Preço mediano: {{median}}. Os mais baratos:",
+        "distanceLabel": "Distância",
+        "mapShow": "Mapa",
+        "mapLabel": "Mapa dos postos da lista",
+        "mapLoading": "A abrir o mapa…",
+        "mapUnavailable": "O mapa não abre neste navegador. Usa a ligação de cada posto.",
+        "directions": "Direções",
+        "you": "A tua localização",
+        "mapUi": {
+          "zoomIn": "Aproximar",
+          "zoomOut": "Afastar",
+          "gesturesWindows": "Usa Ctrl + roda do rato para fazer zoom no mapa",
+          "gesturesMac": "Usa ⌘ + roda do rato para fazer zoom no mapa",
+          "gesturesMobile": "Usa dois dedos para mover o mapa",
+          "attribution": "Mostrar ou esconder as atribuições",
+          "popupClose": "Fechar"
+        }
       }
     },
     "goldPrice": {

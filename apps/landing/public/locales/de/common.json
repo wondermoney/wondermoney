@@ -5388,6 +5388,11 @@
         "gasoline95": "Benzin 95 (gasolina simples 95)",
         "lpg": "Autogas (GPL auto)"
       },
+      "fuelsShort": {
+        "diesel": "Diesel",
+        "gasoline95": "Benzin 95",
+        "lpg": "Autogas"
+      },
       "fields": {
         "fuel": "Kraftstoff",
         "period": "Die eingegebene Strecke gilt",
@@ -5483,6 +5488,7 @@
           },
           "change": "Die Wochenänderung ist der aktuelle DGEG-Durchschnitt minus der von vor sieben Tagen, in Euro pro Liter und als Prozent des früheren Preises.",
           "stations": "Die günstigsten Tankstellen sind die DGEG-Preise je Tankstelle, vom niedrigsten zum höchsten sortiert; bei Gleichstand kommt der zuletzt aktualisierte Preis zuerst. Preise, die seit 30 Tagen nicht aktualisiert wurden, und Preise weit außerhalb des üblichen Bereichs (sehr wahrscheinlich ein Tippfehler) bleiben außen vor. Der Median ist der mittlere Preis aller Tankstellen der Gegend, und die Ersparnis pro Tankfüllung ist der Median minus der günstigste Preis, mal 50 Liter.",
+          "near": "Die Suche in Ihrer Nähe nutzt den Standort Ihres Browsers, nur wenn Sie auf die Schaltfläche tippen. Die Entfernung ist die Luftlinie (Haversine-Formel) von Ihrem Standort zu den Koordinaten, die die DGEG für jede Tankstelle angibt; auf der Straße kann es weiter sein. Die Liste zeigt die {{nearLimit}} günstigsten Tankstellen innerhalb der gewählten Entfernung; bei gleichem Preis steht die nähere zuerst. Tankstellen ohne Koordinaten fehlen.",
           "formulasLabel": "Formeln"
         },
         "data": {
@@ -5493,7 +5499,9 @@
           "refresh": "Die Seite liest eine gespeicherte Datendatei und fragt die DGEG nie ab, während Sie sie nutzen. Die Datei wird von einem Skript aktualisiert, das veraltete oder unplausible Daten ablehnt; eine fehlgeschlagene Aktualisierung behält daher die letzten guten Zahlen mit ihrem Datum ({{asOf}}).",
           "stations": "Tankstellen: die DGEG-Preise je Tankstelle, so wie die Tankstellen sie melden, für dieselben drei Kraftstoffe. Die Momentaufnahme stammt vom {{stationsDate}} um {{stationsTime}} UTC, und jeder Preis behält Datum und Uhrzeit seiner letzten Aktualisierung durch die Tankstelle.",
           "stationsLink": "DGEG, Kraftstoffpreise je Tankstelle",
-          "stationsRefresh": "Die Tankstellenliste ist eine Momentaufnahme, die einmal am Tag beim Neuaufbau der Website entsteht, kein Live-Feed. Antwortet die DGEG nicht oder bestehen ihre Daten die Prüfungen nicht, behält die Seite die vorige Momentaufnahme und zeigt deren Datum ({{stationsDate}})."
+          "stationsRefresh": "Die Tankstellenliste ist eine Momentaufnahme, die einmal am Tag beim Neuaufbau der Website entsteht, kein Live-Feed. Antwortet die DGEG nicht oder bestehen ihre Daten die Prüfungen nicht, behält die Seite die vorige Momentaufnahme und zeigt deren Datum ({{stationsDate}}).",
+          "near": "Ihr Standort verlässt den Browser nie: Die Seite berechnet die Entfernungen aus den Tankstellendateien dieser Website, und der Standort gelangt in keine Adresse, kein Protokoll und kein Statistikereignis.",
+          "map": "Die Karte nutzt Kacheln von OpenFreeMap mit Daten von OpenStreetMap und öffnet sich erst, wenn Sie auf Karte tippen. Wie bei jeder Webkarte erhält der Kachelserver Ihre IP-Adresse und den Bereich, den Sie ansehen."
         },
         "limits": {
           "title": "Was diese Zahlen nicht enthalten",
@@ -5533,7 +5541,7 @@
       },
       "stations": {
         "title": "Günstigste Tankstellen",
-        "intro": "Die günstigsten Tankstellen für jeden Kraftstoff auf dem portugiesischen Festland, in einem Distrikt oder in einer Gemeinde, nach den Preisen, die die Tankstellen der DGEG melden.",
+        "intro": "Die günstigsten Tankstellen für jeden Kraftstoff in Ihrer Nähe oder in einem Distrikt oder einer Gemeinde auf dem portugiesischen Festland, nach den Preisen, die die Tankstellen der DGEG melden.",
         "asOf": "Momentaufnahme der DGEG-Preise je Tankstelle vom {{date}} um {{time}} UTC. Bei jedem Preis steht, wann die Tankstelle ihn zuletzt aktualisiert hat.",
         "stale": "Diese Liste ist {{days}} Tage alt: Die tägliche Aktualisierung läuft seit dem {{date}} nicht. Die Preise können sich geändert haben, prüfen Sie sie also an der Tankstelle, bevor Sie losfahren.",
         "fuel": "Kraftstoffart",
@@ -5551,7 +5559,34 @@
         "saving": "Die günstigste hier liegt {{perLitre}} unter dem Median: {{perTank}} weniger für eine Tankfüllung von {{litres}} L.",
         "noSaving": "Hier verlangt die günstigste Tankstelle den Medianpreis.",
         "nextStepCta": "Monatliche Differenz für ein Ziel sparen",
-        "note": "Preise so, wie die Tankstellen sie der DGEG melden, die sie veröffentlicht; jede Tankstelle ist für ihren Preis verantwortlich. Die Preise können sich im Lauf des Tages ändern und enthalten keine Rabatte von Tankkarten oder Apps."
+        "note": "Preise so, wie die Tankstellen sie der DGEG melden, die sie veröffentlicht; jede Tankstelle ist für ihren Preis verantwortlich. Die Preise können sich im Lauf des Tages ändern und enthalten keine Rabatte von Tankkarten oder Apps.",
+        "nearMe": "In meiner Nähe",
+        "nearClear": "Distrikt und Gemeinde wählen",
+        "radius": "Maximale Entfernung",
+        "locating": "Ihr Standort wird ermittelt…",
+        "denied": "Kein Zugriff auf Ihren Standort. Wählen Sie einen Distrikt.",
+        "timeout": "Die Standortermittlung hat zu lange gedauert. Versuchen Sie es erneut oder wählen Sie einen Distrikt.",
+        "unsupported": "Dieser Browser gibt keinen Standort weiter. Wählen Sie einen Distrikt.",
+        "locationError": "Ihr Standort konnte nicht ermittelt werden. Wählen Sie einen Distrikt.",
+        "nearLoading": "Tankstellen in Ihrer Nähe werden geladen…",
+        "nearNone": "Keine Tankstelle mit einem Preis für {{fuel}} im Umkreis von {{radius}} km.",
+        "nearSummary": "Tankstellen mit einem Preis für {{fuel}} im Umkreis von {{radius}} km: {{count}}. Medianpreis: {{median}}. Die günstigsten:",
+        "distanceLabel": "Entfernung",
+        "mapShow": "Karte",
+        "mapLabel": "Karte der aufgeführten Tankstellen",
+        "mapLoading": "Karte wird geöffnet…",
+        "mapUnavailable": "Die Karte lässt sich in diesem Browser nicht öffnen. Nutzen Sie den Link der jeweiligen Tankstelle.",
+        "directions": "Route",
+        "you": "Ihr Standort",
+        "mapUi": {
+          "zoomIn": "Vergrößern",
+          "zoomOut": "Verkleinern",
+          "gesturesWindows": "Strg + Mausrad zum Zoomen der Karte",
+          "gesturesMac": "⌘ + Mausrad zum Zoomen der Karte",
+          "gesturesMobile": "Mit zwei Fingern die Karte bewegen",
+          "attribution": "Quellenangaben ein- oder ausblenden",
+          "popupClose": "Schließen"
+        }
       }
     },
     "bankAccountsShared": {
