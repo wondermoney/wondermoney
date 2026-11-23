@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { LngLatBounds, Map as MapLibreMap, Marker, NavigationControl, Popup, setWorkerUrl } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import mapCssUrl from "maplibre-gl/dist/maplibre-gl.css?url";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import type { FuelType } from "@/lib/calculators/fuelCost";
 import { stationPlace, type CheapStation, type GeoPoint } from "@/lib/calculators/fuelStations";
@@ -20,6 +20,23 @@ export const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
 // The bundler moves the worker beside the page's chunks; MapLibre would look for it beside its own.
 setWorkerUrl(workerUrl);
+
+/**
+ * MapLibre's stylesheet, linked when the map first opens. A plain CSS import here would be
+ * hoisted into the page's head by the build and block every visitor's first paint.
+ */
+let mapCss: Promise<void> | null = null;
+function loadMapCss(): Promise<void> {
+  mapCss ??= new Promise((resolve) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = mapCssUrl;
+    // A failed stylesheet still lets the map draw; only its controls lose their look.
+    link.onload = link.onerror = () => resolve();
+    document.head.append(link);
+  });
+  return mapCss;
+}
 
 const k = (key: string) => `tools.fuelPrices.stations.${key}`;
 /** Markers hang above their point (anchor bottom), so a popup below the point clears it and one above clears the pill. */
@@ -48,8 +65,17 @@ export default function StationsMap({ stations, fuel, origin }: Props) {
   const map = useRef<MapLibreMap | null>(null);
   const [failed, setFailed] = useState(false);
 
+  const [cssReady, setCssReady] = useState(false);
   useEffect(() => {
-    if (!container.current) return;
+    let current = true;
+    loadMapCss().then(() => current && setCssReady(true));
+    return () => {
+      current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!cssReady || !container.current) return;
     try {
       map.current = new MapLibreMap({
         container: container.current,
@@ -101,7 +127,7 @@ export default function StationsMap({ stations, fuel, origin }: Props) {
       map.current?.remove();
       map.current = null;
     };
-  }, [t, locale]);
+  }, [cssReady, t, locale]);
 
   useEffect(() => {
     const current = map.current;
@@ -136,7 +162,7 @@ export default function StationsMap({ stations, fuel, origin }: Props) {
     // More room on top: a pill stands above its point.
     if (!bounds.isEmpty()) current.fitBounds(bounds, { padding: { top: 56, bottom: 28, left: 40, right: 56 }, maxZoom: 14, duration: 0 });
     return () => markers.forEach((marker) => marker.remove());
-  }, [stations, fuel, origin, t, locale]);
+  }, [cssReady, stations, fuel, origin, t, locale]);
 
   if (failed) return <p className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">{t(k("mapUnavailable"))}</p>;
   return (
