@@ -79,21 +79,14 @@ function BrokerFees() {
 
   return (
     <>
-      <section aria-labelledby="broker-fees-reviewed" className="rounded-card border border-border bg-paper-2 p-5 sm:p-6">
-        <p id="broker-fees-reviewed" className="text-lg font-semibold text-foreground sm:text-xl">
-          {t(k("review.checked"), { date: reviewed })}
-        </p>
-        <p className="mt-2 text-sm text-foreground">{t(k("review.confirm"))}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t(k("review.source"))}</p>
-      </section>
       {stale && (
-        <div role="status" className="mt-4 rounded-card border border-warning-text/40 bg-background p-4 text-sm text-foreground">
+        <div role="status" className="mb-10 rounded-card border border-warning-text/40 bg-background p-4 text-sm text-foreground">
           <p className="font-semibold text-warning-text">{t(k("review.staleTitle"))}</p>
           <p className="mt-1">{t(k("review.stale"), { date: reviewed })}</p>
         </div>
       )}
 
-      <h2 className="mt-10 text-2xl font-semibold tracking-tight text-foreground">{t(k("calculator.title"))}</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t(k("calculator.title"))}</h2>
       <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{t(k("calculator.intro"))}</p>
 
       <div className="mt-6">
@@ -232,6 +225,13 @@ function BrokerFees() {
       </div>
 
       <FeeTable />
+      <section aria-labelledby="broker-fees-reviewed" className="mt-12 rounded-card border border-border bg-paper-2 p-5 sm:p-6">
+        <p id="broker-fees-reviewed" className="text-lg font-semibold text-foreground sm:text-xl">
+          {t(k("review.checked"), { date: reviewed })}
+        </p>
+        <p className="mt-2 text-sm text-foreground">{t(k("review.confirm"))}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t(k("review.source"))}</p>
+      </section>
       <Notices />
     </>
   );

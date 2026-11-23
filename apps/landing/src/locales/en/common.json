@@ -3285,7 +3285,6 @@
       "description": "Compare term deposit offers by term and amount, with interest after tax.",
       "pageTitle": "Term Deposit Comparison Portugal: Best Rates by Term and Amount",
       "pageDescription": "Compare term deposit offers in Portugal by rate (TANB), term and amount, with net interest after the 28% IRS, conditions and the date they were compiled. Educational only.",
-      "asOfBanner": "Offers as of {{date}}",
       "offers": {
         "title": "Deposit offers, highest rate first",
         "intro": "Enter the amount you want to invest and narrow the list by term and conditions. The interest shown is simple interest paid at maturity, after the 28% IRS. Bank conditions are shown in Portuguese, as the banks publish them.",

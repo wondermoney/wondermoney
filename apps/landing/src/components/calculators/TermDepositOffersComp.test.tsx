@@ -34,6 +34,18 @@ it("shows the as-of date, the offers sorted by rate and the net interest for the
   expect(pushGtmEvent).not.toHaveBeenCalled();
 });
 
+it("puts a logo or, for a bank without one, its initials beside each bank's name", () => {
+  render(<TermDepositOffersComp locale="en" />);
+  const rows = [...document.querySelectorAll("table tbody tr")];
+  for (const row of rows) {
+    const tile = row.querySelector("th [aria-hidden]");
+    expect(tile).toBeTruthy();
+    if (row.textContent?.includes("Easisave")) expect(tile?.textContent).toBe("EA");
+    else expect(tile?.querySelector("img")?.getAttribute("alt")).toBe("");
+  }
+  expect(document.body.textContent).toContain("All trademarks mentioned belong to their respective owners.");
+});
+
 it("filters by amount, term and conditions and reports one use without inputs", () => {
   render(<TermDepositOffersComp locale="en" />);
   const all = tableRows();

@@ -3285,7 +3285,6 @@
       "description": "Festgeldangebote nach Laufzeit und Betrag vergleichen, mit Zinsen nach Steuer.",
       "pageTitle": "Festgeld-Vergleich Portugal: Beste Zinsen nach Laufzeit und Betrag",
       "pageDescription": "Vergleichen Sie Festgeldangebote in Portugal nach Zinssatz (TANB), Laufzeit und Betrag, mit Nettozinsen nach 28 % IRS, den Bedingungen und dem Datum der Zusammenstellung. Nur zur Information.",
-      "asOfBanner": "Angebote, Stand {{date}}",
       "offers": {
         "title": "Festgeldangebote, höchster Zins zuerst",
         "intro": "Geben Sie den Betrag ein, den Sie anlegen möchten, und grenzen Sie die Liste nach Laufzeit und Bedingungen ein. Die gezeigten Zinsen sind einfache Zinsen bei Fälligkeit, nach 28 % IRS. Die Bedingungen der Banken stehen auf Portugiesisch, so wie die Banken sie veröffentlichen.",

@@ -11,13 +11,13 @@ export function formatAsOfDate(locale: Lang, iso: string = BANK_ACCOUNTS_SOURCE.
   return `${date.getUTCDate()} ${formatMonth(locale, date)} ${date.getUTCFullYear()}`;
 }
 
-/** The as-of date, prominently, with the source note and "conditions change". */
-export function AsOfBanner() {
+/** The as-of date with the source note and "conditions change", under the list. */
+export function AsOfBanner({ className = "" }: { className?: string }) {
   const { t, locale } = useTranslations();
   return (
     <section
       aria-labelledby="bank-accounts-as-of"
-      className="rounded-card border border-border bg-paper-2 p-5 sm:p-6"
+      className={`rounded-card border border-border bg-paper-2 p-5 sm:p-6 ${className}`}
     >
       <p id="bank-accounts-as-of" className="text-lg font-semibold text-foreground sm:text-xl">
         {t(s("asOf"), { date: formatAsOfDate(locale) })}
