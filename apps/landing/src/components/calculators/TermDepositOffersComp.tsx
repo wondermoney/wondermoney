@@ -19,6 +19,8 @@ import { formatMoney, formatMonthYear, formatPercent } from "@/lib/numberFormat"
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
 import { Select } from "@/components/ui/select";
+import BrandLogo from "@/components/shared/BrandLogo";
+import TrademarkDisclaimer from "@/components/shared/TrademarkDisclaimer";
 
 const k = (key: string) => `tools.termDepositOffers.${key}`;
 const MAX_AMOUNT = 100_000_000;
@@ -82,9 +84,6 @@ function TermDepositOffers() {
         <h2 id="offers-title" className="text-2xl font-semibold tracking-tight text-foreground">
           {t(k("offers.title"))}
         </h2>
-        <p className="mt-3 inline-block rounded-lg bg-paper-2 px-4 py-2 text-base font-semibold text-foreground">
-          {t(k("asOfBanner"), { date: TERM_DEPOSIT_OFFERS_AS_OF })}
-        </p>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{t(k("offers.intro"))}</p>
       </div>
 
@@ -157,6 +156,7 @@ function TermDepositOffers() {
 
       <Comparison visible={visible} amount={amountValid ? filters.amount : null} termMonths={filters.termMonths} eur={eur} percent={percent} />
       <Disclaimers />
+      <TrademarkDisclaimer textKey="lp.trademarks.tmGeneric" />
     </section>
   );
 }
@@ -211,9 +211,12 @@ function OfferCards({ offers, amount, eur, percent }: RowProps) {
         return (
           <li key={index} className="p-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-semibold text-foreground">{offer.bank}</p>
-                <p className="text-sm text-muted-foreground">{offer.product}</p>
+              <div className="flex min-w-0 items-start gap-2.5">
+                <BrandLogo name={offer.bank} />
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground">{offer.bank}</p>
+                  <p className="text-sm text-muted-foreground">{offer.product}</p>
+                </div>
               </div>
               <p className="shrink-0 font-mono text-xl font-semibold text-foreground">{percent(offer.tanb)}</p>
             </div>
@@ -277,8 +280,13 @@ function OfferTable({ offers, amount, eur, percent }: RowProps) {
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono font-semibold text-foreground">{percent(offer.tanb)}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-right font-mono text-foreground">{offer.termMonths}</td>
                 <th scope="row" className="px-3 py-2 text-left font-normal text-foreground">
-                  <span className="font-medium">{offer.bank}</span>
-                  <span className="block text-xs text-muted-foreground">{offer.product}</span>
+                  <span className="flex items-start gap-2">
+                    <BrandLogo name={offer.bank} />
+                    <span className="min-w-0">
+                      <span className="font-medium">{offer.bank}</span>
+                      <span className="block text-xs text-muted-foreground">{offer.product}</span>
+                    </span>
+                  </span>
                 </th>
                 <td className={`whitespace-nowrap px-3 py-2 text-right ${offer.minimum === null ? notStatedClass : "font-mono text-foreground"}`}>{limit(offer.minimum)}</td>
                 <td className={`whitespace-nowrap px-3 py-2 text-right ${offer.maximum === null ? notStatedClass : "font-mono text-foreground"}`}>{limit(offer.maximum)}</td>

@@ -9,6 +9,8 @@ import { FREE_BANK_ACCOUNTS, type FreeBankAccount } from "@/lib/calculators/data
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider, useTranslations } from "@/lib/reactTranslations";
+import BrandLogo from "@/components/shared/BrandLogo";
+import TrademarkDisclaimer from "@/components/shared/TrademarkDisclaimer";
 import { AsOfBanner, BankNotices, OriginalNotes, YesMark } from "./BankAccountsCommon";
 
 const k = (key: string) => `tools.freeBankAccounts.${key}`;
@@ -40,8 +42,7 @@ function FreeBankAccounts() {
 
   return (
     <>
-      <AsOfBanner />
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="flex min-h-11 items-center gap-2 text-sm font-medium text-foreground">
           <input
             type="checkbox"
@@ -71,7 +72,11 @@ function FreeBankAccounts() {
           </section>
         ),
       )}
+      <AsOfBanner className="mt-12" />
       <BankNotices />
+      <div className="mt-8">
+        <TrademarkDisclaimer textKey="lp.trademarks.tmGeneric" />
+      </div>
     </>
   );
 }
@@ -79,15 +84,18 @@ function FreeBankAccounts() {
 function AccountName({ account }: { account: FreeBankAccount }) {
   const { t } = useTranslations();
   return (
-    <>
-      <span className="font-semibold text-foreground">{account.bank}</span>
-      {account.account && <span className="text-muted-foreground"> · {account.account}</span>}
-      {isForeignFreeAccount(account) && (
-        <span className="ml-2 inline-block rounded-full bg-paper-2 px-2 py-0.5 text-xs font-medium text-foreground">
-          {t(k("foreignBadge"))}
-        </span>
-      )}
-    </>
+    <span className="flex items-start gap-2">
+      <BrandLogo name={account.bank} />
+      <span className="min-w-0">
+        <span className="font-semibold text-foreground">{account.bank}</span>
+        {account.account && <span className="text-muted-foreground"> · {account.account}</span>}
+        {isForeignFreeAccount(account) && (
+          <span className="ml-2 inline-block rounded-full bg-paper-2 px-2 py-0.5 text-xs font-medium text-foreground">
+            {t(k("foreignBadge"))}
+          </span>
+        )}
+      </span>
+    </span>
   );
 }
 

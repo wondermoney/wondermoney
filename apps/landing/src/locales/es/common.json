@@ -3285,7 +3285,6 @@
       "description": "Compara ofertas de depósitos a plazo por plazo e importe, con intereses netos de impuestos.",
       "pageTitle": "Comparador de Depósitos a Plazo en Portugal: Mejores Tipos por Plazo e Importe",
       "pageDescription": "Compara ofertas de depósitos a plazo en Portugal por tipo (TANB), plazo e importe, con los intereses netos tras el 28% de IRS, las condiciones y la fecha en que se recopilaron. Solo educativo.",
-      "asOfBanner": "Ofertas a fecha de {{date}}",
       "offers": {
         "title": "Ofertas de depósitos, del tipo más alto al más bajo",
         "intro": "Indica el importe que quieres invertir y filtra la lista por plazo y condiciones. Los intereses mostrados son simples, pagados al vencimiento, tras el 28% de IRS. Las condiciones de los bancos aparecen en portugués, tal como las publican.",

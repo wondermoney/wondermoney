@@ -34,6 +34,23 @@ it("lists the free accounts, shows the date, filters by two holders and reports 
   expect(pushGtmEvent).toHaveBeenCalledWith({ event: "tool_used", tool: "free_bank_accounts", page_type: "tools/x" });
 });
 
+it("puts a logo beside every bank's name and the date note after the list", () => {
+  render(<FreeBankAccountsComp locale="en" />);
+  const rows = document.querySelectorAll("table tbody tr");
+  expect(rows.length).toBe(14);
+  for (const row of rows) {
+    const logo = row.querySelector("th img");
+    expect(logo?.getAttribute("alt")).toBe("");
+    expect(logo?.closest("[aria-hidden]")).toBeTruthy();
+  }
+  // The name stays the row's label.
+  expect(rows[0].querySelector("th")?.textContent).toContain("Activo Bank");
+  const asOf = screen.getByText("Conditions as of 19 Nov 2026");
+  const lastTable = [...document.querySelectorAll("table")].at(-1) as Element;
+  expect(lastTable.compareDocumentPosition(asOf) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(document.body.textContent).toContain("All trademarks mentioned belong to their respective owners.");
+});
+
 it("does not label the Portuguese notes on the pt page", () => {
   render(<FreeBankAccountsComp locale="pt" />);
   expect(document.body.textContent).not.toContain("Condições originais, em português");

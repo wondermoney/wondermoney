@@ -61,11 +61,10 @@ describe("term deposit offers tool page", () => {
 	it("states the date, the guarantee, foreign banks and no affiliate links in every locale", () => {
 		for (const lang of SUPPORTED_LANGS) {
 			const copy = readLocale("src/locales", lang) as unknown as {
-				asOfBanner: string
-				disclaimers: { fgd: string; foreign: string; noAffiliate: string }
+				disclaimers: { asOf: string; fgd: string; foreign: string; noAffiliate: string }
 				sourceNote: string
 			}
-			expect(copy.asOfBanner).toContain("{{date}}")
+			expect(copy.disclaimers.asOf).toContain("{{date}}")
 			expect(copy.sourceNote).toContain("{{date}}")
 			expect(copy.disclaimers.fgd).toMatch(/100[.,\s]?000/)
 			expect(copy.disclaimers.foreign.length).toBeGreaterThan(30)

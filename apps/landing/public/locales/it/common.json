@@ -3285,7 +3285,6 @@
       "description": "Confronta le offerte di depositi vincolati per durata e importo, con interessi al netto delle tasse.",
       "pageTitle": "Confronto depositi vincolati in Portogallo: migliori tassi per durata e importo",
       "pageDescription": "Confronta le offerte di depositi vincolati in Portogallo per tasso (TANB), durata e importo, con gli interessi netti dopo il 28% di IRS, le condizioni e la data di compilazione. Solo a scopo informativo.",
-      "asOfBanner": "Offerte alla data del {{date}}",
       "offers": {
         "title": "Offerte di depositi, dal tasso più alto al più basso",
         "intro": "Inserisci l'importo che vuoi investire e restringi l'elenco per durata e condizioni. Gli interessi mostrati sono semplici, pagati alla scadenza, dopo il 28% di IRS. Le condizioni delle banche sono in portoghese, come le pubblicano le banche.",

@@ -3285,7 +3285,6 @@
       "description": "Compara ofertas de depósitos a prazo por prazo e montante, com juros líquidos de imposto.",
       "pageTitle": "Comparador de Depósitos a Prazo: Melhores Taxas por Prazo e Montante",
       "pageDescription": "Compara ofertas de depósitos a prazo em Portugal por taxa (TANB), prazo e montante, com os juros líquidos após 28% de IRS, as condições e a data em que foram compiladas. Apenas educativo.",
-      "asOfBanner": "Ofertas à data de {{date}}",
       "offers": {
         "title": "Ofertas de depósitos, da taxa mais alta para a mais baixa",
         "intro": "Indica o montante que queres investir e filtra a lista por prazo e condições. Os juros apresentados são juros simples pagos no vencimento, depois dos 28% de IRS. As condições dos bancos aparecem em português, tal como os bancos as publicam.",

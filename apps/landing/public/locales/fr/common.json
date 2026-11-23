@@ -3285,7 +3285,6 @@
       "description": "Comparez les offres de dépôts à terme par durée et montant, avec les intérêts nets d'impôt.",
       "pageTitle": "Comparateur de dépôts à terme au Portugal : meilleurs taux par durée et montant",
       "pageDescription": "Comparez les offres de dépôts à terme au Portugal par taux (TANB), durée et montant, avec les intérêts nets après 28 % d'IRS, les conditions et la date de leur compilation. À but éducatif uniquement.",
-      "asOfBanner": "Offres au {{date}}",
       "offers": {
         "title": "Offres de dépôts, du taux le plus élevé au plus bas",
         "intro": "Indiquez le montant que vous voulez placer et filtrez la liste par durée et conditions. Les intérêts affichés sont des intérêts simples versés à l'échéance, après 28 % d'IRS. Les conditions des banques sont affichées en portugais, comme elles les publient.",
