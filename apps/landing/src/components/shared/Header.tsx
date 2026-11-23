@@ -18,6 +18,7 @@ import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { useCtaUrl } from "@/hooks/useCtaUrl";
 import { useNavMenus } from "./useNavMenus";
+import { appFaqUrl } from "@/lib/appLinks";
 
 export type Props = {
   locale: Lang;
@@ -363,7 +364,7 @@ export default function Header({ locale }: Props) {
           </div>
 
           <a
-            href="https://app.wonder.money/faq"
+            href={appFaqUrl(locale)}
             className="whitespace-nowrap rounded-sm text-sm font-medium leading-6 text-ink-2 transition-colors hover:text-foreground"
           >
             {t("header.faq")}
@@ -539,7 +540,7 @@ export default function Header({ locale }: Props) {
                 </DrawerAccordion>
 
                 <a
-                  href="https://app.wonder.money/faq"
+                  href={appFaqUrl(locale)}
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-foreground hover:bg-accent"
                 >
                   {t("header.faq")}
