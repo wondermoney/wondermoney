@@ -242,10 +242,10 @@ describe('ConnectionsRoute', () => {
     expect(view.getByTestId('disconnecting')).toHaveTextContent('EnableBanking:42')
   })
 
-  it('navigates to the statement import entry point', async () => {
+  it('sends a failed sync to the transaction import, where the person picks the account', async () => {
     const view = await render(<ConnectionsRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'ImportStatement' }))
-    expect(mockPush).toHaveBeenCalledWith('/more/banking/import')
+    expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/import')
   })
 
   describe('SimpleFIN', () => {

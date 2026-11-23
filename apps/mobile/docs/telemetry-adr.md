@@ -45,12 +45,16 @@ its own list beside it, with the same identifier for a screen both apps have.
 
 **Record (2026-11-22, #626):** the app sends the import funnel web sends (`import_started`,
 `import_mapped`, `import_reviewed`, `import_failed`, with the kind, the file format and the step
-that failed) from its transaction, statement and portfolio imports, and `bank_connection_abandoned`
+that failed) from its transaction and portfolio imports, and `bank_connection_abandoned`
 when the person closes the bank's consent page before it returns to the app, the one bank step
 only the app sees. SimpleFIN's `bank_connection_started` is sent with the token, as on web.
 `sign_up_completed` and `sign_in_completed` are gone: the server records every signup and sign-in
 (`signup`, `login`), so the catalogue keeps nine mobile events. `docs/analytics-events.md` lists
 the old names and what replaced them.
+
+**Record (2026-11-23, #647):** the bank statement import screen is gone: it called API routes that
+never existed. A failed sync's "Import a statement" opens the transaction import, which sends the
+import funnel above, and the `bank_statement_import` screen identifier is retired.
 
 ## Why this exists
 

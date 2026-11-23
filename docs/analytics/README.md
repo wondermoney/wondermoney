@@ -19,6 +19,20 @@ dashboard in the hosted PostHog project, in the same order:
 The dashboard is **Product analytics** in the hosted PostHog project:
 <https://eu.posthog.com/project/3621/dashboard/1142647>. Its tiles are grouped by question.
 
+Two more dashboards in the same project are built with PostHog's own insight editor from
+catalogue events, not from SQL here:
+
+- **Growth and engagement** (<https://eu.posthog.com/project/3621/dashboard/1142761>): signups and
+  sign-ins per week by method, daily active people by client, daily over monthly active people,
+  and accounts, budgets and goals created per week. Service events only.
+- **Onboarding and feature usage** (<https://eu.posthog.com/project/3621/dashboard/1142762>): the
+  web signup form and its failures, onboarding steps reached and skipped (counts per step, since
+  web keeps no identity across page loads), the most viewed screens, and feedback by category.
+  Behavioural events only.
+
+Dashboards prefixed `[ARCHIVED]` were built on event names from before the catalogue, or on
+events WonderMoney never sent; they are kept for their history and nothing new lands in them.
+
 ## Reading it
 
 - **Two kinds of event.** Service events (`signup`, `user_active`, `first_*_created`,

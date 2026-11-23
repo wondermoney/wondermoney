@@ -17,7 +17,6 @@ const ACCOUNT_WRITES = [
   'transactionImport.failures',
   'transactionOcr.failures',
   'recurring.actionResult',
-  'banking.statementImport.failures',
   'installments.failures',
   'pendingChanges.failure',
 ]

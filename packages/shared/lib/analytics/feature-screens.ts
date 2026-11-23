@@ -71,7 +71,6 @@ export const mobileFeatureScreens = [
   'bank_connections',
   'bank_connect',
   'bank_connect_simplefin',
-  'bank_statement_import',
   'bank_sync_history',
   // Assistant proposals
   'pending_changes',
