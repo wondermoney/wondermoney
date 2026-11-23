@@ -48,6 +48,14 @@ export function readBankConnectionResult(result: WebBrowserAuthSessionResult): B
   return result.type === 'success' ? parseBankConnectionReturnUrl(result.url) : null
 }
 
+/**
+ * The person closed the consent page before the bank sent them back: `bank_connection_abandoned`.
+ * The bank may have given consent already, so the connection can still complete.
+ */
+export function isBankConsentAbandoned(result: WebBrowserAuthSessionResult): boolean {
+  return result.type === 'cancel' || result.type === 'dismiss'
+}
+
 /** The connections list route, with the marker and any known outcome. */
 export function bankConnectionsHref(connection: BankConnectionResult | null) {
   return {

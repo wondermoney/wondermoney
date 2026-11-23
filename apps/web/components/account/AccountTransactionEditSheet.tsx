@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -119,7 +118,6 @@ export function AccountTransactionEditSheet({
   const EditDescription = isDesktop ? SheetDescription : DrawerDescription;
   const EditFooter = isDesktop ? SheetFooter : DrawerFooter;
   const notifyIfRateLimited = useRateLimitToast();
-  const posthog = usePostHog();
 
   const locale = useLocale();
   const formSchema = z.object({
@@ -253,14 +251,12 @@ export function AccountTransactionEditSheet({
           transactionKey: transaction.transactionKey,
           updatedAmount: data.updatedAmount,
         });
-        posthog.capture("transaction_edited", { field: "amount" });
       }
       if (transferChanged) {
         await editTransactionMutation.mutateAsync({
           transactionKey: transaction.transactionKey,
           ...transferEdit,
         });
-        posthog.capture("transaction_edited", { field: "transfer" });
       }
       if (split.changed) {
         try {
@@ -282,17 +278,12 @@ export function AccountTransactionEditSheet({
           }
           throw error;
         }
-        posthog.capture("transaction_edited", {
-          field: "splits",
-          lines: split.lines.length,
-        });
       }
       if (tagsChanged) {
         await setTransactionTagsMutation.mutateAsync({
           transactionKey: transaction.transactionKey,
           tagKeys,
         });
-        posthog.capture("transaction_edited", { field: "tags" });
       }
     } catch (error) {
       notifyError(error);

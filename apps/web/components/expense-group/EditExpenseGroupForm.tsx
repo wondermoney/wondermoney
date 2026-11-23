@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -31,7 +30,6 @@ export function EditExpenseGroupForm({
 }) {
   const t = useTranslations("expenseGroups");
   const tRoot = useTranslations();
-  const posthog = usePostHog();
   const errorMessage = useGroupErrorMessage();
   const update = useUpdateExpenseGroup(group.expenseGroupKey);
   const currencies = useCurrencies();
@@ -65,10 +63,6 @@ export function EditExpenseGroupForm({
       setRefusal(errorMessage(error));
       return;
     }
-    posthog.capture("expense_group_updated", {
-      renamed: changes.name !== undefined,
-      currency_changed: changes.currencyCode !== undefined,
-    });
     toast.success(t("edit.saved"));
     onDone();
   };

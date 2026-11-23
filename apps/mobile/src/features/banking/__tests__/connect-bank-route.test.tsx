@@ -104,7 +104,8 @@ describe('ConnectBankRoute', () => {
     expect(view.getByTestId('state').props.children).toBe('loading')
   })
 
-  it('captures bank_connection_started with no institution and no consent redirect URL', async () => {
+  it('captures bank_connection_started with the provider, no institution and no consent redirect URL', async () => {
+    mockOpenAuthSessionAsync.mockResolvedValue({ type: 'success', url: 'wondermoney://more/banking?enableBankingConnection=success' })
     mockMutate.mockImplementation((_bankId, { onSuccess }: { onSuccess: (value: { redirectUrl: string }) => void }) => {
       onSuccess({ redirectUrl: 'https://ob.enablebanking.com/session/abc' })
     })
@@ -113,7 +114,7 @@ describe('ConnectBankRoute', () => {
 
     await fireEvent.press(view.getByRole('button', { name: 'Select' }))
 
-    expect(captured.mock.calls).toEqual([['bank_connection_started']])
+    expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'enable_banking' }]])
     const serialized = JSON.stringify(captured.mock.calls)
     expect(serialized).not.toContain('Revolut')
     expect(serialized).not.toContain('enablebanking')
@@ -148,6 +149,11 @@ describe('ConnectBankRoute', () => {
     const view = await render(<ConnectBankRoute />)
     await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Select' })) })
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1' } })
+    // Closed before the bank sent the person back: the one step only the app can see.
+    expect(captured.mock.calls).toEqual([
+      ['bank_connection_started', { provider: 'enable_banking' }],
+      ['bank_connection_abandoned', { provider: 'enable_banking' }],
+    ])
   })
 
   it('carries the outcome when the session saw the return link', async () => {
@@ -161,6 +167,8 @@ describe('ConnectBankRoute', () => {
     const view = await render(<ConnectBankRoute />)
     await act(async () => { await fireEvent.press(view.getByRole('button', { name: 'Select' })) })
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/more/banking', params: { justStarted: '1', connection: 'error' } })
+    // The server records the outcome; returning is not abandoning.
+    expect(captured.mock.calls).toEqual([['bank_connection_started', { provider: 'enable_banking' }]])
   })
 
   it('falls back to the connections list when the session cannot open', async () => {

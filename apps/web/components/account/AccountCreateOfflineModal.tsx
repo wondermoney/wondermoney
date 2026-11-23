@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -90,7 +89,6 @@ const AccountAddOfflineModal = ({
 }: AccountAddOfflineModalProps) => {
   const t = useTranslations();
   const notifyIfRateLimited = useRateLimitToast();
-  const posthog = usePostHog();
   const locale = useLocale();
   const formSchema = useMemo(() => createFormSchema(t, locale), [t, locale]);
   const methods = useForm({
@@ -128,12 +126,6 @@ const AccountAddOfflineModal = ({
       await createOfflineAccountMutation.mutateAsync(accountData, {
         onSuccess: async () => {
           await completeOfflineAccountCreation({
-            analytics: posthog,
-            analyticsProperties: {
-              currency: data.currencyId,
-              financial_institution: data.financialInstitutionId,
-              connection_type: "manual",
-            },
             invalidateAccounts: () => invalidateAccounts(queryClient),
             closeModal,
             resetForm: reset,

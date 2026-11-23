@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { type ReactNode, useCallback, useState } from "react";
 
 import AccountAddModal from "@/components/account/AccountCreateModal";
@@ -25,10 +24,6 @@ import { Button } from "@/components/ui/button";
 import { HelpHint } from "@/components/ui/help-hint";
 import { PreviewBadge } from "@/components/ui/PreviewBadge";
 import { useRouter } from "@/i18n/navigation";
-import {
-  safelyRunDiagnostic,
-  safePostHogCapture,
-} from "@/lib/analytics/safe-diagnostics";
 import { useUser } from "@/lib/auth/user-context";
 import { getDocsLink } from "@/lib/docs-links";
 import {
@@ -42,10 +37,6 @@ import {
   PREVIEW_TOTAL_BALANCE,
 } from "@/lib/preview/sample-accounts";
 import { cn } from "@/lib/utils";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 
 interface AccountsEmptyStateV2Props {
   recoveryState?: ReactNode;
@@ -56,7 +47,6 @@ export default function AccountsEmptyStateV2({
 }: AccountsEmptyStateV2Props = {}) {
   const locale = useLocale();
   const t = useTranslations();
-  const posthog = usePostHog();
   const router = useRouter();
   const searchParams = useSearchParams();
   const user = useUser();
@@ -74,14 +64,10 @@ export default function AccountsEmptyStateV2({
   const onAddSyncAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddSyncModalIsOpen(true);
-    safePostHogCapture(posthog, "account_add_sync_modal", { action: "open" });
   };
   const onAddOfflineAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddOfflineModalIsOpen(true);
-    safePostHogCapture(posthog, "account_add_offline_modal", {
-      action: "open",
-    });
   };
 
   const handleOfflineAccountSuccess = useCallback(async () => {
@@ -95,24 +81,9 @@ export default function AccountsEmptyStateV2({
         user?.id,
       )
     ) {
-      safelyRunDiagnostic(() => {
-        captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
-          account_count: 1,
-          account_source: "manual",
-          locale,
-        });
-        captureActivationEvent(
-          posthog,
-          ACTIVATION_EVENTS.onboardingStepCompleted,
-          {
-            account_source: "manual",
-            step: "account",
-          },
-        );
-      });
       router.replace(getFirstRunStepRoute("sync_value"));
     }
-  }, [locale, posthog, router, user?.id]);
+  }, [router, user?.id]);
 
   const handleFirstRunAccountCancel = useCallback(() => {
     if (cancelFirstRunHandoff("account", "account", user?.id)) {

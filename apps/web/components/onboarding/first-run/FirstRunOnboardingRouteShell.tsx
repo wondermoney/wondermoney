@@ -1,26 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { track } from "@/lib/analytics/track";
 import { useUser } from "@/lib/auth/user-context";
 import {
-  FIRST_RUN_EVENTS,
   FIRST_RUN_STEPS,
   getFirstRunState,
   getFirstRunStepFromPathname,
   getFirstRunStepRoute,
-  getStepIndex,
   markFirstRunStarted,
   patchFirstRunState,
 } from "@/lib/onboarding/firstRunOnboarding";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 
 import FirstRunOnboardingShell from "./FirstRunOnboardingShell";
 
@@ -48,7 +42,6 @@ export default function FirstRunOnboardingRouteShell({
   const t = useTranslations("onboarding.firstRun");
   const pathname = usePathname();
   const router = useRouter();
-  const posthog = usePostHog();
   const user = useUser();
   const [canRender, setCanRender] = useState(false);
   const [footer, setFooter] = useState<ReactNode>(null);
@@ -85,39 +78,18 @@ export default function FirstRunOnboardingRouteShell({
       previousState.status === "not_started"
         ? markFirstRunStarted(user.id)
         : previousState;
-    const nextState =
-      startedState.currentStep === currentStep
-        ? startedState
-        : patchFirstRunState({ currentStep }, user.id);
+    if (startedState.currentStep !== currentStep)
+      patchFirstRunState({ currentStep }, user.id);
 
-    if (previousState.status === "not_started") {
-      posthog?.capture(FIRST_RUN_EVENTS.started, {
-        entry_route: pathname,
-      });
-      captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStarted, {
-        entry_route: pathname,
-      });
-    }
+    if (previousState.status === "not_started") track("onboarding_started");
 
     if (!viewedStepsRef.current.has(currentStep)) {
       viewedStepsRef.current.add(currentStep);
-      posthog?.capture(FIRST_RUN_EVENTS.stepViewed, {
-        step: currentStep,
-        step_index: getStepIndex(currentStep),
-        selected_goals: nextState.selectedGoals,
-        account_step_status: nextState.accountStep,
-      });
+      track("onboarding_step_viewed", { step: currentStep });
     }
 
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepViewed, {
-      account_step_status: nextState.accountStep,
-      goal_count: nextState.selectedGoals.length,
-      step: currentStep,
-      step_index: getStepIndex(currentStep),
-    });
-
     setCanRender(true);
-  }, [currentStep, pathname, posthog, router, user?.id]);
+  }, [currentStep, router, user?.id]);
 
   if (!canRender) return null;
 

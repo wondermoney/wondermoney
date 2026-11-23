@@ -4358,41 +4358,6 @@
         "network": "No pudimos confirmar la conexión. Revisa tus conexiones bancarias antes de volver a intentarlo: un token de configuración solo funciona una vez.",
         "general": "Algo salió mal al conectar SimpleFIN. Inténtalo de nuevo."
       }
-    },
-    "statementImport": {
-      "back": "Atrás",
-      "title": "Importar un extracto bancario",
-      "helper": "Sube un extracto CSV para una cuenta cuando la sincronización del banco haya fallado. Esto añade transacciones a una cuenta que ya tienes — no crea una nueva conexión.",
-      "chooseFile": "Elegir un archivo CSV",
-      "phases": {
-        "uploading": "Subiendo tu extracto…",
-        "processing": "Leyendo e importando tu extracto…"
-      },
-      "succeeded": "Se importaron {{count}} transacciones.",
-      "succeededUnknownCount": "Tu extracto se importó correctamente.",
-      "done": "Hecho",
-      "tryAgain": "Inténtalo de nuevo",
-      "accounts": {
-        "pick": "¿Para qué cuenta es este extracto?",
-        "loading": "Cargando tus cuentas",
-        "empty": "Aún no tienes cuentas para importar.",
-        "emptyTitle": "No hay ninguna cuenta para importar",
-        "unnamed": "Cuenta sin nombre",
-        "error": "No se pudieron cargar tus cuentas. Comprueba tu conexión e inténtalo de nuevo.",
-        "invalid-response": "No se pudieron verificar tus cuentas. Inténtalo de nuevo para obtener una versión actualizada."
-      },
-      "failures": {
-        "demo": "Esta acción no está disponible en el modo de demostración.",
-        "read-only": "$t(common.householdReadOnly)",
-        "account-read-only": "$t(common.accountReadOnly)",
-        "access": "No tienes acceso para importar un extracto.",
-        "mfa": "Se requiere verificación adicional antes de poder importar un extracto.",
-        "cancelled": "Se canceló la importación.",
-        "network": "Comprueba tu conexión e inténtalo de nuevo.",
-        "upload-failed": "No se pudo subir el archivo. Comprueba tu conexión e inténtalo de nuevo.",
-        "processing-failed": "No se pudo importar ese extracto. Comprueba el archivo e inténtalo de nuevo.",
-        "general": "Algo salió mal al importar ese extracto. Inténtalo de nuevo."
-      }
     }
   },
   "marketsSearch": {

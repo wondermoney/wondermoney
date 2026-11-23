@@ -9,6 +9,9 @@ import {
 import { zParse } from '@app/validators/parser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { authedUser } from '@middleware/authed-context';
+import { bankConnectionFailureReason } from '@service/analytics/bank-connection-events';
+import { recordServiceEvent, requestPlatform } from '@service/analytics/service-events.service';
+import { BankProviderError } from '@service/bank-providers/errors';
 import { toHttpError } from '@service/bank-providers/http-errors';
 import { ENABLE_BANKING_PROVIDER_ID, requireBankProvider } from '@service/bank-providers/registry';
 import { BankSyncStatusService } from '@service/bank-sync/bank-sync-status.service';
@@ -42,6 +45,7 @@ export async function getBankSyncStatus(req: Request, res: Response) {
   return res.status(200).json(status);
 }
 
+/** A 4xx the API raised itself, as opposed to the provider's error (`BankProviderError`). */
 export async function startBankConnection(req: Request, res: Response) {
   const user = authedUser(req);
   const {
@@ -65,10 +69,26 @@ export async function startBankConnection(req: Request, res: Response) {
       tenantId: req.tenant.tenantKey,
     }));
   } catch (error) {
+    // The person never reached the bank, so no client sent bank_connection_started. The API's own
+    // refusals of the request (an unknown institution, no credential) are not a bank failing.
+    if (!isOwnRefusal(error)) {
+      await recordServiceEvent(DI.em, user, 'bank_connection_failed', {
+        platform: requestPlatform(req),
+        provider: 'enable_banking',
+        reason: bankConnectionFailureReason(error),
+        step: 'start',
+      });
+    }
     throw toHttpError(error);
   }
 
   return res.json({ redirectUrl });
+}
+
+function isOwnRefusal(error: unknown): boolean {
+  if (error instanceof BankProviderError) return false;
+  const status = typeof error === 'object' && error !== null && 'status' in error ? error.status : undefined;
+  return typeof status === 'number' && status < 500;
 }
 
 /**

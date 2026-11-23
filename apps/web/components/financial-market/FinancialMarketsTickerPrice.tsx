@@ -2,7 +2,6 @@
 
 import { format, getDayOfYear, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useMemo, useState } from "react";
 
 import type { ChartConfig } from "@/components/ui/chart";
@@ -40,14 +39,7 @@ const FinancialMarketsTickerPrice: React.FC<
   const t = useTranslations();
   const { formatChartDate } = useChartFormatters();
   const formatCurrency = useFormatCurrency();
-  const posthog = usePostHog();
   const [timeframe, setTimeframe] = useState(timeframes[4]);
-  const onTimeframeChange = (timeframe: ChartTimeframeT) => {
-    setTimeframe(timeframe);
-    posthog.capture("financial_markets_ticker_price_timeframe_changed", {
-      timeframe: timeframe.label,
-    });
-  };
   const timeframeFormatted = useMemo(
     () =>
       timeframe.valueInDays
@@ -143,7 +135,7 @@ const FinancialMarketsTickerPrice: React.FC<
       <ChartTimeframe
         timeframes={timeframes}
         activeTimeframe={timeframe}
-        onTimeframeChange={onTimeframeChange}
+        onTimeframeChange={setTimeframe}
         compact={compact}
       />
       {/* One height, not a contradictory `h-[400px] min-h-[500px]` pair where

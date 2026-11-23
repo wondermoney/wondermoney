@@ -22,8 +22,8 @@ import {
   type AnalyticsEventNameFor,
   type AnalyticsEventProperties,
   type AnalyticsPropertyValue,
-  featureScreens,
-  type FeatureScreen,
+  type MobileFeatureScreen as FeatureScreen,
+  mobileFeatureScreens as featureScreens,
 } from '@wondermoney/shared/analytics'
 
 /** Fixed by decision, not configuration: this app's only approved ingest host. */
@@ -36,7 +36,6 @@ export const POSTHOG_HOST = 'https://eu.posthog.com'
  */
 export { featureScreens, type FeatureScreen }
 
-export type AnalyticsAuthProvider = AnalyticsEventProperties<'sign_in_completed'>['provider']
 export type AnalyticsFeedbackCategory = AnalyticsEventProperties<'feedback_submitted'>['category']
 
 export type AnalyticsEvent = AnalyticsEventNameFor<'mobile'>

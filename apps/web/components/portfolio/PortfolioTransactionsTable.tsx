@@ -2,7 +2,6 @@
 
 import { Edit, Filter, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React, { useCallback, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 
@@ -70,7 +69,6 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
       const t = useTranslations();
       const formatCurrency = useFormatCurrency();
       const formatQuantity = useFormatQuantity();
-      const posthog = usePostHog();
       const [resetPagination, setResetPagination] = useState(false);
 
       const transactionTypesOptions = useMemo(
@@ -181,31 +179,22 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
 
       const onTransactionTypeFilterChange = useCallback(
         (transactionTypes: string[]) => {
-          posthog.capture("portfolio_transaction_table_filter", {
-            filter: "transaction_type",
-          });
           setTransactionTypeFilter(transactionTypes);
           setResetPagination(true);
         },
-        [posthog],
+        [],
       );
 
       const onTransactionTickerFilterChange = useCallback(
         (tickers: string[]) => {
-          posthog.capture("portfolio_transaction_table_filter", {
-            filter: "transaction_ticker",
-          });
           setTransactionTickerFilter(tickers);
           setResetPagination(true);
         },
-        [posthog],
+        [],
       );
 
       const onTransactionPortfolioFilterChange = useCallback(
         (portfolios: string[]) => {
-          posthog.capture("portfolio_transaction_table_filter", {
-            filter: "transaction_portfolio",
-          });
           setTransactionPortfolioFilter(
             portfolios.includes("__all__")
               ? []
@@ -213,18 +202,15 @@ const PortfolioTransactionsTable: React.FC<PortfolioTransactionsTableProps> =
           );
           setResetPagination(true);
         },
-        [posthog],
+        [],
       );
 
       const onDateRangeFilterChange = useCallback(
         (dateRange: DateRange | undefined) => {
-          posthog.capture("portfolio_transaction_table_filter", {
-            filter: "transaction_date",
-          });
           setTransactionDateRange?.(dateRange);
           setResetPagination(true);
         },
-        [posthog, setTransactionDateRange],
+        [setTransactionDateRange],
       );
 
       const columnHelper = useMemo(

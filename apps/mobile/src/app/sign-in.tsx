@@ -14,7 +14,6 @@ import { usePairing } from '@/features/auth/use-pairing'
 import { Button } from '@/components/ui/button'
 import { takeSignUpAfterSignOut } from '@/lib/auth/sign-up-after-sign-out'
 import { usePasswordSignIn } from '@/lib/server/use-instance'
-import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 export default function SignInRoute() {
   const { t } = useTranslation()
@@ -96,8 +95,6 @@ export default function SignInRoute() {
             blockAccess('mfa-required')
             return 'mfa-pending'
           }
-          // The channel only, never the address that was typed.
-          if (outcome.status === 'accepted') captureAnalyticsEvent('sign_in_completed', { provider: 'email' })
           return outcome.status
         }}
         footer={(

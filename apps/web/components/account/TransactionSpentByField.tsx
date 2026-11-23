@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
 
@@ -65,7 +64,6 @@ export function TransactionSpentByField({
   const t = useTranslations("household.attribution");
   const tRoot = useTranslations();
   const id = useId();
-  const posthog = usePostHog();
   const notifyIfRateLimited = useRateLimitToast();
   const { members } = useHouseholdMembers();
   const accountKey = transaction.accountKey.accountKey;
@@ -101,7 +99,6 @@ export function TransactionSpentByField({
         attributedAppuserKey: keyOf(option),
       });
       setLocalAttribution(saved.attribution);
-      posthog.capture("transaction_edited", { field: "attribution" });
       toast.success(t("spentBySaved"));
     } catch (error) {
       if (notifyIfRateLimited(error) || isHouseholdReadOnlyError(error)) return;

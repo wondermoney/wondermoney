@@ -9,15 +9,12 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
-import { useEffect } from "react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/Link";
 import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { cn } from "@/lib/utils";
-import { RETENTION_GROWTH_EVENTS } from "@/lib/utils/analytics";
 import { useDismissibleActivation } from "@/lib/utils/useDismissibleActivation";
 
 interface SetupChecklistCardProps {
@@ -43,7 +40,6 @@ export function SetupChecklistCard({
   hasPortfolio,
 }: SetupChecklistCardProps) {
   const t = useTranslations();
-  const posthog = usePostHog();
   const isDemo = useIsDemoProfile({ fetch: false });
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDismissed, dismiss } = useDismissibleActivation("setup-checklist");
@@ -62,30 +58,6 @@ export function SetupChecklistCard({
   const totalStepsCount = visibleSteps.length;
   const remainingStepsCount = totalStepsCount - completedStepsCount;
   const allStepsComplete = visibleSteps.every((step) => completed[step.key]);
-
-  useEffect(() => {
-    if (isDemo || isDismissed || allStepsComplete) return;
-
-    posthog?.capture(RETENTION_GROWTH_EVENTS.profileCompletenessViewed, {
-      completedStepsCount,
-      totalStepsCount,
-      hasAccount,
-      hasReviewedTransactions,
-      hasBudget,
-      hasPortfolio,
-    });
-  }, [
-    allStepsComplete,
-    completedStepsCount,
-    hasAccount,
-    hasBudget,
-    hasPortfolio,
-    hasReviewedTransactions,
-    isDismissed,
-    isDemo,
-    posthog,
-    totalStepsCount,
-  ]);
 
   if (isDemo || isDismissed || allStepsComplete) {
     return null;
@@ -178,17 +150,6 @@ export function SetupChecklistCard({
               <li key={step.key}>
                 <Link
                   href={step.href}
-                  onClick={() => {
-                    posthog?.capture(
-                      RETENTION_GROWTH_EVENTS.profileCompletenessItemClicked,
-                      {
-                        itemKey: step.key,
-                        isComplete,
-                        completedStepsCount,
-                        totalStepsCount,
-                      },
-                    );
-                  }}
                   className={cn(
                     "group hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-ring focus-visible:ring-offset-background active:bg-muted/70 flex min-h-11 items-center gap-3 rounded-md px-2 py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-px",
                     isComplete ? "text-muted-foreground" : "text-foreground/90",

@@ -7,11 +7,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
-import { safelyRunDiagnostic } from "@/lib/analytics/safe-diagnostics";
+import { track } from "@/lib/analytics/track";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
 import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
@@ -39,7 +38,6 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
   page = "accounts",
 }) => {
   const t = useTranslations();
-  const posthog = usePostHog();
   // The user's own Enable Banking key, or the server's shared one when it covers this household.
   const {
     canLink,
@@ -85,12 +83,8 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
     : undefined;
   const redirectStarted = Boolean(redirectUrl);
   const leaveForBank = useEffectEvent((url: string) => {
-    safelyRunDiagnostic(() => {
-      posthog.capture("account_add_sync_before_redirect", {
-        source: page === "accounts" ? "accounts" : "budget",
-        state: "redirecting",
-      });
-    });
+    // How it ends is the server's bank_connection_completed or _failed.
+    track("bank_connection_started", { provider: "enable_banking" });
     saveBankAccountSyncReturnMarker(page);
     window.location.href = url;
   });

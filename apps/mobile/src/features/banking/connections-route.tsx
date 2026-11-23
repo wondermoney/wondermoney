@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, isBankConsentAbandoned, parseBankConnectionResultParam, readBankConnectionResult } from './bank-connection-return'
 import { ConnectionsScreen, type ConnectionDisconnectFailureState, type ConnectionReconnectFailureState } from './connections-screen'
 import { mapBankConnections } from './connection-status-view-model'
 import { classifyBankConnectionDisconnectFailure, useBankConnectionDisconnectMutation } from './use-bank-connection-disconnect-mutation'
@@ -60,7 +60,8 @@ export function ConnectionsRoute() {
       }}
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onConnectSimplefin={offersSimplefin ? () => router.push('/more/banking/simplefin/connect' as Href) : undefined}
-      onImportStatement={() => router.push('/more/banking/import' as Href)}
+      // A failed sync's fallback is the staged import every account has: the person picks the account there.
+      onImportStatement={() => router.push('/accounts/transactions/import' as Href)}
       onViewHistory={({ connectionId, provider }, institutionName) => {
         router.push({
           pathname: '/more/banking/history',
@@ -88,9 +89,10 @@ export function ConnectionsRoute() {
         setReconnectFailure(null)
         start.mutate(bankId, {
           onSuccess: ({ redirectUrl }) => {
-            captureAnalyticsEvent('bank_connection_started')
+            captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
+                if (isBankConsentAbandoned(result)) captureAnalyticsEvent('bank_connection_abandoned', { provider: 'enable_banking' })
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
                 void query.refetch()
               },

@@ -2,7 +2,6 @@
 
 import { Plus, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -51,7 +50,6 @@ export function CreateExpenseGroupDialog({
   const tGroups = useTranslations("expenseGroups");
   const tRoot = useTranslations();
   const router = useRouter();
-  const posthog = usePostHog();
   const errorMessage = useGroupErrorMessage();
   const create = useCreateExpenseGroup();
   const currencies = useCurrencies({ enabled: open });
@@ -114,7 +112,6 @@ export function CreateExpenseGroupDialog({
         currencyCode: chosenCurrency,
         members,
       });
-      posthog.capture("expense_group_created", { people: members.length + 1 });
       toast.success(t("created"));
       onOpenChange(false);
       reset();

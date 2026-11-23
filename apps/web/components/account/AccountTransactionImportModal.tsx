@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { ArrowLeft, Download } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -17,6 +16,7 @@ import { Form, FormField, FormItem } from "@/components/ui/Form";
 import { FormControl, FormLabel, FormMessage } from "@/components/ui/Form";
 import type { AccountCsvImportSuccessCallback } from "@/lib/account/account-csv-import-completion";
 import { isStatementMappingComplete } from "@/lib/account/statement-mapping";
+import { track } from "@/lib/analytics/track";
 import { Account } from "@/lib/api/account/useAccounts";
 import useCreateAccountTransactionsCsvUrl from "@/lib/api/account/useCreateAccountTransactionsCsvUrl";
 import usePreviewAccountCsvImport, {
@@ -126,7 +126,6 @@ const AccountTransactionImportModal: React.FC<
     "allowance" | "verification" | null
   >(null);
 
-  const posthog = usePostHog();
   const [isSubmitButtonLoading, setIsSubmitButtonLoading] = useState(false);
   // The staged import the file became: once set, the dialog shows its review.
   const [importId, setImportId] = useState<string | undefined>();
@@ -216,6 +215,11 @@ const AccountTransactionImportModal: React.FC<
       if (!nextMapping) setMapping(response.data.mapping);
     } catch (error) {
       if (sequence !== readSequenceRef.current) return;
+      track("import_failed", {
+        kind: "transactions",
+        format: "statement",
+        step: "read",
+      });
       if (!notifyIfRateLimited(error))
         setReadError(t("import-statement-unreadable"));
       setPreview(undefined);
@@ -243,6 +247,10 @@ const AccountTransactionImportModal: React.FC<
     setMapping(undefined);
     setUploadedKey(undefined);
     setFileFormat(kind);
+    track("import_started", {
+      kind: "transactions",
+      format: kind ?? "statement",
+    });
     useCreateAccountTransactionsCsvUrlMutation.mutate(
       { accountId },
       {
@@ -265,8 +273,10 @@ const AccountTransactionImportModal: React.FC<
             setIsReading(false);
             setFileFormat(null);
             setReadError(t("toast-import-transactions-error"));
-            posthog.capture("account-transactions-import-failure", {
-              reason: "s3_upload_failed",
+            track("import_failed", {
+              kind: "transactions",
+              format: kind ?? "statement",
+              step: "upload",
             });
             return;
           }
@@ -285,8 +295,10 @@ const AccountTransactionImportModal: React.FC<
           setFileFormat(null);
           if (!notifyIfRateLimited(error))
             setReadError(t("toast-import-transactions-error"));
-          posthog.capture("account-transactions-import-failure", {
-            reason: "presigned_url_failed",
+          track("import_failed", {
+            kind: "transactions",
+            format: kind ?? "statement",
+            step: "upload",
           });
         },
       },
@@ -333,6 +345,7 @@ const AccountTransactionImportModal: React.FC<
    * the model reads it.
    */
   const startPdfImport = async (accountId: string, file: File) => {
+    track("import_started", { kind: "transactions", format: "pdf" });
     let session: TransactionImportSession;
     try {
       session = await createPdfImport.mutateAsync({
@@ -341,6 +354,11 @@ const AccountTransactionImportModal: React.FC<
         fileName: file.name,
       });
     } catch (error) {
+      track("import_failed", {
+        kind: "transactions",
+        format: "pdf",
+        step: "upload",
+      });
       if (notifyIfRateLimited(error)) return;
       if (isEmailVerificationRequiredError(error)) setBlockedBy("verification");
       else if (isAiAllowanceExhaustedError(error)) setBlockedBy("allowance");
@@ -361,15 +379,14 @@ const AccountTransactionImportModal: React.FC<
         .mutateAsync({ id: session.id, input: undefined })
         .catch(() => undefined);
       setReadError(t("import-pdf-upload-failed"));
-      posthog.capture("account-transactions-import-failure", {
-        reason: "pdf_upload_failed",
+      track("import_failed", {
+        kind: "transactions",
+        format: "pdf",
+        step: "upload",
       });
       return;
     }
-    posthog.capture("account-transactions-import-started", {
-      kind: "account",
-      source: "pdf",
-    });
+    track("import_mapped", { kind: "transactions", format: "pdf" });
     setImportId(session.id);
   };
 
@@ -405,17 +422,19 @@ const AccountTransactionImportModal: React.FC<
         // The bank's own parser needs no columns; any other file reads as previewed.
         mapping: fileFormat || preview?.source === "bank" ? undefined : mapping,
       });
-      posthog.capture("account-transactions-import-started", {
-        kind: "account",
-        source: fileFormat ?? preview?.source,
+      track("import_mapped", {
+        kind: "transactions",
+        format: fileFormat ?? "statement",
       });
       setImportId(session.id);
     } catch (error) {
       if (!notifyIfRateLimited(error)) {
         toast.error(t("toast-import-transactions-error"), { duration: 5000 });
       }
-      posthog.capture("account-transactions-import-failure", {
-        reason: "start_failed",
+      track("import_failed", {
+        kind: "transactions",
+        format: fileFormat ?? "statement",
+        step: "read",
       });
     } finally {
       setIsSubmitButtonLoading(false);

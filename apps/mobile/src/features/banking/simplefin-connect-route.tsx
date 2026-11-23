@@ -36,9 +36,10 @@ export function SimplefinConnectRoute() {
       }}
       onSubmit={(setupToken) => {
         setFailure(null)
+        // Sending the token is SimpleFIN's start, as on web; the server records how it ends.
+        captureAnalyticsEvent('bank_connection_started', { provider: 'simplefin' })
         connect.mutate(setupToken, {
           onSuccess: () => {
-            captureAnalyticsEvent('bank_connection_started')
             router.replace(bankConnectionsHref('success') as Href)
           },
           onError: (error) => {

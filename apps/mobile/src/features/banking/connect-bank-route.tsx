@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
-import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, readBankConnectionResult } from './bank-connection-return'
+import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, isBankConsentAbandoned, readBankConnectionResult } from './bank-connection-return'
 import type { ConnectBankScreenState } from './connect-bank-screen'
 import { ConnectBankScreen } from './connect-bank-screen'
 import type { BankLinkCredentialState } from './bank-link-credential-policy'
@@ -58,11 +58,12 @@ export function ConnectBankRoute() {
         start.mutate(row.id, {
           onSuccess: ({ redirectUrl }) => {
             // An authorization exists and consent is about to open.
-            // No institution name and no redirect URL: the ADR approves no
-            // properties here, and the redirect URL is a credential-bearing URL.
-            captureAnalyticsEvent('bank_connection_started')
+            // The provider only: no institution name, and no redirect URL, which
+            // is a credential-bearing URL.
+            captureAnalyticsEvent('bank_connection_started', { provider: 'enable_banking' })
             WebBrowser.openAuthSessionAsync(redirectUrl, BANK_CONNECTION_RETURN_URL).then(
               (result) => {
+                if (isBankConsentAbandoned(result)) captureAnalyticsEvent('bank_connection_abandoned', { provider: 'enable_banking' })
                 router.replace(bankConnectionsHref(readBankConnectionResult(result)) as Href)
               },
               () => {

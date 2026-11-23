@@ -20,9 +20,6 @@ import { TransactionSplitField, useSplitDraft } from "./TransactionSplitField";
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: () => {} }),
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 
 beforeAll(() => {
   // jsdom lacks the layout APIs that Radix Popper and cmdk call.

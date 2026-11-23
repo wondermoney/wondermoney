@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React, {
   useCallback,
   useEffect,
@@ -217,7 +216,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
       const splitCategoryLabel = useSplitCategoryLabel();
       const notifyIfRateLimited = useRateLimitToast();
       const router = useRouter();
-      const posthog = usePostHog();
       const [resetPagination, setResetPagination] = useState(false);
       const isDesktop = useBreakpoint("md");
       const isLedger = layout === "ledger";
@@ -402,48 +400,30 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 
       const onTransactionTypeFilterChange = useCallback(
         (transactionTypes: string[]) => {
-          posthog.capture("account_transaction_table_filter", {
-            filter: "transaction_type",
-          });
           setTransactionTypeFilter(transactionTypes);
           setResetPagination(true);
         },
-        [posthog],
+        [],
       );
 
-      const onAccountKeyFilterChange = useCallback(
-        (accountKeys: string[]) => {
-          posthog.capture("account_transaction_table_filter", {
-            filter: "transaction_account",
-          });
-          setAccountKeysFilter(accountKeys);
-          setResetPagination(true);
-        },
-        [posthog],
-      );
+      const onAccountKeyFilterChange = useCallback((accountKeys: string[]) => {
+        setAccountKeysFilter(accountKeys);
+        setResetPagination(true);
+      }, []);
 
       const onCategoryKeyFilterChange = useCallback(
         (categoryKeys: string[]) => {
-          posthog.capture("account_transaction_table_filter", {
-            filter: "transaction_category",
-          });
           setTransactionCategoryKeysFilter(categoryKeys);
           setIsTransactionCategoryFilterDirty(true);
           setResetPagination(true);
         },
-        [posthog],
+        [],
       );
 
-      const onTagKeyFilterChange = useCallback(
-        (tagKeys: string[]) => {
-          posthog.capture("account_transaction_table_filter", {
-            filter: "transaction_tag",
-          });
-          setTagKeysFilter(tagKeys);
-          setResetPagination(true);
-        },
-        [posthog],
-      );
+      const onTagKeyFilterChange = useCallback((tagKeys: string[]) => {
+        setTagKeysFilter(tagKeys);
+        setResetPagination(true);
+      }, []);
 
       /*
        * The row being inspected. § 9 InspectorDrawer.
@@ -476,22 +456,16 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
 
       const onDateRangeFilterChange = useCallback(
         (dateRange: DateRange | undefined) => {
-          posthog.capture("account_transaction_table_filter", {
-            filter: "transaction_date",
-          });
           setTransactionDateRange?.(dateRange);
           setResetPagination(true);
         },
-        [posthog, setTransactionDateRange],
+        [setTransactionDateRange],
       );
 
       const onNeedsReviewFilterChange = useCallback(() => {
-        posthog.capture("account_transaction_table_filter", {
-          filter: "needs_review",
-        });
         setNeedsReviewFilter((value) => !value);
         setResetPagination(true);
-      }, [posthog]);
+      }, []);
 
       const queryClient = useQueryClient();
       const {
@@ -507,11 +481,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
             {
               onSuccess: async (response) => {
                 offerRuleSuggestion(response.data);
-                posthog.capture("transaction_categorized", {
-                  category_key: categoryKey,
-                  source: "table_inline",
-                  was_auto_suggested: false,
-                });
                 // we need this because of the category filter
                 await queryClient.invalidateQueries({
                   queryKey: ["accounts-transactions"],
@@ -537,7 +506,6 @@ const AccountTransactionsTable: React.FC<AccountTransactionTableProps> =
           editTransactionMutation,
           notifyIfRateLimited,
           offerRuleSuggestion,
-          posthog,
           queryClient,
           t,
         ],

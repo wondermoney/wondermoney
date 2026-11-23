@@ -61,10 +61,6 @@ vi.mock("@/lib/api/tag/useTags", () => ({
 // The category picker has its own tests; here it only has to render.
 vi.mock("@/components/CategorySelect", () => ({ default: () => null }));
 
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
-
 vi.mock("sonner", () => ({ toast: state.toast }));
 
 beforeAll(() => {

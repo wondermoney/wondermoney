@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect } from "react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { type SubmitHandler, useForm } from "react-hook-form";
@@ -67,7 +66,6 @@ export default function SignupForm({
     typeof params.locale === "string" ? params.locale : "en",
   );
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const posthog = usePostHog();
   const hydrated = useHydrated();
   // Without Google credentials on the API the sign-in call fails with PROVIDER_NOT_FOUND.
   const googleSignIn = useConfirmedFeature((features) => features.googleSignIn);
@@ -78,11 +76,11 @@ export default function SignupForm({
   );
 
   useEffect(() => {
-    captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.started, {
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.started, {
       locale,
       method: "email",
     });
-  }, [locale, posthog]);
+  }, [locale]);
 
   const searchParams = useSearchParams();
   const forceRecaptchaFailure = searchParams.get("testRecaptcha") === "fail";
@@ -122,14 +120,14 @@ export default function SignupForm({
   const onSubmit: SubmitHandler<SignupFormSchema> = async (values, e) => {
     e?.preventDefault();
     form.clearErrors();
-    captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.submitClicked, {
+    captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitClicked, {
       locale,
       method: "email",
     });
 
     const recaptchaResult = await verifyRecaptcha();
     if (!recaptchaResult.success) {
-      captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.submitFailed, {
+      captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitFailed, {
         failure_category: getSignupFailureCategory("recaptcha"),
         locale,
         method: "email",
@@ -165,7 +163,7 @@ export default function SignupForm({
     });
 
     if (error || !data?.user) {
-      captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.submitFailed, {
+      captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitFailed, {
         failure_category: getSignupFailureCategory(error ?? "missing_user"),
         locale,
         method: "email",
@@ -185,7 +183,7 @@ export default function SignupForm({
     );
 
     if (!completed.ok) {
-      captureSignupFunnelEvent(posthog, SIGNUP_FUNNEL_EVENTS.submitFailed, {
+      captureSignupFunnelEvent(SIGNUP_FUNNEL_EVENTS.submitFailed, {
         failure_category: getSignupFailureCategory("app_callback"),
         locale,
         method: "email",

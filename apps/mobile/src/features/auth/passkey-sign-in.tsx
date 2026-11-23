@@ -15,7 +15,7 @@ import { themeTokens } from '@/theme/tokens'
  * remain. The session the server issues is picked up like any other sign-in; a passkey counts as
  * both factors, so there is no code to ask for. Closing the device's prompt is not an error.
  *
- * No analytics event: the telemetry ADR names the providers `sign_in_completed` may report.
+ * No analytics event: the server records the sign-in (`login`).
  */
 export function PasskeySignIn() {
   const { t } = useTranslation()

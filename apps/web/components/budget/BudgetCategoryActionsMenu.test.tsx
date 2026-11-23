@@ -22,9 +22,6 @@ vi.mock("@/lib/api/budget/useEditBudgetCategory", () => ({
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn(), replace: vi.fn(), push: vi.fn() }),
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
 
 beforeAll(() => {
   // Layout APIs Radix's popper and pointer handling call, which jsdom lacks.

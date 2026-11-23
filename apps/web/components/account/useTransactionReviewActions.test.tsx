@@ -23,9 +23,6 @@ const state = vi.hoisted(() => ({
 vi.mock("@/lib/api/account/useEditTransactions", () => ({
   default: () => ({ mutateAsync: state.edit }),
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
 vi.mock("sonner", () => ({ toast: state.toast }));
 
 afterEach(() => {

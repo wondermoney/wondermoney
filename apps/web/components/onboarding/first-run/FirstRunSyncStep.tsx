@@ -12,28 +12,23 @@ import {
   Wallet,
 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
+import { track } from "@/lib/analytics/track";
 import useBankConnections, {
   latestEnableBankingConnection,
   simplefinConnections,
 } from "@/lib/api/banking/useBankConnections";
 import { useUser } from "@/lib/auth/user-context";
 import {
-  FIRST_RUN_EVENTS,
   getFirstRunState,
   getFirstRunStepRoute,
   patchFirstRunState,
 } from "@/lib/onboarding/firstRunOnboarding";
 import { cn } from "@/lib/utils";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 
 import { EXAMPLE_FIGURES } from "./exampleFigures";
@@ -84,7 +79,6 @@ export default function FirstRunSyncStep() {
   const format = useFormatter();
   const formatCurrency = useFormatCurrency();
   const user = useUser();
-  const posthog = usePostHog();
   const setFooter = useFirstRunOnboardingFooter();
   const bankConnection = useBankConnectionResult();
   const applied = useRef(false);
@@ -96,26 +90,11 @@ export default function FirstRunSyncStep() {
     if (applied.current || bankConnection !== "success" || !user?.id) return;
     applied.current = true;
 
-    posthog?.capture(FIRST_RUN_EVENTS.accountConnectReturned, {
-      outcome: "connected",
-    });
     patchFirstRunState(
       { accountStep: "connected", currentStep: "sync_value" },
       user.id,
     );
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.onboardingStepCompleted, {
-      account_step_status: "connected",
-      step: "account",
-    });
-    // The activation funnel's terminal event, emitted here as well as from
-    // the Accounts-page flow because first-run is the dominant route.
-    // `captureActivationEvent` dedupes it per user, so a user who later adds
-    // an account from the Accounts page does not double-count.
-    captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
-      method: "bank_connection",
-      source: "first_run",
-    });
-  }, [bankConnection, posthog, user?.id]);
+  }, [bankConnection, user?.id]);
 
   const state = getFirstRunState(user?.id);
   const isSkipped = state.accountStep === "skipped";

@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -70,7 +69,6 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
 }) => {
   const t = useTranslations();
   const tb = useTranslations("transactionBulk");
-  const posthog = usePostHog();
   const persisted = transactions.filter(isPersisted);
   const transactionIds = persisted.map((row) => row.transactionKey.toString());
   const allMatching = selectAllMatching?.selected === true;
@@ -147,17 +145,10 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
 
   /** Send one bulk change for the current selection, then refresh and close the bar. */
   const run = async (
-    event: string,
     change: Omit<TransactionEditRequest, "filter" | "transactionIds">,
     successMessage: string,
   ) => {
     setIsSubmitting(true);
-    // Which fields changed, never the transactions, categories or tags themselves.
-    posthog.capture(event, {
-      allMatching,
-      count: selectedCount,
-      changes: Object.keys(change).sort(),
-    });
     try {
       const response = await mutateAsync({ ...scope, ...change });
       await refresh();
@@ -180,7 +171,6 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
       persisted,
       () =>
         void run(
-          "account_transaction_review_set_category",
           { categoryId: value, reviewed: true },
           t("transaction-reviewed"),
         ),
@@ -189,13 +179,11 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
 
   const onAddTag = (tag: Tag) =>
     void run(
-      "account_transactions_bulk_add_tag",
       { addTagIds: [tag.tagKey] },
       tb("tagged-toast", { name: tag.name }),
     );
   const onRemoveTag = (tag: Tag) =>
     void run(
-      "account_transactions_bulk_remove_tag",
       { removeTagIds: [tag.tagKey] },
       tb("untagged-toast", { name: tag.name }),
     );
@@ -211,10 +199,6 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
   };
 
   const onDelete = async () => {
-    posthog.capture("account_transactions_bulk_delete", {
-      allMatching,
-      count: selectedCount,
-    });
     try {
       const result = await deleteTransactions(
         allMatching
@@ -286,11 +270,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
             {!allTransactionsReviewed && (
               <Button
                 onClick={() =>
-                  void run(
-                    "account_transactions_review_set_reviewed",
-                    { reviewed: true },
-                    t("transaction-reviewed"),
-                  )
+                  void run({ reviewed: true }, t("transaction-reviewed"))
                 }
                 variant="outline"
                 loading={isSubmitting}
@@ -304,11 +284,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
             {allTransactionsVisible && (
               <Button
                 onClick={() =>
-                  void run(
-                    "account_transactions_review_set_hidden",
-                    { hidden: true },
-                    t("transaction-hidden-toast"),
-                  )
+                  void run({ hidden: true }, t("transaction-hidden-toast"))
                 }
                 variant="outline"
                 loading={isSubmitting}
@@ -321,11 +297,7 @@ const TransactionReviewControl: React.FC<TransactionReviewControlProps> = ({
             {allTransactionsHidden && (
               <Button
                 onClick={() =>
-                  void run(
-                    "account_transactions_review_set_hidden",
-                    { hidden: false },
-                    t("transaction-unhidden-toast"),
-                  )
+                  void run({ hidden: false }, t("transaction-unhidden-toast"))
                 }
                 variant="outline"
                 loading={isSubmitting}

@@ -35,10 +35,6 @@ vi.mock("@/lib/api/account/useDeleteTransactions", async (importOriginal) => {
   };
 });
 
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: vi.fn() }),
-}));
-
 vi.mock("sonner", () => ({
   toast: { success: state.toastSuccess, error: state.toastError },
 }));

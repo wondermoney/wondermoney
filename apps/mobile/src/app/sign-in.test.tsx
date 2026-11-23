@@ -85,15 +85,14 @@ describe('SignInRoute', () => {
     mockBlockAccess.mockReset()
   })
 
-  it('captures sign_in_completed with the channel only once the session is accepted', async () => {
+  it('sends no analytics for an accepted sign-in: the server records it as login', async () => {
     mockSignInWithPassword.mockResolvedValue({ status: 'accepted' })
     const view = await renderRoute()
 
     await submitCredentials(view)
 
-    await waitFor(() => expect(captured).toHaveBeenCalledTimes(1))
-    expect(captured).toHaveBeenCalledWith('sign_in_completed', { provider: 'email' })
-    expect(JSON.stringify(captured.mock.calls)).not.toContain('person@example.com')
+    await waitFor(() => expect(mockSignInWithPassword).toHaveBeenCalledTimes(1))
+    expect(captured).not.toHaveBeenCalled()
   })
 
   it('captures nothing when the credentials are refused', async () => {

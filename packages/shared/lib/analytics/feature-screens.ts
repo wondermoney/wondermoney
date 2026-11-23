@@ -4,7 +4,7 @@
  * only the identifier (`portfolio_detail`) is sent. `apps/mobile`'s `screen-analytics.test.tsx`
  * fails when a route has no identifier or an identifier has no route.
  */
-export const featureScreens = [
+export const mobileFeatureScreens = [
   // Unauthenticated
   'sign_in',
   'sign_up',
@@ -71,7 +71,6 @@ export const featureScreens = [
   'bank_connections',
   'bank_connect',
   'bank_connect_simplefin',
-  'bank_statement_import',
   'bank_sync_history',
   // Assistant proposals
   'pending_changes',
@@ -109,4 +108,71 @@ export const featureScreens = [
   'settings_security',
 ] as const;
 
-export type FeatureScreen = (typeof featureScreens)[number];
+/**
+ * Web's, the same way: a screen both apps have keeps mobile's identifier. `apps/web`'s
+ * `lib/analytics/feature-screen.test.ts` fails when a route has no identifier or an identifier
+ * has no route.
+ */
+export const webFeatureScreens = [
+  // Unauthenticated
+  'sign_in',
+  'sign_in_mfa',
+  'sign_in_error',
+  'sign_up',
+  'forgot_password',
+  'reset_password',
+  'settings_household_join',
+  'faq',
+  // Activation
+  'onboarding',
+  // Home
+  'dashboard',
+  // Accounts & transactions
+  'accounts',
+  'account_detail',
+  'account_transactions',
+  'installment_plan_detail',
+  'recurring',
+  'transactions',
+  'transaction_review',
+  // Budgets
+  'budgets',
+  'budget_create',
+  'budget_year',
+  'budget_month',
+  // Loans, assets, goals, expense groups
+  'loans',
+  'loan_detail',
+  'assets',
+  'asset_detail',
+  'goals',
+  'goal_detail',
+  'expense_groups',
+  'expense_group_detail',
+  // Markets
+  'markets',
+  'market_screener',
+  'market_watchlist',
+  // Portfolio
+  'portfolio',
+  'portfolio_activity',
+  'portfolio_detail',
+  'portfolio_detail_activity',
+  'portfolio_holdings',
+  // Reports and settings
+  'reports',
+  'settings',
+] as const;
+
+/** Every screen identifier, of both apps: the values of `feature_screen_viewed.screen`. */
+export const featureScreens = [
+  ...mobileFeatureScreens,
+  ...webFeatureScreens.filter(
+    (screen): screen is Exclude<WebFeatureScreen, MobileFeatureScreen> =>
+      !(mobileFeatureScreens as readonly string[]).includes(screen),
+  ),
+] as const;
+
+export type MobileFeatureScreen = (typeof mobileFeatureScreens)[number];
+export type WebFeatureScreen = (typeof webFeatureScreens)[number];
+export type FeatureScreen = MobileFeatureScreen | WebFeatureScreen;

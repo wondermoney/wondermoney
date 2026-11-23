@@ -39,7 +39,6 @@ vi.mock("@/lib/api/budget/useBudgetSuggestions", () => ({
   }),
 }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
-vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: () => {} }) }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 beforeAll(() => {

@@ -7,8 +7,6 @@ import type {
   CatalogueEventProperties,
 } from './types';
 
-const AUTH_PROVIDERS = ['email', 'apple', 'google'] as const;
-
 /** The sign-in methods the API knows; `other` covers any provider added later. */
 const SIGN_IN_METHODS = ['email', 'google', 'apple', 'oidc', 'other'] as const;
 
@@ -32,9 +30,41 @@ export const ANALYTICS_IMPORT_FORMATS = [
   'broker_csv',
 ] as const;
 
+export type AnalyticsImportFormat = (typeof ANALYTICS_IMPORT_FORMATS)[number];
+
+/** A format a client read from the API, as the catalogue's `format`, or `undefined` for one it does not list. */
+export function analyticsImportFormat(value: unknown): AnalyticsImportFormat | undefined {
+  return (ANALYTICS_IMPORT_FORMATS as readonly unknown[]).includes(value)
+    ? (value as AnalyticsImportFormat)
+    : undefined;
+}
+
 const BANK_PROVIDERS = ['enable_banking', 'simplefin'] as const;
 
 const PLATFORMS = ['web', 'mobile', 'api'] as const;
+
+/** The steps of web's first-run onboarding (`lib/onboarding/first-run/types.ts` in the web app). */
+const onboardingStep = {
+  type: 'enum',
+  values: ['welcome', 'goals', 'privacy', 'account', 'sync_value', 'completion'],
+  description: 'The onboarding step.',
+} as const;
+
+const importProperties = {
+  kind: {
+    type: 'enum',
+    values: ['transactions', 'portfolio'],
+    description:
+      'Transactions into accounts, or a portfolio from a broker export.',
+  },
+  format: {
+    type: 'enum',
+    values: ANALYTICS_IMPORT_FORMATS,
+    description:
+      'The file format, once known (`statement` is a bank CSV, `pdf` the AI statement import).',
+    optional: true,
+  },
+} as const;
 
 const requiredPlatform = {
   type: 'enum',
@@ -302,7 +332,7 @@ export const ANALYTICS_EVENTS = {
   },
   bank_connection_failed: {
     description:
-      'Linking a bank connection failed before any sync ran (a refused consent, a bad token, a provider error).',
+      'Connecting a bank failed before any sync ran: the provider refused to start it (before the person reached the bank), or linking it failed afterwards (a refused consent, a bad token, a provider error).',
     surfaces: ['server'],
     tier: 'service',
     question: 'bank_connections',
@@ -332,6 +362,13 @@ export const ANALYTICS_EVENTS = {
         ],
         description: "Why, as a fixed code: never the provider's own message.",
       },
+      step: {
+        type: 'enum',
+        values: ['start', 'link'],
+        description:
+          "Where it failed: asking the provider to start the connection, so the person never reached the bank (and the app sent no `bank_connection_started`), or linking it after the bank's consent or with SimpleFIN's token. Absent on events recorded before it existed.",
+        optional: true,
+      },
       platform,
     },
   },
@@ -359,50 +396,135 @@ export const ANALYTICS_EVENTS = {
   },
 
   // Behavioural events: sent by the apps, only with the person's analytics opt-in.
-  sign_up_completed: {
-    description: 'A new account finished signing up in the app.',
-    surfaces: ['mobile'],
+  signup_started: {
+    description: 'The signup form was shown.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'activation',
+    properties: {},
+  },
+  signup_failed: {
+    description:
+      'A signup did not go through: the form was refused, or the account was made but the app could not finish signing in. A signup that succeeds is the service event `signup`.',
+    surfaces: ['web'],
     tier: 'behavioural',
     question: 'activation',
     properties: {
-      provider: {
+      reason: {
         type: 'enum',
-        values: AUTH_PROVIDERS,
-        description: 'How the person signed up.',
+        values: [
+          'recaptcha',
+          'auth_provider',
+          'missing_user',
+          'app_callback',
+          'unknown',
+        ],
+        description:
+          'Where it failed: the bot check, the sign-in provider, a response without an account, or finishing sign-in in the app.',
       },
     },
   },
-  sign_in_completed: {
-    description: 'An existing account signed in to the app.',
-    surfaces: ['mobile'],
+  onboarding_started: {
+    description:
+      'The person began onboarding, once per browser (the progress is kept in browser storage).',
+    surfaces: ['web'],
     tier: 'behavioural',
-    question: 'retention',
-    properties: {
-      provider: {
-        type: 'enum',
-        values: AUTH_PROVIDERS,
-        description: 'How the person signed in.',
-      },
-    },
+    question: 'activation',
+    properties: {},
+  },
+  onboarding_step_viewed: {
+    description: 'A step of onboarding was shown, once per step and visit.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'activation',
+    properties: { step: onboardingStep },
+  },
+  onboarding_step_skipped: {
+    description: 'The person skipped a step of onboarding.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'activation',
+    properties: { step: onboardingStep },
   },
   onboarding_completed: {
     description: 'The person finished onboarding.',
-    surfaces: ['mobile'],
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'activation',
     properties: {},
   },
   bank_connection_started: {
-    description: 'The person began connecting a bank.',
+    description:
+      'The person began connecting a bank: left for the bank to give consent (Enable Banking), or opened the SimpleFIN setup. How it ends is the service event `bank_connection_completed` or `bank_connection_failed`.',
+    surfaces: ['web', 'mobile'],
+    tier: 'behavioural',
+    question: 'bank_connections',
+    properties: {
+      provider: {
+        type: 'enum',
+        values: BANK_PROVIDERS,
+        description: 'The bank data provider.',
+        optional: true,
+      },
+    },
+  },
+  bank_connection_abandoned: {
+    description:
+      "The person closed the bank's consent page before it returned to the app. The connection may still complete, if the bank had already given consent.",
     surfaces: ['mobile'],
     tier: 'behavioural',
     question: 'bank_connections',
-    properties: {},
+    properties: {
+      provider: {
+        type: 'enum',
+        values: ['enable_banking'],
+        description: 'The bank data provider: only Enable Banking sends the person to the bank.',
+      },
+    },
+  },
+  import_started: {
+    description:
+      'A file was chosen to import.',
+    surfaces: ['web', 'mobile'],
+    tier: 'behavioural',
+    question: 'imports',
+    properties: importProperties,
+  },
+  import_mapped: {
+    description:
+      "The file was read and its columns matched, so the import is ready for review. A file whose columns the format fixes (OFX, QIF, CAMT.053, YNAB, Actual, a PDF) reaches this step as soon as it is read.",
+    surfaces: ['web', 'mobile'],
+    tier: 'behavioural',
+    question: 'imports',
+    properties: importProperties,
+  },
+  import_reviewed: {
+    description:
+      'The person confirmed the review and asked to import. The rows written are the service event `import_committed`.',
+    surfaces: ['web', 'mobile'],
+    tier: 'behavioural',
+    question: 'imports',
+    properties: importProperties,
+  },
+  import_failed: {
+    description: 'An import stopped on an error the person saw.',
+    surfaces: ['web', 'mobile'],
+    tier: 'behavioural',
+    question: 'imports',
+    properties: {
+      ...importProperties,
+      step: {
+        type: 'enum',
+        values: ['upload', 'read', 'mapping', 'review', 'commit'],
+        description:
+          'The step that failed: sending the file, reading it, matching its columns, saving review choices, or importing.',
+      },
+    },
   },
   feedback_submitted: {
     description:
       'The person sent feedback from the app. The message itself is never sent.',
-    surfaces: ['mobile'],
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: null,
     properties: {
@@ -414,8 +536,9 @@ export const ANALYTICS_EVENTS = {
     },
   },
   feature_screen_viewed: {
-    description: 'A screen of the app was shown.',
-    surfaces: ['mobile'],
+    description:
+      'A screen of the app was shown. Web sends it on each navigation, in place of a pageview.',
+    surfaces: ['web', 'mobile'],
     tier: 'behavioural',
     question: 'retention',
     properties: {

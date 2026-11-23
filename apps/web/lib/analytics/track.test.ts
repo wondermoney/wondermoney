@@ -15,19 +15,19 @@ describe("track", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
     untypedTrack("account_delete", { accountKey: 12 });
-    untypedTrack("sign_up_completed", { provider: "email" });
+    untypedTrack("bank_connection_abandoned", { provider: "enable_banking" });
 
     expect(posthog.capture).not.toHaveBeenCalled();
     expect(warn.mock.calls.map(([message]) => message)).toEqual([
       "Analytics event account_delete dropped: account_delete is not in the event catalogue",
-      "Analytics event sign_up_completed dropped: sign_up_completed is not sent from web",
+      "Analytics event bank_connection_abandoned dropped: bank_connection_abandoned is not sent from web",
     ]);
   });
 
   it("does not compile for an event outside the catalogue", () => {
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
     // @ts-expect-error web events come from the catalogue; a mobile-only event is not one
-    track("sign_up_completed", { provider: "email" });
+    track("bank_connection_abandoned", { provider: "enable_banking" });
     // @ts-expect-error nor is a name that was never catalogued
     track("account_delete");
     expect(posthog.capture).not.toHaveBeenCalled();

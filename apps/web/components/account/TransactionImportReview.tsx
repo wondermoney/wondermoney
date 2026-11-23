@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
+import { track } from "@/lib/analytics/track";
 import type { Account } from "@/lib/api/account/useAccounts";
 import useCategories, { type Category } from "@/lib/api/category/useCategories";
 import {
@@ -234,24 +235,36 @@ export default function TransactionImportReview({
 
   /** Commit, with the category step's choices saved first: every file category, picked or as suggested. */
   const commitWithCategories = async () => {
+    const analytics = { kind: "transactions", format: session.format } as const;
+    track("import_reviewed", analytics);
     if (sourceCategories.length > 0) {
-      await mapCategories.mutateAsync({
-        id: importId,
-        input: Object.fromEntries(
-          sourceCategories.map((source) => {
-            const choice = categoryChoice(source);
-            return [
-              source.label,
-              choice === UNCATEGORISED ? null : Number(choice),
-            ];
-          }),
-        ),
-      });
+      try {
+        await mapCategories.mutateAsync({
+          id: importId,
+          input: Object.fromEntries(
+            sourceCategories.map((source) => {
+              const choice = categoryChoice(source);
+              return [
+                source.label,
+                choice === UNCATEGORISED ? null : Number(choice),
+              ];
+            }),
+          ),
+        });
+      } catch (error) {
+        track("import_failed", { ...analytics, step: "review" });
+        throw error;
+      }
     }
-    await commit.mutateAsync({
-      id: importId,
-      input: { acknowledgeMismatch: mismatch && mismatchAcknowledged },
-    });
+    try {
+      await commit.mutateAsync({
+        id: importId,
+        input: { acknowledgeMismatch: mismatch && mismatchAcknowledged },
+      });
+    } catch (error) {
+      track("import_failed", { ...analytics, step: "commit" });
+      throw error;
+    }
   };
   const reviewable =
     session.status === "ready" || session.status === "needs_mapping";

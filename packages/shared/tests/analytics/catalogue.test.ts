@@ -7,6 +7,11 @@ import {
   ANALYTICS_SURFACES,
   ANALYTICS_TIERS,
   type AnalyticsCatalogue,
+  featureScreens,
+  LEGACY_MOBILE_EVENT_NAMES,
+  LEGACY_WEB_EVENT_NAMES,
+  mobileFeatureScreens,
+  webFeatureScreens,
 } from '../../lib/analytics';
 import { IMPORT_FORMATS } from '../../lib/import/types';
 
@@ -107,7 +112,7 @@ describe('the analytics event catalogue', () => {
     },
   );
 
-  it("keeps mobile's events from its telemetry ADR, less the facts the server now records", () => {
+  it("sends from mobile its ADR's events, less the facts the server records, and the import and bank steps (#626)", () => {
     const mobile = entries.filter(([, spec]) =>
       spec.surfaces.includes('mobile'),
     );
@@ -116,16 +121,63 @@ describe('the analytics event catalogue', () => {
         mobile.map(([name, spec]) => [name, Object.keys(spec.properties)]),
       ),
     ).toEqual({
-      bank_connection_started: [],
+      bank_connection_abandoned: ['provider'],
+      bank_connection_started: ['provider'],
       feature_screen_viewed: ['screen'],
       feedback_submitted: ['category'],
+      import_failed: ['kind', 'format', 'step'],
+      import_mapped: ['kind', 'format'],
+      import_reviewed: ['kind', 'format'],
+      import_started: ['kind', 'format'],
       onboarding_completed: [],
-      sign_in_completed: ['provider'],
-      sign_up_completed: ['provider'],
     });
+  });
+
+  it("sends from web only the steps the server can't see (#625)", () => {
+    const web = entries.filter(([, spec]) => spec.surfaces.includes('web'));
+    expect(web.map(([name]) => name).sort()).toEqual([
+      'bank_connection_started',
+      'feature_screen_viewed',
+      'feedback_submitted',
+      'import_failed',
+      'import_mapped',
+      'import_reviewed',
+      'import_started',
+      'onboarding_completed',
+      'onboarding_started',
+      'onboarding_step_skipped',
+      'onboarding_step_viewed',
+      'signup_failed',
+      'signup_started',
+    ]);
+  });
+
+  it('keeps one identifier for a screen both apps have', () => {
+    expect(new Set(featureScreens).size).toBe(featureScreens.length);
+    expect([...featureScreens].sort()).toEqual(
+      [...new Set([...mobileFeatureScreens, ...webFeatureScreens])].sort(),
+    );
   });
 
   it('lists every transaction import format, and the broker export', () => {
     expect(ANALYTICS_IMPORT_FORMATS).toEqual([...IMPORT_FORMATS, 'broker_csv']);
   });
+});
+
+describe('the legacy names', () => {
+  const tables = [
+    ['web', LEGACY_WEB_EVENT_NAMES],
+    ['mobile', LEGACY_MOBILE_EVENT_NAMES],
+  ] as const;
+
+  it.each(tables.flatMap(([surface, names]) => Object.entries(names).map(([before, { now }]) => [surface, before, now] as const)))(
+    '%s %s is replaced by a catalogue event, or is still sent by that client, or by the server alone',
+    (surface, before, now) => {
+      if (now) expect(ANALYTICS_EVENTS).toHaveProperty(now);
+      if (!(before in ANALYTICS_EVENTS)) return;
+      const surfaces: readonly string[] = ANALYTICS_EVENTS[before as keyof typeof ANALYTICS_EVENTS].surfaces;
+      if (now === before && surfaces.includes(surface)) return;
+      expect(surfaces).toEqual(['server']);
+    },
+  );
 });

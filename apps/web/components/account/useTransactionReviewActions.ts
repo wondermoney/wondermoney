@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -16,17 +15,8 @@ function toTransactionIds(transactions: Transaction[]) {
   return transactions.map((transaction) => transaction.transactionKey);
 }
 
-function safeCapture(capture: () => void) {
-  try {
-    capture();
-  } catch {
-    // no-op
-  }
-}
-
 export function useTransactionReviewActions() {
   const t = useTranslations();
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
   const { mutateAsync } = useEditTransactions();
   const offerRuleSuggestion = useRuleSuggestionPrompt();
@@ -57,12 +47,6 @@ export function useTransactionReviewActions() {
     if (transactions.length === 0) return;
 
     const transactionIds = toTransactionIds(transactions);
-    safeCapture(() =>
-      posthog.capture("account_transactions_review_approve", {
-        count: transactions.length,
-        transactionIds,
-      }),
-    );
     setPending(transactions, true);
 
     try {
@@ -103,14 +87,6 @@ export function useTransactionReviewActions() {
         categoryId,
         reviewed: true,
       });
-      safeCapture(() =>
-        posthog.capture("transaction_categorized", {
-          category_key: categoryId,
-          count: transactions.length,
-          source: "review_bulk",
-          was_auto_suggested: false,
-        }),
-      );
       invalidateTransactionQueries(queryClient);
       toast.success(
         t("transaction-category-review-success", {

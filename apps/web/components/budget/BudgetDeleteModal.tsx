@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/i18n/navigation";
@@ -37,14 +36,12 @@ const BudgetDeleteModal: React.FC<BudgetDeleteModalProps> = ({
   const deleteBudgetMutation = useDeleteBudget();
   const qc = useQueryClient();
   const router = useRouter();
-  const posthog = usePostHog();
 
   const onDeleteBudget = () => {
     deleteBudgetMutation.mutate(
       { budgetKey },
       {
         onSuccess: async () => {
-          posthog.capture("budget_deleted");
           await invalidateBudgets(qc, { refresh: () => router.refresh() });
           closeModal();
         },

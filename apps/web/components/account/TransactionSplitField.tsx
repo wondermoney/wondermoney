@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Split } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -173,7 +172,6 @@ export function TransactionSplitField({
 }: TransactionSplitFieldProps) {
   const t = useTranslations("transactionSplit");
   const tRoot = useTranslations();
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
   const categoryLabel = useSplitCategoryLabel();
   const removeSplits = useRemoveTransactionSplits();
@@ -203,7 +201,6 @@ export function TransactionSplitField({
     } finally {
       setConfirmingRemove(false);
     }
-    posthog.capture("transaction_split_removed");
     await invalidateTransactionSplits(queryClient, transaction.transactionKey);
     toast.success(t("removed"));
     onRemoved();

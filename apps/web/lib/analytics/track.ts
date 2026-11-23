@@ -8,8 +8,8 @@ import posthog from "posthog-js";
  * that reaches it untyped and does not match is dropped. Consent is PostHog's own gate plus
  * `before_send` in AnalyticsInit, which also scrubs every event once more.
  *
- * A lint rule bans `posthog.capture` outside this folder (`eslint.config.mjs`). The files that
- * still call it predate the catalogue and move onto `track` with their renames (#625).
+ * A lint rule bans `posthog.capture` outside this folder (`eslint.config.mjs`). The names web
+ * sent before the catalogue, and what replaced each, are in `docs/analytics-events.md`.
  */
 export const track = createCatalogueCapture(
   ANALYTICS_EVENTS,

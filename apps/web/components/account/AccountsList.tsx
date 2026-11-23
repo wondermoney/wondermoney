@@ -30,7 +30,6 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -76,7 +75,6 @@ export default function AccountsList({
 }) {
   const t = useTranslations();
   const formatCurrency = useFormatCurrency();
-  const posthog = usePostHog();
   const router = useRouter();
   const reorderAccounts = useReorderAccounts();
   // Whose each account is, shown only when there is more than one person to tell apart.
@@ -176,9 +174,8 @@ export default function AccountsList({
         creditCard: account.creditCard ?? null,
       });
       setEditAccModalIsOpen(true);
-      posthog.capture("edit_account_modal", { action: "opened" });
     },
-    [posthog, t],
+    [t],
   );
 
   const deleteAccOpenModal = useCallback(
@@ -191,9 +188,8 @@ export default function AccountsList({
         creditCard: account.creditCard ?? null,
       });
       setDeleteAccModalIsOpen(true);
-      posthog.capture("delete_account_modal", { action: "opened" });
     },
-    [posthog, t],
+    [t],
   );
 
   /*
@@ -232,14 +228,7 @@ export default function AccountsList({
     return (
       <div
         key={account.accountKey}
-        onClick={
-          reordering
-            ? undefined
-            : () => {
-                posthog.capture("accounts_table_row_clicked");
-                setInspectedAccount(account);
-              }
-        }
+        onClick={reordering ? undefined : () => setInspectedAccount(account)}
         className={cn(
           "-mx-2 flex items-center justify-between gap-2 rounded-md px-2 py-3.5 transition-colors",
           reordering ? "bg-muted/40" : "hover:bg-muted/50 cursor-pointer",
@@ -592,7 +581,6 @@ export default function AccountsList({
                   isJoint: false,
                   creditCard: null,
                 });
-                posthog.capture("edit_account_modal", { action: "closed" });
               }
             }}
           />
@@ -607,7 +595,6 @@ export default function AccountsList({
                 isJoint: false,
                 creditCard: null,
               });
-              posthog.capture("delete_account_modal", { action: "closed" });
             }}
             accountName={accountData.name}
             accountKey={accountData.key.toString()}

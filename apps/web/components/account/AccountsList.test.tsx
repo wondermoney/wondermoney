@@ -29,9 +29,6 @@ vi.mock("@/lib/api/account/useAccounts", () => ({
     mutateAsync: reorder.mutateAsync,
   }),
 }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("@/i18n/navigation", () => ({
   Link: ({
     href,

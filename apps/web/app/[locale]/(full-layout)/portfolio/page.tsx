@@ -4,7 +4,6 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { FolderPlus, Plus } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useMemo, useState } from "react";
 
 import TimeframeSelect from "@/components/dashboard/TimeframeSelect";
@@ -54,7 +53,6 @@ import { createPortfolioImportHandoff } from "@/lib/portfolio/portfolio-modal-tr
 const Portfolio = () => {
   const t = useTranslations();
   const locale = useLocale();
-  const posthog = usePostHog();
   const searchParams = useSearchParams();
   const router = useRouter();
   const user = useUser();
@@ -113,11 +111,6 @@ const Portfolio = () => {
     useState(false);
   const openPortfolioCreateModal = () => {
     setIsCreatePortfolioModalOpen(true);
-    posthog.capture("portfolio_create_modal", { action: "open" });
-  };
-  const closePortfolioCreateModal = () => {
-    setIsCreatePortfolioModalOpen(false);
-    posthog.capture("portfolio_create_modal", { action: "close" });
   };
 
   const handleFirstRunPortfolioCreated = () => {
@@ -157,12 +150,8 @@ const Portfolio = () => {
         <PortfolioCreateDialog
           isOpen={isCreatePortfolioModalOpen}
           setOpen={(open) => {
-            if (!open) {
-              closePortfolioCreateModal();
-              handleFirstRunPortfolioCancel();
-            } else {
-              openPortfolioCreateModal();
-            }
+            setIsCreatePortfolioModalOpen(open);
+            if (!open) handleFirstRunPortfolioCancel();
           }}
           showTrigger={false}
           onPortfolioCreated={handleFirstRunPortfolioCreated}
@@ -223,12 +212,8 @@ const Portfolio = () => {
               showTrigger={false}
               isOpen={isCreatePortfolioModalOpen}
               setOpen={(open) => {
-                if (!open) {
-                  closePortfolioCreateModal();
-                  handleFirstRunPortfolioCancel();
-                } else {
-                  openPortfolioCreateModal();
-                }
+                setIsCreatePortfolioModalOpen(open);
+                if (!open) handleFirstRunPortfolioCancel();
               }}
               onPortfolioCreated={handleFirstRunPortfolioCreated}
             />

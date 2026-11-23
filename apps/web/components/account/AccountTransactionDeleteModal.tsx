@@ -2,7 +2,6 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import React from "react";
 import { toast } from "sonner";
 
@@ -47,7 +46,6 @@ const AccountTransactionDeleteModal: React.FC<
   const t = useTranslations();
   const tb = useTranslations("transactionBulk");
   const qc = useQueryClient();
-  const posthog = usePostHog();
   const deleteTransaction = useDeleteTransaction();
   const editTransactions = useEditTransactions();
   const bankSynced = transaction.bankSynced === true;
@@ -64,7 +62,6 @@ const AccountTransactionDeleteModal: React.FC<
   };
 
   const onDelete = async () => {
-    posthog.capture("account_transaction_delete");
     try {
       await deleteTransaction.mutateAsync(transaction.transactionKey);
       await invalidateAfterTransactionDelete(qc);

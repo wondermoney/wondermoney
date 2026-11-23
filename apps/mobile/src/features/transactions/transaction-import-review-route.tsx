@@ -2,7 +2,10 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { analyticsImportFormat } from '@wondermoney/shared/analytics'
+
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 
 import type { TransactionImportDecision } from './transaction-import-contract'
 import { TransactionImportReviewScreen } from './transaction-import-review-screen'
@@ -85,6 +88,18 @@ export function TransactionImportReviewRoute({ sessionId, expiresAt, accounts, o
   const cancel = async () => {
     if (await actions.run({ type: 'cancel' })) onImportAnother()
   }
+  // Matching the file's accounts to the person's is a review choice, as web's category step is.
+  const analytics = { kind: 'transactions', format: analyticsImportFormat(session?.format) } as const
+  const recordFailure = (outcome: Awaited<ReturnType<typeof actions.attempt>>, step: 'commit' | 'review') => {
+    if ('failure' in outcome && outcome.failure !== 'cancelled') captureAnalyticsEvent('import_failed', { ...analytics, step })
+  }
+  const commit = async () => {
+    captureAnalyticsEvent('import_reviewed', analytics)
+    recordFailure(await actions.attempt({ type: 'commit' }), 'commit')
+  }
+  const saveMapping = async (mapping: Readonly<Record<string, number>>) => {
+    recordFailure(await actions.attempt({ type: 'map', mapping }), 'review')
+  }
 
   return (
     <TransactionImportReviewScreen
@@ -105,7 +120,7 @@ export function TransactionImportReviewRoute({ sessionId, expiresAt, accounts, o
         : null}
       onBack={onBack}
       onCancel={() => { void cancel() }}
-      onCommit={() => { void actions.run({ type: 'commit' }) }}
+      onCommit={() => { void commit() }}
       onDateOrder={(dateOrder) => { void actions.run({ type: 'parse', dateOrder }) }}
       onDecideAll={decideAll}
       onDecideRow={(rowId, decision) => { void actions.run({ type: 'decide', decision, rowIds: [rowId] }) }}
@@ -115,7 +130,7 @@ export function TransactionImportReviewRoute({ sessionId, expiresAt, accounts, o
       onPageChange={setPage}
       onRetryLoad={() => { void query.refetch() }}
       onRetryRead={() => { void actions.run({ type: 'parse' }) }}
-      onSaveMapping={(mapping) => { void actions.run({ type: 'map', mapping }) }}
+      onSaveMapping={(mapping) => { void saveMapping(mapping) }}
       page={page}
       pages={pages}
       rows={rows ? rows.items.map(toReviewRow) : []}

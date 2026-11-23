@@ -26,7 +26,6 @@ const h = vi.hoisted(() => ({
 }));
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ refresh: h.refresh }) }));
-vi.mock("posthog-js/react", () => ({ usePostHog: () => ({ capture: () => {} }) }));
 // Stand-ins that succeed and run the caller's callbacks, as react-query does.
 vi.mock("@/lib/api/budget/useEditBudget", () => ({
   default: () => ({

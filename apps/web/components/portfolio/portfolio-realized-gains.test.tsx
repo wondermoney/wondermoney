@@ -32,9 +32,6 @@ import PortfolioHoldingsTable from "./PortfolioHoldingsTable";
 import PortfolioRealizedGains from "./PortfolioRealizedGains";
 
 vi.mock("@/lib/api/portfolio/useRealizedGains", () => ({ default: vi.fn() }));
-vi.mock("posthog-js/react", () => ({
-  usePostHog: () => ({ capture: () => {} }),
-}));
 vi.mock("next/image", () => ({ default: () => null }));
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<object>()),

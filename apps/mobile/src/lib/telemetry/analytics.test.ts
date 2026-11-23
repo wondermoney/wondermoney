@@ -22,18 +22,14 @@ describe('analytics allowlist boundary', () => {
     const { port, capture } = fakeClient()
     const analytics = createAnalytics({ environment: 'local', client: port })
 
-    analytics.capture('sign_up_completed', { provider: 'email' })
-    analytics.capture('sign_in_completed', { provider: 'apple' })
     analytics.capture('onboarding_completed')
-    analytics.capture('bank_connection_started')
+    analytics.capture('bank_connection_started', { provider: 'simplefin' })
     analytics.capture('feedback_submitted', { category: 'bug' })
     analytics.capture('feature_screen_viewed', { screen: 'portfolio_detail' })
 
     expect(capture.mock.calls).toEqual([
-      ['sign_up_completed', { provider: 'email' }],
-      ['sign_in_completed', { provider: 'apple' }],
       ['onboarding_completed', undefined],
-      ['bank_connection_started', undefined],
+      ['bank_connection_started', { provider: 'simplefin' }],
       ['feedback_submitted', { category: 'bug' }],
       ['feature_screen_viewed', { screen: 'portfolio_detail' }],
     ])
@@ -48,9 +44,11 @@ describe('analytics allowlist boundary', () => {
     // @ts-expect-error web captures this with an email; mobile has no such event
     analytics.capture('user_identified', { email: 'a@b.co' })
     // @ts-expect-error the provider enum is closed
-    analytics.capture('sign_in_completed', { provider: 'facebook' })
+    analytics.capture('bank_connection_started', { provider: 'plaid' })
     // @ts-expect-error no extra property may ride along on an approved event
-    analytics.capture('sign_in_completed', { provider: 'email', userId: 'user_1' })
+    analytics.capture('bank_connection_started', { provider: 'simplefin', userId: 'user_1' })
+    // @ts-expect-error the server records sign-ins; the app never sends them
+    analytics.capture('sign_in_completed', { provider: 'email' })
     // @ts-expect-error the server records accounts; the app never sends them
     analytics.capture('first_account_created', { method: 'manual' })
     // @ts-expect-error events approved with no properties take none
@@ -98,16 +96,16 @@ describe('createAnalytics', () => {
     const { port, capture } = fakeClient()
 
     const analytics = createAnalytics({ environment: 'production', client: port })
-    analytics.capture('sign_in_completed', { provider: 'email' })
+    analytics.capture('feedback_submitted', { category: 'bug' })
 
-    expect(capture).toHaveBeenCalledWith('sign_in_completed', { provider: 'email' })
+    expect(capture).toHaveBeenCalledWith('feedback_submitted', { category: 'bug' })
   })
 
   it('never reaches the client outside an approved environment', () => {
     const { port, capture } = fakeClient()
 
     const analytics = createAnalytics({ environment: 'preview', client: port })
-    analytics.capture('sign_in_completed', { provider: 'email' })
+    analytics.capture('feedback_submitted', { category: 'bug' })
     analytics.capture('onboarding_completed')
 
     expect(capture).not.toHaveBeenCalled()
@@ -116,7 +114,7 @@ describe('createAnalytics', () => {
 
   it('is inert without a client', () => {
     const analytics = createAnalytics({ environment: 'local', client: null })
-    expect(analytics.capture('bank_connection_started')).toBeUndefined()
+    expect(analytics.capture('onboarding_completed')).toBeUndefined()
   })
 })
 

@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { toast } from "sonner";
@@ -55,7 +54,6 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
   const t = useTranslations();
   const notifyIfRateLimited = useRateLimitToast();
 
-  const posthog = usePostHog();
   const queryClient = useQueryClient();
 
   const [currentStep, setCurrentStep] = useState<TransactionAddStep>(
@@ -88,18 +86,12 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
       onSuccess: async (response) => {
         await invalidateAccounts(queryClient);
         setOpen(false);
-        posthog.capture("transaction_added", {
-          transaction_type: data.transactionTypeId,
-          currency: data.settlementCurrencyId,
-          via: "manual",
-        });
         toast.success(t("toast-add-transaction-success"), { duration: 9000 });
         // Warn-and-allow: the transaction was created; just flag a likely duplicate.
         const possibleDuplicate = (
           response as { data?: { possibleDuplicate?: boolean } } | undefined
         )?.data?.possibleDuplicate;
         if (possibleDuplicate) {
-          posthog.capture("transaction_possible_duplicate");
           toast.warning(t("toast-possible-duplicate"), { duration: 9000 });
         }
       },
@@ -135,11 +127,6 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
         onSuccess: async () => {
           await invalidateAccounts(queryClient);
           setOpen(false);
-          posthog.capture("transaction_added", {
-            transaction_type: data.transactionTypeId,
-            currency: data.settlementCurrencyId,
-            via: "ocr",
-          });
           toast.success(t("toast-add-transaction-success"), { duration: 9000 });
         },
         onError: (error) => {
@@ -163,14 +150,9 @@ const AccountTransactionAddModal: React.FC<AccountTransactionAddModalProps> = ({
 
     if (!open && currentStep === TransactionAddStep.OCR_FILLED && ocrKey) {
       try {
-        await rejectTransactionOcrMutation.mutateAsync(
-          { transactionOcrImportId: ocrKey },
-          {
-            onSuccess: async () => {
-              posthog.capture("account_transaction_reject_ocr_success");
-            },
-          },
-        );
+        await rejectTransactionOcrMutation.mutateAsync({
+          transactionOcrImportId: ocrKey,
+        });
       } catch (error) {
         if (isDemoReadOnlyError(error)) {
           toast.error(t("demo-read-only-title"), {

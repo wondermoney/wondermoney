@@ -4,8 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Landmark, Plus, TrendingDown, TrendingUp } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import AccountAddModal from "@/components/account/AccountCreateModal";
@@ -40,10 +39,6 @@ import {
   getAccountsOverviewCurrencyCode,
 } from "@/lib/account/accounts-overview-state";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
-import {
-  safelyRunDiagnostic,
-  safePostHogCapture,
-} from "@/lib/analytics/safe-diagnostics";
 import type { GetAccountsResponse } from "@/lib/api/account/useAccounts";
 import useAccounts from "@/lib/api/account/useAccounts";
 import useAccountsCashflow from "@/lib/api/account/useAccountsCashflow";
@@ -59,10 +54,6 @@ import {
 } from "@/lib/onboarding/firstRunOnboarding";
 import { serverSeed } from "@/lib/query/server-seed";
 import { cn } from "@/lib/utils";
-import {
-  ACTIVATION_EVENTS,
-  captureActivationEvent,
-} from "@/lib/utils/analytics";
 import { invalidateAccounts } from "@/lib/utils/queryInvalidation";
 import { useFormatCurrency } from "@/lib/utils/useFormatCurrency";
 import { useHydrated } from "@/lib/utils/useHydrated";
@@ -88,27 +79,6 @@ interface AccountsClientProps {
   initialConfigsData: GetConfigsResponse;
 }
 
-type BankRecoveryEventProperties = {
-  locale: string;
-  source: "accounts_callback" | "accounts_recovery";
-  state: "callback_error";
-  fallback_type?: "bank" | "manual" | "statement";
-};
-
-function safeCaptureBankRecoveryEvent(
-  posthog: {
-    capture: (event: string, properties?: Record<string, unknown>) => void;
-  },
-  event: string,
-  properties: BankRecoveryEventProperties,
-) {
-  try {
-    posthog.capture(event, properties);
-  } catch {
-    // Analytics is diagnostic only and must never interrupt recovery actions.
-  }
-}
-
 // ---------- Main Component ----------
 
 export default function AccountsClient({
@@ -120,9 +90,7 @@ export default function AccountsClient({
   const searchParams = useSearchParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const posthog = usePostHog();
   const user = useUser();
-  const locale = useLocale();
   // Back from a bank connection this page started.
   const bankConnection = useBankConnectionResult();
   // True when this mount is the hydration of server HTML (a hard load), as
@@ -192,17 +160,6 @@ export default function AccountsClient({
     void invalidateAccounts(queryClient);
   }, [bankConnection, queryClient]);
 
-  const capturedDiagnosticRef = useRef(false);
-  useEffect(() => {
-    if (bankConnection !== "error" || capturedDiagnosticRef.current) return;
-    capturedDiagnosticRef.current = true;
-    safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_displayed", {
-      locale,
-      source: "accounts_callback",
-      state: "callback_error",
-    });
-  }, [bankConnection, locale, posthog]);
-
   // Modal state
   const firstRunMode = searchParams.get("firstRun");
   const shouldOpenAdd = searchParams.get("add") === "true";
@@ -224,44 +181,21 @@ export default function AccountsClient({
   const onAddSyncAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddSyncModalIsOpen(true);
-    safePostHogCapture(posthog, "account_add_sync_modal", { action: "open" });
   };
   const onRecoveryRetry = () => {
-    safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
-      locale,
-      source: "accounts_recovery",
-      state: "callback_error",
-      fallback_type: "bank",
-    });
     onAddSyncAccountClick();
   };
   const closeAccountAddSyncModal = () => {
     setAccountAddSyncModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_sync_modal", { action: "close" });
   };
   const onAddOfflineAccountClick = () => {
     setAccountAddModalIsOpen(false);
     setAccountAddOfflineModalIsOpen(true);
-    safePostHogCapture(posthog, "account_add_offline_modal", {
-      action: "open",
-    });
   };
   const onRecoveryManual = () => {
-    safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
-      locale,
-      source: "accounts_recovery",
-      state: "callback_error",
-      fallback_type: "manual",
-    });
     onAddOfflineAccountClick();
   };
   const onRecoveryImport = () => {
-    safeCaptureBankRecoveryEvent(posthog, "bank_sync_recovery_selected", {
-      locale,
-      source: "accounts_recovery",
-      state: "callback_error",
-      fallback_type: "statement",
-    });
     setIsRecoveryCsvImport(true);
     if ((accountsData?.accounts?.length ?? 0) === 0) {
       setPendingCsvImport(true);
@@ -272,31 +206,12 @@ export default function AccountsClient({
   };
   const openAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(true);
-    safePostHogCapture(
-      posthog,
-      "account_transaction_table_add_manual_transaction",
-      {
-        action: "open",
-        source: "accounts_overview",
-      },
-    );
   };
   const closeAddManualTransactionModal = () => {
     setIsAddManualTransactionOpen(false);
-    safePostHogCapture(
-      posthog,
-      "account_transaction_table_add_manual_transaction",
-      {
-        action: "close",
-        source: "accounts_overview",
-      },
-    );
   };
   const closeAccountAddOfflineModal = () => {
     setAccountAddOfflineModalIsOpen(false);
-    safePostHogCapture(posthog, "account_add_offline_modal", {
-      action: "close",
-    });
   };
   const handleOfflineAccountSuccess = async () => {
     if (pendingCsvImport) {
@@ -312,18 +227,6 @@ export default function AccountsClient({
         user?.id,
       )
     ) {
-      safelyRunDiagnostic(() => {
-        captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
-          account_count: Math.max(1, accountsData?.accounts?.length ?? 1),
-          account_source: "manual",
-          locale,
-        });
-        captureActivationEvent(
-          posthog,
-          ACTIVATION_EVENTS.onboardingStepCompleted,
-          { account_source: "manual", step: "account" },
-        );
-      });
       router.replace(getFirstRunStepRoute("sync_value"));
     }
   };
@@ -340,18 +243,6 @@ export default function AccountsClient({
         user?.id,
       )
     ) {
-      safelyRunDiagnostic(() => {
-        captureActivationEvent(posthog, ACTIVATION_EVENTS.firstAccountAdded, {
-          account_count: Math.max(1, accountsData?.accounts?.length ?? 1),
-          account_source: "statement",
-          locale,
-        });
-        captureActivationEvent(
-          posthog,
-          ACTIVATION_EVENTS.onboardingStepCompleted,
-          { account_source: "statement", step: "account" },
-        );
-      });
       router.replace(getFirstRunStepRoute("sync_value"));
       return;
     }

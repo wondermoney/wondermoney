@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Download, Plus } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
@@ -135,7 +134,6 @@ const PortfolioTransactionAddModal: React.FC<
   const getDefaultValues = () =>
     getPortfolioTransactionAddDefaultValues(effectiveDefaultPortfolioId);
 
-  const posthog = usePostHog();
   const methods = useForm<FormInput, undefined, FormOutput>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
@@ -281,11 +279,6 @@ const PortfolioTransactionAddModal: React.FC<
       await createTransactionMutation.mutateAsync(postData, {
         onSuccess: async () => {
           closeModal();
-          posthog.capture("portfolio_transaction_added", {
-            transaction_type: data.financialTransactionTypeId,
-            currency: data.settlementCurrencyId,
-            has_fee: enableFees,
-          });
           toast.success(t("toast-portfolio-add-transaction-success"), {
             duration: 9000,
           });

@@ -40,7 +40,9 @@ Bump `version` in `app.config.ts`; EAS increments the build numbers itself
 - **iOS:** `eas build -p ios --profile production`, then
   `eas submit -p ios --profile production --id <build id>`.
 - **Android:** `eas build -p android --profile production`, then
-  `eas submit -p android --profile production --id <build id>`. `app.config.ts`
+  `eas submit -p android --profile production --id <build id>`. The production
+  submit releases to 100% of users on the production track; there is no staged
+  rollout. `app.config.ts`
   caps the Kotlin daemon's heap and the parallel C++ compiles so the release
   build fits in the memory of EAS's free Android builder. To build on your own
   machine instead, with JDK 17 and the Android SDK and NDK installed:
