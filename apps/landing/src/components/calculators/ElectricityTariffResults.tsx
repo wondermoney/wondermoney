@@ -301,9 +301,11 @@ function OptionComparison({ outcome, option, sortBy }: { outcome: ComparatorView
               </p>
               {best ? (
                 <>
-                  <p className="mt-1 whitespace-nowrap font-mono text-lg font-semibold text-foreground sm:text-xl">
-                    {euro(best[sortBy].total / 12)}
-                    <span className="ml-0.5 font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
+                  {/* The amount never breaks; on a phone "/month" wraps under it rather than overflowing. */}
+                  <p className="mt-1 font-mono text-lg font-semibold text-foreground max-sm:leading-tight sm:text-xl">
+                    <span className="whitespace-nowrap">{euro(best[sortBy].total / 12)}</span>
+                    <wbr />
+                    <span className="ml-0.5 whitespace-nowrap font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
                   </p>
                   <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
                     <BrandLogo name={supplierOf(best.offer)} className="size-4 rounded-sm text-[7px]" />
@@ -451,25 +453,27 @@ function ResultRow({
           </span>
         </div>
         <div className="min-w-0 flex-1 space-y-2.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">{supplier}</p>
-              <p className="line-clamp-2 break-words text-sm text-ink-2" title={offer.name}>
+          {/* On a phone the wrappers dissolve into one grid: the supplier and the month on a line, the
+              saving under the month, then the offer's name across the row. From sm, two columns. */}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 sm:flex sm:items-start sm:justify-between">
+            <div className="contents sm:block sm:min-w-0">
+              <p className="col-start-1 row-start-1 text-sm font-semibold text-foreground">{supplier}</p>
+              <p className="col-span-2 row-start-3 line-clamp-2 break-words text-sm text-ink-2" title={offer.name}>
                 {offer.name}
               </p>
             </div>
-            <div className="shrink-0 text-right">
-              <p className={`whitespace-nowrap font-mono text-xl font-semibold leading-tight sm:text-2xl ${rank === 1 ? "text-primary" : "text-foreground"}`}>
+            <div className="contents sm:block sm:shrink-0 sm:text-right">
+              <p className={`col-start-2 row-start-1 whitespace-nowrap text-right font-mono text-xl font-semibold leading-tight sm:text-2xl ${rank === 1 ? "text-primary" : "text-foreground"}`}>
                 {euro(result[sortBy].total / 12)}
                 <span className="ml-0.5 font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
               </p>
               {delta && Math.abs(delta.amount) > 0.005 && (
-                <p className={`flex items-center justify-end gap-1 whitespace-nowrap text-xs ${delta.amount > 0 ? "text-success-text" : "text-muted-foreground"}`}>
+                <p className={`col-span-2 row-start-2 flex items-center justify-end gap-1 whitespace-nowrap text-xs ${delta.amount > 0 ? "text-success-text" : "text-muted-foreground"}`}>
                   {delta.amount > 0 ? <TrendingDown aria-hidden="true" className="size-3.5" /> : <TrendingUp aria-hidden="true" className="size-3.5" />}
                   {withAmount(t(k(`row.${delta.amount > 0 ? "cheaper" : "dearer"}.${delta.against}`), { amount: euro(Math.abs(delta.amount)) }), euro(Math.abs(delta.amount)))}
                 </p>
               )}
-              {delta && Math.abs(delta.amount) <= 0.005 && <p className="text-xs text-muted-foreground">{t(k(`row.same.${delta.against}`))}</p>}
+              {delta && Math.abs(delta.amount) <= 0.005 && <p className="col-span-2 row-start-2 text-right text-xs text-muted-foreground">{t(k(`row.same.${delta.against}`))}</p>}
               {/* The year the row is ranked on, for the tests and screen readers; the details show it too. */}
               <p className="sr-only">{euro(result[sortBy].total)}</p>
             </div>
