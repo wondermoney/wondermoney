@@ -1,4 +1,5 @@
-// Validate the built sitemap, the legacy redirects emitted by Vercel, and any HTML redirects.
+// Validate the built sitemap, the legacy redirects emitted by Vercel, and any HTML redirects; and
+// in every built page, that its JSON-LD parses and its own og:image file was built.
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, sep } from "node:path";
@@ -19,6 +20,8 @@ const sitemap = new Set(sitemapPaths);
 
 const pages = new Map();
 const unfilled = [];
+const pageFailures = [];
+let jsonLdBlocks = 0;
 for (const file of readdirSync(outDir, { recursive: true, encoding: "utf8" })) {
   if (!file.endsWith(".html")) continue;
   const path = `/${file.split(sep).join("/")}`.replace(/(\/index)?\.html$/, "") || "/";
@@ -26,6 +29,19 @@ for (const file of readdirSync(outDir, { recursive: true, encoding: "utf8" })) {
   // A {{placeholder}} in page text means a translation was rendered without its values.
   for (const [text] of html.matchAll(/>[^<]*\{\{\s*[\w.]+\s*\}\}[^<]*</g)) {
     unfilled.push(`${file}: ${text.slice(1, -1).trim().slice(0, 120)}`);
+  }
+  for (const [, json] of html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)) {
+    jsonLdBlocks++;
+    try {
+      const node = JSON.parse(json);
+      if (!node["@context"] || !node["@type"]) pageFailures.push(`${file}: JSON-LD without @context or @type`);
+    } catch (error) {
+      pageFailures.push(`${file}: JSON-LD does not parse (${error.message})`);
+    }
+  }
+  const ogImage = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+  if (ogImage?.startsWith(`${site}/`) && !existsSync(join(outDir, new URL(ogImage).pathname))) {
+    pageFailures.push(`${file}: og:image ${ogImage} was not built`);
   }
   const refresh = html.match(/<meta http-equiv="refresh" content="\d+;\s*url=([^"]+)"/i);
   pages.set(path, refresh ? { redirectTo: refresh[1] } : {});
@@ -67,4 +83,6 @@ for (const [path, { redirectTo }] of htmlRedirects) checkDestination(path, redir
 
 assert.deepEqual(unfilled, [], `Unfilled translation placeholders in built pages:\n${unfilled.join("\n")}`);
 assert.deepEqual(failures, [], `Sitemap check failed:\n${failures.join("\n")}`);
+assert.deepEqual(pageFailures, [], `Page metadata check failed:\n${pageFailures.join("\n")}`);
 console.log(`Sitemap check: ${sitemap.size} canonical URLs, ${legacyRedirects.length} legacy HTTP 301s and ${htmlRedirects.length} HTML redirects.`);
+console.log(`Page metadata check: ${jsonLdBlocks} JSON-LD blocks parsed, every site og:image built.`);

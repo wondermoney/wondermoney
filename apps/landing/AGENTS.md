@@ -38,6 +38,8 @@ public/                # Static assets
 | Feature pages | `src/components/landing/Feature*.tsx`, `featureDetails.ts` | One per `FEATURE_ROUTE_IDS` entry. Explanatory sections use `sections/FeatureExplainer.tsx`; a new page is an entry in `featureDetails.ts` (rendered by `FeatureDetail.tsx`) with `lp.<namespace>.*` copy in all six locales, and every claim checked against the user docs and the app |
 | Page composition | `src/components/pages/` | Shared across locales |
 | Global document/SEO | `src/layouts/Layout.astro`, `src/components/shared/SEO.astro` | Canonical and alternate links |
+| Social preview images | `src/lib/og/`, `src/pages/og/[...path].ts` | Generated at build time, "OpenGraph images" below |
+| Structured data | `src/lib/structuredData.ts`, `src/lib/toolDatasets.ts` | Organization, WebSite, the tool pages' WebApplication, BreadcrumbList and Dataset; only what the page shows |
 | Visual rules | `DESIGN.md` | Tokens shared with `apps/web/DESIGN.md` |
 | Redirects | `vercel.json` | Host-scoped 301s for retired pages |
 | Analytics and attribution | `src/lib/gtm.ts`, `posthog.ts`, `landingSource.ts`, `curatedListTracking.ts` | Every event is consent-gated; how tool and list pages are tied to signups and activations is in `docs/landing-attribution.md` at the repository root |
@@ -87,6 +89,25 @@ src/pages/index.astro         # Root redirect only
   generates Vercel HTTP 301 redirects from those maps. `pnpm build` checks each rule in
   Vercel output and verifies that the sitemap lists its destination only.
 - Verify generated URLs for all six locales, not only the default route.
+
+## OPENGRAPH IMAGES
+
+Every tool page (and the FIRE calculator), the tools hub, every feature page and every learn guide
+without an `ogImage` of its own gets a 1200×630 social preview image, drawn at build time and
+served as a static file at `/og/<page path>.png` (`/og/en/tools/mortgage-calculator.png`). Other
+pages share `public/og-default.png`.
+
+- `src/lib/og/ogImages.ts` decides what each image shows (the section, the page's visible title,
+  one line under it, the page's lucide icon from `toolsCatalog.ts` or `featureMenu.ts`) and its
+  alt text; a new tool or feature page gets its image from the catalog with no other change.
+- `src/lib/og/renderOgImage.ts` draws it with `@napi-rs/canvas` (Skia) and the site's own Geist
+  files, so the text is the same on any build machine and needs no system fonts. The colours are
+  DESIGN.md tokens as sRGB.
+- `src/pages/og/[...path].ts` is the prerendered endpoint; a page links its image by passing
+  `ogImage` and `ogImageAlt` to its layout. `pnpm build`'s `scripts/check-sitemap.mjs` fails when a
+  page's `og:image` was not built or a JSON-LD block does not parse.
+- About 400 images add about 6 seconds and 24 MB of static files to a build. Set
+  `OG_SAMPLES_DIR=<folder>` when running `src/lib/og/renderOgImage.test.ts` to look at samples.
 
 ## LEARN CONTENT
 

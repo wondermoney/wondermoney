@@ -119,6 +119,11 @@ export interface ToolCatalogEntry {
 	readonly comparator?: true
 	/** The tools a calculator page suggests next, in order: every /tools page, and the FIRE page. */
 	readonly related?: readonly ToolRouteId[]
+	/**
+	 * One of the most-used tools: the site footer links it under its task group, on every page.
+	 * Keep it to two to four per group.
+	 */
+	readonly footer?: true
 }
 
 /**
@@ -130,8 +135,9 @@ export interface ToolCatalogEntry {
  * Adding a tool: add its route to `TOOL_ROUTE_IDS`, one entry here, in its group, with a
  * lucide icon and either its `subgroup` or `comparator: true`, and its `title`, `shortName` and
  * `description` under `tools.<key>` in every locale (a comparator also needs its line under
- * `header.comparatorsMenu.items.<key>`). The hub, the header's Tools or Comparators menu and the
- * mobile drawer pick it up. `toolsCatalog.test.ts` fails until all are done.
+ * `header.comparatorsMenu.items.<key>`). The hub, the header's Tools or Comparators menu, the
+ * mobile drawer and the tool's social preview image (`og/ogImages.ts`) pick it up; `footer: true`
+ * also lists it in the site footer. `toolsCatalog.test.ts` fails until all are done.
  */
 export const TOOLS_CATALOG = [
 	// Budget and save
@@ -142,6 +148,7 @@ export const TOOLS_CATALOG = [
 		icon: Wallet,
 		subgroup: "planAndSave",
 		related: ["toolSavingsRate", "toolNetWorth", "toolCompoundInterest", "toolFreeBankAccounts", "toolRemuneratedAccounts"],
+		footer: true,
 	},
 	{
 		key: "savingsRate",
@@ -182,6 +189,7 @@ export const TOOLS_CATALOG = [
 		icon: Banknote,
 		subgroup: "salaryAndBenefits",
 		related: ["toolWithholdingTables", "toolHouseholdBudget", "toolSavingsRate", "toolUnemploymentBenefit", "toolDismissalCompensation"],
+		footer: true,
 	},
 	{
 		key: "christmasAllowance",
@@ -246,6 +254,7 @@ export const TOOLS_CATALOG = [
 		icon: PlugZap,
 		comparator: true,
 		related: ["toolElectricityIndex", "toolHouseholdBudget", "toolEmergencyFund"],
+		footer: true,
 	},
 	{
 		key: "fuelPrices",
@@ -254,6 +263,7 @@ export const TOOLS_CATALOG = [
 		icon: Fuel,
 		comparator: true,
 		related: ["toolHouseholdBudget", "toolCarLoan", "toolVehicleTax"],
+		footer: true,
 	},
 	{
 		key: "freeBankAccounts",
@@ -271,6 +281,7 @@ export const TOOLS_CATALOG = [
 		icon: House,
 		subgroup: "homeLoan",
 		related: ["toolDebtToIncome", "toolEarlyRepayment", "toolSavingsRate"],
+		footer: true,
 	},
 	{
 		key: "debtToIncome",
@@ -327,6 +338,7 @@ export const TOOLS_CATALOG = [
 		icon: ChartLine,
 		subgroup: "homeLoan",
 		related: ["toolRateRevision", "toolMortgage", "toolDebtToIncome"],
+		footer: true,
 	},
 	{
 		key: "carLoan",
@@ -351,6 +363,7 @@ export const TOOLS_CATALOG = [
 		icon: Receipt,
 		subgroup: "buyingAndTaxes",
 		related: ["toolMortgage", "toolBorrowingCapacity", "toolSavingsGoal"],
+		footer: true,
 	},
 	{
 		key: "youthMortgage",
@@ -392,6 +405,7 @@ export const TOOLS_CATALOG = [
 		icon: Sprout,
 		subgroup: "investing",
 		related: ["toolNetWorth", "toolSavingsRate", "toolInvestmentReturn"],
+		footer: true,
 	},
 	{
 		key: "investmentReturn",
@@ -448,6 +462,7 @@ export const TOOLS_CATALOG = [
 		icon: ScrollText,
 		subgroup: "depositsAndCertificates",
 		related: ["toolTermDeposit", "toolCompoundInterest", "toolInflation", "toolDepositRateIndex", "toolTermDepositOffers", "toolRemuneratedAccounts"],
+		footer: true,
 	},
 	{
 		key: "depositRateIndex",
@@ -464,6 +479,7 @@ export const TOOLS_CATALOG = [
 		icon: BadgePercent,
 		comparator: true,
 		related: ["toolTermDeposit", "toolDepositRateIndex", "toolSavingsCertificates", "toolRemuneratedAccounts"],
+		footer: true,
 	},
 	{
 		key: "remuneratedAccounts",
@@ -496,6 +512,7 @@ export const TOOLS_CATALOG = [
 		group: "trackWealth",
 		icon: Layers,
 		related: ["toolCompoundInterest", "toolSavingsRate", "toolInvestmentReturn"],
+		footer: true,
 	},
 	{
 		key: "goldPrice",
@@ -503,6 +520,7 @@ export const TOOLS_CATALOG = [
 		group: "trackWealth",
 		icon: Gem,
 		related: ["toolNetWorth", "toolInflation", "toolInvestmentReturn"],
+		footer: true,
 	},
 ] as const satisfies readonly ToolCatalogEntry[]
 
@@ -579,6 +597,27 @@ export function buildToolsHubItemList(lang: Lang, t: Translate) {
 			url: `https://wonder.money${tool.href}`,
 		})),
 	}
+}
+
+export interface FooterToolGroup {
+	readonly id: ToolGroupId
+	/** The group's section on the tools hub. */
+	readonly href: string
+	readonly tools: readonly ToolsHubTool[]
+}
+
+/**
+ * The footer's tool columns for one locale: each task group, in the hub's order, with its
+ * `footer` tools. A group with none is left out.
+ */
+export function buildFooterToolGroups(lang: Lang, catalog: readonly ToolCatalogEntry[] = CATALOG): FooterToolGroup[] {
+	return buildToolsHub(lang, catalog)
+		.map((group) => ({
+			id: group.id,
+			href: `${toToolsHubPath(lang)}#${group.anchor}`,
+			tools: group.tools.filter((tool) => tool.footer),
+		}))
+		.filter((group) => group.tools.length > 0)
 }
 
 export interface ToolsMenuSection {
