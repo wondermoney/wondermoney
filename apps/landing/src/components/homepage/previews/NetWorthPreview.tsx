@@ -1,247 +1,196 @@
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { useId } from "react";
+
 import { useTranslations } from "@/lib/reactTranslations";
 import { usePreviewFormat, type PreviewFormat } from "@/lib/usePreviewFormat";
 
-// Mock data mirrors the real shape from
-// `web/lib/api/net-worth/useNetWorth.ts` — the page is a marketing
-// mockup, not the real product. The numbers and labels are sample
-// data designed to look like a real WonderMoney net worth summary.
-const SAMPLE_NET_WORTH = (fmt: PreviewFormat) => fmt.money(164500);
-const SAMPLE_ASSETS_TOTAL = (fmt: PreviewFormat) => fmt.money(248000);
-const SAMPLE_LIABILITIES_TOTAL = (fmt: PreviewFormat) => fmt.money(83500);
+import {
+	plotPoints,
+	rowChange,
+	smoothPath,
+	summarize,
+	tickY,
+	type Change,
+	type NetWorthRow,
+	type NetWorthSample,
+} from "./netWorthSample";
 
-interface SampleRow {
-	labelKey: string;
-	amount: string;
-	kind: "asset" | "liability";
+// A marketing mockup of the app's net worth summary, not the real product: the figures come from
+// `netWorthSample.ts`, where they reconcile. The homepage hero and the net worth feature page
+// both draw this card, each with its own household.
+
+/** Gains in the success token, losses in the destructive one; the sign always stays. */
+const toneClass = (change: Change) =>
+	change.delta === 0 ? "text-muted-foreground" : change.improves ? "text-success-text" : "text-destructive-text";
+
+function ChangeBadge({ change, fmt }: { change: Change; fmt: PreviewFormat }) {
+	const Icon = change.delta < 0 ? TrendingDown : TrendingUp;
+	const tint = change.improves ? "bg-success/10" : "bg-destructive/10";
+	return (
+		<span
+			className={`inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 font-mono text-xs font-medium tabular-nums ${tint} ${toneClass(change)}`}
+		>
+			<Icon aria-hidden="true" className="size-3.5" strokeWidth={2} />
+			{fmt.pct(change.percent, { sign: "always" })}
+		</span>
+	);
 }
 
-const sampleAssetRowsFor = (fmt: PreviewFormat): SampleRow[] => [
-	{ labelKey: "preview.netWorth.bankAccounts", amount: fmt.money(45200), kind: "asset" },
-	{ labelKey: "preview.netWorth.investments", amount: fmt.money(202800), kind: "asset" },
-];
+const ROW_GRID = "grid grid-cols-[minmax(0,1fr)_3.5rem_4.75rem] items-baseline gap-x-2";
 
-const sampleLiabilityRowsFor = (fmt: PreviewFormat): SampleRow[] => [
-	{ labelKey: "preview.netWorth.mortgage", amount: fmt.money(71200), kind: "liability" },
-	{ labelKey: "preview.netWorth.carLoan", amount: fmt.money(8200), kind: "liability" },
-	{ labelKey: "preview.netWorth.creditCard", amount: fmt.money(4100), kind: "liability" },
-];
-
-// Six monthly history points (May → Oct), simulated upward trend.
-// Y values are net worth amounts in EUR (in thousands for the chart math).
-const historyPoints = [
-	{ x: "2026-05", y: 148.2 },
-	{ x: "2026-06", y: 151.8 },
-	{ x: "2026-07", y: 156.4 },
-	{ x: "2026-08", y: 159.1 },
-	{ x: "2026-09", y: 161.7 },
-	{ x: "2026-10", y: 164.5 },
-];
-
-type Props = { size?: "compact" | "hero" };
-
-export default function NetWorthPreview({ size = "compact" }: Props) {
+function Rows({ rows, fmt }: { rows: NetWorthRow[]; fmt: PreviewFormat }) {
 	const { t } = useTranslations();
-	const fmt = usePreviewFormat();
-	const sampleAssetRows = sampleAssetRowsFor(fmt);
-	const sampleLiabilityRows = sampleLiabilityRowsFor(fmt);
-	const isHero = size === "hero";
+	return (
+		<ul className="ml-3 space-y-1.5">
+			{rows.map((row) => {
+				const change = rowChange(row);
+				return (
+					<li key={row.labelKey} className={`${ROW_GRID} text-xs`}>
+						<span className="truncate text-muted-foreground">{t(row.labelKey)}</span>
+						<span className={`text-right font-mono text-[11px] tabular-nums ${toneClass(change)}`}>
+							{fmt.pct(change.percent, { sign: "always" })}
+						</span>
+						<span className="text-right font-mono tabular-nums text-ink-2">{fmt.money(row.end)}</span>
+					</li>
+				);
+			})}
+		</ul>
+	);
+}
 
-	// SVG chart math (used in the mini history panel).
-	const chartWidth = 220;
-	const chartHeight = 64;
-	const yMin = 145;
-	const yMax = 168;
-	const yScale = (y: number) =>
-		chartHeight - ((y - yMin) / (yMax - yMin)) * chartHeight;
-	const xScale = (i: number) =>
-		(i / (historyPoints.length - 1)) * chartWidth;
-
-	const linePath = historyPoints
-		.map((p, i) => `${i === 0 ? "M" : "L"} ${xScale(i)} ${yScale(p.y)}`)
-		.join(" ");
-	const areaPath = `${linePath} L ${xScale(historyPoints.length - 1)} ${chartHeight} L 0 ${chartHeight} Z`;
+function HistoryChart({ sample, fmt }: { sample: NetWorthSample; fmt: PreviewFormat }) {
+	const { t } = useTranslations();
+	const gradientId = `${useId()}-net-worth-area`;
+	const points = plotPoints(sample);
+	const linePath = smoothPath(points);
+	const areaPath = `${linePath} L 100 100 L 0 100 Z`;
+	const latest = points[points.length - 1];
+	const months = sample.months.map((month) => fmt.month(month));
+	const lowTick = sample.yTicks[0];
 
 	return (
-		<div
-			className={
-				isHero
-					? "rounded-3xl border border-border bg-card p-8"
-					: "rounded-2xl border border-border bg-card px-5 py-6"
-			}
-		>
-			<div className="flex items-center justify-between">
-				<span
-					className={
-						isHero
-							? "text-base font-semibold text-foreground"
-							: "text-sm font-semibold text-foreground"
-					}
+		<figure className="flex min-w-0 flex-col @xl:h-full">
+			<figcaption className="mb-6 text-xs text-muted-foreground">{t("preview.netWorth.history")}</figcaption>
+			<div className="relative h-44 @xl:h-auto @xl:min-h-44 @xl:flex-1">
+				{/* Tick labels sit over their gridlines at the left, where a rising line leaves room. */}
+				{sample.yTicks.map((tick) => (
+					<span
+						key={tick}
+						className="absolute left-0 -translate-y-full pb-0.5 font-mono text-[10px] leading-none text-muted-foreground tabular-nums"
+						style={{ top: `${tickY(sample, tick)}%` }}
+					>
+						{fmt.money(tick, { compact: true })}
+					</span>
+				))}
+				<svg
+					viewBox="0 0 100 100"
+					preserveAspectRatio="none"
+					className="absolute inset-0 block h-full w-full overflow-visible"
+					role="img"
+					aria-label={t("preview.netWorth.chartTrend", {
+						start: months[0],
+						end: months[months.length - 1],
+						from: fmt.money(sample.history[0]),
+						to: fmt.money(sample.history[sample.history.length - 1]),
+					})}
 				>
-					{t("preview.netWorth.title")}
-				</span>
+					<defs>
+						<linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
+							<stop offset="0%" stopColor="oklch(var(--chart-1))" stopOpacity="0.14" />
+							<stop offset="100%" stopColor="oklch(var(--chart-1))" stopOpacity="0" />
+						</linearGradient>
+					</defs>
+					{sample.yTicks.map((tick) => (
+						<line
+							key={tick}
+							x1="0"
+							x2="100"
+							y1={tickY(sample, tick)}
+							y2={tickY(sample, tick)}
+							stroke={tick === lowTick ? "oklch(var(--border))" : "oklch(var(--border-2))"}
+							strokeWidth="1"
+							vectorEffect="non-scaling-stroke"
+						/>
+					))}
+					<path d={areaPath} fill={`url(#${gradientId})`} />
+					<path
+						d={linePath}
+						fill="none"
+						stroke="oklch(var(--chart-1))"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						vectorEffect="non-scaling-stroke"
+					/>
+				</svg>
+				{/* The latest month only, drawn in HTML so it stays round when the SVG stretches. */}
 				<span
-					className={
-						isHero
-							? "rounded-full border border-border px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"
-							: "rounded-full border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground"
-					}
-				>
+					data-testid="net-worth-latest-point"
+					aria-hidden="true"
+					className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chart-1 ring-[3px] ring-card"
+					style={{ left: `${latest.x}%`, top: `${latest.y}%` }}
+				/>
+			</div>
+			<div aria-hidden="true" className="relative mt-2 h-4 whitespace-nowrap font-mono text-[10px] text-muted-foreground">
+				{months.map((month, i) => (
+					<span
+						key={sample.months[i].getTime()}
+						className="absolute top-0 -translate-x-1/2"
+						style={{ left: `${points[i].x}%` }}
+					>
+						{month}
+					</span>
+				))}
+			</div>
+		</figure>
+	);
+}
+
+export default function NetWorthPreview({ sample }: { sample: NetWorthSample }) {
+	const { t } = useTranslations();
+	const fmt = usePreviewFormat();
+	const { assets, liabilities, netWorth, change } = summarize(sample);
+	const assetRows = sample.rows.filter((row) => row.kind === "asset");
+	const liabilityRows = sample.rows.filter((row) => row.kind === "liability");
+
+	return (
+		<div className="@container rounded-card border border-border bg-card p-6 text-left md:p-8">
+			<div className="flex items-center justify-between gap-3">
+				<span className="text-base font-semibold text-foreground">{t("preview.netWorth.title")}</span>
+				<span className="rounded-sm border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
 					{t("preview.netWorth.historyPeriod")}
 				</span>
 			</div>
 
-			<div
-				className={
-					isHero
-						? "mt-6 grid gap-6 md:grid-cols-2"
-						: "mt-4 grid gap-4 md:grid-cols-2"
-				}
-			>
-				{/* Left: net worth + assets/liabilities breakdown */}
+			<div className="mt-6 grid grid-cols-1 gap-8 @xl:grid-cols-2">
 				<div>
-					<p
-						className={
-							isHero
-								? "text-xs text-muted-foreground"
-								: "text-[11px] text-muted-foreground"
-						}
-					>
-						{t("preview.netWorth.netWorth")}
+					<p className="text-xs text-muted-foreground">{t("preview.netWorth.netWorth")}</p>
+					<p className="mt-1 font-mono text-3xl font-semibold tracking-tight text-foreground tabular-nums md:text-4xl">
+						{fmt.money(netWorth)}
 					</p>
-					<p
-						className={
-							isHero
-								? "mt-1 font-mono text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
-								: "mt-1 font-mono text-2xl font-semibold tracking-tight text-foreground"
-						}
-					>
-						{SAMPLE_NET_WORTH(fmt)}
+					<p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+						<span className="sr-only">{t("preview.netWorth.changeLabel")}:</span>
+						<ChangeBadge change={change} fmt={fmt} />
+						<span className={`font-mono text-sm tabular-nums ${toneClass(change)}`}>
+							{fmt.money(change.delta, { sign: "always" })}
+						</span>
 					</p>
 
-					<div
-						className={
-							isHero
-								? "mt-5 space-y-3"
-								: "mt-4 space-y-2"
-						}
-					>
+					<div className="mt-6 space-y-3">
 						<div className="flex items-center justify-between text-sm">
-							<span className="text-ink-2">
-								{t("preview.netWorth.assets")}
-							</span>
-							<span className="font-mono text-sm font-semibold text-foreground">
-								{SAMPLE_ASSETS_TOTAL(fmt)}
-							</span>
+							<span className="text-ink-2">{t("preview.netWorth.assets")}</span>
+							<span className="font-mono font-semibold text-foreground tabular-nums">{fmt.money(assets)}</span>
 						</div>
-						<ul className={isHero ? "ml-3 space-y-1" : "ml-3 space-y-0.5"}>
-							{sampleAssetRows.map((row) => (
-								<li
-									key={row.labelKey}
-									className={
-										isHero
-											? "flex items-center justify-between text-xs"
-											: "flex items-center justify-between text-[11px]"
-									}
-								>
-									<span className="text-muted-foreground">{t(row.labelKey)}</span>
-									<span className="font-mono text-ink-2">
-										{row.amount}
-									</span>
-								</li>
-							))}
-						</ul>
+						<Rows rows={assetRows} fmt={fmt} />
 						<div className="flex items-center justify-between text-sm">
-							<span className="text-ink-2">
-								{t("preview.netWorth.liabilities")}
-							</span>
-							<span className="font-mono text-sm font-semibold text-foreground">
-								−{SAMPLE_LIABILITIES_TOTAL(fmt)}
-							</span>
+							<span className="text-ink-2">{t("preview.netWorth.liabilities")}</span>
+							<span className="font-mono font-semibold text-foreground tabular-nums">{fmt.money(-liabilities)}</span>
 						</div>
-						<ul className={isHero ? "ml-3 space-y-1" : "ml-3 space-y-0.5"}>
-							{sampleLiabilityRows.map((row) => (
-								<li
-									key={row.labelKey}
-									className={
-										isHero
-											? "flex items-center justify-between text-xs"
-											: "flex items-center justify-between text-[11px]"
-									}
-								>
-									<span className="text-muted-foreground">{t(row.labelKey)}</span>
-									<span className="font-mono text-ink-2">
-										{row.amount}
-									</span>
-								</li>
-							))}
-						</ul>
+						<Rows rows={liabilityRows} fmt={fmt} />
 					</div>
 				</div>
 
-				{/* Right: history chart */}
-				<div>
-					<p
-						className={
-							isHero
-								? "mb-2 text-xs text-muted-foreground"
-								: "mb-1.5 text-[11px] text-muted-foreground"
-						}
-					>
-						{t("preview.netWorth.history")}
-					</p>
-					<div
-						className={
-							isHero
-								? "rounded-xl border border-border bg-muted/40 p-4"
-								: "rounded-lg border border-border bg-muted/40 p-3"
-						}
-					>
-						<svg
-							viewBox={`0 0 ${chartWidth} ${chartHeight + 16}`}
-							className="h-16 w-full"
-							role="img"
-							aria-label={`${t("preview.netWorth.history")}, ${t("preview.netWorth.historyPeriod")}`}
-						>
-							<defs>
-								<linearGradient id="networth-area" x1="0" x2="0" y1="0" y2="1">
-									<stop offset="0%" stopColor="oklch(var(--chart-1))" stopOpacity="0.18" />
-									<stop offset="100%" stopColor="oklch(var(--chart-1))" stopOpacity="0" />
-								</linearGradient>
-							</defs>
-							<path d={areaPath} fill="url(#networth-area)" />
-							<path
-								d={linePath}
-								fill="none"
-								stroke="oklch(var(--chart-1))"
-								strokeWidth="1.5"
-							/>
-							{historyPoints.map((p, i) => (
-								<circle
-									key={p.x}
-									cx={xScale(i)}
-									cy={yScale(p.y)}
-									r="2"
-									fill="oklch(var(--chart-1))"
-								/>
-							))}
-						</svg>
-						<div
-							className={
-								isHero
-									? "mt-2 flex justify-between text-[11px] text-muted-foreground"
-									: "mt-1.5 flex justify-between text-[11px] text-muted-foreground"
-							}
-						>
-							{historyPoints.map((p, i) => (
-								<span key={p.x} className="font-mono">
-									{isHero || i === 0 || i === historyPoints.length - 1
-										? fmt.month(new Date(`${p.x}-01T00:00:00Z`))
-										: ""}
-								</span>
-							))}
-						</div>
-					</div>
-				</div>
+				<HistoryChart sample={sample} fmt={fmt} />
 			</div>
 		</div>
 	);

@@ -6939,6 +6939,7 @@
       "creditCard": "Kreditkarte",
       "history": "Vermögensverlauf",
       "historyPeriod": "Letzte 6 Monate",
+      "changeLabel": "Veränderung in den letzten 6 Monaten",
       "chartTrend": "Nettovermögen, {{start}} bis {{end}}, gestiegen von {{from}} auf {{to}}"
     },
     "perMonth": "/Monat",

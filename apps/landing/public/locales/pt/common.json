@@ -6939,6 +6939,7 @@
       "creditCard": "Cartão de crédito",
       "history": "Histórico do património",
       "historyPeriod": "Últimos 6 meses",
+      "changeLabel": "Variação nos últimos 6 meses",
       "chartTrend": "Património líquido, de {{start}} a {{end}}, a subir de {{from}} para {{to}}"
     },
     "perMonth": "/mês",

@@ -6939,6 +6939,7 @@
       "creditCard": "Carte de crédit",
       "history": "Historique du patrimoine",
       "historyPeriod": "6 derniers mois",
+      "changeLabel": "Variation sur les 6 derniers mois",
       "chartTrend": "Patrimoine net, de {{start}} à {{end}}, en hausse de {{from}} à {{to}}"
     },
     "perMonth": "/mois",
