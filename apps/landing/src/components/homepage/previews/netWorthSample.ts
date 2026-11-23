@@ -44,7 +44,7 @@ export const HERO_NET_WORTH: NetWorthSample = {
 	yTicks: [48000, 51000, 54000],
 	rows: [
 		{ labelKey: "preview.netWorth.bankAccounts", institution: "CGD", kind: "asset", start: 21200, end: 22020 },
-		{ labelKey: "preview.netWorth.investments", institution: "DEGIRO", kind: "asset", start: 29620, end: 32150 },
+		{ labelKey: "preview.netWorth.investments", institution: "Interactive Brokers", kind: "asset", start: 29620, end: 32150 },
 		{ labelKey: "preview.netWorth.creditCard", institution: "BPI", kind: "liability", start: 840, end: 540 },
 	],
 };
