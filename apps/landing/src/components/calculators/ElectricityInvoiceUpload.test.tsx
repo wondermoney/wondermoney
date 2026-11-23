@@ -69,7 +69,7 @@ describe("reading an invoice into the comparator", () => {
 
     fireEvent.click(within(review).getByRole("button", { name: "Fill in the form" }));
     expect(screen.getByText(/The form now holds your invoice's figures/)).toBeTruthy();
-    expect((screen.getByLabelText("Contracted power") as HTMLSelectElement).value).toBe("4.6");
+    expect((screen.getByLabelText("Contracted power (kVA)") as HTMLSelectElement).value).toBe("4.6");
     expect((screen.getByLabelText("Full") as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText("The consumption covers") as HTMLSelectElement).value).toBe("days");
     expect((screen.getByLabelText("Number of days") as HTMLInputElement).value).toBe("30");

@@ -154,6 +154,11 @@ export interface OfferComparison {
   market?: MarketPricing;
   /** Dual offer: needs a gas contract too, and its fixed amounts may cover gas. */
   dual: boolean;
+  /**
+   * The unit prices the bills were priced on, EUR before VAT: power per day, and energy per kWh for
+   * each of `option`'s periods in order (the market's prices when `priceBasis` is "market").
+   */
+  prices: { powerPerDay: number; energy: readonly number[] };
   /** The bill for the entered days, on first-year terms. */
   period: TariffBreakdown;
   /** A year (365 days) of the same consumption, new-client discount included when it applies. */
@@ -457,6 +462,7 @@ export function compareElectricityOffers(
         priceBasis: market ? "market" : offer.indexed ? "erseEstimate" : "fixed",
         ...(market ? { market } : {}),
         dual: offer.dual,
+        prices,
         period: priceBill(offer, prices, terms),
         firstYear: priceBill(offer, prices, year),
         laterYears: priceBill(offer, prices, { ...year, newClient: false }),

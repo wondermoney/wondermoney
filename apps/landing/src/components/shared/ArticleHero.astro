@@ -25,9 +25,15 @@ interface Props {
   /** Section anchors; chips are shown for two or more. */
   outline?: ReadonlyArray<OutlineEntry>;
   figure?: FigureName;
+  /**
+   * A tool that is the page's whole point (the electricity tariff comparator): no figure, less
+   * space and a smaller title, so the tool starts on the first screen.
+   */
+  compact?: boolean;
 }
 
-const { locale, title, dek, breadcrumbs, readMinutes, outline = [], figure } = Astro.props;
+const { locale, title, dek, breadcrumbs, readMinutes, outline = [], compact = false } = Astro.props;
+const figure = compact ? undefined : Astro.props.figure;
 const t = getTranslations(locale);
 const trail: Crumb[] = [{ label: t("nav.home"), href: `/${locale}` }, ...breadcrumbs];
 ---
@@ -35,7 +41,8 @@ const trail: Crumb[] = [{ label: t("nav.home"), href: `/${locale}` }, ...breadcr
 <section class="border-b border-border">
   <div
     class:list={[
-      "mx-auto grid max-w-7xl gap-10 px-6 pb-12 pt-8 sm:pt-10 lg:gap-12 lg:px-8 lg:pb-14",
+      "mx-auto grid max-w-7xl gap-10 px-6 lg:gap-12 lg:px-8",
+      compact ? "pb-7 pt-6 lg:pb-8" : "pb-12 pt-8 sm:pt-10 lg:pb-14",
       figure && "lg:grid-cols-[minmax(0,1fr)_minmax(0,32.5rem)] lg:items-center",
     ]}
   >
@@ -63,15 +70,22 @@ const trail: Crumb[] = [{ label: t("nav.home"), href: `/${locale}` }, ...breadcr
         )}
       </div>
 
-      <h1 class="mt-5 max-w-[20ch] text-[2.25rem] font-bold leading-[1.06] tracking-[-0.03em] text-foreground sm:text-5xl lg:text-[3.25rem] lg:leading-[1.04] lg:tracking-[-0.035em]">
+      <h1
+        class:list={[
+          "font-bold text-foreground",
+          compact
+            ? "mt-3 text-[1.75rem] leading-[1.1] tracking-[-0.025em] sm:text-4xl lg:text-[2.5rem] lg:tracking-[-0.03em]"
+            : "mt-5 max-w-[20ch] text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.04] lg:tracking-[-0.035em]",
+        ]}
+      >
         {title}
       </h1>
-      {dek && <p class="mt-5 max-w-[35rem] text-lg leading-[1.55] text-ink-2 sm:text-xl">{dek}</p>}
+      {dek && <p class:list={["text-ink-2", compact ? "mt-3 max-w-[48rem] text-base leading-[1.55] sm:text-lg" : "mt-5 max-w-[35rem] text-lg leading-[1.55] sm:text-xl"]}>{dek}</p>}
 
       <slot />
 
-      {outline.length > 1 && (
-        <nav aria-label={t("article.onThisPage")} class="mt-7">
+      {!compact && outline.length > 1 && (
+        <nav aria-label={t("article.onThisPage")} class:list={[compact ? "mt-4" : "mt-7"]}>
           <ul role="list" class="flex flex-wrap gap-2.5">
             {outline.map((entry) => (
               <li class="min-w-0">

@@ -55,7 +55,7 @@ function expected(kwhPerMonth: number, overrides: Partial<Parameters<typeof runC
     includeRefunds: true,
     includeConditioned: true,
     includeDual: false,
-    cheapestPerSupplier: false,
+    cheapestPerSupplier: true,
     sortBy: "firstYear",
     filters: DEFAULT_OFFER_FILTERS,
     myTariff: null,
@@ -64,6 +64,13 @@ function expected(kwhPerMonth: number, overrides: Partial<Parameters<typeof runC
   if (!outcome.ok) throw new Error("valid");
   return outcome.view;
 }
+
+/** The kWh a month a 50 EUR bill comes to on the regulated tariff: the page's default. */
+const monthlyKwh50 = () => {
+  const solved = monthlyKwhFromBill(TUR, { bill: 50, contractedPower: 3.45, option: "simple", cycle: "daily", socialTariff: false, largeFamily: false });
+  if (!solved.ok) throw new Error("valid");
+  return solved.monthlyKwh;
+};
 
 const list = () => screen.getByRole("list", { name: "Offers, cheapest first" });
 const cards = () => [...list().children] as HTMLElement[];
@@ -87,10 +94,19 @@ describe("electricity tariff comparator", () => {
     await renderPage();
     const solved = monthlyKwhFromBill(TUR, { bill: 50, contractedPower: 3.45, option: "simple", cycle: "daily", socialTariff: false, largeFamily: false });
     if (!solved.ok) throw new Error("valid");
-    expect(screen.getByText(`On the regulated tariff this bill is about ${Math.round(solved.monthlyKwh)} kWh a month.`)).toBeTruthy();
+    expect(screen.getByText(`≈ ${Math.round(solved.monthlyKwh)} kWh a month on the regulated tariff`)).toBeTruthy();
     const view = expected(solved.monthlyKwh);
     expect(shows(firstCard(), eur(view.results[0].firstYear.total))).toBe(true);
-    expect(screen.getByText(`${view.results.length} offers, priced on ${new Intl.NumberFormat("en-IE").format(Math.round(view.annualKwh))} kWh a year.`)).toBeTruthy();
+    expect(
+      screen.getByText(`${view.results.length} suppliers · ${new Intl.NumberFormat("en-IE").format(Math.round(view.annualKwh))} kWh a year`),
+    ).toBeTruthy();
+    // Each row leads with the month and says how it compares with the regulated tariff.
+    const first = view.results[0];
+    expect(shows(firstCard(), eur(first.firstYear.total / 12))).toBe(true);
+    const lessThanRegulated = (view.regulated!.firstYear.total - first.firstYear.total) / 12;
+    expect(within(firstCard()).getByText((_, element) => element?.tagName === "P" && element.textContent === `${eur(lessThanRegulated)}/mo below regulated`)).toBeTruthy();
+    // The unit prices before VAT, and the contract.
+    expect(shows(firstCard(), new Intl.NumberFormat("en-IE", { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(first.prices.powerPerDay))).toBe(true);
 
     // The source, its date, the estimate and the DGEG fee are stated.
     expect(screen.getByText(/Offers: ERSE, export of 17 November 2026/)).toBeTruthy();
@@ -111,7 +127,7 @@ describe("electricity tariff comparator", () => {
     expect(screen.queryByRole("list", { name: "Offers, cheapest first" })).toBeNull();
 
     // Monthly kWh instead of a bill.
-    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+    fireEvent.click(screen.getByLabelText("Consumption in kWh"));
     fireEvent.change(screen.getByLabelText("Monthly consumption"), { target: { value: "300" } });
     expect(shows(firstCard(), eur(expected(300).results[0].firstYear.total))).toBe(true);
 
@@ -125,7 +141,7 @@ describe("electricity tariff comparator", () => {
   it("full mode: kWh per period for the chosen option and cycle, a total, and the days", async () => {
     await renderPage();
     fireEvent.click(screen.getByLabelText("Full"));
-    fireEvent.change(screen.getByLabelText("Tariff option"), { target: { value: "triHourly" } });
+    fireEvent.click(screen.getByLabelText("Tri-hourly"));
     fireEvent.change(screen.getByLabelText("Hourly cycle"), { target: { value: "weekly" } });
     fireEvent.change(screen.getByLabelText("Peak hours (ponta)"), { target: { value: "40" } });
     fireEvent.change(screen.getByLabelText("Shoulder hours (cheias)"), { target: { value: "100" } });
@@ -145,7 +161,7 @@ describe("electricity tariff comparator", () => {
     expect(shows(firstCard(), "Your 61 days")).toBe(true);
 
     // The breakdown has every line and the offer's links.
-    fireEvent.click(within(firstCard()).getByText("Breakdown and links"));
+    fireEvent.click(within(firstCard()).getByRole("button", { name: "Details" }));
     const table = within(firstCard()).getByRole("table");
     for (const line of ["Power", "Energy", "Electricity tax (IEC)", "VAT at 23%", "Total"]) expect(within(table).getByText(line)).toBeTruthy();
 
@@ -183,7 +199,7 @@ describe("electricity tariff comparator", () => {
     fireEvent.change(upload, { target: { files: [new File([bytes], "consumos.xlsx")] } });
     expect(await screen.findByText("2026-01-14 to 2026-01-15: 2 days, 19 kWh.")).toBeTruthy();
     await screen.findByRole("list", { name: "Offers, cheapest first" });
-    expect(screen.getByText(/priced on 3,504 kWh a year/)).toBeTruthy();
+    expect(screen.getByText(/3,504 kWh a year/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Remove the file" }));
     fireEvent.change(upload, { target: { files: [new File(["just,some,text\n1,2,3\n"], "other.csv", { type: "text/csv" })] } });
@@ -194,8 +210,8 @@ describe("electricity tariff comparator", () => {
     const market = vi.fn(loadMarket);
     render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={market} />);
     await screen.findByRole("list", { name: "Offers, cheapest first" });
-    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
-    fireEvent.change(screen.getByLabelText("Price type"), { target: { value: "indexed" } });
+    fireEvent.click(screen.getByLabelText("Consumption in kWh"));
+    fireEvent.change(screen.getByLabelText("Show"), { target: { value: "all" } });
     expect(market).not.toHaveBeenCalled();
     const card = (name: string) => cards().find((each) => within(each).queryByText(name)) as HTMLElement;
     expect(within(card("Eletricidade Indexada média DD + FE Oferta 100€")).getByText("Estimated price")).toBeTruthy();
@@ -205,7 +221,10 @@ describe("electricity tariff comparator", () => {
     expect(market).toHaveBeenCalledOnce();
     const edp = card("Eletricidade Indexada média DD + FE Oferta 100€");
     expect(within(edp).queryByText("Estimated price")).toBeNull();
-    const view = expected(200, { indexedPricing: { basis: profileBasis(OMIE_MONTHS), formulas: INDEXED_FORMULAS }, filters: { ...DEFAULT_OFFER_FILTERS, pricing: "indexed" } });
+    const view = expected(200, {
+      indexedPricing: { basis: profileBasis(OMIE_MONTHS), formulas: INDEXED_FORMULAS },
+      cheapestPerSupplier: false,
+    });
     const priced = view.results.find((result) => result.offer.id === "EDPC_36")!;
     expect(priced.priceBasis).toBe("market");
     expect(shows(edp, eur(priced.firstYear.total))).toBe(true);
@@ -236,6 +255,7 @@ describe("electricity tariff comparator", () => {
     const quarterHours = vi.fn<QuarterHoursLoader>(async () => data);
     render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={loadMarket} loadQuarterHours={quarterHours} />);
     await screen.findByRole("list", { name: "Offers, cheapest first" });
+    fireEvent.change(screen.getByLabelText("Show"), { target: { value: "all" } });
     fireEvent.click(screen.getByLabelText("Full"));
     fireEvent.change(screen.getByLabelText("Consumption"), { target: { value: "diagram" } });
     const upload = (dates: string[]) => {
@@ -282,44 +302,93 @@ describe("electricity tariff comparator", () => {
 
   it("filters on the offer fields and on the engine's options", async () => {
     await renderPage();
-    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+    fireEvent.click(screen.getByLabelText("Consumption in kWh"));
     const count = () => cards().length;
-    const all = count();
 
-    fireEvent.change(screen.getByLabelText("Price type"), { target: { value: "indexed" } });
-    const indexed = FIXTURE_OFFERS.filter((offer) => offer.indexed && offer.prices[3.45]?.simple);
-    expect(count()).toBe(indexed.length);
-    expect(within(firstCard()).getByText("Estimated price")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Price type"), { target: { value: "all" } });
+    // Each supplier's best offer by default; every offer on request.
+    expect(count()).toBe(expected(200).results.length);
+    fireEvent.change(screen.getByLabelText("Show"), { target: { value: "all" } });
+    const all = count();
+    expect(all).toBe(expected(200, { cheapestPerSupplier: false }).results.length);
+    expect(expected(200).results.length).toBeLessThan(all);
+
+    fireEvent.click(screen.getByLabelText("Fixed price"));
+    expect(count()).toBe(expected(200, { cheapestPerSupplier: false, filters: { ...DEFAULT_OFFER_FILTERS, pricing: "fixed" } }).results.length);
+    expect(within(list()).queryByText("Estimated price", { selector: "li" })).toBeNull();
+    fireEvent.click(screen.getByLabelText("Fixed price"));
 
     fireEvent.change(screen.getByLabelText("Supplier"), { target: { value: "EDPC" } });
     expect(within(list()).getAllByText("EDP").length).toBe(count());
     fireEvent.change(screen.getByLabelText("Supplier"), { target: { value: "" } });
 
-    fireEvent.click(screen.getByLabelText("Include offers with paid mandatory services"));
-    expect(within(list()).queryByText("Paid services")).toBeNull();
-    fireEvent.click(screen.getByLabelText("Include offers with paid mandatory services"));
+    // The quick filters over the list are toggles, each the engine's filter.
+    const quick = (label: string, overrides: Partial<Parameters<typeof runComparator>[0]>) => {
+      fireEvent.click(screen.getByLabelText(label));
+      const filtered = expected(200, { cheapestPerSupplier: false, ...overrides }).results.length;
+      expect(count()).toBe(filtered);
+      fireEvent.click(screen.getByLabelText(label));
+      expect(count()).toBe(all);
+      return filtered;
+    };
+    expect(quick("No paid services", { filters: { ...DEFAULT_OFFER_FILTERS, allowMandatoryServices: false } })).toBeLessThan(all);
+    expect(quick("No direct debit required", { filters: { ...DEFAULT_OFFER_FILTERS, allowDirectDebit: false } })).toBeLessThan(all);
+    expect(quick("No sign-up restrictions", { includeConditioned: false })).toBeLessThan(all);
+    quick("No loyalty period", { filters: { ...DEFAULT_OFFER_FILTERS, noLoyalty: true } });
 
-    fireEvent.click(screen.getByLabelText("Include offers that require direct debit"));
-    expect(within(list()).queryByText("Direct debit")).toBeNull();
-    fireEvent.click(screen.getByLabelText("Include offers that require direct debit"));
+    fireEvent.click(screen.getByLabelText("100% renewable"));
+    expect(count()).toBe(within(list()).getAllByText("100% renewable", { selector: "li" }).length);
+    fireEvent.click(screen.getByLabelText("100% renewable"));
+  });
 
-    fireEvent.click(screen.getByLabelText("Only 100% renewable energy"));
-    expect(count()).toBe(within(list()).getAllByText("100% renewable").length);
-    fireEvent.click(screen.getByLabelText("Only 100% renewable energy"));
+  it("compares up to three offers side by side", async () => {
+    await renderPage();
+    const view = expected(monthlyKwh50());
+    const [a, b, c, d] = cards();
+    const tick = (card: HTMLElement) => fireEvent.click(within(card).getByRole("checkbox", { name: /^Compare / }));
+    tick(a);
+    expect(screen.getByRole("region", { name: "Offers to compare" }).textContent).toContain("1 offer picked");
+    expect((screen.getByRole("button", { name: "Compare side by side" }) as HTMLButtonElement).disabled).toBe(true);
+    tick(b);
+    tick(c);
+    // A fourth cannot be added.
+    expect((within(d).getByRole("checkbox", { name: /^Compare / }) as HTMLInputElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Compare side by side" }));
+    const table = screen.getByRole("table", { name: "Compare side by side" });
+    expect(within(table).getAllByRole("columnheader")).toHaveLength(3);
+    expect(within(table).getAllByText(eur(view.results[0].firstYear.total)).length).toBeGreaterThan(0);
+    expect(within(table).getByText("Contract length")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.queryByRole("region", { name: "Offers to compare" })).toBeNull();
+  });
 
-    fireEvent.click(screen.getByLabelText("Include conditioned offers"));
-    expect(within(list()).queryByText("Conditioned")).toBeNull();
-    fireEvent.click(screen.getByLabelText("Include conditioned offers"));
+  it("shares the inputs in the link's fragment and reads them back", async () => {
+    const writeText = vi.fn(async (_text: string) => {});
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    window.matchMedia ??= ((query: string) => ({ matches: false, media: query }) as MediaQueryList);
+    await renderPage();
+    fireEvent.change(screen.getByLabelText("Contracted power (kVA)"), { target: { value: "6.9" } });
+    fireEvent.change(screen.getByLabelText("Monthly bill"), { target: { value: "85" } });
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
+    const link = new URL(writeText.mock.calls[0][0]);
+    expect(link.search).toBe("");
+    expect(link.hash).toContain("kva=6.9");
+    expect(link.hash).toContain("bill=85");
+    expect(await screen.findByText("Link copied")).toBeTruthy();
+    cleanup();
 
-    fireEvent.click(screen.getByLabelText("Only each supplier's cheapest offer"));
-    expect(count()).toBe(expected(200, { cheapestPerSupplier: true }).results.length);
-    expect(count()).toBeLessThan(all);
+    // Opened from the link: the form takes the values, and the fragment leaves the address bar.
+    window.history.replaceState(null, "", `/en/tools/electricity-tariff-comparison${link.hash}`);
+    await renderPage();
+    expect((screen.getByLabelText("Contracted power (kVA)") as HTMLSelectElement).value).toBe("6.9");
+    expect((screen.getByLabelText("Monthly bill") as HTMLInputElement).value).toBe("85");
+    expect(window.location.hash).toBe("#calculator");
   });
 
   it("my tariff: the visitor's prices go through the same engine, and each offer shows its saving", async () => {
     await renderPage();
-    fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+    fireEvent.click(screen.getByLabelText("Consumption in kWh"));
+    fireEvent.change(screen.getByLabelText("Show"), { target: { value: "all" } });
     fireEvent.click(screen.getByText("Compare with my tariff"));
     fireEvent.click(screen.getByLabelText("Use my prices"));
     expect(screen.getByText("Enter all your prices to see the saving of each offer.")).toBeTruthy();
@@ -330,15 +399,17 @@ describe("electricity tariff comparator", () => {
     fireEvent.change(screen.getByLabelText("Power price"), { target: { value: String(prices.powerPerDay) } });
     fireEvent.change(screen.getByLabelText("Energy price"), { target: { value: String(prices.energy) } });
 
-    const view = expected(200, { myTariff: { powerPerDay: prices.powerPerDay, energy: [prices.energy] } });
+    const view = expected(200, { myTariff: { powerPerDay: prices.powerPerDay, energy: [prices.energy] }, cheapestPerSupplier: false });
     const mine = screen.getByRole("heading", { name: "Your tariff on this consumption" }).closest("section") as HTMLElement;
     expect(within(mine).getByText(eur(view.mine!.firstYear.total))).toBeTruthy();
     const cheaper = view.results.filter((row) => (row.saving ?? 0) > 0.005);
     expect(within(mine).getByText(`${cheaper.length} offers cost less. The cheapest saves you ${eur(cheaper[0].saving!)} a year.`)).toBeTruthy();
-    const savingLine = `Saves you ${eur(view.results[0].saving!)} a year`;
+    // Each row's saving is a month's.
+    const monthly = eur(view.results[0].saving! / 12);
+    const savingLine = `Saves you ${monthly} a month`;
     expect(within(firstCard()).getByText((_, element) => element?.tagName === "P" && element.textContent === savingLine)).toBeTruthy();
     // The amount is set as a figure.
-    expect(within(firstCard()).getByText(eur(view.results[0].saving!)).className).toContain("font-mono");
+    expect(within(firstCard()).getAllByText(monthly).some((element) => element.className.includes("font-mono"))).toBe(true);
     // The regulated tariff typed in as "my tariff" costs exactly the same.
     expect(within(list()).getByText("Costs the same as your tariff")).toBeTruthy();
 

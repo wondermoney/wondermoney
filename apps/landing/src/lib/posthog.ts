@@ -93,9 +93,13 @@ export function applyPostHogConsent(consent: { analytics: boolean }): void {
         // The tool or list page's route id on every event it sends, the automatic
         // page view included: a page's visits, uses and next-step clicks group by it,
         // whatever the locale's slug.
+        // The URL's fragment is dropped: a tool's share link carries the visitor's inputs there
+        // (the electricity comparator's bill and consumption), and an anchor says nothing useful.
         before_send: (event) => {
           const source = getLandingSource();
           if (event && source) event.properties.landing_source = source;
+          const url = event?.properties.$current_url;
+          if (typeof url === "string" && url.includes("#")) event!.properties.$current_url = url.slice(0, url.indexOf("#"));
           return event;
         },
         debug: import.meta.env.DEV,

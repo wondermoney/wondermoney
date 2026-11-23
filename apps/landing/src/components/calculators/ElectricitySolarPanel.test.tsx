@@ -67,7 +67,8 @@ const stat = (label: string) => within(summary()).getByText(label).parentElement
 async function renderPage(loadSolar: SolarLoader, loadSolarProduction?: SolarProductionLoader) {
   render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadOffers} loadSolar={loadSolar} loadSolarProduction={loadSolarProduction} />);
   await screen.findByRole("list", { name: "Offers, cheapest first" });
-  fireEvent.change(screen.getByLabelText("I know my"), { target: { value: "kwh" } });
+  fireEvent.click(screen.getByLabelText("Consumption in kWh"));
+  fireEvent.change(screen.getByLabelText("Show"), { target: { value: "all" } });
   fireEvent.change(screen.getByLabelText("Monthly consumption"), { target: { value: "250" } });
 }
 
@@ -87,7 +88,7 @@ describe("solar panels in the electricity tariff comparator", () => {
 
     const { view, year, saving } = await expected("lisboa", 2);
     expect(within(firstCard()).getAllByText(eur(view.results[0].firstYear.total)).length).toBeGreaterThan(0);
-    expect(screen.getByText(new RegExp(`priced on ${int(view.annualKwh)} kWh a year`))).toBeTruthy();
+    expect(screen.getByText(new RegExp(`${int(view.annualKwh)} kWh a year`))).toBeTruthy();
     const box = summary();
     expect(within(box).getByText("2.0 kWp in Lisboa, facing south at 33°. Figures for a year.")).toBeTruthy();
     expect(stat("Production")).toBe(`${int(year.production)} kWh`);
@@ -123,7 +124,7 @@ describe("solar panels in the electricity tariff comparator", () => {
     expect(screen.queryByRole("heading", { name: "With your solar panels" })).toBeNull();
     const gross = runComparator(REQUEST);
     if (!gross.ok) throw new Error("valid");
-    expect(screen.getByText(new RegExp(`priced on ${int(gross.view.annualKwh)} kWh a year`))).toBeTruthy();
+    expect(screen.getByText(new RegExp(`${int(gross.view.annualKwh)} kWh a year`))).toBeTruthy();
   });
 
   it("picks the nearest district capital from the visitor's location, and says when there is none", async () => {

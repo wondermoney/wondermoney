@@ -3,6 +3,7 @@
 // lib/calculators/electricityInvoice.ts reads the figures. The visitor sees what was read and
 // fills the form with it, or discards it; the form changes only on "Fill in the form", and an
 // invoice the reader cannot use leaves it as it was. The file never leaves the device.
+import { FileUp, Lock } from "lucide-react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { k, PERIOD_KEYS } from "./ElectricityTariffResults";
@@ -16,7 +17,6 @@ import { supplierName } from "@/lib/calculators/electricitySuppliers";
 import { InvoicePdfError, readInvoicePdfLines, type InvoicePdfErrorCode } from "@/lib/calculators/invoicePdf";
 import { formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
-import { FieldMessage } from "@/components/ui/fieldMessage";
 
 /** Larger than any invoice; a bigger file is not read. */
 const MAX_FILE_MB = 15;
@@ -73,31 +73,40 @@ export default function ElectricityInvoiceUpload({
   };
 
   return (
-    <section aria-labelledby="tariff-invoice-title" className="space-y-3 rounded-card border border-border bg-background p-6">
-      <h2 id="tariff-invoice-title" className="text-sm font-semibold text-foreground">
-        {t(i("title"))}
-      </h2>
-      <p className="text-sm text-ink-2">{t(i("intro"))}</p>
-      <div className="space-y-2">
-        <label htmlFor="tariff-invoice" className="block text-sm font-medium text-foreground">
-          {t(i("label"))}
-        </label>
+    <section aria-labelledby="tariff-invoice-title" className="space-y-3">
+      <label
+        className="flex cursor-pointer items-center gap-3 rounded-card border border-dashed border-input bg-background p-4 transition-colors hover:border-primary/60 hover:bg-paper-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
+      >
+        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <FileUp className="size-5" />
+        </span>
+        <span className="min-w-0">
+          <span id="tariff-invoice-title" className="block text-sm font-semibold text-foreground">
+            {t(i("title"))}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Lock aria-hidden="true" className="size-3 shrink-0" />
+            {t(i("privacyShort"))}
+          </span>
+        </span>
         <input
           ref={input}
           id="tariff-invoice"
           type="file"
           accept="application/pdf,.pdf"
+          aria-label={t(i("label"))}
           aria-describedby="tariff-invoice-help tariff-invoice-privacy"
           onChange={(event) => readFile(event.currentTarget.files?.[0])}
-          className="block w-full text-sm text-foreground file:mr-3 file:h-10 file:rounded-md file:border file:border-input file:bg-secondary file:px-4 file:text-sm file:font-medium file:text-secondary-foreground hover:file:bg-paper-3"
+          className="sr-only"
         />
-        <FieldMessage id="tariff-invoice-help">
-          {t(i("supported"), { suppliers })}
-        </FieldMessage>
-        <FieldMessage id="tariff-invoice-privacy">
-          {t(i("privacy"))}
-        </FieldMessage>
-      </div>
+      </label>
+      {/* What the visible line leaves out, for screen readers: the suppliers read and the privacy note. */}
+      <span id="tariff-invoice-help" className="sr-only">
+        {t(i("intro"))} {t(i("supported"), { suppliers })}
+      </span>
+      <span id="tariff-invoice-privacy" className="sr-only">
+        {t(i("privacy"))}
+      </span>
       {status.state === "reading" && (
         <p role="status" className="text-sm text-foreground">
           {t(i("reading"))}
