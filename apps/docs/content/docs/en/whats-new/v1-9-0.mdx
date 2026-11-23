@@ -1,0 +1,24 @@
+---
+title: WonderMoney 1.9.0
+description: Web and mobile analytics from the one published event list, and a working statement import fallback on mobile.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.9.0)
+
+## Upgrading
+
+Nothing to do. There are no migrations and no new settings. If you turned on PostHog in the web app, it now records the screen opened by name in place of page views (see [Analytics](/en/docs/self-hosting/configure#analytics)).
+
+## Fixes
+
+- **Import a statement** on a bank connection whose sync failed, in the mobile app (1.0.6), now opens the transaction import, where you pick the account. It used to open a screen that always failed.
+
+## Privacy
+
+- **Web analytics follow the published list.** With analytics allowed, the web app records the screen you open by its name, never its address, and the steps of signing up, onboarding, imports and bank connections. Page addresses, database identifiers and what you type in forms are no longer sent. The privacy policy describes it.
+- **Feedback stays with support.** The message you send from the web app goes only to support; analytics records just its category.
+- **The mobile app** records imports and bank connections the same way, with your analytics choice, and no longer sends sign-ups and sign-ins itself.
+
+## Thanks to
+
+- @nip10
