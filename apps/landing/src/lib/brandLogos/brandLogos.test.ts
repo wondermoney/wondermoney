@@ -115,7 +115,7 @@ describe("fuel station brands", () => {
 	})
 
 	it("leaves the brands that also sell electricity to that category, and the rest to the monogram", () => {
-		for (const brand of FROM_ANOTHER_CATEGORY) expect(findBrandLogo(brand)?.category, brand).not.toBe("fuel")
+		for (const brand of FROM_ANOTHER_CATEGORY) expect(findBrandLogo(brand)?.category, brand).toBe("electricity")
 		for (const brand of FUEL_ON_MONOGRAM) expect(findBrandLogo(brand), brand).toBeNull()
 	})
 })
