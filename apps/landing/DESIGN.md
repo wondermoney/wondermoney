@@ -224,6 +224,9 @@ The app's radius scale, from one `--radius: 0.5rem`: `sm` 4px (badges), `md` 6px
 - **Background:** identical value to the page canvas (`bg-card`, never `bg-white`).
 - **Shadow Strategy:** none at rest — hairline border only.
 - **No nesting:** a bordered card never holds a second bordered card; inner groups use a background step (`bg-muted`) or a divider, as in the app.
+- **Change over a period:** a preview that follows a figure over time shows how far it moved beside it: a 4px badge with a trend icon and the percent in the financial face (`bg-success/10` and `text-success-text` for a gain, the destructive pair for a loss), then the absolute change; a row's change is a plain `-text` figure. The sign always stays, so colour is never the only cue, and a debt that shrank counts as a gain. The figures reconcile (`netWorthSample.ts` and its test).
+- **Institution logos in previews:** an example account row carries its institution's logo (`BrandLogo`, 24 px) before the label, never instead of it, and only for banks and brokers the product supports (those in `InstitutionMarks.tsx`), as examples, never as partners.
+- **Preview charts** sit on the card with no panel behind them: three light gridlines with their labels over them at the left, a smooth line in `chart-1` over a faint fill, and only the latest point marked (`NetWorthPreview.tsx`, on the homepage hero and the net worth feature page).
 - **Status cards** use the quiet register: a `-text` border at low alpha and an inline icon beside the heading — no tinted coin, no thick side stripe.
 
 ### Hairline figures

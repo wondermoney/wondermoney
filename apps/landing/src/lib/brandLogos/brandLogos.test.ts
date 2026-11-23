@@ -90,3 +90,11 @@ describe("the registry", () => {
 		expect(missing).toEqual(BANKS_ON_MONOGRAM)
 	})
 })
+
+describe("the brokers", () => {
+	it("has a square logo for each broker the product imports portfolio files from", () => {
+		expect(findBrandLogo("DEGIRO")?.category).toBe("brokers")
+		expect(findBrandLogo("Interactive Brokers")?.category).toBe("brokers")
+		expect(findBrandLogo("IBKR")).toBe(findBrandLogo("Interactive Brokers"))
+	})
+})

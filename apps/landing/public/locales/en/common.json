@@ -6939,6 +6939,7 @@
       "creditCard": "Credit card",
       "history": "Net worth history",
       "historyPeriod": "Last 6 months",
+      "changeLabel": "Change over the last 6 months",
       "chartTrend": "Net worth, {{start}} to {{end}}, rising from {{from}} to {{to}}"
     },
     "perMonth": "/mo",
