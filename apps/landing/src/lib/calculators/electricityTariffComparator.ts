@@ -317,6 +317,11 @@ export interface ComparatorView {
   best: Record<TariffOption, OfferComparison | null>;
   /** The visitor's tariff priced on the same consumption, or null. */
   mine: OfferComparison | null;
+  /**
+   * The regulated tariff (TUR) on the visitor's option and the same consumption, whatever the
+   * filters: the reference each offer's saving is shown against. Null when it has no price here.
+   */
+  regulated: OfferComparison | null;
   annualKwh: number;
   socialTariffApplied: boolean;
 }
@@ -360,6 +365,13 @@ export function runComparator(request: ComparatorRequest): ComparatorOutcome {
     });
     if (own.ok) mine = own.result.results[0] ?? null;
   }
+  let regulated: OfferComparison | null = null;
+  const tur = request.offers.find((offer) => offer.regulated);
+  if (tur) {
+    const own = compareElectricityOffers([tur], { ...base, options: [request.option], includeConditioned: true });
+    if (own.ok) regulated = own.result.results[0] ?? null;
+  }
+
   const sortBy = request.sortBy;
   const results = list.result.results.map((result) => ({
     ...result,
@@ -372,6 +384,7 @@ export function runComparator(request: ComparatorRequest): ComparatorOutcome {
       results,
       best,
       mine,
+      regulated,
       annualKwh: list.result.annualKwh,
       socialTariffApplied: list.result.socialTariffApplied,
     },

@@ -4826,24 +4826,22 @@
       "mode": {
         "legend": "¿Cómo quieres comparar?",
         "quick": "Rápida",
-        "full": "Completa",
-        "quickHelp": "A partir de tu factura mensual o de tus kWh. El reparto entre periodos sigue el perfil de consumo estándar de los hogares.",
-        "fullHelp": "A partir de tus kWh por periodo, de un total para cualquier número de días o de tu archivo de consumos de E-REDES."
+        "full": "Completa"
       },
       "fields": {
-        "power": "Potencia contratada",
         "option": "Opción tarifaria",
         "cycle": "Ciclo horario",
         "quickUnit": "Conozco",
-        "unitBill": "La factura mensual en euros",
-        "unitKwh": "El consumo mensual en kWh",
+        "unitBill": "Factura en €",
+        "unitKwh": "Consumo en kWh",
         "bill": "Factura mensual",
         "monthlyKwh": "Consumo mensual",
         "source": "Consumo",
         "period": "El consumo corresponde a",
         "days": "Número de días",
         "total": "Consumo total",
-        "periodsLegend": "Consumo por periodo"
+        "periodsLegend": "Consumo por periodo",
+        "powerKva": "Potencia contratada (kVA)"
       },
       "options": {
         "simple": "Simple",
@@ -4872,12 +4870,7 @@
         "shoulder": "Horas llano (cheias)"
       },
       "help": {
-        "power": "En tu factura, en kVA. La mayoría de los hogares tienen 3,45, 4,6 o 6,9 kVA.",
-        "option": "La simple tiene un único precio de la energía; la bihoraria y la trihoraria ponen precios distintos según la hora. La lista muestra las ofertas de esta opción.",
-        "cycle": "El ciclo de tu contador, indicado en la factura. El ciclo semanal cambia las horas valle los fines de semana.",
-        "bill": "Lo que pagas al mes, IVA incluido. Se convierte en kWh como si tuvieras la tarifa regulada, igual que hace la simulación rápida de ERSE.",
-        "billKwh": "Con la tarifa regulada, esta factura equivale a unos {{kwh}} al mes.",
-        "monthlyKwh": "En la factura, o el consumo anual dividido entre 12.",
+        "billKwh": "≈ {{kwh}} al mes con la tarifa regulada",
         "days": "Los días que cubren tus kWh, de 1 a 731, como en una factura o en una descarga del contador.",
         "total": "Todos los kWh del periodo indicado arriba. El reparto entre periodos sigue el perfil de E-REDES para tu potencia y tu consumo.",
         "periods": "Como en tu factura o en la lectura del contador. Las demás opciones se calculan con los mismos kWh, repartidos con el perfil estándar cuando hace falta."
@@ -4906,14 +4899,8 @@
         "coverage": "El {{percent}}% del consumo de tu archivo cae en días con precios OMIE ({{period}}). El resto se calcula al precio medio de esos días."
       },
       "filters": {
-        "title": "Filtros",
-        "summary": "(tipo de precio, comercializadora, condiciones)",
-        "pricing": "Tipo de precio",
-        "pricingChoices": {
-          "all": "Fijo e indexado",
-          "fixed": "Solo precio fijo",
-          "indexed": "Solo precio indexado"
-        },
+        "title": "Más opciones",
+        "summary": "(orden, ofertas indexadas, reembolsos, factura electrónica, ofertas duales)",
         "supplier": "Comercializadora",
         "supplierAll": "Todas las comercializadoras",
         "sortBy": "Ordenar por",
@@ -4921,19 +4908,25 @@
           "firstYear": "Primer año",
           "laterYears": "Años siguientes (sin descuento de cliente nuevo)"
         },
-        "includeConditioned": "Incluir ofertas condicionadas",
-        "includeConditionedHelp": "Ofertas que solo pueden contratar algunas personas, como los socios de un club o los titulares de una tarjeta.",
         "includeRefunds": "Contar reembolsos y descuentos para cualquier cliente",
         "includeRefundsHelp": "Importes que la comercializadora devuelve en cada factura, tal como los cuenta ERSE.",
-        "mandatoryServices": "Incluir ofertas con servicios obligatorios de pago",
-        "mandatoryServicesHelp": "Algunas ofertas exigen un servicio de pago, como asistencia. Su coste está incluido en el total.",
-        "directDebit": "Incluir ofertas que exigen domiciliación bancaria",
         "eInvoice": "Incluir ofertas que exigen factura electrónica",
-        "renewableOnly": "Solo energía 100% renovable",
-        "noLoyalty": "Solo ofertas sin permanencia",
         "includeDual": "Incluir ofertas duales (electricidad y gas)",
         "includeDualHelp": "Requieren un contrato de gas con la misma comercializadora, y sus importes fijos pueden cubrir también el gas.",
-        "cheapestPerSupplier": "Solo la oferta más barata de cada comercializadora"
+        "view": "Mostrar",
+        "viewChoices": {
+          "best": "La mejor de cada comercializadora",
+          "all": "Todas las ofertas"
+        },
+        "quick": "Filtros rápidos",
+        "chips": {
+          "noLoyalty": "Sin permanencia",
+          "noDirectDebit": "Sin domiciliación obligatoria",
+          "noServices": "Sin servicios de pago",
+          "noConditioned": "Sin restricciones de adhesión",
+          "renewable": "100 % renovable",
+          "fixed": "Precio fijo"
+        }
       },
       "myTariff": {
         "title": "Comparar con mi tarifa",
@@ -4987,7 +4980,8 @@
           "encrypted": "Este PDF está protegido con contraseña. Ábrelo, guarda una copia sin contraseña y elige esa copia, o introduce las cifras abajo.",
           "noText": "Este PDF no tiene texto que leer (puede ser un escaneo o una foto). Usa el PDF que envió la comercializadora, o introduce las cifras abajo.",
           "tooLarge": "Este archivo pesa más de {{max}} MB, más que una factura. El formulario se ha quedado como estaba."
-        }
+        },
+        "privacyShort": "Se lee en tu navegador, nunca se envía"
       },
       "solar": {
         "title": "Paneles solares",
@@ -5107,17 +5101,14 @@
       },
       "compare": {
         "title": "¿Simple, bihoraria o trihoraria?",
-        "intro": "La oferta más barata de cada opción con el mismo consumo, repartido según tu ciclo horario.",
         "yours": "(tu opción)",
-        "perFirstYear": "el primer año",
-        "perLaterYear": "al año a partir del segundo año",
         "cheapest": "Opción más barata",
-        "more": "{{amount}} más al año",
+        "more": "+{{amount}} al año",
         "unavailable": "No hay ofertas con esta potencia."
       },
       "results": {
         "title": "Ofertas en la opción {{option}}",
-        "count": "{{count}} ofertas, calculadas para {{kwh}} al año.",
+        "count": "{{count}} ofertas · {{kwh}} al año",
         "none": "Ninguna oferta coincide. Amplía los filtros o cambia de opción.",
         "listLabel": "Ofertas, de la más barata a la más cara",
         "showMore": "Mostrar {{count}} más",
@@ -5126,10 +5117,7 @@
         "period": "Tus {{days}} días",
         "periodMonth": "Un mes",
         "periodYear": "Un año",
-        "saving": "Te ahorra {{amount}} al año",
-        "dearer": "Cuesta {{amount}} más al año",
-        "same": "Cuesta lo mismo que tu tarifa",
-        "details": "Desglose y enlaces",
+        "details": "Detalles",
         "estimatedNote": "Precio indexado: estimación de ERSE para los próximos meses. Lo que pagas sigue al mercado.",
         "estimatedLeft": "{{count}} ofertas indexadas sin fórmula publicada siguen con la estimación de la ERSE (futuros a 3 meses).",
         "estimatedLeftOne": "1 oferta indexada sin fórmula publicada sigue con la estimación de la ERSE (futuros a 3 meses).",
@@ -5144,7 +5132,9 @@
           "terms": "Condiciones del contrato"
         },
         "breakdownCaption": "Desglose de {{offer}}",
-        "socialNotApplied": "La tarifa social solo se aplica hasta {{kva}} kVA, así que no se cuenta con esta potencia."
+        "socialNotApplied": "La tarifa social solo se aplica hasta {{kva}} kVA, así que no se cuenta con esta potencia.",
+        "countPerSupplier": "{{count}} comercializadoras · {{kwh}} al año",
+        "detailsClose": "Ocultar detalles"
       },
       "badges": {
         "label": "Características de la oferta",
@@ -5223,7 +5213,7 @@
           "diagram": "También puedes darle tu archivo de consumos de E-REDES, descargado del Balcão Digital. Sus lecturas de cada cuarto de hora dan tus kWh reales en cada periodo y ciclo. El archivo se lee en tu navegador y nunca se envía a ningún sitio.",
           "mine": "En \"Comparar con mi tarifa\" introduces los precios de tu factura. Tu tarifa pasa entonces por el mismo cálculo que cada oferta, así que el ahorro que muestra cada una compara lo mismo con lo mismo.",
           "solar": "En \"Paneles solares\" añades un sistema por capital de distrito o por coordenadas, con su inclinación, orientación, potencia pico y pérdidas. Su producción se resta de tu consumo hora a hora, y las ofertas se ordenan por lo que aún compras a la red. El resumen muestra la parte consumida en casa, el excedente y lo que los paneles te ahorran en la oferta más barata. Un precio de venta del excedente, si lo introduces, aparece aparte de la clasificación.",
-          "options": "Al principio de los resultados, las ofertas simple, bihoraria y trihoraria más baratas con el mismo consumo muestran si te compensaría otra opción. Los filtros acotan la lista y el botón CSV la descarga."
+          "options": "Al principio de los resultados, las ofertas simple, bihoraria y trihoraria más baratas con el mismo consumo muestran si te compensaría otra opción. La lista muestra la mejor oferta de cada comercializadora, o todas si cambias \"Mostrar\", con el coste al mes, la diferencia con la tarifa regulada y los precios de la potencia y la energía sin IVA. Los filtros sobre la lista la acotan, \"Comparar\" pone hasta tres ofertas lado a lado, \"Compartir\" copia un enlace con los valores que elegiste (nunca los archivos) y el botón CSV descarga la lista."
         },
         "example": {
           "title": "Ejemplo práctico",
@@ -5301,6 +5291,90 @@
           "householdBudgetLink": "Presupuesto del hogar",
           "householdBudgetBody": "Pon la factura de la luz junto al resto de tus gastos mensuales."
         }
+      },
+      "presets": {
+        "bill": "Importes habituales de la factura",
+        "kwh": "Consumos habituales"
+      },
+      "summary": {
+        "label": "Tu simulación",
+        "bill": "factura de {{amount}}/mes",
+        "kwh": "{{kwh}}/mes",
+        "diagram": "archivo de E-REDES",
+        "full": "consumo por periodo",
+        "change": "Cambiar"
+      },
+      "share": {
+        "button": "Compartir",
+        "copied": "Enlace copiado",
+        "failed": "No se ha podido copiar el enlace"
+      },
+      "row": {
+        "energy": "Energía",
+        "power": "Potencia",
+        "cheaper": {
+          "regulated": "{{amount}}/mes por debajo de la regulada",
+          "mine": "Ahorras {{amount}} al mes"
+        },
+        "dearer": {
+          "regulated": "{{amount}}/mes por encima de la regulada",
+          "mine": "{{amount}} más al mes"
+        },
+        "same": {
+          "regulated": "Igual que la regulada",
+          "mine": "Cuesta lo mismo que tu tarifa"
+        },
+        "goTo": "Ir a {{supplier}}",
+        "contractMonths": "{{months}} meses",
+        "contractMonthsOne": "1 mes",
+        "noTerm": "Sin plazo",
+        "compare": "Comparar",
+        "compareOffer": "Comparar {{offer}}",
+        "pricing": {
+          "fixed": "Fijo",
+          "indexed": "Indexado"
+        },
+        "required": "Obligatoria",
+        "notRequired": "No obligatoria",
+        "yes": "Sí",
+        "no": "No",
+        "validRange": "Del {{from}} al {{to}}",
+        "validFrom": "Desde el {{from}}",
+        "howTotal": "Cómo se llega a {{amount}} el primer año",
+        "conditionsTitle": "Condiciones",
+        "conditions": {
+          "pricing": "Tipo de precio",
+          "duration": "Duración del contrato",
+          "loyalty": "Permanencia",
+          "directDebit": "Domiciliación bancaria",
+          "eInvoice": "Factura electrónica",
+          "renewable": "Energía 100 % renovable",
+          "conditioned": "Restricciones de adhesión",
+          "services": "Servicios obligatorios al año",
+          "valid": "Precios válidos"
+        },
+        "moneyTitle": "Adónde va el dinero, con potencia y energía sin IVA",
+        "money": {
+          "power": "Potencia",
+          "energy": "Energía",
+          "taxes": "Impuestos y tasas",
+          "services": "Servicios",
+          "discounts": "Descuentos"
+        },
+        "perMonth": "/mes",
+        "perDayShort": "€/día"
+      },
+      "compareTray": {
+        "label": "Ofertas para comparar",
+        "count": "{{count}} de {{max}} ofertas para comparar",
+        "countOne": "1 oferta elegida: elige otra para comparar",
+        "clear": "Borrar",
+        "open": "Comparar lado a lado",
+        "title": "Comparar lado a lado",
+        "close": "Cerrar",
+        "vsCheapest": "De más frente a la más barata (al año)",
+        "vsRegulated": "De menos al mes frente a la regulada",
+        "unitPrices": "Precios sin IVA"
       }
     },
     "fuelPrices": {

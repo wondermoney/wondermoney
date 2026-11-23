@@ -4826,24 +4826,22 @@
       "mode": {
         "legend": "Wie möchten Sie vergleichen?",
         "quick": "Schnell",
-        "full": "Vollständig",
-        "quickHelp": "Anhand Ihrer Monatsrechnung oder Ihrer kWh. Die Aufteilung auf die Zeiträume folgt dem Standardprofil für Haushalte.",
-        "fullHelp": "Anhand Ihrer kWh je Zeitraum, einer Summe für beliebig viele Tage oder Ihrer E-REDES-Verbrauchsdatei."
+        "full": "Vollständig"
       },
       "fields": {
-        "power": "Vertraglich vereinbarte Leistung",
         "option": "Tarifoption",
         "cycle": "Zeitzyklus",
         "quickUnit": "Ich kenne",
-        "unitBill": "Meine Monatsrechnung in Euro",
-        "unitKwh": "Meinen Monatsverbrauch in kWh",
+        "unitBill": "Rechnung in €",
+        "unitKwh": "Verbrauch in kWh",
         "bill": "Monatsrechnung",
         "monthlyKwh": "Monatsverbrauch",
         "source": "Verbrauch",
         "period": "Der Verbrauch umfasst",
         "days": "Anzahl der Tage",
         "total": "Gesamtverbrauch",
-        "periodsLegend": "Verbrauch je Zeitraum"
+        "periodsLegend": "Verbrauch je Zeitraum",
+        "powerKva": "Vertragsleistung (kVA)"
       },
       "options": {
         "simple": "Eintarif",
@@ -4872,12 +4870,7 @@
         "shoulder": "Normallastzeit (cheias)"
       },
       "help": {
-        "power": "Auf Ihrer Rechnung, in kVA. Die meisten Haushalte haben 3,45, 4,6 oder 6,9 kVA.",
-        "option": "Der Eintarif hat einen einzigen Energiepreis; Zweitarif und Dreitarif berechnen die Stunden unterschiedlich. Die Liste zeigt Angebote mit dieser Option.",
-        "cycle": "Der Zyklus Ihres Zählers, auf der Rechnung. Der wöchentliche Zyklus verschiebt die Schwachlastzeiten am Wochenende.",
-        "bill": "Was Sie im Monat zahlen, inklusive Mehrwertsteuer. Der Betrag wird in kWh umgerechnet, als hätten Sie den regulierten Tarif, wie bei der Schnellsimulation der ERSE.",
-        "billKwh": "Im regulierten Tarif entspricht diese Rechnung etwa {{kwh}} im Monat.",
-        "monthlyKwh": "Auf der Rechnung, oder der Jahresverbrauch geteilt durch 12.",
+        "billKwh": "≈ {{kwh}} im Monat beim regulierten Tarif",
         "days": "Die Tage, die Ihre kWh abdecken, von 1 bis 731, wie auf einer Rechnung oder in einem Zählerdownload.",
         "total": "Alle kWh im obigen Zeitraum. Die Aufteilung auf die Zeiträume folgt dem E-REDES-Profil für Ihre Leistung und Ihren Verbrauch.",
         "periods": "Wie auf Ihrer Rechnung oder Zählerablesung. Andere Optionen werden mit denselben kWh berechnet, bei Bedarf nach dem Standardprofil aufgeteilt."
@@ -4906,14 +4899,8 @@
         "coverage": "{{percent}} % des Verbrauchs in Ihrer Datei fällt auf Tage mit OMIE-Preisen ({{period}}). Der Rest wird zum Durchschnittspreis dieser Tage berechnet."
       },
       "filters": {
-        "title": "Filter",
-        "summary": "(Preisart, Versorger, Bedingungen)",
-        "pricing": "Preisart",
-        "pricingChoices": {
-          "all": "Fest und indexiert",
-          "fixed": "Nur Festpreis",
-          "indexed": "Nur indexierter Preis"
-        },
+        "title": "Weitere Optionen",
+        "summary": "(Reihenfolge, indexierte Angebote, Erstattungen, elektronische Rechnung, Dual-Angebote)",
         "supplier": "Versorger",
         "supplierAll": "Alle Versorger",
         "sortBy": "Sortieren nach",
@@ -4921,19 +4908,25 @@
           "firstYear": "Erstes Jahr",
           "laterYears": "Folgejahre (ohne Neukundenrabatt)"
         },
-        "includeConditioned": "Angebote mit Teilnahmebedingungen einbeziehen",
-        "includeConditionedHelp": "Angebote, die nur manche Personen abschließen können, etwa Mitglieder eines Vereins oder Inhaber einer Karte.",
         "includeRefunds": "Erstattungen und Rabatte für alle Kunden einrechnen",
         "includeRefundsHelp": "Beträge, die der Versorger auf jeder Rechnung gutschreibt, so wie die ERSE sie zählt.",
-        "mandatoryServices": "Angebote mit kostenpflichtigen Pflichtleistungen einbeziehen",
-        "mandatoryServicesHelp": "Manche Angebote setzen eine kostenpflichtige Leistung voraus, etwa eine Assistenzleistung. Deren Kosten sind in der Summe enthalten.",
-        "directDebit": "Angebote mit Lastschriftpflicht einbeziehen",
         "eInvoice": "Angebote mit Pflicht zur elektronischen Rechnung einbeziehen",
-        "renewableOnly": "Nur 100 % erneuerbare Energie",
-        "noLoyalty": "Nur Angebote ohne Mindestvertragslaufzeit",
         "includeDual": "Kombiangebote (Strom und Gas) einbeziehen",
         "includeDualHelp": "Diese Angebote setzen einen Gasvertrag beim selben Versorger voraus, und ihre Fixbeträge können auch Gas abdecken.",
-        "cheapestPerSupplier": "Nur das günstigste Angebot je Versorger"
+        "view": "Anzeigen",
+        "viewChoices": {
+          "best": "Das beste Angebot jedes Anbieters",
+          "all": "Alle Angebote"
+        },
+        "quick": "Schnellfilter",
+        "chips": {
+          "noLoyalty": "Ohne Mindestlaufzeit",
+          "noDirectDebit": "Ohne Lastschriftpflicht",
+          "noServices": "Ohne kostenpflichtige Dienste",
+          "noConditioned": "Ohne Zugangsbeschränkung",
+          "renewable": "100 % erneuerbar",
+          "fixed": "Festpreis"
+        }
       },
       "myTariff": {
         "title": "Mit meinem Tarif vergleichen",
@@ -4987,7 +4980,8 @@
           "encrypted": "Dieses PDF ist passwortgeschützt. Öffnen Sie es, speichern Sie eine Kopie ohne Passwort und wählen Sie diese Kopie, oder geben Sie die Werte unten ein.",
           "noText": "Dieses PDF enthält keinen lesbaren Text (vielleicht ein Scan oder ein Foto). Verwenden Sie das PDF, das der Anbieter geschickt hat, oder geben Sie die Werte unten ein.",
           "tooLarge": "Diese Datei ist größer als {{max}} MB, mehr als eine Rechnung. Das Formular ist unverändert."
-        }
+        },
+        "privacyShort": "Im Browser gelesen, nie hochgeladen"
       },
       "solar": {
         "title": "Solaranlage",
@@ -5107,17 +5101,14 @@
       },
       "compare": {
         "title": "Eintarif, Zweitarif oder Dreitarif?",
-        "intro": "Das günstigste Angebot jeder Option bei gleichem Verbrauch, aufgeteilt nach Ihrem Zeitzyklus.",
         "yours": "(Ihre Option)",
-        "perFirstYear": "im ersten Jahr",
-        "perLaterYear": "pro Jahr ab dem zweiten Jahr",
         "cheapest": "Günstigste Option",
-        "more": "{{amount}} mehr im Jahr",
+        "more": "+{{amount}} im Jahr",
         "unavailable": "Kein Angebot bei dieser Leistung."
       },
       "results": {
         "title": "Angebote mit der Option {{option}}",
-        "count": "{{count}} Angebote, berechnet für {{kwh}} im Jahr.",
+        "count": "{{count}} Angebote · {{kwh}} im Jahr",
         "none": "Kein Angebot passt. Lockern Sie die Filter oder ändern Sie die Option.",
         "listLabel": "Angebote, günstigstes zuerst",
         "showMore": "{{count}} weitere anzeigen",
@@ -5126,10 +5117,7 @@
         "period": "Ihre {{days}} Tage",
         "periodMonth": "Ein Monat",
         "periodYear": "Ein Jahr",
-        "saving": "Sie sparen {{amount}} im Jahr",
-        "dearer": "Kostet {{amount}} mehr im Jahr",
-        "same": "Kostet so viel wie Ihr Tarif",
-        "details": "Aufschlüsselung und Links",
+        "details": "Details",
         "estimatedNote": "Indexierter Preis: Schätzung der ERSE für die kommenden Monate. Was Sie zahlen, folgt dem Markt.",
         "estimatedLeft": "{{count}} indexierte Angebote ohne veröffentlichte Formel bleiben bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
         "estimatedLeftOne": "1 indexiertes Angebot ohne veröffentlichte Formel bleibt bei der Schätzung der ERSE (Terminpreise für 3 Monate).",
@@ -5144,7 +5132,9 @@
           "terms": "Vertragsbedingungen"
         },
         "breakdownCaption": "Aufschlüsselung von {{offer}}",
-        "socialNotApplied": "Der Sozialtarif gilt nur bis {{kva}} kVA und wird bei dieser Leistung daher nicht berücksichtigt."
+        "socialNotApplied": "Der Sozialtarif gilt nur bis {{kva}} kVA und wird bei dieser Leistung daher nicht berücksichtigt.",
+        "countPerSupplier": "{{count}} Anbieter · {{kwh}} im Jahr",
+        "detailsClose": "Details ausblenden"
       },
       "badges": {
         "label": "Merkmale des Angebots",
@@ -5223,7 +5213,7 @@
           "diagram": "Sie können auch Ihre E-REDES-Verbrauchsdatei verwenden, heruntergeladen aus dem Balcão Digital. Die 15-Minuten-Werte darin ergeben Ihre tatsächlichen kWh in jedem Zeitraum und Zyklus. Die Datei wird in Ihrem Browser gelesen und nirgendwohin gesendet.",
           "mine": "Unter „Mit meinem Tarif vergleichen“ geben Sie die Preise von Ihrer Rechnung ein. Ihr Tarif durchläuft dann dieselbe Berechnung wie jedes Angebot, sodass die bei jedem Angebot gezeigte Ersparnis direkt vergleichbar ist.",
           "solar": "Unter „Solaranlage“ fügen Sie eine Anlage nach Distrikthauptstadt oder nach Koordinaten hinzu, mit Neigung, Ausrichtung, Spitzenleistung und Verlusten. Die Erzeugung der Anlage wird Stunde für Stunde von Ihrem Verbrauch abgezogen, und die Angebote werden nach dem gereiht, was Sie noch aus dem Netz beziehen. Die Übersicht zeigt den selbst verbrauchten Anteil, den Überschuss und was die Anlage beim günstigsten Angebot spart. Ein Verkaufspreis für den Überschuss, wenn Sie einen eingeben, wird getrennt von der Rangfolge gezeigt.",
-          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für Eintarif, Zweitarif und Dreitarif bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Filter grenzen die Liste ein, und der CSV-Button lädt sie herunter."
+          "options": "Oben in den Ergebnissen zeigen die günstigsten Angebote für Eintarif, Zweitarif und Dreitarif bei gleichem Verbrauch, ob sich eine andere Option lohnen würde. Die Liste zeigt das beste Angebot jedes Anbieters, oder alle, wenn Sie \"Anzeigen\" ändern, mit den Kosten im Monat, dem Unterschied zum regulierten Tarif und den Leistungs- und Energiepreisen ohne MwSt. Die Filter über der Liste grenzen sie ein, \"Vergleichen\" stellt bis zu drei Angebote nebeneinander, \"Teilen\" kopiert einen Link mit den gewählten Werten (nie die Dateien), und der CSV-Button lädt die Liste herunter."
         },
         "example": {
           "title": "Rechenbeispiel",
@@ -5301,6 +5291,90 @@
           "householdBudgetLink": "Haushaltsbudget",
           "householdBudgetBody": "Stellen Sie die Stromrechnung neben Ihre übrigen monatlichen Kosten."
         }
+      },
+      "presets": {
+        "bill": "Übliche Rechnungsbeträge",
+        "kwh": "Übliche Verbräuche"
+      },
+      "summary": {
+        "label": "Ihre Simulation",
+        "bill": "Rechnung {{amount}}/Monat",
+        "kwh": "{{kwh}}/Monat",
+        "diagram": "E-REDES-Datei",
+        "full": "Verbrauch je Zeitraum",
+        "change": "Ändern"
+      },
+      "share": {
+        "button": "Teilen",
+        "copied": "Link kopiert",
+        "failed": "Der Link konnte nicht kopiert werden"
+      },
+      "row": {
+        "energy": "Energie",
+        "power": "Leistung",
+        "cheaper": {
+          "regulated": "{{amount}}/Monat unter dem regulierten Tarif",
+          "mine": "Sie sparen {{amount}} im Monat"
+        },
+        "dearer": {
+          "regulated": "{{amount}}/Monat über dem regulierten Tarif",
+          "mine": "{{amount}} mehr im Monat"
+        },
+        "same": {
+          "regulated": "Wie der regulierte Tarif",
+          "mine": "Kostet gleich viel wie Ihr Tarif"
+        },
+        "goTo": "Zu {{supplier}}",
+        "contractMonths": "{{months}} Monate",
+        "contractMonthsOne": "1 Monat",
+        "noTerm": "Ohne Laufzeit",
+        "compare": "Vergleichen",
+        "compareOffer": "{{offer}} vergleichen",
+        "pricing": {
+          "fixed": "Fest",
+          "indexed": "Indexiert"
+        },
+        "required": "Pflicht",
+        "notRequired": "Keine Pflicht",
+        "yes": "Ja",
+        "no": "Nein",
+        "validRange": "Vom {{from}} bis {{to}}",
+        "validFrom": "Seit {{from}}",
+        "howTotal": "Wie das erste Jahr auf {{amount}} kommt",
+        "conditionsTitle": "Bedingungen",
+        "conditions": {
+          "pricing": "Preisart",
+          "duration": "Vertragslaufzeit",
+          "loyalty": "Mindestlaufzeit",
+          "directDebit": "Lastschrift",
+          "eInvoice": "Elektronische Rechnung",
+          "renewable": "100 % erneuerbare Energie",
+          "conditioned": "Zugangsbeschränkung",
+          "services": "Pflichtdienste im Jahr",
+          "valid": "Preise gültig"
+        },
+        "moneyTitle": "Wohin das Geld geht, Leistung und Energie ohne MwSt.",
+        "money": {
+          "power": "Leistung",
+          "energy": "Energie",
+          "taxes": "Steuern und Abgaben",
+          "services": "Dienste",
+          "discounts": "Rabatte"
+        },
+        "perMonth": "/Monat",
+        "perDayShort": "€/Tag"
+      },
+      "compareTray": {
+        "label": "Angebote zum Vergleichen",
+        "count": "{{count}} von {{max}} Angeboten zum Vergleichen",
+        "countOne": "1 Angebot gewählt: Wählen Sie ein weiteres zum Vergleichen",
+        "clear": "Leeren",
+        "open": "Nebeneinander vergleichen",
+        "title": "Nebeneinander vergleichen",
+        "close": "Schließen",
+        "vsCheapest": "Mehr als das günstigste (im Jahr)",
+        "vsRegulated": "Weniger im Monat als der regulierte Tarif",
+        "unitPrices": "Preise ohne MwSt."
       }
     },
     "fuelPrices": {

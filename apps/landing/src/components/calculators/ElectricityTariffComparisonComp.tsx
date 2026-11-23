@@ -5,7 +5,7 @@
 // indexed offers from OMIE's prices, it loads the monthly market data and the suppliers' formulas
 // (data/indexedMarket.ts) the same way, and with a load diagram the quarter-hour prices
 // (public/data/omie-pt-quarter-hours.json) with a fetch.
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown, CreditCard, Leaf, Link2, Lock, Unlock, UserCheck, Wrench, type LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CalculatorInput from "./CalculatorInput";
 import ElectricityInvoiceUpload from "./ElectricityInvoiceUpload";
@@ -58,10 +58,10 @@ import {
   type ComparatorRequest,
   type MyTariffPrices,
   type OfferFilters,
-  type PricingFilter,
 } from "@/lib/calculators/electricityTariffComparator";
 import { solarBillSaving } from "@/lib/calculators/electricitySolar";
 import { applyInvoiceReading } from "@/lib/calculators/electricityInvoice";
+import { readShareFragment, shareFragment } from "@/lib/calculators/electricityComparatorShare";
 import { getPageType, pushGtmEvent } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
@@ -191,7 +191,7 @@ const INITIAL: FormState = {
   includeConditioned: true,
   includeRefunds: true,
   includeDual: false,
-  cheapestPerSupplier: false,
+  cheapestPerSupplier: true,
   sortBy: "firstYear",
   filters: DEFAULT_OFFER_FILTERS,
   myTariffOn: false,
@@ -229,6 +229,10 @@ export interface MarketView {
   diagramMonths?: number;
 }
 
+/** One tap for a common bill or consumption; the field still takes any value. */
+const BILL_PRESETS = [30, 50, 75, 100, 150] as const;
+const KWH_PRESETS = [100, 200, 300, 400, 600] as const;
+
 const summaryClass =
   "flex cursor-pointer list-none items-center justify-between gap-3 px-6 py-4 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden";
 const chevronClass = "size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180 motion-reduce:transition-none";
@@ -255,7 +259,24 @@ function ElectricityTariffComparison({
   const [quarterHours, setQuarterHours] = useState<Async<OmieQuarterHours>>({ state: "idle" });
   const [edited, setEdited] = useState(false);
   const [solarSettings, setSolarSettings] = useState<SolarSettings>(INITIAL_SOLAR);
+  const [shared, setShared] = useState<"idle" | "copied" | "failed">("idle");
   const usageSent = useRef(false);
+
+  // A share link's settings, read once; the fragment then leaves the address bar so the bill and
+  // the consumption are not kept in the history or copied on with the page's address.
+  useEffect(() => {
+    const read = readShareFragment(window.location.hash);
+    if (!read) return;
+    const { filters, ...rest } = read;
+    setForm((current) => ({ ...current, ...rest, filters: { ...current.filters, ...filters } }));
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}#calculator`);
+    document.getElementById("calculator")?.scrollIntoView();
+  }, []);
+  useEffect(() => {
+    if (shared === "idle") return;
+    const timer = window.setTimeout(() => setShared("idle"), 4000);
+    return () => window.clearTimeout(timer);
+  }, [shared]);
 
   useEffect(() => {
     let cancelled = false;
@@ -473,15 +494,23 @@ function ElectricityTariffComparison({
         <span>{label}</span>
       </label>
       {help && (
-        <FieldMessage id={`${id}-help`} className="pl-6">
+        <span id={`${id}-help`} className="sr-only">
           {help}
-        </FieldMessage>
+        </span>
       )}
     </div>
   );
-  const select = <V extends string>(id: string, label: string, value: V, choices: readonly { value: V; label: string }[], onChange: (value: V) => void, help?: string) => (
+  const select = <V extends string>(
+    id: string,
+    label: string,
+    value: V,
+    choices: readonly { value: V; label: string }[],
+    onChange: (value: V) => void,
+    help?: string,
+    hideLabel = false,
+  ) => (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-medium text-foreground">
+      <label htmlFor={id} className={hideLabel ? "sr-only" : "block text-sm font-medium text-foreground"}>
         {label}
       </label>
       <Select
@@ -503,59 +532,184 @@ function ElectricityTariffComparison({
       )}
     </div>
   );
+  const segmented = <V extends string>(
+    name: string,
+    legend: string,
+    value: V,
+    choices: readonly { value: V; label: string }[],
+    onChange: (value: V) => void,
+    hideLegend = false,
+  ) => (
+    <fieldset>
+      <legend className={hideLegend ? "sr-only" : "mb-2 text-sm font-medium text-foreground"}>{legend}</legend>
+      <div className="grid gap-1 rounded-md bg-paper-2 p-1" style={{ gridTemplateColumns: `repeat(${choices.length}, minmax(0, 1fr))` }}>
+        {choices.map((choice) => (
+          <label
+            key={choice.value}
+            className={`flex min-h-9 cursor-pointer items-center justify-center rounded-[4px] px-2 py-1.5 text-center text-sm font-medium leading-tight has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${
+              value === choice.value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <input type="radio" name={name} value={choice.value} checked={value === choice.value} onChange={() => onChange(choice.value)} className="sr-only" />
+            {choice.label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+  const chip = (id: string, label: string, checked: boolean, onChange: (value: boolean) => void, Icon: LucideIcon) => (
+    <label
+      htmlFor={id}
+      className={`inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 ${
+        checked ? "border-primary bg-primary/10 font-medium text-primary" : "border-input bg-background text-foreground hover:bg-paper-2"
+      }`}
+    >
+      <input id={id} type="checkbox" checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} className="sr-only" />
+      {checked ? <Check aria-hidden="true" className="size-3.5" /> : <Icon aria-hidden="true" className="size-3.5 text-muted-foreground" />}
+      {label}
+    </label>
+  );
+  const presets = (values: readonly number[], current: number, onPick: (value: number) => void, format: (value: number) => string, label: string) => (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
+      {values.map((value) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={current === value}
+          onClick={() => onPick(value)}
+          className={`h-8 rounded-md border px-2.5 font-mono text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+            current === value ? "border-primary bg-primary/10 text-primary" : "border-input bg-background text-foreground hover:bg-paper-2"
+          }`}
+        >
+          {format(value)}
+        </button>
+      ))}
+    </div>
+  );
   const periodLabel = (option: TariffOption, index: number) => t(k(`periods.${PERIOD_KEYS[option][index]}`));
   const fromBill = consumption && "fromBill" in consumption ? consumption.fromBill : undefined;
+  const kva = (power: number) => formatNumber(locale, power, 2);
+
+  // The inputs in one line, for the bar over the list on a phone, where the form is far above.
+  const summary = [
+    `${kva(form.contractedPower)} kVA`,
+    optionLabel(form.option),
+    form.mode === "quick"
+      ? form.quickUnit === "bill"
+        ? t(k("summary.bill"), { amount: euro(form.bill) })
+        : t(k("summary.kwh"), { kwh: kwhText(form.monthlyKwh) })
+      : form.source === "diagram"
+        ? t(k("summary.diagram"))
+        : t(k("summary.full")),
+  ].join(" · ");
+
+  const share = async () => {
+    const url = `${window.location.origin}${window.location.pathname}${shareFragment(form)}`;
+    try {
+      if (navigator.share && window.matchMedia("(pointer: coarse)").matches) {
+        await navigator.share({ url, title: document.title });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShared("copied");
+    } catch {
+      setShared("failed");
+    }
+  };
+
+  const toolbar = (
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-2">
+        {select(
+          "tariff-view",
+          t(k("filters.view")),
+          form.cheapestPerSupplier ? "best" : "all",
+          [
+            { value: "best", label: t(k("filters.viewChoices.best")) },
+            { value: "all", label: t(k("filters.viewChoices.all")) },
+          ],
+          (value) => update("cheapestPerSupplier", value === "best"),
+          undefined,
+          true,
+        )}
+        {select(
+          "tariff-supplier",
+          t(k("filters.supplier")),
+          form.filters.supplier ?? "",
+          [{ value: "", label: t(k("filters.supplierAll")) }, ...suppliers.map((supplier) => ({ value: supplier.code, label: supplier.name }))],
+          (value) => updateFilter("supplier", value === "" ? null : value),
+          undefined,
+          true,
+        )}
+      </div>
+      <fieldset>
+        <legend className="sr-only">{t(k("filters.quick"))}</legend>
+        <div className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          {chip("tariff-fixed", t(k("filters.chips.fixed")), form.filters.pricing === "fixed", (value) => updateFilter("pricing", value ? "fixed" : "all"), Lock)}
+          {chip("tariff-loyalty", t(k("filters.chips.noLoyalty")), form.filters.noLoyalty, (value) => updateFilter("noLoyalty", value), Unlock)}
+          {chip("tariff-conditioned", t(k("filters.chips.noConditioned")), !form.includeConditioned, (value) => update("includeConditioned", !value), UserCheck)}
+          {chip("tariff-directdebit", t(k("filters.chips.noDirectDebit")), !form.filters.allowDirectDebit, (value) => updateFilter("allowDirectDebit", !value), CreditCard)}
+          {chip("tariff-services", t(k("filters.chips.noServices")), !form.filters.allowMandatoryServices, (value) => updateFilter("allowMandatoryServices", !value), Wrench)}
+          {chip("tariff-renewable", t(k("filters.chips.renewable")), form.filters.renewableOnly, (value) => updateFilter("renewableOnly", value), Leaf)}
+        </div>
+      </fieldset>
+    </div>
+  );
+
+  const shareButton = (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={share}
+        className="inline-flex h-10 items-center gap-1.5 rounded-md border border-input bg-secondary px-4 text-sm font-medium text-secondary-foreground hover:bg-paper-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.98] motion-reduce:active:scale-100"
+      >
+        <Link2 aria-hidden="true" className="size-4" />
+        {t(k("share.button"))}
+      </button>
+      <span role="status" className="text-xs text-muted-foreground">
+        {shared === "copied" ? t(k("share.copied")) : shared === "failed" ? t(k("share.failed")) : ""}
+      </span>
+    </div>
+  );
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start">
-      <form className="min-w-0 space-y-6" onSubmit={(event) => event.preventDefault()} aria-label={t(k("formLabel"))}>
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+      <form
+        id="tariff-form"
+        className="tariff-form min-w-0 scroll-mt-20 space-y-6 lg:sticky lg:top-20 lg:-m-1 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain lg:p-1 lg:pb-4"
+        onSubmit={(event) => event.preventDefault()}
+        aria-label={t(k("formLabel"))}
+      >
         <ElectricityInvoiceUpload
           onApply={(reading) => {
             setEdited(true);
             setForm((current) => applyInvoiceReading(current, reading));
           }}
         />
-        <div className="space-y-5 rounded-card border border-border bg-background p-6">
-          <fieldset>
-            <legend className="text-sm font-medium text-foreground">{t(k("mode.legend"))}</legend>
-            <div className="mt-2 grid grid-cols-2 gap-1 rounded-md bg-paper-2 p-1" role="radiogroup">
-              {(["quick", "full"] as const).map((mode) => (
-                <label
-                  key={mode}
-                  className={`flex cursor-pointer items-center justify-center rounded-[4px] px-3 py-2 text-sm font-medium has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${
-                    form.mode === mode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="tariff-mode"
-                    value={mode}
-                    checked={form.mode === mode}
-                    onChange={() => update("mode", mode)}
-                    className="sr-only"
-                  />
-                  {t(k(`mode.${mode}`))}
-                </label>
-              ))}
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">{t(k(`mode.${form.mode}Help`))}</p>
-          </fieldset>
+        <div className="space-y-5 rounded-card border border-border bg-background p-5">
+          {segmented(
+            "tariff-mode",
+            t(k("mode.legend")),
+            form.mode,
+            (["quick", "full"] as const).map((mode) => ({ value: mode, label: t(k(`mode.${mode}`)) })),
+            (value) => update("mode", value),
+            true,
+          )}
 
           {select(
             "tariff-power",
-            t(k("fields.power")),
+            t(k("fields.powerKva")),
             String(form.contractedPower),
-            CONTRACTED_POWER_OPTIONS_KVA.map((power) => ({ value: String(power), label: `${formatNumber(locale, power, 2)} kVA` })),
+            CONTRACTED_POWER_OPTIONS_KVA.map((power) => ({ value: String(power), label: kva(power) })),
             (value) => update("contractedPower", Number(value) as ContractedPowerKva),
-            t(k("help.power")),
           )}
-          {select(
+
+          {segmented(
             "tariff-option",
             t(k("fields.option")),
             form.option,
             (["simple", "biHourly", "triHourly"] as const).map((option) => ({ value: option, label: optionLabel(option) })),
             (value) => update("option", value),
-            t(k("help.option")),
           )}
           {form.option !== "simple" &&
             select(
@@ -564,12 +718,11 @@ function ElectricityTariffComparison({
               form.cycle,
               (["daily", "weekly"] as const).map((cycle) => ({ value: cycle, label: t(k(`cycles.${cycle}`)) })),
               (value) => update("cycle", value),
-              t(k("help.cycle")),
             )}
 
           {form.mode === "quick" ? (
             <>
-              {select(
+              {segmented(
                 "tariff-unit",
                 t(k("fields.quickUnit")),
                 form.quickUnit,
@@ -578,33 +731,39 @@ function ElectricityTariffComparison({
                   { value: "kwh", label: t(k("fields.unitKwh")) },
                 ],
                 (value) => update("quickUnit", value),
+                true,
               )}
               {form.quickUnit === "bill" ? (
-                <CalculatorInput
-                  id="tariff-bill"
-                  label={t(k("fields.bill"))}
-                  value={form.bill}
-                  onChange={(value) => update("bill", value)}
-                  min={0}
-                  max={COMPARATOR_LIMITS.maxMonthlyBill}
-                  step={5}
-                  prefix="€"
-                  helpText={fromBill !== undefined ? t(k("help.billKwh"), { kwh: kwhText(fromBill) }) : t(k("help.bill"))}
-                  error={errorOf("bill")}
-                />
+                <div className="space-y-2">
+                  <CalculatorInput
+                    id="tariff-bill"
+                    label={t(k("fields.bill"))}
+                    value={form.bill}
+                    onChange={(value) => update("bill", value)}
+                    min={0}
+                    max={COMPARATOR_LIMITS.maxMonthlyBill}
+                    step={5}
+                    prefix="€"
+                    helpText={fromBill !== undefined ? t(k("help.billKwh"), { kwh: kwhText(fromBill) }) : undefined}
+                    error={errorOf("bill")}
+                  />
+                  {presets(BILL_PRESETS, form.bill, (value) => update("bill", value), (value) => euro(value).replace(/[.,]00(?=\D*$)/, ""), t(k("presets.bill")))}
+                </div>
               ) : (
-                <CalculatorInput
-                  id="tariff-kwh"
-                  label={t(k("fields.monthlyKwh"))}
-                  value={form.monthlyKwh}
-                  onChange={(value) => update("monthlyKwh", value)}
-                  min={0}
-                  max={COMPARATOR_LIMITS.maxMonthlyKwh}
-                  step={10}
-                  suffix="kWh"
-                  helpText={t(k("help.monthlyKwh"))}
-                  error={errorOf("monthlyKwh")}
-                />
+                <div className="space-y-2">
+                  <CalculatorInput
+                    id="tariff-kwh"
+                    label={t(k("fields.monthlyKwh"))}
+                    value={form.monthlyKwh}
+                    onChange={(value) => update("monthlyKwh", value)}
+                    min={0}
+                    max={COMPARATOR_LIMITS.maxMonthlyKwh}
+                    step={10}
+                    suffix="kWh"
+                    error={errorOf("monthlyKwh")}
+                  />
+                  {presets(KWH_PRESETS, form.monthlyKwh, (value) => update("monthlyKwh", value), kwhText, t(k("presets.kwh")))}
+                </div>
               )}
             </>
           ) : (
@@ -686,14 +845,6 @@ function ElectricityTariffComparison({
             {checkbox("tariff-newclient", t(k("household.newClient")), form.newClient, (value) => update("newClient", value), t(k("household.newClientHelp")))}
           </fieldset>
 
-          <IndexedChoiceField
-            value={form.indexed}
-            onChange={(value) => update("indexed", value)}
-            diagram={usesDiagram}
-            market={market.state}
-            quarterHours={quarterHours.state}
-            view={marketView}
-          />
         </div>
 
         <ElectricitySolarPanel
@@ -706,47 +857,6 @@ function ElectricityTariffComparison({
           onRetry={solar.retry}
         />
 
-        <details className="group rounded-card border border-border bg-background">
-          <summary className={summaryClass}>
-            <span>
-              {t(k("filters.title"))}
-              <span className="ml-1 font-normal text-muted-foreground">{t(k("filters.summary"))}</span>
-            </span>
-            <ChevronDown aria-hidden="true" className={chevronClass} />
-          </summary>
-          <div className="space-y-4 border-t border-border px-6 py-5">
-            {select(
-              "tariff-pricing",
-              t(k("filters.pricing")),
-              form.filters.pricing,
-              (["all", "fixed", "indexed"] as const).map((pricing) => ({ value: pricing, label: t(k(`filters.pricingChoices.${pricing}`)) })),
-              (value) => updateFilter("pricing", value as PricingFilter),
-            )}
-            {select(
-              "tariff-supplier",
-              t(k("filters.supplier")),
-              form.filters.supplier ?? "",
-              [{ value: "", label: t(k("filters.supplierAll")) }, ...suppliers.map((supplier) => ({ value: supplier.code, label: supplier.name }))],
-              (value) => updateFilter("supplier", value === "" ? null : value),
-            )}
-            {select(
-              "tariff-sort",
-              t(k("filters.sortBy")),
-              form.sortBy,
-              (["firstYear", "laterYears"] as const).map((sort) => ({ value: sort, label: t(k(`filters.sortChoices.${sort}`)) })),
-              (value) => update("sortBy", value),
-            )}
-            {checkbox("tariff-conditioned", t(k("filters.includeConditioned")), form.includeConditioned, (value) => update("includeConditioned", value), t(k("filters.includeConditionedHelp")))}
-            {checkbox("tariff-refunds", t(k("filters.includeRefunds")), form.includeRefunds, (value) => update("includeRefunds", value), t(k("filters.includeRefundsHelp")))}
-            {checkbox("tariff-services", t(k("filters.mandatoryServices")), form.filters.allowMandatoryServices, (value) => updateFilter("allowMandatoryServices", value), t(k("filters.mandatoryServicesHelp")))}
-            {checkbox("tariff-directdebit", t(k("filters.directDebit")), form.filters.allowDirectDebit, (value) => updateFilter("allowDirectDebit", value))}
-            {checkbox("tariff-einvoice", t(k("filters.eInvoice")), form.filters.allowEInvoice, (value) => updateFilter("allowEInvoice", value))}
-            {checkbox("tariff-renewable", t(k("filters.renewableOnly")), form.filters.renewableOnly, (value) => updateFilter("renewableOnly", value))}
-            {checkbox("tariff-loyalty", t(k("filters.noLoyalty")), form.filters.noLoyalty, (value) => updateFilter("noLoyalty", value))}
-            {checkbox("tariff-dual", t(k("filters.includeDual")), form.includeDual, (value) => update("includeDual", value), t(k("filters.includeDualHelp")))}
-            {checkbox("tariff-cheapest", t(k("filters.cheapestPerSupplier")), form.cheapestPerSupplier, (value) => update("cheapestPerSupplier", value))}
-          </div>
-        </details>
 
         <details className="group rounded-card border border-border bg-background" open={form.myTariffOn || undefined}>
           <summary className={summaryClass}>
@@ -789,9 +899,48 @@ function ElectricityTariffComparison({
             )}
           </div>
         </details>
+
+        <details className="group rounded-card border border-border bg-background">
+          <summary className={summaryClass}>
+            <span>
+              {t(k("filters.title"))}
+              <span className="sr-only"> {t(k("filters.summary"))}</span>
+            </span>
+            <ChevronDown aria-hidden="true" className={chevronClass} />
+          </summary>
+          <div className="space-y-5 border-t border-border px-6 py-5">
+            {select(
+              "tariff-sort",
+              t(k("filters.sortBy")),
+              form.sortBy,
+              (["firstYear", "laterYears"] as const).map((sort) => ({ value: sort, label: t(k(`filters.sortChoices.${sort}`)) })),
+              (value) => update("sortBy", value),
+            )}
+          <IndexedChoiceField
+              value={form.indexed}
+              onChange={(value) => update("indexed", value)}
+              diagram={usesDiagram}
+              market={market.state}
+              quarterHours={quarterHours.state}
+              view={marketView}
+            />
+            {checkbox("tariff-refunds", t(k("filters.includeRefunds")), form.includeRefunds, (value) => update("includeRefunds", value), t(k("filters.includeRefundsHelp")))}
+            {checkbox("tariff-einvoice", t(k("filters.eInvoice")), form.filters.allowEInvoice, (value) => updateFilter("allowEInvoice", value))}
+            {checkbox("tariff-dual", t(k("filters.includeDual")), form.includeDual, (value) => update("includeDual", value), t(k("filters.includeDualHelp")))}
+          </div>
+        </details>
       </form>
 
       <div className="min-w-0">
+        <div className={`sticky top-[3.625rem] z-10 -mx-6 mb-6 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-6 py-2.5 backdrop-blur-md lg:hidden`}>
+          <p className="min-w-0 truncate text-sm text-foreground">
+            <span className="sr-only">{t(k("summary.label"))}: </span>
+            {summary}
+          </p>
+          <a href="#tariff-form" className="shrink-0 text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4">
+            {t(k("summary.change"))}
+          </a>
+        </div>
         {load.state === "loading" && (
           <p role="status" className="rounded-lg bg-paper-2 px-4 py-3 text-sm text-foreground">
             {t(k("loading"))}
@@ -823,6 +972,9 @@ function ElectricityTariffComparison({
             socialTariffAsked={form.socialTariff}
             myTariffOn={form.myTariffOn}
             market={indexedPricing ? marketView : null}
+            cheapestPerSupplier={form.cheapestPerSupplier}
+            toolbar={toolbar}
+            actions={shareButton}
           />
         )}
       </div>

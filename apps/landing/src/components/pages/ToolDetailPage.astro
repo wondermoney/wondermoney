@@ -367,6 +367,8 @@ if ((SAVINGS_GUIDE_RELATED_ROUTE_IDS as readonly string[]).includes(routeId)) {
 // Every calculator but these two has a guide under it; the hero's chips jump to both.
 const toolsWithoutGuide: readonly ToolRouteId[] = ["toolNetWorth", "toolSavingsRate"];
 const hasGuide = !toolsWithoutGuide.includes(routeId);
+// A tool that is the whole page keeps a short hero, so it starts on the first screen.
+const compactHero = routeId === "toolElectricityTariffComparison";
 const outline: OutlineEntry[] = hasGuide
   ? [
       { id: "calculator", title: calculatorLabel },
@@ -413,9 +415,10 @@ const schema = {
       breadcrumbs={[{ label: t("header.tools"), href: toolsHubHref }, { label: sectionTitle }]}
       outline={outline}
       figure={figureForTool(routeId)}
+      compact={compactHero}
     />
 
-    <div class="mx-auto max-w-7xl px-6 py-12 lg:px-8 lg:py-16">
+    <div class:list={["mx-auto max-w-7xl px-6 lg:px-8", compactHero ? "py-6 lg:py-8" : "py-12 lg:py-16"]}>
       <div id="calculator" class="tool-calculator scroll-mt-24">
         {routeId === "toolCompoundInterest" && <CompoundInterestCalculatorComp locale={locale} client:load />}
         {routeId === "toolNetWorth" && <NetWorthCalculatorComp locale={locale} client:load />}
