@@ -1,0 +1,18 @@
+---
+title: WonderMoney 1.10.0
+description: O WonderMoney no Unraid, num só contentor instalado a partir das Community Applications.
+---
+
+[Notas da versão no GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.10.0)
+
+## Atualizar
+
+Nada a fazer. Não há migrações nem definições novas, e as instalações com Docker Compose, Helm e Render funcionam como antes.
+
+## Novo
+
+- **O WonderMoney no Unraid.** Um só contentor, o `wondermoney-aio`, reúne a base de dados, o armazenamento de ficheiros, a API, as tarefas em segundo plano e a aplicação web numa só porta. Indicas o endereço onde o vais abrir, carregas em Apply, e ele cria os próprios segredos no primeiro arranque. Tudo fica na pasta de dados da aplicação, e o teu próprio Postgres ou armazenamento S3 pode substituir os incluídos. Consulta [Unraid](/pt/docs/self-hosting/unraid).
+
+## Agradecimentos
+
+- @nip10

@@ -7,7 +7,7 @@ fullnameOverride: ""
 
 image:
   # Every image's tag, unless a component sets its own. Empty: the chart's appVersion, which a
-  # published chart sets to its release (1.9.0 for chart 1.9.0).
+  # published chart sets to its release (1.10.0 for chart 1.10.0).
   tag: ""
   # Empty: Kubernetes' default, Always for `latest` and IfNotPresent for a release tag.
   pullPolicy: ""
