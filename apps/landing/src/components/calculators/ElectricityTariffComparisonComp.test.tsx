@@ -89,7 +89,9 @@ beforeEach(() => {
 });
 afterEach(() => cleanup());
 
-describe("electricity tariff comparator", () => {
+// Each test renders the whole comparator over the full ERSE offer list: about 3 s on a CI runner
+// alone, and twice that when a lockfile change runs every app's suite in the same job.
+describe("electricity tariff comparator", { timeout: 20_000 }, () => {
   it("quick mode: turns the bill into kWh on the regulated tariff and ranks the offers, with the ERSE source", async () => {
     await renderPage();
     const solved = monthlyKwhFromBill(TUR, { bill: 50, contractedPower: 3.45, option: "simple", cycle: "daily", socialTariff: false, largeFamily: false });

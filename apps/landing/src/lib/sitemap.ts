@@ -1,5 +1,6 @@
 // The @astrojs/sitemap filter (astro.config.mjs). The sitemap lists canonical addresses only.
 import { getLegacyRedirects } from "./legacySlugs"
+import { loadToolDatasets, toolDataLastmod } from "./toolDatasets"
 
 const LEGACY_REDIRECT_PATHS = new Set(getLegacyRedirects().map(({ source }) => source))
 
@@ -13,4 +14,19 @@ export function isSitemapPage(url: string): boolean {
 
 	// Legacy addresses redirect to the localized address.
 	return !LEGACY_REDIRECT_PATHS.has(pathname)
+}
+
+/**
+ * The @astrojs/sitemap `serialize` hook: dates a data-snapshot tool page with its data's date.
+ * Other pages carry no `lastmod`, rather than a build date that changes on every deploy. The data
+ * is loaded while the config loads: the hook runs after the build, when no module can be imported.
+ */
+export async function createSitemapSerializer(): Promise<
+	<T extends { url: string; lastmod?: string }>(item: T) => T
+> {
+	const sources = await loadToolDatasets()
+	return (item) => {
+		const lastmod = toolDataLastmod(new URL(item.url).pathname, sources)
+		return lastmod ? { ...item, lastmod } : item
+	}
 }

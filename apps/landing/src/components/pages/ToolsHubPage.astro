@@ -8,6 +8,7 @@ import { toolsHubGroupCards } from "@/lib/figureCards";
 import { buildAlternateLinksForPath, toToolsHubPath, type Lang } from "@/lib/routes";
 import { buildToolsHub, buildToolsHubItemList } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
+import { ogImageFor, toolsHubOgCard } from "@/lib/og/ogImages";
 
 interface Props {
   locale: Lang;
@@ -18,11 +19,14 @@ const t = getTranslations(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => toToolsHubPath(lang));
 const groups = buildToolsHub(locale);
 const itemListSchema = buildToolsHubItemList(locale, t);
+const ogImage = ogImageFor(toolsHubOgCard(locale));
 ---
 
 <ContentLayout
   title={t("tools.hub.pageTitle")}
   description={t("tools.hub.pageDescription")}
+  ogImage={ogImage.src}
+  ogImageAlt={ogImage.alt}
   alternateLinks={alternateLinks}
   layout="article"
   locale={locale}

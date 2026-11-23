@@ -6,7 +6,7 @@ import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import { getLegacyRedirects } from "./src/lib/legacySlugs.ts";
-import { isSitemapPage } from "./src/lib/sitemap.ts";
+import { createSitemapSerializer, isSitemapPage } from "./src/lib/sitemap.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const defaultLocale = "pt";
@@ -50,6 +50,8 @@ export default defineConfig({
       // filter: filterSitemapByDefaultLocale({ defaultLocale }),
       // Leaves out the noindex ad landing pages and the legacy aliases.
       filter: isSitemapPage,
+      // Dates the data-snapshot tool pages with their data's date.
+      serialize: await createSitemapSerializer(),
     }),
   ],
   vite: {

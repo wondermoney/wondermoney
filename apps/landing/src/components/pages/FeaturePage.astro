@@ -18,6 +18,7 @@ import FeatureDetail from "@/components/landing/FeatureDetail";
 import { FEATURE_DETAILS, isFeatureDetailRouteId, type FeatureDetailRouteId } from "@/components/landing/featureDetails";
 import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
+import { featureOgCard, ogImageFor } from "@/lib/og/ogImages";
 import type { FeatureRouteId } from "@/lib/pageStaticPaths";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 
@@ -28,6 +29,7 @@ interface Props {
 
 const { locale, routeId } = Astro.props;
 const t = getTranslations(locale);
+const ogImage = ogImageFor(featureOgCard(routeId, locale));
 
 type ClassicFeatureRouteId = Exclude<FeatureRouteId, FeatureDetailRouteId>;
 
@@ -403,7 +405,14 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
 };
 ---
 
-<Layout locale={locale} title={pageMetaSelected.title} description={pageMetaSelected.description} alternateLinks={alternateLinks}>
+<Layout
+  locale={locale}
+  title={pageMetaSelected.title}
+  description={pageMetaSelected.description}
+  ogImage={ogImage.src}
+  ogImageAlt={ogImage.alt}
+  alternateLinks={alternateLinks}
+>
   <Header locale={locale} client:load />
   <main class="relative">
     {routeId === "featureAccounts" && <FeatureAccounts locale={locale} client:idle />}

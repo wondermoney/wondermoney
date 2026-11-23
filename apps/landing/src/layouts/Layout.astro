@@ -9,21 +9,13 @@ import SEO from "@/components/shared/SEO.astro";
 import StructuredData from "@/components/shared/StructuredData.astro";
 import type { Lang } from "@/lib/i18nLocale";
 import type { LandingSource } from "@/lib/landingSource";
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "WonderMoney",
-  url: "https://wonder.money",
-  logo: "https://wonder.money/logo.png",
-  description: "The central financial hub for Europeans",
-  sameAs: ["https://discord.gg/9qKZ7gEaAP"],
-};
+import { ORGANIZATION_SCHEMA } from "@/lib/structuredData";
 
 interface Props {
   title: string;
   description: string;
   ogImage?: string;
+  ogImageAlt?: string;
   ogType?: string;
   canonicalUrl?: string;
   noindex?: boolean;
@@ -38,6 +30,7 @@ const {
   title,
   description,
   ogImage,
+  ogImageAlt,
   ogType,
   canonicalUrl,
   noindex = false,
@@ -83,6 +76,7 @@ const enableReactDevTools =
       title={title}
       description={description}
       ogImage={ogImage}
+      ogImageAlt={ogImageAlt}
       ogType={ogType}
       canonicalUrl={canonicalUrl}
       noindex={noindex}
@@ -98,7 +92,7 @@ const enableReactDevTools =
     </div>
     <ConsentBanner locale={locale} client:load />
     <StickyMobileCta locale={locale} client:idle />
-    <StructuredData data={organizationSchema} />
+    <StructuredData data={ORGANIZATION_SCHEMA} />
     <script>
       // Does nothing on a page without `data-landing-source`.
       import { installLandingSourceLinks } from "@/lib/landingSource";

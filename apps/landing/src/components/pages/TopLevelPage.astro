@@ -27,6 +27,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { getTranslations } from "@/lib/translations";
 import { buildAlternateLinks, toLocalizedPath, type RouteId } from "@/lib/routes";
 import type { TopLevelRouteId } from "@/lib/pageStaticPaths";
+import { ogImageFor, toolOgCard } from "@/lib/og/ogImages";
 
 interface Props {
   locale: Lang;
@@ -186,6 +187,8 @@ const pageMeta: Record<TopLevelRouteId, { title: string; description: string }> 
 };
 
 const meta = pageMeta[routeId];
+// The FIRE calculator is in the tools catalog, so it has a generated image like the tool pages.
+const ogImage = routeId === "pageFireCalculator" ? ogImageFor(toolOgCard(routeId, locale)) : undefined;
 const alternateLinks = buildAlternateLinks(routeId);
 // Pages in the article shape (Direction B) close with their own disclaimer, CTA card and figure
 // cards, so the shared disclaimer and related-pages band below are left out for them.
@@ -218,7 +221,14 @@ const structuredData = softwareSchemas[routeId]
   : null;
 ---
 
-<Layout locale={locale} title={meta.title} description={meta.description} alternateLinks={alternateLinks}>
+<Layout
+  locale={locale}
+  title={meta.title}
+  description={meta.description}
+  ogImage={ogImage?.src}
+  ogImageAlt={ogImage?.alt}
+  alternateLinks={alternateLinks}
+>
   <Header locale={locale} client:load />
   <main class="relative">
     {routeId === "pageAbout" && (

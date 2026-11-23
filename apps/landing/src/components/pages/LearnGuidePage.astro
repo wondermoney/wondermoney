@@ -14,6 +14,7 @@ import { guideKeepReading } from "@/lib/figureCards";
 import { figureForGuide } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/routes";
 import { getTranslations } from "@/lib/translations";
+import { guideOgCard, ogImageFor } from "@/lib/og/ogImages";
 
 interface Props {
   locale: Lang;
@@ -51,6 +52,10 @@ const keepReading = guideKeepReading({
   siblings,
 });
 
+// A guide without its own image gets a generated one (src/pages/og).
+const generatedOgImage = guide.ogImageUrl ? null : ogImageFor(guideOgCard(guide));
+const ogImageSrc = guide.ogImageUrl ?? generatedOgImage?.src;
+
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -63,14 +68,15 @@ const articleSchema = {
     name: "WonderMoney",
     url: "https://wonder.money",
   },
-  ...(guide.ogImageUrl && { image: guide.ogImageUrl }),
+  image: guide.ogImageUrl ?? `${Astro.url.origin}${generatedOgImage?.src}`,
 };
 ---
 
 <ContentLayout
   title={guide.seoTitle || `${guide.title} — WonderMoney`}
   description={guide.seoDescription || guide.excerpt || ""}
-  ogImage={guide.ogImageUrl}
+  ogImage={ogImageSrc}
+  ogImageAlt={generatedOgImage?.alt ?? guide.title}
   ogType="article"
   canonicalUrl={canonicalUrl}
   layout="article"
