@@ -16,6 +16,7 @@ import { FEATURE_MENU } from "@/lib/featureMenu";
 import { getTranslations } from "@/lib/translations";
 import { GITHUB_URL, selfHostingDocsUrl } from "@/lib/openSource";
 import type { Lang } from "@/lib/i18nLocale";
+import { appFaqUrl } from "@/lib/appLinks";
 import { Select } from "@/components/ui/select";
 
 export type Props = {
@@ -57,7 +58,7 @@ export default function Footer({ className, locale }: Props) {
     support: [
       {
         name: t("footer.faq"),
-        href: "https://app.wonder.money/faq",
+        href: appFaqUrl(locale),
       },
       { name: t("footer.documentation"), href: "https://docs.wonder.money" },
       // { name: "Guides", href: "#" },
