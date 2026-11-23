@@ -27,6 +27,8 @@ import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
 import { toLocalizedPath } from "@/lib/routes";
 import { Select } from "@/components/ui/select";
+import BrandLogo from "@/components/shared/BrandLogo";
+import TrademarkDisclaimer from "@/components/shared/TrademarkDisclaimer";
 import { FUEL_COLOR_CLASSES } from "./fuelColors";
 
 // MapLibre and its tiles load only when the visitor opens the map.
@@ -371,6 +373,7 @@ export default function CheapestStations() {
           </>
         )}
         <p className="text-xs text-muted-foreground">{t(k("note"))}</p>
+        {list && <TrademarkDisclaimer textKey="lp.trademarks.tmGeneric" />}
       </div>
     </section>
   );
@@ -394,7 +397,7 @@ function StationRow({
   const distance = "distanceKm" in station ? `${formatNumber(locale, station.distanceKm, station.distanceKm < 10 ? 1 : 0)} km` : null;
 
   return (
-    <li className="flex items-center gap-3 p-3 sm:p-4">
+    <li className="flex items-start gap-3 p-3 sm:p-4">
       <p className={`min-w-[6.25rem] shrink-0 rounded-md px-2 py-1.5 text-center ${cheapest ? `${colors.fill} text-white` : colors.tint}`}>
         <span className={`block text-xs font-medium leading-4 ${cheapest ? "" : colors.text}`}>
           {t(`tools.fuelPrices.fuelsShort.${fuel}`)}
@@ -403,40 +406,45 @@ function StationRow({
           {euro(station.price)}/L
         </span>
       </p>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="font-medium text-foreground [overflow-wrap:anywhere]">
-          <span className="sr-only">{index + 1}. </span>
-          {station.label}
-        </p>
-        <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
-          {distance && (
-            <span className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-foreground">
-              <MapPin aria-hidden="true" className="size-3.5 text-muted-foreground" />
-              <span className="sr-only">{t(k("distanceLabel"))}: </span>
-              {distance}
-            </span>
-          )}
-          {place && <span>{place}</span>}
-          <span className="inline-flex items-center gap-1 whitespace-nowrap">
-            <Clock aria-hidden="true" className="size-3.5" />
-            <span className="sr-only">{t(k("updated"), { date: station.updated })}</span>
-            <span aria-hidden="true" className="font-mono text-xs">
-              {station.updated}
-            </span>
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className="flex items-start gap-2 font-medium leading-6 text-foreground">
+          <BrandLogo name={station.brand} />
+          <span className="min-w-0 break-words">
+            <span className="sr-only">{index + 1}. </span>
+            {station.label}
           </span>
         </p>
+        <div className="flex items-end justify-between gap-2">
+          <p className="flex min-w-0 flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+            {distance && (
+              <span className="inline-flex items-center gap-1 whitespace-nowrap font-mono text-foreground">
+                <MapPin aria-hidden="true" className="size-3.5 text-muted-foreground" />
+                <span className="sr-only">{t(k("distanceLabel"))}: </span>
+                {distance}
+              </span>
+            )}
+            {place && <span>{place}</span>}
+            <span className="inline-flex items-center gap-1 whitespace-nowrap">
+              <Clock aria-hidden="true" className="size-3.5" />
+              <span className="sr-only">{t(k("updated"), { date: station.updated })}</span>
+              <span aria-hidden="true" className="font-mono text-xs">
+                {station.updated}
+              </span>
+            </span>
+          </p>
+          <a
+            href={station.mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${t(k("map"))}: ${station.label}`}
+            title={t(k("map"))}
+            className={`inline-flex size-8 shrink-0 items-center justify-center rounded-md border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${idleControl}`}
+          >
+            <Navigation aria-hidden="true" className="size-4" />
+          </a>
+        </div>
         {station.name && <p className="text-sm text-ink-2">{station.address}</p>}
       </div>
-      <a
-        href={station.mapUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={`${t(k("map"))}: ${station.label}`}
-        title={t(k("map"))}
-        className={`${controlClass} w-10 ${idleControl}`}
-      >
-        <Navigation aria-hidden="true" className="size-4" />
-      </a>
     </li>
   );
 }

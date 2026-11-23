@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import type { FuelType } from "@/lib/calculators/fuelCost";
 import { stationPlace, type CheapStation, type GeoPoint } from "@/lib/calculators/fuelStations";
+import { brandMonogram, findBrandLogo, logoSrc } from "@/lib/brandLogos";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
 import { fuelColor } from "./fuelColors";
@@ -175,7 +176,8 @@ function popupContent(station: CheapStation, price: string, fuelName: string, up
     root.append(node);
     return node;
   };
-  add("p", "font-medium", station.label);
+  const title = add("p", "flex items-start gap-2 font-medium", "");
+  title.append(brandTile(station.brand), station.label);
   const place = stationPlace(station);
   if (place) add("p", "text-muted-foreground", place);
   add("p", "font-mono text-base font-semibold", price);
@@ -186,4 +188,26 @@ function popupContent(station: CheapStation, price: string, fuelName: string, up
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   return root;
+}
+
+/** The same tile as BrandLogo.tsx, for a popup built outside React: the logo on white, or the initials. */
+function brandTile(brand: string): HTMLElement {
+  const tile = document.createElement("span");
+  tile.setAttribute("aria-hidden", "true");
+  tile.className = "inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border";
+  const entry = findBrandLogo(brand);
+  if (!entry) {
+    tile.classList.add("bg-paper-2", "text-[10px]", "font-semibold", "leading-none", "text-ink-2");
+    tile.textContent = brandMonogram(brand);
+    return tile;
+  }
+  tile.classList.add("bg-white");
+  const image = document.createElement("img");
+  image.src = logoSrc(entry.logo);
+  image.alt = "";
+  image.width = 24;
+  image.height = 24;
+  image.className = "size-full object-cover";
+  tile.append(image);
+  return tile;
 }

@@ -9,6 +9,7 @@ import {
   loadDistrict,
   stationsNear,
 } from "@/lib/calculators/fuelStations";
+import { brandMonogram, findBrandLogo } from "@/lib/brandLogos";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 
 const pushGtmEvent = vi.fn();
@@ -204,4 +205,21 @@ it("says so when no station is within the radius, as far from mainland Portugal"
   fireEvent.click(screen.getByRole("button", { name: "Near me" }));
   expect(await screen.findByText("No station with a price for Diesel (gasóleo simples) within 10 km of you.")).toBeTruthy();
   expect(screen.queryByRole("list")).toBeNull();
+});
+
+it("puts each station's brand logo beside its label, the initials for a brand without one, and the trademark line", async () => {
+  mockGeolocation((success) => success({ coords: { latitude: LISBON.lat, longitude: LISBON.lon } } as GeolocationPosition));
+  renderEn();
+  fireEvent.click(screen.getByRole("button", { name: "Near me" }));
+  fireEvent.click(screen.getByRole("button", { name: "25 km" }));
+  const files = await Promise.all(districtsNear(LISBON, 25).map(loadDistrict));
+  const stations = stationsNear(files, LISBON, 25, "diesel")!.stations;
+  await waitFor(() => expect(screen.getAllByRole("listitem")).toHaveLength(stations.length));
+  const rows = within(screen.getByRole("list")).getAllByRole("listitem");
+  stations.forEach((station, index) => {
+    const logo = findBrandLogo(station.brand);
+    if (logo) expect(rows[index].querySelector('img[alt=""]'), station.brand).not.toBeNull();
+    else expect(within(rows[index]).getByText(brandMonogram(station.brand))).toBeTruthy();
+  });
+  expect(screen.getByText(/All trademarks mentioned belong to their respective owners/)).toBeTruthy();
 });

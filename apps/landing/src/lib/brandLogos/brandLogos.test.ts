@@ -98,3 +98,24 @@ describe("the brokers", () => {
 		expect(findBrandLogo("IBKR")).toBe(findBrandLogo("Interactive Brokers"))
 	})
 })
+
+describe("fuel station brands", () => {
+	/** The main brands as DGEG writes them, each with a tile in the fuel category. */
+	const FUEL_BRANDS_WITH_LOGO = [
+		"ALVES BANDEIRA", "AUCHAN", "BP", "INTERMARCHÉ", "LECLERC", "MOEVE",
+		"OZ Energia", "PINGO DOCE", "PLENERGY", "PRIO", "Q8", "SHELL",
+	]
+	/** Fuel brands that also sell electricity: their tiles belong to the electricity category. */
+	const FROM_ANOTHER_CATEGORY = ["GALP", "REPSOL"]
+	/** No official mark (Cepsa became Moeve), DGEG's word for an unbranded station, a local brand. */
+	const FUEL_ON_MONOGRAM = ["CEPSA", "Genérico", "FREITAS"]
+
+	it("has a fuel tile for every main brand, matched as DGEG spells it", () => {
+		for (const brand of FUEL_BRANDS_WITH_LOGO) expect(findBrandLogo(brand)?.category, brand).toBe("fuel")
+	})
+
+	it("leaves the brands that also sell electricity to that category, and the rest to the monogram", () => {
+		for (const brand of FROM_ANOTHER_CATEGORY) expect(findBrandLogo(brand)?.category, brand).not.toBe("fuel")
+		for (const brand of FUEL_ON_MONOGRAM) expect(findBrandLogo(brand), brand).toBeNull()
+	})
+})
