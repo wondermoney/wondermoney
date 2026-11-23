@@ -2,7 +2,8 @@ name: Publish self-hosting images
 
 # Multi-arch api, worker and web images on GitHub Container Registry, for the docker compose
 # install in apps/api/deploy/selfhost and the Helm chart in charts/wondermoney. The images build
-# everything from source. A release tag also publishes the chart, as an OCI artifact at
+# everything from source; the all-in-one image for Unraid (deploy/aio) is assembled from them
+# afterwards. A release tag also publishes the chart, as an OCI artifact at
 # oci://ghcr.io/wondermoney/charts/wondermoney.
 on:
   push:
@@ -70,6 +71,52 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  # The all-in-one image for Unraid and other NAS app stores (deploy/aio, deploy/unraid). It is
+  # assembled from the three images above, by the commit's sha tag every run publishes, so it
+  # holds exactly this run's code; it gets the same version tags they do.
+  aio:
+    name: Publish the all-in-one image
+    needs: publish
+    if: github.repository == 'wondermoney/wondermoney' || github.repository == vars.DEPLOY_REPO
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/wondermoney-aio
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+      - id: source
+        name: The sha tag the publish job gave this commit's images
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/aio/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            WM_IMAGE_REGISTRY=ghcr.io/${{ github.repository_owner }}
+            WM_VERSION=${{ steps.source.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=wondermoney-aio
+          cache-to: type=gha,mode=max,scope=wondermoney-aio
 
   # The one-line installer, attached to the release with its checksum, so
   # https://github.com/wondermoney/wondermoney/releases/latest/download/install.sh always serves
