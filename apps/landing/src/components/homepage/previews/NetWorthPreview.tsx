@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { useId } from "react";
 
+import BrandLogo from "@/components/shared/BrandLogo";
 import { useTranslations } from "@/lib/reactTranslations";
 import { usePreviewFormat, type PreviewFormat } from "@/lib/usePreviewFormat";
 
@@ -17,7 +18,8 @@ import {
 
 // A marketing mockup of the app's net worth summary, not the real product: the figures come from
 // `netWorthSample.ts`, where they reconcile. The homepage hero and the net worth feature page
-// both draw this card, each with its own household.
+// both draw this card, each with its own household. Each row carries an example institution's
+// logo beside its label, from the shared registry (`src/lib/brandLogos/`).
 
 /** Gains in the success token, losses in the destructive one; the sign always stays. */
 const toneClass = (change: Change) =>
@@ -36,17 +38,20 @@ function ChangeBadge({ change, fmt }: { change: Change; fmt: PreviewFormat }) {
 	);
 }
 
-const ROW_GRID = "grid grid-cols-[minmax(0,1fr)_3.5rem_4.75rem] items-baseline gap-x-2";
+const ROW_GRID = "grid grid-cols-[minmax(0,1fr)_3.5rem_4.75rem] items-center gap-x-2";
 
 function Rows({ rows, fmt }: { rows: NetWorthRow[]; fmt: PreviewFormat }) {
 	const { t } = useTranslations();
 	return (
-		<ul className="ml-3 space-y-1.5">
+		<ul className="space-y-1.5">
 			{rows.map((row) => {
 				const change = rowChange(row);
 				return (
 					<li key={row.labelKey} className={`${ROW_GRID} text-xs`}>
-						<span className="truncate text-muted-foreground">{t(row.labelKey)}</span>
+						<span className="flex min-w-0 items-center gap-2">
+							<BrandLogo name={row.institution} />
+							<span className="truncate text-muted-foreground">{t(row.labelKey)}</span>
+						</span>
 						<span className={`text-right font-mono text-[11px] tabular-nums ${toneClass(change)}`}>
 							{fmt.pct(change.percent, { sign: "always" })}
 						</span>

@@ -13,6 +13,11 @@ export interface NetWorthRow {
 	/** Translation key of the row's label. */
 	labelKey: string;
 	kind: NetWorthRowKind;
+	/**
+	 * The example institution whose logo the row shows, by its name in `src/lib/brandLogos/`: only
+	 * institutions the product supports (`InstitutionMarks.tsx`), as examples, never as partners.
+	 */
+	institution: string;
 	/** Balance at the first month of the history, in euros. A liability is the amount owed. */
 	start: number;
 	/** Balance at the last month of the history, in euros. */
@@ -38,9 +43,9 @@ export const HERO_NET_WORTH: NetWorthSample = {
 	months: monthsFrom(2026, 2, 6), // March to August 2026
 	yTicks: [48000, 51000, 54000],
 	rows: [
-		{ labelKey: "preview.netWorth.bankAccounts", kind: "asset", start: 21200, end: 22020 },
-		{ labelKey: "preview.netWorth.investments", kind: "asset", start: 29620, end: 32150 },
-		{ labelKey: "preview.netWorth.creditCard", kind: "liability", start: 840, end: 540 },
+		{ labelKey: "preview.netWorth.bankAccounts", institution: "CGD", kind: "asset", start: 21200, end: 22020 },
+		{ labelKey: "preview.netWorth.investments", institution: "DEGIRO", kind: "asset", start: 29620, end: 32150 },
+		{ labelKey: "preview.netWorth.creditCard", institution: "BPI", kind: "liability", start: 840, end: 540 },
 	],
 };
 
@@ -50,11 +55,11 @@ export const FEATURE_NET_WORTH: NetWorthSample = {
 	months: monthsFrom(2026, 4, 6), // May to October 2026
 	yTicks: [145000, 155000, 165000],
 	rows: [
-		{ labelKey: "preview.netWorth.bankAccounts", kind: "asset", start: 43900, end: 45200 },
-		{ labelKey: "preview.netWorth.investments", kind: "asset", start: 190400, end: 202800 },
-		{ labelKey: "preview.netWorth.mortgage", kind: "liability", start: 73400, end: 71200 },
-		{ labelKey: "preview.netWorth.carLoan", kind: "liability", start: 9100, end: 8200 },
-		{ labelKey: "preview.netWorth.creditCard", kind: "liability", start: 3600, end: 4100 },
+		{ labelKey: "preview.netWorth.bankAccounts", institution: "ActivoBank", kind: "asset", start: 43900, end: 45200 },
+		{ labelKey: "preview.netWorth.investments", institution: "Interactive Brokers", kind: "asset", start: 190400, end: 202800 },
+		{ labelKey: "preview.netWorth.mortgage", institution: "CGD", kind: "liability", start: 73400, end: 71200 },
+		{ labelKey: "preview.netWorth.carLoan", institution: "BPI", kind: "liability", start: 9100, end: 8200 },
+		{ labelKey: "preview.netWorth.creditCard", institution: "novobanco", kind: "liability", start: 3600, end: 4100 },
 	],
 };
 

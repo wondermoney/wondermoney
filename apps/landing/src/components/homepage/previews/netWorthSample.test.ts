@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { findBrandLogo } from "@/lib/brandLogos";
+
 import {
 	FEATURE_NET_WORTH,
 	HERO_NET_WORTH,
@@ -40,6 +42,15 @@ describe.each(samples)("the %s net worth sample", (_, sample) => {
 		expect(change.percent).toBe(Math.round((change.delta / sample.history[0]) * 1000) / 10);
 	});
 
+	it("shows only institutions the product supports, each with a logo in the registry", () => {
+		// The banks and brokers `InstitutionMarks.tsx` lists as "works with".
+		const supported = ["CGD", "Millennium bcp", "Santander", "novobanco", "ActivoBank", "BPI", "Revolut", "DEGIRO", "Interactive Brokers"];
+		for (const row of sample.rows) {
+			expect(supported, row.institution).toContain(row.institution);
+			expect(findBrandLogo(row.institution), row.institution).not.toBeNull();
+		}
+	});
+
 	it("has one month per point and keeps every point inside the y-axis ticks", () => {
 		// Given
 		const low = sample.yTicks[0];
@@ -71,9 +82,9 @@ describe("the sample figures", () => {
 describe("rowChange", () => {
 	it("counts an asset that grew and a debt that shrank as raising net worth", () => {
 		// Given an asset that grew, a debt that shrank and a debt that grew
-		const asset = rowChange({ labelKey: "a", kind: "asset", start: 1000, end: 1100 });
-		const paidDown = rowChange({ labelKey: "b", kind: "liability", start: 800, end: 600 });
-		const grew = rowChange({ labelKey: "c", kind: "liability", start: 600, end: 690 });
+		const asset = rowChange({ labelKey: "a", institution: "CGD", kind: "asset", start: 1000, end: 1100 });
+		const paidDown = rowChange({ labelKey: "b", institution: "CGD", kind: "liability", start: 800, end: 600 });
+		const grew = rowChange({ labelKey: "c", institution: "CGD", kind: "liability", start: 600, end: 690 });
 
 		// Then the sign follows the balance and `improves` follows net worth
 		expect(asset).toEqual({ delta: 100, percent: 10, improves: true });
@@ -82,7 +93,7 @@ describe("rowChange", () => {
 	});
 
 	it("counts an unchanged balance as not raising net worth", () => {
-		expect(rowChange({ labelKey: "a", kind: "asset", start: 500, end: 500 }).improves).toBe(false);
+		expect(rowChange({ labelKey: "a", institution: "CGD", kind: "asset", start: 500, end: 500 }).improves).toBe(false);
 	});
 });
 

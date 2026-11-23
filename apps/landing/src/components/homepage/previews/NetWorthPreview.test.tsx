@@ -66,4 +66,15 @@ describe("NetWorthPreview", () => {
 		expect(container.querySelectorAll("circle")).toHaveLength(0);
 		expect(screen.getByRole("img").getAttribute("aria-label")).toMatch(/^Net worth, Mar to Aug, rising from €49,980 to €53,630$/);
 	});
+
+	it("puts an example institution's logo beside every account row, its label still the text", () => {
+		// Given the feature page's household, five accounts
+		const { container } = renderIn("pt", FEATURE_NET_WORTH);
+
+		// Then one decorative logo per row, and the labels stay visible text
+		const logos = container.querySelectorAll("li img");
+		expect(logos).toHaveLength(FEATURE_NET_WORTH.rows.length);
+		for (const logo of logos) expect(logo.getAttribute("alt")).toBe("");
+		expect(screen.getByText("Hipoteca")).toBeTruthy();
+	});
 });
