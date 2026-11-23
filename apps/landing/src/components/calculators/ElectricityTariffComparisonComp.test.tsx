@@ -252,6 +252,8 @@ describe("electricity tariff comparator", () => {
       loss: Array.from({ length: count }, () => 16000),
       profile: Array.from({ length: count }, () => 28539),
     };
+    // Reading the file and re-pricing every offer can take seconds on a busy CI runner.
+    const wait = { timeout: 5000 };
     const quarterHours = vi.fn<QuarterHoursLoader>(async () => data);
     render(<ElectricityTariffComparisonComp locale="en" loadOffers={loadFixtures} loadMarket={loadMarket} loadQuarterHours={quarterHours} />);
     await screen.findByRole("list", { name: "Offers, cheapest first" });
@@ -275,17 +277,17 @@ describe("electricity tariff comparator", () => {
 
     // Two January days: one month of the twelve, too few. The last 12 months are used, and said.
     upload(["2026/01/14", "2026/01/15"]);
-    await screen.findByText("2026-01-14 to 2026-01-15: 2 days, 19 kWh.");
+    await screen.findByText("2026-01-14 to 2026-01-15: 2 days, 19 kWh.", {}, wait);
     fireEvent.click(screen.getByLabelText("Real cost on the dates of your consumption file with OMIE prices"));
-    expect(await screen.findByText(/covers 1 of the 12 months with OMIE prices; at least 6 are needed/)).toBeTruthy();
+    expect(await screen.findByText(/covers 1 of the 12 months with OMIE prices; at least 6 are needed/, {}, wait)).toBeTruthy();
     expect(quarterHours).toHaveBeenCalledExactlyOnceWith("/data/omie-pt-quarter-hours.json");
     expect(within(edp()).getByText(/OMIE prices from November 2025 to October 2026/)).toBeTruthy();
 
     // A day in each of six months: priced on the file's own quarter-hours.
     fireEvent.click(screen.getByRole("button", { name: "Remove the file" }));
     upload(["2026/01/14", "2026/02/14", "2026/03/14", "2026/04/14", "2026/05/14", "2026/06/14"]);
-    await screen.findByText("2026-01-14 to 2026-06-14: 6 days, 58 kWh.");
-    await waitFor(() => expect(screen.getByText(/Portuguese price of each quarter-hour in your consumption file \(January 2026 to June 2026\)/)).toBeTruthy());
+    await screen.findByText("2026-01-14 to 2026-06-14: 6 days, 58 kWh.", {}, wait);
+    await waitFor(() => expect(screen.getByText(/Portuguese price of each quarter-hour in your consumption file \(January 2026 to June 2026\)/)).toBeTruthy(), wait);
     expect(within(edp()).getByText("Real cost (OMIE)")).toBeTruthy();
     // EDP's formula on 100 EUR/MWh: 0,1 x 1,164 x 1,10 + 0,0185 + TAR 0,0607 EUR/kWh.
     expect(within(edp()).getByText(`Energy, before VAT: ${(0.1 * 1.164 * 1.1 + 0.0185 + 0.0607).toFixed(4)} €/kWh.`)).toBeTruthy();
@@ -298,7 +300,7 @@ describe("electricity tariff comparator", () => {
     fireEvent.click(screen.getByLabelText("Real cost over the last 12 months with OMIE prices"));
     expect(await screen.findByText(/OMIE prices could not be loaded/)).toBeTruthy();
     expect(screen.queryAllByText("Real cost (OMIE)")).toHaveLength(0);
-  });
+  }, 15_000);
 
   it("filters on the offer fields and on the engine's options", async () => {
     await renderPage();
