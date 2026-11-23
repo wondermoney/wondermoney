@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!-- The publisher profile Unraid's Community Applications shows for this repository. Its
+     template is deploy/unraid/wondermoney.xml; deploy/unraid/README.md has the listing steps. -->
+<CommunityApplications>
+  <Profile>WonderMoney is free, open-source personal finance for you and your household: accounts and bank sync, budgets, investments and net worth, on a server you host yourself. This repository holds the app and its all-in-one Unraid container.</Profile>
+  <Icon>https://raw.githubusercontent.com/wondermoney/wondermoney/main/deploy/unraid/wondermoney.png</Icon>
+  <WebPage>https://wonder.money</WebPage>
+</CommunityApplications>

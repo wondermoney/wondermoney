@@ -15,11 +15,13 @@ Once the first release with the `wondermoney-aio` image is out and the image is 
 
 1. Install the template by hand on an Unraid server (the docs page's `wget` line), install the
    container from it, and check a fresh install end to end: first account, a CSV import, a restart.
-2. Open a support thread in the Unraid forum's Docker Containers board, named after the app. Put
-   its address in the template as `<Support>`: CA requires a forum thread for support, and the
-   GitHub issues stay linked from `<Project>` and the thread.
-3. Submit this repository through the Community Applications submission form (linked from the
-   CA plugin's settings and the forum's "Community Applications" board). CA scans the repository
-   for `<Container>` templates, so keep `deploy/unraid/` the only folder with one (the other XML
-   files in the repository are bank statement fixtures, which it ignores).
+2. Sign in at https://ca.unraid.net/submit/new with an Unraid account, add
+   `https://github.com/wondermoney/wondermoney`, run Validate and Scan, fix what they flag, and
+   submit. The scan needs the root `LICENSE` (AGPL-3.0, OSI-approved) and `ca_profile.xml`, the
+   publisher profile, with a non-empty `<Profile>`. It finds `<Container>` templates anywhere in
+   the repository, so keep `deploy/unraid/` the only folder with one (the other XML files are bank
+   statement fixtures). Field reference: https://ca.unraid.net/submit/help/xml-field-reference
+3. `<Support>` is the GitHub issues page; a forum thread is optional. If one is opened later (only
+   approved Community Developers start threads in the Docker Containers board, so post it elsewhere
+   and ask a moderator to move it), add it as `<Forum>` in `ca_profile.xml`.
 4. After moderation, search for WonderMoney in the Apps tab of a server to confirm the listing.
