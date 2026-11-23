@@ -4826,24 +4826,22 @@
       "mode": {
         "legend": "How do you want to compare?",
         "quick": "Quick",
-        "full": "Full",
-        "quickHelp": "From your monthly bill or kWh. The split across periods follows the standard household profile.",
-        "fullHelp": "From your kWh per period, a total for any number of days, or your E-REDES consumption file."
+        "full": "Full"
       },
       "fields": {
-        "power": "Contracted power",
         "option": "Tariff option",
         "cycle": "Hourly cycle",
         "quickUnit": "I know my",
-        "unitBill": "Monthly bill in euro",
-        "unitKwh": "Monthly consumption in kWh",
+        "unitBill": "Bill in €",
+        "unitKwh": "Consumption in kWh",
         "bill": "Monthly bill",
         "monthlyKwh": "Monthly consumption",
         "source": "Consumption",
         "period": "The consumption covers",
         "days": "Number of days",
         "total": "Total consumption",
-        "periodsLegend": "Consumption per period"
+        "periodsLegend": "Consumption per period",
+        "powerKva": "Contracted power (kVA)"
       },
       "options": {
         "simple": "Simple",
@@ -4872,12 +4870,7 @@
         "shoulder": "Shoulder hours (cheias)"
       },
       "help": {
-        "power": "On your invoice, in kVA. Most homes have 3.45, 4.6 or 6.9 kVA.",
-        "option": "Simple has one energy price; bi-hourly and tri-hourly price the hours differently. The list shows offers on this option.",
-        "cycle": "Your meter's cycle, on the invoice. The weekly cycle moves the valley hours at weekends.",
-        "bill": "What you pay a month, VAT included. It is turned into kWh as if you were on the regulated tariff, as ERSE's quick simulation does.",
-        "billKwh": "On the regulated tariff this bill is about {{kwh}} a month.",
-        "monthlyKwh": "On the invoice, or the yearly consumption divided by 12.",
+        "billKwh": "≈ {{kwh}} a month on the regulated tariff",
         "days": "The days your kWh cover, from 1 to 731, as on a bill or a meter download.",
         "total": "All the kWh in the period above. The split across periods follows the E-REDES profile for your power and consumption.",
         "periods": "As on your invoice or meter reading. Other options are priced with the same kWh, split with the standard profile where needed."
@@ -4906,14 +4899,8 @@
         "coverage": "{{percent}}% of the consumption in your file falls on days with OMIE prices ({{period}}). The rest is priced at those days' average."
       },
       "filters": {
-        "title": "Filters",
-        "summary": "(price type, supplier, conditions)",
-        "pricing": "Price type",
-        "pricingChoices": {
-          "all": "Fixed and indexed",
-          "fixed": "Fixed price only",
-          "indexed": "Indexed price only"
-        },
+        "title": "More options",
+        "summary": "(ranking, indexed offers, refunds, electronic invoice, dual offers)",
         "supplier": "Supplier",
         "supplierAll": "All suppliers",
         "sortBy": "Rank by",
@@ -4921,19 +4908,25 @@
           "firstYear": "First year",
           "laterYears": "Later years (no new-client discount)"
         },
-        "includeConditioned": "Include conditioned offers",
-        "includeConditionedHelp": "Offers only some people can sign up for, such as members of a club or holders of a card.",
         "includeRefunds": "Count refunds and discounts any client gets",
         "includeRefundsHelp": "Amounts the supplier gives back on every bill, as ERSE counts them.",
-        "mandatoryServices": "Include offers with paid mandatory services",
-        "mandatoryServicesHelp": "Some offers require a paid service, such as assistance. Its cost is in the total.",
-        "directDebit": "Include offers that require direct debit",
         "eInvoice": "Include offers that require an electronic invoice",
-        "renewableOnly": "Only 100% renewable energy",
-        "noLoyalty": "Only offers without a loyalty period",
         "includeDual": "Include dual offers (electricity and gas)",
         "includeDualHelp": "They need a gas contract with the same supplier, and their fixed amounts may cover gas too.",
-        "cheapestPerSupplier": "Only each supplier's cheapest offer"
+        "view": "Show",
+        "viewChoices": {
+          "best": "The best offer of each supplier",
+          "all": "All offers"
+        },
+        "quick": "Quick filters",
+        "chips": {
+          "noLoyalty": "No loyalty period",
+          "noDirectDebit": "No direct debit required",
+          "noServices": "No paid services",
+          "noConditioned": "No sign-up restrictions",
+          "renewable": "100% renewable",
+          "fixed": "Fixed price"
+        }
       },
       "myTariff": {
         "title": "Compare with my tariff",
@@ -4987,7 +4980,8 @@
           "encrypted": "This PDF is password-protected. Open it, save a copy without the password and choose that copy, or enter the figures below.",
           "noText": "This PDF has no text to read (it may be a scan or a photo). Use the PDF the supplier sent, or enter the figures below.",
           "tooLarge": "This file is larger than {{max}} MB, more than an invoice. The form was left as it was."
-        }
+        },
+        "privacyShort": "Read in your browser, never uploaded"
       },
       "solar": {
         "title": "Solar panels",
@@ -5107,17 +5101,14 @@
       },
       "compare": {
         "title": "Simple, bi-hourly or tri-hourly?",
-        "intro": "The cheapest offer of each option on the same consumption, split by your hourly cycle.",
         "yours": "(your option)",
-        "perFirstYear": "in the first year",
-        "perLaterYear": "a year from the second year",
         "cheapest": "Cheapest option",
-        "more": "{{amount}} more a year",
+        "more": "+{{amount}} a year",
         "unavailable": "No offer at this power."
       },
       "results": {
         "title": "Offers on the {{option}} option",
-        "count": "{{count}} offers, priced on {{kwh}} a year.",
+        "count": "{{count}} offers · {{kwh}} a year",
         "none": "No offer matches. Loosen the filters or change the option.",
         "listLabel": "Offers, cheapest first",
         "showMore": "Show {{count}} more",
@@ -5126,10 +5117,7 @@
         "period": "Your {{days}} days",
         "periodMonth": "One month",
         "periodYear": "One year",
-        "saving": "Saves you {{amount}} a year",
-        "dearer": "Costs {{amount}} more a year",
-        "same": "Costs the same as your tariff",
-        "details": "Breakdown and links",
+        "details": "Details",
         "estimatedNote": "Indexed price: ERSE's estimate for the coming months. What you pay follows the market.",
         "estimatedLeft": "{{count}} indexed offers without a published formula stay on ERSE's estimate (3-month futures).",
         "estimatedLeftOne": "1 indexed offer without a published formula stays on ERSE's estimate (3-month futures).",
@@ -5144,7 +5132,9 @@
           "terms": "Contract terms"
         },
         "breakdownCaption": "Breakdown of {{offer}}",
-        "socialNotApplied": "The social tariff applies up to {{kva}} kVA only, so it is not counted at this power."
+        "socialNotApplied": "The social tariff applies up to {{kva}} kVA only, so it is not counted at this power.",
+        "countPerSupplier": "{{count}} suppliers · {{kwh}} a year",
+        "detailsClose": "Hide details"
       },
       "badges": {
         "label": "Offer features",
@@ -5223,7 +5213,7 @@
           "diagram": "You can also give it your E-REDES consumption file, downloaded from Balcão Digital. Its 15-minute readings give your real kWh in each period and cycle. The file is read in your browser and never sent anywhere.",
           "mine": "Under \"Compare with my tariff\" you enter the prices on your invoice. Your tariff then goes through the same calculation as every offer, so the saving shown on each one is like for like.",
           "solar": "Under \"Solar panels\" you add a system by district capital or by coordinates, with its tilt, orientation, peak power and losses. Its production is subtracted from your consumption hour by hour, and the offers are ranked on what you still buy from the grid. The summary shows the share used at home, the surplus and what the panels save on the cheapest offer. A surplus sale price, if you enter one, is shown apart from the ranking.",
-          "options": "At the top of the results, the cheapest simple, bi-hourly and tri-hourly offers on the same consumption show whether another option would pay off. The filters narrow the list, and the CSV button downloads it."
+          "options": "At the top of the results, the cheapest simple, bi-hourly and tri-hourly offers on the same consumption show whether another option would pay off. The list shows each supplier's best offer, or every offer if you change \"Show\", with the cost a month, the difference from the regulated tariff and the power and energy prices before VAT. The filters above the list narrow it, \"Compare\" puts up to three offers side by side, \"Share\" copies a link with the values you chose (never the files), and the CSV button downloads the list."
         },
         "example": {
           "title": "Worked example",
@@ -5301,6 +5291,90 @@
           "householdBudgetLink": "Household budget",
           "householdBudgetBody": "Put the electricity bill next to the rest of your monthly costs."
         }
+      },
+      "presets": {
+        "bill": "Common bill amounts",
+        "kwh": "Common consumptions"
+      },
+      "summary": {
+        "label": "Your simulation",
+        "bill": "{{amount}} bill a month",
+        "kwh": "{{kwh}} a month",
+        "diagram": "E-REDES file",
+        "full": "consumption per period",
+        "change": "Change"
+      },
+      "share": {
+        "button": "Share",
+        "copied": "Link copied",
+        "failed": "The link could not be copied"
+      },
+      "row": {
+        "energy": "Energy",
+        "power": "Power",
+        "cheaper": {
+          "regulated": "{{amount}}/mo below regulated",
+          "mine": "Saves you {{amount}} a month"
+        },
+        "dearer": {
+          "regulated": "{{amount}}/mo above regulated",
+          "mine": "{{amount}} more a month"
+        },
+        "same": {
+          "regulated": "Same as regulated",
+          "mine": "Costs the same as your tariff"
+        },
+        "goTo": "Go to {{supplier}}",
+        "contractMonths": "{{months}} months",
+        "contractMonthsOne": "1 month",
+        "noTerm": "No fixed term",
+        "compare": "Compare",
+        "compareOffer": "Compare {{offer}}",
+        "pricing": {
+          "fixed": "Fixed",
+          "indexed": "Indexed"
+        },
+        "required": "Required",
+        "notRequired": "Not required",
+        "yes": "Yes",
+        "no": "No",
+        "validRange": "From {{from}} to {{to}}",
+        "validFrom": "Since {{from}}",
+        "howTotal": "How the first year comes to {{amount}}",
+        "conditionsTitle": "Conditions",
+        "conditions": {
+          "pricing": "Price type",
+          "duration": "Contract length",
+          "loyalty": "Loyalty period",
+          "directDebit": "Direct debit",
+          "eInvoice": "Electronic invoice",
+          "renewable": "100% renewable energy",
+          "conditioned": "Sign-up restrictions",
+          "services": "Mandatory services a year",
+          "valid": "Prices valid"
+        },
+        "moneyTitle": "Where the money goes, with power and energy before VAT",
+        "money": {
+          "power": "Power",
+          "energy": "Energy",
+          "taxes": "Taxes and levies",
+          "services": "Services",
+          "discounts": "Discounts"
+        },
+        "perMonth": "/mo",
+        "perDayShort": "€/day"
+      },
+      "compareTray": {
+        "label": "Offers to compare",
+        "count": "{{count}} of {{max}} offers to compare",
+        "countOne": "1 offer picked: pick one more to compare",
+        "clear": "Clear",
+        "open": "Compare side by side",
+        "title": "Compare side by side",
+        "close": "Close",
+        "vsCheapest": "More than the cheapest (a year)",
+        "vsRegulated": "Less a month than the regulated tariff",
+        "unitPrices": "Prices before VAT"
       }
     },
     "fuelPrices": {
