@@ -50,8 +50,8 @@ hold the commands. This skill is the order, the gates and the report.
    - build and submit both platforms as `apps/mobile/README.md` sets out, under Node 24;
    - the stores' "what's new" text is the changelog's ✨, 🛠, 🐛 and 📱 lines that apply to
      mobile, in each store language;
-   - Android starts as a staged rollout at the share `eas.json` sets (`submit.production`).
-     Raise it to 100% when the maintainer says so; until then the report shows the share.
+   - Android goes out to 100% of users: `submit.production` in `eas.json` sets
+     `releaseStatus: completed` and no staged rollout. Never submit a staged rollout.
 
    `eas build:list --limit 4 --non-interactive --json` shows build state. Store review takes
    hours to days, so report the submission and move on.
@@ -69,7 +69,7 @@ hold the commands. This skill is the order, the gates and the report.
    | `render.yaml` | `X.Y.Z` | merged to `develop` |
    | "What's new" page | `vX-Y-Z` | merged to `develop`, live after the next release |
    | iOS | app version, build | submitted, in review or live |
-   | Android | app version, build | rollout share |
+   | Android | app version, build | submitted, in review or live at 100% |
 
    A row that is behind says what it waits for and who acts.
 
