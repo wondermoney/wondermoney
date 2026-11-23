@@ -1,5 +1,5 @@
 /** A folder under `src/assets/brands/`, one per kind of brand. */
-export type BrandCategory = "banks" | "brokers"
+export type BrandCategory = "banks" | "brokers" | "electricity"
 
 export interface BrandLogoEntry {
 	category: BrandCategory

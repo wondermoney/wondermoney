@@ -1,8 +1,9 @@
 // The comparator's results: the comparison across tariff options, the visitor's own tariff, the
 // ranked offers as dense rows (the monthly bill, the saving against the regulated tariff, the unit
 // prices, the contract and a link to the offer), each with its breakdown and conditions, a tray
-// that compares up to three offers side by side, the CSV export and the ERSE source note. Indexed
-// offers priced from OMIE's prices say so on their row and cite the supplier's formula.
+// that compares up to three offers side by side, the CSV export, the ERSE source note and the
+// trademark line for the suppliers' logos. Indexed offers priced from OMIE's prices say so on their
+// row and cite the supplier's formula.
 import {
   ArrowUpRight,
   CalendarClock,
@@ -41,6 +42,8 @@ import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
+import BrandLogo from "@/components/shared/BrandLogo";
+import TrademarkDisclaimer from "@/components/shared/TrademarkDisclaimer";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -267,6 +270,7 @@ export default function ElectricityTariffResults({
         </>
       )}
       <SourceNote source={source} date={date} market={market} />
+      <TrademarkDisclaimer textKey="lp.trademarks.tmGeneric" />
     </div>
   );
 }
@@ -301,7 +305,10 @@ function OptionComparison({ outcome, option, sortBy }: { outcome: ComparatorView
                     {euro(best[sortBy].total / 12)}
                     <span className="ml-0.5 font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">{supplierOf(best.offer)}</p>
+                  <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                    <BrandLogo name={supplierOf(best.offer)} className="size-4 rounded-sm text-[7px]" />
+                    <span className="truncate">{supplierOf(best.offer)}</span>
+                  </p>
                   {isCheapest ? (
                     <p className="mt-1 flex items-center gap-1 text-xs font-medium text-success-text">
                       <Check aria-hidden="true" className="size-3.5" />
@@ -362,17 +369,6 @@ function badges(result: RankedOffer, t: (key: string) => string) {
   if (offer.mandatoryServicesPerYear > 0) list.push({ key: "services", label: t(k("badges.services")), tone: "neutral", Icon: Wrench });
   if (offer.renewable) list.push({ key: "renewable", label: t(k("badges.renewable")), tone: "neutral", Icon: Leaf });
   return list;
-}
-
-/** The supplier's initials on a quiet tile: tells the rows apart without a third party's logo. */
-function SupplierMark({ name }: { name: string }) {
-  const words = name.replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter(Boolean);
-  const initials = (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
-  return (
-    <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-paper-2 text-sm font-semibold text-ink-2">
-      {initials}
-    </span>
-  );
 }
 
 /** The offer's unit prices before VAT, energy per period and power per day, and its contract. */
@@ -449,7 +445,7 @@ function ResultRow({
     <li className={`overflow-hidden rounded-card border bg-background ${compared ? "border-primary/50" : "border-border"}`}>
       <div className="flex gap-3 p-4 sm:gap-4 sm:px-5">
         <div className="relative shrink-0">
-          <SupplierMark name={supplier} />
+          <BrandLogo name={supplier} className="size-10 text-sm" />
           <span className="absolute -left-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border bg-background text-[0.6875rem] font-medium text-ink-2">
             {rank}
           </span>
@@ -859,7 +855,10 @@ function CompareTable({ selected, view, sortBy }: { selected: RankedOffer[]; vie
             <td className="w-1/4" />
             {selected.map((result) => (
               <th key={rowKey(result)} scope="col" className="px-3 pb-3 text-left align-bottom font-normal">
-                <span className="block font-semibold text-foreground">{supplierOf(result.offer)}</span>
+                <span className="flex items-center gap-2 font-semibold text-foreground">
+                  <BrandLogo name={supplierOf(result.offer)} />
+                  {supplierOf(result.offer)}
+                </span>
                 <span className="block text-xs text-muted-foreground">{result.offer.name}</span>
               </th>
             ))}
