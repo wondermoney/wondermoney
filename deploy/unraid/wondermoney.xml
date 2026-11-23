@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>WonderMoney</Name>
+  <Repository>ghcr.io/wondermoney/wondermoney-aio:latest</Repository>
+  <Registry>https://github.com/wondermoney/wondermoney/pkgs/container/wondermoney-aio</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/wondermoney/wondermoney/issues</Support>
+  <Project>https://wonder.money</Project>
+  <ReadMe>https://docs.wonder.money/en/docs/self-hosting/unraid</ReadMe>
+  <Overview>Free, open-source personal finance for you and your household: accounts and bank sync, budgets, investments and net worth, in one place you host yourself.&#xD;
+&#xD;
+This one container holds everything WonderMoney needs: its database (Postgres 16), file storage for imports and receipts, the API, the background jobs and the web app. Set APP_URL to the address you will open it at, then Apply. Secrets are generated on the first start and kept with the database in the app data folder: back that folder up, it is the whole instance.&#xD;
+&#xD;
+The first account you create is the instance's owner. Email, AI features, market data and single sign-on are optional; the guide lists every setting.</Overview>
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:3000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/wondermoney/wondermoney/main/deploy/unraid/wondermoney.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/wondermoney/wondermoney/main/deploy/unraid/wondermoney.png</Icon>
+  <ExtraParams>--stop-timeout=30</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="Web UI port" Target="3000" Default="3000" Mode="tcp" Description="The port you open WonderMoney on. Keep it in step with APP_URL." Type="Port" Display="always" Required="true" Mask="false">3000</Config>
+  <Config Name="App data" Target="/config" Default="/mnt/user/appdata/wondermoney" Mode="rw" Description="The database, uploaded files and generated secrets. Back this folder up: without secrets.env, a restored database cannot read the stored bank credentials." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/wondermoney</Config>
+  <Config Name="App URL" Target="APP_URL" Default="" Mode="" Description="The address you open WonderMoney at, without a path: http://YOUR-SERVER-IP:3000, or https://money.example.com behind a reverse proxy. Links in emails and sign-in redirects use it. Passkeys need an https hostname." Type="Variable" Display="always" Required="true" Mask="false"></Config>
+  <Config Name="Instance name" Target="INSTANCE_NAME" Default="WonderMoney" Mode="" Description="Shown in the app, in emails and in authenticator apps." Type="Variable" Display="always" Required="false" Mask="false">WonderMoney</Config>
+  <Config Name="Sign-up" Target="SIGNUP_MODE" Default="open|invite|closed" Mode="" Description="open: anyone who can reach the server can sign up. invite: only people invited to a household. closed: nobody. The first account can always sign up." Type="Variable" Display="always" Required="false" Mask="false">open</Config>
+  <Config Name="Trusted proxies" Target="TRUSTED_PROXIES" Default="" Mode="" Description="Behind a reverse proxy (SWAG, Nginx Proxy Manager, Traefik, a Cloudflare tunnel): its address or network, such as 172.17.0.0/16, comma-separated. Sign-in limits then see each visitor's address. Empty when browsers reach this port directly." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="The user the app runs as and owns the app data folder." Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="The group the app runs as." Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
+  <Config Name="Support email" Target="SUPPORT_EMAIL" Default="" Mode="" Description="Optional. Your inbox for account alerts and in-app feedback, shown as the support address." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Email sender" Target="EMAIL_FROM" Default="" Mode="" Description="Optional. The address emails (password resets, invites) are sent from. Without email settings, they are written to the container log." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="SMTP host" Target="SMTP_HOST" Default="" Mode="" Description="Optional. Your mail server." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="SMTP port" Target="SMTP_PORT" Default="587" Mode="" Description="Optional. 587 for STARTTLS, 465 with SMTP_SECURE=true." Type="Variable" Display="advanced" Required="false" Mask="false">587</Config>
+  <Config Name="SMTP user" Target="SMTP_USER" Default="" Mode="" Description="Optional." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="SMTP password" Target="SMTP_PASSWORD" Default="" Mode="" Description="Optional." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="AI base URL" Target="AI_BASE_URL" Default="" Mode="" Description="Optional. Any OpenAI-compatible endpoint (OpenAI, OpenRouter, Ollama at http://YOUR-SERVER-IP:11434/v1) for receipt scanning, CSV column mapping, categorisation and the assistant." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="AI API key" Target="AI_API_KEY" Default="" Mode="" Description="Optional. The endpoint's key." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="AI model" Target="AI_MODEL" Default="" Mode="" Description="Optional. The model to use, such as gpt-5.4-mini or llama3.2." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="EODHD API key" Target="EODHD_API_KEY" Default="" Mode="" Description="Optional. For ticker search and live prices of investments." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Market data providers" Target="MARKET_DATA_PROVIDERS" Default="" Mode="" Description="Optional. eodhd, stooq, coingecko, in order, comma-separated. Stooq and CoinGecko are free and keyless; read their terms first. Empty means eodhd alone." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Database host" Target="DB_HOST" Default="" Mode="" Description="Optional. Your own Postgres 16 or later instead of the bundled one. Set the four settings below with it. Empty uses the bundled database in the app data folder." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Database port" Target="DB_PORT" Default="5432" Mode="" Description="Optional, with Database host." Type="Variable" Display="advanced" Required="false" Mask="false">5432</Config>
+  <Config Name="Database name" Target="DB_DATABASE" Default="wondermoney" Mode="" Description="Optional, with Database host." Type="Variable" Display="advanced" Required="false" Mask="false">wondermoney</Config>
+  <Config Name="Database user" Target="DB_USERNAME" Default="wondermoney" Mode="" Description="Optional, with Database host." Type="Variable" Display="advanced" Required="false" Mask="false">wondermoney</Config>
+  <Config Name="Database password" Target="DB_PASSWORD" Default="" Mode="" Description="Optional, with Database host." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+</Container>
