@@ -1,0 +1,70 @@
+---
+title: Unraid
+description: Instala WonderMoney en Unraid desde Community Applications, en un solo contenedor con la base de datos y el almacenamiento de archivos incluidos.
+---
+
+En Unraid, WonderMoney es un solo contenedor: `wondermoney-aio` ejecuta la misma API, el mismo proceso de tareas en segundo plano y la misma aplicación web que la [instalación con Docker Compose](/es/docs/self-hosting/install), junto con Postgres 16 y el almacenamiento de archivos para las importaciones de CSV y los recibos. Rellenas una dirección y pulsas Apply. Todo lo que guarda queda en la carpeta de datos de la aplicación.
+
+Necesitas Unraid 6.12 o posterior con el plugin Community Applications, y unos 2 GB de memoria libre.
+
+## Instalar
+
+1. En la pestaña **Apps**, busca **WonderMoney** y elige **Install**.
+2. En **App URL**, indica la dirección en la que abrirás WonderMoney, sin ruta, como `http://192.168.1.10:3000`. El puerto debe coincidir con **Web UI port**.
+3. Elige **Apply**.
+
+El primer arranque crea la base de datos y carga los datos de referencia, lo que tarda unos minutos; cuando está listo, el registro del contenedor termina con `WonderMoney is running at`. Abre entonces la Web UI desde la pestaña Docker y crea tu cuenta. La primera cuenta siempre puede registrarse; a partir de ahí, **Sign-up** decide quién más puede.
+
+Mientras WonderMoney no aparezca en Community Applications, añade la plantilla a mano. Abre un terminal en el servidor y ejecuta:
+
+```sh
+wget -O /boot/config/plugins/dockerMan/templates-user/my-WonderMoney.xml \
+  https://raw.githubusercontent.com/wondermoney/wondermoney/main/deploy/unraid/wondermoney.xml
+```
+
+Después, en la pestaña **Docker**, elige **Add Container**, selecciona **WonderMoney** en **Template** y continúa desde el paso 2.
+
+## Detrás de un proxy inverso
+
+Para llegar a WonderMoney desde fuera de tu red, o para usar passkeys (que necesitan HTTPS y un nombre de dominio), ponlo detrás del proxy inverso que ya usas: SWAG, Nginx Proxy Manager, Traefik o un túnel de Cloudflare. Apunta un nombre de dominio al puerto del contenedor y edita el contenedor:
+
+- **App URL**: la dirección pública, como `https://money.example.com`.
+- **Trusted proxies** (en **Show more settings**): la dirección o la red del proxy, como `172.17.0.0/16` para un proxy en el bridge predeterminado de Unraid. Los límites de inicio de sesión ven entonces la dirección de cada visitante en lugar de la del proxy. Déjalo vacío cuando los navegadores llegan directamente al puerto: con un valor, pueden elegir la dirección que ven los límites.
+
+Basta con un nombre de dominio: el propio contenedor enruta la API, la aplicación web y las subidas de archivos. Cambiar más adelante a otro nombre obliga a todos a añadir de nuevo sus passkeys.
+
+## Ajustes
+
+La plantilla muestra los ajustes más comunes; **Show more settings** tiene el correo, la IA, los datos de mercado y tu propia base de datos. Cualquier otro ajuste de [Configura tu instancia](/es/docs/self-hosting/configure) se puede añadir como variable con **Add another Path, Port, Variable, Label or Device**, con el mismo nombre. Algunos los define el contenedor y no debes cambiarlos: `API_URL` (siempre es el App URL), `TRUST_PROXY` (sale de **Trusted proxies**) y, con la base de datos y el almacenamiento incluidos, los ajustes `DB_*` y `S3_*`.
+
+Para usar tu propio Postgres (16 o posterior) en lugar del incluido, rellena **Database host** y los cuatro ajustes de la base de datos junto a él antes del primer arranque. Para usar tu propio almacenamiento compatible con S3, añade `S3_ENDPOINT`, `S3_BUCKET`, `AWS_ACCESS_KEY_ID` y `AWS_SECRET_ACCESS_KEY` como variables.
+
+## Qué hay en la carpeta de datos de la aplicación
+
+| Ruta | Qué |
+|---|---|
+| `postgres/` | La base de datos |
+| `storage/` | Los archivos subidos: importaciones de CSV, copias de recibos, exportaciones |
+| `secrets.env` | Los secretos generados en el primer arranque |
+
+`secrets.env` guarda `CREDENTIAL_ENCRYPTION_KEY_V1`, que cifra las credenciales bancarias de cada persona. Una base de datos restaurada sin la misma clave no puede leerlas. No borres ni edites nunca el archivo; un valor definido en el contenedor sustituye al que contiene.
+
+## Actualizaciones y copias de seguridad
+
+Las actualizaciones llegan como las de cualquier otro contenedor: **Check for Updates** en la pestaña Docker y luego **Apply Update**. La nueva versión aplica las migraciones de la base de datos al arrancar. Para quedarte en una versión, cambia la etiqueta del repositorio de `latest` a una versión como `1.9.0`.
+
+Haz copia de seguridad de toda la carpeta de datos de la aplicación. El plugin Appdata Backup detiene el contenedor mientras copia, lo que da una copia coherente de la base de datos. Para un volcado de la base de datos sin detenerlo:
+
+```sh
+docker exec WonderMoney sh -c 'PGPASSWORD=$(grep ^POSTGRES_PASSWORD= /config/secrets.env | cut -d= -f2) pg_dump -h 127.0.0.1 -U wondermoney -Fc wondermoney' > wondermoney.dump
+```
+
+La página [Actualizaciones y copias de seguridad](/es/docs/self-hosting/upgrade-and-backup) explica qué debe contener una copia de seguridad y cómo restaurarla.
+
+## Solución de problemas
+
+El registro del contenedor (en la pestaña Docker, el icono del contenedor, **Logs**) muestra cada parte arrancando en orden. Cuando una de ellas se detiene, el contenedor detiene las demás y termina, y Docker lo vuelve a arrancar. Los problemas más comunes:
+
+- **El contenedor se detiene enseguida pidiendo APP_URL**: rellena **App URL**.
+- **El inicio de sesión falla o redirige a otra dirección**: el App URL debe ser exactamente la dirección de la barra del navegador, con el mismo puerto.
+- **Las subidas fallan detrás de un proxy inverso**: el proxy debe pasar la cabecera `Host` original, como hacen por defecto SWAG y Nginx Proxy Manager, y aceptar peticiones de al menos 25 MB.

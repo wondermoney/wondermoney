@@ -1,0 +1,70 @@
+---
+title: Unraid
+description: Install WonderMoney on Unraid from Community Applications, as one container with its database and file storage inside.
+---
+
+On Unraid, WonderMoney is one container: `wondermoney-aio` runs the same API, background worker and web app as the [Docker Compose install](/en/docs/self-hosting/install), together with Postgres 16 and the file storage for CSV imports and receipts. You fill in one address and press Apply. Everything it keeps is in its app data folder.
+
+You need Unraid 6.12 or newer with the Community Applications plugin, and about 2 GB of free memory.
+
+## Install
+
+1. In the **Apps** tab, search for **WonderMoney** and choose **Install**.
+2. Set **App URL** to the address you will open WonderMoney at, without a path, such as `http://192.168.1.10:3000`. The port must match **Web UI port**.
+3. Choose **Apply**.
+
+The first start creates the database and loads the reference data, which takes a few minutes; the container log ends with `WonderMoney is running at` once it is ready. Then open the Web UI from the Docker tab and create your account. The first account can always sign up; after that, **Sign-up** decides who else can.
+
+Before WonderMoney is listed in Community Applications, add its template by hand. Open a terminal on the server and run:
+
+```sh
+wget -O /boot/config/plugins/dockerMan/templates-user/my-WonderMoney.xml \
+  https://raw.githubusercontent.com/wondermoney/wondermoney/main/deploy/unraid/wondermoney.xml
+```
+
+Then, in the **Docker** tab, choose **Add Container**, pick **WonderMoney** under **Template** and continue from step 2.
+
+## Behind a reverse proxy
+
+To reach WonderMoney from outside your network, or to use passkeys (which need HTTPS and a hostname), put it behind the reverse proxy you already run: SWAG, Nginx Proxy Manager, Traefik or a Cloudflare tunnel. Point one hostname at the container's port and edit the container:
+
+- **App URL**: the public address, such as `https://money.example.com`.
+- **Trusted proxies** (under **Show more settings**): the proxy's address or network, such as `172.17.0.0/16` for a proxy on Unraid's default bridge. The sign-in limits then see each visitor's address instead of the proxy's. Leave it empty when browsers reach the port directly: a value lets them choose the address the limits see.
+
+One hostname is all it needs: the container routes the API, the web app and file uploads itself. Moving to another hostname later means everyone adds their passkeys again.
+
+## Settings
+
+The template shows the common settings; **Show more settings** has email, AI, market data and your own database. Any other setting from [Configure your instance](/en/docs/self-hosting/configure) can be added as a variable with **Add another Path, Port, Variable, Label or Device**, under the same name. A few are set by the container and are not yours to change: `API_URL` (always App URL), `TRUST_PROXY` (from **Trusted proxies**), and, with the bundled database and storage, the `DB_*` and `S3_*` settings.
+
+To use your own Postgres (16 or newer) instead of the bundled one, set **Database host** and the four database settings beside it before the first start. To use your own S3-compatible storage, add `S3_ENDPOINT`, `S3_BUCKET`, `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` as variables.
+
+## What is in the app data folder
+
+| Path | What |
+|---|---|
+| `postgres/` | The database |
+| `storage/` | Uploaded files: CSV imports, receipt copies, exports |
+| `secrets.env` | The secrets generated on the first start |
+
+`secrets.env` holds `CREDENTIAL_ENCRYPTION_KEY_V1`, which encrypts each person's bank credentials. A database restored without the same key cannot read them. Never delete or edit the file; a value set on the container replaces the one in it.
+
+## Updates and backups
+
+Updates arrive like any other container's: **Check for Updates** in the Docker tab, then **Apply Update**. The new version applies its database migrations when it starts. To stay on one version, change the repository's tag from `latest` to a version such as `1.9.0`.
+
+Back up the whole app data folder. The Appdata Backup plugin stops the container while it copies, which gives a consistent copy of the database. For a database dump without stopping it:
+
+```sh
+docker exec WonderMoney sh -c 'PGPASSWORD=$(grep ^POSTGRES_PASSWORD= /config/secrets.env | cut -d= -f2) pg_dump -h 127.0.0.1 -U wondermoney -Fc wondermoney' > wondermoney.dump
+```
+
+The [Updates and backups](/en/docs/self-hosting/upgrade-and-backup) page explains what a backup must contain and how to restore one.
+
+## Troubleshooting
+
+The container log (the Docker tab, the container's icon, **Logs**) shows each part starting in order. When one of them stops, the container stops the rest and exits, and Docker starts it again. The most common problems:
+
+- **The container stops at once, asking for APP_URL**: set **App URL**.
+- **Sign-in fails or redirects to another address**: App URL must be exactly the address in the browser's address bar, with the same port.
+- **Uploads fail behind a reverse proxy**: the proxy must pass the original `Host` header, which SWAG and Nginx Proxy Manager do by default, and allow request bodies of at least 25 MB.
