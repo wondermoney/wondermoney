@@ -1,0 +1,22 @@
+---
+title: WonderMoney 1.11.1
+description: O contentor do Unraid para a base de dados de forma limpa, e o site mostra logótipos reais nos exemplos do produto.
+---
+
+[Notas da versão no GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.11.1)
+
+## Atualizar
+
+Nada a fazer. Não há migrações nem definições novas, e as instalações com Docker Compose, Helm e Render funcionam como antes. As instalações no [Unraid](/pt/docs/self-hosting/unraid) recebem a correção abaixo quando as atualizares.
+
+## Novo
+
+- A página inicial de wonder.money mostra logótipos reais dos bancos no exemplo de contas e das empresas no exemplo de portefólio. A lista de bancos e corretoras suportados deixa claro que dá para ligar muitos outros bancos e importar o CSV de qualquer corretora.
+
+## Correções
+
+- **O contentor do Unraid para a base de dados de forma limpa.** No Unraid, o `wondermoney-aio` corre tudo num só contentor, incluindo a base de dados. Parar o contentor já não corta a base de dados ao fim de dois segundos. Agora ela acaba de gravar, por isso o arranque seguinte não precisa de recuperar. O modelo do Unraid dá-lhe até 30 segundos.
+
+## Agradecimentos
+
+- @nip10
