@@ -62,6 +62,8 @@ function fakeDatabase() {
         staged.length = 0;
         return Promise.resolve();
       }),
+      // The first-account check (instance-admin.service.ts): this server already has accounts.
+      getConnection: vi.fn(() => ({ execute: vi.fn(() => Promise.resolve([{ exists: true }])) })),
       getRepository: vi.fn(() => ({
         createUser: vi.fn((input: { email: string; externalUserId: string; language: SupportedLanguages }) => {
           nextKey += 1;
@@ -76,6 +78,7 @@ function fakeDatabase() {
           return appusers.get(externalUserId) ?? null;
         }),
       })),
+      getTransactionContext: vi.fn(() => undefined),
       persist: vi.fn((entity: object) => {
         staged.push(entity);
       }),

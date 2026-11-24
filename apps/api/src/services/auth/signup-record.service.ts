@@ -5,6 +5,7 @@ import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
 import { Appuser, AppuserAccountType, SupportedLanguages } from '@entity/Appuser';
 import { assertAnalyticsOutboxEvent, isAnalyticsOutboxEnabled } from '@service/analytics/analytics-outbox.service';
 import { analyticsSignInMethod } from '@service/analytics/service-events.service';
+import { claimFirstAccount } from '@service/auth/instance-admin.service';
 import { ERROR } from '@utils/constants';
 import logger from '@utils/logger';
 
@@ -12,8 +13,12 @@ const SIGNUP_EVENT_ID_PREFIX = 'signup.v1:';
 const externalUserIdSchema = z.guid().brand<'ExternalUserId'>();
 
 export type SignupRecordInput = Readonly<{
-  /** The identity provider put this person in an admin group (`OIDC_ADMIN_GROUPS`). */
-  admin?: boolean;
+  /**
+   * Whether the identity provider put this person in an admin group, when its groups decide
+   * (`OIDC_ADMIN_GROUPS`; `signupAdminFromGroups`). Null or absent when they don't: the first
+   * account on the instance is then its admin, and every later one is a regular account.
+   */
+  admin?: boolean | null;
   email: string;
   externalUserId: string;
   firstName?: string;
@@ -49,8 +54,11 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
       const existingAppuser = await appuserRepository.getUserByExternalId(externalUserId);
       if (existingAppuser) return { appuser: existingAppuser, created: false };
 
+      // The identity provider's groups decide when they are set; otherwise the first account on
+      // the instance is its admin (instance-admin.service.ts).
+      const admin = input.admin ?? await claimFirstAccount(em);
       const appuser = await appuserRepository.createUser({
-        accountType: input.admin ? AppuserAccountType.ADMIN : AppuserAccountType.REGULAR,
+        accountType: admin ? AppuserAccountType.ADMIN : AppuserAccountType.REGULAR,
         email: input.email,
         externalUserId,
         firstName: input.firstName,

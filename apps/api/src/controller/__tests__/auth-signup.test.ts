@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocked = vi.hoisted(() => ({
   consumeInvite: vi.fn(),
@@ -74,6 +74,11 @@ function makeResponse(): Parameters<typeof authCallback>[1] {
 }
 
 describe('auth callback signup', () => {
+  // Env stubs end with their test, even one that fails.
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   beforeEach(() => {
     vi.resetAllMocks();
     appuser = makeAppuser();
@@ -105,15 +110,37 @@ describe('auth callback signup', () => {
     expect(response.json).toHaveBeenCalledWith({ appuserKey: 42, method: 'email', outcome: 'signup' });
   });
 
-  it.each([[true, true], [false, false], [null, false], [undefined, false]])(
-    'creates the app user as an admin only when the identity provider granted it (oidcAdmin=%s)',
-    async (oidcAdmin, admin) => {
+  describe('with admin groups set on the identity provider', () => {
+    beforeEach(() => {
+      vi.stubEnv('OIDC_ISSUER', 'https://id.example.com');
+      vi.stubEnv('OIDC_CLIENT_ID', 'wondermoney');
+      vi.stubEnv('OIDC_CLIENT_SECRET', 'secret');
+      vi.stubEnv('OIDC_ADMIN_GROUPS', 'finance-admins');
+    });
+
+    it.each([[true, true], [false, false], [null, false], [undefined, false]])(
+      'creates the app user as an admin only when the groups granted it (oidcAdmin=%s)',
+      async (oidcAdmin, admin) => {
+        await authCallback(
+          { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId, oidcAdmin } } } as Parameters<typeof authCallback>[0],
+          makeResponse(),
+        );
+
+        expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ admin }));
+      },
+    );
+  });
+
+  it.each([true, false, null, undefined])(
+    'leaves admin to the first-account rule when no admin groups are set (oidcAdmin=%s)',
+    async (oidcAdmin) => {
+      vi.stubEnv('OIDC_ADMIN_GROUPS', '');
       await authCallback(
         { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId, oidcAdmin } } } as Parameters<typeof authCallback>[0],
         makeResponse(),
       );
 
-      expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ admin }));
+      expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ admin: null }));
     },
   );
 

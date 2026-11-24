@@ -39,5 +39,6 @@ export function mockRes(opts: MockResponseOptions = {}): Response {
   const status = opts.status ?? vi.fn().mockReturnThis();
   const json = opts.json ?? vi.fn().mockReturnThis();
   const sendStatus = opts.sendStatus ?? vi.fn().mockReturnThis();
-  return { json, sendStatus, status } as unknown as Response;
+  const setHeader = vi.fn().mockReturnThis();
+  return { json, sendStatus, setHeader, status } as unknown as Response;
 }
