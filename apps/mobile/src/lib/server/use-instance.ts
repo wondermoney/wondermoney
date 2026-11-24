@@ -4,7 +4,7 @@ import { useServerSwitch } from '@/components/providers/server-switch-provider'
 import { nativePasskeyAuthenticator } from '@/lib/auth/native-passkeys'
 import { appPasskeyDomains, isPasskeyAvailable } from '@/lib/auth/passkey-availability'
 
-import { fetchInstance, type InstanceDescription } from './server-connection'
+import { fetchInstance, hostOf, type InstanceDescription } from './server-connection'
 
 type Features = InstanceDescription['features']
 
@@ -22,10 +22,18 @@ function useInstance() {
       if (fetched.status !== 'ok') throw new Error(`GET /v1/instance: ${fetched.status}`)
       return fetched.instance
     },
-    queryKey: ['instance', apiBaseUrl],
+    queryKey: instanceQueryKey(apiBaseUrl),
     retry: 1,
-    staleTime: Infinity,
+    // A server awaiting its first account stops awaiting it when anyone signs up, here or on
+    // the web, so that description is read again whenever a screen mounts or the app returns
+    // to the foreground.
+    staleTime: (query) => (query.state.data?.setupRequired === true ? 0 : Infinity),
   })
+}
+
+/** The instance query's key, for a screen that knows the description has changed. */
+export function instanceQueryKey(apiBaseUrl: string | null): readonly unknown[] {
+  return ['instance', apiBaseUrl]
 }
 
 /**
@@ -79,6 +87,19 @@ export function usePasswordSignIn(): boolean {
 export function useSignupOpen(): boolean {
   const { data } = useInstance()
   return data?.signupMode === 'open'
+}
+
+/**
+ * The server being set up, while it reports `setupRequired` (no account yet): its name and host,
+ * for the "Set up this server" screen. Null while the description loads, when it can't be
+ * fetched, on an older server without the field and on any server that already has accounts, so
+ * the sign-in screen stays as it is in all of those.
+ */
+export function useServerSetup(): { host: string; name: string } | null {
+  const apiBaseUrl = useServerSwitch()?.apiBaseUrl ?? null
+  const { data } = useInstance()
+  if (!data || data.setupRequired !== true || apiBaseUrl === null) return null
+  return { host: hostOf(apiBaseUrl), name: data.name }
 }
 
 /**

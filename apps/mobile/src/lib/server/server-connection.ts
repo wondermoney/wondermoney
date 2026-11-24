@@ -39,6 +39,15 @@ export function normalizeServerUrl(input: string): string | null {
   }
 }
 
+/** A base URL's host as people read it (`https://money.example.com:8443/api` → `money.example.com:8443`). */
+export function hostOf(url: string): string {
+  try {
+    return new URL(url).host
+  } catch {
+    return url
+  }
+}
+
 const instanceSchema = z.object({
   apiVersion: z.number().int().positive(),
   // Which build the server runs. Optional so an older server that doesn't report them still
@@ -81,6 +90,10 @@ const instanceSchema = z.object({
   }),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),
+  // True while the server has no accounts yet: the signed-out screen offers to set it up, and
+  // the first account becomes the server's admin. Absent on an older server, and malformed, it
+  // reads as false, so sign-in looks as it always has.
+  setupRequired: z.boolean().optional().catch(undefined),
   // A mode this build doesn't know reads as 'unknown' instead of rejecting the server as
   // "not WonderMoney".
   signupMode: tolerantEnum(['open', 'invite', 'closed'], 'unknown'),

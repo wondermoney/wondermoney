@@ -41,9 +41,18 @@ jest.mock('@/features/auth/social-sign-in', () => ({
   },
 }))
 
-const mockServer = { passwordSignIn: true }
+const mockServer: { passwordSignIn: boolean; setup: { host: string; name: string } | null } = { passwordSignIn: true, setup: null }
 jest.mock('@/lib/server/use-instance', () => ({
   usePasswordSignIn: () => mockServer.passwordSignIn,
+  useServerSetup: () => mockServer.setup,
+}))
+
+let capturedSetupProps: Record<string, unknown> | null = null
+jest.mock('@/features/auth/server-setup', () => ({
+  ServerSetup: (props: Record<string, unknown>) => {
+    capturedSetupProps = props
+    return null
+  },
 }))
 
 jest.mock('@/features/auth/sso-sign-in', () => ({
@@ -78,6 +87,8 @@ describe('SignUpRoute', () => {
     capturedInvalidProps = null
     capturedSocialProps = null
     capturedSsoProps = null
+    capturedSetupProps = null
+    mockServer.setup = null
     mockServer.passwordSignIn = true
     captured.mockClear()
   })
@@ -107,6 +118,14 @@ describe('SignUpRoute', () => {
 
     expect(captured).not.toHaveBeenCalled()
     takePendingInviteToken()
+  })
+
+  it('is the setup screen on a server with no accounts yet, not the sign-up form', async () => {
+    mockServer.setup = { host: 'money.example.com', name: 'Casa' }
+    await renderRoute()
+
+    expect(capturedSetupProps).toEqual({ server: { host: 'money.example.com', name: 'Casa' } })
+    expect(capturedSignUpProps).toBeNull()
   })
 
   it('renders a normal, unlocked sign-up form when there is no pending invite', async () => {

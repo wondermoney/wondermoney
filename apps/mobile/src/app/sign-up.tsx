@@ -6,12 +6,13 @@ import { useTranslation } from 'react-i18next'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { AuthLink, AuthLead } from '@/features/auth/auth-form-styles'
 import { InviteInvalidScreen } from '@/features/auth/invite-invalid-screen'
+import { ServerSetup } from '@/features/auth/server-setup'
 import { SignUpScreen } from '@/features/auth/sign-up-screen'
 import { SocialSignIn } from '@/features/auth/social-sign-in'
 import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import type { InviteValidationDto } from '@/lib/auth/household-invite-validation'
 import { setPendingInviteToken, takePendingInviteToken } from '@/lib/auth/invite-token-store'
-import { usePasswordSignIn } from '@/lib/server/use-instance'
+import { usePasswordSignIn, useServerSetup } from '@/lib/server/use-instance'
 
 type InviteState =
   | { status: 'none' }
@@ -27,6 +28,8 @@ export default function SignUpRoute() {
   const [invite, setInvite] = useState<InviteState>(() => (pendingToken ? { status: 'validating' } : { status: 'none' }))
   // OIDC_ONLY: accounts come through the identity provider only.
   const passwordSignIn = usePasswordSignIn()
+  // On a server with no accounts yet, creating one is setting the server up (sign-in.tsx).
+  const serverSetup = useServerSetup()
 
   useEffect(() => {
     if (!pendingToken) return
@@ -39,6 +42,8 @@ export default function SignUpRoute() {
     })
     return () => { cancelled = true }
   }, [pendingToken, validateHouseholdInvite])
+
+  if (serverSetup) return <ServerSetup server={serverSetup} />
 
   if (invite.status === 'validating') {
     return (

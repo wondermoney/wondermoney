@@ -115,6 +115,11 @@
       "submit": "Join now",
       "submitting": "Creating account"
     },
+    "setup": {
+      "title": "Set up this server",
+      "lead": "{{name}} ({{host}}) has no accounts yet. The account you create here will own this server and can invite others.",
+      "submit": "Create account"
+    },
     "social": {
       "divider": "Or continue with",
       "apple": "Continue with Apple",
