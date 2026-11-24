@@ -1,0 +1,22 @@
+---
+title: WonderMoney 1.11.1
+description: The Unraid container stops its database cleanly, and the website shows real logos in its product previews.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.11.1)
+
+## Upgrading
+
+Nothing to do. There are no migrations and no new settings, and the Docker Compose, Helm and Render installs work as before. [Unraid](/en/docs/self-hosting/unraid) installs get the fix below when they update.
+
+## New
+
+- The wonder.money homepage shows real bank logos on its accounts example and real company logos on its portfolio example. Its list of supported banks and brokers now makes clear that many more banks connect and that any broker's CSV file imports.
+
+## Fixes
+
+- **The Unraid container stops its database cleanly.** On Unraid, `wondermoney-aio` runs everything in one container, database included. Stopping the container no longer cuts the database off after two seconds. It now finishes saving, so the next start doesn't have to recover. The Unraid template gives it up to 30 seconds.
+
+## Thanks to
+
+- @nip10
