@@ -137,13 +137,15 @@ start() {
   log "Started $name (pid $!)."
 }
 
-# Stops in three steps, sized so a plain `docker stop` (10 s) never kills the database mid-write:
-# the apps (Caddy, web, worker, API) get SIGTERM and 5 s to drain; then the file store, 2 s
-# (its graceful stop can wait on its own internal streams indefinitely, and by then nothing is
-# writing to it); then Postgres its fast shutdown (SIGINT), about a second. Whatever outlives its
-# step is killed.
+# Stops in two steps. The apps (Caddy, web, worker, API) get SIGTERM and 5 s to drain, and are
+# killed after that. Then, together, the file store gets SIGTERM and 2 s (its graceful stop can
+# wait on its own internal streams indefinitely, and by then nothing is writing to it), and
+# Postgres its fast shutdown (SIGINT). Postgres is never killed from here: its shutdown checkpoint
+# can take seconds on a slow disk (Unraid's /mnt/user), and only Docker's stop timeout (30 s in
+# the Unraid template) cuts it short.
 
-# Sends `signal` to the named processes and waits up to `seconds` for them, then kills the rest.
+# Sends `signal` to the named processes and waits up to `seconds` for them (0: as long as they
+# take), then kills the rest.
 stop_group() {
   local signal="$1" seconds="$2"
   shift 2
@@ -159,7 +161,7 @@ stop_group() {
       [ -n "${wanted[${NAMES[i]}]:-}" ] && kill -0 "${PIDS[i]}" 2>/dev/null && left+=("${NAMES[i]}")
     done
     ((${#left[@]} == 0)) && return
-    if ((SECONDS >= deadline)); then
+    if ((seconds > 0 && SECONDS >= deadline)); then
       log "Still running after ${seconds}s, killing: ${left[*]}."
       for ((i = 0; i < ${#PIDS[@]}; i++)); do
         [ -n "${wanted[${NAMES[i]}]:-}" ] && kill -KILL "${PIDS[i]}" 2>/dev/null || true
@@ -174,8 +176,14 @@ stop_all() {
   $stopping && return
   stopping=true
   stop_group TERM 5 caddy web worker api
+  # Postgres starts its shutdown first, so the store's two seconds run while it writes its
+  # checkpoint; a second SIGINT below changes nothing.
+  local i
+  for i in "${!PIDS[@]}"; do
+    [ "${NAMES[i]}" = postgres ] && kill -INT "${PIDS[i]}" 2>/dev/null || true
+  done
   stop_group TERM 2 storage
-  stop_group INT 2 postgres
+  stop_group INT 0 postgres
   wait 2>/dev/null || true
   log "Stopped."
 }
@@ -196,7 +204,7 @@ wait_for() {
     for pid in "${PIDS[@]}"; do
       kill -0 "$pid" 2>/dev/null || { log "A process exited while waiting for $what."; stop_all; exit 1; }
     done
-    if ((SECONDS >= deadline)); then
+    if ((seconds > 0 && SECONDS >= deadline)); then
       log "$what did not become ready within $seconds seconds."
       stop_all
       exit 1
