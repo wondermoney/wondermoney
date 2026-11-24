@@ -25,7 +25,11 @@ kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
 kubectl -n wondermoney port-forward svc/wondermoney-api 3001:3001 &
 ```
 
-Then open http://localhost:3000 and create your account. The first account can always sign up; after that, `SIGNUP_MODE` decides who else can.
+Then open http://localhost:3000: a new server opens on its setup page. The first account you create there is the instance admin; after that, `SIGNUP_MODE` decides who else can sign up.
+
+<Callout type="warn" title="Finish setup before the server is reachable from the internet">
+  Until the first account exists, whoever opens the app first becomes this server's admin. Create it through the port forward before you add an Ingress.
+</Callout>
 
 To see every setting:
 

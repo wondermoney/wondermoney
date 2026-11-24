@@ -75,7 +75,11 @@ Os outros segredos (o segredo de sessão, as chaves de administração e interna
 1. Abre o serviço `wondermoney` no painel. O endereço dele está no topo da página.
 2. Se não for o `APP_URL` que introduziste, define o `APP_URL` no Environment desse serviço com esse endereço. Os outros serviços copiam o `APP_URL` de lá quando o Blueprint sincroniza: abre a página do Blueprint e carrega em **Manual Sync**.
 3. Para o teu próprio domínio, adiciona-o em **Custom Domains** no serviço `wondermoney` e cria o registo DNS que a Render mostra. A Render obtém o certificado. Consulta o [guia de domínios personalizados da Render](https://render.com/docs/custom-domains).
-4. Abre o endereço e cria a tua conta.
+4. Abre o endereço e termina a configuração: a primeira conta que criares é a administradora da instância.
+
+<Callout type="warn" title="Termina a configuração logo a seguir ao primeiro deploy">
+  Uma instância no Render é pública desde o primeiro deploy. Enquanto a primeira conta não existir, quem abrir o endereço primeiro fica administrador deste servidor, por isso abre-o e cria a tua conta assim que o deploy terminar.
+</Callout>
 
 A aplicação móvel liga-se ao mesmo endereço: consulta [Usar a aplicação móvel com o teu servidor](/pt/docs/self-hosting/mobile-app).
 

@@ -46,7 +46,13 @@ docker compose logs -f api
 
 ## Create your account
 
-Open http://localhost:3000 and sign up. The first account on a new instance can always sign up. After that, `SIGNUP_MODE` in `.env` decides who else can:
+Open http://localhost:3000. A new server opens on its setup page: create the first account there. The first account is the instance admin: it owns the server, can invite other people and can open the admin pages, such as [bank sync health](/en/docs/self-hosting/bank-sync-health). Once it exists, you continue with the usual first steps in the app.
+
+<Callout type="warn" title="Finish setup before the server is reachable from the internet">
+  Until the first account exists, whoever opens the app first becomes this server's admin. Create it on your own network, then add [HTTPS and a domain](/en/docs/self-hosting/https-and-domains).
+</Callout>
+
+After the first account, `SIGNUP_MODE` in `.env` decides who else can sign up:
 
 | Value | Who can sign up |
 |---|---|

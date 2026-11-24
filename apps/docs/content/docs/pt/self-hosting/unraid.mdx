@@ -13,7 +13,11 @@ Precisas do Unraid 6.12 ou mais recente com o plugin Community Applications, e d
 2. Em **App URL**, indica o endereço onde vais abrir o WonderMoney, sem caminho, como `http://192.168.1.10:3000`. A porta tem de ser a mesma de **Web UI port**.
 3. Escolhe **Apply**.
 
-O primeiro arranque cria a base de dados e carrega os dados de referência, o que demora alguns minutos; quando estiver pronto, o registo do contentor termina com `WonderMoney is running at`. Abre então a Web UI a partir do separador Docker e cria a tua conta. A primeira conta pode sempre registar-se; a partir daí, **Sign-up** decide quem mais pode.
+O primeiro arranque cria a base de dados e carrega os dados de referência, o que demora alguns minutos; quando estiver pronto, o registo do contentor termina com `WonderMoney is running at`. Abre então a Web UI a partir do separador Docker: um servidor novo abre na página de configuração. A primeira conta que lá criares é a administradora da instância; a partir daí, **Sign-up** decide quem mais se pode registar.
+
+<Callout type="warn" title="Termina a configuração antes de o servidor estar acessível a partir da internet">
+  Enquanto a primeira conta não existir, quem abrir a aplicação primeiro fica administrador deste servidor. Cria-a na tua própria rede e só depois junta [HTTPS e um domínio](/pt/docs/self-hosting/https-and-domains).
+</Callout>
 
 Enquanto o WonderMoney não estiver nas Community Applications, adiciona o modelo à mão. Abre um terminal no servidor e corre:
 
