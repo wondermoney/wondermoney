@@ -46,11 +46,14 @@ interface SignupFormProps {
   inviteToken?: string;
   /** When set, the email is fixed to the invited address and the field is locked. */
   lockedEmail?: string;
+  /** The submit button's label, when it is not the usual "Join now". */
+  submitLabel?: string;
 }
 
 export default function SignupForm({
   inviteToken,
   lockedEmail,
+  submitLabel,
 }: SignupFormProps) {
   const t = useTranslations();
   const form = useForm<SignupFormSchema>({
@@ -226,6 +229,7 @@ export default function SignupForm({
       onGoogleSignup={signUpWithGoogle}
       onSubmit={onSubmit}
       passwordSignIn={passwordSignIn}
+      submitLabel={submitLabel}
     />
   );
 }
