@@ -7,7 +7,9 @@ Cuando un banco cambia algo o un consentimiento caduca, las sincronizaciones emp
 
 ## Hacer administrador a alguien
 
-**Con inicio de sesión único**, define `OIDC_ADMIN_GROUPS`: los miembros de esos grupos son administradores, y se comprueba en cada inicio de sesión. Consulta [Inicio de sesión único](/es/docs/self-hosting/single-sign-on#administradores).
+La primera cuenta de un servidor nuevo ya es administradora: quien terminó la configuración puede abrir esta página enseguida. Para hacer administradoras a otras personas, usa una de estas formas.
+
+**Con inicio de sesión único**, define `OIDC_ADMIN_GROUPS`: los miembros de esos grupos son administradores, y se comprueba en cada inicio de sesión. En ese caso, los grupos deciden también para la primera cuenta. Consulta [Inicio de sesión único](/es/docs/self-hosting/single-sign-on#administradores).
 
 **Sin inicio de sesión único**, ejecuta el comando `instance-admin` en el contenedor de la API. La persona necesita tener cuenta primero.
 

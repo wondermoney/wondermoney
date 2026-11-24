@@ -54,9 +54,13 @@ cd wondermoney/apps/api/deploy/selfhost
 docker compose up -d
 ```
 
-Open http://localhost:3000 and create your account. The first account on a new instance can
-always sign up; afterwards `SIGNUP_MODE` in `.env` decides who else can (`open`, `invite` or
-`closed`).
+Open http://localhost:3000 and finish setup: a new server opens on its setup page, and the first
+account you create there is the instance admin (it owns the server, invites others and opens the
+admin pages). With `OIDC_ADMIN_GROUPS` set, the identity provider's groups decide admin instead.
+Afterwards `SIGNUP_MODE` in `.env` decides who else can sign up (`open`, `invite` or `closed`).
+
+**Finish setup before the server is reachable from the internet.** Until the first account exists,
+whoever opens the app first becomes its admin.
 
 On first start the API creates the database schema and loads the reference data (currencies,
 categories, the asset catalog). This takes a minute or two; `docker compose logs -f api` shows

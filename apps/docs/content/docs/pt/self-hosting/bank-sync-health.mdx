@@ -7,7 +7,9 @@ Quando um banco muda alguma coisa ou um consentimento expira, as sincronizaçõe
 
 ## Tornar alguém administrador
 
-**Com início de sessão único**, define `OIDC_ADMIN_GROUPS`: os membros desses grupos são administradores, verificado em cada início de sessão. Vê [Início de sessão único](/pt/docs/self-hosting/single-sign-on#administradores).
+A primeira conta de um servidor novo já é administradora: quem terminou a configuração pode abrir esta página de imediato. Para tornares outras pessoas administradoras, usa uma destas formas.
+
+**Com início de sessão único**, define `OIDC_ADMIN_GROUPS`: os membros desses grupos são administradores, verificado em cada início de sessão. Nesse caso, os grupos também decidem para a primeira conta. Vê [Início de sessão único](/pt/docs/self-hosting/single-sign-on#administradores).
 
 **Sem início de sessão único**, corre o comando `instance-admin` no contentor da API. A pessoa tem de ter conta primeiro.
 

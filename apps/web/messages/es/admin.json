@@ -34,5 +34,25 @@
     "col-failing-since": "Con fallos desde",
     "col-last-success": "Último éxito",
     "never": "Nunca"
+  },
+  "instanceSetup": {
+    "meta-title": "Configurar tu servidor",
+    "title": "Te damos la bienvenida a tu servidor {instanceName}",
+    "description": "Todavía nadie tiene una cuenta aquí. La cuenta que crees ahora será la dueña de este servidor: es su administradora y puede invitar a otras personas.",
+    "description-groups": "Todavía nadie tiene una cuenta aquí. La cuenta que crees ahora será la dueña de su hogar y podrá invitar a otras personas. Quién es administrador de este servidor depende de tus grupos de inicio de sesión único.",
+    "create-account": "Crear cuenta",
+    "features-title": "Lo que este servidor tiene activado",
+    "features-description": "Esto viene de las variables de entorno del servidor. Para cambiar una, defínela en el servidor y reinícialo.",
+    "feature-email": "Correo",
+    "feature-fileStorage": "Almacenamiento de archivos",
+    "feature-ai": "Funciones de IA",
+    "feature-bankSync": "Sincronización bancaria",
+    "feature-marketData": "Datos de mercado",
+    "feature-googleSignIn": "Inicio de sesión con Google",
+    "feature-singleSignOn": "Inicio de sesión único",
+    "on": "Activado",
+    "off": "Desactivado",
+    "set-up-link": "Cómo activarlo",
+    "set-up-link-label": "Cómo activar: {feature}"
   }
 }

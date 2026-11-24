@@ -290,6 +290,8 @@ docker compose exec api node dist/database/scripts/seed-demo-household.js
 
 Em Kubernetes, corre o mesmo comando no pod da API. Só escreve a conta de demonstração (`demo@wonder.money`) e o agregado dela, não mexe em mais nenhuma conta e pode ser corrido de novo; corre-o outra vez para repor a demonstração como estava. Recusa, sem alterar nada, quando esse endereço pertence a uma conta que não é a de demonstração. Num servidor sem dados de mercado, dá também um histórico de preços às seis ações da demonstração, mas só a uma ação que não tenha nenhum preço.
 
+A conta de demonstração não conta como a primeira conta do servidor: criá-la antes de alguém se registar mantém a página de configuração, e a primeira conta real continua a ser a administradora da instância.
+
 Definições recomendadas para uma instância de demonstração:
 
 | Definição | Recomendado | Porquê |

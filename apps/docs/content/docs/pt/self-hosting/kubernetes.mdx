@@ -25,7 +25,11 @@ kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
 kubectl -n wondermoney port-forward svc/wondermoney-api 3001:3001 &
 ```
 
-Depois abre http://localhost:3000 e cria a tua conta. A primeira conta pode sempre registar-se; a partir daí, `SIGNUP_MODE` decide quem mais pode.
+Depois abre http://localhost:3000: um servidor novo abre na página de configuração. A primeira conta que lá criares é a administradora da instância; a partir daí, `SIGNUP_MODE` decide quem mais se pode registar.
+
+<Callout type="warn" title="Termina a configuração antes de o servidor estar acessível a partir da internet">
+  Enquanto a primeira conta não existir, quem abrir a aplicação primeiro fica administrador deste servidor. Cria-a através do port forward antes de juntares um Ingress.
+</Callout>
 
 Para ver todas as definições:
 

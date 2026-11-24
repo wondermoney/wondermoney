@@ -34,5 +34,25 @@
     "col-failing-since": "Failing since",
     "col-last-success": "Last success",
     "never": "Never"
+  },
+  "instanceSetup": {
+    "meta-title": "Set up your server",
+    "title": "Welcome to your {instanceName} server",
+    "description": "Nobody has an account here yet. The account you create now owns this server: it is the server's admin and can invite other people.",
+    "description-groups": "Nobody has an account here yet. The account you create now owns its household and can invite other people. Who is an admin of this server follows your single sign-on groups.",
+    "create-account": "Create account",
+    "features-title": "What this server has turned on",
+    "features-description": "These come from the server's environment variables. To change one, set it on the server and restart it.",
+    "feature-email": "Email",
+    "feature-fileStorage": "File storage",
+    "feature-ai": "AI features",
+    "feature-bankSync": "Bank sync",
+    "feature-marketData": "Market data",
+    "feature-googleSignIn": "Google sign-in",
+    "feature-singleSignOn": "Single sign-on",
+    "on": "On",
+    "off": "Off",
+    "set-up-link": "How to turn it on",
+    "set-up-link-label": "How to turn on {feature}"
   }
 }

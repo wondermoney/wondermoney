@@ -290,6 +290,8 @@ docker compose exec api node dist/database/scripts/seed-demo-household.js
 
 On Kubernetes, run the same command in the API pod. It writes only the demo account (`demo@wonder.money`) and its household, leaves every other account alone, and is safe to run again; run it again to put the demo back as it was. It refuses, changing nothing, when that address belongs to an account that is not the demo account. On a server without market data it also gives the demo's six stocks a price history, but only a stock that has no price at all.
 
+The demo account does not count as the server's first account: seeding it before anyone signs up leaves the setup page in place, and the first real account still becomes the instance admin.
+
 Recommended settings for a demo instance:
 
 | Setting | Recommended | Why |

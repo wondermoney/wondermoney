@@ -61,6 +61,11 @@ export async function updateSession(
   // just redirect-loops into login.
   const isFaqRoute =
     pathAfterLocale === "/faq" || pathAfterLocale.startsWith("/faq/");
+  // First-run setup of a new server: signed out by definition. The sign-in and sign-up pages
+  // send visitors there while the server has no account (they ask the API; this gate never does),
+  // and the page sends them back to sign in once it has one.
+  const isSetupRoute =
+    pathAfterLocale === "/setup" || pathAfterLocale.startsWith("/setup/");
 
   // Preserve any cookies next-intl set on the routing response when we swap
   // in a redirect. No auth cookies are refreshed here — better-auth sessions
@@ -94,7 +99,8 @@ export async function updateSession(
     !isLoggedIn &&
     !isAuthRoute &&
     !isJoinRoute &&
-    !isFaqRoute
+    !isFaqRoute &&
+    !isSetupRoute
   ) {
     // Only `next` rides on the login URL: the page's own query string goes
     // inside it, so /en/accounts?tab=x comes back with its tab. Readers
