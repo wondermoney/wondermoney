@@ -1,11 +1,15 @@
 ---
 import { toOgLocale } from "../../lib/ogLocale";
+import { DEFAULT_OG_IMAGE, OG_IMAGE_HEIGHT, OG_IMAGE_WIDTH } from "@/lib/og/ogImages";
 import type { Lang } from "@/lib/i18nLocale";
 
 interface Props {
   title: string;
   description: string;
+  /** Site-relative (one of the site's 1200×630 PNGs) or an absolute URL. */
   ogImage?: string;
+  /** What the image shows; defaults to the site name for the shared image. */
+  ogImageAlt?: string;
   ogType?: string;
   canonicalUrl?: string;
   noindex?: boolean;
@@ -21,7 +25,8 @@ const SITE_NAME = "WonderMoney";
 const {
   title,
   description,
-  ogImage = "/og-default.png",
+  ogImage = DEFAULT_OG_IMAGE,
+  ogImageAlt,
   ogType = "website",
   canonicalUrl,
   noindex = false,
@@ -30,7 +35,11 @@ const {
   locale,
 } = Astro.props;
 
-const effectiveOgImage = ogImage ?? "/og-default.png";
+const effectiveOgImage = ogImage ?? DEFAULT_OG_IMAGE;
+const resolvedOgImageAlt = ogImageAlt ?? SITE_NAME;
+// The site's own images (the shared one and the generated ones) are 1200×630 PNGs; an outside
+// image's size is not known.
+const ownOgImage = !effectiveOgImage.startsWith("http");
 const resolvedOgImage = effectiveOgImage.startsWith("http") ? effectiveOgImage : `${SITE_URL}${effectiveOgImage}`;
 const resolvedCanonicalUrl = canonicalUrl ?? Astro.url.href;
 const ogLocale = toOgLocale(locale);
@@ -48,6 +57,10 @@ const ogLocale = toOgLocale(locale);
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={resolvedOgImage} />
+{ownOgImage && <meta property="og:image:type" content="image/png" />}
+{ownOgImage && <meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />}
+{ownOgImage && <meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />}
+<meta property="og:image:alt" content={resolvedOgImageAlt} />
 <meta property="og:url" content={resolvedCanonicalUrl} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:locale" content={ogLocale} />
@@ -57,3 +70,4 @@ const ogLocale = toOgLocale(locale);
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={resolvedOgImage} />
+<meta name="twitter:image:alt" content={resolvedOgImageAlt} />

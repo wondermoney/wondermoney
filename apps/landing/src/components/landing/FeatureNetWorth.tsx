@@ -2,6 +2,7 @@ import { useTranslations } from "@/lib/reactTranslations";
 import { ChartLine, Scale, ShieldCheck, Sigma } from "lucide-react";
 
 import NetWorthPreview from "@/components/homepage/previews/NetWorthPreview";
+import { FEATURE_NET_WORTH } from "@/components/homepage/previews/netWorthSample";
 import CTABanner from "@/components/shared/CTABanner";
 import { Button } from "@/components/ui/button";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
@@ -90,7 +91,7 @@ function FeatureNetWorthContent({ locale }: { locale: Lang }) {
 							</div>
 						</div>
 						<div className="lg:pl-4">
-							<NetWorthPreview size="hero" />
+							<NetWorthPreview sample={FEATURE_NET_WORTH} />
 						</div>
 					</div>
 				</div>

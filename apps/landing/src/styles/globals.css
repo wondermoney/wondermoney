@@ -89,6 +89,15 @@
     --chart-4: 58% 0.19 30;
     --chart-5: 54% 0.13 235;
 
+    /* Fuel types on the fuel prices page, one hue each wherever a fuel is
+       drawn (chips, price badges, map markers, the price chart): amber 65 ·
+       bluish green 165 · blue 245. Each holds white text at >= 5.4:1 and
+       reads as text on the canvas, paper-2 and its own 10% tint at >= 4.8:1.
+       The fuel's name always goes with the colour. See DESIGN.md. */
+    --fuel-diesel: 52% 0.11 65;
+    --fuel-gasoline95: 50% 0.1 165;
+    --fuel-lpg: 52% 0.13 245;
+
     --radius: 0.5rem;
 
     /* Additive, marketing-only. See DESIGN.md. */

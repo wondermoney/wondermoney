@@ -13,9 +13,11 @@ import {
   toToolsHubPath,
 } from "@/lib/routes";
 import { FEATURE_MENU } from "@/lib/featureMenu";
+import { buildFooterToolGroups } from "@/lib/toolsCatalog";
 import { getTranslations } from "@/lib/translations";
 import { GITHUB_URL, selfHostingDocsUrl } from "@/lib/openSource";
 import type { Lang } from "@/lib/i18nLocale";
+import { appFaqUrl } from "@/lib/appLinks";
 import { Select } from "@/components/ui/select";
 
 export type Props = {
@@ -57,7 +59,7 @@ export default function Footer({ className, locale }: Props) {
     support: [
       {
         name: t("footer.faq"),
-        href: "https://app.wonder.money/faq",
+        href: appFaqUrl(locale),
       },
       { name: t("footer.documentation"), href: "https://docs.wonder.money" },
       // { name: "Guides", href: "#" },
@@ -168,6 +170,16 @@ export default function Footer({ className, locale }: Props) {
     ],
   };
 
+  // The most-used tools, under their task groups: every page links them (toolsCatalog.ts `footer`).
+  const toolGroups = buildFooterToolGroups(locale).map((group) => ({
+    title: t(`tools.hub.groups.${group.id}.title`),
+    href: group.href,
+    items: group.tools.map((tool) => ({
+      name: t(`tools.${tool.key}.shortName`),
+      href: tool.href,
+    })),
+  }));
+
   const linkClass =
     "rounded-sm text-sm leading-6 text-ink-2 transition-colors hover:text-foreground";
 
@@ -233,6 +245,31 @@ export default function Footer({ className, locale }: Props) {
           <div className="col-span-2 min-w-0 sm:col-span-4 lg:col-span-4 lg:col-start-9">
             <EmailCaptureForm locale={locale} source="footer" variant="footer" />
           </div>
+        </div>
+
+        {/* The most-used tools, one column per task group, under the index columns */}
+        <div
+          data-footer-tools
+          className="mt-12 grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-4 lg:grid-cols-12 lg:gap-x-10"
+        >
+          {toolGroups.map((group) => (
+            <div key={group.href} className="min-w-0 lg:col-span-2">
+              <h3 className="text-sm font-medium text-foreground">
+                <a href={group.href} className="rounded-sm transition-colors hover:text-primary">
+                  {group.title}
+                </a>
+              </h3>
+              <ul role="list" className="mt-4 space-y-2.5">
+                {group.items.map((item) => (
+                  <li key={item.href}>
+                    <a href={item.href} className={linkClass}>
+                      {item.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* The wordmark and what WonderMoney is */}

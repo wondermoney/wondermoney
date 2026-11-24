@@ -98,6 +98,8 @@ import type { FigureCard } from "@/lib/figureCards";
 import { figureForTool, PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import { buildAlternateLinks, toLocalizedPath, type Lang } from "@/lib/routes";
 import { getToolCatalogEntry } from "@/lib/toolsCatalog";
+import { ogImageFor, toolOgCard } from "@/lib/og/ogImages";
+import { buildToolStructuredData } from "@/lib/structuredData";
 import { getTranslations } from "@/lib/translations";
 import type { ToolRouteId } from "@/lib/pageStaticPaths";
 
@@ -383,24 +385,15 @@ const sectionTitle = t(`tools.${key}.title`);
 const sectionSubtitle = t(`tools.${key}.subtitle`);
 const toolsHubHref = `/${locale}/tools`;
 
-const schema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  name: pageTitle,
-  url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
-  applicationCategory: "FinanceApplication",
-  operatingSystem: "Web",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "EUR",
-  },
-};
+const ogImage = ogImageFor(toolOgCard(routeId, locale));
+const schema = await buildToolStructuredData(routeId, locale);
 ---
 
 <ContentLayout
   title={pageTitle}
   description={pageDescription}
+  ogImage={ogImage.src}
+  ogImageAlt={ogImage.alt}
   alternateLinks={alternateLinks}
   layout="article"
   landingSource={routeId}

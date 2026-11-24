@@ -1,8 +1,9 @@
 // The comparator's results: the comparison across tariff options, the visitor's own tariff, the
 // ranked offers as dense rows (the monthly bill, the saving against the regulated tariff, the unit
 // prices, the contract and a link to the offer), each with its breakdown and conditions, a tray
-// that compares up to three offers side by side, the CSV export and the ERSE source note. Indexed
-// offers priced from OMIE's prices say so on their row and cite the supplier's formula.
+// that compares up to three offers side by side, the CSV export, the ERSE source note and the
+// trademark line for the suppliers' logos. Indexed offers priced from OMIE's prices say so on their
+// row and cite the supplier's formula.
 import {
   ArrowUpRight,
   CalendarClock,
@@ -41,6 +42,8 @@ import { ERSE_TARIFFS } from "@/lib/calculators/data/erseTariffs";
 import type { Lang } from "@/lib/i18nLocale";
 import { formatMoney, formatNumber } from "@/lib/numberFormat";
 import { useTranslations } from "@/lib/reactTranslations";
+import BrandLogo from "@/components/shared/BrandLogo";
+import TrademarkDisclaimer from "@/components/shared/TrademarkDisclaimer";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -267,6 +270,7 @@ export default function ElectricityTariffResults({
         </>
       )}
       <SourceNote source={source} date={date} market={market} />
+      <TrademarkDisclaimer textKey="lp.trademarks.tmGeneric" />
     </div>
   );
 }
@@ -297,11 +301,16 @@ function OptionComparison({ outcome, option, sortBy }: { outcome: ComparatorView
               </p>
               {best ? (
                 <>
-                  <p className="mt-1 whitespace-nowrap font-mono text-lg font-semibold text-foreground sm:text-xl">
-                    {euro(best[sortBy].total / 12)}
-                    <span className="ml-0.5 font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
+                  {/* The amount never breaks; on a phone "/month" wraps under it rather than overflowing. */}
+                  <p className="mt-1 font-mono text-lg font-semibold text-foreground max-sm:leading-tight sm:text-xl">
+                    <span className="whitespace-nowrap">{euro(best[sortBy].total / 12)}</span>
+                    <wbr />
+                    <span className="ml-0.5 whitespace-nowrap font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
                   </p>
-                  <p className="truncate text-xs text-muted-foreground">{supplierOf(best.offer)}</p>
+                  <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                    <BrandLogo name={supplierOf(best.offer)} className="size-4 rounded-sm text-[7px]" />
+                    <span className="truncate">{supplierOf(best.offer)}</span>
+                  </p>
                   {isCheapest ? (
                     <p className="mt-1 flex items-center gap-1 text-xs font-medium text-success-text">
                       <Check aria-hidden="true" className="size-3.5" />
@@ -362,17 +371,6 @@ function badges(result: RankedOffer, t: (key: string) => string) {
   if (offer.mandatoryServicesPerYear > 0) list.push({ key: "services", label: t(k("badges.services")), tone: "neutral", Icon: Wrench });
   if (offer.renewable) list.push({ key: "renewable", label: t(k("badges.renewable")), tone: "neutral", Icon: Leaf });
   return list;
-}
-
-/** The supplier's initials on a quiet tile: tells the rows apart without a third party's logo. */
-function SupplierMark({ name }: { name: string }) {
-  const words = name.replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter(Boolean);
-  const initials = (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
-  return (
-    <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-paper-2 text-sm font-semibold text-ink-2">
-      {initials}
-    </span>
-  );
 }
 
 /** The offer's unit prices before VAT, energy per period and power per day, and its contract. */
@@ -449,31 +447,33 @@ function ResultRow({
     <li className={`overflow-hidden rounded-card border bg-background ${compared ? "border-primary/50" : "border-border"}`}>
       <div className="flex gap-3 p-4 sm:gap-4 sm:px-5">
         <div className="relative shrink-0">
-          <SupplierMark name={supplier} />
+          <BrandLogo name={supplier} className="size-10 text-sm" />
           <span className="absolute -left-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full border border-border bg-background text-[0.6875rem] font-medium text-ink-2">
             {rank}
           </span>
         </div>
         <div className="min-w-0 flex-1 space-y-2.5">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">{supplier}</p>
-              <p className="line-clamp-2 break-words text-sm text-ink-2" title={offer.name}>
+          {/* On a phone the wrappers dissolve into one grid: the supplier and the month on a line, the
+              saving under the month, then the offer's name across the row. From sm, two columns. */}
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 sm:flex sm:items-start sm:justify-between">
+            <div className="contents sm:block sm:min-w-0">
+              <p className="col-start-1 row-start-1 text-sm font-semibold text-foreground">{supplier}</p>
+              <p className="col-span-2 row-start-3 line-clamp-2 break-words text-sm text-ink-2" title={offer.name}>
                 {offer.name}
               </p>
             </div>
-            <div className="shrink-0 text-right">
-              <p className={`whitespace-nowrap font-mono text-xl font-semibold leading-tight sm:text-2xl ${rank === 1 ? "text-primary" : "text-foreground"}`}>
+            <div className="contents sm:block sm:shrink-0 sm:text-right">
+              <p className={`col-start-2 row-start-1 whitespace-nowrap text-right font-mono text-xl font-semibold leading-tight sm:text-2xl ${rank === 1 ? "text-primary" : "text-foreground"}`}>
                 {euro(result[sortBy].total / 12)}
                 <span className="ml-0.5 font-sans text-xs font-normal text-muted-foreground">{t(k("row.perMonth"))}</span>
               </p>
               {delta && Math.abs(delta.amount) > 0.005 && (
-                <p className={`flex items-center justify-end gap-1 whitespace-nowrap text-xs ${delta.amount > 0 ? "text-success-text" : "text-muted-foreground"}`}>
+                <p className={`col-span-2 row-start-2 flex items-center justify-end gap-1 whitespace-nowrap text-xs ${delta.amount > 0 ? "text-success-text" : "text-muted-foreground"}`}>
                   {delta.amount > 0 ? <TrendingDown aria-hidden="true" className="size-3.5" /> : <TrendingUp aria-hidden="true" className="size-3.5" />}
                   {withAmount(t(k(`row.${delta.amount > 0 ? "cheaper" : "dearer"}.${delta.against}`), { amount: euro(Math.abs(delta.amount)) }), euro(Math.abs(delta.amount)))}
                 </p>
               )}
-              {delta && Math.abs(delta.amount) <= 0.005 && <p className="text-xs text-muted-foreground">{t(k(`row.same.${delta.against}`))}</p>}
+              {delta && Math.abs(delta.amount) <= 0.005 && <p className="col-span-2 row-start-2 text-right text-xs text-muted-foreground">{t(k(`row.same.${delta.against}`))}</p>}
               {/* The year the row is ranked on, for the tests and screen readers; the details show it too. */}
               <p className="sr-only">{euro(result[sortBy].total)}</p>
             </div>
@@ -859,7 +859,10 @@ function CompareTable({ selected, view, sortBy }: { selected: RankedOffer[]; vie
             <td className="w-1/4" />
             {selected.map((result) => (
               <th key={rowKey(result)} scope="col" className="px-3 pb-3 text-left align-bottom font-normal">
-                <span className="block font-semibold text-foreground">{supplierOf(result.offer)}</span>
+                <span className="flex items-center gap-2 font-semibold text-foreground">
+                  <BrandLogo name={supplierOf(result.offer)} />
+                  {supplierOf(result.offer)}
+                </span>
                 <span className="block text-xs text-muted-foreground">{result.offer.name}</span>
               </th>
             ))}

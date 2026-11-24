@@ -16,6 +16,7 @@ interface Props {
 	title: string;
 	description: string;
 	ogImage?: string;
+	ogImageAlt?: string;
 	ogType?: string;
 	canonicalUrl?: string;
 	alternateLinks?: Array<{ hrefLang: string; href: string }>;
@@ -36,6 +37,7 @@ const {
 	title,
 	description,
 	ogImage,
+	ogImageAlt,
 	ogType,
 	canonicalUrl,
 	alternateLinks,
@@ -57,6 +59,7 @@ const homeLabel = translate("nav.home");
 	title={title}
 	description={description}
 	ogImage={ogImage}
+	ogImageAlt={ogImageAlt}
 	ogType={ogType}
 	canonicalUrl={canonicalUrl}
 	alternateLinks={alternateLinks}

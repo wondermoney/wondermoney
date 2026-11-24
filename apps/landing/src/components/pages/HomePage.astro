@@ -15,6 +15,7 @@ import StructuredData from "@/components/shared/StructuredData.astro";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
+import { buildWebSiteSchema } from "@/lib/structuredData";
 
 interface Props {
   locale: Lang;
@@ -68,5 +69,5 @@ const homepageFaqSchema = {
     </div>
   </main>
   <Footer locale={locale} className="mt-0 md:mt-0" client:idle />
-  <StructuredData data={[webApplicationSchema, homepageFaqSchema]} />
+  <StructuredData data={[buildWebSiteSchema(locale), webApplicationSchema, homepageFaqSchema]} />
 </Layout>

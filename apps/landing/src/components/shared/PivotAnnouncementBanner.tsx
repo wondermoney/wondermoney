@@ -11,7 +11,7 @@ import {
   writePivotBannerDismissed,
 } from "@/lib/pivotBanner";
 
-const FAQ_URL = "https://app.wonder.money/faq";
+import { appFaqUrl } from "@/lib/appLinks";
 
 export default function PivotAnnouncementBanner({
   locale,
@@ -20,12 +20,12 @@ export default function PivotAnnouncementBanner({
 }) {
   return (
     <ReactTranslationsProvider locale={locale}>
-      <PivotAnnouncementBannerContent />
+      <PivotAnnouncementBannerContent locale={locale} />
     </ReactTranslationsProvider>
   );
 }
 
-function PivotAnnouncementBannerContent() {
+function PivotAnnouncementBannerContent({ locale }: { locale: Lang }) {
   const { t } = useTranslations();
   const [visible, setVisible] = useState(false);
 
@@ -50,7 +50,7 @@ function PivotAnnouncementBannerContent() {
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1 pr-8 text-center text-sm">
         <span>{t("global.pivotBanner.message")}</span>
         <a
-          href={FAQ_URL}
+          href={appFaqUrl(locale)}
           className="font-semibold underline underline-offset-2 hover:no-underline focus-visible:outline-primary-foreground"
         >
           {t("global.pivotBanner.linkLabel")}

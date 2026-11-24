@@ -87,8 +87,7 @@ function RemuneratedAccounts() {
 
   return (
     <>
-      <AsOfBanner />
-      <h2 className="mt-10 text-2xl font-semibold tracking-tight text-foreground">{t(k("calculator.title"))}</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t(k("calculator.title"))}</h2>
       <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
         {t(k("calculator.intro"), { tax: String(BANK_INTEREST_TAX_RATE) })}
       </p>
@@ -210,6 +209,7 @@ function RemuneratedAccounts() {
           </tbody>
         </table>
       </div>
+      <AsOfBanner className="mt-12" />
       <BankNotices />
     </>
   );

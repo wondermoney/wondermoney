@@ -89,7 +89,9 @@ beforeEach(() => {
 });
 afterEach(() => cleanup());
 
-describe("electricity tariff comparator", () => {
+// Each test renders the whole comparator over the full ERSE offer list: about 3 s on a CI runner
+// alone, and twice that when a lockfile change runs every app's suite in the same job.
+describe("electricity tariff comparator", { timeout: 20_000 }, () => {
   it("quick mode: turns the bill into kWh on the regulated tariff and ranks the offers, with the ERSE source", async () => {
     await renderPage();
     const solved = monthlyKwhFromBill(TUR, { bill: 50, contractedPower: 3.45, option: "simple", cycle: "daily", socialTariff: false, largeFamily: false });
@@ -136,6 +138,20 @@ describe("electricity tariff comparator", () => {
       tool: "electricity_tariff_comparison",
       page_type: "tools/electricity-tariff-comparison",
     });
+  });
+
+  it("puts each supplier's logo, or its initials, on the row's tile, with the trademark line", async () => {
+    await renderPage();
+    const rowOf = (supplier: string) => cards().find((card) => within(card).queryByText(supplier, { selector: "p" }))!;
+    const tile = (card: HTMLElement) => card.querySelector("[aria-hidden='true'].size-10") as HTMLElement;
+    // A supplier with a logo: a decorative image, the name still the row's text.
+    const edp = tile(rowOf("EDP"));
+    expect(edp.querySelector("img")?.getAttribute("src")).toContain("/brands/electricity/edp.webp");
+    expect(edp.querySelector("img")?.getAttribute("alt")).toBe("");
+    // Iberdrola publishes no usable square mark: its initials.
+    expect(tile(rowOf("Iberdrola")).querySelector("img")).toBeNull();
+    expect(tile(rowOf("Iberdrola")).textContent).toBe("IB");
+    expect(screen.getByText(/All trademarks mentioned belong to their respective owners/)).toBeTruthy();
   });
 
   it("full mode: kWh per period for the chosen option and cycle, a total, and the days", async () => {
