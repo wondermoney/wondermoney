@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { ReCaptchaProvider } from "@/components/auth/ReCaptchaProvider";
@@ -9,6 +10,7 @@ import { Link } from "@/components/ui/Link";
 import { Text } from "@/components/ui/Typography";
 import { instanceConfig } from "@/lib/instance";
 import { getInstanceName } from "@/lib/instance-name.server";
+import { getInstanceSetup } from "@/lib/instance-setup.server";
 import { cn } from "@/lib/utils";
 import { createMetadata } from "@/lib/utils/metadata";
 
@@ -25,7 +27,14 @@ export async function generateMetadata({
   });
 }
 
-export default async function SignupPage() {
+export default async function SignupPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  // The first account on a new server is made on the setup page, which says it will be the admin.
+  if ((await getInstanceSetup()).setupRequired) redirect(`/${locale}/setup`);
   const { privacyUrl, termsUrl } = instanceConfig;
   const t = await getTranslations();
   const instanceName = await getInstanceName();

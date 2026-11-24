@@ -70,8 +70,19 @@ export interface InstanceDescription {
      */
     statementImport?: null | StatementImportFeature;
   };
+  /**
+   * Whether the first account on this server becomes its admin: true unless single sign-on's
+   * admin groups decide (`OIDC_ADMIN_GROUPS`). Absent on an API older than first-run setup.
+   */
+  firstAccountAdmin?: boolean;
   minAppVersion: null | string;
   name: string;
+  /**
+   * True while this server has never had an account (the demo account does not count): the web
+   * app then sends signed-out visitors to `/setup`. False for good once the first account
+   * exists; absent on an API older than first-run setup, which reads as false.
+   */
+  setupRequired?: boolean;
   signupMode: "closed" | "invite" | "open";
   /** The operator's `SPONSOR_URL`; null, or absent on an older API, hides the link. */
   sponsorUrl?: null | string;

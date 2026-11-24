@@ -7,7 +7,9 @@ When a bank changes something or a consent runs out, syncs start failing quietly
 
 ## Make someone an admin
 
-**With single sign-on**, set `OIDC_ADMIN_GROUPS`: members of those groups are admins, checked at every sign-in. See [Single sign-on](/en/docs/self-hosting/single-sign-on#admins).
+The first account on a new server is already an admin: whoever finished setup can open this page straight away. Make other people admins one of these ways.
+
+**With single sign-on**, set `OIDC_ADMIN_GROUPS`: members of those groups are admins, checked at every sign-in. The groups then decide for the first account too. See [Single sign-on](/en/docs/self-hosting/single-sign-on#admins).
 
 **Without single sign-on**, run the `instance-admin` command in the api container. The person needs an account first.
 

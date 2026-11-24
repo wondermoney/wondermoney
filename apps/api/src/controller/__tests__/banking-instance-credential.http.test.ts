@@ -372,7 +372,7 @@ describe('instance-wide Enable Banking credentials', () => {
       const first = await seedHousehold(db.em());
       const second = await secondHousehold();
       const json = vi.fn();
-      getInstance(mockReq(), mockRes({ json }));
+      await getInstance(mockReq(), mockRes({ json }));
       // Under the contract flag the first household links; without it, the second is refused.
       vi.stubEnv('ENABLE_BANKING_PRODUCTION_CONTRACT', 'true');
       const responses = [

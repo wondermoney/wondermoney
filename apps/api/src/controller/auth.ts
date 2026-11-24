@@ -6,6 +6,7 @@ import { analyticsSignInMethod, loginEventId, recordServiceEvent } from '@servic
 import { isAppError, provisionHomeTenant } from '@service/auth/auth-callback.service';
 import { getAuthUserFullName } from '@service/auth/auth-callback.utils';
 import { type AuthContext, betterAuthUserExists, getPrimaryAuthProvider, sendReconnectVerificationEmail } from '@service/auth/better-auth';
+import { signupAdminFromGroups } from '@service/auth/instance-admin.service';
 import { reconnectLegacyAppuser } from '@service/auth/legacy-account-reconnect.service';
 import { recordSignup } from '@service/auth/signup-record.service';
 import { sendSignupEmail } from '@service/email/email';
@@ -106,9 +107,10 @@ export async function authCallback(req: Request, res: Response) {
 
     const [firstName, lastName] = fullName ? fullName.split(' ') : [undefined, undefined];
     const { appuser: appUser, created: signupCreated } = await recordSignup({
-      // Set from the identity provider's admin groups at sign-in (services/auth/oidc.ts); every
-      // later OIDC sign-in keeps it in step (instance-admin.service.ts).
-      admin: authUser.user.oidcAdmin === true,
+      // With OIDC_ADMIN_GROUPS, the identity provider's groups at sign-in (services/auth/oidc.ts),
+      // kept in step at every later OIDC sign-in; without, null: the first account on the instance
+      // is its admin (instance-admin.service.ts).
+      admin: signupAdminFromGroups(authUser.user.oidcAdmin),
       email,
       externalUserId,
       firstName: firstName ?? email.split('@')[0],

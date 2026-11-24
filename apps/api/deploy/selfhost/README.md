@@ -23,7 +23,7 @@ stack and waits up to three minutes for the API. It asks for the web app and the
 
 | Flag | What it does |
 |---|---|
-| `--version 1.11.0` | Install a specific release instead of the latest |
+| `--version 1.11.1` | Install a specific release instead of the latest |
 | `--dir /srv/wondermoney` | Where to install (default `./wondermoney`) |
 | `--yes` | No questions: default addresses, and upgrade an existing install |
 | `--app-url`, `--api-url` | The addresses the web app and the API are served at |
@@ -47,16 +47,20 @@ sh install.sh
 Or do the same steps by hand, from the release tag:
 
 ```sh
-# v1.11.0 here: the release you want
-git clone --depth 1 --branch v1.11.0 https://github.com/wondermoney/wondermoney.git
+# v1.11.1 here: the release you want
+git clone --depth 1 --branch v1.11.1 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh        # writes .env with fresh secrets (refuses to overwrite an existing one)
 docker compose up -d
 ```
 
-Open http://localhost:3000 and create your account. The first account on a new instance can
-always sign up; afterwards `SIGNUP_MODE` in `.env` decides who else can (`open`, `invite` or
-`closed`).
+Open http://localhost:3000 and finish setup: a new server opens on its setup page, and the first
+account you create there is the instance admin (it owns the server, invites others and opens the
+admin pages). With `OIDC_ADMIN_GROUPS` set, the identity provider's groups decide admin instead.
+Afterwards `SIGNUP_MODE` in `.env` decides who else can sign up (`open`, `invite` or `closed`).
+
+**Finish setup before the server is reachable from the internet.** Until the first account exists,
+whoever opens the app first becomes its admin.
 
 On first start the API creates the database schema and loads the reference data (currencies,
 categories, the asset catalog). This takes a minute or two; `docker compose logs -f api` shows

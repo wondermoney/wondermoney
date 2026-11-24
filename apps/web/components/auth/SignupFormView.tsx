@@ -30,6 +30,8 @@ type SignupFormViewProps = {
   readonly onSubmit: SubmitHandler<SignupFormSchema>;
   /** False under `OIDC_ONLY`: accounts come only through the provider. */
   readonly passwordSignIn?: boolean;
+  /** The submit button's label, when it is not the usual "Join now". */
+  readonly submitLabel?: string;
 };
 
 export function SignupFormView({
@@ -43,6 +45,7 @@ export function SignupFormView({
   onGoogleSignup,
   onSubmit,
   passwordSignIn = true,
+  submitLabel,
 }: SignupFormViewProps) {
   const t = useTranslations();
   // With password sign-up on, single sign-on sits with Google under "Or continue with"; under
@@ -122,7 +125,7 @@ export function SignupFormView({
               loading={form.formState.isSubmitting}
               disabled={!hydrated || form.formState.isSubmitting}
             >
-              {t("join-now")}
+              {submitLabel ?? t("join-now")}
             </Button>
           </form>
         </Form>

@@ -1,0 +1,22 @@
+---
+title: WonderMoney 1.11.1
+description: El contenedor de Unraid detiene su base de datos de forma limpia, y el sitio muestra logotipos reales en los ejemplos del producto.
+---
+
+[Notas de la versión en GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.11.1)
+
+## Actualizar
+
+Nada que hacer. No hay migraciones ni ajustes nuevos, y las instalaciones con Docker Compose, Helm y Render funcionan como antes. Las instalaciones en [Unraid](/es/docs/self-hosting/unraid) reciben la corrección de abajo cuando las actualices.
+
+## Nuevo
+
+- La página de inicio de wonder.money muestra logotipos reales de bancos en el ejemplo de cuentas y de empresas en el ejemplo de cartera. La lista de bancos y brókers compatibles deja claro que puedes conectar muchos más bancos e importar el CSV de cualquier bróker.
+
+## Correcciones
+
+- **El contenedor de Unraid detiene su base de datos de forma limpia.** En Unraid, `wondermoney-aio` ejecuta todo en un solo contenedor, base de datos incluida. Detener el contenedor ya no corta la base de datos a los dos segundos. Ahora termina de guardar, así que el siguiente arranque no tiene que recuperarse. La plantilla de Unraid le da hasta 30 segundos.
+
+## Agradecimientos
+
+- @nip10

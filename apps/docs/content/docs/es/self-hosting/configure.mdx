@@ -290,6 +290,8 @@ docker compose exec api node dist/database/scripts/seed-demo-household.js
 
 En Kubernetes, ejecuta el mismo comando en el pod de la API. Solo escribe la cuenta de demostración (`demo@wonder.money`) y su hogar, no toca ninguna otra cuenta y se puede ejecutar de nuevo; vuelve a ejecutarlo para dejar la demostración como estaba. Se niega, sin cambiar nada, cuando esa dirección pertenece a una cuenta que no es la de demostración. En un servidor sin datos de mercado, también da un historial de precios a las seis acciones de la demostración, pero solo a una acción que no tenga ningún precio.
 
+La cuenta de demostración no cuenta como la primera cuenta del servidor: crearla antes de que nadie se registre mantiene la página de configuración, y la primera cuenta real sigue siendo la administradora de la instancia.
+
 Ajustes recomendados para una instancia de demostración:
 
 | Ajuste | Recomendado | Por qué |

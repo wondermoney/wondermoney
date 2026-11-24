@@ -81,6 +81,8 @@ Las cuentas nuevas siguen `SIGNUP_MODE` como cualquier otro registro: con `invit
 
 Con `OIDC_ADMIN_GROUPS=wondermoney-admins`, los miembros de ese grupo son administradores de la instancia. WonderMoney lee los grupos en cada inicio de sesión a través del proveedor y concede o retira la administración en consecuencia, así que sacar a alguien del grupo le retira la administración en su siguiente inicio de sesión. Solo se guarda esa respuesta de sí o no; WonderMoney no guarda los tokens del proveedor ni la lista de grupos. Sin `OIDC_ADMIN_GROUPS`, el inicio de sesión no toca la administración.
 
+En un servidor nuevo, la primera cuenta es la administradora de la instancia. Con `OIDC_ADMIN_GROUPS` definido, esa regla no se aplica: los grupos deciden para todas las cuentas, también la primera, sea cual sea la forma en que se registró. Una cuenta creada con contraseña o con Google es entonces una cuenta normal hasta que le des la administración a mano. Ponte en un grupo de administración antes de crear la primera cuenta.
+
 Los administradores pueden abrir la página del [estado de la sincronización bancaria](/es/docs/self-hosting/bank-sync-health). Esa página explica también cómo hacer administrador a alguien sin inicio de sesión único.
 
 ## Direcciones de correo y cuentas existentes

@@ -34,5 +34,25 @@
     "col-failing-since": "Com falhas desde",
     "col-last-success": "Último sucesso",
     "never": "Nunca"
+  },
+  "instanceSetup": {
+    "meta-title": "Configurar o teu servidor",
+    "title": "Damos-te as boas-vindas ao teu servidor {instanceName}",
+    "description": "Ainda ninguém tem conta aqui. A conta que criares agora fica dona deste servidor: é a administradora do servidor e pode convidar outras pessoas.",
+    "description-groups": "Ainda ninguém tem conta aqui. A conta que criares agora fica dona do seu agregado e pode convidar outras pessoas. Quem é administrador deste servidor segue os teus grupos de início de sessão único.",
+    "create-account": "Criar conta",
+    "features-title": "O que este servidor tem ligado",
+    "features-description": "Isto vem das variáveis de ambiente do servidor. Para mudares uma, define-a no servidor e reinicia-o.",
+    "feature-email": "Email",
+    "feature-fileStorage": "Armazenamento de ficheiros",
+    "feature-ai": "Funcionalidades de IA",
+    "feature-bankSync": "Sincronização bancária",
+    "feature-marketData": "Dados de mercado",
+    "feature-googleSignIn": "Início de sessão com Google",
+    "feature-singleSignOn": "Início de sessão único",
+    "on": "Ligado",
+    "off": "Desligado",
+    "set-up-link": "Como ligar",
+    "set-up-link-label": "Como ligar: {feature}"
   }
 }

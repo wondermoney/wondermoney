@@ -7,6 +7,8 @@ import { isMcpEnabled } from '@config/mcp';
 import { isPushEnabled } from '@config/push';
 import { statementImportLimits } from '@config/statement-import';
 import { aiCapabilities, aiProviderLabel } from '@service/ai/ai-provider';
+import { firstAccountIsAdmin } from '@service/auth/instance-admin.service';
+import { isSetupRequired } from '@service/auth/instance-setup';
 import { signInMethods } from '@service/auth/oidc-provider';
 import { passkeyRelyingParty } from '@service/auth/passkey';
 import { resolveSignupMode } from '@service/auth/signup-policy';
@@ -22,11 +24,19 @@ import { buildInfo, FRONTEND_URL } from '@utils/constants';
  * and which optional features it has configured. Clients read it before sign-in, to hide what is not available and,
  * on mobile, to check that a self-hosted server URL is a WonderMoney API at all.
  *
+ * `setupRequired` is true while the instance has never had an account (the demo aside): the
+ * clients then offer the first-run setup. It turns false at the first account and stays false
+ * (services/auth/instance-setup.ts). `firstAccountAdmin` says whether that first account becomes
+ * the instance admin: true unless single sign-on's admin groups decide (`OIDC_ADMIN_GROUPS`).
+ * Never cached, so a client cannot keep offering setup after it is done.
+ *
  * Bump `apiVersion` on a breaking change to the client contract; `MIN_APP_VERSION` lets an
  * operator tell older mobile builds to update. `version` and `commit` say which build the server
  * runs (`dev` and null for a local build).
  */
-export function getInstance(_req: Request, res: Response) {
+export async function getInstance(_req: Request, res: Response) {
+  const setupRequired = await isSetupRequired();
+  res.setHeader('Cache-Control', 'no-store');
   const { commit, version } = buildInfo();
   const bankSync = bankSyncFeatures();
   const signIn = signInMethods();
@@ -79,8 +89,10 @@ export function getInstance(_req: Request, res: Response) {
       // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.
       statementImport: statementProvider ? { ...statementImportLimits(), providerKind: statementProvider.kind } : null,
     },
+    firstAccountAdmin: firstAccountIsAdmin(),
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),
+    setupRequired,
     signupMode: resolveSignupMode(),
     // Where users can chip in towards running this instance (`SPONSOR_URL`); null hides the link.
     sponsorUrl: process.env['SPONSOR_URL']?.trim() || null,

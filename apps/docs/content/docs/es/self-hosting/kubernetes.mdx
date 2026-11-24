@@ -13,24 +13,28 @@ Con el Postgres incluido:
 
 ```sh
 helm install wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.11.0 \
+  --version 1.11.1 \
   --namespace wondermoney --create-namespace \
   --set postgresql.enabled=true
 ```
 
-El chart 1.11.0 usa las imágenes 1.11.0; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
+El chart 1.11.1 usa las imágenes 1.11.1; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
 
 ```sh
 kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
 kubectl -n wondermoney port-forward svc/wondermoney-api 3001:3001 &
 ```
 
-Después abre http://localhost:3000 y crea tu cuenta. La primera cuenta siempre puede registrarse; a partir de ahí, `SIGNUP_MODE` decide quién más puede.
+Después abre http://localhost:3000: un servidor nuevo se abre en su página de configuración. La primera cuenta que crees allí es la administradora de la instancia; a partir de ahí, `SIGNUP_MODE` decide quién más puede registrarse.
+
+<Callout type="warn" title="Termina la configuración antes de que el servidor sea accesible desde internet">
+  Mientras no exista la primera cuenta, quien abra la aplicación primero será el administrador de este servidor. Créala a través del port forward antes de añadir un Ingress.
+</Callout>
 
 Para ver todos los ajustes:
 
 ```sh
-helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.11.0
+helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.11.1
 ```
 
 ## Tu propio Postgres
@@ -131,7 +135,7 @@ helm test wondermoney -n wondermoney --logs
 
 ```sh
 helm upgrade wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.11.0 -n wondermoney --reuse-values
+  --version 1.11.1 -n wondermoney --reuse-values
 ```
 
 La API aplica las nuevas migraciones de la base de datos al arrancar, y los secretos generados se quedan como están.

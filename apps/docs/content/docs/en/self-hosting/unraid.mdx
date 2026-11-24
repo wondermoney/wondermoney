@@ -13,7 +13,11 @@ You need Unraid 6.12 or newer with the Community Applications plugin, and about 
 2. Set **App URL** to the address you will open WonderMoney at, without a path, such as `http://192.168.1.10:3000`. The port must match **Web UI port**.
 3. Choose **Apply**.
 
-The first start creates the database and loads the reference data, which takes a few minutes; the container log ends with `WonderMoney is running at` once it is ready. Then open the Web UI from the Docker tab and create your account. The first account can always sign up; after that, **Sign-up** decides who else can.
+The first start creates the database and loads the reference data, which takes a few minutes; the container log ends with `WonderMoney is running at` once it is ready. Then open the Web UI from the Docker tab: a new server opens on its setup page. The first account you create there is the instance admin; after that, **Sign-up** decides who else can sign up.
+
+<Callout type="warn" title="Finish setup before the server is reachable from the internet">
+  Until the first account exists, whoever opens the app first becomes this server's admin. Create it on your own network, then add [HTTPS and a domain](/en/docs/self-hosting/https-and-domains).
+</Callout>
 
 Before WonderMoney is listed in Community Applications, add its template by hand. Open a terminal on the server and run:
 
@@ -51,7 +55,7 @@ To use your own Postgres (16 or newer) instead of the bundled one, set **Databas
 
 ## Updates and backups
 
-Updates arrive like any other container's: **Check for Updates** in the Docker tab, then **Apply Update**. The new version applies its database migrations when it starts. To stay on one version, change the repository's tag from `latest` to a version such as `1.11.0`.
+Updates arrive like any other container's: **Check for Updates** in the Docker tab, then **Apply Update**. The new version applies its database migrations when it starts. To stay on one version, change the repository's tag from `latest` to a version such as `1.11.1`.
 
 Back up the whole app data folder. The Appdata Backup plugin stops the container while it copies, which gives a consistent copy of the database. For a database dump without stopping it:
 

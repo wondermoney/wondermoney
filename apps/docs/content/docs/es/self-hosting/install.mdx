@@ -29,8 +29,8 @@ sh install.sh
 O haz los mismos pasos a mano, desde la etiqueta de la versión:
 
 ```sh
-# v1.11.0: la versión que quieras
-git clone --depth 1 --branch v1.11.0 https://github.com/wondermoney/wondermoney.git
+# v1.11.1: la versión que quieras
+git clone --depth 1 --branch v1.11.1 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh
 docker compose up -d
@@ -46,7 +46,13 @@ docker compose logs -f api
 
 ## Crear tu cuenta
 
-Abre http://localhost:3000 y regístrate. La primera cuenta de una instancia nueva siempre puede registrarse. A partir de ahí, `SIGNUP_MODE` en el `.env` decide quién más puede hacerlo:
+Abre http://localhost:3000. Un servidor nuevo se abre en su página de configuración: crea allí la primera cuenta. La primera cuenta es la administradora de la instancia: es la dueña del servidor, puede invitar a otras personas y puede abrir las páginas de administración, como el [estado de la sincronización bancaria](/es/docs/self-hosting/bank-sync-health). Una vez creada, sigues con los primeros pasos habituales en la aplicación.
+
+<Callout type="warn" title="Termina la configuración antes de que el servidor sea accesible desde internet">
+  Mientras no exista la primera cuenta, quien abra la aplicación primero será el administrador de este servidor. Créala en tu propia red y después añade [HTTPS y un dominio](/es/docs/self-hosting/https-and-domains).
+</Callout>
+
+Después de la primera cuenta, `SIGNUP_MODE` en el `.env` decide quién más puede registrarse:
 
 | Valor | Quién puede registrarse |
 |---|---|

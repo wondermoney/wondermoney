@@ -96,3 +96,8 @@ test("a logged-out visit to an unprefixed page keeps it as a localised next", as
   assert.equal(location.pathname, "/en/auth/login");
   assert.equal(location.searchParams.get("next"), "/en/accounts/42?tab=x");
 });
+
+test("a logged-out visit to first-run setup is let through", async () => {
+  assert.equal(await redirectFor("http://localhost:3000/en/setup"), null);
+  assert.equal(await redirectFor("http://localhost:3000/pt/setup"), null);
+});
