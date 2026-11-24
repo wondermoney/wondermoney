@@ -147,7 +147,9 @@
         "description": "Connect all your bank accounts in one place. Transactions sync automatically - no manual entry, no switching between apps.",
         "status": "",
         "banksLabel": "Banks, via read-only Open Banking",
-        "brokersLabel": "Brokers, via file import"
+        "brokersLabel": "Brokers, via file import",
+        "banksMore": "+ many more banks",
+        "brokersMore": "+ Trading 212, Coinbase or any broker's CSV"
       },
       "item2": {
         "title": "Know Exactly Where Your Money Goes",

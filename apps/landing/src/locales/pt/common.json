@@ -147,7 +147,9 @@
         "description": "Liga as tuas contas bancárias num só lugar. As transações sincronizam sozinhas - sem meter nada à mão.",
         "status": "",
         "banksLabel": "Bancos, por Open Banking só de leitura",
-        "brokersLabel": "Corretoras, por importação de ficheiro"
+        "brokersLabel": "Corretoras, por importação de ficheiro",
+        "banksMore": "+ muitos outros bancos",
+        "brokersMore": "+ Trading 212, Coinbase ou o CSV de qualquer corretora"
       },
       "item2": {
         "title": "Sabe para onde vai cada euro",

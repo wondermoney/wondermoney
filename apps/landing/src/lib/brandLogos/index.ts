@@ -2,19 +2,20 @@ import { BANK_LOGOS } from "./banks"
 import { BROKER_LOGOS } from "./brokers"
 import { ELECTRICITY_LOGOS } from "./electricity"
 import { FUEL_LOGOS } from "./fuel"
+import { SECURITY_LOGOS } from "./securities"
 import type { BrandLogoEntry } from "./types"
 
 export type { BrandCategory, BrandLogoEntry } from "./types"
 
 /**
- * Brand logos for the data tools and the product previews (banks, brokers, electricity suppliers
- * and fuel stations), committed as local assets: no logo API, no hotlinking. To add a brand, put
- * its tile in `src/assets/brands/<category>/` and an entry in that category's module, with the
- * URL it was downloaded from. A new category is a folder, a module beside `banks.ts` and a line
+ * Brand logos for the data tools and the product previews (banks, brokers, electricity suppliers,
+ * fuel stations and the issuers of sample holdings), committed as local assets: no logo API, no
+ * hotlinking. To add a brand, put its tile in `src/assets/brands/<category>/` and an entry in
+ * that category's module, with the URL it was downloaded from. A new category is a folder, a module beside `banks.ts` and a line
  * below. A brand in two tools (Galp, Repsol) has one entry, in the category that added it first.
  * `brandLogos.test.ts` fails on a name two entries share, a missing source or a large file.
  */
-export const BRAND_LOGOS: readonly BrandLogoEntry[] = [...BANK_LOGOS, ...BROKER_LOGOS, ...ELECTRICITY_LOGOS, ...FUEL_LOGOS]
+export const BRAND_LOGOS: readonly BrandLogoEntry[] = [...BANK_LOGOS, ...BROKER_LOGOS, ...ELECTRICITY_LOGOS, ...FUEL_LOGOS, ...SECURITY_LOGOS]
 
 /** "Activo Bank", "ActivoBank" and "activobank" are one key: no case, accents, spaces or punctuation. */
 export function normaliseBrandName(name: string): string {

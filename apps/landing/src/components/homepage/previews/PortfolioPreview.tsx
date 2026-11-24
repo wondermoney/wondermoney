@@ -1,3 +1,4 @@
+import BrandLogo from "@/components/shared/BrandLogo";
 import { useTranslations } from "@/lib/reactTranslations";
 import { usePreviewFormat, type PreviewFormat } from "@/lib/usePreviewFormat";
 
@@ -101,11 +102,7 @@ export default function PortfolioPreview({ size = "compact" }: Props) {
 								className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
 							>
 								<div className="flex items-center gap-2">
-									<div
-										className={`flex h-7 w-7 items-center justify-center rounded-md text-[11px] font-semibold text-primary-foreground ${holding.color}`}
-									>
-										{holding.ticker.slice(0, 2)}
-									</div>
+									<BrandLogo name={holding.ticker} className="size-7" />
 									<div>
 										<p className="text-xs font-semibold text-foreground">
 											{holding.ticker}
