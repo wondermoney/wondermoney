@@ -147,7 +147,9 @@
         "description": "Collega tutti i tuoi conti bancari in un unico posto. Le transazioni si sincronizzano automaticamente — nessuna voce manuale, nessun cambio di app.",
         "status": "",
         "banksLabel": "Banche, tramite Open Banking in sola lettura",
-        "brokersLabel": "Broker, tramite importazione di file"
+        "brokersLabel": "Broker, tramite importazione di file",
+        "banksMore": "+ molte altre banche",
+        "brokersMore": "+ Trading 212, Coinbase o il CSV di qualsiasi broker"
       },
       "item2": {
         "title": "Sai esattamente dove va il tuo denaro",

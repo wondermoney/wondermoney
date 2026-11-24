@@ -1,3 +1,4 @@
+import BrandLogo from "@/components/shared/BrandLogo";
 import { useTranslations } from "@/lib/reactTranslations";
 import { usePreviewFormat } from "@/lib/usePreviewFormat";
 
@@ -8,9 +9,9 @@ export default function AccountsPreview({ size = "compact" }: Props) {
 	const fmt = usePreviewFormat();
 	const isHero = size === "hero";
 	const sampleAccounts = [
-		{ nameKey: "preview.accounts.account1", balance: fmt.money(2450, { decimals: 2 }), tone: "text-success-text" },
-		{ nameKey: "preview.accounts.account2", balance: fmt.money(8750, { decimals: 2 }), tone: "text-success-text" },
-		{ nameKey: "preview.accounts.account3", balance: fmt.money(-320, { decimals: 2 }), tone: "text-destructive-text" },
+		{ nameKey: "preview.accounts.account1", bank: "CGD", balance: fmt.money(2450, { decimals: 2 }), tone: "text-success-text" },
+		{ nameKey: "preview.accounts.account2", bank: "Revolut", balance: fmt.money(8750, { decimals: 2 }), tone: "text-success-text" },
+		{ nameKey: "preview.accounts.account3", bank: "novobanco", balance: fmt.money(-320, { decimals: 2 }), tone: "text-destructive-text" },
 	];
 
 	return (
@@ -36,11 +37,15 @@ export default function AccountsPreview({ size = "compact" }: Props) {
 				{sampleAccounts.map((account) => (
 					<div
 						key={account.nameKey}
-						className="flex items-center justify-between rounded-xl border border-border bg-muted/60 px-4 py-3"
+						className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/60 px-4 py-3"
 					>
-						<span className="text-sm font-medium text-foreground">
-							{t(account.nameKey)}
-						</span>
+						<div className="flex min-w-0 items-center gap-3">
+							<BrandLogo name={account.bank} className="size-8" />
+							<div className="min-w-0">
+								<p className="truncate text-sm font-medium text-foreground">{t(account.nameKey)}</p>
+								<p className="truncate text-[11px] text-muted-foreground">{account.bank}</p>
+							</div>
+						</div>
 						<span className={`font-mono text-sm font-semibold ${account.tone}`}>
 							{account.balance}
 						</span>
