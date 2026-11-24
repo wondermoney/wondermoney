@@ -16,8 +16,9 @@ Applications (`deploy/unraid`) and other NAS app stores. `wm-aio.sh` starts, in 
 Caddy routes `/v1/*` and `/api/auth/*` to the API, `/wondermoney-files/*` (the storage bucket, so
 presigned uploads go to the same address as the app) to SeaweedFS, and everything else to the web
 app. When any process exits the script stops the rest and exits, and the restart policy starts the
-container again. On `docker stop` it stops the apps (5 s), then storage (2 s), then Postgres,
-within Docker's default 10 s.
+container again. On `docker stop` it stops the apps (5 s, then killed), then storage (2 s, then
+killed) while Postgres writes its shutdown checkpoint. Postgres is never killed from inside: only
+Docker's stop timeout cuts it short, so the Unraid template sets `--stop-timeout=30`.
 
 The secrets the compose install keeps in `.env` are generated on the first start into
 `/config/secrets.env` and read from there afterwards; a value set on the container wins.
