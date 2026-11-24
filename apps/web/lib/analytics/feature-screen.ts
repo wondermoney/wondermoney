@@ -14,6 +14,8 @@ const SCREENS: readonly (readonly [RegExp, WebFeatureScreen | null])[] = [
   [/^\/auth\/mfa$/u, "sign_in_mfa"],
   [/^\/auth\/auth-code-error$/u, "sign_in_error"],
   [/^\/auth\/signup$/u, "sign_up"],
+  // A new server's first-run setup is its first sign-up.
+  [/^\/setup$/u, "sign_up"],
   [/^\/auth\/forgot$/u, "forgot_password"],
   [/^\/auth\/reset$/u, "reset_password"],
   [/^\/join$/u, "settings_household_join"],
