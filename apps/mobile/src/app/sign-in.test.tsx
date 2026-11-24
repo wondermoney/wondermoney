@@ -45,6 +45,8 @@ jest.mock('@/lib/server/use-instance', () => ({
   useOidcProvider: () => mockServer.oidc,
   usePasswordSignIn: () => mockServer.passwordSignIn,
   usePasskeyAvailable: () => mockServer.passkey,
+  // The setup screen's choice is covered against real instance responses in sign-in-setup.test.tsx.
+  useServerSetup: () => null,
 }))
 
 jest.mock('@/features/auth/social-sign-in', () => {

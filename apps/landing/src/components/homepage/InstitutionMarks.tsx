@@ -48,7 +48,12 @@ type Size = "default" | "large";
 
 const LARGE_HEIGHT = 28;
 
-function MarkRow({ label, marks, size }: { label: string; marks: Mark[]; size: Size }) {
+/**
+ * `more` closes the row, so the marks read as examples rather than the full list: the app's bank
+ * picker lists every bank Enable Banking reaches, and any broker's file imports by its columns.
+ * `moreSpan` widens it in the large grid when the row leaves room.
+ */
+function MarkRow({ label, marks, more, moreSpan = 1, size }: { label: string; marks: Mark[]; more: string; moreSpan?: 1 | 2; size: Size }) {
   return (
     <div>
       <p className="text-sm text-muted-foreground">{label}</p>
@@ -75,6 +80,9 @@ function MarkRow({ label, marks, size }: { label: string; marks: Mark[]; size: S
             </li>
           );
         })}
+        <li className={size === "large" && moreSpan === 2 ? "col-span-2 flex min-w-0" : "flex min-w-0"}>
+          <span className="text-sm font-medium text-muted-foreground">{more}</span>
+        </li>
       </ul>
     </div>
   );
@@ -86,10 +94,17 @@ export default function InstitutionMarks({ size = "default" }: { size?: Size }) 
 
   return (
     <div className={size === "large" ? "space-y-12" : "space-y-6 pt-4"}>
-      <MarkRow label={t("homepage.features.item1.banksLabel")} marks={banks} size={size} />
+      <MarkRow
+        label={t("homepage.features.item1.banksLabel")}
+        marks={banks}
+        more={t("homepage.features.item1.banksMore")}
+        size={size}
+      />
       <MarkRow
         label={t("homepage.features.item1.brokersLabel")}
         marks={brokers}
+        more={t("homepage.features.item1.brokersMore")}
+        moreSpan={2}
         size={size}
       />
     </div>

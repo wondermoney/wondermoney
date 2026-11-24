@@ -147,7 +147,9 @@
         "description": "Verbinden Sie alle Ihre Bankkonten an einem Ort. Transaktionen synchronisieren sich automatisch — keine manuelle Eingabe, kein Wechsel zwischen Apps.",
         "status": "",
         "banksLabel": "Banken, über Open Banking mit reinem Lesezugriff",
-        "brokersLabel": "Broker, per Dateiimport"
+        "brokersLabel": "Broker, per Dateiimport",
+        "banksMore": "+ viele weitere Banken",
+        "brokersMore": "+ Trading 212, Coinbase oder die CSV-Datei jedes Brokers"
       },
       "item2": {
         "title": "Genau wissen, wohin Ihr Geld fließt",

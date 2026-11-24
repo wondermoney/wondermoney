@@ -147,7 +147,9 @@
         "description": "Regroupez tous vos comptes bancaires en un seul endroit. Les transactions se synchronisent automatiquement — sans saisie manuelle, sans changement d'application.",
         "status": "",
         "banksLabel": "Banques, via l'Open Banking en lecture seule",
-        "brokersLabel": "Courtiers, via l'import de fichiers"
+        "brokersLabel": "Courtiers, via l'import de fichiers",
+        "banksMore": "+ bien d'autres banques",
+        "brokersMore": "+ Trading 212, Coinbase ou le CSV de tout courtier"
       },
       "item2": {
         "title": "Sachez exactement où va votre argent",

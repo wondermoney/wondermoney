@@ -26,9 +26,23 @@ export type SignUpScreenProps = {
   lead?: ReactNode
   /** False under `OIDC_ONLY`: no password sign-up; the footer's single sign-on button creates the account. */
   passwordSignIn?: boolean
+  /** Replaces "Create your account" (the server setup screen says "Set up this server"). */
+  title?: string
+  /** Replaces "Join now" on the submit button. */
+  submitLabel?: string
 }
 
-export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = false, greeting, lead, passwordSignIn = true }: SignUpScreenProps) {
+export function SignUpScreen({
+  onSubmit,
+  footer,
+  initialEmail,
+  emailLocked = false,
+  greeting,
+  lead,
+  passwordSignIn = true,
+  title,
+  submitLabel,
+}: SignUpScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
   const [email, setEmail] = useState(initialEmail ?? '')
@@ -83,7 +97,7 @@ export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = fal
       eyebrow={greeting}
       footer={footer ? <AuthFooter>{footer}</AuthFooter> : undefined}
       lead={lead ?? <Text tone="muted" variant="meta">{t('auth.signup.helper')}</Text>}
-      title={t('auth.signup.title')}
+      title={title ?? t('auth.signup.title')}
     >
       {passwordSignIn ? (
         <>
@@ -181,7 +195,7 @@ export function SignUpScreen({ onSubmit, footer, initialEmail, emailLocked = fal
           <Button
             block
             disabled={submitting}
-            label={submitting ? t('auth.signup.submitting') : t('auth.signup.submit')}
+            label={submitting ? t('auth.signup.submitting') : (submitLabel ?? t('auth.signup.submit'))}
             onPress={submit}
           />
         </>
