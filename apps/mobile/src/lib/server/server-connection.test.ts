@@ -76,6 +76,17 @@ describe('checkServer', () => {
     expect(malformed.status === 'ok' && malformed.instance.features.bankSyncProviders).toBeUndefined()
   })
 
+  it('reads whether the server awaits its first account, and an older server or a malformed value as not', async () => {
+    const check = async (overrides: Record<string, unknown>) => {
+      const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance(overrides)) })
+      return result.status === 'ok' ? result.instance.setupRequired : 'rejected'
+    }
+    await expect(check({ setupRequired: true })).resolves.toBe(true)
+    await expect(check({ setupRequired: false })).resolves.toBe(false)
+    await expect(check({})).resolves.toBeUndefined()
+    await expect(check({ setupRequired: 'yes' })).resolves.toBeUndefined()
+  })
+
   it('asks for an app update when the server needs a newer version', async () => {
     await expect(checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance({ minAppVersion: '1.2.0' })) })).resolves.toEqual({ minAppVersion: '1.2.0', status: 'update-required' })
   })

@@ -115,6 +115,11 @@
       "submit": "Criar conta agora",
       "submitting": "A criar conta"
     },
+    "setup": {
+      "title": "Configura este servidor",
+      "lead": "{{name}} ({{host}}) ainda não tem contas. A conta que criares aqui será a proprietária deste servidor e poderá convidar outras pessoas.",
+      "submit": "Criar conta"
+    },
     "social": {
       "divider": "Ou continuar com",
       "apple": "Continuar com a Apple",

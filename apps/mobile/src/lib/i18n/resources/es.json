@@ -115,6 +115,11 @@
       "submit": "Únete ahora",
       "submitting": "Creando cuenta"
     },
+    "setup": {
+      "title": "Configura este servidor",
+      "lead": "{{name}} ({{host}}) todavía no tiene cuentas. La cuenta que crees aquí será la propietaria de este servidor y podrá invitar a otras personas.",
+      "submit": "Crear cuenta"
+    },
     "social": {
       "divider": "O continúa con",
       "apple": "Continuar con Apple",

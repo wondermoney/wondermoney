@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Text } from '@/components/ui/text'
 
 import { useServerSwitch } from '@/components/providers/server-switch-provider'
-import { checkServer, normalizeServerUrl, type ServerCheck } from '@/lib/server/server-connection'
+import { checkServer, hostOf, normalizeServerUrl, type ServerCheck } from '@/lib/server/server-connection'
 import { themeTokens } from '@/theme/tokens'
 
 import { AuthField, AuthLink, AuthTextInput } from './auth-form-styles'
@@ -108,11 +108,3 @@ const localStyles = StyleSheet.create({
   links: { flexDirection: 'row', flexWrap: 'wrap', columnGap: themeTokens.spacing[4], rowGap: themeTokens.spacing[2] },
   actions: { flexDirection: 'row', gap: themeTokens.spacing[2] },
 })
-
-function hostOf(url: string): string {
-  try {
-    return new URL(url).host
-  } catch {
-    return url
-  }
-}
