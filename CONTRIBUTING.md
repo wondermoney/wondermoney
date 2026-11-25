@@ -284,7 +284,7 @@ then force-push your branch): history is public too. If it is a false positive:
 ## License
 
 By contributing you agree that your contribution is licensed under this repository's
-license (see [LICENSE](LICENSE): AGPL-3.0 for the apps, MIT for `packages/*`, CC BY 4.0
-for the documentation text). You keep the copyright on your work.
+license (see [NOTICE](NOTICE) and [LICENSE](LICENSE): AGPL-3.0 for the apps, MIT for
+`packages/*`, CC BY 4.0 for the documentation text). You keep the copyright on your work.
 
 Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
