@@ -1,7 +1,7 @@
 #!/bin/bash
 # Starts WonderMoney's processes in one container, in order, as PUID:PGID:
 #
-#   Postgres  127.0.0.1:5432   unless DB_HOST names your own
+#   Postgres  127.0.0.1:5432   unless DB_HOST or DATABASE_URL names your own
 #   SeaweedFS 127.0.0.1:8333   S3 for file uploads, unless S3_ENDPOINT names your own store
 #   API       127.0.0.1:3001   applies migrations first
 #   worker    127.0.0.1:3002   (health only)
@@ -58,6 +58,13 @@ fi
 
 USE_BUNDLED_DB=true
 [ -z "${DB_HOST:-}" ] && [ -z "${DATABASE_URL:-}" ] || USE_BUNDLED_DB=false
+# The API refuses DATABASE_URL beside any DB_* setting. The Unraid template always passes its
+# defaults for the port, name and user, so with DATABASE_URL they are dropped; a database host as
+# well is two answers to one question.
+if [ -n "${DATABASE_URL:-}" ]; then
+  [ -z "${DB_HOST:-}" ] || die "Set either DATABASE_URL or the database host (DB_HOST), not both."
+  unset DB_HOST DB_PORT DB_DATABASE DB_USERNAME DB_PASSWORD
+fi
 USE_BUNDLED_STORAGE=true
 [ -z "${S3_ENDPOINT:-}" ] || USE_BUNDLED_STORAGE=false
 [ "${BUNDLED_STORAGE:-true}" != false ] || USE_BUNDLED_STORAGE=false
@@ -189,6 +196,7 @@ stop_all() {
   log "Stopped."
 }
 
+# shellcheck disable=SC2329 # run by the trap below
 on_signal() {
   log "Stopping."
   stop_all
@@ -215,6 +223,7 @@ wait_for() {
   log "$what is ready."
 }
 
+# shellcheck disable=SC2329 # run by wait_for
 http_ok() { curl -fsS -o /dev/null "$1"; }
 
 # ─── Postgres ──────────────────────────────────────────────────────────────────
