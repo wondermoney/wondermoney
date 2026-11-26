@@ -12,7 +12,7 @@
 #   builder       dev dependencies, source and the compile
 #   dist          the compiled API alone, for the Sentry source map upload
 #   runtime-base  the image: pruned node_modules, then the builds; `api` and `worker` set CMD
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS manifests
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS manifests
 WORKDIR /repo
 # Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
 # provides the pnpm version in the root package.json's packageManager field.
@@ -56,7 +56,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store,sharing=lock
 # binary that needs no cairo/pango headers and no compiler. The toolchain was a
 # multi-minute apk install on every cache miss for nothing. If a dependency ever
 # genuinely needs to compile against cairo, add it back with a comment naming it.
-FROM --platform=$BUILDPLATFORM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
+FROM --platform=$BUILDPLATFORM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS builder
 WORKDIR /repo
 RUN npm install -g corepack@0.36.0 && corepack enable
 COPY --from=manifests /repo ./
@@ -108,7 +108,7 @@ COPY --from=prod-deps /out/node_modules /home/node/app/node_modules
 RUN node-prune /home/node/app/node_modules
 
 # Start production image build
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS runtime-base
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5 AS runtime-base
 
 # `curl` is for the container health check, not the app — and it is a cosmetic
 # fix, not a correctness one. Coolify generates a `curl ... || wget ...` check on

@@ -1,7 +1,7 @@
 # Development image for docker-compose.yml (watch mode). Build context is the monorepo root,
 # which the compose file also bind-mounts at /repo. Base image pinned by digest to match
 # Dockerfile (node:26.13.0-alpine as of 2026-10-31); Dependabot bumps both together.
-FROM node:26.13.0-alpine@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216
+FROM node:26.13.1-alpine@sha256:6bd9ab43c0ec0190ca7b2d193906cb8b7edf6e7f4afa43ddeccd6452710bffb5
 
 # Node 25+ no longer bundles corepack, so install it (pinned) before enabling it; it then
 # provides the pnpm version in the root package.json's packageManager field.
