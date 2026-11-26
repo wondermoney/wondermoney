@@ -66,8 +66,9 @@ const CLIENT_ROWS = ['oauthAccessToken', 'oauthRefreshToken', 'oauthConsent', 'o
  * returns a person's data. Each client goes in its own transaction, which locks the client row
  * and then checks again, in a fresh statement, that it is still unused: a consent stored for it
  * meanwhile either commits first (and the client is kept) or waits on the lock and then fails
- * its foreign key. The consent hook (`mcpOAuthPolicy`) waits on the same lock and answers
- * `invalid_client` before better-auth tries to store one.
+ * its foreign key. The consent hook (`mcpOAuthPolicy`) answers `invalid_client` in both cases
+ * where the client is gone: its check waits on this lock and then finds no client, and a consent
+ * stored after the check whose foreign key fails is answered the same way.
  */
 export async function pruneUnusedMcpOAuthClients(
   em: EntityManager,

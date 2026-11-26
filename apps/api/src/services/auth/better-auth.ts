@@ -807,6 +807,11 @@ function redirectOrigins(redirectUris: unknown): string[] {
  * Revoke `userId`'s grants on one client, or on every client when `clientId` is null. A client
  * this leaves with no consent from anyone records when it lost its last grant
  * (`mcpOAuthClientActivity`), so the daily prune counts its seven days from then.
+ *
+ * It first locks the rows of every client it will touch, in `clientId` order, as the prune does
+ * (client first, then its tokens and consents). So it never deadlocks with the prune, which
+ * would abort it and leave the grant standing, and two revocations on one client run one after
+ * the other: the second sees the first's consent gone and records the disconnection.
  */
 async function revokeGrants(userId: string, clientId: null | string): Promise<boolean> {
   const client = await betterAuthPool.connect();
@@ -814,6 +819,14 @@ async function revokeGrants(userId: string, clientId: null | string): Promise<bo
   const params = clientId === null ? [userId] : [userId, clientId];
   try {
     await client.query('begin');
+    await client.query(
+      `select 1 from "${BETTER_AUTH_SCHEMA}"."oauthClient" where "clientId" in (
+         select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope}
+         union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" where "userId" = $1${scope}
+         union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}
+       ) order by "clientId" for no key update`,
+      params,
+    );
     const consents = await client.query<{ clientId: string }>(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope} returning "clientId"`, params);
     const refreshTokens = await client.query<{ clientId: string }>(
       `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null returning "clientId"`,

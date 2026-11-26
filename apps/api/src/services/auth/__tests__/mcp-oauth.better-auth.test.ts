@@ -360,6 +360,17 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     return row.lastGrantEndedAt === null ? null : new Date(row.lastGrantEndedAt);
   }
 
+  /** Wait until `count` sessions wait on a lock. */
+  async function waitForLockWaiters(count: number): Promise<void> {
+    const deadline = Date.now() + 10_000;
+    for (;;) {
+      const [row] = await sql<{ waiting: number }>(`select count(*)::int as waiting from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`);
+      if (row?.waiting === count) return;
+      if (Date.now() > deadline) throw new Error(`Timed out waiting for ${count} sessions to block`);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  }
+
   const isRegistered = async (clientId: string) => (await sql('select 1 from better_auth."oauthClient" where "clientId" = ?', [clientId])).length === 1;
   const DAY = 24 * 60 * 60 * 1000;
 
@@ -593,13 +604,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     const context = removal.getTransactionContext();
     await removal.getConnection().execute('select 1 from better_auth."oauthClient" where "clientId" = ? for update', [clientId], 'all', context);
     const answered = postConsent(cookie, { accept: true, oauth_query: oauthQuery }).then((response) => response);
-    const deadline = Date.now() + 10_000;
-    for (;;) {
-      const [row] = await sql<{ waiting: number }>(`select count(*)::int as waiting from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`);
-      if (row?.waiting === 1) break;
-      if (Date.now() > deadline) throw new Error('Timed out waiting for the consent to block');
-      await new Promise((resolve) => setTimeout(resolve, 20));
-    }
+    await waitForLockWaiters(1);
     for (const table of ['oauthClientResource', 'oauthClient']) {
       await removal.getConnection().execute(`delete from better_auth."${table}" where "clientId" = ?`, [clientId], 'run', context);
     }
@@ -608,6 +613,48 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     const response = await answered;
     expect(response.status).toBe(400);
     expect(response.body).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('answers invalid_client to a consent whose client is removed after the check, as better-auth stores it', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const oauthQuery = await consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge });
+
+    // Hold back every consent insert, so the client goes between the hook's check and the insert.
+    const removal = db.em();
+    await removal.begin();
+    const context = removal.getTransactionContext();
+    await removal.getConnection().execute('lock table better_auth."oauthConsent" in share mode', [], 'run', context);
+    const answered = postConsent(cookie, { accept: true, oauth_query: oauthQuery }).then((response) => response);
+    await waitForLockWaiters(1);
+    for (const table of ['oauthClientResource', 'oauthClient']) {
+      await removal.getConnection().execute(`delete from better_auth."${table}" where "clientId" = ?`, [clientId], 'run', context);
+    }
+    await removal.commit();
+
+    const response = await answered;
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('records the disconnection when the last two people disconnect one client at the same moment', async () => {
+    const { household, partner } = await householdWithPartner();
+    const { clientId, cookie, discovery } = await connect(household.appuser);
+    const partnerCookie = await signInAs(partner);
+    await consent(discovery, clientId, partnerCookie, { challenge: pkce().challenge });
+
+    // Both revocations get as far as the access tokens before either commits.
+    const hold = db.em();
+    await hold.begin();
+    await hold.getConnection().execute('lock table better_auth."oauthAccessToken" in share mode', [], 'run', hold.getTransactionContext());
+    const revokes = Promise.all([cookie, partnerCookie].map((session) => request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', session).then((response) => response.status)));
+    await waitForLockWaiters(2);
+    await hold.commit();
+
+    expect(await revokes).toEqual([204, 204]);
+    expect(await grantEndOf(clientId)).toBeInstanceOf(Date);
   });
 
   it('names the household in a token by an opaque reference, never its key', async () => {

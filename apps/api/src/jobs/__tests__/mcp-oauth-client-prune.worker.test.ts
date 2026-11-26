@@ -42,11 +42,11 @@ async function addClient(registeredAt: Date): Promise<string> {
 const CONSENT = `insert into better_auth."oauthConsent" (id, "clientId", "userId", "referenceId", scopes, "createdAt", "updatedAt")
   values (?, ?, ?, 'household-ref', '["mcp:read","offline_access"]'::jsonb, ?, ?)`;
 
-/** The client lost its last grant at `at`, as a revocation records it. */
 async function addConsent(clientId: string, userId: string, at: Date): Promise<void> {
   await sql(CONSENT, [randomUUID(), clientId, userId, at, at]);
 }
 
+/** The client lost its last grant at `at`, as a revocation records it. */
 async function disconnectedAt(clientId: string, at: Date): Promise<void> {
   await sql('insert into better_auth."mcpOAuthClientActivity" ("clientId", "lastGrantEndedAt") values (?, ?)', [clientId, at]);
 }

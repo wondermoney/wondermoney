@@ -71,6 +71,15 @@ function consentClientId(body: unknown): null | string {
   return typeof query === 'string' ? new URLSearchParams(query).get('client_id') || null : null;
 }
 
+/** better-auth's OAuth error for a consent whose client is gone (removed by the daily prune). */
+const UNREGISTERED_CLIENT = {
+  error: 'invalid_client',
+  error_description: 'This client is no longer registered. Add it again in the app you are connecting.',
+};
+
+/** Postgres's foreign key violation: a row that references one that no longer exists. */
+const isForeignKeyViolation = (error: unknown) => (error as null | undefined | { code?: unknown })?.code === '23503';
+
 const isAcceptedConsent = (ctx: { body?: unknown; path?: string }) =>
   ctx.path === '/oauth2/consent' && (ctx.body as undefined | { accept?: unknown })?.accept === true;
 
@@ -122,8 +131,8 @@ async function refuseSilentAuthorization(ctx: Parameters<Parameters<typeof creat
  *   authenticator code in `x-totp-code` (`middleware/sensitive-session.ts` holds the same rule
  *   for the `/v1` routes). Answers 403 with `session_not_fresh`, `totp_required` or `invalid_totp`,
  *   and 400 `invalid_client` for a client that is no longer registered (the daily prune removed
- *   it while the consent page was open, or is removing it now). A stored consent clears the
- *   client's disconnection time (`mcpOAuthClientActivity`).
+ *   it while the consent page was open, or removes it while the consent is being stored). A
+ *   stored consent clears the client's disconnection time (`mcpOAuthClientActivity`).
  * - Registration takes `https` redirects, or `http` on a loopback host, and nothing else
  *   (`isAllowedMcpRedirectUri`), and no DPoP-bound clients.
  * - Every authorization request shows the consent page (`prompt=consent` is added, and
@@ -169,9 +178,7 @@ function mcpOAuthPolicy(deps: McpOAuthPolicyDeps): BetterAuthPlugin {
             // A client removed since the consent page opened (the daily prune), or being removed
             // now: better-auth would fail storing the consent with a server error.
             const clientId = consentClientId(ctx.body);
-            if (clientId && !await deps.isClientRegistered(clientId)) {
-              refuse('BAD_REQUEST', { error: 'invalid_client', error_description: 'This client is no longer registered. Add it again in the app you are connecting.' });
-            }
+            if (clientId && !await deps.isClientRegistered(clientId)) refuse('BAD_REQUEST', UNREGISTERED_CLIENT);
             const createdAt = new Date(session.session.createdAt).getTime();
             if (!Number.isFinite(createdAt) || Date.now() - createdAt > SENSITIVE_SESSION_MAX_AGE_MS) {
               refuse('FORBIDDEN', { code: 'session_not_fresh', message: 'Please sign in again before connecting a client.' });
@@ -187,6 +194,21 @@ function mcpOAuthPolicy(deps: McpOAuthPolicyDeps): BetterAuthPlugin {
             }
             // The one way to a code: the authorization this consent dispatches may issue it.
             await consentApproved.set(true);
+            if (!clientId) return;
+            // The prune can still remove the client between the check above and better-auth
+            // storing the consent, which then fails its foreign key: that answers invalid_client too.
+            const adapter = ctx.context.adapter;
+            const create = (async (input: Parameters<typeof adapter.create>[0]) => {
+              try {
+                return await adapter.create(input);
+              } catch (error) {
+                if (input.model === 'oauthConsent' && isForeignKeyViolation(error) && !await deps.isClientRegistered(clientId)) {
+                  refuse('BAD_REQUEST', UNREGISTERED_CLIENT);
+                }
+                throw error;
+              }
+            }) as typeof adapter.create;
+            return { context: { context: { adapter: { ...adapter, create } } } };
           }),
           matcher: isAcceptedConsent,
         },
