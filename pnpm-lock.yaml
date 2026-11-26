@@ -529,8 +529,8 @@ importers:
         specifier: ^5.0.5
         version: 5.1.1(@opentelemetry/api@1.9.1)(@types/node@26.6.6)(@vitest/coverage-v8@5.1.1)(@vitest/ui@5.1.1)(vite@8.3.8(@types/node@26.6.6)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
       vitest-mock-extended:
-        specifier: ^5.1.1
-        version: 5.1.1(typescript@6.0.3)(vitest@5.1.1)
+        specifier: ^6.0.1
+        version: 6.0.1(typescript@6.0.3)(vitest@5.1.1)
       yaml:
         specifier: 2.9.1
         version: 2.9.1
@@ -15553,8 +15553,8 @@ packages:
       vite:
         optional: true
 
-  vitest-mock-extended@5.1.1:
-    resolution: {integrity: sha512-k5Ji2+t4+nsdepXeakCkilyKydtgaULtP0HsjwQGIZsYr5hDTqrwCtC0+Sh0YBKUS7cY/Wxplf7SVjcZstTIMQ==}
+  vitest-mock-extended@6.0.1:
+    resolution: {integrity: sha512-tsyqBqOascdCkcWTA7YvDKRmk4KPhvpY0FyfbO+bCSPrbRwfsHbw7O4VcpL9kODlrW2o4qahNNjEchoW4FrwRw==}
     peerDependencies:
       typescript: 3.x || 4.x || 5.x || 6.x || 7.x
       vitest: '>=4.0.0'
@@ -32351,7 +32351,7 @@ snapshots:
     optionalDependencies:
       vite: 8.3.8(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
 
-  vitest-mock-extended@5.1.1(typescript@6.0.3)(vitest@5.1.1):
+  vitest-mock-extended@6.0.1(typescript@6.0.3)(vitest@5.1.1):
     dependencies:
       ts-essentials: 10.2.1(typescript@6.0.3)
       typescript: 6.0.3
