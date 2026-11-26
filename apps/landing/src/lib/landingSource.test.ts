@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it } from "vitest";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appDemoUrl, appSignupUrl } from "./appLinks";
 import { createConsentDecision, writeConsentDecision } from "./consent";
+import { SUPPORTED_LANGS } from "./i18nLocale";
 import { installLandingSourceLinks, withLandingSource, withSignupAttribution } from "./landingSource";
+
+// The sign-up link of an Italian page: the app's sign-up in Italian.
+const CTA_URL = appSignupUrl("it");
 
 const allowAnalytics = (analytics: boolean) =>
   writeConsentDecision(window.localStorage, createConsentDecision({ analytics, ads: false }));
@@ -13,9 +17,19 @@ describe("landing source on signup links", () => {
 
   it("is added only to links to the app's signup", () => {
     expect(withLandingSource(CTA_URL, "toolMortgage")).toBe(`${CTA_URL}?landing_source=toolMortgage`);
-    expect(withLandingSource("https://app.wonder.money/auth/login", "toolMortgage")).toBe("https://app.wonder.money/auth/login");
+    expect(withLandingSource("https://app.wonder.money/it/auth/login", "toolMortgage")).toBe("https://app.wonder.money/it/auth/login");
+    expect(withLandingSource(appDemoUrl("it"), "toolMortgage")).toBe(appDemoUrl("it"));
     expect(withLandingSource("https://example.com/auth/signup", "toolMortgage")).toBe("https://example.com/auth/signup");
     expect(withLandingSource(`${CTA_URL}?landing_source=toolMortgage`, undefined)).toBe(CTA_URL);
+  });
+
+  it("is added to the sign-up link of a page in every language", () => {
+    for (const locale of SUPPORTED_LANGS) {
+      const signup = appSignupUrl(locale);
+      expect(withSignupAttribution(signup, { landingSource: "toolMortgage", referrerClass: "search" }), locale).toBe(
+        `${signup}?landing_source=toolMortgage&referrer_class=search`,
+      );
+    }
   });
 
   it("rides a followed signup link from a tool page only with analytics consent", () => {

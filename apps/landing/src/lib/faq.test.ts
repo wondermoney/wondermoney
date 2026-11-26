@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { HOMEPAGE_FAQ_KEYS, homepageFaq } from "./faq"
 import { SUPPORTED_LANGS } from "./routes"
-import { APP_STORE_URL, PLAY_STORE_URL } from "./storeLinks"
+import { APP_STORE_URL, PLAY_STORE_URL } from "./appLinks"
 import { buildFaqPageSchema, buildSoftwareApplicationSchema } from "./structuredData"
 import { getTranslations } from "./translations"
 
