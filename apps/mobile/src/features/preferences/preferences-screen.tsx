@@ -20,7 +20,7 @@ import { PreviewFeaturesSection } from './preview-features-section'
 import { ServiceAnalyticsSection } from './service-analytics-section'
 
 const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
-const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
+const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es', 'it']
 
 /**
  * Settings › Appearance (web `components/settings/Appearance.tsx`): the section head,

@@ -28,7 +28,7 @@ describe('account view-only copy', () => {
     expect(ACCOUNT_WRITES.filter((path) => typeof node(path)?.['account-read-only'] !== 'string')).toEqual([])
   })
 
-  it.each(['en', 'es', 'pt-PT'] as const)('resolves to a real message in %s', async (locale) => {
+  it.each(['en', 'es', 'pt-PT', 'it'] as const)('resolves to a real message in %s', async (locale) => {
     const i18n = await initMobileI18n(locale)
     const shared = i18n.t('common.accountReadOnly')
     expect(shared).not.toBe('common.accountReadOnly')

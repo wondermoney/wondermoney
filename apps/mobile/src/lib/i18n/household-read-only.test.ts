@@ -27,7 +27,7 @@ describe('household view-only copy', () => {
     expect(missing).toEqual([])
   })
 
-  it.each(['en', 'es', 'pt-PT'] as const)('resolves to a real message in %s', async (locale) => {
+  it.each(['en', 'es', 'pt-PT', 'it'] as const)('resolves to a real message in %s', async (locale) => {
     const i18n = await initMobileI18n(locale)
     const shared = i18n.t('common.householdReadOnly')
     expect(shared).not.toBe('common.householdReadOnly')

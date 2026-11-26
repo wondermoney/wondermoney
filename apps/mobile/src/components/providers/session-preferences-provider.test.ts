@@ -3,6 +3,7 @@ import { resolveLocale, resolveTheme } from './session-preferences-provider'
 describe('session preference resolution', () => {
   it.each([
     ['device', 'pt-BR', 'pt-PT'], ['device', 'es-MX', 'es'], ['device', 'fr-FR', 'en'], ['en', 'pt-PT', 'en'],
+    ['device', 'it-IT', 'it'], ['device', 'it_CH', 'it'], ['it', 'en-US', 'it'],
   ] as const)('resolves %s with device %s to %s', (preference, device, expected) => expect(resolveLocale(preference, device)).toBe(expected))
 
   it('resolves explicit and system themes', () => {

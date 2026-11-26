@@ -4,17 +4,19 @@ import { accountLanguageEndpoint, toAccountLanguage } from './account-language'
 
 describe('toAccountLanguage', () => {
   it('maps every app locale to the account language the API stores', () => {
-    const locales: SupportedLocale[] = ['en', 'pt-PT', 'es']
+    const locales: SupportedLocale[] = ['en', 'pt-PT', 'es', 'it']
     expect(locales.map((locale) => [locale, toAccountLanguage(locale)])).toEqual([
       ['en', 'EN'],
       ['pt-PT', 'PT'],
       ['es', 'ES'],
+      ['it', 'IT'],
     ])
   })
 
   it('follows the device language when the person keeps "Device language"', () => {
     expect(toAccountLanguage(resolveLocale('device', 'es-MX'))).toBe('ES')
     expect(toAccountLanguage(resolveLocale('device', 'pt-BR'))).toBe('PT')
+    expect(toAccountLanguage(resolveLocale('device', 'it-IT'))).toBe('IT')
     expect(toAccountLanguage(resolveLocale('device', 'fr-FR'))).toBe('EN')
   })
 })

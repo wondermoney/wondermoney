@@ -76,6 +76,7 @@ describe('AppProviders', () => {
   it.each([
     ['en', 'Refresh|Loading'],
     ['pt-PT', 'Atualizar|A carregar'],
+    ['it', 'Aggiorna|Caricamento'],
   ])('waits for isolated %s translations before rendering children', async (locale, label) => {
     const session = lifecycle({ status: 'ready', session: null })
     const view = await render(
@@ -135,6 +136,10 @@ describe('AppProviders', () => {
     expect(view.getByText('Refresh|Loading')).toBeOnTheScreen()
     await view.rerender(<AppProviders locale="pt-PT" createSessionLifecycle={factory}><Shell queryClients={queryClients} /></AppProviders>)
     await waitFor(() => expect(view.getByText('Atualizar|A carregar')).toBeOnTheScreen())
+    await view.rerender(<AppProviders locale="it" createSessionLifecycle={factory}><Shell queryClients={queryClients} /></AppProviders>)
+    await waitFor(() => expect(view.getByText('Aggiorna|Caricamento')).toBeOnTheScreen())
+    await view.rerender(<AppProviders locale="en" createSessionLifecycle={factory}><Shell queryClients={queryClients} /></AppProviders>)
+    await waitFor(() => expect(view.getByText('Refresh|Loading')).toBeOnTheScreen())
     expect(factory).toHaveBeenCalledTimes(1)
     expect(session.dispose).not.toHaveBeenCalled()
     expect(new Set(queryClients).size).toBe(1)

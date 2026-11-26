@@ -2,12 +2,14 @@ import { createInstance, type i18n } from 'i18next'
 
 import en from './resources/en.json'
 import es from './resources/es.json'
+import italian from './resources/it.json'
 import ptPT from './resources/pt-PT.json'
 
 const localeResources = {
   en,
   'pt-PT': ptPT,
   es,
+  it: italian,
 } as const
 
 export const foundationResources = Object.fromEntries(
@@ -59,6 +61,10 @@ const normalizeLocale = (locale: string): Locale => {
 
   if (base === 'es') {
     return 'es'
+  }
+
+  if (base === 'it') {
+    return 'it'
   }
 
   if (base === 'en') {
