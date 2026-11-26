@@ -37,6 +37,7 @@ jest.mock('@/features/household/use-household-members', () => ({
 jest.mock('./use-net-worth', () => ({ useNetWorth: (member?: string) => { mockMemberArgs.netWorth = member; return mocks.netWorth } }))
 jest.mock('./use-net-worth-history', () => ({ useNetWorthHistory: (_months: number, member?: string) => { mockMemberArgs.history = member; return mocks.history } }))
 jest.mock('@/features/accounts/use-accounts', () => ({ useAccounts: () => mocks.accounts }))
+jest.mock('@/lib/server/use-instance', () => ({ useConfirmedFeature: () => true }))
 jest.mock('@/features/budgets/use-budgets', () => ({ useBudgets: () => mocks.budgets }))
 jest.mock('@/features/loans/use-loans', () => ({ useLoans: () => mocks.loans }))
 jest.mock('@/features/transactions/use-transactions', () => ({

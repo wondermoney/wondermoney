@@ -99,12 +99,13 @@ const SETUP_STEPS = [
   { key: 'portfolio', href: '/portfolio' },
 ] as const
 
-export function SetupChecklist({ steps, onDismiss, onNavigate }: { steps: SetupSteps; onDismiss: () => void; onNavigate: Navigate }) {
+export function SetupChecklist({ steps, onDismiss, onNavigate, hideAccount = false }: { steps: SetupSteps; onDismiss: () => void; onNavigate: Navigate; /** Left out while Home's no-accounts card asks for it. */ hideAccount?: boolean }) {
   const { t } = useTranslation()
   const palette = usePalette()
   const [expanded, setExpanded] = useState(false)
-  const completed = SETUP_STEPS.filter((step) => steps[step.key]).length
-  const total = SETUP_STEPS.length
+  const visibleSteps = hideAccount ? SETUP_STEPS.filter((step) => step.key !== 'account') : SETUP_STEPS
+  const completed = visibleSteps.filter((step) => steps[step.key]).length
+  const total = visibleSteps.length
   if (completed === total) return null
   const remaining = total - completed
 
@@ -141,7 +142,7 @@ export function SetupChecklist({ steps, onDismiss, onNavigate }: { steps: SetupS
       </View>
       {expanded ? (
         <View style={[styles.setupSteps, { borderTopColor: palette.border }]}>
-          {SETUP_STEPS.map((step) => {
+          {visibleSteps.map((step) => {
             const done = steps[step.key]
             const label = t(`home.setup.steps.${step.key}`)
             return (

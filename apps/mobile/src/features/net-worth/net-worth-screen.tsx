@@ -47,7 +47,7 @@ import {
   type SectionState,
   type SetupSteps,
 } from './home-sections'
-import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
+import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type NoAccountsCardModel, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
 import { NoAccountsCard } from './no-accounts-card'
@@ -90,8 +90,8 @@ export type HomeSections = {
   freshness: Date | null
   /** null while its inputs load, or once dismissed. */
   setup: SetupSteps | null
-  /** The account list loaded and holds nothing: Home offers the ways in (web `NoAccountsCard`). */
-  noAccounts?: boolean
+  /** Home's no-accounts card (web `NoAccountsCard`); null or absent shows none. */
+  noAccounts?: NoAccountsCardModel | null
   /** The bank connection alerts not yet dismissed; null or absent shows nothing. */
   bankAlert?: BankAlertBannerModel | null
   month: SectionState<readonly BudgetMonthRow[]>
@@ -224,9 +224,10 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
             <BankAlertBanner locale={locale} model={sections.bankAlert} onDismiss={() => props.onDismissBankAlert?.()} onNavigate={props.onNavigate} />
           ) : null}
 
-          {sections.noAccounts ? <NoAccountsCard onNavigate={props.onNavigate} /> : null}
+          {sections.noAccounts ? <NoAccountsCard importAvailable={sections.noAccounts.importAvailable} onNavigate={props.onNavigate} /> : null}
 
-          {sections.setup ? <SetupChecklist onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
+          {/* While the card asks for the account, the checklist does not ask again. */}
+          {sections.setup ? <SetupChecklist hideAccount={Boolean(sections.noAccounts)} onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
 
           {layout
             .filter((entry) => entry.id !== 'net-worth' && !entry.hidden)

@@ -12,6 +12,7 @@ const state = vi.hoisted(() => ({
   preferences: {} as Record<string, unknown>,
   noAccounts: true,
   heroHidesEmptyAction: undefined as boolean | undefined,
+  checklistHidesAccount: undefined as boolean | undefined,
 }));
 
 vi.mock("@/lib/api/user-preferences/useUserPreferences", () => ({
@@ -31,11 +32,14 @@ vi.mock("@/components/household/MemberFilterSelect", () => ({
 vi.mock("./BankAlertsBanner", () => ({ BankAlertsBanner: () => null }));
 vi.mock("./CustomizeHomeSheet", () => ({ CustomizeHomeSheet: () => null }));
 vi.mock("@/components/activation/SetupChecklistCard", () => ({
-  SetupChecklistCard: () => null,
+  SetupChecklistCard: ({ hideAccountStep }: { hideAccountStep?: boolean }) => {
+    state.checklistHidesAccount = hideAccountStep;
+    return null;
+  },
 }));
 vi.mock("@/components/activation/NoAccountsCard", () => ({
   NoAccountsCard: () => <div data-testid="no-accounts-card" />,
-  useHasNoAccounts: () => state.noAccounts,
+  useNoAccountsCardShown: () => state.noAccounts,
 }));
 vi.mock("@/lib/api/account/useAccounts", () => ({
   default: () => ({ data: { accounts: [] }, isSuccess: true }),
@@ -94,6 +98,7 @@ afterEach(() => {
   cleanup();
   state.noAccounts = true;
   state.heroHidesEmptyAction = undefined;
+  state.checklistHidesAccount = undefined;
 });
 
 function renderHome(dashboardLayout?: { id: string; hidden: boolean }[]) {
@@ -158,6 +163,8 @@ test("with no accounts, the no-accounts card offers the ways in and net worth dr
 
   assert.ok(screen.getByTestId("no-accounts-card"));
   assert.equal(state.heroHidesEmptyAction, true);
+  // The card asks for the account; the checklist does not ask again.
+  assert.equal(state.checklistHidesAccount, true);
 });
 
 test("with an account, net worth keeps its empty-state button", () => {
@@ -165,4 +172,5 @@ test("with an account, net worth keeps its empty-state button", () => {
   renderHome();
 
   assert.equal(state.heroHidesEmptyAction, false);
+  assert.equal(state.checklistHidesAccount, false);
 });

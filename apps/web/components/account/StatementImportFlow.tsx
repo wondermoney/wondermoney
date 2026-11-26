@@ -22,19 +22,16 @@ export function useStatementImportAvailable(): boolean {
  * existing import dialog opens on the account it created. With one, the import opens directly.
  *
  * `onImported` fires once the import has written its transactions; `onClose` when the person
- * leaves either dialog. An account created before leaving stays: it is a real account, and
- * `onAccountAdded` says so.
+ * leaves either dialog. An account created before leaving stays: it is a real account.
  */
 export default function StatementImportFlow({
   open,
   onClose,
   onImported,
-  onAccountAdded,
 }: {
   open: boolean;
   onClose: () => void;
   onImported: () => void;
-  onAccountAdded?: () => void;
 }) {
   const { data } = useAccounts();
   const accounts = writableAccounts(data?.accounts ?? []);
@@ -51,10 +48,7 @@ export default function StatementImportFlow({
         // On success the import takes over once the account is listed; leaving is `onCancel`.
         closeModal={() => {}}
         onCancel={onClose}
-        onSuccess={() => {
-          setAccountAdded(true);
-          onAccountAdded?.();
-        }}
+        onSuccess={() => setAccountAdded(true)}
       />
       {needsAccount ? null : (
         <AccountTransactionImportModal

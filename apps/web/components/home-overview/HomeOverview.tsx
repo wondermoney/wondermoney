@@ -11,7 +11,7 @@ import { Fragment, type ReactNode, useState } from "react";
 import AccountsFreshness from "@/components/account/AccountsFreshness";
 import {
   NoAccountsCard,
-  useHasNoAccounts,
+  useNoAccountsCardShown,
 } from "@/components/activation/NoAccountsCard";
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
 import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
@@ -41,8 +41,12 @@ const ANY_UNREVIEWED = {
   unreviewedOnly: true,
 } as const;
 
-/** The ways in for a household with no accounts, then the activation checklist. */
+/**
+ * The ways in for a household with no accounts, then the activation checklist. While the card
+ * offers them, the checklist leaves its own account row out, so the empty Home asks once.
+ */
 function HomeActivation() {
+  const noAccountsCard = useNoAccountsCardShown();
   const { data: accountsData, isSuccess: accountsLoaded } = useAccounts();
   const { data: portfoliosData } = usePortfolios();
   const { data: budgetsData } = useBudgetsFull();
@@ -59,6 +63,7 @@ function HomeActivation() {
       {accountsLoaded ? (
         <SetupChecklistCard
           hasAccount={accountCount > 0}
+          hideAccountStep={noAccountsCard}
           hasReviewedTransactions={
             hasTransactions && !anyUnreviewed?.transactions?.length
           }
@@ -91,7 +96,7 @@ export function HomeOverview() {
   // household's: their figures come from endpoints that do not take the filter.
   const { filter: member } = useMemberFilter();
   // The no-accounts card offers the ways in, so the net worth's own "Add an account" steps aside.
-  const noAccounts = useHasNoAccounts();
+  const noAccounts = useNoAccountsCardShown();
 
   const sections: Record<
     Exclude<DashboardSectionId, "net-worth">,

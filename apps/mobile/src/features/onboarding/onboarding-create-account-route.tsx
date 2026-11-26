@@ -12,6 +12,7 @@ import { ApiError } from '@/lib/api/errors'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { parseAccountOrigin } from './onboarding-account-origin'
 import { useCompleteOnboarding } from './use-complete-onboarding'
 
 /**
@@ -38,9 +39,12 @@ function parseVersion(raw: string | string[] | undefined): number | null {
 }
 
 export function OnboardingCreateAccountRoute() {
-  const params = useLocalSearchParams<{ version?: string; then?: string }>()
+  const params = useLocalSearchParams<{ version?: string; then?: string; from?: string }>()
   const version = parseVersion(params.version)
   const destination = afterAccountCreated(params.then, '/')
+  // Back returns to the view this screen was opened from, not to the journey's first step.
+  const from = parseAccountOrigin(params.from)
+  const backTo = (from ? `/onboarding?resume=${from}` : '/onboarding') as Href
   const options = useOfflineAccountOptions()
   // The activation path: reaching this screen means onboarding is
   // still required, so a successful creation here is a first account by
@@ -67,7 +71,7 @@ export function OnboardingCreateAccountRoute() {
     institutions={options.institutions.data?.accountFinancialInstitutions ?? []}
     pending={create.isPending || completion.isPending}
     unknownGuard={create.unknownGuard}
-    onBack={() => router.replace('/onboarding' as Href)}
+    onBack={() => router.replace(backTo)}
     onConfirm={async (payload) => {
       try {
         await create.mutateAsync(payload)

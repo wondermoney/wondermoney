@@ -19,10 +19,12 @@ const h = vi.hoisted(() => ({
     isSuccess: boolean;
   },
   importAvailable: true,
+  viewer: false,
   addModal: null as null | { onAddSyncAccountClick: () => void },
 }));
 
 vi.mock("@/lib/api/account/useAccounts", () => ({ default: () => h.accounts }));
+vi.mock("@/lib/household/useIsHouseholdViewer", () => ({ useIsHouseholdViewer: () => h.viewer }));
 vi.mock("@/components/account/AccountCreateModal", () => ({
   default: (props: Open & { onAddSyncAccountClick: () => void }) => {
     h.addModal = props;
@@ -44,6 +46,7 @@ afterEach(() => {
   cleanup();
   h.accounts = { data: { accounts: [] }, isSuccess: true };
   h.importAvailable = true;
+  h.viewer = false;
   h.addModal = null;
 });
 
@@ -114,4 +117,11 @@ test("a server that takes no statement files does not offer the import", () => {
   assert.equal(screen.queryByRole("button", { name: new RegExp(copy.import) }), null);
   option(copy.connect);
   option(copy.manual);
+});
+
+test("a household viewer, who cannot add an account, is not offered one", () => {
+  h.viewer = true;
+  const view = renderCard();
+
+  assert.equal(view.container.innerHTML, "");
 });

@@ -53,13 +53,6 @@
           "financial_freedom": "Empieza con una cuenta para que saldos, gasto e inversiones creen una visión fiable.",
           "exploring": "Empieza con una cuenta, o añade una manualmente, y ve cómo funciona WonderMoney."
         },
-        "skipWarning": {
-          "headline": "¿Continuar sin datos financieros reales?",
-          "description": "Puedes hacerlo, pero WonderMoney no podrá mostrar tus saldos reales, transacciones, patrones de gasto ni patrimonio neto hasta que añadas una cuenta.",
-          "primary": "Añadir una cuenta primero",
-          "secondary": "Continuar sin cuenta",
-          "reassurance": "Siempre puedes añadir una más tarde desde Cuentas."
-        },
         "credentialRequired": {
           "title": "Conectar un banco requiere una configuración rápida y única",
           "body": "Antes de poder conectar un banco real, añade tu propia clave de Enable Banking desde Ajustes. Puedes hacerlo cuando quieras después de terminar la configuración. Por ahora, añade una cuenta manualmente arriba o salta este paso y conéctalo más tarde."
@@ -324,7 +317,8 @@
         "importHint": "Un archivo exportado de tu banco",
         "manual": "Añadir una cuenta a mano",
         "manualHint": "Un nombre y un saldo",
-        "skip": "Saltar por ahora"
+        "skip": "Saltar por ahora",
+        "connectInstead": "Conectar un banco en su lugar"
       }
     },
     "dashboard": {

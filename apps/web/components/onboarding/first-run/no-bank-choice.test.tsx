@@ -29,7 +29,6 @@ type ImportFlowProps = {
   open: boolean;
   onClose: () => void;
   onImported: () => void;
-  onAccountAdded?: () => void;
 };
 
 const h = vi.hoisted(() => ({
@@ -38,6 +37,7 @@ const h = vi.hoisted(() => ({
   footer: null as ReactNode,
   importAvailable: true,
   importFlow: null as null | ImportFlowProps,
+  accounts: [] as { accountKey: number; myAccess?: "owner" | "read" | "write" }[],
 }));
 
 vi.mock("@/lib/analytics/track", () => ({ track: h.capture }));
@@ -59,6 +59,9 @@ vi.mock("@/lib/api/banking/useBankList", () => ({ default: () => ({ data: [], is
 vi.mock("@/components/account/BankList", () => ({ default: () => null }));
 vi.mock("@/lib/api/banking/useCreateRequisition", () => ({
   default: () => ({ data: undefined, isError: false, refetch: vi.fn() }),
+}));
+vi.mock("@/lib/api/account/useAccounts", () => ({
+  default: () => ({ data: { accounts: h.accounts }, isSuccess: true }),
 }));
 vi.mock("@/lib/api/account/useCreateOfflineAccount", () => ({
   default: () => ({ mutate: vi.fn(), isPending: false }),
@@ -113,6 +116,7 @@ afterEach(() => {
   h.footer = null;
   h.importAvailable = true;
   h.importFlow = null;
+  h.accounts = [];
 });
 
 function withProviders(node: ReactNode) {
@@ -171,7 +175,7 @@ test("importing a statement opens the import flow and comes back to the sync ste
   await userEvent.click(screen.getByRole("button", { name: new RegExp(copy.noBank.import) }));
   screen.getByTestId("statement-import");
 
-  act(() => h.importFlow!.onAccountAdded?.());
+  h.accounts = [{ accountKey: 1, myAccess: "owner" }];
   act(() => h.importFlow!.onImported());
 
   assert.equal(getFirstRunState("user-1").accountStep, "manual_added");
@@ -182,7 +186,7 @@ test("importing a statement opens the import flow and comes back to the sync ste
 test("leaving the import after it added the account goes on with that account, not a skip", async () => {
   await skipTheBank();
   await userEvent.click(screen.getByRole("button", { name: new RegExp(copy.noBank.import) }));
-  act(() => h.importFlow!.onAccountAdded?.());
+  h.accounts = [{ accountKey: 1, myAccess: "owner" }];
   act(() => h.importFlow!.onClose());
   assert.equal(screen.queryByTestId("statement-import"), null);
 
@@ -203,7 +207,31 @@ test("a server that takes no statement files offers only the manual account", as
 
 test("the choice can go back to the bank list", async () => {
   await skipTheBank();
-  await userEvent.click(screen.getByRole("button", { name: copy.completion.connectInstead }));
+  await userEvent.click(screen.getByRole("button", { name: copy.noBank.connectInstead }));
 
   screen.getByRole("heading", { name: copy.account.headline });
+});
+
+test("an account the import added still counts after going back to the banks and skipping again", async () => {
+  await skipTheBank();
+  await userEvent.click(screen.getByRole("button", { name: new RegExp(copy.noBank.import) }));
+  h.accounts = [{ accountKey: 1, myAccess: "owner" }];
+  act(() => h.importFlow!.onClose());
+
+  await userEvent.click(screen.getByRole("button", { name: copy.noBank.connectInstead }));
+  screen.getByRole("heading", { name: copy.account.headline });
+  await pressFooter(copy.skipStep);
+  await pressFooter(copy.noBank.skip);
+
+  assert.deepEqual(h.capture.mock.calls, []);
+  assert.equal(getFirstRunState("user-1").accountStep, "manual_added");
+  assert.deepEqual(h.push.mock.calls, [["/onboarding/sync"]]);
+});
+
+test("an account shared only to view is not one of the person's own: going on is a skip", async () => {
+  h.accounts = [{ accountKey: 2, myAccess: "read" }];
+  await skipTheBank();
+  await pressFooter(copy.noBank.skip);
+
+  assert.deepEqual(h.capture.mock.calls, [["onboarding_step_skipped", { step: "account" }]]);
 });

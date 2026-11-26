@@ -9,10 +9,10 @@ import { themeTokens } from '@/theme/tokens'
 /**
  * Web's `NoAccountsCard`: Home for a household with no accounts at all, with the three ways in,
  * each opening the flow the app already has. A statement goes into an account, so "Import a
- * statement" adds the account first and then opens the import on it. Home shows it only while
- * the account list is loaded and empty.
+ * statement" adds the account first and then opens the import on it, and is left out where the
+ * server stores no files. Home shows it as `home-model`'s `noAccountsCard` decides.
  */
-export function NoAccountsCard({ onNavigate }: { onNavigate: (href: string) => void }) {
+export function NoAccountsCard({ importAvailable, onNavigate }: { importAvailable: boolean; onNavigate: (href: string) => void }) {
   const { t } = useTranslation()
   return (
     <View style={styles.card} testID="home-no-accounts">
@@ -20,7 +20,7 @@ export function NoAccountsCard({ onNavigate }: { onNavigate: (href: string) => v
       <NoAccountOptionList
         options={[
           { key: 'connect', icon: 'landmark', label: t('home.noAccounts.connect'), onPress: () => onNavigate('/more/banking/connect') },
-          { key: 'import', icon: 'file-text', label: t('home.noAccounts.import'), hint: t('home.noAccounts.importHint'), onPress: () => onNavigate(`/accounts/create?then=${THEN_IMPORT}`) },
+          ...(importAvailable ? [{ key: 'import', icon: 'file-text' as const, label: t('home.noAccounts.import'), hint: t('home.noAccounts.importHint'), onPress: () => onNavigate(`/accounts/create?then=${THEN_IMPORT}`) }] : []),
           { key: 'manual', icon: 'pencil', label: t('home.noAccounts.manual'), hint: t('home.noAccounts.manualHint'), onPress: () => onNavigate('/accounts/create') },
         ]}
       />

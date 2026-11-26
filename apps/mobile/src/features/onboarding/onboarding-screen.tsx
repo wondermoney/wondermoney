@@ -10,6 +10,7 @@ import { Text } from '@/components/ui/text'
 import { NoAccountOptionList } from '@/features/accounts/no-account-options'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
+import type { OnboardingAccountOrigin } from './onboarding-account-origin'
 import type { OnboardingJourneyView } from './onboarding-view-model'
 import type { CompleteOnboardingFailure } from './use-complete-onboarding'
 
@@ -27,13 +28,18 @@ export type OnboardingScreenProps = Readonly<{
   outcome: 'idle' | 'skip' | 'connect-bank'
   onSkip: () => void | Promise<void>
   onConnectBank: () => void | Promise<void>
-  onCreateAccount: () => void | Promise<void>
+  /** Opens the manual-account screen, saying which view its Back returns to. */
+  onCreateAccount: (from: OnboardingAccountOrigin) => void | Promise<void>
   /** "Import a statement" after skipping the bank: an account to import into, then the import. */
   onImportStatement: () => void | Promise<void>
   onRetry: () => void | Promise<void>
+  /** Where the journey opens when coming back from the manual-account screen; absent, at the start. */
+  resumeAt?: OnboardingAccountOrigin
+  /** Whether the server stores files: without it a statement upload fails, so no import is offered. */
+  importAvailable?: boolean
 }>
 
-export function OnboardingScreen({ state, pending, completionFailure = null, onSkip, onConnectBank, onCreateAccount, onImportStatement, onRetry }: OnboardingScreenProps) {
+export function OnboardingScreen({ state, pending, completionFailure = null, onSkip, onConnectBank, onCreateAccount, onImportStatement, onRetry, resumeAt, importAvailable = false }: OnboardingScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
   if (state.status === 'access-transition') return null
@@ -63,7 +69,7 @@ export function OnboardingScreen({ state, pending, completionFailure = null, onS
       </SafeAreaView>
     )
   }
-  return <OnboardingJourney palette={palette} view={state.view} pending={pending} completionFailure={completionFailure} onSkip={onSkip} onConnectBank={onConnectBank} onCreateAccount={onCreateAccount} onImportStatement={onImportStatement} />
+  return <OnboardingJourney palette={palette} view={state.view} pending={pending} completionFailure={completionFailure} onSkip={onSkip} onConnectBank={onConnectBank} onCreateAccount={onCreateAccount} onImportStatement={onImportStatement} resumeAt={resumeAt} importAvailable={importAvailable} />
 }
 
 /**
@@ -105,12 +111,12 @@ const WELCOME_FACTS: readonly { key: 'connected' | 'readOnly' | 'netWorth'; icon
 ]
 const MAX_GOALS = 2
 
-function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, onConnectBank, onCreateAccount, onImportStatement }: { palette: Palette; view: OnboardingJourneyView; pending: boolean; completionFailure: OnboardingCompletionFailure | null; onSkip: () => void | Promise<void>; onConnectBank: () => void | Promise<void>; onCreateAccount: () => void | Promise<void>; onImportStatement: () => void | Promise<void> }) {
+function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, onConnectBank, onCreateAccount, onImportStatement, resumeAt, importAvailable }: { palette: Palette; view: OnboardingJourneyView; pending: boolean; completionFailure: OnboardingCompletionFailure | null; onSkip: () => void | Promise<void>; onConnectBank: () => void | Promise<void>; onCreateAccount: (from: OnboardingAccountOrigin) => void | Promise<void>; onImportStatement: () => void | Promise<void>; resumeAt?: OnboardingAccountOrigin; importAvailable: boolean }) {
   const { t } = useTranslation()
-  const [step, setStep] = useState<Step>('welcome')
+  const [step, setStep] = useState<Step>(resumeAt ? 'account' : 'welcome')
   // Web's no-bank choice (`FirstRunAccountStep`, mode `choice`): skipping on the account step
   // offers importing a statement or adding an account by hand before finishing without one.
-  const [noBank, setNoBank] = useState(false)
+  const [noBank, setNoBank] = useState(resumeAt === 'no-bank')
   const [goals, setGoals] = useState<string[]>([])
   const index = STEPS.indexOf(step)
 
@@ -231,8 +237,9 @@ function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, 
       {noBank ? (
         <NoAccountOptionList
           options={[
-            { key: 'import', icon: 'file-text', label: t('onboarding.firstRun.noBank.import'), hint: t('onboarding.firstRun.noBank.importHint'), disabled: pending, onPress: () => void onImportStatement() },
-            { key: 'manual', icon: 'pencil', label: t('onboarding.firstRun.noBank.manual'), hint: t('onboarding.firstRun.noBank.manualHint'), disabled: pending, onPress: () => void onCreateAccount() },
+            // Without file storage the upload fails, after the account it goes into was created.
+            ...(importAvailable ? [{ key: 'import', icon: 'file-text' as const, label: t('onboarding.firstRun.noBank.import'), hint: t('onboarding.firstRun.noBank.importHint'), disabled: pending, onPress: () => void onImportStatement() }] : []),
+            { key: 'manual', icon: 'pencil', label: t('onboarding.firstRun.noBank.manual'), hint: t('onboarding.firstRun.noBank.manualHint'), disabled: pending, onPress: () => void onCreateAccount('no-bank') },
           ]}
           testID="onboarding-no-bank"
         />
@@ -244,7 +251,7 @@ function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, 
           block
           disabled={pending || !view.createAccountActionAvailable}
           label={t('onboarding.firstRun.account.manualCta')}
-          onPress={() => void onCreateAccount()}
+          onPress={() => void onCreateAccount('account')}
           variant="outline"
         />
       ) : null}

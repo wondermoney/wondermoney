@@ -2,7 +2,7 @@
 
 import { FileText, KeyRound, Pencil, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 
 import BankList from "@/components/account/BankList";
 import StatementImportFlow, {
@@ -17,9 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
+import { writableAccounts } from "@/lib/account/account-access";
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import { track } from "@/lib/analytics/track";
+import useAccounts from "@/lib/api/account/useAccounts";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
@@ -535,14 +537,16 @@ function NoBankChoice({
   const setFooter = useFirstRunOnboardingFooter();
   const importAvailable = useStatementImportAvailable();
   const [importOpen, setImportOpen] = useState(false);
-  // The import adds an account before its file; leaving the import keeps it,
-  // and going on then is going on with a manual account, not skipping.
-  const accountAdded = useRef(false);
+  // The import adds an account before its file, and leaving the import keeps
+  // it: going on then is going on with a manual account, not skipping. The
+  // account list says so, however the person got back here.
+  const { data: accountsData } = useAccounts();
+  const hasAccount = writableAccounts(accountsData?.accounts ?? []).length > 0;
   const userId = user?.id;
 
   useEffect(() => {
     const goOn = () => {
-      if (accountAdded.current) {
+      if (hasAccount) {
         if (userId)
           patchFirstRunState(
             { accountStep: "manual_added", currentStep: "sync_value" },
@@ -569,7 +573,7 @@ function NoBankChoice({
       </Button>,
     );
     return () => setFooter(null);
-  }, [router, setFooter, t, userId]);
+  }, [hasAccount, router, setFooter, t, userId]);
 
   const onImported = () => {
     setImportOpen(false);
@@ -617,16 +621,13 @@ function NoBankChoice({
             className="text-muted-foreground min-h-11"
             onClick={onBack}
           >
-            {t("completion.connectInstead")}
+            {t("noBank.connectInstead")}
           </Button>
           {importAvailable ? (
             <StatementImportFlow
               open={importOpen}
               onClose={() => setImportOpen(false)}
               onImported={onImported}
-              onAccountAdded={() => {
-                accountAdded.current = true;
-              }}
             />
           ) : null}
         </div>

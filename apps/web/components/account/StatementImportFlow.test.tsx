@@ -55,7 +55,6 @@ function renderFlow({ open = true }: { open?: boolean } = {}) {
     open,
     onClose: vi.fn(),
     onImported: vi.fn(),
-    onAccountAdded: vi.fn(),
   };
   const view = render(<StatementImportFlow {...props} />);
   return { ...view, props };
@@ -79,7 +78,6 @@ test("once the account exists, the import opens on it", () => {
   const { props, rerender } = renderFlow();
 
   act(() => h.offline!.onSuccess?.());
-  assert.equal(props.onAccountAdded.mock.calls.length, 1);
 
   h.accounts = [{ accountKey: 7, myAccess: "owner" }];
   rerender(<StatementImportFlow {...props} />);

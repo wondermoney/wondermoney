@@ -11,6 +11,7 @@ import StatementImportFlow, {
   useStatementImportAvailable,
 } from "@/components/account/StatementImportFlow";
 import useAccounts from "@/lib/api/account/useAccounts";
+import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 
 import { NoAccountOptionList } from "./NoAccountOptions";
 
@@ -21,13 +22,13 @@ import { NoAccountOptionList } from "./NoAccountOptions";
  * the ones first run offers after skipping the bank.
  *
  * It shows only while the account list is loaded and empty, so the first account takes it
- * away. A dialog already open stays mounted after that, until it is closed: importing a
+ * away, and never to a household viewer, who cannot add one. A dialog already open stays mounted after that, until it is closed: importing a
  * statement creates the account first and then opens the import on it. With accounts and no
  * dialog open, nothing mounts, so the dialogs' own requests are not made for everyone.
  */
 export function NoAccountsCard() {
   const t = useTranslations("homeOverview.noAccounts");
-  const visible = useHasNoAccounts();
+  const visible = useNoAccountsCardShown();
   const headingId = useId();
   const importAvailable = useStatementImportAvailable();
   const [addOpen, setAddOpen] = useState(false);
@@ -108,8 +109,12 @@ export function NoAccountsCard() {
   );
 }
 
-/** The account list has loaded and holds nothing: not while it loads, nor after it failed. */
-export function useHasNoAccounts(): boolean {
+/**
+ * Whether Home shows the card: the account list has loaded and holds nothing (not while it
+ * loads, nor after it failed), and the person may add an account (not a household viewer).
+ */
+export function useNoAccountsCardShown(): boolean {
   const { data, isSuccess } = useAccounts();
-  return isSuccess && (data?.accounts?.length ?? 0) === 0;
+  const viewer = useIsHouseholdViewer();
+  return isSuccess && (data?.accounts?.length ?? 0) === 0 && !viewer;
 }
