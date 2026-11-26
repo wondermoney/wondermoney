@@ -30,9 +30,9 @@ const mockMutateAsync = jest.fn()
 let mockParams: { justStarted?: string; connection?: string } = {}
 let mockIsPending = false
 let mockVariables: { connectionId: number; provider: string } | undefined
-let mockFeatures: { bankSyncProviders?: string[] } = {}
+let mockFeatures: { bankSyncProviders?: string[]; fileStorage?: boolean } = {}
 jest.mock('@/lib/server/use-instance', () => ({
-  useConfirmedFeature: (select: (features: { bankSyncProviders?: string[] }) => boolean | undefined) => select(mockFeatures) === true,
+  useConfirmedFeature: (select: (features: { bankSyncProviders?: string[]; fileStorage?: boolean }) => boolean | undefined) => select(mockFeatures) === true,
 }))
 
 const mockStartMutate = jest.fn()
@@ -82,7 +82,7 @@ jest.mock('../connections-screen', () => ({
     onViewHistory: (target: { connectionId: number; provider: string }, institutionName: string | null) => void
     disconnectingConnection: { connectionId: number; provider: string } | null
     disconnectFailure: { connectionId: number; provider: string; failure: string } | null
-    onImportStatement: () => void
+    onImportStatement?: () => void
     onReconnect: (bankId: string) => void
     reconnectingBankId: string | null
     reconnectFailure: { bankId: string; failure: string } | null
@@ -103,7 +103,7 @@ jest.mock('../connections-screen', () => ({
         <Native.Pressable accessibilityRole="button" accessibilityLabel="ConnectBank" onPress={props.onConnectBank}><Native.Text>Connect</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Refresh" onPress={props.onRefresh}><Native.Text>Refresh</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Disconnect" onPress={() => void props.onDisconnect({ connectionId: 42, provider: 'EnableBanking' })}><Native.Text>Disconnect</Native.Text></Native.Pressable>
-        <Native.Pressable accessibilityRole="button" accessibilityLabel="ImportStatement" onPress={props.onImportStatement}><Native.Text>Import statement</Native.Text></Native.Pressable>
+        {props.onImportStatement ? <Native.Pressable accessibilityRole="button" accessibilityLabel="ImportStatement" onPress={props.onImportStatement}><Native.Text>Import statement</Native.Text></Native.Pressable> : null}
         <Native.Text testID="reconnecting">{String(props.reconnectingBankId)}</Native.Text>
         <Native.Text testID="reconnectFailure">{props.reconnectFailure ? `${props.reconnectFailure.bankId}:${props.reconnectFailure.failure}` : 'none'}</Native.Text>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Reconnect" onPress={() => props.onReconnect('UFQ6OlJldm9sdXQ')}><Native.Text>Reconnect</Native.Text></Native.Pressable>
@@ -243,9 +243,16 @@ describe('ConnectionsRoute', () => {
   })
 
   it('sends a failed sync to the transaction import, where the person picks the account', async () => {
+    mockFeatures = { fileStorage: true }
     const view = await render(<ConnectionsRoute />)
     await fireEvent.press(view.getByRole('button', { name: 'ImportStatement' }))
     expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/import')
+  })
+
+  it('offers no import on a server without file storage, where the upload would fail', async () => {
+    mockFeatures = { fileStorage: false }
+    const view = await render(<ConnectionsRoute />)
+    expect(view.queryByRole('button', { name: 'ImportStatement' })).not.toBeOnTheScreen()
   })
 
   describe('SimpleFIN', () => {

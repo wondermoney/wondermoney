@@ -49,16 +49,22 @@ jest.mock('./use-onboarding-bootstrap', () => ({
   useOnboardingBootstrap: () => mockLoadedBootstrap,
 }))
 
+const mockCompleteOnboarding = jest.fn()
 jest.mock('./use-complete-onboarding', () => ({
-  useCompleteOnboarding: () => ({ isPending: false, mutateAsync: jest.fn() }),
+  useCompleteOnboarding: () => ({ isPending: false, mutateAsync: mockCompleteOnboarding, reset: jest.fn() }),
   classifyCompleteOnboardingFailure: jest.fn(),
 }))
 
+let mockHasWritableAccount = false
+jest.mock('./use-has-writable-account', () => ({
+  useHasWritableAccount: () => mockHasWritableAccount,
+}))
+
 let capturedOnCreateAccount: ((from: 'account' | 'no-bank') => void) | undefined
-let capturedOnImportStatement: (() => void) | undefined
+let capturedOnImportStatement: (() => void | Promise<void>) | undefined
 let capturedScreen: { resumeAt?: string; importAvailable?: boolean } = {}
 jest.mock('./onboarding-screen', () => ({
-  OnboardingScreen: (props: { onCreateAccount: (from: 'account' | 'no-bank') => void; onImportStatement: () => void; resumeAt?: string; importAvailable?: boolean }) => {
+  OnboardingScreen: (props: { onCreateAccount: (from: 'account' | 'no-bank') => void; onImportStatement: () => void | Promise<void>; resumeAt?: string; importAvailable?: boolean }) => {
     capturedOnCreateAccount = props.onCreateAccount
     capturedOnImportStatement = props.onImportStatement
     capturedScreen = { resumeAt: props.resumeAt, importAvailable: props.importAvailable }
@@ -152,9 +158,36 @@ describe('OnboardingRoute — create-account navigation', () => {
   it('importing a statement takes the same screen first, then on to the import', async () => {
     await render(<OnboardingRoute />)
 
-    capturedOnImportStatement?.()
+    await capturedOnImportStatement?.()
 
     expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7&then=import&from=no-bank')
+    expect(mockCompleteOnboarding).not.toHaveBeenCalled()
+  })
+
+  it('imports into an account the person can already write to, completing onboarding, instead of creating one', async () => {
+    mockHasWritableAccount = true
+    mockCompleteOnboarding.mockResolvedValueOnce({})
+    await render(<OnboardingRoute />)
+
+    await capturedOnImportStatement?.()
+
+    expect(mockCompleteOnboarding).toHaveBeenCalledWith({ version: 7 })
+    expect(mockReplace).toHaveBeenCalledTimes(1)
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
+    expect(mockPush).not.toHaveBeenCalled()
+    mockHasWritableAccount = false
+  })
+
+  it('still opens the import on an existing account when completing onboarding fails', async () => {
+    mockHasWritableAccount = true
+    mockCompleteOnboarding.mockRejectedValueOnce(new Error('network'))
+    await render(<OnboardingRoute />)
+
+    await capturedOnImportStatement?.()
+
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
+    expect(mockPush).not.toHaveBeenCalled()
+    mockHasWritableAccount = false
   })
 
   it('reopens the journey where the manual-account screen was opened from', async () => {

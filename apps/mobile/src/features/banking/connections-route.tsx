@@ -40,6 +40,8 @@ export function ConnectionsRoute() {
   const [reconnectFailure, setReconnectFailure] = useState<ConnectionReconnectFailureState | null>(null)
   // Off by default on a server: offered only once the instance says the operator enabled it.
   const offersSimplefin = useConfirmedFeature((features) => features.bankSyncProviders?.includes('simplefin'))
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
 
 
   return (
@@ -61,7 +63,7 @@ export function ConnectionsRoute() {
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onConnectSimplefin={offersSimplefin ? () => router.push('/more/banking/simplefin/connect' as Href) : undefined}
       // A failed sync's fallback is the staged import every account has: the person picks the account there.
-      onImportStatement={() => router.push('/accounts/transactions/import' as Href)}
+      onImportStatement={importAvailable ? () => router.push('/accounts/transactions/import' as Href) : undefined}
       onViewHistory={({ connectionId, provider }, institutionName) => {
         router.push({
           pathname: '/more/banking/history',
