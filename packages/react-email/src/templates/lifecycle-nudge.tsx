@@ -26,12 +26,14 @@ export const FOOTER = {
   en: { note: (brand: string) => `You're receiving this as part of your ${brand} account.`, unsubscribe: "Unsubscribe", settings: "Notification settings" },
   pt: { note: (brand: string) => `Recebes este email por teres uma conta ${brand}.`, unsubscribe: "Cancelar subscrição", settings: "Definições de notificações" },
   es: { note: (brand: string) => `Recibes este correo porque tienes una cuenta de ${brand}.`, unsubscribe: "Cancelar la suscripción", settings: "Ajustes de notificaciones" },
+  it: { note: (brand: string) => `Ricevi questa email perché hai un account ${brand}.`, unsubscribe: "Annulla l'iscrizione", settings: "Impostazioni delle notifiche" },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;
 
 function greetingFor(language: TransactionalEmailLanguage, firstName?: string): string {
   const name = firstName?.trim();
   if (language === "pt") return name ? `Olá ${name},` : "Olá,";
   if (language === "es") return name ? `Hola ${name},` : "Hola,";
+  if (language === "it") return name ? `Ciao ${name},` : "Ciao,";
   return name ? `Hi ${name},` : "Hi there,";
 }
 

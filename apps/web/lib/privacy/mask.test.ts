@@ -13,7 +13,7 @@ test("the mask keeps the currency symbol where the locale puts it", () => {
 });
 
 test("the mask carries no digit, sign or magnitude", () => {
-  for (const locale of ["en", "pt", "es"]) {
+  for (const locale of ["en", "pt", "es", "it"]) {
     for (const currency of ["EUR", "USD", "JPY", "", undefined, null]) {
       const mask = maskMoney(currency, locale);
       assert.ok(!/[\d+\-−]/.test(mask), `${locale}/${currency}: ${mask}`);

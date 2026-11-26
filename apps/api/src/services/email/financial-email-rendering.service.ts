@@ -21,12 +21,12 @@ export type RenderedEmailAdapter = (input: RenderedEmailInput) => Promise<Render
 type FinancialLanguage = SupportedLanguages;
 
 /**
- * The financial emails ship in EN, PT and ES; an account language outside that list reads
+ * The financial emails ship in EN, PT, ES and IT; an account language outside that list reads
  * English. Each renderer keeps three things apart: the copy language (`lang`, which the
  * react-email template and the formatting follow), its `Intl` locale, and the account's own web
  * locale (`link`), which every link into the app carries.
  */
-const COPY_LOCALES = ['en', 'pt', 'es'] as const;
+const COPY_LOCALES = ['en', 'pt', 'es', 'it'] as const;
 type CopyLang = (typeof COPY_LOCALES)[number];
 const languagesFor = (language: FinancialLanguage) => {
   const lang: CopyLang = copyLocale(language, COPY_LOCALES);
@@ -55,6 +55,17 @@ const COPY = {
     comparisonText: 'Comparado con la semana anterior',
     dataContext: 'Según las transacciones disponibles actualmente.',
     noChange: 'sin cambios',
+  },
+  it: {
+    above: 'sopra',
+    below: 'sotto',
+    budgetPressure: {
+      near: { detail: 'Questo mese il tuo budget è vicino ai limiti.', status: 'Vicino al budget' },
+      over: { detail: 'Questo mese hai superato il budget in una o più categorie.', status: 'Oltre il budget' },
+    },
+    comparisonText: 'Rispetto alla settimana precedente',
+    dataContext: 'In base alle transazioni attualmente disponibili.',
+    noChange: 'nessuna variazione',
   },
   pt: {
     above: 'acima',
@@ -276,6 +287,16 @@ function formatWeekRange(range: { end: Date; start: Date }, language: CopyLang) 
     if (sameMonth) return `${day(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     if (sameYear) return `${day(range.start)} de ${month(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     return `${day(range.start)} de ${month(range.start)} de ${year(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
+  }
+  // Italian reads "Settimana conclusa: dal 6 al 12 luglio 2026", the range carrying its own
+  // prepositions, elided before a day said with a vowel: "dall'1", "all'8", "dall'11".
+  if (language === 'it') {
+    const elided = (date: Date) => ['1', '8', '11'].includes(day(date));
+    const from = (date: Date) => (elided(date) ? `dall'${day(date)}` : `dal ${day(date)}`);
+    const to = (date: Date) => (elided(date) ? `all'${day(date)}` : `al ${day(date)}`);
+    if (sameMonth) return `${from(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
+    if (sameYear) return `${from(range.start)} ${month(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
+    return `${from(range.start)} ${month(range.start)} ${year(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
   }
   if (sameMonth) return `${day(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
   if (sameYear) return `${day(range.start)} ${month(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;

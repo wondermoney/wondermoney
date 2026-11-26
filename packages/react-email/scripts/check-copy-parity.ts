@@ -1,5 +1,5 @@
 /**
- * Keep every transactional email's copy in en, pt and es with the same shape.
+ * Keep every transactional email's copy in en, pt, es and it with the same shape.
  *
  * Each template keeps its copy in a table beside the component, one entry per
  * language. Nothing connects those tables, so a language can be added to the
@@ -7,14 +7,18 @@
  * date)` arguments its subject interpolates: the build stays green while a
  * reader gets an English sentence or a literal missing value.
  *
- * Every template must carry en, pt and es copy. A missing language fails the
- * check, so a template cannot ship English to a Spanish account by omission.
+ * Every template must carry en, pt, es and it copy. A missing language fails
+ * the check, so a template cannot ship English to a Spanish or Italian account
+ * by omission.
  *
  * Portuguese copy addresses the reader as "tu" ("Recebes este email…"), never
  * as "você" or in the formal third person (CONTRIBUTING.md has the rule), so
  * the pt entries also fail on "você" or a formal imperative opening a sentence.
  * The same patterns guard the web and mobile copy. Spanish copy uses "tú" too,
- * so the es entries fail on "usted" or "Ud.".
+ * so the es entries fail on "usted" or "Ud.". Italian copy uses "tu" as well,
+ * never the formal "Lei", so the it entries fail on a formal imperative opening
+ * a sentence ("Scelga", "Inserisca", "Si assicuri"…) or a capitalised courtesy
+ * pronoun (Lei, Suo, Sua, Suoi, Sue) in the middle of a sentence.
  *
  *   tsx scripts/check-copy-parity.ts
  */
@@ -48,7 +52,7 @@ const templates: Array<{ file: string; copy: CopyTable }> = [
   { file: "src/weekly-insights-preheader.ts", copy: weeklyInsightsPreheader },
 ];
 
-const LOCALES = ["en", "pt", "es"] as const;
+const LOCALES = ["en", "pt", "es", "it"] as const;
 
 const FORMAL_ADDRESS = [
   /(?<!\p{L})[Vv]ocê(?!\p{L})/u,
@@ -56,6 +60,11 @@ const FORMAL_ADDRESS = [
 ];
 
 const SPANISH_FORMAL_ADDRESS = /(?<!\p{L})(?:[Uu]sted(?:es)?|Uds?\.)(?!\p{L})/u;
+
+const ITALIAN_FORMAL_ADDRESS = [
+  /(?:^|[.!?:…]\s+|\n|`)(?:Scelga|Inserisca|Apra|Attenda|Faccia|Veda|Mantenga|Acceda|Scriva|Aggiunga|Si assicuri|Si registri|Legga|Prema)(?!\p{L})/u,
+  /(?<=[\p{L}\d,;]\s+)(?:Lei|Suo|Sua|Suoi|Sue)(?!\p{L})/u,
+];
 
 const failures: string[] = [];
 
@@ -169,6 +178,12 @@ for (const { file, copy } of templates) {
     }
   }
 
+  for (const [path, text] of copyText(copy.it, "it")) {
+    if (ITALIAN_FORMAL_ADDRESS.some((pattern) => pattern.test(text))) {
+      failures.push(`${file}: ${path} addresses the reader as "Lei"; use the "tu" form.`);
+    }
+  }
+
   if (!copy.en) {
     failures.push(`${file}: no English copy to compare against.`);
     continue;
@@ -195,5 +210,5 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `Email copy parity check passed — ${templates.length} templates in en, pt and es with matching placeholders.`,
+  `Email copy parity check passed — ${templates.length} templates in en, pt, es and it with matching placeholders.`,
 );

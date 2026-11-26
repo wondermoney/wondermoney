@@ -47,6 +47,16 @@ export const COPY: Record<TransactionalEmailLanguage, LanguageCopy> = {
     ignoreNote: (brand) => `Si no creaste una cuenta en ${brand}, puedes ignorar este correo.`,
     footer: (brand) => `Recibes este correo porque esta dirección se usó en una cuenta de ${brand}.`,
   },
+  it: {
+    subject: (brand) => `Verifica la tua email su ${brand}`,
+    preheader: "Conferma il tuo indirizzo email per completare la configurazione del tuo account.",
+    heading: "Conferma il tuo indirizzo email",
+    intro: (brand) => `Ti diamo il benvenuto su ${brand}! Conferma il tuo indirizzo email con il pulsante qui sotto.`,
+    cta: "Conferma l'indirizzo email",
+    linkNote: "Se il pulsante non funziona, copia questo link nel tuo browser:",
+    ignoreNote: (brand) => `Se non hai creato un account su ${brand}, puoi ignorare questa email.`,
+    footer: (brand) => `Ricevi questa email perché questo indirizzo è stato usato per un account ${brand}.`,
+  },
 };
 
 export const getEmailVerificationSubject = (props: EmailVerificationEmailProps) =>

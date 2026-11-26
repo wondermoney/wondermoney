@@ -1,7 +1,7 @@
 import type { Lang } from "@/lib/i18nLocale";
 
 /** Languages app.wonder.money is translated into; it prefixes every route with one of them. */
-const APP_LANGS: ReadonlyArray<Lang> = ["en", "pt", "es"];
+const APP_LANGS: ReadonlyArray<Lang> = ["en", "pt", "es", "it"];
 
 /**
  * The hosted app's FAQ in the page's language, or English where the app has no translation.

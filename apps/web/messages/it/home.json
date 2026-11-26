@@ -1,0 +1,167 @@
+{
+  "homeOverview": {
+    "customize": {
+      "action": "Personalizza",
+      "title": "Personalizza la home",
+      "description": "Scegli cosa compare nella tua home e in quale ordine.",
+      "sections": {
+        "net-worth": "Patrimonio netto",
+        "insights": "Approfondimenti",
+        "this-month": "Questo mese",
+        "balance-sheet": "Stato patrimoniale",
+        "cashflow": "Flusso di cassa netto",
+        "loans": "Prestiti",
+        "latest-transactions": "Ultime transazioni"
+      },
+      "moveUp": "Sposta {section} più in alto",
+      "moveDown": "Sposta {section} più in basso",
+      "pinned": "Sempre in prima posizione",
+      "reset": "Ripristina l'ordine predefinito",
+      "saving": "Salvataggio…",
+      "saveError": "Impossibile salvare. Riprova.",
+      "retry": "Riprova",
+      "loadError": "Impossibile caricare il layout della tua home.",
+      "done": "Fine"
+    },
+    "insights": {
+      "title": "Approfondimenti",
+      "empty": {
+        "title": "Niente di insolito questo mese",
+        "body": "Le spese seguono il ritmo abituale e nessun budget rischia di essere sforato."
+      },
+      "severity": {
+        "critical": "Richiede attenzione",
+        "warning": "Da controllare",
+        "info": "Buone notizie"
+      },
+      "spending": {
+        "above": "La spesa per {category} è del {percent}% sopra il ritmo abituale.",
+        "below": "La spesa per {category} è del {percent}% sotto il ritmo abituale.",
+        "figures": "<current></current> finora, di solito <baseline></baseline> a questo punto del mese.",
+        "link": "Vedi transazioni",
+        "status": {
+          "above": "{percent}% sopra il ritmo abituale.",
+          "below": "{percent}% sotto il ritmo abituale."
+        }
+      },
+      "budget": {
+        "pace": "{category} rischia di sforare il budget.",
+        "figures": "<projected></projected> previsti a fronte di <budgeted></budgeted> pianificati.",
+        "link": "Vedi budget",
+        "status": "Rischia di sforare il budget."
+      },
+      "ask": {
+        "link": "Chiedi all'assistente",
+        "prompt": {
+          "spending": {
+            "above": "Perché questo mese la mia spesa per {category} è del {percent} sopra la norma?",
+            "below": "Perché questo mese la mia spesa per {category} è del {percent} sotto la norma?"
+          },
+          "budget": "Perché questo mese il mio budget per {category} è previsto a {projected} a fronte dei {budgeted} pianificati?",
+          "budgetHidden": "Perché questo mese il mio budget per {category} rischia di essere sforato?"
+        }
+      }
+    },
+    "bank-alerts": {
+      "label": "Avvisi sulle connessioni bancarie",
+      "consent-expiring": "{days, plural, =0 {L'accesso a {bank} termina entro un giorno.} one {L'accesso a {bank} termina tra # giorno.} other {L'accesso a {bank} termina tra # giorni.}} Ricollega la banca per mantenere aggiornate le tue transazioni.",
+      "consent-revoked": "{bank} ha interrotto l'accesso ai tuoi conti. Ricollega la banca per mantenere aggiornate le tue transazioni.",
+      "sync-failing": "{bank} non si aggiorna dal {date}. Di solito ricollegare la banca risolve il problema.",
+      "sync-failing-no-date": "{bank} non si aggiorna da più di 2 giorni. Di solito ricollegare la banca risolve il problema.",
+      "unknown-bank": "La tua banca",
+      "more": "{count, plural, one {E # altra connessione richiede attenzione.} other {E altre # connessioni richiedono attenzione.}}",
+      "reconnect": "Ricollega",
+      "dismiss": "Ignora"
+    },
+    "net-worth": {
+      "title": "Patrimonio netto",
+      "since": "dalla fine di {month}",
+      "chart-label": "Patrimonio netto alla chiusura di ogni mese, da {from} a {to}",
+      "history-error": "Non è stato possibile caricare l'andamento nel tempo.",
+      "retry": "Riprova",
+      "empty-title": "Ancora nessun conto",
+      "empty-body": "Aggiungi un conto per vedere cosa possiedi e cosa devi.",
+      "empty-action": "Aggiungi un conto"
+    },
+    "shell": {
+      "dark-mode": "Modalità scura",
+      "light-mode": "Modalità chiara"
+    },
+    "month": {
+      "title": "Questo mese",
+      "days-left": "{days, plural, =0 {Ultimo giorno di {month}} one {Manca # giorno alla fine di {month}} other {Mancano # giorni alla fine di {month}}}",
+      "left": "ancora da spendere",
+      "overspent": "oltre il previsto",
+      "spent-of": "<spent></spent> spesi su <planned></planned> pianificati",
+      "over-plan": "{count, plural, one {# categoria oltre il previsto} other {# categorie oltre il previsto}}",
+      "measure-label": "{name}: {spent} spesi su {planned} pianificati",
+      "row-error": "Non è stato possibile caricare questo mese.",
+      "retry": "Riprova"
+    },
+    "budget-empty": {
+      "title": "Ancora nessun budget",
+      "body": "Imposta un piano mensile per vedere quanto ti resta da spendere e cosa supera il previsto.",
+      "action": "Crea un budget"
+    },
+    "sheet": {
+      "title": "Stato patrimoniale",
+      "own": "Possiedi",
+      "owe": "Devi",
+      "total": "Totale",
+      "side-empty": "Nessuna voce.",
+      "groups": {
+        "accounts": "Conti",
+        "portfolios": "Portafogli",
+        "manualAssets": "Immobili e altri beni",
+        "loans": "Prestiti",
+        "other": "Altro"
+      },
+      "counted-in": "Incluso in {account}",
+      "share-of-account": "{percent} di questo conto"
+    },
+    "cashflow": {
+      "title": "Flusso di cassa netto per mese",
+      "list-label": "Flusso di cassa netto, da {from} a {to}",
+      "caption": "Entrate meno uscite su tutti i tuoi conti.",
+      "empty-title": "Ancora nessun flusso di cassa",
+      "empty-body": "Compare quando i tuoi conti hanno delle transazioni.",
+      "this-month": "Questo mese",
+      "income": "Entrate",
+      "spending": "Spese",
+      "savings-rate": "Tasso di risparmio",
+      "change": "<amount></amount> {vs}",
+      "rate-change": "<points></points> {vs}",
+      "points": "{points} pt",
+      "vs": "rispetto a {month}",
+      "vs-same-point": "rispetto allo stesso punto del mese scorso",
+      "formula": "Il tasso di risparmio è dato dalle entrate meno le spese, diviso per le entrate. Mostra — quando le entrate sono zero."
+    },
+    "loans": {
+      "title": "Prossime rate dei prestiti",
+      "outstanding": "<amount></amount> residui",
+      "rate": "al {rate}",
+      "empty-title": "Nessun prestito",
+      "empty-body": "Aggiungi un prestito per vedere qui le prossime rate.",
+      "none-due-title": "Nessuna rata in scadenza",
+      "none-due-body": "Qui compaiono i prestiti attivi con la data della prossima rata.",
+      "action": "Vai ai prestiti"
+    },
+    "latest": {
+      "title": "Ultime transazioni",
+      "review-summary": "{count, plural, one {# transazione da rivedere} other {# transazioni da rivedere}} · {amount} in totale",
+      "review-now": "Rivedi ora",
+      "all-caught-up": "Tutto in ordine",
+      "all": "Tutte le transazioni",
+      "caption": "{count, plural, one {La transazione più recente} other {Le # transazioni più recenti}}",
+      "date": "Data",
+      "description": "Descrizione",
+      "category": "Categoria",
+      "amount": "Importo",
+      "uncategorised": "Senza categoria",
+      "needs-review": "Da rivedere",
+      "empty-title": "Ancora nessuna transazione",
+      "empty-body": "Collega una banca o aggiungi una transazione per vederla qui.",
+      "action": "Vai ai conti"
+    }
+  }
+}

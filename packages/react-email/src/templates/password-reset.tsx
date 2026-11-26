@@ -47,6 +47,16 @@ export const COPY: Record<TransactionalEmailLanguage, LanguageCopy> = {
     ignoreNote: "Si no lo pediste, puedes ignorar este correo. Tu contraseña se queda como está.",
     footer: (brand) => `Recibes este correo porque se pidió restablecer la contraseña de tu cuenta de ${brand}.`,
   },
+  it: {
+    subject: (brand) => `Reimposta la tua password di ${brand}`,
+    preheader: "Scegli una nuova password con il link in questa email.",
+    heading: "Reimposta la tua password",
+    intro: (brand) => `Abbiamo ricevuto una richiesta di reimpostazione della password del tuo account ${brand}. Usa il pulsante qui sotto per sceglierne una nuova.`,
+    cta: "Scegli una nuova password",
+    linkNote: "Se il pulsante non funziona, copia questo link nel tuo browser:",
+    ignoreNote: "Se non l'hai richiesto tu, puoi ignorare questa email. La tua password resta invariata.",
+    footer: (brand) => `Ricevi questa email perché è stata richiesta la reimpostazione della password del tuo account ${brand}.`,
+  },
 };
 
 export const getPasswordResetSubject = (props: PasswordResetEmailProps) =>

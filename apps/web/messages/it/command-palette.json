@@ -1,0 +1,15 @@
+{
+  "command-palette": {
+    "title": "Palette dei comandi",
+    "placeholder": "Cerca o vai a…",
+    "menu-item": "Palette dei comandi",
+    "footer-cta": "Cerca",
+    "shortcut": "⌘K",
+    "loading": "Caricamento…",
+    "empty": "Nessun risultato.",
+    "groups": {
+      "go-to": "Vai a",
+      "actions": "Azioni"
+    }
+  }
+}

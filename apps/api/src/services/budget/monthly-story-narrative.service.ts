@@ -11,7 +11,7 @@ interface PromptClient {
 }
 
 /** The language the polish is asked for, named for the model; every narrative language has one. */
-const LANGUAGE_NAME: Readonly<Record<NarrativeLanguage, string>> = { en: 'English', es: 'Spanish', pt: 'European Portuguese' };
+const LANGUAGE_NAME: Readonly<Record<NarrativeLanguage, string>> = { en: 'English', es: 'Spanish', it: 'Italian', pt: 'European Portuguese' };
 
 const NARRATIVE_SCHEMA = jsonSchema({
   additionalProperties: false,

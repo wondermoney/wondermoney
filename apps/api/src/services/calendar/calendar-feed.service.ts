@@ -14,11 +14,11 @@ const CALENDAR_FEED_REFRESH_INTERVAL_HOURS = 12;
 
 const DAY_MS = 86_400_000;
 
-export const CALENDAR_LOCALES = ['en', 'es', 'pt'] as const;
+export const CALENDAR_LOCALES = ['en', 'es', 'it', 'pt'] as const;
 export type CalendarLocale = (typeof CALENDAR_LOCALES)[number];
 
 /** European Portuguese, matching the web and the assistant, not Intl's Brazilian default. */
-const FORMATTING_LOCALE: Readonly<Record<CalendarLocale, string>> = { en: 'en', es: 'es', pt: 'pt-PT' };
+const FORMATTING_LOCALE: Readonly<Record<CalendarLocale, string>> = { en: 'en', es: 'es', it: 'it-IT', pt: 'pt-PT' };
 
 interface CalendarText {
   calendarDescription: string;
@@ -36,6 +36,11 @@ const CALENDAR_TEXT: Readonly<Record<CalendarLocale, CalendarText>> = {
     calendarDescription: 'Próximos pagos recurrentes de WonderMoney',
     calendarName: 'Pagos de WonderMoney',
     recurringPayment: 'Pago recurrente',
+  },
+  it: {
+    calendarDescription: 'Prossimi pagamenti ricorrenti da WonderMoney',
+    calendarName: 'Pagamenti WonderMoney',
+    recurringPayment: 'Pagamento ricorrente',
   },
   pt: {
     calendarDescription: 'Próximos pagamentos recorrentes do WonderMoney',

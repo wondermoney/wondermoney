@@ -51,6 +51,17 @@ export const COPY: Record<TransactionalEmailLanguage, LanguageCopy> = {
     ignoreNote: "Si no esperabas esta invitación, puedes ignorar este correo.",
     footer: (brand) => `Recibes este correo porque alguien en ${brand} invitó a esta dirección a su hogar.`,
   },
+  it: {
+    subject: (inviter, brand) => `${inviter} ti invita nella sua famiglia su ${brand}`,
+    preheader: (inviter) => `${inviter} vuole condividere le sue finanze con te.`,
+    heading: "Un invito a unirti a una famiglia",
+    intro: (inviter, brand) => `${inviter} ti invita a unirti alla sua famiglia su ${brand} per condividere conti, budget e obiettivi.`,
+    cta: "Accetta l'invito",
+    linkNote: "Se il pulsante non funziona, copia questo link nel tuo browser:",
+    expiry: (days) => `Questo link scade tra ${days} giorni.`,
+    ignoreNote: "Se non ti aspettavi questo invito, puoi ignorare questa email.",
+    footer: (brand) => `Ricevi questa email perché qualcuno su ${brand} ha invitato questo indirizzo nella sua famiglia.`,
+  },
 };
 
 export const getHouseholdInviteSubject = (props: HouseholdInviteEmailProps) =>

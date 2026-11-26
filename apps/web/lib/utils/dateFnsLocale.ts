@@ -1,5 +1,5 @@
 import type { Locale } from "date-fns";
-import { enUS, es, pt } from "date-fns/locale";
+import { enUS, es, it, pt } from "date-fns/locale";
 
 /**
  * date-fns locale for the app's current `next-intl` locale.
@@ -20,6 +20,9 @@ export const getDateFnsLocale = (locale?: string): Locale => {
     case "es":
     case "es-ES":
       return es;
+    case "it":
+    case "it-IT":
+      return it;
     default:
       return enUS;
   }

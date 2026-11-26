@@ -25,7 +25,7 @@ export const assistantConsentUpdateSchema = z.object({
 });
 
 /** The locales the web app ships; the chat formats amounts and replies in the one the client is showing. */
-export const ASSISTANT_LOCALES = ['en', 'pt', 'es'] as const;
+export const ASSISTANT_LOCALES = ['en', 'pt', 'es', 'it'] as const;
 export type AssistantLocale = (typeof ASSISTANT_LOCALES)[number];
 
 export const assistantChatSchema = z.object({

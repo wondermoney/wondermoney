@@ -52,6 +52,20 @@ export const COPY = {
     marketingFooterText: (brand: string) => `Recibes este resumen porque activaste el resumen semanal en ${brand}.`,
     bodyParagraph: "En el resumen completo puedes revisar las transacciones incluidas y ver el detalle de las categorías y los presupuestos que aparecen.",
   },
+  it: {
+    subject: "Il riepilogo finanziario della tua settimana",
+    heading: "Il riepilogo finanziario della tua settimana",
+    intro: (weekDateRange: string) => `Settimana conclusa: ${weekDateRange}. I punti principali per capire dove si è concentrata l'attività registrata.`,
+    ariaSummary: (weekDateRange: string) => `Riepilogo finanziario della settimana ${weekDateRange}`,
+    totalSpending: "Spese totali",
+    topCategory: "Categoria principale",
+    budgets: "Budget",
+    budgetStatus: { over: "Alcune categorie sono oltre il previsto", near: "Alcune categorie sono vicine all'importo impostato", within: "Entro gli importi previsti" },
+    budgetCount: { within: (n: number) => `${n} entro il previsto`, near: (n: number) => `${n} vicine al limite`, over: (n: number) => `${n} oltre il previsto` },
+    ctaLabel: "Vedi il riepilogo",
+    marketingFooterText: (brand: string) => `Ricevi questo riepilogo perché hai attivato il riepilogo settimanale su ${brand}.`,
+    bodyParagraph: "Nel riepilogo completo puoi controllare le transazioni incluse e vedere il dettaglio delle categorie e dei budget mostrati.",
+  },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
 export function getWeeklyInsightsSubject(language: TransactionalEmailLanguage = "pt") {

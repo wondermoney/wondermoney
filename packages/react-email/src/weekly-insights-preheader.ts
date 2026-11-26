@@ -13,6 +13,10 @@ export const COPY = {
     withBudget: "Gastos, categoría principal y estado de los presupuestos de la semana completa.",
     withoutBudget: "Gastos y categoría principal de la semana completa.",
   },
+  it: {
+    withBudget: "Spese, categoria principale e stato dei budget della settimana conclusa.",
+    withoutBudget: "Spese e categoria principale della settimana conclusa.",
+  },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, string>>;
 
 export function getWeeklyInsightsPreheader(

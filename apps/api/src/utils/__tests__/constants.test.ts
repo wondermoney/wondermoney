@@ -61,6 +61,17 @@ describe('privacyPolicyUrl', () => {
     expect(privacyPolicyUrl('pt')).toBe('https://example.com/pt/privacy');
   });
 
+  it('fills English into a configured address for a language the docs do not have', () => {
+    vi.stubEnv('PRIVACY_POLICY_URL', 'https://example.com/{lang}/privacy');
+    expect(privacyPolicyUrl('es')).toBe('https://example.com/es/privacy');
+    expect(privacyPolicyUrl('it')).toBe('https://example.com/en/privacy');
+  });
+
+  it('keeps the account locale in the app privacy settings, Italian included', () => {
+    vi.stubEnv('PRIVACY_POLICY_URL', '');
+    expect(privacyPolicyUrl('it')).toMatch(/\/it\/settings\?tab=privacy$/u);
+  });
+
   it('points at the app privacy settings when none is configured', () => {
     vi.stubEnv('PRIVACY_POLICY_URL', '');
     expect(privacyPolicyUrl('en')).toMatch(/\/en\/settings\?tab=privacy$/u);

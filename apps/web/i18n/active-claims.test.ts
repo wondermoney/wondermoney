@@ -14,7 +14,7 @@ const catalogs = import.meta.glob<Record<string, unknown>>("../messages/*/*.json
   import: "default",
 });
 
-const locales = ["en", "pt", "es"] as const;
+const locales = ["en", "pt", "es", "it"] as const;
 type Locale = (typeof locales)[number];
 
 type MessageLeaf = { key: string; value: string };
@@ -36,15 +36,15 @@ function catalogsFor(locale: Locale) {
 }
 
 const prohibitedClaims = [
-  /\b30\s*(?:seconds?|segundos?)\b/i,
-  /\b(?:a few|few)\s+seconds?\b|\b(?:alguns?|unos?)\s+segundos?\b/i,
-  /\binstantly\b|\bimmediately\b|\bimediatamente\b|\bal instante\b|\bal momento\b/i,
-  /\breal[- ]time\b|\btempo real\b|\btiempo real\b/i,
-  /\bbank[- ]level\b|\bbank[- ]grade\b|\bnível bancário\b|\bnivel bancario\b/i,
+  /\b30\s*(?:seconds?|segundos?|secondi)\b/i,
+  /\b(?:a few|few)\s+seconds?\b|\b(?:alguns?|unos?)\s+segundos?\b|\bpochi\s+secondi\b/i,
+  /\binstantly\b|\bimmediately\b|\bimediatamente\b|\bal instante\b|\bal momento\b|\bistantaneamente\b|\bimmediatamente\b/i,
+  /\breal[- ]time\b|\btempo real\b|\btiempo real\b|\btempo reale\b/i,
+  /\bbank[- ]level\b|\bbank[- ]grade\b|\bnível bancário\b|\bnivel bancario\b|\blivello bancario\b/i,
   /\b256[- ]bit\b/i,
-  /\bcrypto(?:currency|currencies)?\b|\bcriptomonedas?\b|\bcriptoativos?\b|\bcripto\b/i,
-  /\bonly European\b|\bapenas europe(?:u|ia)s?\b|\bsó europe(?:u|ia)s?\b|\bsolo europe[oa]s?\b/i,
-  /\b(?:full|complete) financial picture\b|\b(?:imagem|visão) financeira completa\b|\b(?:panorama|foto|imagen) financier[oa] complet[oa]\b/i,
+  /\bcrypto(?:currency|currencies)?\b|\bcriptomonedas?\b|\bcriptoativos?\b|\bcripto\b|\bcriptovalut[ae]\b/i,
+  /\bonly European\b|\bapenas europe(?:u|ia)s?\b|\bsó europe(?:u|ia)s?\b|\bsolo europe[oaie]s?\b/i,
+  /\b(?:full|complete) financial picture\b|\b(?:imagem|visão) financeira completa\b|\b(?:panorama|foto|imagen) financier[oa] complet[oa]\b|\b(?:quadro|visione|panoramica) finanziari[ao] complet[ao]\b/i,
 ] as const;
 
 const allowedMessageClaims = new Set([
@@ -52,6 +52,7 @@ const allowedMessageClaims = new Set([
   "en:common.json:toast-success-processing",
   "pt:common.json:toast-success-processing",
   "es:common.json:toast-success-processing",
+  "it:common.json:toast-success-processing",
   // Crypto wallets name what they are. The app shows these only on a server
   // whose operator set up a blockchain explorer, where the feature works.
   ...locales.flatMap((locale) =>
@@ -73,6 +74,7 @@ const leadingNegation: Record<Locale, RegExp> = {
   // No bare "no" for pt — there it is the preposition "in the".
   es: /\b(?:no|nunca|sin|tampoco|carece|carecen)\b/i,
   pt: /\b(?:não|nunca|sem|carece|carecem)\b/i,
+  it: /\b(?:non|mai|senza|nessun[oa]?|manca|mancano)\b/i,
 };
 
 // Only an explicit statement of absence counts after the phrase.
@@ -80,6 +82,7 @@ const trailingNegation: Record<Locale, RegExp> = {
   en: /\b(?:not available|unavailable|not supported|unsupported|not offered)\b/i,
   es: /\b(?:no disponible[s]?|indisponible[s]?|no compatible[s]?)\b/i,
   pt: /\b(?:indisponí(?:vel|veis)|não disponí(?:vel|veis))\b/i,
+  it: /\b(?:non disponibil[ei]|non supportat[oaie])\b/i,
 };
 
 function splitAtBoundary(text: string, fromEnd: boolean) {
@@ -104,8 +107,18 @@ function isDenial(value: string, pattern: RegExp, locale: Locale) {
   return true;
 }
 
+/**
+ * Words a pattern matches that mean something else in a locale: Italian "al
+ * momento" is "at the moment", not the Spanish "instantly".
+ */
+const ordinaryPhrases: Partial<Record<Locale, RegExp>> = {
+  it: /\bal momento\b/gi,
+};
+
 function isClaim(value: string, locale: Locale) {
-  return prohibitedClaims.some((pattern) => pattern.test(value) && !isDenial(value, pattern, locale));
+  const ordinary = ordinaryPhrases[locale];
+  const text = ordinary ? value.replace(ordinary, "") : value;
+  return prohibitedClaims.some((pattern) => pattern.test(text) && !isDenial(text, pattern, locale));
 }
 
 test("the claim detector tells a promise from a denial", () => {
@@ -114,6 +127,10 @@ test("the claim detector tells a promise from a denial", () => {
   assert.equal(isClaim("Real-time quote unavailable", "en"), false);
   assert.equal(isClaim("Cotação em tempo real indisponível", "pt"), false);
   assert.equal(isClaim("Sin cotización en tiempo real", "es"), false);
+  assert.equal(isClaim("Quotazione in tempo reale non disponibile", "it"), false);
+  assert.equal(isClaim("I saldi si aggiornano in tempo reale", "it"), true);
+  assert.equal(isClaim("Al momento non è possibile applicare le regole.", "it"), false);
+  assert.equal(isClaim("Se sincroniza al momento", "es"), true);
   assert.equal(isClaim("Read-only; cannot move money", "en"), false);
 });
 
@@ -136,7 +153,7 @@ for (const locale of locales) {
     assert.ok(common);
     assert.doesNotMatch(
       JSON.stringify(common.messages),
-      /14\s+(?:days|dias|días) (?:of full access|de acceso completo|de acesso completo)/i,
+      /14\s+(?:days|dias|días|giorni) (?:of full access|de acceso completo|de acesso completo|di accesso completo)/i,
     );
   });
 }

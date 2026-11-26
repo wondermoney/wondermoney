@@ -127,6 +127,16 @@ test("follows the app locale's week start: Monday in Spanish", () => {
   assert.match(firstDay.getAttribute("aria-label") ?? "", /^lunes/i);
 });
 
+test("follows the app locale: Italian month and day names, the week starting on Monday", () => {
+  render(
+    withLocale("it", <Calendar mode="single" defaultMonth={MARCH_2026} />),
+  );
+
+  const grid = screen.getByRole("grid", { name: /marzo/i });
+  const [firstDay] = within(grid).getAllByRole("button");
+  assert.match(firstDay.getAttribute("aria-label") ?? "", /^lunedì/i);
+});
+
 test("in Portuguese the week starts on Monday, as it does in Portugal", () => {
   render(
     withLocale("pt", <Calendar mode="single" defaultMonth={MARCH_2026} />),

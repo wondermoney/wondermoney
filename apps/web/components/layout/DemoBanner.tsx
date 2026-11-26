@@ -11,6 +11,7 @@ import {
 import { useSignupMode } from "@/lib/api/instance/useInstance";
 import { useIsDemoProfile } from "@/lib/api/user/useProfile";
 import { useSignOut } from "@/lib/auth/useSignOut";
+import { docsLocaleFor } from "@/lib/docs-links";
 import { instanceConfig } from "@/lib/instance";
 
 const linkClass =
@@ -55,7 +56,7 @@ export default function DemoBanner({
         </button>
       ) : null}
       <a
-        href={`${instanceConfig.docsUrl}/${locale}/docs/self-hosting`}
+        href={`${instanceConfig.docsUrl}/${docsLocaleFor(locale)}/docs/self-hosting`}
         target="_blank"
         rel="noreferrer"
         className={linkClass}

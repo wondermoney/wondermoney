@@ -4,17 +4,18 @@ import { SupportedLanguages } from '@entity/Appuser';
 export type AccountLanguage = `${SupportedLanguages}` | SupportedLanguages;
 
 /** The web app's locale segment for an account language; links into the app carry it. */
-export type AccountLocale = 'en' | 'es' | 'pt';
+export type AccountLocale = 'en' | 'es' | 'it' | 'pt';
 
 /** Keyed by every enum value (`satisfies`); read by any string, so an unknown one misses. */
 const LOCALE_BY_LANGUAGE: Readonly<Partial<Record<string, AccountLocale>>> = {
   [SupportedLanguages.EN]: 'en',
   [SupportedLanguages.ES]: 'es',
+  [SupportedLanguages.IT]: 'it',
   [SupportedLanguages.PT]: 'pt',
 } satisfies Record<SupportedLanguages, AccountLocale>;
 
 /** The `Intl` locale that formats dates and money beside copy in a locale. */
-export const INTL_LOCALE: Readonly<Record<AccountLocale, string>> = { en: 'en-GB', es: 'es-ES', pt: 'pt-PT' };
+export const INTL_LOCALE: Readonly<Record<AccountLocale, string>> = { en: 'en-GB', es: 'es-ES', it: 'it-IT', pt: 'pt-PT' };
 
 /** The web locale of an account (`ES` → `es`). Anything unknown reads as English. */
 export function accountLocale(language: AccountLanguage): AccountLocale {

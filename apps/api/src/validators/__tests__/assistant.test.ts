@@ -50,7 +50,7 @@ describe('assistant validators', () => {
   it('accepts the locales the web app ships and rejects others', async () => {
     const messages = [{ parts: [{ text: 'Hello', type: 'text' }], role: 'user' }];
 
-    for (const locale of ['en', 'pt', 'es']) {
+    for (const locale of ['en', 'pt', 'es', 'it']) {
       await expect(assistantChatSchema.parseAsync({ body: { locale, messages } })).resolves.toBeDefined();
     }
     await expect(assistantChatSchema.parseAsync({ body: { locale: 'xx', messages } })).rejects.toThrow();
