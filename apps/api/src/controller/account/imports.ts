@@ -11,6 +11,7 @@ import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/accoun
 import { spendAiAllowance } from '@service/ai/ai-allowance.service';
 import { isAiAllowedFor } from '@service/ai/ai-availability';
 import s3Service from '@service/storage/s3';
+import { assertOpenForImport } from '@service/transaction-import/import-account';
 import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { BadRequestError, NotFoundError } from '@utils/errors';
 import { getAccountPresignedUrlForUploadRequestSchema, previewAccountCsvImportRequestSchema, startAccountCsvImportRequestSchema } from '@validators/account';
@@ -39,6 +40,7 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
     next(new NotFoundError('Account not found'));
     return;
   }
+  assertOpenForImport(account);
   // Every account can import: one at a supported bank reads that bank's statement export, any other
   // (unsupported bank, or a manual account with no institution) reads the generic CSV format.
   const institutionName = account.accountFinancialInstitutionKey?.name;
@@ -116,6 +118,7 @@ export async function previewAccountCsvImport(req: Request, res: Response, next:
     next(new NotFoundError('Account not found'));
     return;
   }
+  assertOpenForImport(account);
   if (!validateCsvObjectKey({ key, maxLength: 170, prefix: `account-${accountId}-` })) {
     next(new BadRequestError('Invalid CSV object key'));
     return;

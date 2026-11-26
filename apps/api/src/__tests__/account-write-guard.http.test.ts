@@ -104,13 +104,17 @@ const SERVICE_CHECKED = new Set([
   'DELETE /v1/expense-groups/:groupId/settlements/:settlementId', // a linked transaction's account must be writable (expense-group.service.ts)
   'DELETE /v1/expense-groups/:groupId/shares/:transactionId', // the shared transaction's account must be writable
   'PATCH /v1/transaction-import-sessions/:importId/account-mapping', // accounts the member may write to (transaction-import.service.ts)
+  'PATCH /v1/transaction-import-sessions/:importId/rows', // the session's accounts must still be writable
   'POST /v1/assistant/proposals/:proposalId/apply', // fails on a view-only row (assistant-proposal.service.ts)
   'POST /v1/expense-groups/:groupId/settlements', // a linked transaction's account must be writable
   'POST /v1/expense-groups/:groupId/shares', // the shared transaction's account must be writable
   'POST /v1/portfolio', // linking an account needs write access (portfolio-account-link.ts)
   'POST /v1/rule/:ruleId/apply', // view-only rows are left alone (ruleRunTransactionsWhere)
   'POST /v1/rule/apply-all',
-  'POST /v1/transaction-import-sessions/:importId/commit', // accounts the member may still write to
+  'POST /v1/transaction-import-sessions', // the account must be writable (transaction-import.service.ts)
+  'POST /v1/transaction-import-sessions/:importId/commit', // accounts the member may still write to, checked again by the job
+  'POST /v1/transaction-import-sessions/:importId/parse', // the session's accounts must still be writable; a one-step session commits once read
+  'POST /v1/transaction-import-sessions/pdf', // the account must be writable, checked before the AI allowance is spent
   'PUT /v1/account/:accountId/ownership', // its own rule: the account owner or the household owner
   'PUT /v1/account/:accountId/shares', // its own rule: the account owner or the household owner
   'PUT /v1/portfolio/:portfolioId', // linking an account needs write access (portfolio-account-link.ts)
@@ -140,7 +144,6 @@ const NOT_ACCOUNT_DATA = new Set([
   'PATCH /v1/loan/:loanId/rate-periods/:ratePeriodId',
   'PATCH /v1/rule/:ruleId',
   'PATCH /v1/transaction-import-sessions/:importId/category-mapping',
-  'PATCH /v1/transaction-import-sessions/:importId/rows',
   'POST /v1/account/offline', // a new account of the member's own
   'POST /v1/account/transaction/ocr', // a scan; the transaction is made by confirming it
   'POST /v1/assistant/chat',
@@ -167,10 +170,7 @@ const NOT_ACCOUNT_DATA = new Set([
   'POST /v1/rule/presets/:code/install',
   'POST /v1/rule/preview',
   'POST /v1/rule/suggestions/dismiss',
-  'POST /v1/transaction-import-sessions',
   'POST /v1/transaction-import-sessions/:importId/cancel',
-  'POST /v1/transaction-import-sessions/:importId/parse',
-  'POST /v1/transaction-import-sessions/pdf',
   'PUT /v1/account/order', // the member's own order
   'PUT /v1/account/transaction/ocr/:transactionOCRImportId/reject',
   'PUT /v1/portfolio/:portfolioId/transaction/:transactionId',

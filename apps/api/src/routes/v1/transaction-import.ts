@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { cancelTransactionImport, commitTransactionImport, createPdfTransactionImport, createTransactionImport, decideTransactionImportRows, getTransactionImport, mapTransactionImportAccounts, mapTransactionImportCategories, parseTransactionImport } from '@controller/transaction-import';
+import { cancelTransactionImport, commitTransactionImport, createPdfTransactionImport, createTransactionImport, decideTransactionImportRows, getTransactionImport, mapTransactionImportAccounts, mapTransactionImportCategories, parseTransactionImport, requirePdfImportAccount } from '@controller/transaction-import';
 import { requireAiAllowance } from '@middleware/ai-allowance';
 import { requireAiAllowed } from '@middleware/ai-enabled';
 import { requireVerifiedEmailForAi } from '@middleware/email-verification';
@@ -8,8 +8,9 @@ import { requireVerifiedEmailForAi } from '@middleware/email-verification';
 const router = express.Router();
 
 router.post('/', createTransactionImport);
-// A PDF statement goes to the vision model: the same gates, in the same order, as receipt scanning.
-router.post('/pdf', requireVerifiedEmailForAi, requireAiAllowed('statementImport'), requireAiAllowance('statementImport'), createPdfTransactionImport);
+// A PDF statement goes to the vision model: the same gates, in the same order, as receipt scanning,
+// and the account is checked before the allowance is spent on it.
+router.post('/pdf', requireVerifiedEmailForAi, requireAiAllowed('statementImport'), requirePdfImportAccount, requireAiAllowance('statementImport'), createPdfTransactionImport);
 router.get('/:importId', getTransactionImport);
 router.post('/:importId/parse', parseTransactionImport);
 router.patch('/:importId/rows', decideTransactionImportRows);

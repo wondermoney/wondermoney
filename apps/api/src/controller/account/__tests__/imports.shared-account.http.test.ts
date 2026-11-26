@@ -33,19 +33,22 @@ const store = vi.hoisted(() => {
 });
 vi.mock('@service/storage/s3', () => ({ default: store.s3 }));
 
-import { addAccount, addPartner, addShare, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addShare, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { DI } from '@app/database/di';
-import type { Account } from '@entity/Account';
+import { Account } from '@entity/Account';
+import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
 import type { Appuser } from '@entity/Appuser';
-import { HouseholdRole } from '@entity/AppuserTenant';
+import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { Transaction } from '@entity/Transaction';
+import { TransactionImportRow } from '@entity/TransactionImportRow';
+import { TransactionImportSession } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import accountRoutes from '@route/account';
 import transactionImportRoutes from '@route/transaction-import';
 import type { Enqueue } from '@service/queue/enqueue';
-import { TransactionImportService } from '@service/transaction-import/transaction-import.service';
+import { ACCOUNT_ACCESS_ERROR, TransactionImportService } from '@service/transaction-import/transaction-import.service';
 import { ERROR_CODE } from '@utils/errors';
 
 /*
@@ -198,5 +201,106 @@ describe('a statement import into an account the caller may write to', () => {
       expect(responses.map((response) => response.status)).toEqual([404, 404, 404, 404]);
       expect(await storedAmounts(account)).toEqual([]);
     }
+  });
+  describe('when access changes after the import was asked for', () => {
+    /** A household whose owner shares a private account with a member for writing. */
+    async function sharedForWriting() {
+      const household = await seed();
+      const member = await addPartner(db.em(), household);
+      const account = await addAccount(db.em(), household, { isPrivate: true });
+      const share = await addShare(db.em(), household, account, member, 'write');
+      return { account, household, member, share };
+    }
+    const setShare = (share: AccountShare, change: { access?: AccountShareAccess; deletedAt?: Date }) => db.em().nativeUpdate(AccountShare, { accountShareKey: share.accountShareKey }, change);
+    const sessionOf = (publicId: string) => db.em().findOneOrFail(TransactionImportSession, { publicId }, { filters: false });
+    const rowsOf = async (publicId: string) => db.em().count(TransactionImportRow, { transactionImportSessionKey: { transactionImportSessionKey: (await sessionOf(publicId)).transactionImportSessionKey } }, { filters: false });
+
+    /** A one-step import of the statement into `account` as `user`, its job not run yet. */
+    async function oneStep(user: Appuser, account: Account, upload = true) {
+      const key = `account-${account.accountKey}-generic-one-step-${sent.length}.csv`;
+      if (upload) store.objects.set(key, Buffer.from(STATEMENT, 'latin1'));
+      const response = await accounts.as(user).post(`/v1/account/${account.accountKey}/transaction/import`).send({ key });
+      expect(response.status).toBe(202);
+      return { id: response.body.importId as string, key };
+    }
+
+    it('stores nothing when a one-step import is read again after the share became view-only', async () => {
+      const { account, member, share } = await sharedForWriting();
+      // The first read fails: the file is not there yet.
+      const { id, key } = await oneStep(member, account, false);
+      await runLastJob();
+      expect((await sessionOf(id)).status).toBe('failed');
+
+      store.objects.set(key, Buffer.from(STATEMENT, 'latin1'));
+      await setShare(share, { access: AccountShareAccess.READ });
+      const reread = await sessions.as(member).post(`/v1/transaction-import-sessions/${id}/parse`).send({});
+
+      expect(reread.status).toBe(403);
+      expect((reread.body as { code?: string }).code).toBe(ERROR_CODE.ACCOUNT_READ_ONLY);
+      expect(await storedAmounts(account)).toEqual([]);
+    });
+
+    it.each([
+      ['the share is taken back', async ({ share }: Awaited<ReturnType<typeof sharedForWriting>>) => { await setShare(share, { deletedAt: new Date() }) }],
+      ['the share becomes view-only', async ({ share }: Awaited<ReturnType<typeof sharedForWriting>>) => { await setShare(share, { access: AccountShareAccess.READ }) }],
+      ['the member becomes a viewer', async ({ household, member }: Awaited<ReturnType<typeof sharedForWriting>>) => { await db.em().nativeUpdate(AppuserTenant, { appuserKey: { appuserKey: member.appuserKey }, tenantKey: { tenantKey: household.tenant.tenantKey } }, { role: HouseholdRole.VIEWER }) }],
+      ['the member leaves the household', async ({ household, member }: Awaited<ReturnType<typeof sharedForWriting>>) => { await db.em().nativeUpdate(AppuserTenant, { appuserKey: { appuserKey: member.appuserKey }, tenantKey: { tenantKey: household.tenant.tenantKey } }, { recordActive: false }) }],
+      ['the account is closed', async ({ account }: Awaited<ReturnType<typeof sharedForWriting>>) => { await db.em().nativeUpdate(Account, { accountKey: account.accountKey }, { closed: true }) }],
+    ])('stores nothing when %s between the one-step import and its job', async (_change, change) => {
+      const shared = await sharedForWriting();
+      const { id } = await oneStep(shared.member, shared.account);
+
+      await change(shared);
+      await runLastJob();
+
+      expect(await sessionOf(id)).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'failed' });
+      expect(await rowsOf(id)).toBe(0);
+      expect(await storedAmounts(shared.account)).toEqual([]);
+    });
+
+    it('stores nothing when the share is taken back between a staged commit and its job', async () => {
+      const { account, member, share } = await sharedForWriting();
+      const key = `account-${account.accountKey}-generic-staged.csv`;
+      store.objects.set(key, Buffer.from(STATEMENT, 'latin1'));
+      const created = await sessions.as(member).post('/v1/transaction-import-sessions').send({ accountId: account.accountKey, format: 'statement', key });
+      const id = created.body.session.id as string;
+      await runLastJob();
+      expect((await sessions.as(member).post(`/v1/transaction-import-sessions/${id}/commit`).send({})).status).toBe(202);
+
+      await setShare(share, { access: AccountShareAccess.READ });
+      await runLastJob();
+
+      expect(await sessionOf(id)).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'failed' });
+      expect(await storedAmounts(account)).toEqual([]);
+    });
+
+    it('neither reads again nor shows its duplicate matches once the person can no longer see the account', async () => {
+      const { account, household, member, share } = await sharedForWriting();
+      // A transaction already on the account that the file's first line repeats.
+      await addTransaction(db.em(), household, { account, amount: -42.5, date: new Date('2026-09-02T00:00:00.000Z'), status: 'BOOKED' });
+      const key = `account-${account.accountKey}-generic-hidden.csv`;
+      store.objects.set(key, Buffer.from(STATEMENT, 'latin1'));
+      const created = await sessions.as(member).post('/v1/transaction-import-sessions').send({ accountId: account.accountKey, format: 'statement', key });
+      const id = created.body.session.id as string;
+      await runLastJob();
+      const before = await sessions.as(member).get(`/v1/transaction-import-sessions/${id}`);
+      expect((before.body.rows.items as { matchedTransaction: unknown }[]).some((row) => row.matchedTransaction !== null)).toBe(true);
+
+      await setShare(share, { deletedAt: new Date() });
+
+      expect((await sessions.as(member).get(`/v1/transaction-import-sessions/${id}`)).status).toBe(404);
+      expect((await sessions.as(member).post(`/v1/transaction-import-sessions/${id}/parse`).send({})).status).toBe(404);
+      expect((await sessions.as(member).patch(`/v1/transaction-import-sessions/${id}/rows`).send({ decision: 'import', status: 'possible_duplicate' })).status).toBe(404);
+      expect((await sessions.as(member).post(`/v1/transaction-import-sessions/${id}/commit`).send({})).status).toBe(404);
+    });
+  });
+
+  it('refuses an import into a closed account before any upload link exists', async () => {
+    const household = await seed();
+    await db.em().nativeUpdate(Account, { accountKey: household.account.accountKey }, { closed: true });
+
+    const responses = await attempts(household.appuser, household.account);
+
+    expect(responses.map((response) => response.status)).toEqual([409, 409, 409, 409]);
   });
 });

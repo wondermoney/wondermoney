@@ -1,8 +1,6 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { NotFoundError } from '@utils/errors';
-
 const mocks = vi.hoisted(() => ({
   createSession: vi.fn(),
   findOne: vi.fn(),
@@ -169,39 +167,9 @@ describe('account CSV import authorization', () => {
     expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ format: 'statement' }));
   });
 
-  // Which accounts a caller may import into is the route guard's and the tenant filter's, tested
-  // against a database in `imports.shared-account.http.test.ts`; here, an account not found.
-  it.each([
-    ['foreign-tenant', 52],
-    ['deleted', 53],
-  ])('rejects a %s account before presigning', async (_kind, accountId) => {
-    mocks.findOne.mockResolvedValueOnce(null);
-    const next = vi.fn();
-
-    await getS3PresignedUrlForCsvUpload(makeRequest({ params: { accountId: String(accountId) } }), mockRes(), next);
-
-    expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account not found' }));
-    expect(next.mock.calls[0]?.[0]).toBeInstanceOf(NotFoundError);
-    expect(mocks.generatePresignedUrlForAccountCsv).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['foreign-tenant', 52],
-    ['deleted', 53],
-  ])('rejects a %s account before staging an import', async (_kind, accountId) => {
-    mocks.findOne.mockResolvedValueOnce(null);
-    const next = vi.fn();
-
-    await startAccountCsvImport(
-      makeRequest({ body: { key: `account-${accountId}-upload.csv` }, params: { accountId: String(accountId) } }),
-      mockRes(),
-      next,
-    );
-
-    expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account not found' }));
-    expect(next.mock.calls[0]?.[0]).toBeInstanceOf(NotFoundError);
-    expect(mocks.createSession).not.toHaveBeenCalled();
-  });
+  // Which accounts a caller may import into (another household's, a deleted one, another
+  // member's private one) is the route guard's and the tenant filter's, tested against a database
+  // in `imports.shared-account.http.test.ts`.
 
   it('requires authenticated user and tenant context before account lookup', async () => {
     const next = vi.fn();

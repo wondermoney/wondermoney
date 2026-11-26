@@ -15,6 +15,7 @@ import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
 import { HouseholdRole } from '@entity/AppuserTenant';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionImportSession } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
@@ -356,6 +357,33 @@ describe('staged transaction import', () => {
 
       const started = await ctx.service().create(ownerScope(), { accountId: partnersShared.accountKey, format: 'statement', key: ctx.upload(partnersShared, statement(lines)) });
       expect(started.accountId).toBe(partnersShared.accountKey);
+    });
+
+    it('records the member who imported as the one who set a row\'s type, on the account owner\'s row', async () => {
+      const typed: transactionImport.ImportAdapter = {
+        format: 'statement',
+        parse: () => Promise.resolve({
+          rows: [{ normalized: { amount: -10, date: '2026-09-01T00:00:00.000Z', description: 'Rent', externalId: 't-1', typeHint: 'PAYMENT', typeIsUserSet: true }, raw: {}, sourceRow: 2 }],
+          sourceAccounts: [],
+          warnings: [],
+        }),
+      };
+      const ctx = setup({ adapters: { statement: typed } });
+      const member = await addPartner(db.em(), household);
+      const memberScope = { appuserKey: member.appuserKey, tenantKey: household.tenant.tenantKey };
+      const created = await ctx.service().create(memberScope, { accountId: household.account.accountKey, format: 'statement', key: ctx.upload(household.account, 'ignored') });
+      await ctx.runLastJob();
+      await ctx.service().commit(memberScope, created.id);
+      await ctx.runLastJob();
+
+      const entries = await db.em().find(TransactionAuditLog, { source: 'transaction-import' }, { filters: false });
+      expect(entries.map((entry) => ({ actor: entry.actorAppuserKey?.appuserKey, owner: entry.appuserKey.appuserKey }))).toEqual([{ actor: member.appuserKey, owner: household.appuser.appuserKey }]);
+    });
+
+    it('starts on no closed account', async () => {
+      const ctx = setup();
+      await db.em().nativeUpdate(Account, { accountKey: household.account.accountKey }, { closed: true });
+      await expect(ctx.service().create(ownerScope(), { accountId: household.account.accountKey, format: 'statement', key: ctx.upload(household.account, statement(lines)) })).rejects.toBeInstanceOf(ConflictError);
     });
 
     it('commits only while the person may still write to the account', async () => {

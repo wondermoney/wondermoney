@@ -15,6 +15,7 @@ vi.mock('@service/storage/s3', () => ({
 import { addAccount, addPartner, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
+import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import transactionImportRoutes from '@route/transaction-import';
 
@@ -75,6 +76,21 @@ describe('PDF statement imports over HTTP', () => {
     const refused = await start(partner, household.account.accountKey);
     expect(refused.status).toBe(403);
     expect(refused.body.code).toBe('ai_allowance_exhausted');
+  });
+
+  it('spends nothing on an import refused for its account', async () => {
+    vi.stubEnv('AI_DAILY_LIMIT_STATEMENT_IMPORT', '1');
+    const household = await seedHousehold(db.em());
+    const partner = await addPartner(db.em(), household);
+    const ownersPrivate = await addAccount(db.em(), household, { isPrivate: true });
+    const closed = await addAccount(db.em(), household, { name: 'Closed' });
+    await db.em().nativeUpdate(Account, { accountKey: closed.accountKey }, { closed: true });
+
+    expect((await start(partner, ownersPrivate.accountKey)).status).toBe(404);
+    expect((await start(partner, closed.accountKey)).status).toBe(409);
+    // The one statement import of the day is still there.
+    expect((await start(partner, household.account.accountKey)).status).toBe(201);
+    expect((await start(partner, household.account.accountKey)).status).toBe(403);
   });
 
   it('refuses a PDF over the size limit, by its code', async () => {
