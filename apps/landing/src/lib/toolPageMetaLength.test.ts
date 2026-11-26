@@ -9,7 +9,11 @@ import { SUPPORTED_LANGS } from "./routes"
 const MAX_TITLE = 60
 const MAX_DESCRIPTION = 160
 
-type Copy = { tools: Record<string, unknown> }
+type Copy = { lp: Record<string, unknown>; tools: Record<string, unknown> }
+
+// Landing pages under `lp.*` whose <title> is their `metaTitle` (brand suffix included, as written)
+// and whose description is `metaDescription`. Add a page here once its copy fits the same limits.
+const LP_PAGES = ["fireCalculator"] as const
 
 function readLocale(base: "src/locales" | "public/locales", lang: string): Copy {
 	return JSON.parse(readFileSync(fileURLToPath(new URL(`../../${base}/${lang}/common.json`, import.meta.url)), "utf8")) as Copy
@@ -24,6 +28,16 @@ function toolMeta(copy: Copy): Array<{ key: string; pageTitle: string; pageDescr
 	})
 }
 
+function lpMeta(copy: Copy): Array<{ key: string; pageTitle: string; pageDescription: string }> {
+	return LP_PAGES.flatMap((key) => {
+		const value = copy.lp[key]
+		if (typeof value !== "object" || value === null) return []
+		const { metaTitle, metaDescription } = value as Record<string, unknown>
+		if (typeof metaTitle !== "string" || typeof metaDescription !== "string") return []
+		return [{ key: `lp.${key}`, pageTitle: metaTitle, pageDescription: metaDescription }]
+	})
+}
+
 const cases = SUPPORTED_LANGS.flatMap((lang) =>
 	(["src/locales", "public/locales"] as const).map((base) => [`${base}/${lang}`, readLocale(base, lang)] as const),
 )
@@ -33,15 +47,19 @@ describe("tool page titles and descriptions", () => {
 		for (const [, copy] of cases) expect(toolMeta(copy).length).toBeGreaterThan(40)
 	})
 
+	it("reads every listed landing page in every locale", () => {
+		for (const [, copy] of cases) expect(lpMeta(copy).map(({ key }) => key)).toEqual(LP_PAGES.map((key) => `lp.${key}`))
+	})
+
 	it.each(cases)(`%s keeps every pageTitle within ${MAX_TITLE} characters`, (_name, copy) => {
-		const tooLong = toolMeta(copy)
+		const tooLong = [...toolMeta(copy), ...lpMeta(copy)]
 			.filter(({ pageTitle }) => pageTitle.length > MAX_TITLE)
 			.map(({ key, pageTitle }) => `${key} (${pageTitle.length}): ${pageTitle}`)
 		expect(tooLong).toEqual([])
 	})
 
 	it.each(cases)(`%s keeps every pageDescription within ${MAX_DESCRIPTION} characters`, (_name, copy) => {
-		const tooLong = toolMeta(copy)
+		const tooLong = [...toolMeta(copy), ...lpMeta(copy)]
 			.filter(({ pageDescription }) => pageDescription.length > MAX_DESCRIPTION)
 			.map(({ key, pageDescription }) => `${key} (${pageDescription.length}): ${pageDescription}`)
 		expect(tooLong).toEqual([])
