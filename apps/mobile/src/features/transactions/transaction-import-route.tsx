@@ -59,8 +59,9 @@ export function TransactionImportRoute() {
 
   usePreventRemove(BLOCKING_PHASES.has(importState.state.phase))
 
-  // Only accounts the caller can edit take an import; a view-only one (#95) is not offered.
-  const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data).filter(canWriteAccount) : []
+  // Only accounts the caller can edit take an import; a view-only one (#95) is not offered, nor a
+  // closed one, which the API refuses (409).
+  const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data).filter((account) => canWriteAccount(account) && !account.closed) : []
   // Another member's account says whose it is, as on Accounts; a file's accounts map to any of these.
   const accounts = accountModels.map((account) => ({ id: account.accountId, name: importAccountLabel(account, t) }))
   const selectedAccount = accountModels.find((account) => account.accountId === selectedAccountId) ?? null

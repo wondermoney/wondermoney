@@ -303,4 +303,28 @@ describe('a statement import into an account the caller may write to', () => {
 
     expect(responses.map((response) => response.status)).toEqual([409, 409, 409, 409]);
   });
+
+  it('refuses every step of a session whose account was closed after it started, and writes nothing', async () => {
+    const household = await seed();
+    const key = `account-${household.account.accountKey}-generic-closed-later.csv`;
+    store.objects.set(key, Buffer.from(STATEMENT, 'latin1'));
+    const created = await sessions.as(household.appuser).post('/v1/transaction-import-sessions').send({ accountId: household.account.accountKey, format: 'statement', key });
+    const id = created.body.session.id as string;
+    await runLastJob();
+    expect((await sessions.as(household.appuser).get(`/v1/transaction-import-sessions/${id}`)).body.session).toMatchObject({ canCommit: true, status: 'ready' });
+
+    await db.em().nativeUpdate(Account, { accountKey: household.account.accountKey }, { closed: true });
+    const as = sessions.as(household.appuser);
+    const responses = [
+      await as.post(`/v1/transaction-import-sessions/${id}/parse`).send({}),
+      await as.patch(`/v1/transaction-import-sessions/${id}/rows`).send({ decision: 'skip', status: 'new' }),
+      await as.patch(`/v1/transaction-import-sessions/${id}/account-mapping`).send({ mapping: {} }),
+      await as.patch(`/v1/transaction-import-sessions/${id}/category-mapping`).send({ mapping: {} }),
+      await as.post(`/v1/transaction-import-sessions/${id}/commit`).send({}),
+    ];
+
+    expect(responses.map((response) => response.status)).toEqual([409, 409, 409, 409, 409]);
+    expect((await sessions.as(household.appuser).get(`/v1/transaction-import-sessions/${id}`)).body.session).toMatchObject({ decisions: { import: 2, skip: 0 }, status: 'ready' });
+    expect(await storedAmounts(household.account)).toEqual([]);
+  });
 });

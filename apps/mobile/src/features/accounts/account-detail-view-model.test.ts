@@ -41,6 +41,7 @@ describe('account detail view model', () => {
       accountType: null,
       creditCard: null,
       myAccess: 'owner',
+      closed: false,
       fx: { status: 'exact' },
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')

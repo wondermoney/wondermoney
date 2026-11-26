@@ -12,10 +12,11 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
 import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
-import { HouseholdRole } from '@entity/AppuserTenant';
+import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditLog } from '@entity/TransactionAuditLog';
+import { TransactionImportRow } from '@entity/TransactionImportRow';
 import { TransactionImportSession } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
@@ -23,7 +24,7 @@ import type { Enqueue } from '@service/queue/enqueue';
 import { ConflictError, ForbiddenError, NotFoundError } from '@utils/errors';
 
 import { sweepTransactionImportSessions } from '../transaction-import-sweep';
-import { type TransactionImportDeps, TransactionImportService, type TransactionImportStorage } from '../transaction-import.service';
+import { ACCOUNT_ACCESS_ERROR, type TransactionImportDeps, TransactionImportService, type TransactionImportStorage } from '../transaction-import.service';
 
 /*
  * A person importing a bank statement in stages: the file is read into rows, the rows are
@@ -400,6 +401,115 @@ describe('staged transaction import', () => {
 
       await expect(ctx.service().commit(ownerScope(), created.id)).rejects.toBeInstanceOf(ForbiddenError);
       expect(await storedTransactions(partnersPrivate)).toEqual([]);
+    });
+
+    it('refuses a role lowered while a one-step import reads its file, before it writes a row', async () => {
+      const member = await addPartner(db.em(), household);
+      const memberScope = { appuserKey: member.appuserKey, tenantKey: household.tenant.tenantKey };
+      // The member is made a viewer while the job is still reading the file.
+      const lowersRole: transactionImport.ImportAdapter = {
+        format: 'statement',
+        parse: async () => {
+          await DI.em.fork().nativeUpdate(AppuserTenant, { appuserKey: { appuserKey: member.appuserKey }, tenantKey: { tenantKey: household.tenant.tenantKey } }, { role: HouseholdRole.VIEWER });
+          return { rows: [{ normalized: { amount: -10, date: '2026-09-01T00:00:00.000Z', description: 'Rent', externalId: 'r-1' }, raw: {}, sourceRow: 2 }], sourceAccounts: [], warnings: [] };
+        },
+      };
+      const ctx = setup({ adapters: { statement: lowersRole } });
+      const created = await ctx.service().create(memberScope, { accountId: household.account.accountKey, autoCommit: true, format: 'statement', key: ctx.upload(household.account, 'ignored') });
+
+      await expect(ctx.runLastJob()).resolves.toBe(false);
+
+      expect(await db.em().findOneOrFail(TransactionImportSession, { publicId: created.id }, { filters: false })).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'failed' });
+      expect(await storedTransactions()).toEqual([]);
+    });
+
+    describe('when access goes while the commit is writing', () => {
+      /** A member imports into the household owner's private account, shared with them for writing. */
+      async function sharedForWriting() {
+        const member = await addPartner(db.em(), household);
+        const account = await addAccount(db.em(), household, { balance: 1000, isPrivate: true });
+        const share = await addShare(db.em(), household, account, member, 'write');
+        return { account, member, scope: { appuserKey: member.appuserKey, tenantKey: household.tenant.tenantKey }, share };
+      }
+      const rowsOf = async (publicId: string) => {
+        const session = await db.em().findOneOrFail(TransactionImportSession, { publicId }, { filters: false });
+        const rows = await db.em().find(TransactionImportRow, { transactionImportSessionKey: { transactionImportSessionKey: session.transactionImportSessionKey } }, { filters: false });
+        return { rows: rows.map((row) => row.status).sort(), session };
+      };
+
+      it.each([
+        ['the share is taken back', async ({ share }: Awaited<ReturnType<typeof sharedForWriting>>) => { await DI.em.fork().nativeUpdate(AccountShare, { accountShareKey: share.accountShareKey }, { deletedAt: new Date() }) }],
+        ['the share becomes view-only', async ({ share }: Awaited<ReturnType<typeof sharedForWriting>>) => { await DI.em.fork().nativeUpdate(AccountShare, { accountShareKey: share.accountShareKey }, { access: AccountShareAccess.READ }) }],
+        ['the member is made a viewer', async ({ member }: Awaited<ReturnType<typeof sharedForWriting>>) => { await DI.em.fork().nativeUpdate(AppuserTenant, { appuserKey: { appuserKey: member.appuserKey }, tenantKey: { tenantKey: household.tenant.tenantKey } }, { role: HouseholdRole.VIEWER }) }],
+        ['the account is closed', async ({ account }: Awaited<ReturnType<typeof sharedForWriting>>) => { await DI.em.fork().nativeUpdate(Account, { accountKey: account.accountKey }, { closed: true }) }],
+      ])('stops at the next chunk when %s, keeping the chunks already written', async (_change, change) => {
+        const shared = await sharedForWriting();
+        const ctx = setup({
+          chunkSize: 2,
+          onChunk: async (index) => {
+            if (index === 1) await change(shared);
+          },
+        });
+        const created = await ctx.service().create(shared.scope, { accountId: shared.account.accountKey, format: 'statement', key: ctx.upload(shared.account, statement(lines)) });
+        await ctx.runLastJob();
+        await ctx.service().commit(shared.scope, created.id);
+
+        await expect(ctx.runLastJob()).resolves.toBe(false);
+
+        // The first chunk stays, settled into the account's balance chain; the rest is not written.
+        const stored = await storedTransactions(shared.account);
+        expect(stored.map((row) => row.merchant)).toEqual(['CONTINENTE MATOSINHOS', 'SALARIO ACME LDA']);
+        expect(stored.map((row) => row.balance)).toEqual([-500, 1000]);
+        const { rows, session } = await rowsOf(created.id);
+        expect(session).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'partial' });
+        expect(session.committedAt).toBeInstanceOf(Date);
+        expect(rows).toEqual(['imported', 'imported', 'skipped', 'skipped', 'skipped']);
+        const operation = await db.em().findOneOrFail(BackgroundOperation, { correlationId: session.correlationId! }, { filters: false });
+        expect(operation).toMatchObject({ errorCode: `transaction-import:${ACCOUNT_ACCESS_ERROR}`, status: BackgroundOperationStatus.PARTIAL });
+      });
+
+      it('settles the chunks an earlier job wrote when access went before the job was handed back', async () => {
+        const shared = await sharedForWriting();
+        let failures = 1;
+        const ctx = setup({
+          chunkSize: 2,
+          onChunk: (index) => {
+            if (index === 1 && failures-- > 0) throw new Error('worker stopped');
+          },
+        });
+        const created = await ctx.service().create(shared.scope, { accountId: shared.account.accountKey, format: 'statement', key: ctx.upload(shared.account, statement(lines)) });
+        await ctx.runLastJob();
+        await ctx.service().commit(shared.scope, created.id);
+        await expect(ctx.runLastJob()).rejects.toThrow('worker stopped');
+
+        await DI.em.fork().nativeUpdate(AccountShare, { accountShareKey: shared.share.accountShareKey }, { access: AccountShareAccess.READ });
+        await expect(ctx.runLastJob()).resolves.toBe(false);
+
+        const stored = await storedTransactions(shared.account);
+        expect(stored).toHaveLength(2);
+        expect(stored.map((row) => row.balance)).toEqual([-500, 1000]);
+        expect((await rowsOf(created.id)).session).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'partial' });
+      });
+
+      it('stores nothing when access goes before the first chunk', async () => {
+        const shared = await sharedForWriting();
+        const ctx = setup({
+          chunkSize: 2,
+          onChunk: async (index) => {
+            if (index === 0) await DI.em.fork().nativeUpdate(AccountShare, { accountShareKey: shared.share.accountShareKey }, { access: AccountShareAccess.READ });
+          },
+        });
+        const created = await ctx.service().create(shared.scope, { accountId: shared.account.accountKey, format: 'statement', key: ctx.upload(shared.account, statement(lines)) });
+        await ctx.runLastJob();
+        await ctx.service().commit(shared.scope, created.id);
+
+        await expect(ctx.runLastJob()).resolves.toBe(false);
+
+        expect(await storedTransactions(shared.account)).toEqual([]);
+        const { rows, session } = await rowsOf(created.id);
+        expect(session).toMatchObject({ errorCode: ACCOUNT_ACCESS_ERROR, status: 'failed' });
+        expect(rows).toEqual([]);
+      });
     });
 
     it('reads only a file uploaded for the account it imports into', async () => {

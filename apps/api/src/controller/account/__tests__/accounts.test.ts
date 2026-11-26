@@ -64,6 +64,7 @@ const account = (overrides: AccountFixtureOverrides = {}) => ({
   accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } },
   appuserCurrencyBalance: 0,
   balance: 0,
+  closed: false,
   currencyKey: { code: 'EUR' },
   isJoint: false,
   isPrivate: false,
@@ -161,6 +162,7 @@ describe('getAccount', () => {
         availableBalance: 0,
         balance: 0,
         balanceDerivedAt: null,
+        closed: false,
         creditCard: null,
         csvImportFormat: 'generic',
         currencyKey: { code: 'GBP' },
@@ -333,6 +335,7 @@ describe('getAccounts', () => {
           availableBalance: 0,
           balance: 0,
           balanceDerivedAt: null,
+          closed: false,
           creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
@@ -360,6 +363,7 @@ describe('getAccounts', () => {
           availableBalance: null,
           balance: null,
           balanceDerivedAt: null,
+          closed: false,
           creditCard: null,
           csvImportFormat: 'generic',
           currencyKey: { code: 'EUR' },
@@ -523,6 +527,12 @@ describe('mapAccountSummary accountType', () => {
     ['an account with no type', undefined, null],
   ] as const)('tells the client the type of %s, so it can pick a glyph', (_kind, accountTypeKey, expected) => {
     expect(mapAccountSummary(account({ accountTypeKey })).accountType).toBe(expected);
+  });
+});
+
+describe('mapAccountSummary closed', () => {
+  it.each([[true], [false]])('tells the client whether the account is closed (%s), so an import does not offer a closed one', (closed) => {
+    expect(mapAccountSummary(account({ closed })).closed).toBe(closed);
   });
 });
 

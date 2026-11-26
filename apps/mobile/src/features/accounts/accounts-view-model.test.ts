@@ -41,10 +41,16 @@ describe('accounts view model', () => {
       accountType: null,
       creditCard: null,
       myAccess: 'owner',
+      closed: false,
       attribution: null,
       fx: { status: 'exact' },
     })
     expect('logoUrl' in result).toBe(false)
+  })
+
+  it('reads whether the account is closed, and an API that does not say as open', () => {
+    expect(mapAccountSummary({ ...dto(0), closed: true }).closed).toBe(true)
+    expect(mapAccountSummary(dto(0)).closed).toBe(false)
   })
 
   it('preserves a null conversion without arithmetic or defaulting', () => {

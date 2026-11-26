@@ -2880,6 +2880,7 @@
   "import-review-date-order-hint-month-first": "The file doesn't say, so they were read month first (01/15/2026 is 15 January). Choose the other order if that's wrong.",
   "import-review-done": "{imported, plural, one {# transaction imported} other {# transactions imported}}, {skipped} skipped.",
   "import-review-done-failed": "{failed, plural, one {# row couldn't be imported} other {# rows couldn't be imported}}.",
+  "import-review-access-lost-partway": "You can no longer import into this account, so the rest of the file wasn't imported.",
   "import-review-details-deleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account.",
   "portfolioAccountLink": {
     "account-label": "Account that holds this portfolio",

@@ -534,6 +534,28 @@ test("a file whose columns could not be found cannot be imported until they are 
   );
 });
 
+test("offers no closed account to import into, nor starts on one", async () => {
+  renderModal(
+    {
+      ...manualAccount,
+      accountKey: 6,
+      accountName: "Old savings",
+      closed: true,
+    },
+    { ...manualAccount, accountKey: 8, accountName: "Cash" },
+    { ...manualAccount, accountKey: 9, accountName: "Card" },
+  );
+  const user = userEvent.setup();
+
+  const selector = screen.getAllByRole("combobox")[0];
+  assert.equal(selector.textContent, "Cash");
+  await user.click(selector);
+  const options = (await screen.findAllByRole("option")).map(
+    (option) => option.textContent,
+  );
+  assert.deepEqual(options, ["Cash", "Card"]);
+});
+
 test("picking another account uploads the file again for that account", async () => {
   presignAnswers(false);
   mocks.preview.mockResolvedValue(previewOf());

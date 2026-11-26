@@ -74,7 +74,9 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  *            category is written with it, as the person's choice. After the last chunk it settles the
  *            accounts once (balance chain, rules, learned categories) and sets the outcome; then
  *            transfer matching, recurring detection and enrichment follow. The job heartbeats
- *            between chunks, and on a timer through the settling and follow-ups.
+ *            between chunks, and on a timer through the settling and follow-ups. Before every
+ *            chunk it checks again that its starter may still write to the session's accounts:
+ *            once they may not, it stops, and the chunks already written are settled and stay.
  *
  * A PDF statement (`format: pdf`, `createPdf`) is read by the `statementImport` vision model, page
  * by page, in the parse job (`pdf-statement/pdf-statement-reader.ts`): the session records each
@@ -429,6 +431,7 @@ export class TransactionImportService {
   async setCategoryMapping(scope: TransactionImportScope, id: string, mapping: Record<string, null | number>): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     this.assertReviewable(session);
+    await this.assertSessionWritable(scope, session);
     const labels = new Set((session.sourceCategories ?? []).map((source) => source.label));
     if (Object.keys(mapping).some((label) => !labels.has(label))) throw new BadRequestError('The file has no such category');
     for (const categoryKey of new Set(Object.values(mapping))) {
@@ -526,17 +529,19 @@ export class TransactionImportService {
         });
         return session.status !== SESSION_STATUS.FAILED;
       }
-      // Every commit, one-step or resumed, is the job's to check: no request stands before it.
-      if (!(await this.startedByWriter(session))) return await this.failForAccess(session, correlationId, queueJobId);
       if (session.status !== SESSION_STATUS.IMPORTING) {
         session.status = SESSION_STATUS.IMPORTING;
         await this.em.flush();
       }
+      // Every commit, one-step or resumed, is the job's to check, before each chunk: no request stands before it.
       const totals = await this.commitRows(session, correlationId, queueJobId);
+      if (totals === 'refused') return await this.failForAccess(session, correlationId, queueJobId);
       if (!totals) return false;
+      const errorCode = session.errorCode ? `${TRANSACTION_IMPORT_OPERATION}:${session.errorCode}` : undefined;
       await backgroundOperationService.heartbeatJob(correlationId, queueJobId, { progress: { ...totals }, stage: `${TRANSACTION_IMPORT_OPERATION}:${session.status}` });
-      await backgroundOperationService.finishJob(correlationId, queueJobId, { stage: `${TRANSACTION_IMPORT_OPERATION}:${session.status}`, status: operationStatusOf(session, totals) });
-      return true;
+      await backgroundOperationService.finishJob(correlationId, queueJobId, { errorCode, stage: `${TRANSACTION_IMPORT_OPERATION}:${session.status}`, status: operationStatusOf(session, totals) });
+      // Stopped part way because its starter lost access: the chunks written stay, the rest did not run.
+      return session.errorCode !== ACCOUNT_ACCESS_ERROR;
     } catch (error) {
       logger.error({ correlationId, error, mode }, 'Transaction import job failed');
       Sentry.captureException(error, { tags: { job: TRANSACTION_IMPORT_OPERATION } });
@@ -873,12 +878,24 @@ export class TransactionImportService {
   /**
    * Write every row decided `import`, chunk by chunk, then settle the accounts once. Returns null
    * when another job has taken the session over.
+   *
+   * Before each chunk, the starter's access is read again from the database: a share taken back, a
+   * role lowered, a membership ended or an account closed while a large file commits stops it at
+   * the next chunk. With nothing written yet, the commit is `refused` and the caller stores
+   * nothing; otherwise the chunks already written are settled and stay, the rest are skipped, and
+   * the session ends with {@link ACCOUNT_ACCESS_ERROR}.
    */
-  private async commitRows(session: TransactionImportSession, correlationId: string, queueJobId: string): Promise<CommitTotals | null> {
+  private async commitRows(session: TransactionImportSession, correlationId: string, queueJobId: string): Promise<'refused' | CommitTotals | null> {
     const sessionKey = session.transactionImportSessionKey;
     const chunkSize = this.deps.chunkSize ?? CHUNK_SIZE;
+    let stoppedFor: typeof ACCOUNT_ACCESS_ERROR | undefined;
     for (let index = 0; ; index++) {
       await this.deps.onChunk?.(index);
+      if (!(await this.startedByWriter(session))) {
+        if (!(await this.hasImportedRows(sessionKey))) return 'refused';
+        stoppedFor = ACCOUNT_ACCESS_ERROR;
+        break;
+      }
       const outcome = await this.writeChunk(sessionKey, correlationId, chunkSize).catch(async (error: unknown) => {
         // A row the database refuses (a constraint) fails alone: the chunk is written again row by row.
         if (!(error instanceof DriverException)) throw error;
@@ -891,7 +908,7 @@ export class TransactionImportService {
     }
     // Settling and the follow-ups have no chunks to heartbeat between, and grow with the file.
     return this.keptAlive(correlationId, queueJobId, async () => {
-      const settled = await this.settle(sessionKey, correlationId);
+      const settled = await this.settle(sessionKey, correlationId, stoppedFor);
       if (!settled) return null;
       if (settled.committed) await this.recordImportCommitted(settled.committed);
       await this.em.refresh(session);
@@ -1017,10 +1034,11 @@ export class TransactionImportService {
 
   /**
    * After the last chunk, in one transaction: each account's balance chain, rules and learned
-   * categories over the rows this session wrote, the undecided-to-import rows marked `skipped`,
-   * and the session's outcome. Null when another job has taken the session over.
+   * categories over the rows this session wrote, the rows not written marked `skipped`, and the
+   * session's outcome. A commit `stoppedFor` lost access ends `partial` (or `failed`, when no row
+   * was written) with that code. Null when another job has taken the session over.
    */
-  private async settle(sessionKey: number, correlationId: string): Promise<null | { accounts: { account: Account; dates: Date[] }[]; committed?: { format: transactionImport.ImportFormat; importer: null | number; importId: string; partial: boolean }; totals: CommitTotals }> {
+  private async settle(sessionKey: number, correlationId: string, stoppedFor?: typeof ACCOUNT_ACCESS_ERROR): Promise<null | { accounts: { account: Account; dates: Date[] }[]; committed?: { format: transactionImport.ImportFormat; importer: null | number; importId: string; partial: boolean }; totals: CommitTotals }> {
     return this.em.fork().transactional(async (tx) => {
       const locked = await tx.findOne(TransactionImportSession, { transactionImportSessionKey: sessionKey }, { filters: false, lockMode: LockMode.PESSIMISTIC_WRITE });
       if (locked?.status !== SESSION_STATUS.IMPORTING || locked.correlationId !== correlationId) return null;
@@ -1040,8 +1058,11 @@ export class TransactionImportService {
       await tx.nativeUpdate(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { status: ROW_STATUS.SKIPPED, updatedAt: this.now });
       const counts = await this.countRows(tx, sessionKey);
       const totals: CommitTotals = { failed: counts.statuses.failed + counts.statuses.invalid, imported: counts.statuses.imported, skipped: counts.statuses.skipped, totalRows: Object.values(counts.statuses).reduce((sum, count) => sum + count, 0) };
-      const outcome = transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported });
+      const outcome = stoppedFor
+        ? (counts.statuses.imported > 0 ? 'partial' : 'failed')
+        : transactionImport.commitOutcome({ failed: counts.statuses.failed, imported: counts.statuses.imported });
       locked.status = OUTCOME_OF[outcome];
+      locked.errorCode = stoppedFor;
       locked.committedAt = this.now;
       await tx.flush();
       // Recorded by the caller once this transaction commits, so analytics can never abort it.
@@ -1110,6 +1131,11 @@ export class TransactionImportService {
         transactionKey,
       }, { flush: false });
     }
+  }
+
+  /** Whether a commit of the session has written any row yet (this job or an earlier one). */
+  private async hasImportedRows(sessionKey: number): Promise<boolean> {
+    return (await this.em.fork().count(TransactionImportRow, { status: ROW_STATUS.IMPORTED, transactionImportSessionKey: bySession(sessionKey) }, { filters: false })) > 0;
   }
 
   /** Rows by status and, among those not committed yet, by decision. Scoped by the session's key alone: only an owner-checked session reaches it. */
@@ -1220,22 +1246,30 @@ export class TransactionImportService {
     return account;
   }
 
-  /** The session's accounts must all still be the person's to write to (see {@link writableAccount}). */
+  /**
+   * The session's accounts must all still be the person's to write to, and open (see
+   * {@link writableAccount}): one closed since the session started answers 409, as at the start.
+   */
   private async assertSessionWritable(scope: TransactionImportScope, session: TransactionImportSession): Promise<void> {
-    await assertAccountsWritable(this.em, sessionAccountKeys(session), scope);
+    const keys = sessionAccountKeys(session);
+    await assertAccountsWritable(this.em, keys, scope);
+    if (keys.length === 0) return;
+    const closed = await this.em.count(Account, { accountKey: { $in: keys }, closed: true, tenantKey: { tenantKey: scope.tenantKey } }, { filters: false });
+    assertOpenForImport({ closed: closed > 0 });
   }
 
   /**
-   * The job's own check, before it reads a file or writes a row: the person who started the
-   * session is still an active member of its household, and with their role today may write to
-   * every account it imports into, none of them closed. The worker has no request, so nothing
-   * else has checked since they asked.
+   * The job's own check, before it reads a file and before each chunk it writes: the person who
+   * started the session is still an active member of its household, and with their role today may
+   * write to every account it imports into, none of them closed. The worker has no request, so
+   * nothing else has checked since they asked. Everything is read from the database each time,
+   * never from what this entity manager loaded for an earlier check.
    */
   private async startedByWriter(session: TransactionImportSession): Promise<boolean> {
     const appuserKey = keyOf(session.appuserKey, 'appuserKey');
     const tenantKey = keyOf(session.tenantKey, 'tenantKey');
     if (appuserKey === null || tenantKey === null) return false;
-    const membership = await findActiveMembership(this.em, tenantKey, appuserKey);
+    const membership = await findActiveMembership(this.em, tenantKey, appuserKey, { refresh: true });
     if (!membership) return false;
     const keys = sessionAccountKeys(session);
     const writable = await writableAccountKeys(this.em, keys, { appuserKey, householdRole: membership.role, tenantKey });
@@ -1263,6 +1297,8 @@ export class TransactionImportService {
 /**
  * A session's `errorCode` when the job refused it: the person who started it may no longer write
  * to one of its accounts (a share taken back, a role lowered, a membership ended, an account closed).
+ * On a `failed` session nothing was written; on a `partial` one the commit stopped part way, and
+ * `counts.imported` is what it wrote before.
  */
 export const ACCOUNT_ACCESS_ERROR = 'account_access';
 

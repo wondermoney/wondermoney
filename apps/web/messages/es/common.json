@@ -2880,6 +2880,7 @@
   "import-review-date-order-hint-month-first": "El archivo no lo indica, así que se leyeron con el mes primero (01/15/2026 es el 15 de enero). Elige el otro orden si es incorrecto.",
   "import-review-done": "{imported, plural, one {# transacción importada} other {# transacciones importadas}}, {skipped} omitidas.",
   "import-review-done-failed": "{failed, plural, one {# fila no se pudo importar} other {# filas no se pudieron importar}}.",
+  "import-review-access-lost-partway": "Ya no puedes importar en esta cuenta, así que el resto del archivo no se importó.",
   "import-review-details-deleted": "Los detalles fila a fila de esta importación ya no se conservan: se eliminan 7 días después de una importación. Las transacciones importadas siguen en la cuenta.",
   "portfolioAccountLink": {
     "account-label": "Cuenta que contiene esta cartera",

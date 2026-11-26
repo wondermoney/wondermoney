@@ -36,6 +36,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     isOwnedByViewer: false,
     ownerFirstName: null,
     myAccess: "write",
+    closed: false,
     isJoint: false,
     ownerAppuserKey: null,
     attribution: { appuserKey: null, displayName: null },
@@ -78,6 +79,21 @@ test("reads the caller's access, and derives it for an API that does not send it
   assert.deepEqual(
     response.accounts.map((account) => account.myAccess),
     ["read", "write", "owner", "write", "write"],
+  );
+});
+
+test("reads whether an account is closed; an API that does not say reads as open", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), closed: true },
+      { ...requiredAccountFields(2), closed: false },
+      requiredAccountFields(3),
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.closed),
+    [true, false, false],
   );
 });
 

@@ -1268,6 +1268,7 @@
       "importing": "Importazione… {{imported}} di {{total}} transazioni finora.",
       "stalled": "L'importazione si è interrotta prima di finire. Riprova per riprendere da dove si è fermata: nulla viene importato due volte.",
       "accessLost": "Non puoi più importare in questo conto, quindi non è stato importato nulla.",
+      "accessLostPartway": "Non puoi più importare in questo conto, quindi il resto del file non è stato importato.",
       "readFailed": "Non siamo riusciti a leggere questo file. Scegli un'esportazione CSV o Excel del tuo estratto conto.",
       "expired": "Questa importazione è scaduta prima di essere completata. Ricomincia con il file.",
       "unsupported": "Questa versione dell'app non può mostrare questa importazione. Aggiorna l'app o completala dal web.",
