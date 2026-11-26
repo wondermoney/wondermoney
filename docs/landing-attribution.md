@@ -75,11 +75,21 @@ its `signup` event.
 
 ## Signups from AI assistants
 
-`referrer_class` answers how many signups each kind of source brings, AI assistants above all:
-count `signup` events by `referrer_class`, and the site's `$pageview` events by the same property
-for the visits. Like `landing_source`, it undercounts the signups against the visits by the share
-of people who decline the app's opt-in, and it misses a visit whose analytics consent came after
-its first page.
+`referrer_class` answers how many signups each kind of source brings, AI assistants above all.
+A PostHog SQL insight, one row per referrer class, over the last 90 days:
+
+| Column | What it counts | Undercount |
+|---|---|---|
+| `entrances` | The site's `$pageview` events with that `referrer_class`, arriving from outside the site (the same rule as the per-tool funnel: any referrer but `wonder.money` and `www.wonder.money`, or none, so a return from the app or the docs is another entrance in the visit's class). Every page of the site, not only the tools and lists | Visitors who decline the site's Analytics consent, and a visit whose consent came after its first page (it has no class) |
+| `signups` | `signup` events with that `referrer_class` | As `entrances`, and also every new user who declines the app's opt-in: the class reaches the `signup` event only with consent on both sites |
+| `activations` | Of those signups, the accounts with a `first_budget_created` or `first_goal_created`, at any time after their signup | As `signups`: the activation events are service events, but they are counted only for signups that carry a class |
+
+The query is [`docs/analytics/referrer-class.sql`](analytics/referrer-class.sql), on the product
+dashboard (`docs/analytics/README.md`). Read it as the per-tool funnel: signups and activations
+undercount against the site's visits by roughly the share of new users who decline the app's
+opt-in, so compare classes with each other, and a column with itself over time, rather than
+signups with entrances as a conversion rate. Signups that came from no website visit, or without
+both consents, carry no class and are not in the table.
 
 ## The per-tool funnel
 
