@@ -111,7 +111,7 @@ test("a threshold marks only the breach, with the accessible destructive text to
 });
 
 test("a negative amount carries a true minus sign in every locale", () => {
-  for (const locale of ["en", "pt", "es"]) {
+  for (const locale of ["en", "pt", "es", "it"]) {
     const text = renderAmount({ value: -221.67 }, locale).textContent ?? "";
     assert.ok(text.includes("−"), `${locale}: ${text}`);
     assert.ok(!text.includes("-"), `${locale}: ${text}`);

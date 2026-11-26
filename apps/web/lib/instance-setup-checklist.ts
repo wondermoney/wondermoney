@@ -1,4 +1,5 @@
 import type { InstanceDescription } from "@/lib/api/instance/useInstance";
+import { type DocsLocale, docsLocaleFor } from "@/lib/docs-links";
 
 /** The optional parts of a server the setup page lists, in the order it lists them. */
 export const SETUP_FEATURES = [
@@ -20,7 +21,6 @@ export interface SetupChecklistItem {
   on: boolean;
 }
 
-type DocsLocale = "en" | "es" | "pt";
 
 /**
  * The heading anchors of `self-hosting/configure` in each docs locale. The docs slug the localized
@@ -88,8 +88,7 @@ export function setupChecklist(
   locale: string,
   docsUrl: string,
 ): SetupChecklistItem[] {
-  const docsLocale: DocsLocale =
-    locale === "pt" || locale === "es" ? locale : "en";
+  const docsLocale = docsLocaleFor(locale);
   const selfHosting = `${docsUrl.replace(/\/+$/u, "")}/${docsLocale}/docs/self-hosting`;
   return SETUP_FEATURES.map((feature) => ({
     docsHref:

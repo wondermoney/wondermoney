@@ -7,11 +7,12 @@ import api from "../api";
 type AppLocale = (typeof routing.locales)[number];
 
 /** The account language the API stores: emails and other server-written texts go out in it. */
-export type AccountLanguage = "EN" | "ES" | "PT";
+export type AccountLanguage = "EN" | "ES" | "IT" | "PT";
 
 const ACCOUNT_LANGUAGE: Readonly<Record<AppLocale, AccountLanguage>> = {
   en: "EN",
   es: "ES",
+  it: "IT",
   pt: "PT",
 };
 
