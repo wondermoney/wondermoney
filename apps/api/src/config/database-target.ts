@@ -16,7 +16,9 @@
  * The target is read with `pg-connection-string`'s `parse`, the parser `pg` itself applies to a
  * connection string, so what the guard checks and what `pg` connects to cannot differ. `pg` lets
  * query parameters replace the URL's own fields (`?host=` the host, `?options=` the server
- * options better-auth sets its `search_path` with), so a URL with any of those is refused.
+ * options better-auth sets its `search_path` with), so a URL with any of those is refused. So is
+ * one `pg` would read differently from how it looks (a stray `%` makes `parse` re-encode the whole
+ * string), and any `#`.
  *
  * Messages never include the URL or a parameter's value: either can carry the password.
  *
@@ -111,34 +113,51 @@ function inspectDatabaseUrl(raw: string): Inspection {
     };
   }
 
-  let parsed: ReturnType<typeof parse>;
+  // A `#` starts a fragment `pg` still feeds to its parser, where a stray `%` changes how the whole
+  // URL is decoded. A `#` in a password is written `%23`.
+  if (value.includes('#')) {
+    return { ok: false, problem: 'DATABASE_URL must not contain #. Write a # in the password as %23' };
+  }
+
+  // `asGiven` is what `pg` reads: this exact string. A stray `%` anywhere in it makes `parse`
+  // re-encode the whole URL, which changes the host it decodes (`%6cocalhost` stays as written),
+  // so the copies with the query trimmed must agree with it, or the URL is refused.
+  let asGiven: ReturnType<typeof parse>;
+  try {
+    asGiven = parse(value);
+  } catch (error) {
+    // It reads the TLS files the URL names (sslrootcert...), as `pg` does when it connects.
+    const tlsFile = error instanceof Error && 'code' in error && typeof error.code === 'string' && error.code.startsWith('E');
+    return { ok: false, problem: tlsFile ? 'DATABASE_URL names a TLS file (sslcert, sslkey or sslrootcert) that cannot be read' : INVALID_URL };
+  }
+  let withoutTlsFiles: ReturnType<typeof parse>;
   let withoutQuery: ReturnType<typeof parse>;
   try {
-    // TLS file parameters (sslrootcert...) make `parse` read files; they never move the target.
-    parsed = parse(stripQuery(value, (key) => !key.toLowerCase().startsWith('ssl')));
+    withoutTlsFiles = parse(stripQuery(value, (key) => !key.toLowerCase().startsWith('ssl')));
     withoutQuery = parse(stripQuery(value, () => false));
   } catch {
     return { ok: false, problem: INVALID_URL };
   }
 
   // Belt and braces for an encoding the parameter check above did not foresee: the query must not
-  // change where `pg` connects.
+  // change where `pg` connects, or who as.
   for (const field of ['host', 'port', 'user', 'password'] as const) {
-    if ((parsed[field] ?? '') !== (withoutQuery[field] ?? '')) {
-      return { ok: false, problem: `DATABASE_URL's query string changes its ${field}. Give it in the URL before the ?` };
+    const given = asGiven[field] ?? '';
+    if (given !== (withoutTlsFiles[field] ?? '') || given !== (withoutQuery[field] ?? '')) {
+      return { ok: false, problem: `DATABASE_URL is written so that pg would read its ${field} differently from how it looks. Percent-encode only what needs it` };
     }
   }
 
   // An empty host is a Unix socket: the guard cannot tell where that is, so it is not accepted.
-  const host = parsed.host ?? '';
-  const database = parsed.database ?? '';
+  const host = asGiven.host ?? '';
+  const database = asGiven.database ?? '';
   if (host === '' || database === '') return { ok: false, problem: INVALID_URL };
-  const port = parsed.port ? Number(parsed.port) : null;
+  const port = asGiven.port ? Number(asGiven.port) : null;
   if (port !== null && !Number.isInteger(port)) return { ok: false, problem: INVALID_URL };
-  return { ok: true, target: { database, host, port, username: parsed.user ? parsed.user : null } };
+  return { ok: true, target: { database, host, port, username: asGiven.user ? asGiven.user : null } };
 }
 
-/** The query parameter names, decoded as URL parsing decodes them. The fragment is not the query. */
+/** The query parameter names, decoded as URL parsing decodes them. */
 function queryParameters(value: string): string[] {
   const beforeFragment = value.split('#', 1)[0] ?? '';
   const at = beforeFragment.indexOf('?');

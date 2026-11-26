@@ -56,6 +56,12 @@ if [ -n "$TRUSTED_PROXIES" ] && ! [[ "$TRUSTED_PROXIES" =~ ^[0-9A-Fa-f.:/,]+$ ]]
   die "TRUSTED_PROXIES is a comma-separated list of IP addresses or CIDR ranges, such as 172.17.0.0/16."
 fi
 
+# Whitespace around DATABASE_URL is dropped and a blank one is unset, as the API reads it.
+DATABASE_URL="${DATABASE_URL:-}"
+DATABASE_URL="${DATABASE_URL#"${DATABASE_URL%%[![:space:]]*}"}"
+DATABASE_URL="${DATABASE_URL%"${DATABASE_URL##*[![:space:]]}"}"
+if [ -n "$DATABASE_URL" ]; then export DATABASE_URL; else unset DATABASE_URL; fi
+
 USE_BUNDLED_DB=true
 [ -z "${DB_HOST:-}" ] && [ -z "${DATABASE_URL:-}" ] || USE_BUNDLED_DB=false
 # The API refuses DATABASE_URL beside any DB_* setting. The Unraid template always passes its

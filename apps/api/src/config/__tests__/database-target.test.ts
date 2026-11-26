@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import { databaseUrlProblem, parseDatabaseUrl } from '../database-target';
@@ -9,9 +11,30 @@ describe('parseDatabaseUrl', () => {
     expect(parseDatabaseUrl('postgresql://wm@[::1]/wm%20db')).toEqual({ database: 'wm db', host: '::1', port: null, username: 'wm' });
   });
 
-  it('reads a TLS file parameter without opening the file', () => {
-    expect(parseDatabaseUrl('postgres://wm@db.example.com/wondermoney?sslmode=verify-full&sslrootcert=/nonexistent/ca.pem'))
+  it('accepts a TLS file parameter naming a file pg can read, and refuses one it cannot', () => {
+    // Any readable file will do: `parse` only loads it, as `pg` does when it connects.
+    const readable = fileURLToPath(new URL('fixtures/precedence.env', import.meta.url));
+
+    expect(parseDatabaseUrl(`postgres://wm@db.example.com/wondermoney?sslmode=verify-full&sslrootcert=${readable}`))
       .toMatchObject({ host: 'db.example.com' });
+    expect(databaseUrlProblem({ DATABASE_URL: 'postgres://wm@db.example.com/wondermoney?sslrootcert=/nonexistent/ca.pem' })?.message)
+      .toMatch(/TLS file/);
+  });
+
+  // `pg` parses the string exactly as given. A stray `%` anywhere makes it re-encode the whole URL,
+  // so `%6cocalhost` stays `%6cocalhost` for `pg` while a cleaned-up copy would read `localhost`.
+  it.each([
+    ['in a fragment', 'postgres://u:p@%6cocalhost:1/wmdb#%zz'],
+    ['in a query value', 'postgres://u:p@%6cocalhost:1/wmdb?application_name=%zz'],
+  ])('refuses a URL that pg would read differently because of a stray %% %s', (_where, url) => {
+    expect(parseDatabaseUrl(url)).toBeNull();
+    expect(databaseUrlProblem({ DATABASE_URL: url })?.code).toBe('invalid-format');
+  });
+
+  it('refuses any # and says how to write one in a password', () => {
+    expect(parseDatabaseUrl('postgres://wm:pw@db.example.com/wondermoney#main')).toBeNull();
+    expect(databaseUrlProblem({ DATABASE_URL: 'postgres://wm:p#w@db.example.com/wondermoney' })?.message).toMatch(/%23/);
+    expect(parseDatabaseUrl('postgres://wm:p%23w@db.example.com/wondermoney')).toMatchObject({ host: 'db.example.com' });
   });
 
   it.each([

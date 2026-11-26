@@ -77,6 +77,10 @@ describe('checkLocalDbTarget', () => {
       ['postgres://wm@localhost:5434'],
       ['postgres:///wmdb?host=/var/run/postgresql'],
       ['wmdb'],
+      // pg reads the host of these as %6cocalhost, not localhost.
+      ['postgres://u:p@%6cocalhost:1/wmdb#%zz'],
+      ['postgres://u:p@%6cocalhost:1/wmdb?application_name=%zz'],
+      ['postgres://wm@localhost:5434/wmdb#main'],
     ])('refuses DATABASE_URL=%s, which it cannot check', (value) => {
       expect(check({ DATABASE_URL: value }, true).allowed).toBe(false);
       expect(check({ ALLOW_REMOTE_DB: '1', DATABASE_URL: value }, true).allowed).toBe(false);
