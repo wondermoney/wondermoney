@@ -3,7 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { OAuthConsent } from "@/components/auth/OAuthConsent";
 import Logo from "@/components/layout/Logo";
 import { Text } from "@/components/ui/Typography";
-import { parseOAuthConsentRequest } from "@/lib/auth/oauth-consent";
+import {
+  isSessionFreshForConsent,
+  parseOAuthConsentRequest,
+} from "@/lib/auth/oauth-consent";
 import { requireServerAuth } from "@/lib/auth/server-auth";
 import { getInstanceName } from "@/lib/instance-name.server";
 
@@ -66,12 +69,16 @@ export default async function OAuthConsentPage({
   }
 
   const email = session.user.email;
+  const twoFactorEnabled = session.user.twoFactorEnabled === true;
+  const sessionFresh = isSessionFreshForConsent(session.session.createdAt);
   return (
     <ConsentShell>
       <OAuthConsent
         request={consentRequest}
         instanceName={instanceName}
         signedInEmail={typeof email === "string" ? email : null}
+        twoFactorEnabled={twoFactorEnabled}
+        sessionFresh={sessionFresh}
       />
     </ConsentShell>
   );

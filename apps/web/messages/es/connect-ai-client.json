@@ -44,13 +44,13 @@
     "oauth-revoke-confirm": "Desconectar",
     "oauth-cancel": "Cancelar",
     "oauth-revoked": "Cliente desconectado",
-    "oauth-error-revoke": "No se pudo desconectar el cliente. Inténtalo de nuevo."
+    "oauth-error-revoke": "No se pudo desconectar el cliente. Inténtalo de nuevo.",
+    "oauth-device-redirect": "una app en este dispositivo (<code>{app}</code>)"
   },
   "oauthConsent": {
     "title": "{client} quiere leer tus finanzas en {instanceName}",
     "title-unnamed": "Un cliente de IA quiere leer tus finanzas en {instanceName}",
     "signed-in-as": "Sesión iniciada como {email}.",
-    "redirect-host": "Cuando respondas, volverás a {host}. Continúa solo si empezaste esto allí.",
     "household-title": "Qué puede ver",
     "household-alone": "Tu hogar: lo que ves en la app, incluidas tus cuentas privadas.",
     "household-with": "Tu hogar con {members}: lo que ves en la app, incluidas tus cuentas privadas. La cuenta privada de otro miembro sigue oculta salvo que la haya compartido contigo.",
@@ -63,8 +63,19 @@
     "revoke-hint": "Puedes desconectarlo en cualquier momento en Configuración › Tokens de API › Conectar un cliente de IA.",
     "allow": "Autorizar",
     "deny": "Cancelar",
-    "error": "No se pudo completar esta solicitud. Puede que haya caducado: empieza de nuevo desde el cliente.",
     "invalid-title": "Esta no es una solicitud de conexión válida",
-    "invalid-body": "Empieza de nuevo desde el cliente de IA que quieres conectar."
+    "invalid-body": "Empieza de nuevo desde el cliente de IA que quieres conectar.",
+    "error-generic": "No se pudo completar esta solicitud. Puede que haya caducado: empieza de nuevo desde el cliente.",
+    "redirect-web": "Cuando respondas, volverás a <code>{origin}</code>. Continúa solo si empezaste esto allí.",
+    "redirect-device": "Cuando respondas, volverás a una app en este dispositivo (<code>{app}</code>).",
+    "redirect-device-warning": "Cualquier app de este dispositivo podría reclamar esa dirección. Continúa solo si empezaste esto desde una app de confianza.",
+    "totp-label": "Código de autenticación",
+    "totp-hint": "Tu cuenta usa autenticación en dos pasos: introduce el código de tu app de autenticación.",
+    "stale-title": "Vuelve a iniciar sesión para conectar un cliente",
+    "stale-body": "Conectar un cliente le da acceso duradero, así que hace falta haber iniciado sesión en las últimas 24 horas.",
+    "sign-in-again": "Volver a iniciar sesión",
+    "error-totp-required": "Introduce tu código de autenticación para autorizarlo.",
+    "error-invalid-totp": "Ese código de autenticación no es válido.",
+    "error-session-not-fresh": "Vuelve a iniciar sesión."
   }
 }

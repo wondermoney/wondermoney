@@ -379,6 +379,28 @@ describe('rate-limit families', () => {
       expect(isHealthCheckPath({ path: '/v1/budget' } as Request)).toBe(false);
     });
   });
+
+  describe('shared egress exemption', () => {
+    it('lets authenticated MCP calls and the OAuth discovery documents past the per-IP backstop, and nothing else', async () => {
+      const { globalBackstopRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.all('/*splat', (_req, res) => res.sendStatus(200));
+      const ip = '198.51.100.77';
+      // The backstop's budget is far above what a test sends; its own header says whether a
+      // request was counted at all.
+      const mcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', ip).set('Authorization', 'Bearer some-access-token');
+      const metadata = await request(app).get('/.well-known/oauth-protected-resource/v1/mcp').set('X-Forwarded-For', ip);
+      const anonymousMcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', ip);
+      const other = await request(app).get('/v1/budget').set('X-Forwarded-For', ip).set('Authorization', 'Bearer some-access-token');
+
+      expect(mcp.headers['ratelimit']).toBeUndefined();
+      expect(metadata.headers['ratelimit']).toBeUndefined();
+      expect(anonymousMcp.headers['ratelimit']).toBeDefined();
+      expect(other.headers['ratelimit']).toBeDefined();
+    });
+  });
 });
 
 /**

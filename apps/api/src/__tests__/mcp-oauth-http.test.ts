@@ -3,16 +3,16 @@ import express from 'express';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { addAccount, addPartner, addShare, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addShare, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
 import { errorHandler } from '@middleware/error-handler';
 import mcpRoutes from '@route/mcp';
-import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
+import mcpOAuthMetadataRoutes, { issuerPathMetadataRoutes } from '@route/mcp-oauth-metadata';
 import { createApiToken } from '@service/api-token/api-token.service';
-import { getMcpOAuthServerMetadata } from '@service/auth/better-auth';
+import { getMcpOAuthServerMetadata, revokeMcpOAuthGrant } from '@service/auth/better-auth';
 import { verifyMcpOAuthAccessToken } from '@service/mcp/mcp-oauth-token.service';
 import { resetMcpToolCallWindows } from '@service/mcp/mcp-rate-limit.service';
 
@@ -50,6 +50,14 @@ const post = (bearer: null | string, body: unknown) => {
   return bearer === null ? agent.send(body as object) : agent.set('Authorization', `Bearer ${bearer}`).send(body as object);
 };
 
+/** A verified OAuth caller: the household's owner, through one client, for their household. */
+const callerFor = (household: Household, scopes = ['mcp:read']) => ({
+  clientId: 'chatgpt-client',
+  household: String(household.tenant.tenantKey),
+  scopes,
+  userId: household.appuser.externalUserId,
+});
+
 const accountNames = (response: request.Response) =>
   (response.body.result.structuredContent as { accounts: { name: string }[] }).accounts.map((account) => account.name);
 
@@ -58,6 +66,7 @@ describe('OAuth on the MCP server', () => {
     DI.em = db.em();
     resetMcpToolCallWindows();
     verify.mockReset();
+    vi.mocked(revokeMcpOAuthGrant).mockClear();
   });
 
   afterEach(() => {
@@ -72,7 +81,7 @@ describe('OAuth on the MCP server', () => {
     });
 
     it('rejects an OAuth access token without looking at it, and points no client at OAuth', async () => {
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt', scopes: ['mcp:read'], userId: 'anyone' }, ok: true });
+      verify.mockResolvedValue({ caller: { clientId: 'chatgpt', household: '1', scopes: ['mcp:read'], userId: 'anyone' }, ok: true });
 
       const response = await post('eyJhbGciOiJFZERTQSJ9.e30.c2ln', initialize);
 
@@ -131,7 +140,7 @@ describe('OAuth on the MCP server', () => {
       await addShare(em, household, shared, household.appuser, 'read');
       const other = await seedHousehold(em);
       await addAccount(em, other, { name: 'Other household' });
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', scopes: ['mcp:read', 'offline_access'], userId: household.appuser.externalUserId }, ok: true });
+      verify.mockResolvedValue({ caller: callerFor(household, ['mcp:read', 'offline_access']), ok: true });
 
       const response = await post('an-oauth-access-token', listAccounts);
 
@@ -146,7 +155,7 @@ describe('OAuth on the MCP server', () => {
 
     it('offers an OAuth client the read tools only, each annotated read-only', async () => {
       const household = await seedHousehold(db.em());
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', scopes: ['mcp:read'], userId: household.appuser.externalUserId }, ok: true });
+      verify.mockResolvedValue({ caller: callerFor(household), ok: true });
 
       const response = await post('an-oauth-access-token', { id: 3, jsonrpc: '2.0', method: 'tools/list' });
 
@@ -158,7 +167,7 @@ describe('OAuth on the MCP server', () => {
 
     it('records each call with the OAuth client and no token', async () => {
       const household = await seedHousehold(db.em());
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', scopes: ['mcp:read'], userId: household.appuser.externalUserId }, ok: true });
+      verify.mockResolvedValue({ caller: callerFor(household), ok: true });
 
       await post('an-oauth-access-token', listAccounts);
 
@@ -187,13 +196,41 @@ describe('OAuth on the MCP server', () => {
     });
 
     it('refuses a token whose person has no app account or no household', async () => {
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', scopes: ['mcp:read'], userId: 'no-such-user' }, ok: true });
+      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', household: '1', scopes: ['mcp:read'], userId: 'no-such-user' }, ok: true });
       expect((await post('a-token', initialize)).status).toBe(401);
 
       const household = await seedHousehold(db.em());
       await db.em().nativeUpdate(AppuserTenant, { appuserKey: household.appuser }, { recordActive: false });
-      verify.mockResolvedValue({ caller: { clientId: 'chatgpt-client', scopes: ['mcp:read'], userId: household.appuser.externalUserId }, ok: true });
+      verify.mockResolvedValue({ caller: callerFor(household), ok: true });
       expect((await post('a-token', initialize)).status).toBe(401);
+    });
+
+    it('refuses, and revokes, a grant whose person has moved to another household', async () => {
+      const em = db.em();
+      const household = await seedHousehold(em);
+      const elsewhere = await seedHousehold(em);
+      await em.nativeUpdate(AppuserTenant, { appuserKey: household.appuser }, { recordActive: false });
+      em.create(AppuserTenant, { appuserKey: household.appuser, recordActive: true, tenantKey: elsewhere.tenant }, { partial: true });
+      await em.flush();
+      verify.mockResolvedValue({ caller: callerFor(household), ok: true });
+
+      const response = await post('a-token-for-the-old-household', listAccounts);
+
+      expect(response.status).toBe(401);
+      expect(vi.mocked(revokeMcpOAuthGrant)).toHaveBeenCalledWith(household.appuser.externalUserId, 'chatgpt-client');
+    });
+
+    it('does not advertise DPoP, at the root or at the issuer path', async () => {
+      vi.mocked(getMcpOAuthServerMetadata).mockResolvedValue({ dpop_signing_alg_values_supported: ['ES256'], issuer: 'http://localhost:3001/api/auth' });
+      const host = express();
+      host.use('/api/auth', issuerPathMetadataRoutes);
+      host.use('/.well-known', mcpOAuthMetadataRoutes);
+
+      const root = await request(host).get('/.well-known/oauth-authorization-server/api/auth');
+      const atIssuer = await request(host).get('/api/auth/.well-known/oauth-authorization-server');
+
+      expect(root.body).toEqual({ issuer: 'http://localhost:3001/api/auth' });
+      expect(atIssuer.body).toEqual(root.body);
     });
 
     it('still accepts a personal API token, and its 401 points at OAuth too', async () => {

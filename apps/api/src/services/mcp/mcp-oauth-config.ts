@@ -13,6 +13,12 @@ export const MCP_OAUTH_READ_SCOPE = 'mcp:read';
  */
 export const MCP_OAUTH_SCOPES = [MCP_OAUTH_READ_SCOPE, 'offline_access'] as const;
 
+/**
+ * The access-token claim naming the household (tenant key, as a string) the person consented for.
+ * `middleware/mcp-auth.ts` refuses the token once the person is in another household.
+ */
+export const MCP_OAUTH_HOUSEHOLD_CLAIM = 'wm_household';
+
 /** How long an OAuth access token lives. Short: a refresh token (rotated on use) renews it. */
 export const MCP_OAUTH_ACCESS_TOKEN_SECONDS = 15 * 60;
 

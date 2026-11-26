@@ -13,15 +13,24 @@ export function isMcpEnabled(env: Env = process.env): boolean {
 }
 
 /**
- * Whether the operator asked for OAuth on the MCP server (`MCP_OAUTH_ENABLED`), so that a client
- * that knows only the server's URL, such as ChatGPT, can register, sign the person in and ask for
- * their consent. Off unless set to `true` (or `1`, `on`): it opens unauthenticated client
- * registration, which a self-hosted server should choose. It needs the MCP server itself, so
- * `MCP_ENABLED=false` turns it off too. `mcpOAuthResource` adds the one other condition.
+ * `MCP_OAUTH_ENABLED` as the operator set it: `true` (or `1`, `on`, `yes`, as every on/off switch
+ * here reads), anything else off. It asks for OAuth on the MCP server, so that a client that knows
+ * only the server's URL, such as ChatGPT, can register, sign the person in and ask for their
+ * consent. Off by default: it opens unauthenticated client registration, which a self-hosted
+ * server should choose.
+ */
+export function isMcpOAuthSwitchOn(env: Env = process.env): boolean {
+  const value = env['MCP_OAUTH_ENABLED']?.trim().toLowerCase();
+  return value === '1' || value === 'true' || value === 'on' || value === 'yes';
+}
+
+/**
+ * Whether OAuth on the MCP server is asked for and possible as far as the switches go: the switch
+ * on, and the MCP server itself on (`MCP_ENABLED=false` turns it off too). `mcpOAuthResource`
+ * adds the one other condition, an API address that can be an OAuth resource.
  */
 export function isMcpOAuthRequested(env: Env = process.env): boolean {
-  const value = env['MCP_OAUTH_ENABLED']?.trim().toLowerCase();
-  return isMcpEnabled(env) && (value === 'true' || value === '1' || value === 'on');
+  return isMcpEnabled(env) && isMcpOAuthSwitchOn(env);
 }
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', '[::1]', 'localhost']);

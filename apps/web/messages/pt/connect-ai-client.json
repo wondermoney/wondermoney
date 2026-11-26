@@ -44,13 +44,13 @@
     "oauth-revoke-confirm": "Desligar",
     "oauth-cancel": "Cancelar",
     "oauth-revoked": "Cliente desligado",
-    "oauth-error-revoke": "Não foi possível desligar o cliente. Tenta novamente."
+    "oauth-error-revoke": "Não foi possível desligar o cliente. Tenta novamente.",
+    "oauth-device-redirect": "uma app neste dispositivo (<code>{app}</code>)"
   },
   "oauthConsent": {
     "title": "{client} quer ler as tuas finanças em {instanceName}",
     "title-unnamed": "Um cliente de IA quer ler as tuas finanças em {instanceName}",
     "signed-in-as": "Sessão iniciada como {email}.",
-    "redirect-host": "Quando responderes, voltas a {host}. Continua só se começaste isto aí.",
     "household-title": "O que pode ver",
     "household-alone": "O teu agregado: o que vês na app, incluindo as tuas contas privadas.",
     "household-with": "O teu agregado com {members}: o que vês na app, incluindo as tuas contas privadas. A conta privada de outro membro continua oculta, a menos que a tenha partilhado contigo.",
@@ -63,8 +63,19 @@
     "revoke-hint": "Podes desligá-lo a qualquer momento em Definições › Tokens de API › Ligar um cliente de IA.",
     "allow": "Autorizar",
     "deny": "Cancelar",
-    "error": "Não foi possível concluir este pedido. Pode ter expirado: começa de novo a partir do cliente.",
     "invalid-title": "Este não é um pedido de ligação válido",
-    "invalid-body": "Começa de novo a partir do cliente de IA que queres ligar."
+    "invalid-body": "Começa de novo a partir do cliente de IA que queres ligar.",
+    "error-generic": "Não foi possível concluir este pedido. Pode ter expirado: começa de novo a partir do cliente.",
+    "redirect-web": "Quando responderes, voltas a <code>{origin}</code>. Continua só se começaste isto aí.",
+    "redirect-device": "Quando responderes, voltas a uma app neste dispositivo (<code>{app}</code>).",
+    "redirect-device-warning": "Qualquer app neste dispositivo pode reclamar esse endereço. Continua só se começaste isto numa app em que confias.",
+    "totp-label": "Código de autenticação",
+    "totp-hint": "A tua conta usa autenticação de dois fatores: introduz o código da tua app de autenticação.",
+    "stale-title": "Inicia sessão de novo para ligar um cliente",
+    "stale-body": "Ligar um cliente dá-lhe acesso duradouro, por isso é preciso teres iniciado sessão nas últimas 24 horas.",
+    "sign-in-again": "Iniciar sessão de novo",
+    "error-totp-required": "Introduz o teu código de autenticação para o autorizares.",
+    "error-invalid-totp": "Esse código de autenticação não é válido.",
+    "error-session-not-fresh": "Inicia sessão de novo."
   }
 }

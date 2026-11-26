@@ -65,7 +65,7 @@ export async function listMcpOAuthClients(req: Request, res: Response) {
       connectedAt: grant.connectedAt.toISOString(),
       lastUsedAt: lastCalls[index]?.createdAt.toISOString() ?? null,
       name: grant.name,
-      redirectHost: grant.redirectHost,
+      redirectOrigins: grant.redirectOrigins,
       scopes: grant.scopes,
     })),
   });
@@ -116,15 +116,29 @@ export async function getMcpProtectedResourceMetadata(_req: Request, res: Respon
  * metadata, as better-auth's OAuth provider describes itself: the authorization, token,
  * registration and revocation endpoints under `/api/auth/oauth2`, PKCE with S256 only. The issuer
  * is better-auth's base URL, so the path form (`/.well-known/oauth-authorization-server/api/auth`)
- * is the one RFC 8414 discovery asks for; the bare path serves the same document. 404 while
- * `MCP_OAUTH_ENABLED` is off.
+ * is the one RFC 8414 discovery asks for; the bare path, and better-auth's own copy under its
+ * base path (`/api/auth/.well-known/oauth-authorization-server`, served from here too so the two
+ * never differ), serve the same document. 404 while `MCP_OAUTH_ENABLED` is off.
  */
 export async function getMcpAuthorizationServerMetadata(req: Request, res: Response) {
   if (!mcpOAuthResourceIfEnabled()) throw new NotFoundError();
   const issuerPath = new URL(await getMcpOAuthIssuer()).pathname.replace(/\/+$/, '');
   const suffix = req.path.replace(/^\/oauth-authorization-server/, '').replace(/\/+$/, '');
   if (suffix !== '' && suffix !== issuerPath) throw new NotFoundError();
+  return sendAuthorizationServerMetadata(res);
+}
+
+/** `GET /api/auth/.well-known/oauth-authorization-server`: the same document, at the issuer's own path. */
+export async function getMcpAuthorizationServerMetadataAtIssuer(_req: Request, res: Response) {
+  if (!mcpOAuthResourceIfEnabled()) throw new NotFoundError();
+  return sendAuthorizationServerMetadata(res);
+}
+
+async function sendAuthorizationServerMetadata(res: Response) {
   const metadata = await getMcpOAuthServerMetadata();
   if (!metadata) throw new NotFoundError();
-  return sendMetadata(res, metadata);
+  // `/v1/mcp` accepts bearer tokens only, and the token endpoint refuses DPoP proofs
+  // (services/auth/mcp-oauth.ts), so DPoP is not advertised.
+  const { dpop_signing_alg_values_supported: _dpop, ...advertised } = metadata;
+  return sendMetadata(res, advertised);
 }

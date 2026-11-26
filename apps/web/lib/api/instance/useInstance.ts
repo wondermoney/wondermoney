@@ -11,14 +11,7 @@ export interface InstanceDescription {
   /** The commit the server was built from; null for a local build. */
   commit?: null | string;
   features: {
-    ai: {
-      assistant: boolean;
-      csvMapping: boolean;
-      enrichment: boolean;
-      monthlyStory: boolean;
-      ocr: boolean;
-      statementImport?: boolean;
-    };
+    ai: { assistant: boolean; csvMapping: boolean; enrichment: boolean; monthlyStory: boolean; ocr: boolean; statementImport?: boolean };
     bankSync: boolean;
     /**
      * `instance` when the operator set a shared Enable Banking credential, `user` when everyone
@@ -124,8 +117,7 @@ export interface StatementImportFeature {
   providerKind: "anthropic" | "azure-openai" | "openai-compatible";
 }
 
-const apiBaseUrl = () =>
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+const apiBaseUrl = () => process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 async function fetchInstance(): Promise<InstanceDescription> {
   const res = await fetch(`${apiBaseUrl()}/v1/instance`);
@@ -166,9 +158,7 @@ function useHydrated(): boolean {
 }
 
 /** True unless the server has said the feature is off. */
-export function useFeature(
-  select: (features: InstanceDescription["features"]) => boolean,
-): boolean {
+export function useFeature(select: (features: InstanceDescription["features"]) => boolean): boolean {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated && data ? select(data.features) : true;
@@ -179,9 +169,7 @@ export function useFeature(
  * server without the feature (a sign-in button that would error), where briefly hiding the
  * control on a server that has it is the lesser harm.
  */
-export function useConfirmedFeature(
-  select: (features: InstanceDescription["features"]) => boolean,
-): boolean {
+export function useConfirmedFeature(select: (features: InstanceDescription["features"]) => boolean): boolean {
   const { data } = useInstance();
   const hydrated = useHydrated();
   return hydrated && data ? select(data.features) : false;
@@ -219,8 +207,7 @@ export function useSignupMode(): InstanceDescription["signupMode"] | null {
  * Whether the server has a shared Enable Banking credential (`features.bankSyncCredentials`).
  * Undefined until the description arrives.
  */
-export function useInstanceBankSyncCredentials():
-  "instance" | "user" | undefined {
+export function useInstanceBankSyncCredentials(): "instance" | "user" | undefined {
   const { data } = useInstance();
   const hydrated = useHydrated();
   if (!hydrated || !data) return undefined;

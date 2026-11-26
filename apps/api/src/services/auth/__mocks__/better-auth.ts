@@ -118,11 +118,15 @@ export const getMcpOAuthJwks = vi.fn<() => Promise<{ keys: unknown[] }>>().mockR
 export const getMcpOAuthServerMetadata = vi.fn<() => Promise<null | Record<string, unknown>>>().mockResolvedValue(null);
 
 export const findMcpOAuthGrant = vi
-  .fn<(userId: string, clientId: string) => Promise<null | { consentedAt: Date; scopes: string[] }>>()
+  .fn<(userId: string, clientId: string, token: { household: string; issuedAt: number; withRefreshToken: boolean }) => Promise<null | { consentedAt: Date; refreshTokenLive: boolean | null; scopes: string[] }>>()
   .mockResolvedValue(null);
 
+export const householdOfUser = vi.fn<(userId: string) => Promise<null | number>>().mockResolvedValue(null);
+
 export const listMcpOAuthGrants = vi
-  .fn<(userId: string) => Promise<{ clientId: string; connectedAt: Date; name: null | string; redirectHost: null | string; scopes: string[] }[]>>()
+  .fn<(userId: string) => Promise<{ clientId: string; connectedAt: Date; name: null | string; redirectOrigins: string[]; scopes: string[] }[]>>()
   .mockResolvedValue([]);
 
 export const revokeMcpOAuthGrant = vi.fn<(userId: string, clientId: string) => Promise<boolean>>().mockResolvedValue(false);
+
+export const revokeAllMcpOAuthGrants = vi.fn<(userId: string) => Promise<void>>().mockResolvedValue(undefined);

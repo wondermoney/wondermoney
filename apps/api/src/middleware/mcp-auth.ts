@@ -11,6 +11,7 @@ import { MCP_SCOPES } from '@middleware/api-token-policy';
 import { getBearerToken } from '@middleware/auth-helpers';
 import { recordUserActive } from '@service/analytics/service-events.service';
 import { authenticateApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
+import { revokeMcpOAuthGrant } from '@service/auth/better-auth';
 import { MCP_OAUTH_READ_SCOPE, mcpOAuthResourceIfEnabled, protectedResourceMetadataUrl } from '@service/mcp/mcp-oauth-config';
 import { verifyMcpOAuthAccessToken } from '@service/mcp/mcp-oauth-token.service';
 import type { McpCredential } from '@service/mcp/mcp-types';
@@ -135,13 +136,19 @@ async function authenticateWithOAuth(req: Request, res: Response, next: NextFunc
   }
 
   // The person behind the grant, and their household, resolved the way a session resolves them:
-  // the live app user and their one active membership. Someone who has since been removed from
-  // the household reads their own household from then on, never the old one.
-  const { clientId, userId } = verification.caller;
+  // the live app user and their one active membership. The consent was given for one household;
+  // once the person is in another (removed, or joined elsewhere), the grant is revoked, so the
+  // client never reads a household the person did not consent for.
+  const { clientId, household, userId } = verification.caller;
   const appuser = await DI.em.findOne(Appuser, { deletedAt: null, externalUserId: userId, recordActive: true }, { filters: false });
   const membership = appuser ? await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser) : null;
   const tenant = membership?.tenantKey;
-  if (!appuser || !tenant || tenant.deletedAt || !tenant.recordActive) {
+  if (!appuser || !tenant || tenant.deletedAt || !tenant.recordActive || String(tenant.tenantKey) !== household) {
+    if (appuser && tenant && String(tenant.tenantKey) !== household) {
+      await revokeMcpOAuthGrant(userId, clientId).catch((error: unknown) => {
+        logger.error({ err: error }, 'Revoking an MCP OAuth grant for a former household failed');
+      });
+    }
     setChallenge(res, resource, 'invalid_token');
     next(new UnauthorizedError('Invalid or revoked access token'));
     return;

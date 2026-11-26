@@ -44,13 +44,13 @@
     "oauth-revoke-confirm": "Disconnect",
     "oauth-cancel": "Cancel",
     "oauth-revoked": "Client disconnected",
-    "oauth-error-revoke": "Could not disconnect the client. Try again."
+    "oauth-error-revoke": "Could not disconnect the client. Try again.",
+    "oauth-device-redirect": "an app on this device (<code>{app}</code>)"
   },
   "oauthConsent": {
     "title": "{client} wants to read your finances on {instanceName}",
     "title-unnamed": "An AI client wants to read your finances on {instanceName}",
     "signed-in-as": "Signed in as {email}.",
-    "redirect-host": "When you answer, you go back to {host}. Continue only if you started this there.",
     "household-title": "What it can see",
     "household-alone": "Your household: what you see in the app, including your private accounts.",
     "household-with": "Your household with {members}: what you see in the app, including your private accounts. A member's private account stays hidden unless they shared it with you.",
@@ -63,8 +63,19 @@
     "revoke-hint": "You can disconnect it at any time in Settings › API tokens › Connect an AI client.",
     "allow": "Allow",
     "deny": "Cancel",
-    "error": "This request could not be completed. It may have expired: start again from the client.",
     "invalid-title": "This is not a valid connection request",
-    "invalid-body": "Start again from the AI client you want to connect."
+    "invalid-body": "Start again from the AI client you want to connect.",
+    "error-generic": "This request could not be completed. It may have expired: start again from the client.",
+    "redirect-web": "When you answer, you go back to <code>{origin}</code>. Continue only if you started this there.",
+    "redirect-device": "When you answer, you go back to an app on this device (<code>{app}</code>).",
+    "redirect-device-warning": "Any app on this device could claim that address. Continue only if you started this from an app you trust.",
+    "totp-label": "Authenticator code",
+    "totp-hint": "Your account uses two-factor authentication: enter the code from your authenticator app.",
+    "stale-title": "Sign in again to connect a client",
+    "stale-body": "Connecting a client gives it lasting access, so it needs a sign-in from the last 24 hours.",
+    "sign-in-again": "Sign in again",
+    "error-totp-required": "Enter your authenticator code to allow it.",
+    "error-invalid-totp": "That authenticator code is not valid.",
+    "error-session-not-fresh": "Please sign in again."
   }
 }

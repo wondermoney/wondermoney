@@ -24,9 +24,9 @@ import {
 import { Button } from "../ui/button";
 import { Heading, Text } from "../ui/Typography";
 
-/** A client's name as the list shows it: its self-declared name, else where it lives. */
+/** A client's name as the list shows it: its self-declared name, else where it redirects. */
 function clientLabel(client: McpOAuthClient, fallback: string): string {
-  return client.name ?? client.redirectHost ?? fallback;
+  return client.name ?? client.redirectOrigins[0] ?? fallback;
 }
 
 /**
@@ -85,11 +85,26 @@ export default function McpOAuthClients({ endpoint }: { endpoint: string }) {
                   <Text className="font-medium">
                     {clientLabel(client, t("oauth-unnamed"))}
                   </Text>
-                  {client.redirectHost && client.name ? (
-                    <Text variant="mutedText" className="font-mono text-xs">
-                      {client.redirectHost}
-                    </Text>
-                  ) : null}
+                  {/* Every place it can send an answer: a self-declared name proves nothing. */}
+                  <ul className="flex flex-col gap-0.5">
+                    {client.redirectOrigins.map((origin) => (
+                      <li
+                        key={origin}
+                        className="text-muted-foreground text-xs"
+                      >
+                        {origin.startsWith("https://") ? (
+                          <code className="font-mono">{origin}</code>
+                        ) : (
+                          t.rich("oauth-device-redirect", {
+                            app: origin,
+                            code: (chunks) => (
+                              <code className="font-mono">{chunks}</code>
+                            ),
+                          })
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                   <Text variant="mutedText">
                     {t("oauth-connected-on", {
                       date: formatShortDateForLocale(

@@ -26,11 +26,12 @@ vi.mock("@/lib/api/api", () => ({
   getApiUrl: () => "https://api.example.test",
 }));
 
-vi.mock("@/lib/api/instance/useInstance", () => ({
-  useFeature: (
+vi.mock("@/lib/api/instance/useInstance", () => {
+  const useFeature = (
     select: (features: { mcp?: boolean; mcpOAuth?: boolean }) => boolean,
-  ) => select({ mcp: state.mcpEnabled, mcpOAuth: state.mcpOAuthEnabled }),
-}));
+  ) => select({ mcp: state.mcpEnabled, mcpOAuth: state.mcpOAuthEnabled });
+  return { useConfirmedFeature: useFeature, useFeature };
+});
 
 vi.mock("@/lib/api/user/useApiTokens", () => ({
   useCreateApiToken: () => ({ isPending: false, mutateAsync: state.create }),
@@ -174,7 +175,7 @@ test("lists the OAuth clients the member allowed and disconnects one", async () 
       connectedAt: "2026-11-20T10:00:00.000Z",
       lastUsedAt: null,
       name: "ChatGPT",
-      redirectHost: "chatgpt.com",
+      redirectOrigins: ["https://chatgpt.com", "http://127.0.0.1:8976"],
       scopes: ["mcp:read", "offline_access"],
     },
   ];
@@ -183,7 +184,8 @@ test("lists the OAuth clients the member allowed and disconnects one", async () 
 
   assert.ok(screen.getByText("Connect ChatGPT"));
   assert.ok(screen.getByText("ChatGPT"));
-  assert.ok(screen.getByText("chatgpt.com"));
+  assert.ok(screen.getByText("https://chatgpt.com"));
+  assert.ok(screen.getByText("http://127.0.0.1:8976"));
 
   await user.click(screen.getByRole("button", { name: "Disconnect" }));
   const dialog = await screen.findByRole("alertdialog");

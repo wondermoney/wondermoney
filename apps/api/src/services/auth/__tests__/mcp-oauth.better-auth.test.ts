@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 
+import { createOTP } from '@better-auth/utils/otp';
 import { RequestContext } from '@mikro-orm/postgresql';
 import express from 'express';
 import request from 'supertest';
@@ -12,10 +13,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 vi.unmock('@service/auth/better-auth');
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 
+import { symmetricEncrypt } from 'better-auth/crypto';
+
 import { addAccount, addPartner, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { Appuser } from '@entity/Appuser';
+import { AppuserTenant } from '@entity/AppuserTenant';
 import { FRONTEND_URL } from '@utils/constants';
 
 const PASSWORD = 'correct horse battery staple';
@@ -43,6 +47,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
   const db = useTestDatabase({ postgresUrl: process.env['TEST_POSTGRES_URL'], schema: 'migrations' });
   let closePool: () => Promise<void>;
   let app: express.Express;
+  const loginOf = new Map<number, { email: string; userId: string }>();
 
   beforeAll(async () => {
     const server = new URL(process.env['TEST_POSTGRES_URL'] ?? '');
@@ -81,16 +86,24 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
   beforeEach(() => {
     DI.em = db.em();
+    // App rows and their keys start over for every test; the logins in `better_auth` do not.
+    loginOf.clear();
   });
 
   let people = 0;
   /** A better-auth login bound to `appuser`, signed in: its session cookie. */
   async function signInAs(appuser: Appuser): Promise<string> {
+    const existing = loginOf.get(appuser.appuserKey);
+    if (existing) {
+      const again = await request(app).post('/api/auth/sign-in/email').set('Origin', FRONTEND_URL).send({ email: existing.email, password: PASSWORD }).expect(200);
+      return (again.headers['set-cookie'] as unknown as string[]).map((cookie) => cookie.split(';')[0]).join('; ');
+    }
     people += 1;
     const email = `person${people}@example.test`;
     const signUp = await request(app).post('/api/auth/sign-up/email').set('Origin', FRONTEND_URL).send({ email, name: email, password: PASSWORD }).expect(200);
     const userId = (signUp.body as { user: { id: string } }).user.id;
     await db.em().nativeUpdate(Appuser, { appuserKey: appuser.appuserKey }, { emailAddress: email, externalUserId: userId });
+    loginOf.set(appuser.appuserKey, { email, userId });
     const signIn = await request(app).post('/api/auth/sign-in/email').set('Origin', FRONTEND_URL).send({ email, password: PASSWORD }).expect(200);
     return (signIn.headers['set-cookie'] as unknown as string[]).map((cookie) => cookie.split(';')[0]).join('; ');
   }
@@ -118,20 +131,23 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     return { ...serverMetadata, resource: resourceMetadata.resource };
   }
 
+  const registration = (discovery: Discovery, redirectUris: string[], name = 'ChatGPT') => request(app).post(pathOf(discovery.registration_endpoint)).send({
+    client_name: name,
+    grant_types: ['authorization_code', 'refresh_token'],
+    redirect_uris: redirectUris,
+    response_types: ['code'],
+    token_endpoint_auth_method: 'none',
+  });
+
   async function register(discovery: Discovery, name = 'ChatGPT'): Promise<string> {
-    const response = await request(app).post(pathOf(discovery.registration_endpoint)).send({
-      client_name: name,
-      grant_types: ['authorization_code', 'refresh_token'],
-      redirect_uris: [REDIRECT_URI],
-      response_types: ['code'],
-      token_endpoint_auth_method: 'none',
-    });
+    const response = await registration(discovery, [REDIRECT_URI], name);
     expect(response.status).toBe(201);
     return (response.body as { client_id: string }).client_id;
   }
 
-  function authorizeUrl(discovery: Discovery, clientId: string, input: { challenge?: string; scope?: string; state?: string }) {
-    const params = new URLSearchParams({ client_id: clientId, redirect_uri: REDIRECT_URI, resource: discovery.resource, response_type: 'code', scope: input.scope ?? 'mcp:read offline_access', state: input.state ?? 'state-1' });
+  function authorizeUrl(discovery: Discovery, clientId: string, input: { challenge?: string; omitResource?: boolean; scope?: string; state?: string }) {
+    const params = new URLSearchParams({ client_id: clientId, redirect_uri: REDIRECT_URI, response_type: 'code', scope: input.scope ?? 'mcp:read offline_access', state: input.state ?? 'state-1' });
+    if (!input.omitResource) params.set('resource', discovery.resource);
     if (input.challenge) {
       params.set('code_challenge', input.challenge);
       params.set('code_challenge_method', 'S256');
@@ -140,29 +156,37 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
   }
 
   /** The person signs in, sees the consent page and accepts: the code the client receives. */
-  async function consent(discovery: Discovery, clientId: string, cookie: string, input: { acceptScope?: string; challenge: string; scope?: string }): Promise<string> {
+  /** The signed query the authorization endpoint hands the consent page. */
+  async function consentQuery(discovery: Discovery, clientId: string, cookie: string, input: { challenge?: string; omitResource?: boolean; scope?: string }): Promise<string> {
     const authorize = await request(app).get(authorizeUrl(discovery, clientId, input)).set('Cookie', cookie);
     expect(authorize.status).toBe(302);
     const consentPage = new URL(String(authorize.headers['location']));
     expect(`${consentPage.origin}${consentPage.pathname}`).toBe(new URL('oauth/consent', `${FRONTEND_URL}/`).toString());
+    return consentPage.search.slice(1);
+  }
 
-    const accepted = await request(app).post('/api/auth/oauth2/consent').set('Origin', FRONTEND_URL).set('Cookie', cookie)
-      .send({ accept: true, oauth_query: consentPage.search.slice(1), ...(input.acceptScope ? { scope: input.acceptScope } : {}) })
-      .expect(200);
+  const postConsent = (cookie: string, body: object, totp?: string) => {
+    const agent = request(app).post('/api/auth/oauth2/consent').set('Origin', FRONTEND_URL).set('Cookie', cookie);
+    return (totp ? agent.set('x-totp-code', totp) : agent).send(body);
+  };
+
+  async function consent(discovery: Discovery, clientId: string, cookie: string, input: { acceptScope?: string; challenge: string; omitResource?: boolean; scope?: string; totp?: string }): Promise<string> {
+    const oauthQuery = await consentQuery(discovery, clientId, cookie, input);
+    const accepted = await postConsent(cookie, { accept: true, oauth_query: oauthQuery, ...(input.acceptScope ? { scope: input.acceptScope } : {}) }, input.totp).expect(200);
     const callback = new URL((accepted.body as { url: string }).url);
     expect(`${callback.origin}${callback.pathname}`).toBe(REDIRECT_URI);
     expect(callback.searchParams.get('state')).toBe('state-1');
     return callback.searchParams.get('code') ?? '';
   }
 
-  async function exchange(discovery: Discovery, clientId: string, code: string, verifier: string) {
+  async function exchange(discovery: Discovery, clientId: string, code: string, verifier: string, overrides: { omitResource?: boolean; redirectUri?: string } = {}) {
     return request(app).post(pathOf(discovery.token_endpoint)).type('form').send({
       client_id: clientId,
       code,
       code_verifier: verifier,
       grant_type: 'authorization_code',
-      redirect_uri: REDIRECT_URI,
-      resource: discovery.resource,
+      redirect_uri: overrides.redirectUri ?? REDIRECT_URI,
+      ...(overrides.omitResource ? {} : { resource: discovery.resource }),
     });
   }
 
@@ -264,7 +288,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     expect((await listAccounts(tokens.access_token)).status).toBe(200);
 
     const listed = await request(app).get('/v1/user/mcp-clients').set('Cookie', cookie).expect(200);
-    expect(listed.body.clients).toEqual([expect.objectContaining({ clientId, name: 'ChatGPT', redirectHost: 'chatgpt.example.test', scopes: expect.arrayContaining(['mcp:read']) })]);
+    expect(listed.body.clients).toEqual([expect.objectContaining({ clientId, name: 'ChatGPT', redirectOrigins: ['https://chatgpt.example.test'], scopes: expect.arrayContaining(['mcp:read']) })]);
 
     await request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', cookie).expect(204);
 
@@ -324,5 +348,125 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
     expect((await listAccounts(sessionJwt)).status).toBe(401);
     expect((await listAccounts('eyJhbGciOiJFZERTQSJ9.e30.c2ln')).status).toBe(401);
+  });
+
+  const sql = <T extends object>(text: string, values: unknown[] = []) => db.em().getConnection().execute<T[]>(text, values);
+
+  it('asks for a fresh session to consent, and the authenticator code when the account has two-factor on', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const login = loginOf.get(household.appuser.appuserKey);
+    if (!login) throw new Error('no login');
+
+    // A session from two days ago.
+    await sql(`update better_auth.session set "createdAt" = now() - interval '2 days' where "userId" = ?`, [login.userId]);
+    const stale = await postConsent(cookie, { accept: true, oauth_query: await consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge }) });
+    expect(stale.status).toBe(403);
+    expect(stale.body.code).toBe('session_not_fresh');
+    await sql(`update better_auth.session set "createdAt" = now() where "userId" = ?`, [login.userId]);
+
+    // Two-factor on: no code, a wrong code, the right code.
+    const secret = 'mcp-oauth-totp-test-secret';
+    const encrypted = await symmetricEncrypt({ data: secret, key: process.env['BETTER_AUTH_SECRET'] ?? '' });
+    await sql(`insert into better_auth."twoFactor" (id, secret, "backupCodes", "userId", verified) values (?, ?, ?, ?, true)`, [`tf-${login.userId}`, encrypted, '[]', login.userId]);
+    await sql(`update better_auth."user" set "twoFactorEnabled" = true where id = ?`, [login.userId]);
+    const query = () => consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge });
+
+    expect((await postConsent(cookie, { accept: true, oauth_query: await query() })).body.code).toBe('totp_required');
+    expect((await postConsent(cookie, { accept: true, oauth_query: await query() }, '000000')).body.code).toBe('invalid_totp');
+    // Declining needs neither.
+    expect((await postConsent(cookie, { accept: false, oauth_query: await query() })).status).toBe(200);
+    const { challenge, verifier } = pkce();
+    const code = await consent(discovery, clientId, cookie, { challenge, totp: await createOTP(secret).totp() });
+    expect((await exchange(discovery, clientId, code, verifier)).status).toBe(200);
+  });
+
+  it.each([
+    ['a password change', async (cookie: string) => request(app).post('/api/auth/change-password').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({ currentPassword: PASSWORD, newPassword: `${PASSWORD}!` }).expect(200)],
+    ['signing out everywhere', async (cookie: string) => request(app).post('/api/auth/revoke-sessions').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({}).expect(200)],
+    ['signing out other devices', async (cookie: string) => request(app).post('/api/auth/revoke-other-sessions').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({}).expect(200)],
+  ])('takes back every OAuth grant on %s', async (_name, secure) => {
+    const { household } = await householdWithPartner();
+    const { cookie, tokens } = await connect(household.appuser);
+    expect((await listAccounts(tokens.access_token)).status).toBe(200);
+
+    await secure(cookie);
+
+    expect((await listAccounts(tokens.access_token)).status).toBe(401);
+  });
+
+  it('registers only https redirects, or http on a loopback host', async () => {
+    const discovery = await discover();
+
+    expect((await registration(discovery, ['evilapp://chatgpt.com/oauth/callback'])).status).toBe(400);
+    expect((await registration(discovery, ['http://chatgpt.example.test/callback'])).status).toBe(400);
+    expect((await registration(discovery, [REDIRECT_URI, 'com.example.app:/callback'])).status).toBe(400);
+    expect((await registration(discovery, ['http://127.0.0.1:8976/callback'])).status).toBe(201);
+    expect((await registration(discovery, ['http://localhost:33418/callback'])).status).toBe(201);
+  });
+
+  it('binds a token to an MCP request without a resource, and refuses DPoP at the token endpoint', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+
+    const { challenge, verifier } = pkce();
+    const code = await consent(discovery, clientId, cookie, { challenge, omitResource: true });
+    const tokens = await exchange(discovery, clientId, code, verifier, { omitResource: true });
+    expect(tokens.status).toBe(200);
+    expect((await listAccounts((tokens.body as { access_token: string }).access_token)).status).toBe(200);
+
+    // Consent given, the next authorization comes straight back with a code.
+    const second = pkce();
+    const again = await request(app).get(authorizeUrl(discovery, clientId, { challenge: second.challenge })).set('Cookie', cookie).expect(302);
+    const secondCode = new URL(String(again.headers['location'])).searchParams.get('code') ?? '';
+    const dpop = await request(app).post(pathOf(discovery.token_endpoint)).set('DPoP', 'eyJhbGciOiJFUzI1NiJ9.e30.c2ln').type('form')
+      .send({ client_id: clientId, code: secondCode, code_verifier: second.verifier, grant_type: 'authorization_code', redirect_uri: REDIRECT_URI, resource: discovery.resource });
+    expect(dpop.status).toBe(400);
+    expect(dpop.body.error).toBe('invalid_dpop_proof');
+  });
+
+  it('refuses a code exchanged for another redirect than it was issued to', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const { challenge, verifier } = pkce();
+    const code = await consent(discovery, clientId, cookie, { challenge });
+
+    const response = await exchange(discovery, clientId, code, verifier, { redirectUri: 'https://chatgpt.example.test/connector/oauth/other' });
+
+    expect(response.status).toBe(400);
+  });
+
+  it('stops the first exchange\'s access token at once when the authorization code is replayed', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const { challenge, verifier } = pkce();
+    const code = await consent(discovery, clientId, cookie, { challenge });
+    const first = (await exchange(discovery, clientId, code, verifier)).body as { access_token: string };
+    expect((await listAccounts(first.access_token)).status).toBe(200);
+
+    expect((await exchange(discovery, clientId, code, verifier)).status).toBe(400);
+
+    expect((await listAccounts(first.access_token)).status).toBe(401);
+  });
+
+  it('refuses and revokes a grant once its person is in another household', async () => {
+    const { household } = await householdWithPartner();
+    const { cookie, tokens } = await connect(household.appuser);
+    const em = db.em();
+    const elsewhere = await seedHousehold(em);
+    await em.nativeUpdate(AppuserTenant, { appuserKey: household.appuser }, { recordActive: false });
+    em.create(AppuserTenant, { appuserKey: await em.findOneOrFail(Appuser, { appuserKey: { $eq: household.appuser.appuserKey } }), recordActive: true, tenantKey: elsewhere.tenant }, { partial: true });
+    await em.flush();
+
+    expect((await listAccounts(tokens.access_token)).status).toBe(401);
+    expect((await request(app).get('/v1/user/mcp-clients').set('Cookie', cookie).expect(200)).body.clients).toEqual([]);
   });
 });

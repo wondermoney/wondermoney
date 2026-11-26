@@ -14,6 +14,7 @@ import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
+import { isMcpOAuthSwitchOn } from '@config/mcp';
 import { SupportedLanguages } from '@entity/Appuser';
 import { BETTER_AUTH_IP_ADDRESS_OPTIONS } from '@middleware/client-ip';
 import { configuredAppleOptions } from '@service/auth/apple-options';
@@ -23,7 +24,7 @@ import { resolveAuthCookiePrefix } from '@service/auth/cookie-prefix';
 import { capDemoSessionRefresh, isExpiredDemoSession } from '@service/auth/demo-session';
 import { aiRequiresVerifiedEmail, verificationLinkLandingOnApp } from '@service/auth/email-verification-policy';
 import { syncInstanceAdmin } from '@service/auth/instance-admin.service';
-import { mcpOAuthPlugin } from '@service/auth/mcp-oauth';
+import { mcpOAuthPlugins, mcpOAuthRevocationPlugin } from '@service/auth/mcp-oauth';
 import { OIDC_PROVIDER_ID, oidcPlugins } from '@service/auth/oidc';
 import { androidCertFingerprints, passkeyPlugins } from '@service/auth/passkey';
 import { signUpLocale } from '@service/auth/sign-up-locale';
@@ -145,7 +146,7 @@ export const verifyPasswordShim = async ({ hash, password }: { hash: string; pas
 // OAuth for the MCP server (`MCP_OAUTH_ENABLED`), read once at start like the OIDC settings: the
 // plugin and its routes exist only when it is on (services/auth/mcp-oauth.ts).
 const mcpOAuthResource = mcpOAuthResourceIfEnabled();
-if (!mcpOAuthResource && process.env['MCP_OAUTH_ENABLED']?.trim().toLowerCase() === 'true') {
+if (!mcpOAuthResource && isMcpOAuthSwitchOn()) {
   logger.warn(
     { apiUrl: BACKEND_URL },
     'MCP_OAUTH_ENABLED is ignored: OAuth for the MCP server needs the MCP server on and an https API_URL (plain http only on localhost)',
@@ -230,6 +231,11 @@ const auth = betterAuth({
     // In-process, in the account's language, landing on the reset page in its locale. better-auth
     // calls this only for an address with an account and answers the same either way, so the
     // language lookup never throws (services/auth/auth-email-language.ts).
+    // A new password takes back every OAuth grant (services/auth/mcp-oauth.ts does the same for
+    // a password change and for signing out other devices).
+    onPasswordReset: async ({ user }) => {
+      await revokeAllMcpOAuthGrants(user.id);
+    },
     sendResetPassword: async ({ url, user }) => {
       const language = await authEmailLanguage({ appUrl: FRONTEND_URL, link: url, user }, accountLanguageOf);
       const link = language ? linkInAccountLocale(url, FRONTEND_URL, language) : url;
@@ -291,7 +297,18 @@ const auth = betterAuth({
     jwt(),
     bearer(),
     expo(),
-    ...(mcpOAuthResource ? [mcpOAuthPlugin({ appUrl: FRONTEND_URL, resource: mcpOAuthResource })] : []),
+    ...(mcpOAuthResource
+      ? mcpOAuthPlugins({
+        appUrl: FRONTEND_URL,
+        householdOf: (userId) => householdOfUser(userId),
+        resource: mcpOAuthResource,
+        // Called from a hook once a request is under way, by which time `auth` exists.
+        verifyTotp: async (headers, code) => {
+          await auth.api.verifyTOTP({ body: { code }, headers });
+        },
+      })
+      : []),
+    mcpOAuthRevocationPlugin({ revokeAll: (userId) => revokeAllMcpOAuthGrants(userId) }),
   ],
   secret: authConfig.betterAuthSecret ?? undefined,
   // The Google client is reused from the existing OAuth app. Referencing the
@@ -657,42 +674,86 @@ export const getMcpOAuthServerMetadata = async (): Promise<null | Record<string,
   return api.getOAuthServerConfig ? api.getOAuthServerConfig() : null;
 };
 
-/** What a person has granted one OAuth client: the consent row, while the client is enabled. */
+/** What a person has granted one OAuth client, as an access token presented on `/v1/mcp` finds it. */
 export interface McpOAuthGrant {
   consentedAt: Date;
+  /**
+   * Whether the refresh token issued beside the access token still stands: issued in the same
+   * second, and not revoked other than by its own rotation. False once the authorization code
+   * was replayed (better-auth then deletes every token issued from it), the refresh token family
+   * was torn down, or the grant revoked. Null for an access token issued without a refresh token.
+   */
+  refreshTokenLive: boolean | null;
   scopes: string[];
 }
 
 /**
- * The live grant behind an OAuth access token: the consent `userId` gave `clientId`, or null
- * when there is none (revoked in Settings, or never given) or the client is disabled. Checked on
- * every MCP call, so a revocation outlives no access token.
+ * The live grant behind an OAuth access token: the consent `userId` gave `clientId` for
+ * `household` (the consent's reference), or null when there is none (revoked in Settings, never
+ * given, or given for another household) or the client is disabled. Checked on every MCP call,
+ * so a revocation outlives no access token.
  */
-export const findMcpOAuthGrant = async (userId: string, clientId: string): Promise<McpOAuthGrant | null> => {
-  const { rows } = await betterAuthPool.query<{ consentedAt: Date; scopes: unknown }>(
-    `select consent."createdAt" as "consentedAt", consent.scopes
+export const findMcpOAuthGrant = async (
+  userId: string,
+  clientId: string,
+  token: { household: string; issuedAt: number; withRefreshToken: boolean },
+): Promise<McpOAuthGrant | null> => {
+  const { rows } = await betterAuthPool.query<{ consentedAt: Date; refreshTokenLive: boolean | null; scopes: unknown }>(
+    `select consent."createdAt" as "consentedAt", consent.scopes,
+            case when $5::boolean then exists(
+              select 1 from "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" refresh
+               where refresh."userId" = consent."userId" and refresh."clientId" = consent."clientId"
+                 and refresh."createdAt" = to_timestamp($4)
+                 and (refresh.revoked is null or refresh."rotatedAt" is not null)
+            ) end as "refreshTokenLive"
        from "${BETTER_AUTH_SCHEMA}"."oauthConsent" consent
        join "${BETTER_AUTH_SCHEMA}"."oauthClient" client on client."clientId" = consent."clientId"
-      where consent."userId" = $1 and consent."clientId" = $2 and coalesce(client.disabled, false) = false
+      where consent."userId" = $1 and consent."clientId" = $2 and consent."referenceId" = $3
+        and coalesce(client.disabled, false) = false
       order by consent."createdAt" desc
       limit 1`,
-    [userId, clientId],
+    [userId, clientId, token.household, token.issuedAt, token.withRefreshToken],
   );
   const row = rows[0];
   if (!row) return null;
-  return { consentedAt: row.consentedAt, scopes: Array.isArray(row.scopes) ? row.scopes.filter((scope): scope is string => typeof scope === 'string') : [] };
+  return { consentedAt: row.consentedAt, refreshTokenLive: row.refreshTokenLive, scopes: stringList(row.scopes) };
+};
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+/**
+ * The household `userId` (a better-auth user id) belongs to now: their one active membership's
+ * tenant key, or null when they have no app account or no household yet.
+ */
+export const householdOfUser = async (userId: string): Promise<null | number> => {
+  const { rows } = await betterAuthPool.query<{ tenantKey: number }>(
+    `select membership.tenant_key as "tenantKey"
+       from public.appuser_tenant membership
+       join public.appuser appuser on appuser.appuser_key = membership.appuser_key
+      where appuser.external_user_id = $1 and appuser.record_active and appuser.deleted_at is null
+        and membership.record_active and membership.deleted_at is null
+      order by membership.appuser_tenant_key asc
+      limit 1`,
+    [userId],
+  );
+  return rows[0]?.tenantKey ?? null;
 };
 
 /** One OAuth client a person has let into the MCP server, for Settings. */
 export interface McpOAuthClientGrant {
   clientId: string;
-  /** The client's self-declared name (dynamic registration is unauthenticated): shown with its redirect host. */
-  name: null | string;
-  /** The host the client receives its authorization codes on, such as `chatgpt.com`. */
-  redirectHost: null | string;
-  scopes: string[];
   /** When the person first consented. */
   connectedAt: Date;
+  /** The client's self-declared name (dynamic registration is unauthenticated): shown with its redirects. */
+  name: null | string;
+  /**
+   * Where the client receives its authorization codes, every one it registered: an `https`
+   * origin (`https://chatgpt.com`) or a loopback one (`http://127.0.0.1:8976`).
+   */
+  redirectOrigins: string[];
+  scopes: string[];
 }
 
 /** The OAuth clients `userId` has consented to, newest first. Another person's grants never appear. */
@@ -709,18 +770,44 @@ export const listMcpOAuthGrants = async (userId: string): Promise<McpOAuthClient
     clientId: row.clientId,
     connectedAt: row.connectedAt,
     name: row.name?.trim() || null,
-    redirectHost: firstRedirectHost(row.redirectUris),
-    scopes: Array.isArray(row.scopes) ? row.scopes.filter((scope): scope is string => typeof scope === 'string') : [],
+    redirectOrigins: redirectOrigins(row.redirectUris),
+    scopes: stringList(row.scopes),
   }));
 };
 
-function firstRedirectHost(redirectUris: unknown): null | string {
-  const first = Array.isArray(redirectUris) ? redirectUris.find((uri): uri is string => typeof uri === 'string') : undefined;
-  if (!first) return null;
+/** Each registered redirect's scheme and authority, deduplicated; a URI that does not parse is shown as is. */
+function redirectOrigins(redirectUris: unknown): string[] {
+  const origins = stringList(redirectUris).map((uri) => {
+    try {
+      const url = new URL(uri);
+      return url.host ? `${url.protocol}//${url.host}` : url.protocol;
+    } catch {
+      return uri;
+    }
+  });
+  return [...new Set(origins)];
+}
+
+/** Revoke `userId`'s grants on one client, or on every client when `clientId` is null. */
+async function revokeGrants(userId: string, clientId: null | string): Promise<boolean> {
+  const client = await betterAuthPool.connect();
+  const scope = clientId === null ? '' : ' and "clientId" = $2';
+  const params = clientId === null ? [userId] : [userId, clientId];
   try {
-    return new URL(first).host || null;
-  } catch {
-    return null;
+    await client.query('begin');
+    const consents = await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope}`, params);
+    const refreshTokens = await client.query(
+      `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null`,
+      params,
+    );
+    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}`, params);
+    await client.query('commit');
+    return (consents.rowCount ?? 0) + (refreshTokens.rowCount ?? 0) > 0;
+  } catch (error) {
+    await client.query('rollback');
+    throw error;
+  } finally {
+    client.release();
   }
 }
 
@@ -731,25 +818,9 @@ function firstRedirectHost(redirectUris: unknown): null | string {
  * this person's rows; the client stays registered for anyone else who uses it. False when there
  * was nothing to revoke.
  */
-export const revokeMcpOAuthGrant = async (userId: string, clientId: string): Promise<boolean> => {
-  const client = await betterAuthPool.connect();
-  try {
-    await client.query('begin');
-    const consents = await client.query(
-      `delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1 and "clientId" = $2`,
-      [userId, clientId],
-    );
-    const refreshTokens = await client.query(
-      `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1 and "clientId" = $2 and revoked is null`,
-      [userId, clientId],
-    );
-    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1 and "clientId" = $2`, [userId, clientId]);
-    await client.query('commit');
-    return (consents.rowCount ?? 0) + (refreshTokens.rowCount ?? 0) > 0;
-  } catch (error) {
-    await client.query('rollback');
-    throw error;
-  } finally {
-    client.release();
-  }
+export const revokeMcpOAuthGrant = async (userId: string, clientId: string): Promise<boolean> => revokeGrants(userId, clientId);
+
+/** Take back every OAuth grant `userId` gave, on every client: after a password change or reset, or signing out everywhere. */
+export const revokeAllMcpOAuthGrants = async (userId: string): Promise<void> => {
+  await revokeGrants(userId, null);
 };

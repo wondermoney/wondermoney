@@ -370,6 +370,18 @@ export function createMethodScopedRateLimiter(read: RateLimitFamilyName, write: 
 export const isHealthCheckPath = (req: Request): boolean =>
   req.path === '/v1/health' || req.path.startsWith('/v1/health/');
 
+/**
+ * Traffic that arrives from a shared egress, many people behind one address: ChatGPT and other
+ * hosted MCP clients call the MCP server and read its OAuth discovery documents from a handful
+ * of their own addresses. A per-IP budget would let one busy client lock everyone out, so these
+ * skip the backstop: an MCP call with a bearer credential is budgeted per credential (the
+ * `apiToken` family and the per-minute tool-call cap, both keyed on the token or the OAuth grant),
+ * and the discovery documents are static.
+ */
+export const isSharedEgressRequest = (req: Request): boolean =>
+  (req.path === '/v1/mcp' && /^bearer\s+\S/i.test(req.get('authorization') ?? ''))
+  || req.path.startsWith('/.well-known/oauth-');
+
 // ---------------------------------------------------------------------------
 // Ready-made limiters.
 //
@@ -380,7 +392,7 @@ export const isHealthCheckPath = (req: Request): boolean =>
 
 /** Per-IP backstop in front of the whole app, including the auth middleware. */
 export const globalBackstopRateLimit = (): RequestHandler =>
-  createRateLimiter({ family: 'globalBackstop', skip: isHealthCheckPath });
+  createRateLimiter({ family: 'globalBackstop', skip: (req) => isHealthCheckPath(req) || isSharedEgressRequest(req) });
 
 /** `/v1/admin` and the credential-gated Swagger UI. */
 export const adminApiRateLimit = (): RequestHandler => createRateLimiter({ family: 'adminApi' });

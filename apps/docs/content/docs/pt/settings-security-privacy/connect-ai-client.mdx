@@ -89,11 +89,13 @@ O ChatGPT, e outros clientes que iniciam sessão com OAuth, ligam-se sem token, 
 
 1. No ChatGPT, adiciona uma app (um conector), indica o endpoint MCP, `https://api.example.com/v1/mcp` com o endereço da tua API, e escolhe OAuth.
 2. O ChatGPT envia-te para o WonderMoney. Inicia sessão, se ainda não o fizeste, com o segundo fator se o usares.
-3. A página de consentimento indica o cliente, o endereço para onde te devolve e o teu agregado, e lista o que pode fazer. Seleciona **Autorizar**.
+3. A página de consentimento indica o cliente, o endereço para onde te devolve e o teu agregado, e lista o que pode fazer. Seleciona **Autorizar**. Autorizar exige teres iniciado sessão nas últimas 24 horas e, se usares autenticação de dois fatores, o teu código de autenticação, tal como criar um token.
 
 O cliente recebe só acesso de leitura (`mcp:read`): as ferramentas só de leitura acima, nunca as ferramentas de propostas, que continuam a exigir um token pessoal. Fica ligado até o desligares; o token de acesso dura 15 minutos e é renovado sem te voltar a perguntar. Os clientes que autorizaste aparecem em **Ligados com OAuth**, com a última vez que chamaram uma ferramenta.
 
-Confirma o endereço na página de consentimento antes de autorizares: qualquer cliente se pode registar com qualquer nome, e só o endereço para onde te devolve (como `chatgpt.com`) diz para onde vai a tua resposta.
+Confirma o endereço na página de consentimento antes de autorizares: qualquer cliente se pode registar com qualquer nome, e só o endereço para onde te devolve (como `https://chatgpt.com`) diz para onde vai a tua resposta. Um cliente que responde a uma app no teu próprio computador aparece como tal, com um aviso. Os clientes só podem registar endereços `https`, ou `http` em `127.0.0.1` ou `localhost`.
+
+A ligação pertence ao agregado em que estavas quando a autorizaste. Se saíres dele ou entrares noutro, o cliente é desligado.
 
 ## Registo de auditoria
 
@@ -103,7 +105,7 @@ Cada chamada a uma ferramenta é escrita no registo de auditoria do assistente c
 
 Seleciona **Revogar** ao lado do token em **Definições → Tokens de API**. A revogação é imediata: o pedido seguinte do cliente recebe `401 Unauthorized`. Apaga também a entrada do servidor na configuração do cliente, para que deixe de tentar.
 
-Para um cliente ligado com OAuth, seleciona **Desligar** ao lado dele em **Ligados com OAuth**. Os tokens dele deixam de funcionar de imediato, e o pedido seguinte recebe `401 Unauthorized`. Para o voltares a usar, liga-o de novo a partir do cliente.
+Para um cliente ligado com OAuth, seleciona **Desligar** ao lado dele em **Ligados com OAuth**. Os tokens dele deixam de funcionar de imediato, e o pedido seguinte recebe `401 Unauthorized`. Para o voltares a usar, liga-o de novo a partir do cliente. Alterar ou repor a palavra-passe, e terminar a sessão nos outros dispositivos ou em todos, também desliga todos os clientes OAuth.
 
 ## Limites de utilização
 

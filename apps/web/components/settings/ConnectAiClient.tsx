@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { getApiUrl } from "@/lib/api/api";
 import { getApiErrorCode } from "@/lib/api/errors";
-import { useFeature } from "@/lib/api/instance/useInstance";
+import { useConfirmedFeature, useFeature } from "@/lib/api/instance/useInstance";
 import { useCreateApiToken } from "@/lib/api/user/useApiTokens";
 import { useMcpCalls } from "@/lib/api/user/useMcpCalls";
 import { formatShortDateForLocale } from "@/lib/utils/formatDate";
@@ -30,8 +30,7 @@ export const MCP_TOKEN_EXPIRY_DAYS = 90;
  * data routes. With proposals allowed it also carries `mcp:propose`: the client may draft
  * changes, which wait for the member to apply them in Settings › Assistant and which the client
  * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config,
- * the OAuth clients the member allowed when the server offers OAuth, and the recent calls the server
- * recorded.
+ * the OAuth clients the member allowed when the server offers OAuth, and the recent calls.
  */
 export default function ConnectAiClient() {
   const t = useTranslations("connectAiClient");
@@ -39,8 +38,9 @@ export default function ConnectAiClient() {
   const id = useId();
   // An older API that does not report `mcp` reads as on, like every other feature.
   const mcpEnabled = useFeature((features) => features.mcp !== false);
-  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default.
-  const mcpOAuthEnabled = useFeature((features) => features.mcpOAuth === true);
+  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default: shown
+  // only once the server has confirmed it.
+  const mcpOAuthEnabled = useConfirmedFeature((features) => features.mcpOAuth === true);
   const create = useCreateApiToken();
   const { data: calls = [], isLoading: callsLoading } = useMcpCalls(mcpEnabled);
 
@@ -68,13 +68,7 @@ export default function ConnectAiClient() {
     {
       mcpServers: {
         wondermoney: {
-          args: [
-            "-y",
-            "mcp-remote",
-            endpoint,
-            "--header",
-            `Authorization: Bearer ${tokenForConfig}`,
-          ],
+          args: ["-y", "mcp-remote", endpoint, "--header", `Authorization: Bearer ${tokenForConfig}`],
           command: "npx",
         },
       },
@@ -139,11 +133,7 @@ export default function ConnectAiClient() {
                 className="font-mono"
                 onFocus={(event) => event.currentTarget.select()}
               />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void copy(endpoint)}
-              >
+              <Button type="button" variant="outline" onClick={() => void copy(endpoint)}>
                 {t("copy")}
               </Button>
             </div>
@@ -156,13 +146,9 @@ export default function ConnectAiClient() {
                 <Checkbox
                   id={`${id}-proposals`}
                   checked={allowProposals}
-                  onCheckedChange={(checked) =>
-                    setAllowProposals(checked === true)
-                  }
+                  onCheckedChange={(checked) => setAllowProposals(checked === true)}
                 />
-                <Label htmlFor={`${id}-proposals`}>
-                  {t("allow-proposals")}
-                </Label>
+                <Label htmlFor={`${id}-proposals`}>{t("allow-proposals")}</Label>
               </div>
               <Text variant="mutedText">{t("allow-proposals-hint")}</Text>
             </div>
@@ -202,11 +188,7 @@ export default function ConnectAiClient() {
                   className="font-mono"
                   onFocus={(event) => event.currentTarget.select()}
                 />
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={() => void copy(createdToken)}
-                >
+                <Button type="button" variant="default" onClick={() => void copy(createdToken)}>
                   {t("copy")}
                 </Button>
               </div>
@@ -292,13 +274,9 @@ export default function ConnectAiClient() {
                   key={`${call.createdAt}-${index}`}
                   className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <code className="font-mono text-sm">
-                    {call.toolName ?? t("calls-unknown-tool")}
-                  </code>
+                  <code className="font-mono text-sm">{call.toolName ?? t("calls-unknown-tool")}</code>
                   <Text variant="mutedText">
-                    {formatShortDateForLocale(call.createdAt, locale, {
-                      withTime: true,
-                    })}
+                    {formatShortDateForLocale(call.createdAt, locale, { withTime: true })}
                   </Text>
                 </li>
               ))}

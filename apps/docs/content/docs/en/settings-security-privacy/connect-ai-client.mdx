@@ -89,11 +89,13 @@ ChatGPT, and other clients that sign in with OAuth, connect without a token, on 
 
 1. In ChatGPT, add an app (a connector) and give it the MCP endpoint, `https://api.example.com/v1/mcp` with your API address, and choose OAuth.
 2. ChatGPT sends you to WonderMoney. Sign in if you are not signed in already, with your second factor if you use one.
-3. The consent page names the client, the address it sends you back to and your household, and lists what it may do. Select **Allow**.
+3. The consent page names the client, the address it sends you back to and your household, and lists what it may do. Select **Allow**. Allowing needs a sign-in from the last 24 hours and, if you use two-factor authentication, your authenticator code, as creating a token does.
 
 The client gets read access only (`mcp:read`): the read-only tools above, never the proposal tools, which stay behind a personal token. It stays connected until you disconnect it; its access token lasts 15 minutes and is renewed without asking you again. Clients you allowed are listed under **Connected with OAuth**, with when they last called a tool.
 
-Check the address on the consent page before you allow: any client can register itself under any name, and only the address it sends you back to (such as `chatgpt.com`) says where your answer goes.
+Check the address on the consent page before you allow: any client can register itself under any name, and only the address it sends you back to (such as `https://chatgpt.com`) says where your answer goes. A client that answers to an app on your own computer is shown as one, with a warning. Clients can only register `https` addresses, or `http` on `127.0.0.1` or `localhost`.
+
+The connection belongs to the household you were in when you allowed it. If you leave it or join another, the client is disconnected.
 
 ## Audit log
 
@@ -103,7 +105,7 @@ Every tool call is written to the assistant audit log with the tool name, the to
 
 Select **Revoke** next to the token in **Settings → API tokens**. Revocation is immediate: the next request from the client gets `401 Unauthorized`. Delete the server entry from the client's configuration as well, so it stops retrying.
 
-For a client connected with OAuth, select **Disconnect** next to it under **Connected with OAuth**. Its tokens stop working at once, and its next request gets `401 Unauthorized`. To use it again, connect it again from the client.
+For a client connected with OAuth, select **Disconnect** next to it under **Connected with OAuth**. Its tokens stop working at once, and its next request gets `401 Unauthorized`. To use it again, connect it again from the client. Changing or resetting your password, and signing out of other devices or everywhere, disconnects every OAuth client too.
 
 ## Rate limits
 

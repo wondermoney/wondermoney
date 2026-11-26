@@ -11,9 +11,10 @@ export interface McpOAuthClient {
   clientId: string;
   connectedAt: string;
   lastUsedAt: string | null;
-  /** Self-declared at registration, so the settings list shows `redirectHost` beside it. */
+  /** Self-declared at registration, so the settings list shows where it redirects beside it. */
   name: string | null;
-  redirectHost: string | null;
+  /** Every registered redirect's scheme and host: `https://chatgpt.com`, `http://127.0.0.1:8976`. */
+  redirectOrigins: string[];
   scopes: string[];
 }
 

@@ -2,11 +2,13 @@ import { verifyJwsAccessToken } from 'better-auth/oauth2';
 
 import { findMcpOAuthGrant, getMcpOAuthIssuer, getMcpOAuthJwks } from '@service/auth/better-auth';
 
-import { MCP_OAUTH_READ_SCOPE } from './mcp-oauth-config';
+import { MCP_OAUTH_HOUSEHOLD_CLAIM, MCP_OAUTH_READ_SCOPE } from './mcp-oauth-config';
 
 /** A verified OAuth access token: whose it is, which client holds it, and what it may do. */
 export interface McpOAuthCaller {
   clientId: string;
+  /** The household (tenant key) the person consented for, as the token carries it. */
+  household: string;
   scopes: string[];
   userId: string;
 }
@@ -29,10 +31,14 @@ const JWKS_CACHE_KEY = {};
  * resource fails here. A sender-constrained (DPoP) token is refused: this endpoint checks no
  * proof, so it accepts bearer tokens only.
  *
- * Then the grant behind it must still stand: the person's consent to this client, given no later
- * than the token was issued, on a client that is not disabled. Revoking the client in Settings
- * deletes the consent, so every token it holds is refused from the next call, and re-connecting
- * later does not bring an older token back. Both the token and the consent must carry `mcp:read`.
+ * Then the grant behind it must still stand: the person's consent to this client for the
+ * household the token names, given no later than the token was issued, on a client that is not
+ * disabled; and, for a token issued with a refresh token, that refresh token not revoked (a
+ * replayed authorization code or a torn-down refresh family takes its access tokens with it).
+ * Revoking the client in Settings deletes the consent, so every token it holds is refused from
+ * the next call, and re-connecting later does not bring an older token back. Both the token and
+ * the consent must carry `mcp:read`. Whether the person is still in that household is the
+ * caller's to check (`middleware/mcp-auth.ts`).
  */
 export async function verifyMcpOAuthAccessToken(token: string, resource: string): Promise<McpOAuthVerification> {
   let payload: Awaited<ReturnType<typeof verifyJwsAccessToken>>;
@@ -55,16 +61,17 @@ export async function verifyMcpOAuthAccessToken(token: string, resource: string)
   const userId = payload.sub;
   const clientId = payload['azp'];
   const issuedAt = payload.iat;
-  if (typeof userId !== 'string' || !userId || typeof clientId !== 'string' || !clientId || typeof issuedAt !== 'number') {
+  const household = payload[MCP_OAUTH_HOUSEHOLD_CLAIM];
+  if (typeof userId !== 'string' || !userId || typeof clientId !== 'string' || !clientId || typeof issuedAt !== 'number' || typeof household !== 'string' || !household) {
     return { error: 'invalid_token', ok: false };
   }
-
-  const grant = await findMcpOAuthGrant(userId, clientId);
-  if (!grant || grant.consentedAt.getTime() > issuedAt * 1000) return { error: 'invalid_token', ok: false };
-
   const scopes = typeof payload['scope'] === 'string' ? payload['scope'].split(' ').filter(Boolean) : [];
+
+  const grant = await findMcpOAuthGrant(userId, clientId, { household, issuedAt, withRefreshToken: scopes.includes('offline_access') });
+  if (!grant || grant.consentedAt.getTime() > issuedAt * 1000 || grant.refreshTokenLive === false) return { error: 'invalid_token', ok: false };
+
   if (!scopes.includes(MCP_OAUTH_READ_SCOPE) || !grant.scopes.includes(MCP_OAUTH_READ_SCOPE)) {
     return { error: 'insufficient_scope', ok: false };
   }
-  return { caller: { clientId, scopes, userId }, ok: true };
+  return { caller: { clientId, household, scopes, userId }, ok: true };
 }

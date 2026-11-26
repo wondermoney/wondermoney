@@ -79,7 +79,7 @@ async function withViewer<TData>(
  * names its own currency.
  */
 export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
-  defineTool('compare_budget_periods', 'Read-only comparison of this month\'s budget with last month\'s: budgeted, spent and remaining, in the budget currency.', z.object({ period: periodSchema.optional() }), async (input, context) =>
+  defineTool('compare_budget_periods', 'Compare budgets between two months: budgeted, spent and remaining for a period (default this month) beside last month. Use for "am I spending more than last month?". Parameter: period.', z.object({ period: periodSchema.optional() }), async (input, context) =>
     withViewer(context, async (viewer) => {
       const current = await budgetStatusFor(viewer, input.period ?? 'current_month');
       const previous = await budgetStatusFor(viewer, 'previous_month');
@@ -95,7 +95,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ comparison: [], currency: context.currency }, 'budget_status'))),
 
-  defineTool('get_account_balance_summary', 'Read-only, privacy-minimizing summary of account balances in the caller\'s base currency. Private accounts of other household members are excluded.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_account_balance_summary', 'Balance of each bank account the person can see and their total, in their base currency. Use for "how much money do I have?". No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const summary = await netWorthService.getNetWorth(viewer.appuser);
       const accounts = summary.rows
@@ -107,7 +107,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ accounts: [], currency: context.currency, total: 0 }, 'account_balances'))),
 
-  defineTool('get_budget_status', 'Read-only, privacy-minimizing budget status summary for a period, in the budget currency.', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
+  defineTool('get_budget_status', 'Budget totals for one period: budgeted, spent, remaining and whether it is on track, in the budget currency. Use for "how is my budget doing?". Parameter: period (default current_month).', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
     withViewer(context, async (viewer) => {
       const status = await budgetStatusFor(viewer, input.period);
       return result(
@@ -116,7 +116,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ budgeted: 0, currency: context.currency, remaining: 0, spent: 0, status: 'no_tenant_access' }, 'budget_status', input.period))),
 
-  defineTool('get_cashflow_summary', 'Read-only, privacy-minimizing cashflow summary: money in, money out and net, in the caller\'s base currency.', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
+  defineTool('get_cashflow_summary', 'Money in, money out and the net for one period, transfers between own accounts left out, in the base currency. Use for "did I save money this month?". Parameter: period (default current_month).', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
     withViewer(context, async (viewer) => {
       const resolved = AiToolPeriodService.resolve(input.period);
       const transactions = (await findScopedTransactions(viewer, resolved)).filter((transaction) => !isTransfer(transaction));
@@ -137,7 +137,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, inflow: 0, net: 0, outflow: 0 }, 'month', input.period))),
 
-  defineTool('get_goal_progress_summary', 'Read-only progress of every active savings or debt-paydown goal.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_goal_progress_summary', 'Each savings or debt-payoff goal: target, amount available, progress percent and status. Use for questions about goals. No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const goals = await new GoalService(DI.em).listGoals({ appuserKey: viewer.appuser.appuserKey, tenantKey: viewer.tenant.tenantKey });
       const rows = goals.map((goal) => ({
@@ -154,7 +154,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, goals: [] }, 'goal_progress'))),
 
-  defineTool('get_insights', 'Read-only deterministic spending and budget-pace insights for a month.', z.object({ month: monthSchema.optional() }), async (input, context) =>
+  defineTool('get_insights', 'Notable changes for one month: spending against usual, categories over pace, budgets at risk; the same insights the app shows. Use for "anything unusual?". Parameter: month (YYYY-MM, default this month).', z.object({ month: monthSchema.optional() }), async (input, context) =>
     withViewer(context, async (viewer) => {
       // The same service the home cards read, so an answer in chat matches what the person sees.
       const insights = await new InsightsService(new MikroOrmTenantAggregationRepository(DI.em)).getInsights({
@@ -169,7 +169,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, insights: [] }, 'insights', input.month ?? 'current_month'))),
 
-  defineTool('get_large_transactions_summary', 'Read-only summary of the ten largest transactions in a period, in the caller\'s base currency. Descriptions are omitted.', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
+  defineTool('get_large_transactions_summary', 'The ten largest transactions in one period: date, amount and category, without descriptions, in the base currency. Use for "what were my biggest expenses?". Parameter: period (default current_month).', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
     withViewer(context, async (viewer) => {
       const resolved = AiToolPeriodService.resolve(input.period);
       const transactions = (await findScopedTransactions(viewer, resolved, { withCategories: true })).filter((transaction) => !isTransfer(transaction));
@@ -188,7 +188,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, transactions: [] }, 'large_transactions', input.period))),
 
-  defineTool('get_net_worth_summary', 'Read-only, privacy-minimizing summary of current net worth: assets, liabilities and the total, in the caller\'s base currency.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_net_worth_summary', 'Current net worth: assets (accounts, manual assets, portfolios), liabilities (loans) and the total, in the base currency. Use for "what am I worth?". No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const summary = await netWorthService.getNetWorth(viewer.appuser);
       return result(
@@ -203,7 +203,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ assets: { accounts: 0, manualAssets: 0, portfolios: 0 }, currency: context.currency, isComplete: true, liabilities: { loans: 0 }, netWorth: 0 }, 'net_worth'))),
 
-  defineTool('get_portfolio_income_summary', 'Read-only dividend income received, in the caller\'s base currency.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_portfolio_income_summary', 'Dividends received, all time, in total and per holding (by ticker), in the base currency. Use for questions about investment income. No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const income = await portfolioHoldingsService.getDividendIncome(viewer.appuser, undefined, viewer.tenant.tenantKey);
       return result(
@@ -216,7 +216,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ byAsset: [], currency: context.currency, total: 0 }, 'portfolio_income'))),
 
-  defineTool('get_portfolio_summary', 'Read-only portfolio summary: value, gains and the share of each portfolio, in the caller\'s base currency. A portfolio marked excluded is left out of the totals by the household\'s choice and has no share.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_portfolio_summary', 'Investment portfolios: total value, gain or loss this year, and each portfolio\'s value and share, in the base currency. A portfolio marked excluded is left out of the totals. Use for "how are my investments doing?". No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const dashboard = await portfolioDashboardService.getAggregateDashboard(viewer.appuser, 'YTD', viewer.tenant.tenantKey);
       return result(
@@ -231,7 +231,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, portfolios: [], portfolioValue: 0, totalGainLoss: 0, totalGainLossPercent: 0 }, 'portfolio_summary'))),
 
-  defineTool('get_recurring_payments_summary', 'Read-only recurring payments expected in the next 30 days, with their expected amount and currency.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_recurring_payments_summary', 'Recurring payments expected in the next 30 days: name, date, expected amount and currency. Use for "what bills are coming up?". No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const now = new Date();
       const entries = await loadRecurringSchedule({ from: now, tenantKey: viewer.tenant.tenantKey, to: new Date(now.getTime() + 30 * 86_400_000) });
@@ -248,7 +248,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, recurringPayments: [] }, 'recurring_payments', 'next_30_days'))),
 
-  defineTool('get_spending_by_category', 'Read-only, privacy-minimizing spending breakdown by category, in the caller\'s base currency.', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
+  defineTool('get_spending_by_category', 'Spending per category for one period, largest first, in the base currency. Use for "where does my money go?". Parameter: period (default current_month).', z.object({ period: periodSchema.default('current_month') }), async (input, context) =>
     withViewer(context, async (viewer) => {
       const resolved = AiToolPeriodService.resolve(input.period);
       const categoryLinks = (await findOwnSpendingLines(viewer, resolved)).filter((line) => line.category !== null);
@@ -267,7 +267,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ categories: [], currency: context.currency }, 'category_totals', input.period))),
 
-  defineTool('get_spending_trend', 'Read-only monthly spending for the last six months, in the caller\'s base currency.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
+  defineTool('get_spending_trend', 'Total spending per month for the last six months, in the base currency. Use for trends over time. No parameters are needed.', z.object({ period: periodSchema.optional() }), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const now = new Date();
       const resolved = { end: endOfMonth(now), granularity: 'month' as const, key: 'last_6_months' as const, start: startOfMonth(subMonths(now, 5)) };
@@ -293,7 +293,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ currency: context.currency, trend: [] }, 'month', 'last_6_months'))),
 
-  defineTool('list_accounts', 'List the accounts the caller can see: name, type, currency, balance and whether it is closed. Private accounts of other household members are excluded.', z.object({}), async (_input, context) =>
+  defineTool('list_accounts', 'Every account the person can see: id, name, type, currency, balance and whether it is closed. Use to find an account id for search_transactions. No parameters.', z.object({}), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const accounts = await DI.em.find(
         Account,
@@ -314,7 +314,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ accounts: [], currency: context.currency }, 'accounts'))),
 
-  defineTool('list_budgets', 'List the budgets the caller can see: the household\'s shared budgets and the caller\'s own personal ones (another member\'s personal budgets are never included). Name, currency, household size and visibility.', z.object({}), async (_input, context) =>
+  defineTool('list_budgets', 'The budgets the person can see, shared and their own personal ones: id, name, currency, household size and visibility. For how a budget is doing, use get_budget_status. No parameters.', z.object({}), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const budgets = await DI.em.find(Budget, { deletedAt: undefined }, { orderBy: HOUSEHOLD_BUDGETS_FIRST, populate: ['currencyKey'] });
       const rows = budgets.map((budget) => ({
@@ -333,7 +333,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ budgets: [], currency: context.currency }, 'budgets'))),
 
-  defineTool('list_categories', 'List the spending and income categories available to the household, including the shared system categories.', z.object({}), async (_input, context) =>
+  defineTool('list_categories', 'Every spending and income category: id, name and parent. Use to find a category id for search_transactions. No parameters.', z.object({}), async (_input, context) =>
     withViewer(context, async (viewer) => {
       const categories = await DI.em.find(Category, { deletedAt: undefined }, { orderBy: { name: 'ASC' }, populate: ['parentCategory'] });
       const rows = categories.map((category) => ({
@@ -348,7 +348,7 @@ export const AI_TOOL_DEFINITIONS: readonly AiToolDefinition<never>[] = [
       );
     }, () => emptyResult({ categories: [], currency: context.currency }, 'categories'))),
 
-  defineTool('search_transactions', 'Search the caller\'s visible transactions by date range, account, category and amount range. Returns at most 100 rows, newest first, with amounts in the caller\'s base currency.', z.object({
+  defineTool('search_transactions', 'Find individual transactions, newest first, at most 100: date, amount, description, account and category, in the base currency. Use for "what did I pay at X?" or a list of payments. Parameters: from and to (YYYY-MM-DD, default the last 30 days), accountId, categoryId, amountMin and amountMax, limit.', z.object({
     accountId: z.number().int().positive().optional().describe('Only transactions on this account.'),
     amountMax: z.number().optional().describe('Largest absolute amount, in the caller\'s base currency.'),
     amountMin: z.number().optional().describe('Smallest absolute amount, in the caller\'s base currency.'),
