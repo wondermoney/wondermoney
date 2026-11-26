@@ -1,5 +1,14 @@
+import { fileURLToPath } from 'node:url';
+
 import { Configuration } from '@mikro-orm/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// vitest.setup.ts mocks `dotenv` and points DOTENV_CONFIG_PATH at /dev/null. The real module is
+// loaded here so the `.env` tests below read their fixture; the others still read /dev/null.
+vi.unmock('dotenv');
+
+const dotenvFixture = fileURLToPath(new URL('./fixtures/db-target.env', import.meta.url));
+const DB_KEYS = ['DB_DATABASE', 'DB_HOST', 'DB_PASSWORD', 'DB_PORT', 'DB_USERNAME'] as const;
 
 const env: Record<string, string> = {
   AWS_ACCESS_KEY_ID: 'aws',
@@ -53,5 +62,34 @@ describe('mikro-orm.config default export', () => {
     expect(config.get('dbName')).toBe('wm_staging');
     expect(config.get('user')).toBe('wm');
     expect(config.get('migrations').path).toBe('./dist/database/migrations');
+  });
+
+  describe('with the database settings only in .env', () => {
+    beforeEach(() => {
+      // Leave the target to the fixture; unstubAllEnvs then removes what it loaded.
+      for (const key of DB_KEYS) vi.stubEnv(key, undefined);
+      vi.stubEnv('DOTENV_CONFIG_PATH', dotenvFixture);
+    });
+
+    // The MikroORM CLI (`migrate:prd:pending`, `migrate:dev:check`, ...) runs nothing else that
+    // would load `.env`, so without it the CLI saw no database at all.
+    it('connects to the target .env names', async () => {
+      const { default: options } = await import('../mikro-orm.config');
+
+      const config = new Configuration(options, false);
+
+      expect(config.get('host')).toBe('from-dotenv.example.test');
+      expect(config.get('dbName')).toBe('wm_from_dotenv');
+    });
+
+    it('lets a DB_HOST exported in the shell win over .env', async () => {
+      vi.stubEnv('DB_HOST', 'exported.example.test');
+      const { default: options } = await import('../mikro-orm.config');
+
+      const config = new Configuration(options, false);
+
+      expect(config.get('host')).toBe('exported.example.test');
+      expect(config.get('dbName')).toBe('wm_from_dotenv');
+    });
   });
 });

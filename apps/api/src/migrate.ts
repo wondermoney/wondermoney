@@ -2,7 +2,7 @@ import { pathToFileURL } from 'node:url';
 
 import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { Client } from 'pg';
+import { Client, type ClientConfig } from 'pg';
 
 import { loadDotenv } from './config/load-dotenv.js';
 import { ensureInvestmentsAndSavingsCategory } from './database/seeders/InvestmentsAndSavingsCategorySeeder.js';
@@ -139,21 +139,31 @@ export function planBaseline(executed: readonly string[]): BaselinePlan {
  * run, and closing it releases the lock even if the process dies mid-migration.
  */
 async function createLockClient(): Promise<Client> {
-  // Read the connection details straight from the env rather than off `config`.
-  // `main()` has loaded `.env` (`loadDotenv`) before this runs; importing
-  // `./mikro-orm.config.js` does not, since that config resolves lazily on first use.
-  // The config object is built from these same five variables, but its `password` is
-  // typed as MikroORM's dynamic-credential union, which `pg` does not accept.
+  const client = new Client(lockClientConfig());
+  await client.connect();
+  return client;
+}
+
+/**
+ * The lock client's connection settings: the `DB_*` target, with `.env` loaded first
+ * (`loadDotenv`: the process environment wins, then the last assignment in `.env`). It loads it
+ * itself because no import can be relied on to have done so (`./mikro-orm.config.js` resolves
+ * lazily), and without `DB_*` `pg` falls back to the shell's `PG*` variables.
+ *
+ * Read from the env rather than off `config`: that object is built from these same five
+ * variables, but its `password` is typed as MikroORM's dynamic-credential union, which `pg`
+ * does not accept.
+ */
+export function lockClientConfig(): ClientConfig {
+  loadDotenv();
   const { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } = process.env;
-  const client = new Client({
+  return {
     database: DB_DATABASE,
     host: DB_HOST,
     password: DB_PASSWORD,
     port: DB_PORT === undefined ? undefined : Number(DB_PORT),
     user: DB_USERNAME,
-  });
-  await client.connect();
-  return client;
+  };
 }
 
 /**
@@ -204,8 +214,6 @@ export function shouldSeedReferenceData(referenceDataPresent: boolean, env: Node
 }
 
 async function main() {
-  // The process environment wins, then the last assignment in `.env`, as for the API itself.
-  loadDotenv();
   const lockClient = await createLockClient();
   try {
     console.log('[migrate] acquiring advisory lock');

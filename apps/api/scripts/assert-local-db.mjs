@@ -14,14 +14,17 @@
  *
  *   - **Destructive** (default, `*:fresh`) — deliberately un-overridable. There is no
  *     legitimate reason to drop a remote database from a `package.json` script.
- *   - **Writing** (`--opt-in`, `migrate:dev` / `seed:dev`) — these write to whatever `.env`
- *     resolves to, and CLAUDE.md explicitly recommends `migrate:dev` to move a real database
+ *   - **Writing** (`--opt-in`: `migrate:dev`, `migrate:manual`, `seed:dev`, `demo:*:dev`) —
+ *     these write to whatever `.env` resolves to, and CLAUDE.md explicitly recommends `migrate:dev` to move a real database
  *     forward, so a hard block would break a documented workflow. Instead the remote case
  *     must be *stated*: set `ALLOW_REMOTE_DB=1`. Accidents are blocked, intent is not.
  *
  * It resolves the host exactly the way the app does (existing process env wins
  * over `.env`, and within `.env` the last assignment wins) and never prints
- * credentials — only the host, port and database name.
+ * credentials — only the host, port and database name. It also refuses a
+ * `MIKRO_ORM_CLIENT_URL` / `MIKRO_ORM_HOST` naming a non-local host and any
+ * `MIKRO_ORM_DB_NAME`, which MikroORM would merge over the `DB_*` target. The rules
+ * are in `src/config/local-db-guard.ts`, with their tests.
  *
  * ## Known limitation — the locality test is host-only
  *
@@ -40,79 +43,22 @@
  */
 import process from 'node:process';
 
-// Node strips the types of this plain TypeScript module, so the guard loads `.env` with the
-// same helper as the app and the MikroORM CLI: an exported DB_HOST wins over `.env`, and
-// within `.env` the last assignment wins.
+// Node strips the types of these plain TypeScript modules. The guard loads `.env` with the same
+// helper as the app and the MikroORM CLI: an exported DB_HOST wins over `.env`, and within
+// `.env` the last assignment wins.
+import { checkLocalDbTarget } from '../src/config/local-db-guard.ts';
 import { loadDotenv } from '../src/config/load-dotenv.ts';
 
 loadDotenv();
 
-const LOCAL_HOSTS = new Set([
-  '127.0.0.1',
-  '::1',
-  '0.0.0.0',
-  'localhost',
-  // docker-compose service names — inside the compose network these *are* the
-  // local development database.
-  'postgres',
-  'db',
-  'host.docker.internal',
-]);
+const result = checkLocalDbTarget({
+  command: process.argv[2] ?? 'this destructive command',
+  env: process.env,
+  optIn: process.argv.includes('--opt-in'),
+});
 
-const host = (process.env['DB_HOST'] ?? '').trim();
-const port = (process.env['DB_PORT'] ?? '').trim();
-const database = (process.env['DB_DATABASE'] ?? '').trim();
+if (result.level === 'ok') console.log(result.message);
+else if (result.level === 'warn') console.warn(result.message);
+else console.error(result.message);
 
-const command = process.argv[2] ?? 'this destructive command';
-/** `--opt-in`: a writing (not dropping) command — allow a remote target if explicitly stated. */
-const optIn = process.argv.includes('--opt-in');
-const remoteAllowed = process.env['ALLOW_REMOTE_DB'] === '1';
-
-if (host === '') {
-  console.error(
-    `\n✖ Refusing to run ${command}: DB_HOST is not set, so the target database cannot be verified.\n` +
-      `  Set a local DB_HOST in .env (see .env.sample) before running a destructive command.\n`,
-  );
-  process.exit(1);
-}
-
-if (!LOCAL_HOSTS.has(host.toLowerCase()) && optIn && remoteAllowed) {
-  // Deliberate remote write. Say so loudly — the point is that it cannot happen silently.
-  console.warn(
-    `\n⚠ ${command} is targeting a REMOTE database, because ALLOW_REMOTE_DB=1 is set.\n\n` +
-      `    DB_HOST     ${host}\n` +
-      `    DB_PORT     ${port || '(unset)'}\n` +
-      `    DB_DATABASE ${database || '(unset)'}\n`,
-  );
-  process.exit(0);
-}
-
-if (!LOCAL_HOSTS.has(host.toLowerCase()) && optIn) {
-  console.error(
-    `\n✖ Refusing to run ${command} against a non-local database.\n\n` +
-      `    DB_HOST     ${host}\n` +
-      `    DB_PORT     ${port || '(unset)'}\n` +
-      `    DB_DATABASE ${database || '(unset)'}\n\n` +
-      `  This command WRITES to the target database, and the \`dev\` in its name does not\n` +
-      `  make the target local — it connects to whatever .env resolves to.\n\n` +
-      `  If that is genuinely what you want, state it:  ALLOW_REMOTE_DB=1 pnpm ${command}\n`,
-  );
-  process.exit(1);
-}
-
-if (!LOCAL_HOSTS.has(host.toLowerCase())) {
-  console.error(
-    `\n✖ Refusing to run ${command} against a non-local database.\n\n` +
-      `    DB_HOST     ${host}\n` +
-      `    DB_PORT     ${port || '(unset)'}\n` +
-      `    DB_DATABASE ${database || '(unset)'}\n\n` +
-      `  This command DROPS the entire database. It is only ever allowed against a\n` +
-      `  disposable local/CI database (${[...LOCAL_HOSTS].join(', ')}).\n\n` +
-      `  If you meant to target a local database, fix the DB_* block in .env — and make\n` +
-      `  sure there is only ONE of them, because dotenv keeps the last assignment.\n` +
-      `  To move a real database forward, use the non-destructive \`pnpm migrate:dev\`.\n`,
-  );
-  process.exit(1);
-}
-
-console.log(`✔ ${command}: target is local (DB_HOST=${host}, DB_DATABASE=${database || '(unset)'}).`);
+process.exit(result.allowed ? 0 : 1);
