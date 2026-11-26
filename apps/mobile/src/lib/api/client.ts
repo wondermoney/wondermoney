@@ -21,6 +21,9 @@ import {
   type WriteMethod,
 } from './runtime-schema'
 
+/** The header the API reads an authenticator code from for a sensitive action. */
+export const TOTP_CODE_HEADER = 'x-totp-code'
+
 export type HttpRequest = Readonly<{
   method: ReadMethod | WriteMethod
   path: string
@@ -67,6 +70,11 @@ export type ApiClientDependencies = Readonly<{
 export type WriteOptions<Value> = Readonly<{
   body?: unknown
   commit: (value: Value) => void
+  /**
+   * The authenticator code for an action the API gates on a fresh session and TOTP
+   * (`requireSensitiveSession`), sent as `x-totp-code`, never in the URL or body.
+   */
+  totpCode?: string
 }>
 
 export type ApiClient = Readonly<{
@@ -192,11 +200,15 @@ export const createApiClient = ({
     authAttempt: 0 | 1,
     body?: unknown,
     responseType?: 'json' | 'text',
+    totpCode?: string,
   ): Promise<HttpResponse> => {
     const request: HttpRequest = {
       method: endpoint.method,
       path: endpoint.path,
-      headers: { Authorization: `Bearer ${snapshot.accessToken}` },
+      headers: {
+        Authorization: `Bearer ${snapshot.accessToken}`,
+        ...(totpCode ? { [TOTP_CODE_HEADER]: totpCode } : {}),
+      },
       ...(body === undefined ? {} : { body }),
       signal,
       tokenGeneration: snapshot.tokenGeneration,
@@ -306,7 +318,7 @@ export const createApiClient = ({
 
   const write = async <Value>(
     endpoint: WriteEndpoint<Value>,
-    { body, commit }: WriteOptions<Value>,
+    { body, commit, totpCode }: WriteOptions<Value>,
   ): Promise<Value> => {
     let dispatchState: WriteDispatchState = 'pre-dispatch'
     try {
@@ -327,7 +339,7 @@ export const createApiClient = ({
           try {
             // From this point the transport may have delivered the unsafe write.
             dispatchState = 'post-dispatch'
-            response = await dispatch(endpoint, initial.snapshot, signal, 0, body)
+            response = await dispatch(endpoint, initial.snapshot, signal, 0, body, undefined, totpCode)
           } catch {
             if (signal.aborted) throw new SessionOperationCancelledError()
             throw new ApiError('network')

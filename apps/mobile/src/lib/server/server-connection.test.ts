@@ -76,6 +76,24 @@ describe('checkServer', () => {
     expect(malformed.status === 'ok' && malformed.instance.features.bankSyncProviders).toBeUndefined()
   })
 
+  it('reads the Enable Banking Control Panel values, and none from an older server or a malformed value', async () => {
+    const values = {
+      applicationDescription: 'Personal use: reads my own bank accounts into WonderMoney.',
+      applicationName: 'WonderMoney',
+      privacyUrl: 'https://docs.example.com/privacy',
+      redirectUrl: 'https://api.example.com/v1/banking/enable-banking/callback',
+      termsUrl: 'https://docs.example.com/terms',
+    }
+    const check = async (overrides: Record<string, unknown>) => {
+      const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance(overrides)) })
+      return result.status === 'ok' ? result.instance.enableBankingSetup : 'rejected'
+    }
+    await expect(check({ enableBankingSetup: values })).resolves.toEqual(values)
+    await expect(check({ enableBankingSetup: null })).resolves.toBeNull()
+    await expect(check({})).resolves.toBeUndefined()
+    await expect(check({ enableBankingSetup: { applicationName: 'WonderMoney' } })).resolves.toBeUndefined()
+  })
+
   it('reads whether the server awaits its first account, and an older server or a malformed value as not', async () => {
     const check = async (overrides: Record<string, unknown>) => {
       const result = await checkServer('https://money.example.com', { appVersion: '1.0.0', fetchImpl: respond(instance(overrides)) })

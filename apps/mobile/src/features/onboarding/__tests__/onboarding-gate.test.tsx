@@ -2,16 +2,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
+import { requestReturnAfterSignIn, takeReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
+
 import { useOnboardingGate } from '../onboarding-gate.hook'
 
 const mockRead = jest.fn()
 const mockReplace = jest.fn()
+const mockPush = jest.fn()
 jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ runtime: { epochId: 4, apiClient: { read: mockRead } }, blockAccess: jest.fn() }),
 }))
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ replace: mockReplace, canGoBack: () => true, back: jest.fn() }),
+  useRouter: () => ({ replace: mockReplace, push: mockPush, canGoBack: () => true, back: jest.fn() }),
 }))
 
 const wrap = (client: QueryClient) => {
@@ -53,7 +56,29 @@ const legacyCompleted = {
 }
 
 describe('useOnboardingGate', () => {
-  beforeEach(() => { mockRead.mockReset(); mockReplace.mockReset() })
+  beforeEach(() => { mockRead.mockReset(); mockReplace.mockReset(); mockPush.mockReset(); takeReturnAfterSignIn() })
+
+  it('after signing in again, opens the screen that asked for it on top of first run', async () => {
+    const client = new QueryClient()
+    mockRead.mockResolvedValue(newUser)
+    requestReturnAfterSignIn('/more/banking/connect')
+    const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/more/banking/connect'))
+    expect(mockReplace).toHaveBeenCalledWith('/onboarding')
+    expect(mockReplace.mock.invocationCallOrder[0]).toBeLessThan(mockPush.mock.invocationCallOrder[0] ?? 0)
+    expect(takeReturnAfterSignIn()).toBeNull()
+    await hook.unmount(); client.clear()
+  })
+
+  it('after signing in again with first run done, opens the screen that asked for it', async () => {
+    const client = new QueryClient()
+    mockRead.mockResolvedValue(legacyCompleted)
+    requestReturnAfterSignIn('/more/banking/connect')
+    const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
+    await waitFor(() => expect(mockPush).toHaveBeenCalledTimes(1))
+    expect(mockReplace).not.toHaveBeenCalled()
+    await hook.unmount(); client.clear()
+  })
 
   it('navigates to /onboarding when the bootstrap resolves required and not completed', async () => {
     const client = new QueryClient()

@@ -7,6 +7,7 @@ import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
 import { BANK_CONNECTION_RETURN_URL, bankConnectionsHref, isBankConsentAbandoned, readBankConnectionResult } from './bank-connection-return'
 import type { ConnectBankScreenState } from './connect-bank-screen'
 import { ConnectBankScreen } from './connect-bank-screen'
+import { EnableBankingSetupRoute } from './enable-banking-setup-route'
 import type { BankLinkCredentialState } from './bank-link-credential-policy'
 import { mapBankInstitutions } from './institutions-view-model'
 import { useBankInstitutions } from './use-bank-institutions'
@@ -14,8 +15,7 @@ import { useBankLinkCredential } from './use-bank-link-credential'
 import { classifyStartBankConnectionFailure, type StartBankConnectionFailure, useStartBankConnection } from './use-start-bank-connection'
 
 function resolveViewState(credential: BankLinkCredentialState, query: ReturnType<typeof useBankInstitutions>): ConnectBankScreenState {
-  if (credential.status === 'loading') return { status: 'loading' }
-  if (credential.status === 'credential-required') return { sharedUnavailable: credential.sharedUnavailable, status: 'credential-required' }
+  if (credential.status !== 'ready') return { status: 'loading' }
   if (query.isAccessTransition) return { status: 'access-transition' }
   if (query.data) return { status: 'loaded', rows: mapBankInstitutions(query.data) }
   if (query.isInitialFailure) {
@@ -27,8 +27,9 @@ function resolveViewState(credential: BankLinkCredentialState, query: ReturnType
 
 /**
  * Institution picker → start authorization → consent in an auth session. Without a usable
- * Enable Banking key (their own, or the server's shared one for their household) the screen asks
- * for one instead of listing banks.
+ * Enable Banking key (their own, or the server's shared one for their household) the screen sets
+ * one up first (`enable-banking-setup-route.tsx`), and lists banks once it is active: the setup's
+ * last step. A household the shared credential covers goes straight to the list.
  *
  * The connection is started with `returnTo=mobile`, so the API's callback
  * redirects to the app's own return link and the session closes itself.
@@ -42,16 +43,30 @@ export function ConnectBankRoute() {
   const institutions = useBankInstitutions({ enabled: credential.status === 'ready' })
   const start = useStartBankConnection()
   const [startFailure, setStartFailure] = useState<StartBankConnectionFailure | null>(null)
+  const [activated, setActivated] = useState(false)
+
+  const leave = () => {
+    if (router.canGoBack()) router.back()
+    else router.replace('/more/banking' as Href)
+  }
+
+  if (credential.status === 'credential-required') {
+    return (
+      <EnableBankingSetupRoute
+        sharedUnavailable={credential.sharedUnavailable}
+        onBack={leave}
+        onActivated={() => setActivated(true)}
+      />
+    )
+  }
 
   return (
     <ConnectBankScreen
       state={resolveViewState(credential, institutions)}
+      keyActivated={activated}
       pendingBankId={start.isPending ? (start.variables ?? null) : null}
       startFailure={startFailure}
-      onBack={() => {
-        if (router.canGoBack()) router.back()
-        else router.replace('/more/banking' as Href)
-      }}
+      onBack={leave}
       onRetry={() => { void institutions.refetch() }}
       onSelectBank={(row) => {
         setStartFailure(null)

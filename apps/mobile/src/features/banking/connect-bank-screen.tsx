@@ -18,19 +18,20 @@ export type ConnectBankScreenState =
   | { status: 'loading' }
   | { status: 'invalid-response' }
   | { status: 'error' }
-  | { sharedUnavailable: boolean; status: 'credential-required' }
   | { status: 'loaded'; rows: readonly BankInstitutionRow[] }
 
 export type ConnectBankScreenProps = {
   state: ConnectBankScreenState
   pendingBankId: string | null
   startFailure: StartBankConnectionFailure | null
+  /** The Enable Banking key was set up just now: the bank list is the setup's last step. */
+  keyActivated?: boolean
   onBack: () => void
   onRetry: () => void | Promise<void>
   onSelectBank: (row: BankInstitutionRow) => void
 }
 
-export function ConnectBankScreen({ state, pendingBankId, startFailure, onBack, onRetry, onSelectBank }: ConnectBankScreenProps) {
+export function ConnectBankScreen({ state, pendingBankId, startFailure, keyActivated = false, onBack, onRetry, onSelectBank }: ConnectBankScreenProps) {
   const { t } = useTranslation()
   const palette = themeTokens.colors[useColorScheme() === 'dark' ? 'dark' : 'light']
   const [query, setQuery] = useState('')
@@ -46,6 +47,14 @@ export function ConnectBankScreen({ state, pendingBankId, startFailure, onBack, 
         <View style={styles.page}>
           <BackControl fallback="/more/banking" label={t('banking.connect.back')} onPress={onBack} />
           <PageHeader palette={palette} title={t('banking.connect.heading')} instruction={t('banking.connect.helper')} />
+
+          {keyActivated ? (
+            <View style={[styles.notice, { borderColor: palette.border }]}>
+              <Text accessibilityLiveRegion="polite" allowFontScaling style={[styles.noticeBody, { color: palette.foreground }]}>
+                {t('banking.connect.activated')}
+              </Text>
+            </View>
+          ) : null}
 
           {startFailure ? (
             <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
@@ -77,22 +86,6 @@ export function ConnectBankScreen({ state, pendingBankId, startFailure, onBack, 
             >
               <View style={[styles.skeleton, { width: 260, height: 20, backgroundColor: palette.muted }]} />
               <View style={[styles.skeleton, { width: 320, height: 20, backgroundColor: palette.muted }]} />
-            </View>
-          ) : null}
-
-          {state.status === 'credential-required' ? (
-            <View style={[styles.notice, { borderColor: palette.border, backgroundColor: palette.muted }]}>
-              <Text accessibilityRole="header" allowFontScaling style={[styles.noticeTitle, { color: palette.foreground }]}>
-                {t('banking.connect.credentialRequired.title')}
-              </Text>
-              <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                {t('banking.connect.credentialRequired.message')}
-              </Text>
-              {state.sharedUnavailable ? (
-                <Text allowFontScaling style={[styles.noticeBody, { color: palette.mutedForeground }]}>
-                  {t('banking.connect.credentialRequired.sharedUnavailable')}
-                </Text>
-              ) : null}
             </View>
           ) : null}
 

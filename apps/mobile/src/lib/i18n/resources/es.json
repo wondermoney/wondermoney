@@ -216,7 +216,8 @@
       "errors": {
         "unavailable": "No se ha podido iniciar sesión con esa llave de acceso. Inténtalo de nuevo o usa tu contraseña."
       }
-    }
+    },
+    "signInAgainNotice": "Por seguridad, vuelve a iniciar sesión. WonderMoney te lleva de vuelta a donde estabas."
   },
   "access": {
     "mfa": {
@@ -4352,10 +4353,9 @@
         "general": "Algo salió mal al iniciar esa conexión. Inténtalo de nuevo."
       },
       "credentialRequired": {
-        "title": "Añade primero tu clave de Enable Banking",
-        "message": "Para vincular un banco hace falta tu propio ID de aplicación y clave de Enable Banking. Añádelos en Ajustes, en Proveedor bancario, en la aplicación web de WonderMoney y vuelve después aquí.",
         "sharedUnavailable": "La conexión bancaria compartida de este servidor solo sirve a un hogar, así que el tuyo necesita su propia clave."
-      }
+      },
+      "activated": "Tu clave de Enable Banking está activa. Elige tu banco para conectarlo."
     },
     "simplefin": {
       "heading": "Conectar con SimpleFIN",
@@ -4382,6 +4382,88 @@
         "rate-limited": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
         "network": "No pudimos confirmar la conexión. Revisa tus conexiones bancarias antes de volver a intentarlo: un token de configuración solo funciona una vez.",
         "general": "Algo salió mal al conectar SimpleFIN. Inténtalo de nuevo."
+      }
+    },
+    "keySetup": {
+      "heading": "Configurar la sincronización bancaria",
+      "helper": "Registra tu propia aplicación gratuita de Enable Banking, una sola vez. WonderMoney crea su clave y la guarda cifrada en este servidor; nunca la ves.",
+      "stepOf": "Paso {{number}} de {{total}}",
+      "steps": {
+        "sign_in": "Inicia sesión en Enable Banking",
+        "create_application": "Crea la aplicación",
+        "activate": "Actívala vinculando cuentas",
+        "application_id": "Pega el ID de la aplicación",
+        "choose_bank": "Elige tu banco"
+      },
+      "continue": "Continuar",
+      "previous": "Atrás",
+      "openHint": "Abre Enable Banking en el navegador",
+      "signIn": {
+        "body": "Enable Banking conecta tu banco con WonderMoney, solo en lectura. Introduce allí tu email: te envía un enlace para iniciar sesión, sin contraseña que crear.",
+        "mailHint": "Abre el enlace del email en este teléfono y vuelve aquí.",
+        "open": "Abrir Enable Banking"
+      },
+      "create": {
+        "certificateIntro": "WonderMoney crea la clave y te da su certificado, la mitad pública, para registrarlo con tu aplicación.",
+        "createCertificate": "Crear certificado",
+        "recreate": "Crear un certificado nuevo",
+        "pendingNotice": "Ya hay un certificado esperando hasta el {{date}}. Si ya lo registraste, continúa. Un certificado nuevo lo sustituye.",
+        "copyCertificate": "Copiar certificado",
+        "shareCertificate": "Compartir certificado",
+        "shareTitle": "Certificado de Enable Banking",
+        "shareFailed": "No se pudo abrir el menú para compartir. Copia el certificado en su lugar.",
+        "certificateHint": "En un teléfono, copiar es lo que mejor funciona: pega el certificado en “Public certificate” en Enable Banking. Compártelo para guardarlo en Archivos o enviarlo a un ordenador.",
+        "productionTitle": "Elige Production",
+        "productionMessage": "Pon Environment en Production. Una aplicación Sandbox nunca llega a un banco real.",
+        "formIntro": "En Enable Banking, abre Applications y añade una aplicación nueva. Copia cada valor en su campo.",
+        "keyChoice": "En la generación de la clave, elige “Generate outside the browser and import public certificate” y pega el certificado.",
+        "openControlPanel": "Abrir el Control Panel"
+      },
+      "fields": {
+        "environment": "Entorno",
+        "production": "Production",
+        "name": "Nombre de la aplicación",
+        "description": "Descripción",
+        "redirectUrl": "URL de redirección",
+        "privacyUrl": "URL de privacidad",
+        "termsUrl": "URL de los términos"
+      },
+      "copyValue": "Copiar {{field}}",
+      "copied": "Copiado.",
+      "copyFailed": "No se pudo copiar. Mantén pulsado el valor para copiarlo.",
+      "activate": {
+        "body": "En la página de la aplicación en Enable Banking, elige “Activate by linking accounts” y vincula una de tus propias cuentas bancarias. Así se activa para tu uso personal.",
+        "warning": "No “Request activation”: esa es para empresas y pide verificaciones de la empresa."
+      },
+      "applicationId": {
+        "body": "Copia el ID de la aplicación desde su página en Enable Banking y pégalo aquí.",
+        "label": "ID de la aplicación",
+        "placeholder": "p. ej. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
+        "paste": "Pegar",
+        "pasteEmpty": "El portapapeles no tiene texto para pegar.",
+        "waiting": "El certificado espera su ID de aplicación hasta el {{date}}.",
+        "submit": "Activar",
+        "submitting": "Activando…"
+      },
+      "totpLabel": "Código del autenticador",
+      "totpHint": "De tu app de autenticación, porque tienes activada la autenticación en dos pasos.",
+      "revisit": "Ir al paso {{number}}: {{title}}",
+      "signInAgain": "Volver a iniciar sesión",
+      "errors": {
+        "applicationNotFound": "Enable Banking no reconoce este ID de aplicación con este certificado. Revisa el ID y que registraste la aplicación con este certificado.",
+        "sandbox": "Esta es una aplicación Sandbox, que no llega a ningún banco real. Registra una aplicación nueva con Environment en Production.",
+        "notActivated": "Esta aplicación aún no está activada. Elige “Activate by linking accounts”, vincula una de tus propias cuentas bancarias y vuelve a intentarlo.",
+        "refused": "Enable Banking rechazó esta clave. Vuelve a intentarlo más tarde o registra la aplicación de nuevo.",
+        "pendingMissing": "Este certificado ha caducado o se ha sustituido. Crea un certificado nuevo y vuelve a registrarlo.",
+        "totpRequired": "Introduce tu código del autenticador para continuar.",
+        "invalidTotp": "Ese código del autenticador no es válido. Introduce el actual.",
+        "sessionNotFresh": "Por seguridad, vuelve a iniciar sesión antes de configurar tu clave.",
+        "rateLimited": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+        "demo": "Esta acción no está disponible en el modo demo.",
+        "read-only": "$t(common.householdReadOnly)",
+        "network": "Revisa tu conexión y vuelve a intentarlo.",
+        "unavailable": "No se pudo contactar con Enable Banking o con este servidor. Vuelve a intentarlo en un momento.",
+        "general": "Algo salió mal. Vuelve a intentarlo."
       }
     }
   },

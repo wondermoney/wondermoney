@@ -131,3 +131,15 @@ export function useInstanceBankSyncCredentials(): 'instance' | 'user' | undefine
   const { data } = useInstance()
   return data ? (data.features.bankSyncCredentials ?? 'user') : undefined
 }
+
+export type EnableBankingSetupValues = NonNullable<InstanceDescription['enableBankingSetup']>
+
+/**
+ * The values to enter in Enable Banking's Control Panel for this server (its own redirect URL,
+ * the privacy and terms URLs, a suggested name and description). Null while the description
+ * loads, when Enable Banking is off and on a server older than the field.
+ */
+export function useEnableBankingSetup(): EnableBankingSetupValues | null {
+  const { data } = useInstance()
+  return data?.enableBankingSetup ?? null
+}

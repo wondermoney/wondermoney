@@ -88,6 +88,15 @@ const instanceSchema = z.object({
     // Mobile push notifications (`PUSH_ENABLED`). Absent on an older server: off.
     push: z.boolean().optional(),
   }),
+  // What to enter in Enable Banking's Control Panel to register an application for this server.
+  // Null when Enable Banking is off; absent on an older server, and malformed, it reads as absent.
+  enableBankingSetup: z.object({
+    applicationDescription: z.string(),
+    applicationName: z.string(),
+    privacyUrl: z.string(),
+    redirectUrl: z.string().min(1),
+    termsUrl: z.string(),
+  }).nullable().optional().catch(undefined),
   minAppVersion: z.string().nullable(),
   name: z.string().min(1),
   // True while the server has no accounts yet: the signed-out screen offers to set it up, and

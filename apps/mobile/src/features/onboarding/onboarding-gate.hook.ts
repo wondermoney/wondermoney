@@ -2,6 +2,7 @@ import { type Href, useRouter } from 'expo-router'
 import { useEffect, useRef } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { takeReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
 
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
 
@@ -16,7 +17,8 @@ export type OnboardingGateView = Readonly<{
  * presentational `OnboardingGate` component so it can be tested without
  * rendering. Returns the three flags the root router cares about and, as a
  * side effect, navigates the router to `/onboarding` once when the bootstrap
- * resolves to required && !completed.
+ * resolves to required && !completed. After a sign-in that a sensitive action asked for, it then
+ * opens the screen the person left.
  *
  * Returns a never-pushed gate when the runtime isn't authenticated (signed
  * out, activating, deactivating, mfa / sign-out-failed): the
@@ -47,6 +49,10 @@ export function useOnboardingGate(): OnboardingGateView {
     } else {
       lastAction.current = 'dismissed'
     }
+    // Back to the screen that asked for a fresh sign-in (lib/auth/return-after-sign-in.ts), on
+    // top of first run when it is still required, so leaving that screen returns there.
+    const returnTo = takeReturnAfterSignIn()
+    if (returnTo) router.push(returnTo as Href)
   }, [bootstrap.data, bootstrap.isAccessTransition, bootstrap.isLoading, router, runtime])
 
   const onboarding = bootstrap.data?.onboarding

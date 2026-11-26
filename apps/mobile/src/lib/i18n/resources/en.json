@@ -216,7 +216,8 @@
       "errors": {
         "unavailable": "Signing in with that passkey didn't work. Try again, or use your password."
       }
-    }
+    },
+    "signInAgainNotice": "For your security, sign in again. WonderMoney takes you back to where you were."
   },
   "access": {
     "mfa": {
@@ -4352,10 +4353,9 @@
         "general": "Something went wrong starting that connection. Please try again."
       },
       "credentialRequired": {
-        "title": "Add your Enable Banking key first",
-        "message": "Linking a bank needs your own Enable Banking application ID and key. Add them in Settings, under Bank Provider, in the WonderMoney web app, then come back here.",
         "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
-      }
+      },
+      "activated": "Your Enable Banking key is active. Choose your bank to connect it."
     },
     "simplefin": {
       "heading": "Connect with SimpleFIN",
@@ -4382,6 +4382,88 @@
         "rate-limited": "Too many attempts. Wait a moment, then try again.",
         "network": "We couldn't confirm the connection. Check your bank connections before trying again: a setup token works only once.",
         "general": "Something went wrong connecting SimpleFIN. Please try again."
+      }
+    },
+    "keySetup": {
+      "heading": "Set up bank sync",
+      "helper": "Register your own free Enable Banking application, once. WonderMoney creates its key and keeps it encrypted on this server; you never see it.",
+      "stepOf": "Step {{number}} of {{total}}",
+      "steps": {
+        "sign_in": "Sign in to Enable Banking",
+        "create_application": "Create the application",
+        "activate": "Activate by linking accounts",
+        "application_id": "Paste the application ID",
+        "choose_bank": "Choose your bank"
+      },
+      "continue": "Continue",
+      "previous": "Back",
+      "openHint": "Opens Enable Banking in the browser",
+      "signIn": {
+        "body": "Enable Banking connects your bank to WonderMoney, read-only. Enter your email there: it emails you a sign-in link, with no password to create.",
+        "mailHint": "Open the emailed link on this phone, then come back here.",
+        "open": "Open Enable Banking"
+      },
+      "create": {
+        "certificateIntro": "WonderMoney creates the key and gives you its certificate, the public half, to register with your application.",
+        "createCertificate": "Create certificate",
+        "recreate": "Create a new certificate",
+        "pendingNotice": "A certificate is already waiting until {{date}}. If you registered it, continue. A new certificate replaces it.",
+        "copyCertificate": "Copy certificate",
+        "shareCertificate": "Share certificate",
+        "shareTitle": "Enable Banking certificate",
+        "shareFailed": "Couldn't open the share sheet. Copy the certificate instead.",
+        "certificateHint": "On a phone, copying works best: paste the certificate into “Public certificate” in Enable Banking. Share it to save it in Files or send it to a computer.",
+        "productionTitle": "Choose Production",
+        "productionMessage": "Set Environment to Production. A Sandbox application never reaches a real bank.",
+        "formIntro": "In Enable Banking, open Applications and add a new application. Copy each value into its field.",
+        "keyChoice": "Under key generation, choose “Generate outside the browser and import public certificate”, then paste the certificate.",
+        "openControlPanel": "Open Control Panel"
+      },
+      "fields": {
+        "environment": "Environment",
+        "production": "Production",
+        "name": "Application name",
+        "description": "Description",
+        "redirectUrl": "Redirect URL",
+        "privacyUrl": "Privacy URL",
+        "termsUrl": "Terms URL"
+      },
+      "copyValue": "Copy {{field}}",
+      "copied": "Copied.",
+      "copyFailed": "Couldn't copy. Press and hold the value to copy it instead.",
+      "activate": {
+        "body": "On the application's page in Enable Banking, choose “Activate by linking accounts” and link one of your own bank accounts. That activates it for your personal use.",
+        "warning": "Not “Request activation”: that is for businesses, and asks for company checks."
+      },
+      "applicationId": {
+        "body": "Copy the application ID from the application's page in Enable Banking, then paste it here.",
+        "label": "Application ID",
+        "placeholder": "e.g. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
+        "paste": "Paste",
+        "pasteEmpty": "The clipboard has no text to paste.",
+        "waiting": "The certificate waits for its application ID until {{date}}.",
+        "submit": "Activate",
+        "submitting": "Activating…"
+      },
+      "totpLabel": "Authenticator code",
+      "totpHint": "From your authenticator app, because two-factor authentication is on.",
+      "revisit": "Go to step {{number}}: {{title}}",
+      "signInAgain": "Sign in again",
+      "errors": {
+        "applicationNotFound": "Enable Banking doesn't recognise this application ID with this certificate. Check the ID, and that you registered the application with this certificate.",
+        "sandbox": "This is a Sandbox application, which can't reach a real bank. Register a new application with Environment set to Production.",
+        "notActivated": "This application isn't activated yet. Choose “Activate by linking accounts” and link one of your own bank accounts, then try again.",
+        "refused": "Enable Banking refused this key. Try again later, or register the application again.",
+        "pendingMissing": "This certificate expired or was replaced. Create a new certificate and register it again.",
+        "totpRequired": "Enter your authenticator code to continue.",
+        "invalidTotp": "That authenticator code isn't valid. Enter the current one.",
+        "sessionNotFresh": "For your security, sign in again before setting up your key.",
+        "rateLimited": "Too many attempts. Wait a few minutes and try again.",
+        "demo": "This action is unavailable in demo mode.",
+        "read-only": "$t(common.householdReadOnly)",
+        "network": "Check your connection and try again.",
+        "unavailable": "Enable Banking or this server couldn't be reached. Try again in a moment.",
+        "general": "Something went wrong. Please try again."
       }
     }
   },

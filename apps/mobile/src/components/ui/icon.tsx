@@ -101,6 +101,10 @@ const ICONS = {
   eye: { ios: 'eye', android: 'visibility', web: 'visibility' },
   'eye-off': { ios: 'eye.slash', android: 'visibility_off', web: 'visibility_off' },
   users: { ios: 'person.2', android: 'group', web: 'group' },
+  // Copy, share and paste a value (the Enable Banking key setup).
+  copy: { ios: 'doc.on.doc', android: 'content_copy', web: 'content_copy' },
+  share: { ios: 'square.and.arrow.up', android: 'share', web: 'share' },
+  'clipboard-paste': { ios: 'doc.on.clipboard', android: 'content_paste', web: 'content_paste' },
 } as const satisfies Record<string, SymbolName>
 
 export type IconName = keyof typeof ICONS

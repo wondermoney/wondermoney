@@ -1,16 +1,55 @@
 import { z } from 'zod'
 
-import { readEndpoint } from '@/lib/api/runtime-schema'
+import { readEndpoint, tolerantEnum, writeEndpoint } from '@/lib/api/runtime-schema'
 
 /**
- * The signed-in person's own Enable Banking key, as far as the connect screen needs it: whether
- * one is active. `GET /v1/user/enable-banking-credential` answers null when they have none and
- * never returns key material. Adding a key happens in the web app's Settings.
+ * The signed-in person's own Enable Banking key. `GET /v1/user/enable-banking-credential` answers
+ * null when they have none and never returns key material. `pending` is a key the server
+ * generated, waiting for its application ID, and when it lapses; absent on an API older than
+ * generated keys.
  */
-export const enableBankingCredentialSchema = z.object({ status: z.string() }).nullable()
+export const enableBankingCredentialSchema = z.object({
+  applicationId: z.string().nullable().optional(),
+  pending: z.object({ expiresAt: z.string() }).nullable().optional().catch(undefined),
+  status: tolerantEnum(['active', 'invalid', 'pending', 'revoked'], 'unknown'),
+}).nullable()
+
+export type EnableBankingCredential = z.infer<typeof enableBankingCredentialSchema>
 
 export const enableBankingCredentialEndpoint = readEndpoint({
   method: 'GET',
   path: '/v1/user/enable-banking-credential',
   schema: enableBankingCredentialSchema,
+})
+
+/**
+ * `POST /v1/user/enable-banking-credential/certificate`: the server generates a key pair, keeps
+ * the private key, and answers the public certificate (PEM) to register in the Control Panel.
+ * Calling it again replaces a key still waiting for its application ID, never an active one.
+ * Needs a fresh session, and the authenticator code when two-factor is on.
+ */
+export const enableBankingCertificateSchema = z.object({
+  certificatePem: z.string().min(1),
+  expiresAt: z.string(),
+})
+
+export type EnableBankingCertificate = z.infer<typeof enableBankingCertificateSchema>
+
+export const createEnableBankingCertificateEndpoint = writeEndpoint({
+  method: 'POST',
+  path: '/v1/user/enable-banking-credential/certificate',
+  schema: enableBankingCertificateSchema,
+  successStatuses: [201],
+})
+
+/**
+ * `POST /v1/user/enable-banking-credential/activate` with `{ applicationId }`: checks the
+ * generated key against Enable Banking under that application and makes it the active key. A
+ * wrong application answers 400 with its own code (`enable-banking-setup-view-model.ts`). Same
+ * session and authenticator rules as the certificate.
+ */
+export const activateEnableBankingCredentialEndpoint = writeEndpoint({
+  method: 'POST',
+  path: '/v1/user/enable-banking-credential/activate',
+  schema: z.object({ status: z.string() }),
 })
