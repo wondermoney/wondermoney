@@ -69,10 +69,10 @@ const point = (date: string, netWorth: number): NetWorthPoint => ({
   breakdown: { assets: 0, liabilities: 0 },
 });
 
-function renderHero() {
+function renderHero(props: Parameters<typeof NetWorthHero>[0] = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={messages}>
-      <NetWorthHero />
+      <NetWorthHero {...props} />
     </NextIntlClientProvider>,
   );
 }
@@ -150,6 +150,15 @@ test("with no accounts the hero offers to add one", () => {
     screen.getByRole("link", { name: "Add an account" }).getAttribute("href"),
     "/accounts",
   );
+});
+
+test("beside the no-accounts card the empty hero leaves the adding to the card", () => {
+  state.netWorth = { netWorth: 0, currencyCode: "EUR", rows: [] };
+
+  renderHero({ hideEmptyAction: true });
+
+  assert.ok(screen.getByText("No accounts yet"));
+  assert.equal(screen.queryByRole("link", { name: "Add an account" }), null);
 });
 
 test("privacy mode hides every figure in the hero and keeps the words", () => {

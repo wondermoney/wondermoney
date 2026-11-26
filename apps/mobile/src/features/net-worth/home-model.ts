@@ -436,3 +436,21 @@ export function formatShortDate(date: Date, locale: string): string {
     return localDateKey(date)
   }
 }
+
+/** Home's no-accounts card (web `NoAccountsCard`): which of its ways in it offers. */
+export type NoAccountsCardModel = Readonly<{ importAvailable: boolean }>
+
+/**
+ * Whether Home shows the no-accounts card: only once the account list has loaded and holds
+ * nothing, and never to a household viewer, who cannot add an account. "Import a statement" is
+ * offered only where the server stores files, because the upload fails without storage (and
+ * would fail after the account it goes into was already created).
+ */
+export function noAccountsCard(input: {
+  accounts: readonly unknown[] | undefined
+  readOnly: boolean
+  fileStorage: boolean
+}): NoAccountsCardModel | null {
+  if (input.accounts === undefined || input.accounts.length > 0 || input.readOnly) return null
+  return { importAvailable: input.fileStorage }
+}

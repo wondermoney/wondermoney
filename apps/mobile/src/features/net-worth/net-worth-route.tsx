@@ -18,6 +18,7 @@ import { useDashboardLayout } from '@/features/preferences/use-dashboard-layout'
 import { useTransactions } from '@/features/transactions/use-transactions'
 import { useTransactionReviewSummary } from '@/features/transactions/use-transaction-review-summary'
 import { ApiError } from '@/lib/api/errors'
+import { useConfirmedFeature } from '@/lib/server/use-instance'
 
 import {
   cashflowScale,
@@ -25,6 +26,7 @@ import {
   monthComparisonRange,
   monthSummary,
   monthTotalsOf,
+  noAccountsCard,
   oldestRefresh,
   savingsSummary,
   upcomingLoanPayments,
@@ -90,6 +92,7 @@ export function NetWorthRoute() {
   const linkPortfolio = useLinkPortfolioAccount()
   const bankAlerts = useBankAlertBanner()
   const dashboardLayout = useDashboardLayout()
+  const fileStorage = useConfirmedFeature((features) => features.fileStorage)
 
   let state: NetWorthViewState
   if (query.isLoading) state = { status: 'loading' }
@@ -182,6 +185,7 @@ export function NetWorthRoute() {
     history: historyState,
     freshness,
     setup,
+    noAccounts: noAccountsCard({ accounts: accounts.data?.accounts, readOnly: members.readOnly, fileStorage }),
     bankAlert: bankAlerts.banner,
     month: monthRows,
     cashflow: sectionOf(cashflow, (data) => ({

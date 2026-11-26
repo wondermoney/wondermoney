@@ -1,8 +1,11 @@
-import { type Href, useRouter } from 'expo-router'
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
+import { useConfirmedFeature } from '@/lib/server/use-instance'
+
+import { parseAccountOrigin } from './onboarding-account-origin'
 import { OnboardingScreen } from './onboarding-screen'
 import { classifyCompleteOnboardingFailure, useCompleteOnboarding } from './use-complete-onboarding'
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
@@ -13,6 +16,11 @@ type Outcome = 'idle' | 'skip' | 'connect-bank'
 export function OnboardingRoute() {
   const { runtime } = useProductRuntime()
   const router = useRouter()
+  // Back from the manual-account screen returns to the view it was opened from.
+  const params = useLocalSearchParams<{ resume?: string }>()
+  const resumeAt = parseAccountOrigin(params.resume)
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
   const bootstrap = useOnboardingBootstrap()
   const completion = useCompleteOnboarding()
   const [outcome, setOutcome] = useState<Outcome>('idle')
@@ -57,6 +65,8 @@ export function OnboardingRoute() {
       pending={completion.isPending}
       completionFailure={completionFailure}
       outcome={outcome}
+      resumeAt={resumeAt}
+      importAvailable={importAvailable}
       onRetry={() => { void bootstrap.refetch() }}
       onConnectBank={async () => {
         setOutcome('connect-bank')
@@ -77,7 +87,7 @@ export function OnboardingRoute() {
           setOutcome('idle')
         }
       }}
-      onCreateAccount={() => {
+      onCreateAccount={(from) => {
         // Pure navigation — no mutation happens here. The destination screen
         // creates the account first and only then completes onboarding, so a
         // user who backs out mid-flow is left in the same required state.
@@ -91,7 +101,13 @@ export function OnboardingRoute() {
         // expects, and matches the existing recovery/invite deep-link
         // pushes elsewhere in the app.
         if (state.status !== 'loaded') return
-        router.push(`/onboarding/create-account?version=${state.view.version}` as Href)
+        router.push(`/onboarding/create-account?version=${state.view.version}&from=${from}` as Href)
+      }}
+      onImportStatement={() => {
+        // A statement goes into an account: the same manual-account screen first, which then
+        // opens the import on it (`then=import`) instead of going home.
+        if (state.status !== 'loaded') return
+        router.push(`/onboarding/create-account?version=${state.view.version}&then=import&from=no-bank` as Href)
       }}
     />
   )

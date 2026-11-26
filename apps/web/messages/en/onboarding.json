@@ -53,13 +53,6 @@
           "financial_freedom": "Start with one account so balances, spending, and investments build a reliable picture.",
           "exploring": "Start with one account, or add one manually, and see how WonderMoney works."
         },
-        "skipWarning": {
-          "headline": "Continue without real financial data?",
-          "description": "You can, but WonderMoney will not be able to show your real balances, transactions, spending patterns, or net worth until you add an account.",
-          "primary": "Add an account first",
-          "secondary": "Continue without account",
-          "reassurance": "You can always add one later from Accounts."
-        },
         "credentialRequired": {
           "title": "Connecting a bank needs a quick one-time setup",
           "body": "Before you can link a real bank, add your own Enable Banking key from Settings. You can do that anytime after setup. For now, add an account manually above or skip this step and connect later."
@@ -316,6 +309,16 @@
         "description": "Already use WonderMoney on another server, or kept an export? Load it here and pick up where you left off.",
         "done": "Go to the dashboard",
         "back": "Set up from scratch instead"
+      },
+      "noBank": {
+        "headline": "Start without a bank",
+        "description": "Bring in a statement, or add an account with its balance.",
+        "import": "Import a statement",
+        "importHint": "A file exported from your bank",
+        "manual": "Add an account by hand",
+        "manualHint": "A name and a balance",
+        "skip": "Skip for now",
+        "connectInstead": "Connect a bank instead"
       }
     },
     "dashboard": {

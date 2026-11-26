@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Icon, type IconName } from '@/components/ui/icon'
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { Text } from '@/components/ui/text'
+import { NoAccountOptionList } from '@/features/accounts/no-account-options'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { usePalette } from '@/theme/use-palette'
+import type { OnboardingAccountOrigin } from './onboarding-account-origin'
 import type { OnboardingJourneyView } from './onboarding-view-model'
 import type { CompleteOnboardingFailure } from './use-complete-onboarding'
 
@@ -26,11 +28,18 @@ export type OnboardingScreenProps = Readonly<{
   outcome: 'idle' | 'skip' | 'connect-bank'
   onSkip: () => void | Promise<void>
   onConnectBank: () => void | Promise<void>
-  onCreateAccount: () => void | Promise<void>
+  /** Opens the manual-account screen, saying which view its Back returns to. */
+  onCreateAccount: (from: OnboardingAccountOrigin) => void | Promise<void>
+  /** "Import a statement" after skipping the bank: an account to import into, then the import. */
+  onImportStatement: () => void | Promise<void>
   onRetry: () => void | Promise<void>
+  /** Where the journey opens when coming back from the manual-account screen; absent, at the start. */
+  resumeAt?: OnboardingAccountOrigin
+  /** Whether the server stores files: without it a statement upload fails, so no import is offered. */
+  importAvailable?: boolean
 }>
 
-export function OnboardingScreen({ state, pending, completionFailure = null, onSkip, onConnectBank, onCreateAccount, onRetry }: OnboardingScreenProps) {
+export function OnboardingScreen({ state, pending, completionFailure = null, onSkip, onConnectBank, onCreateAccount, onImportStatement, onRetry, resumeAt, importAvailable = false }: OnboardingScreenProps) {
   const { t } = useTranslation()
   const palette = usePalette()
   if (state.status === 'access-transition') return null
@@ -60,7 +69,7 @@ export function OnboardingScreen({ state, pending, completionFailure = null, onS
       </SafeAreaView>
     )
   }
-  return <OnboardingJourney palette={palette} view={state.view} pending={pending} completionFailure={completionFailure} onSkip={onSkip} onConnectBank={onConnectBank} onCreateAccount={onCreateAccount} />
+  return <OnboardingJourney palette={palette} view={state.view} pending={pending} completionFailure={completionFailure} onSkip={onSkip} onConnectBank={onConnectBank} onCreateAccount={onCreateAccount} onImportStatement={onImportStatement} resumeAt={resumeAt} importAvailable={importAvailable} />
 }
 
 /**
@@ -102,9 +111,12 @@ const WELCOME_FACTS: readonly { key: 'connected' | 'readOnly' | 'netWorth'; icon
 ]
 const MAX_GOALS = 2
 
-function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, onConnectBank, onCreateAccount }: { palette: Palette; view: OnboardingJourneyView; pending: boolean; completionFailure: OnboardingCompletionFailure | null; onSkip: () => void | Promise<void>; onConnectBank: () => void | Promise<void>; onCreateAccount: () => void | Promise<void> }) {
+function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, onConnectBank, onCreateAccount, onImportStatement, resumeAt, importAvailable }: { palette: Palette; view: OnboardingJourneyView; pending: boolean; completionFailure: OnboardingCompletionFailure | null; onSkip: () => void | Promise<void>; onConnectBank: () => void | Promise<void>; onCreateAccount: (from: OnboardingAccountOrigin) => void | Promise<void>; onImportStatement: () => void | Promise<void>; resumeAt?: OnboardingAccountOrigin; importAvailable: boolean }) {
   const { t } = useTranslation()
-  const [step, setStep] = useState<Step>('welcome')
+  const [step, setStep] = useState<Step>(resumeAt ? 'account' : 'welcome')
+  // Web's no-bank choice (`FirstRunAccountStep`, mode `choice`): skipping on the account step
+  // offers importing a statement or adding an account by hand before finishing without one.
+  const [noBank, setNoBank] = useState(resumeAt === 'no-bank')
   const [goals, setGoals] = useState<string[]>([])
   const index = STEPS.indexOf(step)
 
@@ -115,21 +127,23 @@ function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, 
     void SecureStore.setItemAsync(GOALS_KEY, JSON.stringify(next)).catch(() => undefined)
   }
   const next = () => { if (index < STEPS.length - 1) setStep(STEPS[index + 1]) }
-  const back = () => { if (index > 0) setStep(STEPS[index - 1]) }
+  const back = () => { if (noBank) setNoBank(false); else if (index > 0) setStep(STEPS[index - 1]) }
   const finish = () => { if (!pending) void onSkip() }
-  const title = t(`onboarding.firstRun.${step}.headline`)
+  const accountStep = step === 'account'
+  const skip = () => { if (accountStep && view.createAccountActionAvailable) setNoBank(true); else finish() }
+  const copyKey = noBank ? 'noBank' : step
+  const title = t(`onboarding.firstRun.${copyKey}.headline`)
   // `privacy` makes its case through its own points; its description was a
   // restatement of the list sitting directly underneath it.
   const NO_DESCRIPTION = '\u0000'
-  const resolvedDescription = t(`onboarding.firstRun.${step}.description`, { defaultValue: NO_DESCRIPTION })
+  const resolvedDescription = t(`onboarding.firstRun.${copyKey}.description`, { defaultValue: NO_DESCRIPTION })
   const description = resolvedDescription === NO_DESCRIPTION ? '' : resolvedDescription
-  const accountStep = step === 'account'
   const toneColor = (tone: Tone) => ({ violet: palette.primary, sky: palette.chart5, green: palette.chart3, slate: palette.mutedForeground }[tone])
 
   return <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
     <OnboardingHeader
-      action={view.skipActionAvailable ? (
-        <Button accessibilityLabel={t('onboarding.firstRun.skip')} disabled={pending} label={t('onboarding.firstRun.skip')} onPress={finish} size="sm" variant="ghost" />
+      action={view.skipActionAvailable && !noBank ? (
+        <Button accessibilityLabel={t('onboarding.firstRun.skip')} disabled={pending} label={t('onboarding.firstRun.skip')} onPress={skip} size="sm" variant="ghost" />
       ) : null}
     />
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled"><View style={styles.page}>
@@ -220,13 +234,24 @@ function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, 
         </View>
       ) : null}
 
-      {accountStep ? (
+      {noBank ? (
+        <NoAccountOptionList
+          options={[
+            // Without file storage the upload fails, after the account it goes into was created.
+            ...(importAvailable ? [{ key: 'import', icon: 'file-text' as const, label: t('onboarding.firstRun.noBank.import'), hint: t('onboarding.firstRun.noBank.importHint'), disabled: pending, onPress: () => void onImportStatement() }] : []),
+            { key: 'manual', icon: 'pencil', label: t('onboarding.firstRun.noBank.manual'), hint: t('onboarding.firstRun.noBank.manualHint'), disabled: pending, onPress: () => void onCreateAccount('no-bank') },
+          ]}
+          testID="onboarding-no-bank"
+        />
+      ) : null}
+
+      {accountStep && !noBank ? (
         <Button
           accessibilityLabel={t('onboarding.firstRun.account.manualCta')}
           block
           disabled={pending || !view.createAccountActionAvailable}
           label={t('onboarding.firstRun.account.manualCta')}
-          onPress={() => void onCreateAccount()}
+          onPress={() => void onCreateAccount('account')}
           variant="outline"
         />
       ) : null}
@@ -240,7 +265,15 @@ function OnboardingJourney({ palette, view, pending, completionFailure, onSkip, 
         </Pressable>
       ) : null}
       <View style={styles.spacer} />
-      {accountStep ? (
+      {noBank ? (
+        <Button
+          accessibilityLabel={t('onboarding.firstRun.noBank.skip')}
+          disabled={pending || !view.skipActionAvailable}
+          label={t('onboarding.firstRun.noBank.skip')}
+          onPress={finish}
+          variant="ghost"
+        />
+      ) : accountStep ? (
         <Button
           accessibilityLabel={t('onboarding.firstRun.account.cta')}
           disabled={pending || !view.primaryActionAvailable}

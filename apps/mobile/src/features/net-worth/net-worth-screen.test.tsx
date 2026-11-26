@@ -188,6 +188,37 @@ describe('NetWorthScreen (Home)', () => {
     expect(props.onNavigate).toHaveBeenCalledWith('/accounts')
   })
 
+  it('with no accounts at all, offers the three ways in, and net worth leaves the adding to them', async () => {
+    const { view, props } = await renderScreen({ state: { status: 'loaded', data: { ...data, total: 0, rows: [] } } }, { noAccounts: { importAvailable: true }, setup: { account: false, transactions: false, budget: false, portfolio: false } })
+    expect(view.getByText('No accounts yet')).toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Add an account' })).toBeNull()
+    expect(view.getByRole('header', { name: 'Add your first account' })).toBeOnTheScreen()
+
+    await fireEvent.press(view.getByRole('button', { name: 'Connect a bank' }))
+    expect(props.onNavigate).toHaveBeenLastCalledWith('/more/banking/connect')
+    await fireEvent.press(view.getByRole('button', { name: 'Import a statement, A file exported from your bank' }))
+    expect(props.onNavigate).toHaveBeenLastCalledWith('/accounts/create?then=import')
+    await fireEvent.press(view.getByRole('button', { name: 'Add an account by hand, A name and a balance' }))
+    expect(props.onNavigate).toHaveBeenLastCalledWith('/accounts/create')
+
+    // The card asks for the account; the checklist does not ask again.
+    expect(view.getByText('0 of 3 steps complete')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Show onboarding steps' }))
+    expect(view.queryByRole('link', { name: /Connect or add your accounts/ })).toBeNull()
+  })
+
+  it('leaves the import out of the card where the server stores no files', async () => {
+    const { view } = await renderScreen({}, { noAccounts: { importAvailable: false } })
+    expect(view.getByRole('button', { name: 'Connect a bank' })).toBeOnTheScreen()
+    expect(view.queryByTestId('no-account-option-import')).toBeNull()
+    expect(view.getByTestId('no-account-option-manual')).toBeOnTheScreen()
+  })
+
+  it('shows no no-accounts card once an account exists', async () => {
+    const { view } = await renderScreen({}, { noAccounts: null })
+    expect(view.queryByTestId('home-no-accounts')).toBeNull()
+  })
+
   it('says the history failed in the chart slot only, with a retry', async () => {
     const { view, props } = await renderScreen({}, { history: { status: 'error' } })
     expect(view.getByText('The change over time didn’t load.')).toBeOnTheScreen()

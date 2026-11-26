@@ -53,13 +53,6 @@
           "financial_freedom": "Inizia con un conto, così saldi, spese e investimenti compongono un quadro affidabile.",
           "exploring": "Inizia con un conto, oppure aggiungine uno manualmente, e scopri come funziona WonderMoney."
         },
-        "skipWarning": {
-          "headline": "Continuare senza dati finanziari reali?",
-          "description": "Puoi farlo, ma WonderMoney non potrà mostrarti saldi reali, transazioni, abitudini di spesa o patrimonio netto finché non aggiungi un conto.",
-          "primary": "Aggiungi prima un conto",
-          "secondary": "Continua senza conto",
-          "reassurance": "Puoi sempre aggiungerne uno più tardi da Conti."
-        },
         "credentialRequired": {
           "title": "Per collegare una banca serve una breve configurazione una tantum",
           "body": "Prima di collegare una banca reale, aggiungi la tua chiave Enable Banking dalle Impostazioni. Puoi farlo in qualsiasi momento dopo la configurazione. Per ora aggiungi un conto manualmente qui sopra oppure salta questo passaggio e collegalo più tardi."
@@ -316,6 +309,16 @@
         "description": "Usi già WonderMoney su un altro server o hai conservato un'esportazione? Caricala qui e riprendi da dove avevi lasciato.",
         "done": "Vai alla dashboard",
         "back": "Configura da zero"
+      },
+      "noBank": {
+        "headline": "Inizia senza banca",
+        "description": "Importa un estratto conto o aggiungi un conto con il suo saldo.",
+        "import": "Importa un estratto conto",
+        "importHint": "Un file esportato dalla tua banca",
+        "manual": "Aggiungi un conto a mano",
+        "manualHint": "Un nome e un saldo",
+        "skip": "Salta per ora",
+        "connectInstead": "Collega invece una banca"
       }
     },
     "dashboard": {

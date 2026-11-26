@@ -458,6 +458,14 @@
       "more_other": "And {{count}} more bank alerts.",
       "reconnect": "Reconnect",
       "dismiss": "Dismiss"
+    },
+    "noAccounts": {
+      "title": "Add your first account",
+      "connect": "Connect a bank",
+      "import": "Import a statement",
+      "importHint": "A file exported from your bank",
+      "manual": "Add an account by hand",
+      "manualHint": "A name and a balance"
     }
   },
   "netWorthHistory": {
@@ -4160,6 +4168,15 @@
           "title": "Net worth as the north star",
           "description": "Accounts and investments combine into one number that helps you understand your position."
         }
+      },
+      "noBank": {
+        "headline": "Start without a bank",
+        "description": "Bring in a statement, or add an account with its balance.",
+        "import": "Import a statement",
+        "importHint": "A file exported from your bank",
+        "manual": "Add an account by hand",
+        "manualHint": "A name and a balance",
+        "skip": "Skip for now"
       }
     },
     "heading": "Welcome to WonderMoney",

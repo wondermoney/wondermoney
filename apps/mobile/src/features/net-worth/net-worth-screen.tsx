@@ -47,9 +47,10 @@ import {
   type SectionState,
   type SetupSteps,
 } from './home-sections'
-import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
+import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type NoAccountsCardModel, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
+import { NoAccountsCard } from './no-accounts-card'
 import { PortfolioLinkSuggestion, type PortfolioLinkSaveResult, type PortfolioLinkSuggestionModel } from './portfolio-link-suggestion'
 import type { PortfolioAccountLinkInput } from '@/features/portfolios/portfolio-account-link'
 import type { LoanDto } from '@/features/loans/loans-contract'
@@ -89,6 +90,8 @@ export type HomeSections = {
   freshness: Date | null
   /** null while its inputs load, or once dismissed. */
   setup: SetupSteps | null
+  /** Home's no-accounts card (web `NoAccountsCard`); null or absent shows none. */
+  noAccounts?: NoAccountsCardModel | null
   /** The bank connection alerts not yet dismissed; null or absent shows nothing. */
   bankAlert?: BankAlertBannerModel | null
   month: SectionState<readonly BudgetMonthRow[]>
@@ -221,7 +224,10 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
             <BankAlertBanner locale={locale} model={sections.bankAlert} onDismiss={() => props.onDismissBankAlert?.()} onNavigate={props.onNavigate} />
           ) : null}
 
-          {sections.setup ? <SetupChecklist onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
+          {sections.noAccounts ? <NoAccountsCard importAvailable={sections.noAccounts.importAvailable} onNavigate={props.onNavigate} /> : null}
+
+          {/* While the card asks for the account, the checklist does not ask again. */}
+          {sections.setup ? <SetupChecklist hideAccount={Boolean(sections.noAccounts)} onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
 
           {layout
             .filter((entry) => entry.id !== 'net-worth' && !entry.hidden)
@@ -291,7 +297,8 @@ function NetWorthHero({ state, sections, today, locale, onRefresh, onLogout, onV
       <View style={styles.hero}>
         {header}
         <SectionEmpty
-          action={<Button label={t('home.netWorth.emptyAction')} onPress={() => onNavigate('/accounts')} />}
+          // Beside the no-accounts card, the adding is the card's.
+          action={sections.noAccounts ? undefined : <Button label={t('home.netWorth.emptyAction')} onPress={() => onNavigate('/accounts')} />}
           body={t('home.netWorth.emptyBody')}
           title={t('home.netWorth.emptyTitle')}
         />

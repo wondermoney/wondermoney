@@ -22,6 +22,8 @@ interface SetupChecklistCardProps {
   hasReviewedTransactions: boolean;
   hasBudget: boolean;
   hasPortfolio: boolean;
+  /** Left out while Home's no-accounts card offers the ways to add one. */
+  hideAccountStep?: boolean;
 }
 
 const steps = [
@@ -38,12 +40,15 @@ export function SetupChecklistCard({
   hasReviewedTransactions,
   hasBudget,
   hasPortfolio,
+  hideAccountStep = false,
 }: SetupChecklistCardProps) {
   const t = useTranslations();
   const isDemo = useIsDemoProfile({ fetch: false });
   const [isExpanded, setIsExpanded] = useState(false);
   const { isDismissed, dismiss } = useDismissibleActivation("setup-checklist");
-  const visibleSteps = steps;
+  const visibleSteps = hideAccountStep
+    ? steps.filter((step) => step.key !== "account")
+    : steps;
 
   const completed = {
     account: hasAccount,

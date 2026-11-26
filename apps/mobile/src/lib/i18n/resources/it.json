@@ -458,6 +458,14 @@
       "more_other": "E altri {{count}} avvisi bancari.",
       "reconnect": "Ricollega",
       "dismiss": "Ignora"
+    },
+    "noAccounts": {
+      "title": "Aggiungi il tuo primo conto",
+      "connect": "Collega una banca",
+      "import": "Importa un estratto conto",
+      "importHint": "Un file esportato dalla tua banca",
+      "manual": "Aggiungi un conto a mano",
+      "manualHint": "Un nome e un saldo"
     }
   },
   "netWorthHistory": {
@@ -4160,6 +4168,15 @@
           "title": "Il patrimonio netto come stella polare",
           "description": "Conti e investimenti si combinano in un unico numero che ti aiuta a capire la tua situazione."
         }
+      },
+      "noBank": {
+        "headline": "Inizia senza banca",
+        "description": "Importa un estratto conto o aggiungi un conto con il suo saldo.",
+        "import": "Importa un estratto conto",
+        "importHint": "Un file esportato dalla tua banca",
+        "manual": "Aggiungi un conto a mano",
+        "manualHint": "Un nome e un saldo",
+        "skip": "Salta per ora"
       }
     },
     "heading": "Ti diamo il benvenuto in WonderMoney",
