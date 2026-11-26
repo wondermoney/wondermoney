@@ -5331,6 +5331,36 @@
         }
       }
     },
+    "/v1/user/mcp-clients": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/user/mcp-clients/{clientId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/v1/user/calendar-feed-token": {
       "get": {
         "description": "",

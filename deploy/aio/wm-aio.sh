@@ -6,8 +6,9 @@
 #   API       127.0.0.1:3001   applies migrations first
 #   worker    127.0.0.1:3002   (health only)
 #   web       127.0.0.1:3100
-#   Caddy     0.0.0.0:3000     the only published port: /v1/* and /api/auth/* to the API, the
-#                              storage bucket to SeaweedFS, everything else to the web app
+#   Caddy     0.0.0.0:3000     the only published port: /v1/*, /api/auth/* and /.well-known/oauth-*
+#                              to the API, the storage bucket to SeaweedFS, everything else to the
+#                              web app
 #
 # When any of them exits the others are stopped and the container exits, so Docker's restart
 # policy starts it again whole. Secrets are generated on the first start and kept in
@@ -322,6 +323,9 @@ caddyfile="$RUN_DIR/caddy/Caddyfile"
   echo "    reverse_proxy 127.0.0.1:$PORT_API"
   echo '  }'
   echo "  handle /api/auth/* {"
+  echo "    reverse_proxy 127.0.0.1:$PORT_API"
+  echo '  }'
+  echo "  handle /.well-known/oauth-* {"
   echo "    reverse_proxy 127.0.0.1:$PORT_API"
   echo '  }'
   if $USE_BUNDLED_STORAGE; then

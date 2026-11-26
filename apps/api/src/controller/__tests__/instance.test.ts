@@ -70,6 +70,7 @@ describe('GET /v1/instance', () => {
         marketDataCapabilities: [],
         marketDataProviders: [],
         mcp: true,
+        mcpOAuth: false,
         oidc: null,
         passkey: true,
         // APP_URL's hostname (vitest.setup.ts): passkeys belong to the web app.
@@ -214,6 +215,20 @@ describe('GET /v1/instance', () => {
 
     vi.stubEnv('MCP_ENABLED', 'false');
     expect((await describeInstance())).toMatchObject({ features: { mcp: false } });
+  });
+
+  it('reports OAuth for the MCP server only when MCP_OAUTH_ENABLED turns it on', async () => {
+    for (const key of INTEGRATION_KEYS) vi.stubEnv(key, '');
+    vi.stubEnv('MCP_ENABLED', '');
+    vi.stubEnv('MCP_OAUTH_ENABLED', '');
+    expect((await describeInstance())).toMatchObject({ features: { mcpOAuth: false } });
+
+    vi.stubEnv('MCP_OAUTH_ENABLED', 'true');
+    expect((await describeInstance())).toMatchObject({ features: { mcpOAuth: true } });
+
+    // It needs the MCP server itself.
+    vi.stubEnv('MCP_ENABLED', 'false');
+    expect((await describeInstance())).toMatchObject({ features: { mcpOAuth: false } });
   });
 
   it('offers Google sign-in only when both of its credentials are set', async () => {

@@ -4,6 +4,7 @@ import { ipKeyGenerator, rateLimit, type RateLimitInfo } from 'express-rate-limi
 import { StatusCodes } from 'http-status-codes';
 
 import { IS_PROD } from '@config/env';
+import { mcpCredentialKey } from '@service/mcp/mcp-types';
 import { ERROR_CODE } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -218,6 +219,10 @@ export function buildRateLimitKey(req: Request, scope: RateLimitFamily['scope'])
     if (apiTokenKey !== undefined) {
       return `t:${apiTokenKey}`;
     }
+    // An MCP OAuth grant (one person, one client) has no token row: it keys on the grant, so
+    // everyone reaching the server through the same client's addresses keeps a budget of their own.
+    const mcpIdentity = req.mcpIdentity;
+    if (mcpIdentity) return mcpCredentialKey(mcpIdentity.credential);
     return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
   }
   if (scope === 'identity') {

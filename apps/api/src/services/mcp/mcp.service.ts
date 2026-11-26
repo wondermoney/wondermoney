@@ -12,18 +12,22 @@ import { buildInfo } from '@utils/constants';
 import logger from '@utils/logger';
 
 import { consumeMcpToolCall } from './mcp-rate-limit.service';
-import type { McpRequestIdentity } from './mcp-types';
+import { mcpCredentialKey, type McpRequestIdentity } from './mcp-types';
 
 /**
- * The MCP server: the read tools for a token with `mcp:read`, the `propose_*` tools for one with
- * `mcp:propose`. A proposal only waits for the person to apply it in the app; no MCP tool, and
- * no API token, can apply one.
+ * The MCP server: the read tools for a caller with `mcp:read`, the `propose_*` tools for a personal
+ * API token with `mcp:propose`. A proposal only waits for the person to apply it in the app; no
+ * MCP tool, and no token, can apply one. An OAuth client (ChatGPT) is only ever granted
+ * `mcp:read`.
+ *
+ * Every read tool is annotated read-only and returns its data twice: as `structuredContent` for
+ * clients that read structured results (the ChatGPT Apps SDK), and as JSON text for the rest.
  *
  * Stateless Streamable HTTP: every POST gets a fresh `McpServer` and transport, so there is no
  * server-side session to leak between callers and no state to expire. The caller is resolved
- * from their personal API token before this runs (`middleware/mcp-auth.ts`), and every tool
- * reads through the request EntityManager, so the tenant filter and its per-account privacy
- * carve-out apply exactly as they do for the assistant.
+ * from their personal API token or OAuth access token before this runs (`middleware/mcp-auth.ts`),
+ * and every tool reads through the request EntityManager, so the tenant filter and its
+ * per-account privacy carve-out apply exactly as they do for the assistant.
  */
 export function createMcpServer(identity: McpRequestIdentity): McpServer {
   const { version } = buildInfo();
@@ -31,20 +35,29 @@ export function createMcpServer(identity: McpRequestIdentity): McpServer {
   const context: AiToolContext = {
     appuserKey: identity.appuser.appuserKey,
     currency: identity.appuser.currencyKey.code || 'EUR',
-    origin: { apiTokenKey: identity.apiTokenKey, source: 'mcp' },
+    origin: identity.credential.kind === 'api_token' ? { apiTokenKey: identity.credential.apiTokenKey, source: 'mcp' } : { source: 'mcp' },
     tenantKey: identity.tenant.tenantKey,
   };
 
   const definitions = [
-    ...(identity.scopes.includes('mcp:read') ? AI_TOOL_DEFINITIONS : []),
-    ...(identity.scopes.includes('mcp:propose') ? AI_PROPOSAL_TOOL_DEFINITIONS : []),
+    ...(identity.scopes.includes('mcp:read') ? AI_TOOL_DEFINITIONS.map((definition) => ({ definition, readOnly: true })) : []),
+    ...(identity.scopes.includes('mcp:propose') ? AI_PROPOSAL_TOOL_DEFINITIONS.map((definition) => ({ definition, readOnly: false })) : []),
   ];
-  for (const definition of definitions) {
+  const credentialKey = mcpCredentialKey(identity.credential);
+  for (const { definition, readOnly } of definitions) {
     server.registerTool(
       definition.name,
-      { description: definition.description, inputSchema: definition.inputSchema },
+      {
+        // A proposal tool writes nothing the person has not confirmed, but it does record a
+        // pending change, so only the read tools claim to be read-only.
+        annotations: readOnly
+          ? { destructiveHint: false, idempotentHint: true, openWorldHint: false, readOnlyHint: true }
+          : { destructiveHint: false, idempotentHint: false, openWorldHint: false, readOnlyHint: false },
+        description: definition.description,
+        inputSchema: definition.inputSchema,
+      },
       async (input) => {
-        if (!consumeMcpToolCall(identity.apiTokenKey)) {
+        if (!consumeMcpToolCall(credentialKey)) {
           await audit(identity, definition.name, AssistantAuditEventType.TOOL_DENIED, { status: 'rate_limited' });
           return toolError('Too many tool calls for this token. Try again in a minute.');
         }
@@ -58,7 +71,10 @@ export function createMcpServer(identity: McpRequestIdentity): McpServer {
             source: result.dataUsed.source,
             status: 'completed',
           });
-          return { content: [{ text: JSON.stringify(result.data), type: 'text' as const }] };
+          return {
+            content: [{ text: JSON.stringify(result.data), type: 'text' as const }],
+            structuredContent: toStructuredContent(result.data),
+          };
         } catch (error) {
           logger.error({ err: error, toolName: definition.name }, 'MCP tool call failed');
           await audit(identity, definition.name, AssistantAuditEventType.ERROR, { status: 'failed' });
@@ -109,17 +125,20 @@ export function methodNotAllowed(_req: Request, res: Response): void {
   res.status(405).json(jsonRpcError(-32000, 'Method not allowed.'));
 }
 
+/** MCP's `structuredContent` is a JSON object; a tool whose data is anything else is wrapped. */
 async function audit(
   identity: McpRequestIdentity,
   toolName: string,
   eventType: AssistantAuditEventType,
   metadata: Record<string, unknown>,
 ): Promise<void> {
+  const { credential } = identity;
   await AssistantAuditService.log(DI.em, {
-    apiTokenKey: identity.apiTokenKey,
+    ...(credential.kind === 'api_token' ? { apiTokenKey: credential.apiTokenKey } : { oauthClientId: credential.clientId }),
     appuserKey: identity.appuser.appuserKey,
-    // One conversation per token: the audit log's `conversation_id` groups an MCP client's calls.
-    conversationId: `mcp:${identity.apiTokenKey}`,
+    // One conversation per credential: the audit log's `conversation_id` groups an MCP client's
+    // calls, by personal token or by OAuth client.
+    conversationId: credential.kind === 'api_token' ? `mcp:${credential.apiTokenKey}` : `mcp:oauth:${credential.clientId}`,
     eventType,
     metadata: { ...metadata, toolName },
     source: AssistantAuditSource.MCP,
@@ -134,4 +153,8 @@ function jsonRpcError(code: number, message: string) {
 
 function toolError(message: string) {
   return { content: [{ text: message, type: 'text' as const }], isError: true };
+}
+
+function toStructuredContent(data: unknown): Record<string, unknown> {
+  return typeof data === 'object' && data !== null && !Array.isArray(data) ? data as Record<string, unknown> : { result: data };
 }

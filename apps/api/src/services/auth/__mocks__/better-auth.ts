@@ -109,3 +109,20 @@ export const isLegacyBcryptHash = vi.fn((hash: string) => hash.startsWith('$2'))
 export const verifyPasswordShim = vi
   .fn<(input: { hash: string; password: string }) => Promise<boolean>>()
   .mockResolvedValue(true);
+
+// OAuth for the MCP server: off in the inert double (no plugin, no grants).
+export const getMcpOAuthIssuer = vi.fn<() => Promise<string>>().mockResolvedValue('http://localhost:3001/api/auth');
+
+export const getMcpOAuthJwks = vi.fn<() => Promise<{ keys: unknown[] }>>().mockResolvedValue({ keys: [] });
+
+export const getMcpOAuthServerMetadata = vi.fn<() => Promise<null | Record<string, unknown>>>().mockResolvedValue(null);
+
+export const findMcpOAuthGrant = vi
+  .fn<(userId: string, clientId: string) => Promise<null | { consentedAt: Date; scopes: string[] }>>()
+  .mockResolvedValue(null);
+
+export const listMcpOAuthGrants = vi
+  .fn<(userId: string) => Promise<{ clientId: string; connectedAt: Date; name: null | string; redirectHost: null | string; scopes: string[] }[]>>()
+  .mockResolvedValue([]);
+
+export const revokeMcpOAuthGrant = vi.fn<(userId: string, clientId: string) => Promise<boolean>>().mockResolvedValue(false);

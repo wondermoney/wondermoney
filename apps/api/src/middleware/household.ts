@@ -67,6 +67,7 @@ export const VIEWER_PERSONAL_WRITES: readonly PersonalWrite[] = [
   { method: 'DELETE', mount: '/v1/user', path: '/me' },
   { method: 'POST', mount: '/v1/user', path: '/api-tokens' },
   { method: 'DELETE', mount: '/v1/user', path: '/api-tokens/:id' },
+  { method: 'DELETE', mount: '/v1/user', path: '/mcp-clients/:clientId' },
   { method: 'POST', mount: '/v1/user', path: '/calendar-feed-token' },
   { method: 'DELETE', mount: '/v1/user', path: '/calendar-feed-token' },
   { method: 'POST', mount: '/v1/user', path: '/pairing-codes' },

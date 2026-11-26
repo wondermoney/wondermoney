@@ -124,7 +124,8 @@ reachable from the phone, over HTTPS in practice.
 ## HTTPS
 
 One hostname is enough. The bundled proxy (the `proxy` profile) serves the web app and the API
-on the same address: `/v1/*` and `/api/auth/*` go to the API, everything else to the web app. It
+on the same address: `/v1/*`, `/api/auth/*` and `/.well-known/oauth-*` (the MCP server's OAuth
+discovery documents) go to the API, everything else to the web app. It
 is [Caddy](https://caddyserver.com), so it fetches and renews the certificate itself.
 
 In `.env`:
@@ -154,7 +155,7 @@ serves plain HTTP on port 80, with no certificate.
 
 ### Another reverse proxy
 
-Any other reverse proxy works: give it one hostname and route the same two path prefixes to the
+Any other reverse proxy works: give it one hostname and route the same path prefixes to the
 API. With Caddy on the host:
 
 ```
@@ -163,6 +164,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/oauth-* {
     reverse_proxy localhost:3001
   }
   handle {
