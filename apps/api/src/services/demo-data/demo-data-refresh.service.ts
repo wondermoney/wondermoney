@@ -1,6 +1,6 @@
 import type { RequiredEntityData } from '@mikro-orm/core';
-import type { EntityManager } from '@mikro-orm/core';
 import { QueryOrder } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/database/di';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
@@ -191,7 +191,7 @@ export class DemoDataRefreshService {
         (earliest, date) => (!earliest || date < earliest ? date : earliest),
         undefined,
       );
-      await portfolioSnapshotService.backfillSnapshotsForPortfolio(portfolio.portfolioKey, fromDate, asOfDate);
+      await portfolioSnapshotService.backfillSnapshotsForPortfolio(portfolio.portfolioKey, fromDate, asOfDate, em);
     }
   }
 

@@ -348,6 +348,7 @@ describe('demo data refresh service', () => {
       portfolio.portfolioKey,
       new Date('2026-05-06T00:00:00.000Z'),
       new Date('2026-06-05T00:00:00.000Z'),
+      em,
     );
   });
 
@@ -406,6 +407,7 @@ describe('demo data refresh service', () => {
       portfolio.portfolioKey,
       new Date('2026-04-01T00:00:00.000Z'),
       new Date('2026-06-05T00:00:00.000Z'),
+      em,
     );
   });
 
@@ -464,6 +466,7 @@ describe('demo data refresh service', () => {
       portfolio.portfolioKey,
       new Date('2026-04-01T00:00:00.000Z'),
       new Date('2026-06-05T00:00:00.000Z'),
+      em,
     );
   });
 
