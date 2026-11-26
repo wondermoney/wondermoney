@@ -14,6 +14,13 @@ describe('buildPgBossConfig', () => {
     ).toThrow(/DB_HOST|DB_PORT|DB_DATABASE|DB_USERNAME|DB_PASSWORD/);
   });
 
+  it('connects to DATABASE_URL as given, and refuses it beside DB_*', () => {
+    const url = 'postgres://wm:secret@db.example.test:6432/wondermoney?sslmode=verify-full';
+
+    expect(buildPgBossConfig({ DATABASE_URL: url }).connectionString).toBe(url);
+    expect(() => buildPgBossConfig({ DATABASE_URL: url, DB_HOST: 'localhost' })).toThrow(/DATABASE_URL and DB_HOST are both set/);
+  });
+
   it('validates the connection string inputs and encodes credentials', () => {
     const config = buildPgBossConfig({
       DB_DATABASE: 'wm db',

@@ -1,3 +1,5 @@
+import { databaseUrlOrThrow } from '@app/config/database-target';
+
 type EnvLike = Partial<Record<string, string | undefined>>;
 
 interface PgBossConfig {
@@ -18,7 +20,20 @@ const parseBoolean = (name: string, value: string | undefined, fallback: boolean
   throw new Error(`Invalid ${name} env value: ${value}`);
 };
 
-export const buildPgBossConfig = (env: EnvLike = process.env): PgBossConfig => {
+export const buildPgBossConfig = (env: EnvLike = process.env): PgBossConfig => ({
+  connectionString: pgBossConnectionString(env),
+  migrate: parseBoolean('PGBOSS_MIGRATE', env['PGBOSS_MIGRATE'], false),
+  persistWarnings: parseBoolean('PGBOSS_PERSIST_WARNINGS', env['PGBOSS_PERSIST_WARNINGS'], true),
+  schedule: parseBoolean('PGBOSS_SCHEDULE', env['PGBOSS_SCHEDULE'], false),
+  schema: env['PGBOSS_SCHEMA'] ?? 'pgboss',
+  supervise: parseBoolean('PGBOSS_SUPERVISE', env['PGBOSS_SUPERVISE'], true),
+});
+
+/** `DATABASE_URL` as given, or a URL built from the `DB_*` settings (`config/database-target.ts`). */
+function pgBossConnectionString(env: EnvLike): string {
+  const url = databaseUrlOrThrow(env);
+  if (url) return url;
+
   const host = env['DB_HOST'];
   const port = env['DB_PORT'];
   const database = env['DB_DATABASE'];
@@ -27,7 +42,7 @@ export const buildPgBossConfig = (env: EnvLike = process.env): PgBossConfig => {
   const nodeEnv = env['NODE_ENV'];
 
   if (!host || !port || !database || !username || !password) {
-    throw new Error(`Invalid DB data in .env file for ENV ${nodeEnv ?? 'unknown'}; expected DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD`);
+    throw new Error(`Invalid DB data in .env file for ENV ${nodeEnv ?? 'unknown'}; expected DATABASE_URL, or DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD`);
   }
 
   if (!/^\d+$/.test(port)) {
@@ -36,12 +51,5 @@ export const buildPgBossConfig = (env: EnvLike = process.env): PgBossConfig => {
 
   const auth = password ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@` : `${encodeURIComponent(username)}@`;
 
-  return {
-    connectionString: `postgres://${auth}${host}:${port}/${encodeURIComponent(database)}`,
-    migrate: parseBoolean('PGBOSS_MIGRATE', env['PGBOSS_MIGRATE'], false),
-    persistWarnings: parseBoolean('PGBOSS_PERSIST_WARNINGS', env['PGBOSS_PERSIST_WARNINGS'], true),
-    schedule: parseBoolean('PGBOSS_SCHEDULE', env['PGBOSS_SCHEDULE'], false),
-    schema: env['PGBOSS_SCHEMA'] ?? 'pgboss',
-    supervise: parseBoolean('PGBOSS_SUPERVISE', env['PGBOSS_SUPERVISE'], true),
-  };
-};
+  return `postgres://${auth}${host}:${port}/${encodeURIComponent(database)}`;
+}

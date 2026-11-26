@@ -25,9 +25,46 @@ describe('checkLocalDbTarget', () => {
     expect(check({ ...REMOTE, ALLOW_REMOTE_DB: '1' }, true)).toMatchObject({ allowed: true, level: 'warn' });
   });
 
-  it('refuses a target it cannot verify: no DB_HOST, including one given only as DATABASE_URL', () => {
+  it('refuses a target it cannot verify: no DB_HOST and no DATABASE_URL', () => {
     expect(check({}, true).allowed).toBe(false);
-    expect(check({ DATABASE_URL: 'postgres://wm@localhost:5434/wmdb' }, false).allowed).toBe(false);
+  });
+
+  describe('with the database given as DATABASE_URL', () => {
+    const localUrl = { DATABASE_URL: 'postgres://wm:never-printed@localhost:5434/wmdb' };
+    const remoteUrl = { DATABASE_URL: 'postgres://wm:never-printed@db.example.com:5432/wm_production?sslmode=verify-full' };
+
+    it('checks the host the URL names', () => {
+      expect(check(localUrl, false)).toMatchObject({ allowed: true, level: 'ok' });
+      expect(check(remoteUrl, false).allowed).toBe(false);
+      expect(check({ ...remoteUrl, ALLOW_REMOTE_DB: '1' }, false).allowed).toBe(false);
+      expect(check(remoteUrl, true).allowed).toBe(false);
+      expect(check({ ...remoteUrl, ALLOW_REMOTE_DB: '1' }, true)).toMatchObject({ allowed: true, level: 'warn' });
+    });
+
+    it('reports the host and database it checked, never the credentials', () => {
+      const { message } = check(remoteUrl, true);
+
+      expect(message).toContain('db.example.com');
+      expect(message).toContain('wm_production');
+      expect(message).not.toContain('never-printed');
+    });
+
+    it.each([
+      ['not a url'],
+      ['postgres://wm@localhost:5434'],
+      ['postgres:///wmdb?host=/var/run/postgresql'],
+    ])('refuses DATABASE_URL=%s, which it cannot check', (value) => {
+      expect(check({ DATABASE_URL: value }, true).allowed).toBe(false);
+      expect(check({ ALLOW_REMOTE_DB: '1', DATABASE_URL: value }, true).allowed).toBe(false);
+    });
+
+    it('refuses DATABASE_URL beside DB_*, even when both name a local database', () => {
+      const both = check({ ...LOCAL, ...localUrl }, false);
+
+      expect(both.allowed).toBe(false);
+      expect(both.message).toContain('DATABASE_URL and DB_HOST');
+      expect(both.message).not.toContain('never-printed');
+    });
   });
 
   it.each([

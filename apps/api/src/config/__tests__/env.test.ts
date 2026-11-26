@@ -25,9 +25,7 @@ function validEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     // Must be real base64 decoding to 32 bytes — the schema checks the shape, not just
     // presence, after production shipped a 34-byte key that passed a non-empty check.
     CREDENTIAL_ENCRYPTION_KEY_V1: Buffer.alloc(32, 1).toString('base64'),
-    DATABASE_URL: 'postgres://user:pass@localhost:5432/db',
-    // The DB_* trio as well: a connection target may be given either way, and including
-    // both means removing one does not masquerade as "required".
+    // The database as DB_*; DATABASE_URL is the other way to give it, never beside them.
     DB_DATABASE: 'wmdb',
     DB_HOST: 'localhost',
     DB_PASSWORD: 'pw',
@@ -120,7 +118,7 @@ describe('environment validation', () => {
     expect(() => loadEnv({ role: 'api', source: validEnv({ ADMIN_API_KEY: '   ' }) })).toThrow(/ADMIN_API_KEY/);
   });
 
-  it('accepts either DATABASE_URL or the discrete DB_* set, but not neither', () => {
+  it('accepts either DATABASE_URL or the discrete DB_* set, but not neither (both: configuration.test.ts)', () => {
     const discrete = validEnv({
       DATABASE_URL: undefined,
       DB_DATABASE: 'wondermoney',
@@ -129,11 +127,13 @@ describe('environment validation', () => {
     });
     expect(() => loadEnv({ role: 'api', source: discrete })).not.toThrow();
 
-    // "Neither" means clearing both forms — the fixture supplies both, so dropping only
-    // DATABASE_URL leaves a perfectly valid discrete configuration behind.
-    const neither = validEnv({
-      DATABASE_URL: undefined, DB_DATABASE: undefined, DB_HOST: undefined, DB_USERNAME: undefined,
+    const url = validEnv({
+      DATABASE_URL: 'postgres://user:pass@localhost:5432/db',
+      DB_DATABASE: undefined, DB_HOST: undefined, DB_PASSWORD: undefined, DB_PORT: undefined, DB_USERNAME: undefined,
     });
+    expect(() => loadEnv({ role: 'api', source: url })).not.toThrow();
+
+    const neither = validEnv({ DB_DATABASE: undefined, DB_HOST: undefined, DB_USERNAME: undefined });
     expect(() => loadEnv({ role: 'api', source: neither })).toThrow(/DATABASE_URL/);
   });
 

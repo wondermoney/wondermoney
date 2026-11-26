@@ -12,6 +12,7 @@ import { Pool } from 'pg';
 
 import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
+import { databaseUrlOrThrow } from '@config/database-target';
 import { IS_PROD, IS_PRODUCTION_LIKE } from '@config/env';
 import { instanceName } from '@config/instance-name';
 import { isMcpOAuthSwitchOn } from '@config/mcp';
@@ -62,11 +63,16 @@ if (IS_PRODUCTION_LIKE && !authConfig.betterAuthSecret) {
 const BETTER_AUTH_SCHEMA = 'better_auth';
 
 /**
- * Build a dedicated pg Pool for better-auth from the same `DB_*` env the app and
- * pg-boss use, pinning `search_path` to the `better_auth` schema so every query
- * (and better-auth's own CLI-generated schema) resolves there instead of `public`.
+ * Build a dedicated pg Pool for better-auth from the same database settings the app and pg-boss
+ * use (`DATABASE_URL`, or `DB_*`: `config/database-target.ts`), pinning `search_path` to the
+ * `better_auth` schema so every query (and better-auth's own CLI-generated schema) resolves there
+ * instead of `public`.
  */
 const buildBetterAuthPool = (env: NodeJS.ProcessEnv = process.env): Pool => {
+  const options = `-c search_path=${BETTER_AUTH_SCHEMA}`;
+  const url = databaseUrlOrThrow(env);
+  if (url) return new Pool({ connectionString: url, options });
+
   const host = env['DB_HOST'];
   const port = env['DB_PORT'];
   const database = env['DB_DATABASE'];
@@ -75,14 +81,14 @@ const buildBetterAuthPool = (env: NodeJS.ProcessEnv = process.env): Pool => {
 
   if (!host || !port || !database || !username || !password) {
     throw new Error(
-      'Invalid DB data in .env file for better-auth; expected DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD',
+      'Invalid DB data in .env file for better-auth; expected DATABASE_URL, or DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD',
     );
   }
 
   const credentials = `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`;
   const connectionString = `postgres://${credentials}${host}:${port}/${encodeURIComponent(database)}`;
 
-  return new Pool({ connectionString, options: `-c search_path=${BETTER_AUTH_SCHEMA}` });
+  return new Pool({ connectionString, options });
 };
 
 const betterAuthPool = buildBetterAuthPool();

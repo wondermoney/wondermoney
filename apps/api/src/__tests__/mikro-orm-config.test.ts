@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url';
 
 import { Configuration } from '@mikro-orm/core';
+import { PostgreSqlConnection } from '@mikro-orm/postgresql';
+import { Client } from 'pg';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // vitest.setup.ts mocks `dotenv` and points DOTENV_CONFIG_PATH at /dev/null. The real module is
@@ -90,6 +92,45 @@ describe('mikro-orm.config default export', () => {
 
       expect(config.get('host')).toBe('exported.example.test');
       expect(config.get('dbName')).toBe('wm_from_dotenv');
+    });
+  });
+
+  // `migrate:prd:pending` is the MikroORM CLI with NODE_ENV=production and this config.
+  it('resolves with only the database settings, no app secrets', async () => {
+    for (const key of Object.keys(env)) {
+      if (!key.startsWith('DB_') && key !== 'NODE_ENV') vi.stubEnv(key, undefined);
+    }
+    const { default: options } = await import('../mikro-orm.config');
+
+    const config = new Configuration(options, false);
+
+    expect(config.get('host')).toBe('db.internal');
+    expect(config.get('dbName')).toBe('wm_staging');
+  });
+
+  describe('with the database given as DATABASE_URL', () => {
+    beforeEach(() => {
+      for (const key of DB_KEYS) vi.stubEnv(key, undefined);
+      vi.stubEnv('DATABASE_URL', 'postgres://wm:secret@db.example.test:6432/wondermoney?sslmode=verify-full');
+    });
+
+    it('hands pg the whole URL, so it connects to that database over TLS', async () => {
+      const { default: options } = await import('../mikro-orm.config');
+      const config = new Configuration(options, false);
+
+      // What MikroORM's own pool is built from.
+      const client = new Client(new PostgreSqlConnection(config).mapOptions(config.get('driverOptions')));
+
+      expect(config.get('dbName')).toBe('wondermoney');
+      expect(client).toMatchObject({ database: 'wondermoney', host: 'db.example.test', port: 6432, user: 'wm' });
+      expect(client.ssl).toBeTruthy();
+    });
+
+    it('refuses it beside DB_*, rather than choosing one', async () => {
+      vi.stubEnv('DB_HOST', 'db.internal');
+      const { default: options } = await import('../mikro-orm.config');
+
+      expect(() => new Configuration(options, false)).toThrow(/DATABASE_URL and DB_HOST are both set/);
     });
   });
 });

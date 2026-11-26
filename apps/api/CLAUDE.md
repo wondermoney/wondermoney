@@ -12,14 +12,17 @@ the repository root: `pnpm install && pnpm build:lib` first, since the API impor
 ## Database safety: read before any DB command
 
 **`.env` decides which database you touch.** Every `migrate:*`, `seed:*` and `demo:*` script
-reads `.env` (`src/config/load-dotenv.ts`) and connects to whatever `DB_HOST`/`DB_PORT`/
-`DB_DATABASE` resolve to (process env first, then the *last* assignment in `.env`), regardless
-of the `dev`/`prd` in its name. A `.env` can hold a block for a remote database, and a port
-forward to one looks like `localhost`. The local compose
-Postgres is on **5434**, so it is never confused with a forwarded `5432`. Run
-`grep -E '^DB_' .env` and confirm the target before anything that writes.
+reads `.env` (`src/config/load-dotenv.ts`) and connects to whatever `DATABASE_URL`, or else
+`DB_HOST`/`DB_PORT`/`DB_DATABASE`, resolve to (process env first, then the *last* assignment in
+`.env`), regardless of the `dev`/`prd` in its name. `DATABASE_URL` beside any `DB_*` setting is
+refused, by every script and by the API and the worker (`src/config/database-target.ts`). A
+`.env` can hold a block for a remote database, and a port forward to one looks like `localhost`.
+The local compose Postgres is on **5434**, so it is never confused with a forwarded `5432`. Run
+`grep -E '^DB_|DATABASE_URL' .env` and confirm the target before anything that writes. They
+need only the database settings, not the app's secrets.
 
-- `scripts/assert-local-db.mjs` guards the scripts: `*:fresh` refuses any non-local host;
+- `scripts/assert-local-db.mjs` guards the scripts, checking the host of `DATABASE_URL` when it
+  is set (one that doesn't parse is refused) and `DB_HOST` otherwise: `*:fresh` refuses any non-local host;
   `migrate:dev`, `migrate:manual`, `seed:dev` and `demo:{seed,reset,refresh}:dev` need
   `ALLOW_REMOTE_DB=1` for one. All of them refuse a non-local `MIKRO_ORM_HOST` or
   `MIKRO_ORM_CLIENT_URL` and any `MIKRO_ORM_DB_NAME`, which MikroORM merges over the config.

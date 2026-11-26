@@ -45,17 +45,13 @@ export function createMikroOrmOptions(
   } as const;
 
   const base: Partial<Options<PostgreSqlDriver>> = {
-    dbName: database.database ?? undefined,
+    ...connectionTarget(database),
     driver: PostgreSqlDriver,
     entityRepository: () => ExtendedEntityRepository,
     extensions: [Migrator, SeedManager],
-    host: database.host ?? undefined,
     metadataProvider: TsMorphMetadataProvider,
     namingStrategy: NamingStrategy,
-    password: database.password ?? undefined,
     pool: { ...pool },
-    port: database.port ?? undefined,
-    user: database.username ?? undefined,
   };
 
   if (runtime.isProduction || runtime.isStaging) {
@@ -93,6 +89,27 @@ export function createMikroOrmOptions(
   }
 
   throw new Error(`Invalid runtime ${runtime.appEnv}`);
+}
+
+/**
+ * Where MikroORM connects. A `DATABASE_URL` goes in as `clientUrl`, from which MikroORM takes the
+ * database name, and to `pg` whole as `connectionString`: MikroORM itself keeps only the host,
+ * port, credentials and database of a `clientUrl`, which would drop `?sslmode=require` and connect
+ * without TLS. `pg` applies the URL over the fields MikroORM derived from it.
+ */
+function connectionTarget(
+  database: ReturnType<typeof loadConfiguration<'migration' | 'orm-cli'>>['database'],
+): Partial<Options<PostgreSqlDriver>> {
+  if (database.connectionString) {
+    return { clientUrl: database.connectionString, driverOptions: { connectionString: database.connectionString } };
+  }
+  return {
+    dbName: database.database ?? undefined,
+    host: database.host ?? undefined,
+    password: database.password ?? undefined,
+    port: database.port ?? undefined,
+    user: database.username ?? undefined,
+  };
 }
 
 /**
