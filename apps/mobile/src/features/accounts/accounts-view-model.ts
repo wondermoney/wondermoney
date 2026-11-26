@@ -42,6 +42,8 @@ export type AccountSummaryViewModel = Readonly<{
   fx?: FxState
   /** The caller's access (#95). `read` hides every edit action; absent on older fixtures: writable. */
   myAccess?: AccountAccess
+  /** A closed account takes no statement import; absent on older fixtures and APIs: open. */
+  closed?: boolean
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -66,6 +68,7 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   accountType: dto.accountType ?? null,
   creditCard: dto.creditCard ?? null,
   myAccess: dto.myAccess,
+  closed: dto.closed === true,
   attribution: dto.attribution ?? null,
   fx: resolveFxState({
     fxStatus: dto.fxStatus,

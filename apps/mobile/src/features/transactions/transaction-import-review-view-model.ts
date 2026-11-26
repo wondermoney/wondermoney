@@ -43,7 +43,8 @@ export type TransactionImportStage =
   | Readonly<{ kind: 'review'; needsMapping: boolean }>
   /** The commit is writing rows; `stalled` when its job stopped (asked again, it carries on). */
   | Readonly<{ kind: 'importing'; stalled: boolean; imported: number; total: number }>
-  | Readonly<{ kind: 'done'; outcome: 'succeeded' | 'partial' | 'failed'; imported: number; skipped: number; failed: number; detailsDeleted: boolean }>
+  /** `accessLost`: the commit stopped part way, the person no longer writing to its account; what it imported stays. */
+  | Readonly<{ kind: 'done'; outcome: 'succeeded' | 'partial' | 'failed'; imported: number; skipped: number; failed: number; detailsDeleted: boolean; accessLost: boolean }>
   /** The file could not be read (the session ended with a code). */
   /** `access`: the job refused it, the person no longer writing to its account; else the file did not read. */
   | Readonly<{ kind: 'read-failed'; reason?: 'access' }>
@@ -108,6 +109,7 @@ function doneStage(session: TransactionImportSessionDto, outcome: 'succeeded' | 
     failed: session.counts.failed,
     // Seven days after a commit only the summary is kept.
     detailsDeleted: session.detailsDeletedAt !== null,
+    accessLost: session.errorCode === ACCOUNT_ACCESS_ERROR,
   }
 }
 

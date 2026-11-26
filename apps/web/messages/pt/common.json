@@ -2837,6 +2837,7 @@
   "import-review-date-order-hint-month-first": "O ficheiro não o indica, por isso foram lidas com o mês primeiro (01/15/2026 é 15 de janeiro). Escolhe a outra ordem se estiver errado.",
   "import-review-done": "{imported, plural, one {# transação importada} other {# transações importadas}}, {skipped} ignoradas.",
   "import-review-done-failed": "{failed, plural, one {# linha não pôde ser importada} other {# linhas não puderam ser importadas}}.",
+  "import-review-access-lost-partway": "Já não podes importar para esta conta, por isso o resto do ficheiro não foi importado.",
   "import-review-details-deleted": "Os detalhes linha a linha desta importação já não são guardados: são eliminados 7 dias depois de uma importação. As transações importadas continuam na conta.",
   "portfolioAccountLink": {
     "account-label": "Conta onde está este portefólio",

@@ -681,7 +681,10 @@ function Working({
   );
 }
 
-/** The API's `errorCode` for a session it refused once the person could no longer write to its account. */
+/**
+ * The API's `errorCode` for a session it refused once the person could no longer write to its
+ * account: on a failed session nothing was imported, on a partial one the commit stopped part way.
+ */
 const ACCOUNT_ACCESS_ERROR = "account_access";
 
 function Outcome({
@@ -727,6 +730,12 @@ function Outcome({
       {session.counts.failed > 0 ? (
         <p className="text-muted-foreground">
           {t("import-review-done-failed", { failed: session.counts.failed })}
+        </p>
+      ) : null}
+      {/* The commit stopped part way: what it wrote before stays. */}
+      {session.errorCode === ACCOUNT_ACCESS_ERROR ? (
+        <p className="text-muted-foreground">
+          {t("import-review-access-lost-partway")}
         </p>
       ) : null}
       {session.detailsDeletedAt ? (
@@ -892,6 +901,8 @@ function AccountMapping({
   onSave: (mapping: TransactionImportAccountMapping) => void;
 }) {
   const t = useTranslations();
+  // A closed account takes no import (the API answers 409), so it is not offered.
+  const offeredAccounts = accounts.filter((account) => !account.closed);
   const [mapping, setMapping] = useState<
     Record<string, number | typeof NEW_ACCOUNT>
   >(() => {
@@ -899,7 +910,9 @@ function AccountMapping({
     // statement's IBAN against the account's number, an account of the same name); the person
     // still confirms it. Only an account listed here: one the select does not offer would show
     // its placeholder while Save sent the rows to it.
-    const offered = new Set(accounts.map((account) => account.accountKey));
+    const offered = new Set(
+      offeredAccounts.map((account) => account.accountKey),
+    );
     const initial: Record<string, number | typeof NEW_ACCOUNT> = {
       ...session.accountMapping,
     };
@@ -963,7 +976,7 @@ function AccountMapping({
               <SelectValue placeholder={t("account")} />
             </SelectTrigger>
             <SelectContent>
-              {accounts.map((account) => (
+              {offeredAccounts.map((account) => (
                 <SelectItem
                   key={account.accountKey}
                   value={String(account.accountKey)}

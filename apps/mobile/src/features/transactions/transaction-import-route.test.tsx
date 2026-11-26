@@ -87,6 +87,31 @@ describe('TransactionImportRoute', () => {
     expect(mockReviewProps?.accounts).toEqual([{ id: 7, name: 'Daily account' }, { id: 9, name: 'Joint · Shared by Ana' }])
   })
 
+  it('offers no closed account to import into', async () => {
+    mockUseAccounts = () => ({ data: { accounts: [
+      accountsData.accounts[0],
+      { ...accountsData.accounts[0], accountKey: 11, accountName: 'Old savings', closed: true },
+    ] }, isLoading: false })
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: /^Account,/ }))
+    expect(view.getByRole('radio', { name: 'Daily account' })).toBeOnTheScreen()
+    expect(view.queryByRole('radio', { name: 'Old savings' })).not.toBeOnTheScreen()
+  })
+
+  it('maps a file\'s accounts to no closed account', async () => {
+    mockParams = { accountId: '7' }
+    mockUseAccounts = () => ({ data: { accounts: [
+      { ...accountsData.accounts[0], closed: false },
+      { ...accountsData.accounts[0], accountKey: 11, accountName: 'Old savings', closed: true },
+    ] }, isLoading: false })
+    mockGetDocumentAsync.mockResolvedValue({ canceled: false, assets: [{ uri: 'file:///a.xml', name: 'a.xml' }] })
+    mockStart.mockResolvedValue({ id: '0b3c9a52-7d3e-4c4e-9d55-6f1b2a3c4d5e', expiresAt: '2026-11-19T10:00:00.000Z' })
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: 'Choose file' }))
+    await view.findByTestId('review')
+    expect(mockReviewProps?.accounts).toEqual([{ id: 7, name: 'Daily account' }])
+  })
+
   it('preselects the account id from route params', async () => {
     mockParams = { accountId: '7' }
     const view = await renderRoute()

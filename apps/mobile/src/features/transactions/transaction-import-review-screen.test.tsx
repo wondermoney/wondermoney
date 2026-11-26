@@ -216,7 +216,7 @@ describe('TransactionImportReviewScreen', () => {
   it('shows how the import ended', async () => {
     const onDone = jest.fn()
     const onImportAnother = jest.fn()
-    const { view } = await renderScreen({ stage: { kind: 'done', outcome: 'partial', imported: 3, skipped: 1, failed: 2, detailsDeleted: false }, onDone, onImportAnother })
+    const { view } = await renderScreen({ stage: { kind: 'done', outcome: 'partial', imported: 3, skipped: 1, failed: 2, detailsDeleted: false, accessLost: false }, onDone, onImportAnother })
     expect(view.getByRole('alert')).toHaveTextContent('3 transactions imported, 1 skipped.')
     expect(view.getByText("2 rows couldn't be imported.")).toBeOnTheScreen()
     await fireEvent.press(view.getByRole('button', { name: 'Done' }))
@@ -225,8 +225,14 @@ describe('TransactionImportReviewScreen', () => {
     expect(onImportAnother).toHaveBeenCalled()
   })
 
+  it('says why the rest of the file was not imported when the commit stopped part way', async () => {
+    const { view } = await renderScreen({ stage: { kind: 'done', outcome: 'partial', imported: 2, skipped: 3, failed: 0, detailsDeleted: false, accessLost: true } })
+    expect(view.getByRole('alert')).toHaveTextContent('2 transactions imported, 3 skipped.')
+    expect(view.getByText("You can no longer import into this account, so the rest of the file wasn't imported.")).toBeOnTheScreen()
+  })
+
   it('says the row details are gone seven days after a commit', async () => {
-    const { view } = await renderScreen({ stage: { kind: 'done', outcome: 'succeeded', imported: 1, skipped: 0, failed: 0, detailsDeleted: true } })
+    const { view } = await renderScreen({ stage: { kind: 'done', outcome: 'succeeded', imported: 1, skipped: 0, failed: 0, detailsDeleted: true, accessLost: false } })
     expect(view.getByText(/they are deleted 7 days after an import/)).toBeOnTheScreen()
   })
 

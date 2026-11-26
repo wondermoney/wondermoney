@@ -55,6 +55,12 @@ export interface Account {
   /** The caller's access; every edit action is hidden when it is `read`. */
   myAccess: AccountAccess;
   /**
+   * A closed account keeps its history but takes no statement import, so the import's account
+   * mapping leaves it out. Optional so fixtures written before it still type-check; an API that
+   * does not send it reads as open.
+   */
+  closed?: boolean;
+  /**
    * Member attribution (issue #96). Optional so fixtures written before it still type-check;
    * `normalizeAccount` always fills them. A joint account's spending counts as Shared; it does
    * not change who can see the account.
@@ -344,6 +350,7 @@ function normalizeAccount(account: unknown): Account {
       account.myAccess,
       account.isOwnedByViewer === true,
     ),
+    closed: account.closed === true,
     isJoint: account.isJoint === true,
     ownerAppuserKey: normalizeMemberKey(account.ownerAppuserKey),
     attribution: normalizeAttribution(account.attribution),

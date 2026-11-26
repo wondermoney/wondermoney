@@ -267,6 +267,7 @@ function Outcome({ stage, onDone, onImportAnother }: { stage: Extract<Transactio
         {t('transactionImport.review.done', { count: stage.imported, skipped: stage.skipped })}
       </Text>
       {stage.failed > 0 ? <Text tone="muted" variant="meta">{t('transactionImport.review.doneFailed', { count: stage.failed })}</Text> : null}
+      {stage.accessLost ? <Text tone="muted" variant="meta">{t('transactionImport.review.accessLostPartway')}</Text> : null}
       {stage.detailsDeleted ? <Text tone="muted" variant="meta">{t('transactionImport.review.detailsDeleted')}</Text> : null}
       <View style={styles.actions}>
         <Button block label={t('transactionImport.done')} onPress={onDone} />
