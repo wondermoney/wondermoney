@@ -1,6 +1,7 @@
 /**
  * Schema.org structured data shared across pages: the WonderMoney organization (every page, from
- * Layout.astro), the website (the homepage) and the tool pages' graph (`buildToolStructuredData`).
+ * Layout.astro), the website (the homepage), the top-level landing pages' SoftwareApplication
+ * (`buildSoftwarePageSchema`) and the tool pages' graph (`buildToolStructuredData`).
  *
  * Structured data states only what the page itself shows: the visible title, the dek, the
  * breadcrumb trail, the FAQ the page prints (`buildFaqPageSchema`), the app's stores and price
@@ -11,7 +12,7 @@ import type { FaqEntry } from "./faq"
 import type { Lang } from "./i18nLocale"
 import { ogImageFor, toolOgCard } from "./og/ogImages"
 import { toOgLocale } from "./ogLocale"
-import { toLocalizedPath, toToolsHubPath, type ToolRouteId } from "./routes"
+import { toLocalizedPath, toToolsHubPath, type RouteId, type ToolRouteId } from "./routes"
 import { APP_STORE_URL, PLAY_STORE_URL, WEB_APP_URL } from "./appLinks"
 import { getToolCatalogEntry } from "./toolsCatalog"
 import { getTranslations } from "./translations"
@@ -95,6 +96,50 @@ export function buildSoftwareApplicationSchema(locale: Lang): JsonLd {
 		},
 		downloadUrl: [APP_STORE_URL, PLAY_STORE_URL],
 		publisher: ORGANIZATION_REF,
+	}
+}
+
+/** The brand suffix of a page title: " — WonderMoney", " | WonderMoney", " - WonderMoney". */
+const TITLE_BRAND_SUFFIX = /\s+[—–|-]\s*WonderMoney\s*$/u
+
+/**
+ * A page's name for structured data: its title with only the trailing brand suffix removed, so
+ * dashes, colons and pipes inside the title stay as written.
+ */
+export function pageNameFromTitle(title: string): string {
+	return title.replace(TITLE_BRAND_SUFFIX, "").trim()
+}
+
+/** The top-level landing pages that describe WonderMoney as a SoftwareApplication, by `lp.*` namespace. */
+export const SOFTWARE_PAGE_NAMESPACES = {
+	pageEtfTracker: "etfTracker",
+	pagePortfolioTracker: "portfolioTracker",
+	pageNetWorthTracker: "netWorthTracker",
+	pageYnabAlternative: "ynabAlternative",
+	pageFireCalculator: "fireCalculator",
+	pagePersonalFinanceApp: "personalFinanceApp",
+	pageOpenBankingApp: "openBankingApp",
+	pageBudgetApp: "budgetApp",
+} as const satisfies Partial<Record<RouteId, string>>
+
+export type SoftwarePageRouteId = keyof typeof SOFTWARE_PAGE_NAMESPACES
+
+export function isSoftwarePageRouteId(routeId: RouteId): routeId is SoftwarePageRouteId {
+	return Object.hasOwn(SOFTWARE_PAGE_NAMESPACES, routeId)
+}
+
+/** A top-level landing page's SoftwareApplication: named after its title, described by its meta description. */
+export function buildSoftwarePageSchema(routeId: SoftwarePageRouteId, locale: Lang): JsonLd {
+	const t = getTranslations(locale)
+	const namespace = SOFTWARE_PAGE_NAMESPACES[routeId]
+	return {
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		name: pageNameFromTitle(t(`lp.${namespace}.metaTitle`)),
+		url: `${SITE_URL}${toLocalizedPath(routeId, locale)}`,
+		applicationCategory: "FinanceApplication",
+		operatingSystem: "Web",
+		description: t(`lp.${namespace}.metaDescription`),
 	}
 }
 
