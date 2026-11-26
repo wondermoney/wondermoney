@@ -195,6 +195,21 @@ export const RATE_LIMIT_FAMILIES = {
    */
   pairing: { limit: 10, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
+  /**
+   * Wrong authenticator codes on the routes behind `requireSensitiveSession` (API tokens, pairing
+   * codes, the calendar feed, Enable Banking keys), per person. The code is checked in-process
+   * (`auth.api.verifyTOTP`), which neither the `/api/auth/two-factor` limiter nor better-auth's own
+   * sees, so without this a stolen session could try every 6-digit code. Only a wrong code counts,
+   * a right one does not clear it, and the count is read before any code is checked. Keyed on the
+   * person, as the session already names them, so one person's guesses never lock out others
+   * behind the same address; `sensitiveTotpFailureIp` bounds an address across accounts. Never
+   * relaxed: it guards a credential check.
+   */
+  sensitiveTotpFailure: { limit: 5, relaxable: false, scope: 'identity', windowMs: QUARTER_HOUR_MS },
+
+  /** The same wrong codes, per address, across every account it uses. Never relaxed. */
+  sensitiveTotpFailureIp: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
   /** `/v1/marketing` — unauthenticated opt-out/lead endpoints. Unchanged from the previous rule. */
   publicMarketing: { limit: 50, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
@@ -370,27 +385,28 @@ function buildLimitHandler(family: RateLimitFamilyName) {
   };
 }
 
-/** One address's failed credential checks, read before the credential is looked at. */
+/** One key's failed credential checks (an address, or a person), read before the credential is looked at. */
 export interface AuthFailureBudget {
-  /** The address has used its budget: the next failure would be refused. */
+  /** The key has used its budget: the next failure would be refused. */
   overBudget: boolean;
   /** Answer 429 with `Retry-After`, as every limiter here does. */
   refuse: (res: Response) => void;
   /**
-   * Count one failed check. True when that takes the address past its budget: a 429 has been
-   * sent and the caller stops; false, and the caller sends its own 401.
+   * Count one failed check. True when that takes the key past its budget: a 429 has been
+   * sent and the caller stops; false, and the caller sends its own refusal (401, 403).
    */
   failed: (res: Response) => Promise<boolean>;
 }
 
 /**
- * A per-address budget on failed credential checks, in the same kind of store as every other
- * family (express-rate-limit's in-process `MemoryStore`, one per limiter). Unlike a limiter it
- * counts only what the caller reports as a failure, and it lets the caller read the count before
- * looking anything up, so an address over budget can be turned away before any database work.
+ * A budget on failed credential checks, keyed as the family's scope says (per address, or per
+ * verified person), in the same kind of store as every other family (express-rate-limit's
+ * in-process `MemoryStore`, one per limiter). Unlike a limiter it counts only what the caller
+ * reports as a failure, and it lets the caller read the count before looking anything up, so a
+ * key over budget can be turned away before any database work.
  */
 export function createAuthFailureLimiter(family: RateLimitFamilyName): { check: (req: Request) => Promise<AuthFailureBudget>; reset: () => Promise<void> } {
-  const { windowMs } = RATE_LIMIT_FAMILIES[family];
+  const { scope, windowMs } = RATE_LIMIT_FAMILIES[family];
   const limit = resolveFamilyLimit(family);
   const store = new MemoryStore();
   store.init({ windowMs } as RateLimitOptions);
@@ -400,7 +416,7 @@ export function createAuthFailureLimiter(family: RateLimitFamilyName): { check: 
   };
   return {
     check: async (req) => {
-      const key = buildRateLimitKey(req, 'ip');
+      const key = buildRateLimitKey(req, scope);
       const current = await store.get(key);
       return {
         failed: async (res) => {
