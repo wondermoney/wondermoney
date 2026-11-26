@@ -14,6 +14,7 @@ import type { RuleDto, RuleSuggestionDto } from '@/features/rules/rules-contract
 import { seedRuleFromSuggestion, seedRuleFromTransaction, type RuleEditorForm } from '@/features/rules/rules-view-model'
 import { toTagsState, useCreateTagForPicker, useSetTransactionTags, useTags } from '@/features/tags/use-tags'
 import { ApiError } from '@/lib/api/errors'
+import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { canWriteAccount, readOnlyAccountKeys } from '@/features/accounts/account-access'
 import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { useAccounts } from '@/features/accounts/use-accounts'
@@ -148,6 +149,8 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
   const createTag = useCreateTagForPicker()
   const { blockAccess } = useProductRuntime()
   const aiHidden = useAiHiddenPreference()
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
   const { t, i18n } = useTranslation()
   const router = useRouter()
   // "Create rule" from a row: the pre-filled form, then the saved rule's apply offer.
@@ -311,7 +314,7 @@ export function TransactionsRoute({ perAccount = false }: { perAccount?: boolean
     freshness={perAccount ? null : freshness}
     onBack={() => perAccount && accountId ? router.replace(`/accounts/${accountId}`) : router.replace('/accounts')}
     onCreate={!canAddTransactions ? undefined : () => router.push({ pathname: '/accounts/transactions/create', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
-    onImport={!canAddTransactions ? undefined : () => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
+    onImport={!canAddTransactions || !importAvailable ? undefined : () => router.push({ pathname: '/accounts/transactions/import', ...(accountId ? { params: { accountId: String(accountId) } } : {}) } as Href)}
     onScanReceipt={aiHidden || !canAddTransactions ? undefined : () => router.push('/accounts/transactions/scan' as Href)}
     onFiltersChange={setFilters}
     onRefresh={async () => { await query.refetch() }}

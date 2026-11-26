@@ -1267,6 +1267,7 @@
       "readStalled": "La lectura del archivo se detuvo antes de terminar. Vuelve a intentarlo para leerlo de nuevo.",
       "importing": "Importando… {{imported}} de {{total}} transacciones hasta ahora.",
       "stalled": "La importación se detuvo antes de terminar. Vuelve a intentarlo para seguir donde se quedó; nada se importa dos veces.",
+      "accessLost": "Ya no puedes importar en esta cuenta, así que no se importó nada.",
       "readFailed": "No pudimos leer este archivo. Elige una exportación del extracto en CSV o Excel.",
       "expired": "Esta importación caducó antes de terminar. Empieza de nuevo con el archivo.",
       "unsupported": "Esta versión de la app no puede mostrar esta importación. Actualiza la app o termínala en la web.",

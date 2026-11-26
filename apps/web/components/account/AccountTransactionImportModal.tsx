@@ -14,6 +14,7 @@ import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { FileUploader } from "@/components/ui/FileUploader";
 import { Form, FormField, FormItem } from "@/components/ui/Form";
 import { FormControl, FormLabel, FormMessage } from "@/components/ui/Form";
+import { writableAccounts } from "@/lib/account/account-access";
 import type { AccountCsvImportSuccessCallback } from "@/lib/account/account-csv-import-completion";
 import { isStatementMappingComplete } from "@/lib/account/statement-mapping";
 import { track } from "@/lib/analytics/track";
@@ -445,9 +446,8 @@ const AccountTransactionImportModal: React.FC<
     isSubmitButtonLoading ||
     createImport.isPending ||
     createPdfImport.isPending;
-  const reviewAccounts = accounts.filter(
-    (account) => account.isOwnedByViewer !== false,
-  );
+  // A file's accounts map to any account the person may write to, another member's shared one too.
+  const reviewAccounts = writableAccounts(accounts);
 
   // CSV imports upload the file to storage first; a server without storage offers none.
   if (!canImportFiles) return null;

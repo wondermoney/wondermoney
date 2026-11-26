@@ -138,7 +138,7 @@ export function TransactionImportReviewScreen(props: TransactionImportReviewScre
           {stage?.kind === 'read-failed' || stage?.kind === 'expired' || stage?.kind === 'unsupported' ? (
             <View style={styles.block}>
               <FormNotice tone={stage.kind === 'read-failed' ? 'destructive' : 'default'}>
-                {t(stage.kind === 'read-failed' ? 'transactionImport.review.readFailed' : stage.kind === 'expired' ? 'transactionImport.review.expired' : 'transactionImport.review.unsupported')}
+                {t(stage.kind === 'read-failed' ? (stage.reason === 'access' ? 'transactionImport.review.accessLost' : 'transactionImport.review.readFailed') : stage.kind === 'expired' ? 'transactionImport.review.expired' : 'transactionImport.review.unsupported')}
               </FormNotice>
               <View style={styles.actions}>
                 {stage.kind === 'unsupported' ? null : <Button block label={t('transactionImport.importAnother')} onPress={props.onImportAnother} />}

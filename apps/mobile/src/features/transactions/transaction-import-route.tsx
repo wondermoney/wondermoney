@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import * as DocumentPicker from 'expo-document-picker'
 import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useCallback, useState } from 'react'
+import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 
 import { parseAccountId } from '@/features/accounts/accounts-contract'
 import { canWriteAccount } from '@/features/accounts/account-access'
-import { mapAccounts } from '@/features/accounts/accounts-view-model'
+import { type AccountSummaryViewModel, mapAccounts } from '@/features/accounts/accounts-view-model'
 import { useAccounts } from '@/features/accounts/use-accounts'
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { shareReportCsv } from '@/features/reports/report-csv-export'
@@ -60,7 +61,8 @@ export function TransactionImportRoute() {
 
   // Only accounts the caller can edit take an import; a view-only one (#95) is not offered.
   const accountModels = accountsQuery.data ? mapAccounts(accountsQuery.data).filter(canWriteAccount) : []
-  const accounts = accountModels.map((account) => ({ id: account.accountId, name: account.accountName ?? t('accounts.unnamed') }))
+  // Another member's account says whose it is, as on Accounts; a file's accounts map to any of these.
+  const accounts = accountModels.map((account) => ({ id: account.accountId, name: importAccountLabel(account, t) }))
   const selectedAccount = accountModels.find((account) => account.accountId === selectedAccountId) ?? null
   const flow = selectedAccount ? importFlowForAccount(selectedAccount.csvImportFormat) : null
 
@@ -110,7 +112,7 @@ export function TransactionImportRoute() {
   if (review) {
     return (
       <TransactionImportReviewRoute
-        accounts={accountModels.filter((account) => account.isOwnedByViewer).map((account) => ({ id: account.accountId, name: account.accountName ?? t('accounts.unnamed') }))}
+        accounts={accounts}
         expiresAt={review.expiresAt}
         key={review.sessionId}
         onBack={back}
@@ -142,4 +144,10 @@ export function TransactionImportRoute() {
       onBack={back}
     />
   )
+}
+
+/** An account as the import's pickers list it: its name, and whose it is when it is another member's. */
+export function importAccountLabel(account: Pick<AccountSummaryViewModel, 'accountName' | 'isOwnedByViewer' | 'ownerFirstName'>, t: TFunction): string {
+  const name = account.accountName ?? t('accounts.unnamed')
+  return !account.isOwnedByViewer && account.ownerFirstName ? `${name} · ${t('accountsOverview.sharedBy', { name: account.ownerFirstName })}` : name
 }

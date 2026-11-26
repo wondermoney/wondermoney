@@ -116,7 +116,7 @@ export function TransactionImportReviewRoute({ sessionId, expiresAt, accounts, o
       locale={locale}
       locked={actions.demoLocked}
       mapping={session?.status === 'needs_mapping' && session.sourceAccounts.length > 0
-        ? { sources: session.sourceAccounts, accounts, initial: initialAccountMapping(session) }
+        ? { sources: session.sourceAccounts, accounts, initial: initialAccountMapping(session, accounts) }
         : null}
       onBack={onBack}
       onCancel={() => { void cancel() }}

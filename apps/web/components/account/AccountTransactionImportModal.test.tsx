@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => ({
   cancelImport: vi.fn(async () => ({})),
   toastError: vi.fn(),
   track: vi.fn(),
+  reviewAccounts: [] as { accountKey: number }[],
   aiHidden: false,
   statementImport: null as null | {
     maxBytes: number;
@@ -74,9 +75,16 @@ vi.mock("@/components/auth/EmailVerificationNotice", () => ({
   default: () => <div data-testid="email-verification-notice" />,
 }));
 vi.mock("./TransactionImportReview", () => ({
-  default: ({ importId }: { importId: string }) => (
-    <div data-testid="review">{importId}</div>
-  ),
+  default: ({
+    accounts,
+    importId,
+  }: {
+    accounts: { accountKey: number }[];
+    importId: string;
+  }) => {
+    mocks.reviewAccounts = accounts;
+    return <div data-testid="review">{importId}</div>;
+  },
 }));
 vi.mock("@/lib/api/instance/useInstance", () => ({
   useFeature: () => true,
@@ -268,6 +276,41 @@ test("a file from any bank is read as soon as it is picked, and is staged for re
     ["import_started", { kind: "transactions", format: "statement" }],
     ["import_mapped", { kind: "transactions", format: "statement" }],
   ]);
+});
+
+test("the review maps a file's accounts to every account the person may write to, another member's shared one too", async () => {
+  presignAnswers(false);
+  renderModal(
+    manualAccount,
+    account({
+      accountKey: 9,
+      accountName: "Joint",
+      csvImportFormat: "generic",
+      isOwnedByViewer: false,
+      myAccess: "write",
+      ownerFirstName: "Ana",
+    }),
+    account({
+      accountKey: 10,
+      accountName: "Ana's savings",
+      csvImportFormat: "generic",
+      isOwnedByViewer: false,
+      isPrivate: true,
+      myAccess: "read",
+      ownerFirstName: "Ana",
+    }),
+  );
+
+  const user = await pickFile("statement.ofx");
+  await user.click(
+    screen.getByRole("button", { name: messages["import-review-start"] }),
+  );
+
+  await screen.findByTestId("review");
+  assert.deepEqual(
+    mocks.reviewAccounts.map((option) => option.accountKey),
+    [3, 9],
+  );
 });
 
 test("a supported bank's own export is staged without columns", async () => {

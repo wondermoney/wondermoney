@@ -1,9 +1,6 @@
 import type { Request, Response } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Account } from '@entity/Account';
-import { NotFoundError } from '@utils/errors';
-
 const mocks = vi.hoisted(() => ({
   createSession: vi.fn(),
   findOne: vi.fn(),
@@ -72,32 +69,22 @@ describe('account CSV import authorization', () => {
     return { json, next, status };
   };
 
-  it('presigns only an active account owned by the current user and tenant', async () => {
+  it('presigns an upload for the account', async () => {
     mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: { name: 'bcp' } });
     mocks.generatePresignedUrlForAccountCsv.mockResolvedValueOnce({ key: 'account-41-upload.csv', presignedUrl: 'https://example.test/upload' });
     const json = vi.fn();
 
     await getS3PresignedUrlForCsvUpload(makeRequest(), { json } as unknown as Response, vi.fn());
 
-    expect(mocks.findOne).toHaveBeenCalledWith(
-      Account,
-      { accountKey: '41', accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
-      { populate: ['accountFinancialInstitutionKey'] },
-    );
     expect(mocks.generatePresignedUrlForAccountCsv).toHaveBeenCalledWith('41', 'bcp');
     expect(json).toHaveBeenCalledWith(expect.objectContaining({ key: 'account-41-upload.csv' }));
   });
 
-  it('stages a self-committing import only for an active account owned by the current user and tenant', async () => {
+  it('stages a self-committing import on the account', async () => {
     mocks.findOne.mockResolvedValueOnce({ accountFinancialInstitutionKey: null });
 
     const { json, status } = await startImport({ key: 'account-41-upload.csv' });
 
-    expect(mocks.findOne).toHaveBeenCalledWith(
-      Account,
-      { accountKey: 41, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
-      { populate: ['accountFinancialInstitutionKey'] },
-    );
     expect(mocks.createSession).toHaveBeenCalledWith(
       { appuserKey: user.appuserKey, tenantKey: tenant.tenantKey },
       expect.objectContaining({ accountId: 41, autoCommit: true, key: 'account-41-upload.csv' }),
@@ -180,49 +167,9 @@ describe('account CSV import authorization', () => {
     expect(mocks.createSession).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ format: 'statement' }));
   });
 
-  it.each([
-    ['partner/shared', 51],
-    ['foreign-tenant', 52],
-    ['deleted', 53],
-  ])('rejects a %s account before presigning', async (_kind, accountId) => {
-    mocks.findOne.mockResolvedValueOnce(null);
-    const next = vi.fn();
-
-    await getS3PresignedUrlForCsvUpload(makeRequest({ params: { accountId: String(accountId) } }), mockRes(), next);
-
-    expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account not found' }));
-    expect(next.mock.calls[0]?.[0]).toBeInstanceOf(NotFoundError);
-    expect(mocks.generatePresignedUrlForAccountCsv).not.toHaveBeenCalled();
-    expect(mocks.findOne).toHaveBeenCalledWith(
-      Account,
-      { accountKey: String(accountId), accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
-      { populate: ['accountFinancialInstitutionKey'] },
-    );
-  });
-
-  it.each([
-    ['partner/shared', 51],
-    ['foreign-tenant', 52],
-    ['deleted', 53],
-  ])('rejects a %s account before staging an import', async (_kind, accountId) => {
-    mocks.findOne.mockResolvedValueOnce(null);
-    const next = vi.fn();
-
-    await startAccountCsvImport(
-      makeRequest({ body: { key: `account-${accountId}-upload.csv` }, params: { accountId: String(accountId) } }),
-      mockRes(),
-      next,
-    );
-
-    expect(next).toHaveBeenCalledWith(expect.objectContaining({ message: 'Account not found' }));
-    expect(next.mock.calls[0]?.[0]).toBeInstanceOf(NotFoundError);
-    expect(mocks.createSession).not.toHaveBeenCalled();
-    expect(mocks.findOne).toHaveBeenCalledWith(
-      Account,
-      { accountKey: accountId, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
-      { populate: ['accountFinancialInstitutionKey'] },
-    );
-  });
+  // Which accounts a caller may import into (another household's, a deleted one, another
+  // member's private one) is the route guard's and the tenant filter's, tested against a database
+  // in `imports.shared-account.http.test.ts`.
 
   it('requires authenticated user and tenant context before account lookup', async () => {
     const next = vi.fn();

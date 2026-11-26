@@ -10,6 +10,7 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app/jobs/transaction-import.queue';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
+import type { HouseholdRole } from '@entity/AppuserTenant';
 import { AppuserTransactionCategory, Source as CategorySource } from '@entity/AppuserTransactionCategory';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Category } from '@entity/Category';
@@ -20,12 +21,14 @@ import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/Tr
 import { TransactionImportRow, TransactionImportRowDecision, TransactionImportRowStatus } from '@entity/TransactionImportRow';
 import { type StatementExtraction, TransactionImportSession, TransactionImportSessionStatus } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
+import { assertAccountsWritable, assertAccountWritable, loadAccountAccess, writableAccountKeys } from '@service/account/account-access';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
 import { getLimitedCsvObjectBuffer, validateCsvObjectKey } from '@service/account/csv-upload-boundary.service';
 import { importCommittedEventId, recordAccountCreated, recordServiceEvent } from '@service/analytics/service-events.service';
 import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
+import { findActiveMembership } from '@service/household/household-membership.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import s3Service from '@service/storage/s3';
@@ -37,6 +40,7 @@ import { BadRequestError, ConflictError, ERROR_CODE, FeatureDisabledError, NotFo
 import logger from '@utils/logger';
 import { getFullName } from '@utils/misc';
 
+import { assertOpenForImport } from './import-account';
 import { importFileName } from './import-file-name';
 import { findLikelyDuplicateCandidates } from './likely-duplicate-candidates';
 import { type LikelyDuplicateRow, matchLikelyDuplicates } from './likely-duplicate-match';
@@ -47,7 +51,7 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  * Staged, resumable transaction imports (wondermoney/wondermoney#58), one `TransactionImportSession`
  * per file:
  *
- *   create   on an account the person owns: with a file already uploaded for that account (the
+ *   create   on an account the person may write to (`account-access.ts`): with a file already uploaded for that account (the
  *            import dialog's upload), parsing starts at once; without, the response carries a link
  *            to upload it to, and `parse` starts it.
  *   parse    a worker job reads the file with its format's adapter, stores every line as a
@@ -168,8 +172,13 @@ export interface TransactionImportRowView {
   targetAccountId: null | number;
 }
 
+/**
+ * The member acting on an import. `householdRole` caps a viewer at read (`account-access.ts`); the
+ * route stack sets it, and a viewer's writes are refused before they get here.
+ */
 export interface TransactionImportScope {
   appuserKey: number;
+  householdRole?: HouseholdRole;
   tenantKey: number;
 }
 
@@ -327,7 +336,7 @@ export class TransactionImportService {
   }
 
   /**
-   * Start a PDF statement import on an account the person owns: the response carries a link to PUT
+   * Start a PDF statement import on an account the person may write to: the response carries a link to PUT
    * the PDF to, signed for exactly `contentLength` bytes, and `parse` starts the read once it is
    * uploaded. The caller has checked that the person may use the `statementImport` model and spent
    * the household's allowance for it. A PDF over the size limit is refused before any link exists.
@@ -357,6 +366,10 @@ export class TransactionImportService {
 
   async get(scope: TransactionImportScope, id: string, query: TransactionImportRowQuery): Promise<TransactionImportView> {
     const session = await this.find(scope, id);
+    // Its rows show the transactions they repeat: once the person can no longer see one of its
+    // accounts, the session is gone for them too.
+    const visible = await loadAccountAccess(this.em, sessionAccountKeys(session), scope);
+    if (sessionAccountKeys(session).some((key) => !visible.has(key))) throw new NotFoundError('Import not found');
     const pageSize = Math.min(Math.max(query.pageSize ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
     const page = Math.max(query.page ?? 1, 1);
     const where = { transactionImportSessionKey: bySession(session.transactionImportSessionKey), ...(query.status ? { status: ROW_STATUS_OF[query.status] } : {}) };
@@ -369,6 +382,7 @@ export class TransactionImportService {
   async decide(scope: TransactionImportScope, id: string, input: { decision: transactionImport.ImportDecision; rowIds?: number[]; status?: transactionImport.ImportRowStatus }): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     this.assertReviewable(session);
+    await this.assertSessionWritable(scope, session);
     if ((input.rowIds === undefined) === (input.status === undefined)) throw new BadRequestError('Choose rows by id or by status');
     const statuses = WRITABLE_ROW_STATUSES.filter((status) => input.status === undefined || status === ROW_STATUS_OF[input.status]);
     await this.em.nativeUpdate(
@@ -388,6 +402,7 @@ export class TransactionImportService {
   async setAccountMapping(scope: TransactionImportScope, id: string, mapping: Record<string, number>, options: { create?: string[] } = {}): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
     this.assertReviewable(session);
+    await this.assertSessionWritable(scope, session);
     const labels = new Set((session.sourceAccounts ?? []).map((source) => source.label));
     const create = [...new Set(options.create ?? [])];
     const unknown = [...Object.keys(mapping), ...create].filter((label) => !labels.has(label));
@@ -427,6 +442,8 @@ export class TransactionImportService {
   /** Read (or read again, with corrected options) the uploaded file. */
   async parse(scope: TransactionImportScope, id: string, input: { options?: TransactionImportOptions }): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
+    // A one-step session commits as soon as it is read: the access it was started with may be gone.
+    await this.assertSessionWritable(scope, session);
     const view = await this.sessionView(session);
     const restartable = view.status === 'parsing' && view.canRetry;
     // A PDF is deleted once it has been read: it is read once, or again only after its job stopped part way.
@@ -447,6 +464,9 @@ export class TransactionImportService {
    */
   async commit(scope: TransactionImportScope, id: string, input: { acknowledgeMismatch?: boolean } = {}): Promise<TransactionImportSessionView> {
     const session = await this.find(scope, id);
+    // Access is checked again here, on a resumed commit too: a share can be taken back between the
+    // read and the commit. The job checks once more before it writes (`run`).
+    await this.assertSessionWritable(scope, session);
     const view = await this.sessionView(session);
     if (view.status === 'importing' && view.canRetry) {
       await this.startJob(session, 'commit');
@@ -493,7 +513,10 @@ export class TransactionImportService {
     if (!session) return false;
     if (!(await backgroundOperationService.claimJobStartOrResume(correlationId, queueJobId))) return false;
     try {
-      if (mode === 'parse' && session.status === SESSION_STATUS.PARSING) await this.parseFile(session, correlationId, queueJobId);
+      if (mode === 'parse' && session.status === SESSION_STATUS.PARSING) {
+        if (!(await this.startedByWriter(session))) return await this.failForAccess(session, correlationId, queueJobId);
+        await this.parseFile(session, correlationId, queueJobId);
+      }
       const committing = session.status === SESSION_STATUS.IMPORTING || (mode === 'parse' && session.autoCommit && session.status === SESSION_STATUS.READY);
       if (!committing) {
         await backgroundOperationService.finishJob(correlationId, queueJobId, {
@@ -503,6 +526,8 @@ export class TransactionImportService {
         });
         return session.status !== SESSION_STATUS.FAILED;
       }
+      // Every commit, one-step or resumed, is the job's to check: no request stands before it.
+      if (!(await this.startedByWriter(session))) return await this.failForAccess(session, correlationId, queueJobId);
       if (session.status !== SESSION_STATUS.IMPORTING) {
         session.status = SESSION_STATUS.IMPORTING;
         await this.em.flush();
@@ -692,14 +717,17 @@ export class TransactionImportService {
 
   /**
    * The account the file's own identifier points at, for the mapping step. A CAMT.053 statement is
-   * labelled by its IBAN, so an account of the person's whose `accountNumber` holds that IBAN is
-   * suggested; a file that labels its accounts by name (YNAB, Actual, QIF) suggests the one account
-   * of theirs with that name, case and accents aside. The person still confirms the mapping. The
-   * adapter is pure, so the session matches the labels against its accounts here.
+   * labelled by its IBAN, so an account the person may write to whose `accountNumber` holds that
+   * IBAN is suggested; a file that labels its accounts by name (YNAB, Actual, QIF) suggests the one
+   * such account with that name, case and accents aside. These are the accounts the mapping step
+   * accepts. The person still confirms the mapping. The adapter is pure, so the session matches the
+   * labels against its accounts here.
    */
   private async suggestSourceAccounts(appuserId: null | number, tenantId: null | number, sourceAccounts: transactionImport.ImportSourceAccount[]): Promise<void> {
     if (appuserId === null || tenantId === null || sourceAccounts.length === 0) return;
-    const accounts = await this.em.find(Account, { accountOwnerAppuserKey: { appuserKey: appuserId }, deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountName', 'accountNumber'] });
+    const inHousehold = await this.em.find(Account, { deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountName', 'accountNumber'], filters: false, orderBy: { accountKey: 'asc' } });
+    const writable = await writableAccountKeys(this.em, inHousehold.map((account) => account.accountKey), { appuserKey: appuserId, tenantKey: tenantId });
+    const accounts = inHousehold.filter((account) => writable.has(account.accountKey));
     const byIban = new Map<string, number>();
     for (const account of accounts) {
       const iban = transactionImport.normalizeIban(account.accountNumber);
@@ -1006,7 +1034,7 @@ export class TransactionImportService {
         const imported = all.filter((transaction) => importedKeys.has(transaction.transactionKey));
         const existing = all.filter((transaction) => !importedKeys.has(transaction.transactionKey));
         await settleStatementImport(tx, account, existing, imported);
-        await this.recordFileSetTypes(tx, account, importedRows.filter((row) => keyOf(row.targetAccountKey, 'accountKey') === accountKey));
+        await this.recordFileSetTypes(tx, account, importedRows.filter((row) => keyOf(row.targetAccountKey, 'accountKey') === accountKey), keyOf(locked.appuserKey, 'appuserKey'));
         accounts.push({ account, dates: imported.flatMap((transaction) => (transaction.transactionDate ? [transaction.transactionDate] : [])) });
       }
       await tx.nativeUpdate(TransactionImportRow, { status: { $in: WRITABLE_ROW_STATUSES }, transactionImportSessionKey: bySession(sessionKey) }, { status: ROW_STATUS.SKIPPED, updatedAt: this.now });
@@ -1060,17 +1088,19 @@ export class TransactionImportService {
    * entry that changed `transactionTypeKey` and never re-types such a row. A statement's type is a
    * guess from the description, so it is not recorded and the matcher may still pair it.
    */
-  private async recordFileSetTypes(tx: EntityManager, account: Account, rows: Pick<TransactionImportRow, 'importedTransactionKey' | 'normalized'>[]): Promise<void> {
+  private async recordFileSetTypes(tx: EntityManager, account: Account, rows: Pick<TransactionImportRow, 'importedTransactionKey' | 'normalized'>[], importer: null | number): Promise<void> {
     const ownerKey = keyOf(account.accountOwnerAppuserKey, 'appuserKey');
     const tenantKey = keyOf(account.tenantKey, 'tenantKey');
     if (ownerKey === null || tenantKey === null) return;
+    // The change is the importer's, on a row of the account owner's.
+    const actorKey = importer ?? ownerKey;
     for (const row of rows) {
       const typeName = row.normalized?.typeIsUserSet === true ? row.normalized.typeHint : undefined;
       const transactionKey = keyOf(row.importedTransactionKey, 'transactionKey');
       if (!typeName || transactionKey === null) continue;
       await TransactionAuditService.log(tx, {
         accountKey: account.accountKey,
-        actorAppuserKey: ownerKey,
+        actorAppuserKey: actorKey,
         actorType: TransactionAuditActorType.USER,
         appuserKey: ownerKey,
         changes: { transactionTypeKey: { from: null, to: typeName } },
@@ -1177,12 +1207,69 @@ export class TransactionImportService {
     }
   }
 
-  /** An account the person owns in this household, open for imports. */
+  /**
+   * An account in this household the person may write to, open for imports: their own, a shared
+   * one, or a private one shared with them for writing. Not seen: 404; seen but read-only: 403;
+   * closed: 409.
+   */
   private async writableAccount(scope: TransactionImportScope, accountId: number): Promise<Account> {
-    const account = await this.em.findOne(Account, { accountKey: accountId, accountOwnerAppuserKey: { appuserKey: scope.appuserKey }, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { populate: ['accountFinancialInstitutionKey', 'currencyKey'] });
+    await assertAccountWritable(this.em, accountId, scope);
+    const account = await this.em.findOne(Account, { accountKey: accountId, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { filters: false, populate: ['accountFinancialInstitutionKey', 'currencyKey'] });
     if (!account) throw new NotFoundError('Account not found');
+    assertOpenForImport(account);
     return account;
   }
+
+  /** The session's accounts must all still be the person's to write to (see {@link writableAccount}). */
+  private async assertSessionWritable(scope: TransactionImportScope, session: TransactionImportSession): Promise<void> {
+    await assertAccountsWritable(this.em, sessionAccountKeys(session), scope);
+  }
+
+  /**
+   * The job's own check, before it reads a file or writes a row: the person who started the
+   * session is still an active member of its household, and with their role today may write to
+   * every account it imports into, none of them closed. The worker has no request, so nothing
+   * else has checked since they asked.
+   */
+  private async startedByWriter(session: TransactionImportSession): Promise<boolean> {
+    const appuserKey = keyOf(session.appuserKey, 'appuserKey');
+    const tenantKey = keyOf(session.tenantKey, 'tenantKey');
+    if (appuserKey === null || tenantKey === null) return false;
+    const membership = await findActiveMembership(this.em, tenantKey, appuserKey);
+    if (!membership) return false;
+    const keys = sessionAccountKeys(session);
+    const writable = await writableAccountKeys(this.em, keys, { appuserKey, householdRole: membership.role, tenantKey });
+    if (!keys.every((key) => writable.has(key))) return false;
+    return (await this.em.count(Account, { accountKey: { $in: keys }, closed: true }, { filters: false })) === 0;
+  }
+
+  /** End a session its starter may no longer write through: its staged rows and its PDF go, and nothing is stored. */
+  private async failForAccess(session: TransactionImportSession, correlationId: string, queueJobId: string): Promise<false> {
+    session.status = SESSION_STATUS.FAILED;
+    session.errorCode = ACCOUNT_ACCESS_ERROR;
+    await this.em.nativeDelete(TransactionImportRow, { transactionImportSessionKey: bySession(session.transactionImportSessionKey) });
+    await this.em.flush();
+    if (session.format === 'pdf') await this.deleteFile(session);
+    await backgroundOperationService.finishJob(correlationId, queueJobId, { errorCode: `${TRANSACTION_IMPORT_OPERATION}:${ACCOUNT_ACCESS_ERROR}`, stage: `${TRANSACTION_IMPORT_OPERATION}:${session.status}`, status: BackgroundOperationStatus.FAILED });
+    return false;
+  }
+
+  /** Refuse an import into `accountId` before anything is spent on it (the PDF route's AI allowance). */
+  async assertImportableAccount(scope: TransactionImportScope, accountId: number): Promise<void> {
+    await this.writableAccount(scope, accountId);
+  }
+}
+
+/**
+ * A session's `errorCode` when the job refused it: the person who started it may no longer write
+ * to one of its accounts (a share taken back, a role lowered, a membership ended, an account closed).
+ */
+export const ACCOUNT_ACCESS_ERROR = 'account_access';
+
+/** The accounts a session imports into: the one it was started on and those its file's accounts map to. */
+function sessionAccountKeys(session: TransactionImportSession): number[] {
+  const started = keyOf(session.accountKey, 'accountKey');
+  return [...new Set([...(started === null ? [] : [started]), ...Object.values(session.accountMapping ?? {})])];
 }
 
 /** How the commit reads on its operation: the session's outcome, or for a one-step import the outcome it always reported. */

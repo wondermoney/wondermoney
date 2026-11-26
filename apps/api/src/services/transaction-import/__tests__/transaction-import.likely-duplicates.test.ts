@@ -191,7 +191,7 @@ describe('likely duplicates on import', () => {
     expect(summary(view).map((row) => [row.status, row.matched])).toEqual([['possible_duplicate', hidden.transactionKey], ['new', null]]);
   });
 
-  it('looks only at the row\'s own account, and only at accounts of the person importing', async () => {
+  it('looks only at the row\'s own account, and only at accounts the person importing may see', async () => {
     const ctx = setup();
     const otherAccount = await addAccount(db.em(), household);
     await synced({ account: otherAccount, amount: -42.5, date: day('2026-09-02') });
@@ -209,6 +209,8 @@ describe('likely duplicates on import', () => {
     expect(await findLikelyDuplicateCandidates(DI.em.fork(), ownerScope(), partnersPrivate.accountKey, rows)).toEqual([]);
     expect(await findLikelyDuplicateCandidates(DI.em.fork(), ownerScope(), other.account.accountKey, rows)).toEqual([]);
     expect(await findLikelyDuplicateCandidates(DI.em.fork(), ownerScope(), otherAccount.accountKey, rows)).toHaveLength(1);
+    // A member importing into the household's shared account checks it like its owner does.
+    expect(await findLikelyDuplicateCandidates(DI.em.fork(), { appuserKey: partner.appuserKey, tenantKey: household.tenant.tenantKey }, otherAccount.accountKey, rows)).toHaveLength(1);
   });
 
   it('matches each row of a file with several accounts against the account it is mapped to, again when the mapping changes', async () => {

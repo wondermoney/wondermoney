@@ -13,6 +13,7 @@ const mockUseAccount = jest.fn()
 const mockUseInsights = jest.fn()
 const mockUseAccountMetrics = jest.fn()
 const mockUseRecentTransactions = jest.fn()
+let mockFileStorage = true
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
@@ -22,6 +23,7 @@ jest.mock('@/components/providers/product-runtime-provider', () => ({
   useProductRuntime: () => ({ signOut: jest.fn() }),
 }))
 jest.mock('./use-accounts', () => ({ useAccounts: () => mockUseAccounts() }))
+jest.mock('@/lib/server/use-instance', () => ({ useConfirmedFeature: (select: (features: { fileStorage: boolean }) => boolean) => select({ fileStorage: mockFileStorage }) }))
 jest.mock('@/features/household/use-household-members', () => ({ useHouseholdMembers: () => jest.requireActual('@/features/household/member-attribution').NO_HOUSEHOLD_MEMBERS }))
 jest.mock('./use-reorder-accounts', () => ({ useReorderAccounts: () => ({ mutateAsync: jest.fn() }) }))
 jest.mock('./use-account', () => ({ useAccount: (id: number | null) => mockUseAccount(id) }))
@@ -39,20 +41,21 @@ jest.mock('@/features/installments/use-installment-plans', () => ({
 }))
 jest.mock('@/features/transactions/use-transactions', () => ({ useTransactions: () => ({ data: { transactions: [] }, isAccessTransition: false, isLoading: false, isRefreshing: false, isRefreshFailure: false, error: null, refetch: jest.fn() }) }))
 jest.mock('./accounts-screen', () => ({
-  AccountsScreen: ({ onSelectAccount, onCreateAccount, onViewTransactions, onConnectBank, onCreateTransaction, onEditAccount }: { onSelectAccount: (id: number) => void; onCreateAccount: () => void; onViewTransactions: () => void; onConnectBank: () => void; onCreateTransaction: () => void; onEditAccount: (id: number) => void }) => {
+  AccountsScreen: ({ onSelectAccount, onCreateAccount, onViewTransactions, onConnectBank, onCreateTransaction, onEditAccount, onImportTransactions }: { onSelectAccount: (id: number) => void; onCreateAccount: () => void; onViewTransactions: () => void; onConnectBank: () => void; onCreateTransaction: () => void; onEditAccount: (id: number) => void; onImportTransactions?: () => void }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
     const item = (label: string, onPress: () => void) => <Native.Pressable key={label} accessibilityRole="button" accessibilityLabel={label} onPress={onPress}><Native.Text>{label}</Native.Text></Native.Pressable>
-    return <>{[item('Account row', () => onSelectAccount(42)), item('Create', onCreateAccount), item('Transactions', onViewTransactions), item('Connect', onConnectBank), item('Add transaction', onCreateTransaction), item('Edit', () => onEditAccount(42))]}</>
+    return <>{[item('Account row', () => onSelectAccount(42)), item('Create', onCreateAccount), item('Transactions', onViewTransactions), item('Connect', onConnectBank), item('Add transaction', onCreateTransaction), item('Edit', () => onEditAccount(42)), ...(onImportTransactions ? [item('Import', onImportTransactions)] : [])]}</>
   },
 }))
 jest.mock('./account-detail-screen', () => ({
-  AccountDetailScreen: ({ state, onBack, onViewTransactions, onOpenInstallmentPlan, onAcceptInstallmentSuggestion }: { state: { status: string; data?: { installmentPlans?: { commitment: { status: string; data?: { remainingAmount: number } | null } } } }; onBack: () => void; onViewTransactions: () => void; onOpenInstallmentPlan?: (planId: number) => void; onAcceptInstallmentSuggestion?: (key: string) => void }) => {
+  AccountDetailScreen: ({ state, onBack, onViewTransactions, onOpenInstallmentPlan, onAcceptInstallmentSuggestion, onImportTransactions }: { state: { status: string; data?: { installmentPlans?: { commitment: { status: string; data?: { remainingAmount: number } | null } } } }; onBack: () => void; onViewTransactions: () => void; onOpenInstallmentPlan?: (planId: number) => void; onAcceptInstallmentSuggestion?: (key: string) => void; onImportTransactions?: () => void }) => {
     const Native = jest.requireActual<typeof import('react-native')>('react-native')
     const commitment = state.data?.installmentPlans?.commitment
     return <><Native.Text>{state.status}</Native.Text>
       {commitment ? <Native.Text>{`commitment ${commitment.status} ${commitment.data?.remainingAmount ?? 'none'}`}</Native.Text> : null}
       <Native.Pressable accessibilityRole="button" accessibilityLabel="Open plan" onPress={() => onOpenInstallmentPlan?.(5)}><Native.Text>Open plan</Native.Text></Native.Pressable>
-      <Native.Pressable accessibilityRole="button" accessibilityLabel="Accept suggestion" onPress={() => onAcceptInstallmentSuggestion?.('s-1')}><Native.Text>Accept suggestion</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack}><Native.Text>Back</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Account transactions" onPress={onViewTransactions}><Native.Text>Account transactions</Native.Text></Native.Pressable></>
+      <Native.Pressable accessibilityRole="button" accessibilityLabel="Accept suggestion" onPress={() => onAcceptInstallmentSuggestion?.('s-1')}><Native.Text>Accept suggestion</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={onBack}><Native.Text>Back</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Account transactions" onPress={onViewTransactions}><Native.Text>Account transactions</Native.Text></Native.Pressable>
+      {onImportTransactions ? <Native.Pressable accessibilityRole="button" accessibilityLabel="Import" onPress={onImportTransactions}><Native.Text>Import</Native.Text></Native.Pressable> : null}</>
   },
 }))
 
@@ -70,6 +73,7 @@ describe('accounts route adapters', () => {
     mockUseAccountMetrics.mockReturnValue({ ...resource({ metrics: [] }), isInvalidId: false })
     mockUseRecentTransactions.mockReturnValue({ ...resource({ transactions: [] }), isInvalidId: false })
     mockParams = {}
+    mockFileStorage = true
   })
 
   it('pushes numeric account 42 from the list presentation', async () => {
@@ -129,6 +133,34 @@ describe('accounts route adapters', () => {
     expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/create')
     await fireEvent.press(view.getByRole('button', { name: 'Edit' }))
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/[accountId]/edit', params: { accountId: '42' } })
+  })
+
+  it('opens the statement import from Accounts, and offers none on a server without file storage', async () => {
+    mockUseAccounts.mockReturnValue({ isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    const view = await render(<AccountsRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Import' }))
+    expect(mockPush).toHaveBeenCalledWith('/accounts/transactions/import')
+    await view.unmount()
+
+    mockFileStorage = false
+    const without = await render(<AccountsRoute />)
+    expect(without.queryByRole('button', { name: 'Import' })).not.toBeOnTheScreen()
+  })
+
+  it('opens the statement import on a manual account, and offers none on a server without file storage', async () => {
+    mockParams = { accountId: '42' }
+    mockUseAccount.mockReturnValue({
+      isInvalidId: false, isAccessTransition: false, isLoading: false, isRefreshFailure: false, refetch: jest.fn(),
+      data: { account: { accountFinancialInstitutionKey: null, accountKey: 42, accountName: 'Cash', accountOwnerAppuserKey: { currencyKey: { code: 'EUR' } }, appuserCurrencyBalance: 10, balance: 10, currencyKey: { code: 'EUR' }, isOwnedByViewer: true, isPrivate: false, refreshedAt: null, source: 'manual' } },
+    })
+    const view = await render(<AccountDetailRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Import' }))
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/transactions/import', params: { accountId: '42' } })
+    await view.unmount()
+
+    mockFileStorage = false
+    const without = await render(<AccountDetailRoute />)
+    expect(without.queryByRole('button', { name: 'Import' })).not.toBeOnTheScreen()
   })
 
   it('maps Back to Accounts rather than exposing a third tab', async () => {

@@ -7,17 +7,20 @@ vi.mock('@service/transaction-enrichment/transaction-enrichment-enqueue.service'
 
 import type { transactionImport } from '@wondermoney/shared';
 
-import { addAccount, addPartner, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, addShare, addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
+import { AccountShare, AccountShareAccess } from '@entity/AccountShare';
+import { HouseholdRole } from '@entity/AppuserTenant';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Transaction } from '@entity/Transaction';
+import { TransactionAuditLog } from '@entity/TransactionAuditLog';
 import { TransactionImportSession } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import type { Enqueue } from '@service/queue/enqueue';
-import { ConflictError, NotFoundError } from '@utils/errors';
+import { ConflictError, ForbiddenError, NotFoundError } from '@utils/errors';
 
 import { sweepTransactionImportSessions } from '../transaction-import-sweep';
 import { type TransactionImportDeps, TransactionImportService, type TransactionImportStorage } from '../transaction-import.service';
@@ -299,11 +302,17 @@ describe('staged transaction import', () => {
       const ctx = setup({ adapters: { statement: twoAccounts } });
       const other = await seedHousehold(db.em());
       const partner = await addPartner(db.em(), household);
-      const partnersAccount = await addAccount(db.em(), household, { owner: partner });
+      const partnersPrivate = await addAccount(db.em(), household, { isPrivate: true, owner: partner });
+      const partnersReadOnly = await addAccount(db.em(), household, { isPrivate: true, owner: partner });
+      await addShare(db.em(), household, partnersReadOnly, household.appuser, 'read');
+      const partnersShared = await addAccount(db.em(), household, { owner: partner });
       const view = await staged(ctx, 'ignored');
 
       await expect(ctx.service().setAccountMapping(ownerScope(), view.session.id, { Card: other.account.accountKey, Checking: household.account.accountKey })).rejects.toBeInstanceOf(NotFoundError);
-      await expect(ctx.service().setAccountMapping(ownerScope(), view.session.id, { Card: partnersAccount.accountKey, Checking: household.account.accountKey })).rejects.toBeInstanceOf(NotFoundError);
+      await expect(ctx.service().setAccountMapping(ownerScope(), view.session.id, { Card: partnersPrivate.accountKey, Checking: household.account.accountKey })).rejects.toBeInstanceOf(NotFoundError);
+      await expect(ctx.service().setAccountMapping(ownerScope(), view.session.id, { Card: partnersReadOnly.accountKey, Checking: household.account.accountKey })).rejects.toBeInstanceOf(ForbiddenError);
+      const mapped = await ctx.service().setAccountMapping(ownerScope(), view.session.id, { Card: partnersShared.accountKey, Checking: household.account.accountKey });
+      expect(mapped.status).toBe('ready');
     });
   });
 
@@ -330,15 +339,67 @@ describe('staged transaction import', () => {
       expect((await ctx.service().get(ownerScope(), view.session.id, {})).session.decisions).toEqual({ import: 2, skip: 0 });
     });
 
-    it('starts only on an account the person owns', async () => {
+    it('starts only on an account the person may write to', async () => {
       const ctx = setup();
       const other = await seedHousehold(db.em());
       const partner = await addPartner(db.em(), household);
-      const partnersAccount = await addAccount(db.em(), household, { owner: partner });
-      for (const account of [other.account, partnersAccount]) {
+      const partnersPrivate = await addAccount(db.em(), household, { isPrivate: true, owner: partner });
+      const partnersReadOnly = await addAccount(db.em(), household, { isPrivate: true, owner: partner });
+      await addShare(db.em(), household, partnersReadOnly, household.appuser, 'read');
+      const partnersShared = await addAccount(db.em(), household, { owner: partner });
+      for (const account of [other.account, partnersPrivate]) {
         const key = ctx.upload(account, statement(lines));
         await expect(ctx.service().create(ownerScope(), { accountId: account.accountKey, format: 'statement', key })).rejects.toBeInstanceOf(NotFoundError);
       }
+      await expect(ctx.service().create(ownerScope(), { accountId: partnersReadOnly.accountKey, format: 'statement', key: ctx.upload(partnersReadOnly, statement(lines)) })).rejects.toBeInstanceOf(ForbiddenError);
+      // A household viewer writes to no account, a shared one included.
+      await expect(ctx.service().create({ ...ownerScope(), householdRole: HouseholdRole.VIEWER }, { accountId: partnersShared.accountKey, format: 'statement', key: ctx.upload(partnersShared, statement(lines)) })).rejects.toBeInstanceOf(ForbiddenError);
+
+      const started = await ctx.service().create(ownerScope(), { accountId: partnersShared.accountKey, format: 'statement', key: ctx.upload(partnersShared, statement(lines)) });
+      expect(started.accountId).toBe(partnersShared.accountKey);
+    });
+
+    it('records the member who imported as the one who set a row\'s type, on the account owner\'s row', async () => {
+      const typed: transactionImport.ImportAdapter = {
+        format: 'statement',
+        parse: () => Promise.resolve({
+          rows: [{ normalized: { amount: -10, date: '2026-09-01T00:00:00.000Z', description: 'Rent', externalId: 't-1', typeHint: 'PAYMENT', typeIsUserSet: true }, raw: {}, sourceRow: 2 }],
+          sourceAccounts: [],
+          warnings: [],
+        }),
+      };
+      const ctx = setup({ adapters: { statement: typed } });
+      const member = await addPartner(db.em(), household);
+      const memberScope = { appuserKey: member.appuserKey, tenantKey: household.tenant.tenantKey };
+      const created = await ctx.service().create(memberScope, { accountId: household.account.accountKey, format: 'statement', key: ctx.upload(household.account, 'ignored') });
+      await ctx.runLastJob();
+      await ctx.service().commit(memberScope, created.id);
+      await ctx.runLastJob();
+
+      const entries = await db.em().find(TransactionAuditLog, { source: 'transaction-import' }, { filters: false });
+      expect(entries.map((entry) => ({ actor: entry.actorAppuserKey?.appuserKey, owner: entry.appuserKey.appuserKey }))).toEqual([{ actor: member.appuserKey, owner: household.appuser.appuserKey }]);
+    });
+
+    it('starts on no closed account', async () => {
+      const ctx = setup();
+      await db.em().nativeUpdate(Account, { accountKey: household.account.accountKey }, { closed: true });
+      await expect(ctx.service().create(ownerScope(), { accountId: household.account.accountKey, format: 'statement', key: ctx.upload(household.account, statement(lines)) })).rejects.toBeInstanceOf(ConflictError);
+    });
+
+    it('commits only while the person may still write to the account', async () => {
+      const ctx = setup();
+      const partner = await addPartner(db.em(), household);
+      const partnersPrivate = await addAccount(db.em(), household, { isPrivate: true, owner: partner });
+      const share = await addShare(db.em(), household, partnersPrivate, household.appuser, 'write');
+      const created = await ctx.service().create(ownerScope(), { accountId: partnersPrivate.accountKey, format: 'statement', key: ctx.upload(partnersPrivate, statement(lines.slice(0, 2))) });
+      await ctx.runLastJob();
+      expect((await ctx.service().get(ownerScope(), created.id, {})).session.canCommit).toBe(true);
+
+      // The account's owner takes the write access back before the commit.
+      await db.em().nativeUpdate(AccountShare, { accountShareKey: share.accountShareKey }, { access: AccountShareAccess.READ });
+
+      await expect(ctx.service().commit(ownerScope(), created.id)).rejects.toBeInstanceOf(ForbiddenError);
+      expect(await storedTransactions(partnersPrivate)).toEqual([]);
     });
 
     it('reads only a file uploaded for the account it imports into', async () => {

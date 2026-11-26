@@ -21,10 +21,12 @@ const mockUseAccounts = jest.fn()
 let mockCapturedProps: Record<string, unknown> = {}
 let mockAiHidden = false
 let mockCanWriteGroups = true
+let mockFileStorage = true
 jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ replace: jest.fn(), push: mockPush }) }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en', resolvedLanguage: 'en' } }) }))
 jest.mock('@/components/providers/product-runtime-provider', () => ({ useProductRuntime: () => ({ blockAccess: mockBlockAccess }) }))
 jest.mock('@/features/preferences/use-ai-hidden', () => ({ useAiHiddenPreference: () => mockAiHidden }))
+jest.mock('@/lib/server/use-instance', () => ({ useConfirmedFeature: (select: (features: { fileStorage: boolean }) => boolean) => select({ fileStorage: mockFileStorage }) }))
 jest.mock('@/features/categories/use-categories', () => ({ useCategories: () => ({ isLoading: true }) }))
 const mockSetTags = jest.fn()
 jest.mock('@/features/tags/use-tags', () => ({
@@ -59,7 +61,7 @@ jest.mock('@/features/rules/rule-editor-sheet', () => ({ RuleEditorSheet: (props
 jest.mock('./transactions-screen', () => ({ TransactionsScreen: (props: { state: { status: string } }) => { mockCapturedProps = props; const Native = jest.requireActual<typeof import('react-native')>('react-native'); return <Native.Text>{props.state.status}</Native.Text> } }))
 
 describe('TransactionsRoute', () => {
-  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockSetSplitsAsync.mockReset(); mockRemoveSplitsAsync.mockReset(); mockUnlinkAsync.mockReset(); mockPush.mockReset() })
+  beforeEach(() => { mockParams = {}; mockCapturedProps = {}; mockAiHidden = false; mockFileStorage = true; mockBlockAccess.mockReset(); mockUseTransactions.mockReset(); mockUseAccounts.mockReset(); mockUseAccounts.mockReturnValue({ data: { accounts: [] } }); mockMutateAsync.mockReset(); mockMutateAmountAsync.mockReset(); mockSetSplitsAsync.mockReset(); mockRemoveSplitsAsync.mockReset(); mockUnlinkAsync.mockReset(); mockPush.mockReset() })
 
   it('navigates to the import screen, carrying the current account id when present', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
@@ -71,6 +73,13 @@ describe('TransactionsRoute', () => {
     await render(<TransactionsRoute perAccount />)
     ;(mockCapturedProps.onImport as () => void)()
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/accounts/transactions/import', params: { accountId: '7' } })
+  })
+  it('offers no import on a server without file storage, where the upload would fail', async () => {
+    mockFileStorage = false
+    mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
+    await render(<TransactionsRoute />)
+    expect(mockCapturedProps.onImport).toBeUndefined()
+    expect(mockCapturedProps.onCreate).toBeDefined()
   })
   it('navigates to the receipt-scan screen', async () => {
     mockUseTransactions.mockReturnValue({ isInvalidAccountId: false, isAccessTransition: false, isLoading: true, refetch: jest.fn() })
