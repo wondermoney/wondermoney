@@ -15,6 +15,7 @@ dashboard in the hosted PostHog project, in the same order:
 | Bank sync incidents by cause | Why syncs end in an incident, by kind and code | [`bank-sync-failures.sql`](bank-sync-failures.sql) |
 | Imports | Each import step and failure, by kind and format | [`imports.sql`](imports.sql) |
 | Landing attribution | Per website tool or list: visits to signups and activations | [`landing-funnel.sql`](landing-funnel.sql) ([how it works](../landing-attribution.md)) |
+| Signups by referrer class | Per kind of source a website visit came from (AI assistant, search, social, direct, other): visits to signups and activations | [`referrer-class.sql`](referrer-class.sql) ([how it works](../landing-attribution.md#signups-from-ai-assistants)) |
 
 The dashboard is **Product analytics** in the hosted PostHog project:
 <https://eu.posthog.com/project/3621/dashboard/1142647>. Its tiles are grouped by question.
