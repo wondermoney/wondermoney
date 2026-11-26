@@ -3,6 +3,7 @@
     "names": {
       "pt-PT": "Portugal",
       "es-ES": "Spain",
+      "it-IT": "Italy",
       "pt-BR": "Brazil",
       "en": "the UK and US"
     },
@@ -16,7 +17,7 @@
     "browse-hint": "Ready-made rules for well-known merchants in a country",
     "dialog": {
       "title": "Rules for {name}",
-      "description": "Each rule recognizes a merchant in the bank's description of money going out, then sets its category and merchant. Income, transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
+      "description": "Each rule recognizes a merchant or a salary in the bank's description, then sets its category or merchant. Spending rules only match money going out and salary rules only money coming in, so income never gets a spending category. Transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
       "choose": "Country",
       "list-label": "Rules for {name}",
       "loading": "Loading the rules…",

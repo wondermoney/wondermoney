@@ -73,7 +73,7 @@ describe('rule presets', () => {
     }
   });
 
-  it('only ever sets a selectable spending category, never an income one', async () => {
+  it('only ever sets a selectable category: spending on money out, income on money in', async () => {
     await seedSystemCategories();
     const em = db.em();
     const incomeKeys = new Set((await em.find(Category, { $or: [{ name: 'INCOME' }, { parentCategory: { name: 'INCOME' } }], isSystemCategory: true })).map((category) => category.categoryKey));
@@ -82,10 +82,17 @@ describe('rule presets', () => {
 
     for (const preset of RULE_PRESETS) await install(household.appuser, preset.preset.code);
 
-    const categoryKeys = (await liveRules(household)).flatMap((rule) => rule.actions.flatMap((action) => (action.type === 'set_category' ? [action.categoryId] : [])));
-    expect(categoryKeys.length).toBeGreaterThan(0);
-    for (const key of categoryKeys) {
-      expect(incomeKeys.has(key)).toBe(false);
+    const categorised = (await liveRules(household)).flatMap((rule) =>
+      rule.actions.flatMap((action) => {
+        if (action.type !== 'set_category') return [];
+        const direction = rule.conditions.find((condition) => condition.field === 'direction');
+        return [{ direction: direction && 'value' in direction ? direction.value : undefined, key: action.categoryId, match: rule.match }];
+      }),
+    );
+    expect(categorised.length).toBeGreaterThan(0);
+    for (const { direction, key, match } of categorised) {
+      expect(match).toBe('all');
+      expect(direction).toBe(incomeKeys.has(key) ? 'in' : 'out');
       // A system parent is a heading the category pickers do not offer.
       expect(parents.has(key)).toBe(false);
     }
@@ -231,6 +238,18 @@ describe('rule presets', () => {
       await em.flush();
 
       expect((await list(household.appuser)).suggested).toBe('pt-BR');
+    });
+
+    it('offers an Italian account the Italian preset', async () => {
+      const household = await seedHousehold(db.em());
+      const em = db.em();
+      const appuser = await em.findOneOrFail(Appuser, { appuserKey: household.appuser.appuserKey });
+      appuser.language = SupportedLanguages.IT;
+      appuser.currencyKey = await currencyFor(em, 'EUR');
+      await em.flush();
+
+      expect((await list(household.appuser)).suggested).toBe('it-IT');
+      expect((await list(household.appuser, '?language=it')).suggested).toBe('it-IT');
     });
 
     it('prefers the country the person banks in', async () => {

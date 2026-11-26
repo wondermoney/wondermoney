@@ -1,0 +1,661 @@
+{
+  "format": "wondermoney-rules",
+  "version": 1,
+  "preset": {
+    "code": "it-IT",
+    "countries": [
+      "IT"
+    ],
+    "language": "it",
+    "revision": 1
+  },
+  "rules": [
+    {
+      "name": "Esselunga",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Esselunga"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Esselunga"
+        }
+      ]
+    },
+    {
+      "name": "Conad",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Conad"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Conad"
+        }
+      ]
+    },
+    {
+      "name": "Eurospin",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Eurospin"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Eurospin"
+        }
+      ]
+    },
+    {
+      "name": "Lidl",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Lidl"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Lidl"
+        }
+      ]
+    },
+    {
+      "name": "Carrefour",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Carrefour"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "GROCERIES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Carrefour"
+        }
+      ]
+    },
+    {
+      "name": "Enel Energia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Enel Energia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "ELECTRICITY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Enel Energia"
+        }
+      ]
+    },
+    {
+      "name": "Vodafone",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Vodafone"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Vodafone"
+        }
+      ]
+    },
+    {
+      "name": "WindTre",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Wind Tre"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "WindTre"
+        }
+      ]
+    },
+    {
+      "name": "Iliad",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Iliad"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Iliad"
+        }
+      ]
+    },
+    {
+      "name": "Fastweb",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Fastweb"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "TV_PHONE_INTERNET"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Fastweb"
+        }
+      ]
+    },
+    {
+      "name": "Trenitalia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Trenitalia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "PUBLIC_TRANSPORT"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Trenitalia"
+        }
+      ]
+    },
+    {
+      "name": "Telepass",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Telepass"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "VEHICLE_MAINTENANCE"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Telepass"
+        }
+      ]
+    },
+    {
+      "name": "Enilive",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Enilive"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FUEL"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Enilive"
+        }
+      ]
+    },
+    {
+      "name": "Tamoil",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Tamoil"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FUEL"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Tamoil"
+        }
+      ]
+    },
+    {
+      "name": "Glovo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Glovo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Glovo"
+        }
+      ]
+    },
+    {
+      "name": "Deliveroo",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Deliveroo"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Deliveroo"
+        }
+      ]
+    },
+    {
+      "name": "Just Eat",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Just Eat"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "FOOD_DELIVERY"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Just Eat"
+        }
+      ]
+    },
+    {
+      "name": "Netflix",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Netflix"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Netflix"
+        }
+      ]
+    },
+    {
+      "name": "Spotify",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Spotify"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "STREAMING_SERVICES"
+          }
+        },
+        {
+          "type": "set_merchant",
+          "merchant": "Spotify"
+        }
+      ]
+    },
+    {
+      "name": "Farmacia",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Farmacia"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "HEALTH"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Modello F24",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "F24"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_merchant",
+          "merchant": "Modello F24"
+        }
+      ]
+    },
+    {
+      "name": "pagoPA",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "out"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "pagoPA"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_merchant",
+          "merchant": "pagoPA"
+        }
+      ]
+    },
+    {
+      "name": "Stipendio",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "in"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Stipendio"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "SALARY"
+          }
+        }
+      ]
+    }
+  ]
+}

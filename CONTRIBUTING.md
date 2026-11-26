@@ -81,13 +81,14 @@ schema only (data goes in seeders), and `.env` must point at a local database.
 If `develop` moves on while you work, rebase your branch onto it and force-push:
 `git fetch upstream && git rebase upstream/develop`, where `upstream` is this repository.
 
-User-facing text goes through the translation files (English, Portuguese and Spanish);
-please don't hardcode strings. Every key must exist in all three locales with the same
-ICU placeholders (`{name}`, plural and select arguments), and every documentation page
-and `meta.json` entry must exist in `en`, `pt` and `es`. CI enforces this: the web and
-mobile i18n tests, the transactional-email copy check and the docs locale-parity check
-fail with the locale, file and key to fix. If you can't translate, add the English text
-to all three locales and say so in the pull request.
+User-facing text goes through the translation files; please don't hardcode strings. The
+web app, the mobile app and the emails speak English, Portuguese, Spanish and Italian, and
+every key must exist in all four locales with the same ICU placeholders (`{name}`, plural
+and select arguments). The documentation stays in `en`, `pt` and `es`: every page and
+`meta.json` entry must exist in all three, and an Italian account gets the English docs
+and privacy links. CI enforces this: the web and mobile i18n tests, the transactional-email
+copy check and the docs locale-parity check fail with the locale, file and key to fix. If
+you can't translate, add the English text to every locale and say so in the pull request.
 
 Portuguese copy is European Portuguese (pt-PT) and addresses the reader as **tu**, in the
 web app, the mobile app, emails, the docs and the marketing site. Write the verb in the
@@ -108,6 +109,27 @@ is still right for someone else's things ("{name} convidou-te para o seu agregad
 legal pages (terms, privacy, cookies) keep their formal "o utilizador" register, and
 Brazilian Portuguese, if it is ever added, uses "você". The web, mobile and email checks
 fail on "você" and on formal imperatives such as "Clique" or "Introduza" in pt copy.
+
+Spanish copy also addresses the reader as **tú** ("Introduce tu email", "Ábrelo con
+7-Zip"), never as "usted" ("Introduzca su email", "Ábralo").
+
+Italian copy addresses the reader as **tu**, never "Lei" or the formal third person, and
+addresses them without a gender: a word that would agree with the reader is rephrased.
+
+| Not this | This |
+|---|---|
+| Inserisca la Sua email | Inserisci la tua email |
+| Benvenuto in WonderMoney | Ti diamo il benvenuto in WonderMoney |
+| Sei pronto per iniziare? | Puoi iniziare quando vuoi |
+| Sei sicuro di voler eliminare questo conto? | Vuoi davvero eliminare questo conto? |
+
+Buttons and menu items use the same tu imperative ("Salva", "Elimina", "Aggiungi conto").
+Placeholders and plurals follow the English message: the same ICU arguments, and
+`one`/`other` (web) or `_one`/`_other` (mobile) wherever English has them. Numbers, amounts
+and dates come from `Intl` in the Italian locale (`it`, which formats as `it-IT`), never
+by hand. The mobile app
+keeps the web app's Italian terms (`apps/web/messages/it`), and the web and mobile
+`it-form-of-address` tests enforce the form of address.
 
 ## Shipping a feature behind preview features
 
