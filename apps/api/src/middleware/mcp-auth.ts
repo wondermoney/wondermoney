@@ -66,9 +66,10 @@ function setChallenge(res: Response, resource: null | string, error?: 'insuffici
 export async function requireMcpToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   const oauthResource = mcpOAuthResourceIfEnabled();
   const bearer = getBearerToken(req.headers.authorization);
-  // While OAuth is on, a request with a bearer skips the per-IP backstop
-  // (`isSharedEgressRequest`), so its failures are budgeted per address here; the count is read
-  // now, before anything is looked up. Off, the backstop applies as it always has.
+  // While OAuth is on, a request with a bearer skips the per-IP backstop for the larger `mcpBearer`
+  // family (`isSharedEgressRequest`), so its failures are budgeted per address here too; the
+  // count is read now, before anything is looked up. Off, the backstop applies as it always has.
+  // Both read the same test, `mcpOAuthResourceIfEnabled`.
   const hasBearerHeader = /^bearer\s+\S/i.test(req.get('authorization') ?? '');
   const budget = oauthResource && hasBearerHeader ? await mcpAuthFailures.check(req) : null;
   const outcome = createOutcome(res, next, budget);

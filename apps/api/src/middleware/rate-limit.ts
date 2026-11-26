@@ -4,7 +4,7 @@ import { ipKeyGenerator, MemoryStore, rateLimit, type RateLimitInfo, type Option
 import { StatusCodes } from 'http-status-codes';
 
 import { IS_PROD } from '@config/env';
-import { isMcpOAuthRequested } from '@config/mcp';
+import { mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
 import { mcpCredentialKey } from '@service/mcp/mcp-types';
 import { ERROR_CODE } from '@utils/errors';
 import logger from '@utils/logger';
@@ -141,6 +141,15 @@ export const RATE_LIMIT_FAMILIES = {
    * per-endpoint budget — the families below are — it is the ceiling on any single address.
    */
   globalBackstop: { limit: 3000, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * `POST /v1/mcp` with a bearer credential while OAuth is on, per address, in place of the
+   * backstop: ten times its budget, because ChatGPT brings many people's calls from a few shared
+   * addresses, yet still a ceiling, so replaying any token (valid, revoked or junk) cannot run
+   * unbounded lookups from one address. Each credential has its own budget besides (`apiToken`,
+   * the tool-call cap) and failures their own (`mcpAuthFailure`).
+   */
+  mcpBearer: { limit: 30000, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /**
    * Portfolio and transaction import-session *mutations*: parsing, mapping, row decisions and
@@ -432,21 +441,23 @@ export function createMethodScopedRateLimiter(read: RateLimitFamilyName, write: 
 export const isHealthCheckPath = (req: Request): boolean =>
   req.path === '/v1/health' || req.path.startsWith('/v1/health/');
 
+/** `POST /v1/mcp` carrying a bearer credential, while OAuth for the MCP server is on. */
+export const isMcpBearerRequest = (req: Request): boolean =>
+  mcpOAuthResourceIfEnabled() !== null && /^bearer\s+\S/i.test(req.get('authorization') ?? '');
+
 /**
  * Traffic that arrives from a shared egress, many people behind one address: ChatGPT and other
  * hosted MCP clients call the MCP server, read its OAuth discovery documents and refresh tokens
- * from a handful of their own addresses. A per-IP budget would let one busy client lock everyone
- * out, so, while OAuth is on (off, nothing changes), these skip the backstop: an MCP call with a
- * bearer credential is budgeted per credential (the `apiToken` family and the per-minute tool-call
- * cap, keyed on the token or the OAuth grant) and its failures per address (`mcpAuthFailure`),
- * the token and registration endpoints by better-auth's own limits, and the discovery documents
- * are static.
+ * from a handful of their own addresses. A per-IP budget sized for one person would let one busy
+ * client lock everyone out, so, while OAuth is on (`mcpOAuthResourceIfEnabled`, the same test the
+ * failure budget uses; off, nothing changes), these skip the backstop: an MCP call with a bearer
+ * credential has its own, larger per-address family (`mcpBearer`) besides its per-credential
+ * budgets and the failure budget (`mcpAuthFailure`), the token and registration endpoints have
+ * better-auth's own limits, and the discovery documents are static.
  */
 export const isSharedEgressRequest = (req: Request): boolean =>
-  // The switch as set (`MCP_OAUTH_ENABLED` and the MCP server on), read here without the API
-  // address so this module loads before the instance URLs are known.
-  isMcpOAuthRequested() && (
-    (req.path === '/v1/mcp' && /^bearer\s+\S/i.test(req.get('authorization') ?? ''))
+  mcpOAuthResourceIfEnabled() !== null && (
+    (req.path === '/v1/mcp' && isMcpBearerRequest(req))
     || req.path.startsWith('/.well-known/oauth-')
     // Budgeted by better-auth's own OAuth limits instead (services/auth/mcp-oauth.ts).
     || req.path === '/api/auth/oauth2/token'
@@ -464,6 +475,14 @@ export const isSharedEgressRequest = (req: Request): boolean =>
 /** Per-IP backstop in front of the whole app, including the auth middleware. */
 export const globalBackstopRateLimit = (): RequestHandler =>
   createRateLimiter({ family: 'globalBackstop', skip: (req) => isHealthCheckPath(req) || isSharedEgressRequest(req) });
+
+/**
+ * `POST /v1/mcp` with a bearer while OAuth is on, per address (`mcpBearer`), where the backstop
+ * steps aside (`isSharedEgressRequest`). Every other request to the route skips it, the backstop
+ * having counted it already.
+ */
+export const mcpBearerRateLimit = (): RequestHandler =>
+  createRateLimiter({ family: 'mcpBearer', skip: (req) => !isMcpBearerRequest(req) });
 
 /** `/v1/admin` and the credential-gated Swagger UI. */
 export const adminApiRateLimit = (): RequestHandler => createRateLimiter({ family: 'adminApi' });
