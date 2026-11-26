@@ -5474,7 +5474,7 @@
           "prices": "En la parte superior está el último precio medio nacional por litro del gasóleo, la gasolina 95 y el GLP, tal como lo publicó la DGEG para el {{asOf}}, y cuánto se movió cada uno en una semana: gasóleo {{dieselChange}} y gasolina {{gasolineChange}} respecto a la semana anterior.",
           "calculator": "La calculadora convierte tu conducción en un coste mensual de combustible. Indicas la distancia, el consumo en litros por 100 km y el combustible; el precio empieza en la última media y puedes cambiarlo por el que pagas de verdad.",
           "noForecast": "Esta página no hace previsiones. Muestra lo que midió la DGEG y lo que cuesta tu conducción a ese precio; no dice cuál será el precio la semana que viene.",
-          "stations": "Debajo están las gasolineras más baratas: las {{stationsDistrict}} más baratas de Portugal continental o de un distrito, o las {{stationsMunicipality}} más baratas de un municipio, para el combustible que elijas. Cada una muestra el precio, la estación y su marca, la dirección, un enlace al mapa y cuándo actualizó la estación el precio por última vez."
+          "stations": "Debajo están las gasolineras más baratas: las {{stationsDistrict}} más baratas de Portugal continental o de un distrito, o las {{stationsMunicipality}} más baratas de un municipio, para el combustible que elijas. Cada una muestra el precio, la estación y su marca, la dirección, un enlace al mapa y cuándo actualizó la estación el precio por última vez. En el mapa, las estaciones muy cercanas comparten un marcador con el precio más bajo entre ellas y cuántas son; tócalo para acercar."
         },
         "example": {
           "title": "Ejemplo práctico",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "El mapa no se abre en este navegador. Usa el enlace de cada estación.",
         "directions": "Cómo llegar",
         "you": "Tu ubicación",
+        "mapCluster": "{{count}} estaciones, la más barata a {{price}}. Acercar",
         "mapUi": {
           "zoomIn": "Acercar",
           "zoomOut": "Alejar",

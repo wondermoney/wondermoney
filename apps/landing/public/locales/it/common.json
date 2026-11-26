@@ -5474,7 +5474,7 @@
           "prices": "In alto trovi l'ultimo prezzo medio nazionale al litro di gasolio, benzina 95 e GPL, come lo ha pubblicato la DGEG per il {{asOf}}, e di quanto si è mosso ciascuno in una settimana: gasolio {{dieselChange}} e benzina {{gasolineChange}} rispetto alla settimana precedente.",
           "calculator": "Il calcolatore trasforma la tua guida in un costo mensile di carburante. Indichi la distanza, il consumo in litri per 100 km e il carburante; il prezzo parte dall'ultima media e puoi cambiarlo con quello che paghi davvero.",
           "noForecast": "Questa pagina non fa previsioni. Mostra ciò che la DGEG ha rilevato e quanto costa la tua guida a quel prezzo; non dice quale sarà il prezzo la settimana prossima.",
-          "stations": "Sotto ci sono i distributori più economici: i {{stationsDistrict}} più economici del Portogallo continentale o di un distretto, oppure i {{stationsMunicipality}} più economici di un comune, per il carburante scelto. Ognuno mostra il prezzo, il distributore e il marchio, l'indirizzo, un link alla mappa e quando il distributore ha aggiornato il prezzo l'ultima volta."
+          "stations": "Sotto ci sono i distributori più economici: i {{stationsDistrict}} più economici del Portogallo continentale o di un distretto, oppure i {{stationsMunicipality}} più economici di un comune, per il carburante scelto. Ognuno mostra il prezzo, il distributore e il marchio, l'indirizzo, un link alla mappa e quando il distributore ha aggiornato il prezzo l'ultima volta. Sulla mappa, i distributori vicini condividono un indicatore con il prezzo più basso tra loro e il loro numero; toccalo per ingrandire."
         },
         "example": {
           "title": "Esempio pratico",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "La mappa non si apre in questo browser. Usa il link di ogni distributore.",
         "directions": "Indicazioni",
         "you": "La tua posizione",
+        "mapCluster": "{{count}} distributori, il più economico a {{price}}. Ingrandisci",
         "mapUi": {
           "zoomIn": "Ingrandisci",
           "zoomOut": "Riduci",

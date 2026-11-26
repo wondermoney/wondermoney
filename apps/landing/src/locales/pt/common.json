@@ -5474,7 +5474,7 @@
           "prices": "No topo da página está o último preço médio nacional por litro do gasóleo, da gasolina 95 e do GPL, tal como a DGEG o publicou para {{asOf}}, e quanto cada um variou numa semana: gasóleo {{dieselChange}} e gasolina {{gasolineChange}} face à semana anterior.",
           "calculator": "A calculadora transforma a tua condução num custo mensal de combustível. Indicas a distância, o consumo em litros por 100 km e o combustível; o preço começa na média mais recente e podes alterá-lo para o que realmente pagas.",
           "noForecast": "Esta página não faz previsões. Mostra o que a DGEG mediu e quanto custa a tua condução a esse preço; não diz qual será o preço na próxima semana.",
-          "stations": "Por baixo estão os postos mais baratos: os {{stationsDistrict}} mais baratos do continente ou de um distrito, ou os {{stationsMunicipality}} mais baratos de um concelho, para o combustível que escolheres. Cada um mostra o preço, o posto e a marca, a morada, uma ligação para o mapa e quando o posto atualizou o preço pela última vez."
+          "stations": "Por baixo estão os postos mais baratos: os {{stationsDistrict}} mais baratos do continente ou de um distrito, ou os {{stationsMunicipality}} mais baratos de um concelho, para o combustível que escolheres. Cada um mostra o preço, o posto e a marca, a morada, uma ligação para o mapa e quando o posto atualizou o preço pela última vez. No mapa, os postos muito próximos partilham um marcador com o preço mais baixo entre eles e quantos são; toca nele para aproximar."
         },
         "example": {
           "title": "Exemplo prático",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "O mapa não abre neste navegador. Usa a ligação de cada posto.",
         "directions": "Como chegar",
         "you": "A tua localização",
+        "mapCluster": "{{count}} postos, o mais barato a {{price}}. Aproximar",
         "mapUi": {
           "zoomIn": "Aproximar",
           "zoomOut": "Afastar",
