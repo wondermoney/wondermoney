@@ -50,7 +50,7 @@ database:
   existingSecret: wondermoney-db
 ```
 
-Ou dá uma connection string em `database.url` (acrescenta `?sslmode=require` para TLS), ou uma guardada no teu Secret com `database.existingSecretUrlKey`. O chart recusa instalar sem nenhuma base de dados.
+Ou dá uma connection string em `database.url` (acrescenta `?sslmode=require` para TLS), ou uma guardada no teu Secret com `database.existingSecretUrlKey`. O chart recusa instalar sem nenhuma base de dados. Uma connection string chega à API e ao worker como `DATABASE_URL`: não acrescentes definições `DB_*` em `extraEnv` ou `existingSecret`, ou eles recusam arrancar. O `pg`, o driver que o WonderMoney usa, trata `sslmode=require` como `verify-full`: o certificado do servidor tem de ser válido para o seu nome de anfitrião. Para um certificado autoassinado, usa `?uselibpqcompat=true&sslmode=require`, que dá a `require` o significado do libpq (ligação cifrada, certificado não verificado).
 
 ## Um só nome de anfitrião
 

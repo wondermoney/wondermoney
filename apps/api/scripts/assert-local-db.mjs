@@ -3,9 +3,9 @@
  * Refuse to run a destructive database command against anything that is not a
  * local database.
  *
- * Why this exists: `src/mikro-orm.config.ts` connects to whatever `DB_HOST` /
- * `DB_PORT` / `DB_DATABASE` resolve to from the process env (loaded from `.env`),
- * with no regard for the `dev` or `prd` in the calling script's name. A `.env`
+ * Why this exists: `src/mikro-orm.config.ts` connects to whatever `DATABASE_URL`, or
+ * else `DB_HOST` / `DB_PORT` / `DB_DATABASE`, resolve to from the process env (loaded
+ * from `.env`), with no regard for the `dev` or `prd` in the calling script's name. A `.env`
  * that has ever held a remote-database block — and this repo's has — means
  * `pnpm migrate:dev:fresh` is one line-reorder away from dropping staging or
  * production. Documentation is not a control; this is.

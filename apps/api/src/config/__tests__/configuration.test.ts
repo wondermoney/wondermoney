@@ -183,3 +183,68 @@ describe('loadConfiguration', () => {
     ]));
   });
 });
+
+describe('the migration and ORM CLI targets', () => {
+  const databaseOnly: ConfigurationSource = Object.freeze({
+    DB_DATABASE: 'wondermoney',
+    DB_HOST: 'db.example.test',
+    DB_PASSWORD: 'secret',
+    DB_PORT: '5432',
+    DB_USERNAME: 'wm',
+    NODE_ENV: 'production',
+  });
+
+  it.each(['migration', 'orm-cli'] as const)('%s resolves with only the database settings', (role) => {
+    const config = loadConfiguration(role, databaseOnly);
+
+    expect(config.database).toMatchObject({ database: 'wondermoney', host: 'db.example.test', port: 5432 });
+    expect(config.runtime.isProduction).toBe(true);
+  });
+
+  it.each(['migration', 'orm-cli'] as const)('%s does not judge the app secrets or settings it never reads', (role) => {
+    // A migration run must not need, or trip over, what only the API and the worker use.
+    const unrelated = { ...databaseOnly, ADMIN_API_KEY: '', CREDENTIAL_ENCRYPTION_KEY_V1: 'not-a-key', TRUST_PROXY: 'true' };
+
+    expect(() => loadConfiguration(role, unrelated)).not.toThrow();
+  });
+
+  it.each(['migration', 'orm-cli'] as const)('%s still requires a database', (role) => {
+    const { DB_HOST: _host, ...withoutHost } = databaseOnly;
+
+    expect(() => loadConfiguration(role, withoutHost)).toThrow(/DATABASE_URL or all of DB_HOST/);
+  });
+});
+
+describe('the database given as DATABASE_URL', () => {
+  const url = 'postgres://wm:secret@db.example.test:6432/wondermoney?sslmode=require';
+  const { DB_DATABASE: _d, DB_HOST: _h, DB_PASSWORD: _w, DB_PORT: _p, DB_USERNAME: _u, ...withoutDb } = validApi;
+
+  it('connects to DATABASE_URL alone, on every role', () => {
+    for (const role of ['api', 'worker', 'migration', 'orm-cli'] as const) {
+      expect(loadConfiguration(role, { ...withoutDb, DATABASE_URL: url }).database)
+        .toMatchObject({ connectionString: url, database: 'wondermoney', host: 'db.example.test', port: 6432, username: 'wm' });
+    }
+  });
+
+  it('refuses DATABASE_URL beside DB_* on every role instead of picking one', () => {
+    for (const role of ['api', 'worker', 'migration', 'orm-cli'] as const) {
+      expect(() => loadConfiguration(role, { ...validApi, DATABASE_URL: url }))
+        .toThrow(/DATABASE_URL and DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD are both set/);
+    }
+  });
+
+  it('refuses a DATABASE_URL that names no database, without printing it', () => {
+    const error = (() => {
+      try {
+        loadConfiguration('migration', { DATABASE_URL: 'postgres://wm:secret@db.example.test:6432' });
+      } catch (caught) {
+        return caught;
+      }
+      return undefined;
+    })();
+
+    expect(error).toBeInstanceOf(ConfigurationError);
+    expect((error as ConfigurationError).issues).toEqual([expect.objectContaining({ code: 'invalid-format', path: 'DATABASE_URL' })]);
+    expect((error as ConfigurationError).message).not.toContain('secret');
+  });
+});

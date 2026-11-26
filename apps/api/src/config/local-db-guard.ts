@@ -4,11 +4,16 @@
  * this, prints the message and exits with its status. The header of that script explains the
  * two tiers and the limits of a host-only check.
  *
- * Plain TypeScript with no imports, so the script can import it under Node's type stripping.
+ * The target is the one the scripts connect to (`database-target.ts`): the host and database of
+ * `DATABASE_URL` as `pg` reads it when it is set, else `DB_HOST` and `DB_DATABASE`. A
+ * `DATABASE_URL` that does not parse, one whose query would replace its host, port or user, and
+ * one set beside `DB_*` are refused, as the scripts themselves refuse them.
  *
- * `DATABASE_URL` is not read here: a target given only by it has no `DB_HOST`, so the guard
- * refuses it as unverifiable, which fails closed.
+ * Plain TypeScript, so the script can import it under Node's type stripping (hence the `.ts`
+ * extension on the import).
  */
+import { databaseUrlProblem, databaseUrlSetting, parseDatabaseUrl } from './database-target.ts';
+
 
 const LOCAL_HOSTS: ReadonlySet<string> = new Set([
   '0.0.0.0',
@@ -47,12 +52,21 @@ export function isLocalDbHost(host: string): boolean {
   return LOCAL_HOSTS.has(normalized);
 }
 
-/** Why a `MIKRO_ORM_*` connection override is refused, or null when none is set to one. */
+/** May `command` run against the target `env` resolves to, and what to print either way. */
 export function checkLocalDbTarget({ command, env, optIn }: LocalDbGuardInput): LocalDbGuardResult {
-  const host = (env['DB_HOST'] ?? '').trim();
-  const port = (env['DB_PORT'] ?? '').trim();
-  const database = (env['DB_DATABASE'] ?? '').trim();
-  const target = `    DB_HOST     ${host}\n    DB_PORT     ${port || '(unset)'}\n    DB_DATABASE ${database || '(unset)'}\n`;
+  const urlProblem = databaseUrlProblem(env);
+  if (urlProblem) {
+    return {
+      allowed: false,
+      level: 'error',
+      message: `\n✖ Refusing to run ${command}: ${urlProblem.message}.\n`,
+    };
+  }
+
+  const { database, host, port, source } = resolveTarget(env);
+  const target = source === 'DATABASE_URL'
+    ? `    DATABASE_URL host ${host}, port ${port || '(default)'}, database ${database}\n`
+    : `    DB_HOST     ${host}\n    DB_PORT     ${port || '(unset)'}\n    DB_DATABASE ${database || '(unset)'}\n`;
 
   const override = mikroOrmOverrideProblem(env);
   if (override) {
@@ -78,7 +92,8 @@ export function checkLocalDbTarget({ command, env, optIn }: LocalDbGuardInput): 
   }
 
   if (isLocalDbHost(host)) {
-    return { allowed: true, level: 'ok', message: `✔ ${command}: target is local (DB_HOST=${host}, DB_DATABASE=${database || '(unset)'}).` };
+    const named = source === 'DATABASE_URL' ? `DATABASE_URL host ${host}, database ${database}` : `DB_HOST=${host}, DB_DATABASE=${database || '(unset)'}`;
+    return { allowed: true, level: 'ok', message: `✔ ${command}: target is local (${named}).` };
   }
 
   if (optIn && env['ALLOW_REMOTE_DB'] === '1') {
@@ -115,14 +130,13 @@ export function checkLocalDbTarget({ command, env, optIn }: LocalDbGuardInput): 
   };
 }
 
+/** A URL whose host, as `pg` reads it, is local; one that does not parse is not. */
 function isLocalUrl(value: string): boolean {
-  try {
-    return isLocalDbHost(new URL(value).hostname);
-  } catch {
-    return false;
-  }
+  const target = parseDatabaseUrl(value);
+  return target !== null && isLocalDbHost(target.host);
 }
 
+/** Why a `MIKRO_ORM_*` connection override is refused, or null when none is set to one. */
 function mikroOrmOverrideProblem(env: LocalDbGuardInput['env']): null | string {
   for (const key of MIKRO_ORM_TARGET_KEYS) {
     const value = env[key]?.trim();
@@ -134,4 +148,20 @@ function mikroOrmOverrideProblem(env: LocalDbGuardInput['env']): null | string {
     return key;
   }
   return null;
+}
+
+/**
+ * The host, port and database the scripts will connect to. Only called once `databaseUrlProblem`
+ * passed, so a set `DATABASE_URL` parses. Never the credentials.
+ */
+function resolveTarget(env: LocalDbGuardInput['env']): { database: string; host: string; port: string; source: 'DATABASE_URL' | 'DB_*' } {
+  const url = databaseUrlSetting(env);
+  const parsed = url === null ? null : parseDatabaseUrl(url);
+  if (parsed) return { database: parsed.database, host: parsed.host, port: parsed.port === null ? '' : String(parsed.port), source: 'DATABASE_URL' };
+  return {
+    database: (env['DB_DATABASE'] ?? '').trim(),
+    host: (env['DB_HOST'] ?? '').trim(),
+    port: (env['DB_PORT'] ?? '').trim(),
+    source: 'DB_*',
+  };
 }

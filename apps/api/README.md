@@ -53,13 +53,14 @@ rebaseline the demo's account balances as well; it leaves other households alone
 
 ## `.env` decides which database you touch
 
-Every `migrate:*` and `seed:*` script connects to whatever `DB_HOST` / `DB_PORT` /
-`DB_DATABASE` resolve to, **regardless of the `dev` or `prd` in the script name**.
+Every `migrate:*` and `seed:*` script connects to whatever `DATABASE_URL`, or else `DB_HOST` /
+`DB_PORT` / `DB_DATABASE`, resolve to, **regardless of the `dev` or `prd` in the script name**.
+Give the database one way: `DATABASE_URL` beside `DB_*` is refused.
 
 1. **Keep `.env` local, with exactly one `DB_*` block.** dotenv keeps the _last_
    assignment, so a second block pasted at the bottom silently wins.
 2. **`migrate:dev:fresh` / `migrate:prd:fresh` DROP the whole database.** They refuse to
-   run unless `DB_HOST` is local (`scripts/assert-local-db.mjs`). To move a real
+   run unless the host (of `DATABASE_URL`, or `DB_HOST`) is local (`scripts/assert-local-db.mjs`). To move a real
    database forward, use the non-destructive `pnpm migrate:dev`.
 
 ## Commands

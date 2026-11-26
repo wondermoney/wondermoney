@@ -25,9 +25,74 @@ describe('checkLocalDbTarget', () => {
     expect(check({ ...REMOTE, ALLOW_REMOTE_DB: '1' }, true)).toMatchObject({ allowed: true, level: 'warn' });
   });
 
-  it('refuses a target it cannot verify: no DB_HOST, including one given only as DATABASE_URL', () => {
+  it('refuses a target it cannot verify: no DB_HOST and no DATABASE_URL', () => {
     expect(check({}, true).allowed).toBe(false);
-    expect(check({ DATABASE_URL: 'postgres://wm@localhost:5434/wmdb' }, false).allowed).toBe(false);
+  });
+
+  describe('with the database given as DATABASE_URL', () => {
+    const localUrl = { DATABASE_URL: 'postgres://wm:never-printed@localhost:5434/wmdb' };
+    const remoteUrl = { DATABASE_URL: 'postgres://wm:never-printed@db.example.com:5432/wm_production?sslmode=verify-full' };
+
+    it('checks the host the URL names', () => {
+      expect(check(localUrl, false)).toMatchObject({ allowed: true, level: 'ok' });
+      expect(check(remoteUrl, false).allowed).toBe(false);
+      expect(check({ ...remoteUrl, ALLOW_REMOTE_DB: '1' }, false).allowed).toBe(false);
+      expect(check(remoteUrl, true).allowed).toBe(false);
+      expect(check({ ...remoteUrl, ALLOW_REMOTE_DB: '1' }, true)).toMatchObject({ allowed: true, level: 'warn' });
+    });
+
+    it('reports the host and database it checked, never the credentials', () => {
+      const { message } = check(remoteUrl, true);
+
+      expect(message).toContain('db.example.com');
+      expect(message).toContain('wm_production');
+      expect(message).not.toContain('never-printed');
+    });
+
+    // The URL names a local host, but `pg` would take these from the query instead.
+    it.each([
+      ['host', 'remote-db.example.invalid'],
+      ['hostaddr', '192.0.2.10'],
+      ['port', '6543'],
+      ['user', 'postgres'],
+      ['password', 'never-printed'],
+      ['options', '-c search_path=public'],
+    ])('refuses a local-looking DATABASE_URL whose query sets %s, naming it and not its value', (parameter, value) => {
+      const url = `postgres://wm:pw@localhost:1/wmdb?${parameter}=${encodeURIComponent(value)}`;
+
+      for (const optIn of [false, true]) {
+        const result = check({ ALLOW_REMOTE_DB: '1', DATABASE_URL: url }, optIn);
+        expect(result.allowed).toBe(false);
+        expect(result.message).toContain(parameter);
+        expect(result.message).not.toContain(value);
+      }
+    });
+
+    it('refuses a MIKRO_ORM_CLIENT_URL whose query moves it off the local host', () => {
+      expect(check({ ...LOCAL, MIKRO_ORM_CLIENT_URL: 'postgres://wm@localhost:5434/wmdb?host=remote-db.example.invalid' }, false).allowed).toBe(false);
+    });
+
+    it.each([
+      ['not a url'],
+      ['postgres://wm@localhost:5434'],
+      ['postgres:///wmdb?host=/var/run/postgresql'],
+      ['wmdb'],
+      // pg reads the host of these as %6cocalhost, not localhost.
+      ['postgres://u:p@%6cocalhost:1/wmdb#%zz'],
+      ['postgres://u:p@%6cocalhost:1/wmdb?application_name=%zz'],
+      ['postgres://wm@localhost:5434/wmdb#main'],
+    ])('refuses DATABASE_URL=%s, which it cannot check', (value) => {
+      expect(check({ DATABASE_URL: value }, true).allowed).toBe(false);
+      expect(check({ ALLOW_REMOTE_DB: '1', DATABASE_URL: value }, true).allowed).toBe(false);
+    });
+
+    it('refuses DATABASE_URL beside DB_*, even when both name a local database', () => {
+      const both = check({ ...LOCAL, ...localUrl }, false);
+
+      expect(both.allowed).toBe(false);
+      expect(both.message).toContain('DATABASE_URL and DB_HOST');
+      expect(both.message).not.toContain('never-printed');
+    });
   });
 
   it.each([
