@@ -12,9 +12,9 @@ import { Migration } from '@mikro-orm/migrations';
  * `assistant_audit_log.oauth_client_id` records the OAuth client an MCP call came through, beside
  * `api_token_key` for a personal API token.
  */
-export class Migration20261126100201 extends Migration {
+export class Migration20261126152624 extends Migration {
 
-  override name = 'Migration20261126100201';
+  override name = 'Migration20261126152624';
 
   override up(): void | Promise<void> {
     this.addSql(`alter table "assistant_audit_log" add "oauth_client_id" varchar(255) null;`);
