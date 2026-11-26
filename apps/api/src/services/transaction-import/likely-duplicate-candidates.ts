@@ -4,6 +4,7 @@ import type { EntityManager } from '@mikro-orm/postgresql';
 import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { Account } from '@entity/Account';
 import { Transaction } from '@entity/Transaction';
+import { accountAccessOf } from '@service/account/account-access';
 import { roundMoney } from '@utils/money';
 
 import { LIKELY_DUPLICATE_WINDOW_DAYS, type LikelyDuplicateCandidate } from './likely-duplicate-match';
@@ -13,12 +14,13 @@ const AMOUNT_BATCH_SIZE = 500;
 
 /**
  * The transactions a file's rows may repeat, for `matchLikelyDuplicates`: on the target
- * account only, and only while it is an account of the importing person in their household, so
- * another household's rows and the partner's private accounts never take part. Soft-deleted rows
- * are left out and hidden rows count, as for the exact match on ids
- * (`findImportedTransactionIds`): a hidden row is still the stored copy of that transaction.
- * Read with explicit tenant and owner predicates, since the parse job runs without a tenant
- * context. A transaction with no currency of its own is in the account's.
+ * account only, and only while the importing person may see it in their household (their own, a
+ * shared one, or a private one shared with them), so another household's rows and another
+ * member's private accounts never take part. Soft-deleted rows are left out and hidden rows
+ * count, as for the exact match on ids (`findImportedTransactionIds`): a hidden row is still the
+ * stored copy of that transaction. Read with explicit tenant and access predicates
+ * (`accountAccessOf`), since the parse job runs without a tenant context. A transaction with no
+ * currency of its own is in the account's.
  */
 export async function findLikelyDuplicateCandidates(
   em: EntityManager,
@@ -27,7 +29,8 @@ export async function findLikelyDuplicateCandidates(
   rows: readonly { amount: number; date: Date | string }[],
 ): Promise<LikelyDuplicateCandidate[]> {
   if (rows.length === 0) return [];
-  const account = await em.findOne(Account, { accountKey, accountOwnerAppuserKey: { appuserKey: scope.appuserKey }, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { filters: false, populate: ['currencyKey'] });
+  if ((await accountAccessOf(em, accountKey, scope)) === null) return [];
+  const account = await em.findOne(Account, { accountKey, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { filters: false, populate: ['currencyKey'] });
   if (!account) return [];
   const days = rows.map((row) => Math.floor(new Date(row.date).getTime() / MS_PER_DAY)).filter((day) => Number.isFinite(day));
   if (days.length === 0) return [];

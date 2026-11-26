@@ -5,7 +5,7 @@ vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }))
 vi.mock('@service/recurring/post-transaction-ingestion-detection.service', () => ({ triggerRecurringDetectionAfterTransactionIngestion: vi.fn().mockResolvedValue(undefined) }));
 vi.mock('@service/transaction-enrichment/transaction-enrichment-enqueue.service', () => ({ enqueueTransactionEnrichmentForTenant: vi.fn().mockResolvedValue(undefined) }));
 
-import { addAccount, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
@@ -243,6 +243,39 @@ ${entry({ acctSvcrRef: 'SAV-1', amount: '200.00', creditDebit: 'CRDT', date: '20
     await commitAndRun(ctx, view.session.id);
     expect((await storedTransactions()).map((row) => row.amount)).toEqual([-11]);
     expect((await storedTransactions(savings)).map((row) => row.amount)).toEqual([200]);
+  });
+
+  it('suggests the accounts a member may write to, and never another member\'s private one', async () => {
+    const ctx = setup();
+    const em = db.em();
+    const member = await addPartner(em, household);
+    const memberScope = { appuserKey: member.appuserKey, tenantKey: household.tenant.tenantKey };
+    // The owner's shared account holds the first IBAN, the owner's private one the second.
+    await em.nativeUpdate(Account, { accountKey: household.account.accountKey }, { accountNumber: 'PT50000201231234567890154' });
+    const ownersPrivate = await addAccount(em, household, { isPrivate: true, name: 'Private savings' });
+    ownersPrivate.accountNumber = 'PT50003300009998887776655';
+    await em.flush();
+    const file = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Id>CHECKING</Id>
+      <Acct><Id><IBAN>PT50000201231234567890154</IBAN></Id><Ccy>EUR</Ccy></Acct>
+${entry({ acctSvcrRef: 'CHK-1', amount: '11.00', creditDebit: 'DBIT', date: '2026-01-15', details: detail({ name: 'SUPERMERCADO', remittance: 'Groceries' }) })}
+    </Stmt>
+    <Stmt>
+      <Id>SAVINGS</Id>
+      <Acct><Id><IBAN>PT50003300009998887776655</IBAN></Id><Ccy>EUR</Ccy></Acct>
+${entry({ acctSvcrRef: 'SAV-1', amount: '200.00', creditDebit: 'CRDT', date: '2026-01-21', details: detail({ name: 'CHECKING', remittance: 'Transfer' }) })}
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>`;
+
+    const created = await ctx.service().create(memberScope, { accountId: household.account.accountKey, format: 'camt053', key: ctx.upload(household.account, file) });
+    await ctx.runLastJob();
+    const view = await ctx.service().get(memberScope, created.id, {});
+
+    expect(view.session.sourceAccounts.map((source) => source.suggestedAccountId)).toEqual([household.account.accountKey, undefined]);
   });
 
   it('suggests no account when no account number holds the IBAN', async () => {

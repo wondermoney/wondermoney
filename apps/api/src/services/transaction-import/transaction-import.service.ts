@@ -10,6 +10,7 @@ import { HIDDEN_FILTER } from '@app/database/filters/tenant-filter';
 import { enqueueTransactionImportJob, type TransactionImportJobMode } from '@app/jobs/transaction-import.queue';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
+import type { HouseholdRole } from '@entity/AppuserTenant';
 import { AppuserTransactionCategory, Source as CategorySource } from '@entity/AppuserTransactionCategory';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
 import { Category } from '@entity/Category';
@@ -20,6 +21,7 @@ import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/Tr
 import { TransactionImportRow, TransactionImportRowDecision, TransactionImportRowStatus } from '@entity/TransactionImportRow';
 import { type StatementExtraction, TransactionImportSession, TransactionImportSessionStatus } from '@entity/TransactionImportSession';
 import { TransactionType } from '@entity/TransactionType';
+import { assertAccountsWritable, assertAccountWritable, writableAccountKeys } from '@service/account/account-access';
 import { resolveAccountCsvImportFormat } from '@service/account/account-csv-import-format';
 import type { StatementMapping } from '@service/account/account-statement-mapping.schema';
 import { buildStatementTransaction, followUpStatementImport, settleStatementImport, type StatementWriteContext, statementWriteContext } from '@service/account/account-statement-transaction';
@@ -47,7 +49,7 @@ import { statementImportAdapter, StatementUnreadableError, toStatementLine } fro
  * Staged, resumable transaction imports (wondermoney/wondermoney#58), one `TransactionImportSession`
  * per file:
  *
- *   create   on an account the person owns: with a file already uploaded for that account (the
+ *   create   on an account the person may write to (`account-access.ts`): with a file already uploaded for that account (the
  *            import dialog's upload), parsing starts at once; without, the response carries a link
  *            to upload it to, and `parse` starts it.
  *   parse    a worker job reads the file with its format's adapter, stores every line as a
@@ -168,8 +170,13 @@ export interface TransactionImportRowView {
   targetAccountId: null | number;
 }
 
+/**
+ * The member acting on an import. `householdRole` caps a viewer at read (`account-access.ts`); the
+ * route stack sets it, and a viewer's writes are refused before they get here.
+ */
 export interface TransactionImportScope {
   appuserKey: number;
+  householdRole?: HouseholdRole;
   tenantKey: number;
 }
 
@@ -327,7 +334,7 @@ export class TransactionImportService {
   }
 
   /**
-   * Start a PDF statement import on an account the person owns: the response carries a link to PUT
+   * Start a PDF statement import on an account the person may write to: the response carries a link to PUT
    * the PDF to, signed for exactly `contentLength` bytes, and `parse` starts the read once it is
    * uploaded. The caller has checked that the person may use the `statementImport` model and spent
    * the household's allowance for it. A PDF over the size limit is refused before any link exists.
@@ -454,6 +461,8 @@ export class TransactionImportService {
     }
     if (view.status === 'needs_mapping') throw new ConflictError('Choose an account for each account in the file first');
     if (!view.canCommit) throw new ConflictError('This import cannot be committed now');
+    // Access is checked again here: a share can be taken back between the read and the commit.
+    await assertAccountsWritable(this.em, [view.accountId, ...Object.values(view.accountMapping)].filter((key): key is number => key !== null), scope);
     if (session.statementExtraction?.reconciliation?.status === 'mismatch' && input.acknowledgeMismatch !== true) {
       throw new ConflictError("The statement's balances do not add up; acknowledge the difference to import it anyway", ERROR_CODE.STATEMENT_RECONCILIATION_UNACKNOWLEDGED);
     }
@@ -692,14 +701,17 @@ export class TransactionImportService {
 
   /**
    * The account the file's own identifier points at, for the mapping step. A CAMT.053 statement is
-   * labelled by its IBAN, so an account of the person's whose `accountNumber` holds that IBAN is
-   * suggested; a file that labels its accounts by name (YNAB, Actual, QIF) suggests the one account
-   * of theirs with that name, case and accents aside. The person still confirms the mapping. The
-   * adapter is pure, so the session matches the labels against its accounts here.
+   * labelled by its IBAN, so an account the person may write to whose `accountNumber` holds that
+   * IBAN is suggested; a file that labels its accounts by name (YNAB, Actual, QIF) suggests the one
+   * such account with that name, case and accents aside. These are the accounts the mapping step
+   * accepts. The person still confirms the mapping. The adapter is pure, so the session matches the
+   * labels against its accounts here.
    */
   private async suggestSourceAccounts(appuserId: null | number, tenantId: null | number, sourceAccounts: transactionImport.ImportSourceAccount[]): Promise<void> {
     if (appuserId === null || tenantId === null || sourceAccounts.length === 0) return;
-    const accounts = await this.em.find(Account, { accountOwnerAppuserKey: { appuserKey: appuserId }, deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountName', 'accountNumber'] });
+    const inHousehold = await this.em.find(Account, { deletedAt: null, tenantKey: { tenantKey: tenantId } }, { fields: ['accountKey', 'accountName', 'accountNumber'], filters: false, orderBy: { accountKey: 'asc' } });
+    const writable = await writableAccountKeys(this.em, inHousehold.map((account) => account.accountKey), { appuserKey: appuserId, tenantKey: tenantId });
+    const accounts = inHousehold.filter((account) => writable.has(account.accountKey));
     const byIban = new Map<string, number>();
     for (const account of accounts) {
       const iban = transactionImport.normalizeIban(account.accountNumber);
@@ -1177,9 +1189,13 @@ export class TransactionImportService {
     }
   }
 
-  /** An account the person owns in this household, open for imports. */
+  /**
+   * An account in this household the person may write to, open for imports: their own, a shared
+   * one, or a private one shared with them for writing. Not seen: 404; seen but read-only: 403.
+   */
   private async writableAccount(scope: TransactionImportScope, accountId: number): Promise<Account> {
-    const account = await this.em.findOne(Account, { accountKey: accountId, accountOwnerAppuserKey: { appuserKey: scope.appuserKey }, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { populate: ['accountFinancialInstitutionKey', 'currencyKey'] });
+    await assertAccountWritable(this.em, accountId, scope);
+    const account = await this.em.findOne(Account, { accountKey: accountId, deletedAt: null, tenantKey: { tenantKey: scope.tenantKey } }, { populate: ['accountFinancialInstitutionKey', 'currencyKey'] });
     if (!account) throw new NotFoundError('Account not found');
     return account;
   }

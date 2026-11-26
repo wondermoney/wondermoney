@@ -15,7 +15,7 @@ import { commitTransactionImportSchema, createPdfTransactionImportSchema, create
 const serviceFor = (req: Request) => new TransactionImportService(DI.em, { enqueue: req.enqueue });
 const scopeOf = (req: Request) => {
   const { appuserKey, tenantKey } = authedContext(req);
-  return { appuserKey, tenantKey };
+  return { appuserKey, householdRole: req.householdRole, tenantKey };
 };
 
 /** `POST /`: start an import on an account. With `key` (a file uploaded for it) it is read at once; without, the response carries the upload link. */

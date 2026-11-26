@@ -19,14 +19,20 @@ import { zParse } from '@validators/parser';
 import { DI } from '../../app.js';
 dotenv.config({ quiet: true });
 
+/*
+ * Who may import into an account is the route's `requireWritableAccount` guard
+ * (`services/account/account-access.ts`): its owner, any member on a shared account, and a member
+ * a private account is shared with for writing. The lookups here are by household only; the
+ * tenant filter keeps another member's private account out of them.
+ */
 export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response, next: NextFunction) {
-  const { tenant, user } = authedContext(req);
+  const { tenant } = authedContext(req);
   const {
     params: { accountId },
   } = await zParse(getAccountPresignedUrlForUploadRequestSchema, req);
   const account = await DI.em.findOne(
     Account,
-    { accountKey: accountId, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
+    { accountKey: accountId, deletedAt: undefined, tenantKey: tenant },
     { populate: ['accountFinancialInstitutionKey'] },
   );
   if (!account) {
@@ -53,7 +59,7 @@ export async function getS3PresignedUrlForCsvUpload(req: Request, res: Response,
  * accounts to be mapped.
  */
 export async function startAccountCsvImport(req: Request, res: Response, next: NextFunction) {
-  const { appuserKey, tenant, tenantKey, user } = authedContext(req);
+  const { appuserKey, tenant, tenantKey } = authedContext(req);
   const {
     body: { fileName, key, mapping },
     params: { accountId },
@@ -61,7 +67,7 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
   const normalizedAccountId = typeof accountId === 'number' ? accountId : Number.parseInt(accountId, 10);
   const account = await DI.em.findOne(
     Account,
-    { accountKey: normalizedAccountId, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
+    { accountKey: normalizedAccountId, deletedAt: undefined, tenantKey: tenant },
     { populate: ['accountFinancialInstitutionKey'] },
   );
   if (!account) {
@@ -85,7 +91,7 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
   } catch {
     // The worker reports an unreadable file; the statement path below keeps its own behaviour.
   }
-  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, fileName, format, key, options: mapping ? { mapping } : undefined });
+  const session = await new TransactionImportService(DI.em, { enqueue: req.enqueue }).create({ appuserKey, householdRole: req.householdRole, tenantKey }, { accountId: normalizedAccountId, autoCommit: true, fileName, format, key, options: mapping ? { mapping } : undefined });
   return res.status(202).json({ correlationId: session.correlationId, importId: session.id, status: 'queued' });
 }
 
@@ -96,14 +102,14 @@ export async function startAccountCsvImport(req: Request, res: Response, next: N
  * same mapping, so what was previewed is what is stored.
  */
 export async function previewAccountCsvImport(req: Request, res: Response, next: NextFunction) {
-  const { tenant, user } = authedContext(req);
+  const { tenant } = authedContext(req);
   const {
     body: { key, mapping },
     params: { accountId },
   } = await zParse(previewAccountCsvImportRequestSchema, req);
   const account = await DI.em.findOne(
     Account,
-    { accountKey: accountId, accountOwnerAppuserKey: user, deletedAt: undefined, tenantKey: tenant },
+    { accountKey: accountId, deletedAt: undefined, tenantKey: tenant },
     { populate: ['accountFinancialInstitutionKey', 'currencyKey'] },
   );
   if (!account) {
