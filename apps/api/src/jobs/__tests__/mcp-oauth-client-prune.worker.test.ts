@@ -46,6 +46,11 @@ async function addConsent(clientId: string, userId: string, at: Date): Promise<v
   await sql(CONSENT, [randomUUID(), clientId, userId, at, at]);
 }
 
+/** The client lost its last grant at `at`, as a revocation records it. */
+async function disconnectedAt(clientId: string, at: Date): Promise<void> {
+  await sql('insert into better_auth."mcpOAuthClientActivity" ("clientId", "lastGrantEndedAt") values (?, ?)', [clientId, at]);
+}
+
 async function waitFor(condition: () => Promise<boolean>, timeoutMs = 10_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (!(await condition())) {
@@ -81,8 +86,14 @@ async function rowsOf(clientId: string): Promise<Record<string, number>> {
 
 const NONE = { oauthAccessToken: 0, oauthClient: 0, oauthClientResource: 0, oauthConsent: 0, oauthRefreshToken: 0 };
 
-const prune = (enabled = true) =>
-  handleMcpOAuthClientPruneJob(job, { em: db.em(), isEnabled: () => enabled, logger: { info: vi.fn(), warn: vi.fn() }, now: () => NOW });
+const prune = (enabled = true, limit?: number) =>
+  handleMcpOAuthClientPruneJob(job, { em: db.em(), isEnabled: () => enabled, limit, logger: { info: vi.fn(), warn: vi.fn() }, now: () => NOW });
+
+/** Which of `clientIds` are still registered. */
+async function registered(clientIds: string[]): Promise<string[]> {
+  const rows = await sql('select "clientId" from better_auth."oauthClient"');
+  return clientIds.filter((clientId) => (rows as { clientId: string }[]).some((row) => row.clientId === clientId));
+}
 
 describe('the MCP OAuth client prune job', () => {
   beforeEach(async () => {
@@ -120,6 +131,45 @@ describe('the MCP OAuth client prune job', () => {
     expect(await prune()).toMatchObject({ pruned: 0 });
 
     expect(await rowsOf(recent)).toMatchObject({ oauthClient: 1, oauthClientResource: 1 });
+  });
+
+  it('keeps an old client disconnected less than seven days ago, and removes one disconnected longer ago', async () => {
+    const person = await addPerson();
+    const recentlyDisconnected = await addClient(ago(90));
+    await addTokens(recentlyDisconnected, person, { expiresAt: later(20), issuedAt: ago(10), revoked: ago(2) });
+    await disconnectedAt(recentlyDisconnected, ago(2));
+    const longDisconnected = await addClient(ago(90));
+    await addTokens(longDisconnected, person, { expiresAt: later(20), issuedAt: ago(10), revoked: ago(8) });
+    await disconnectedAt(longDisconnected, ago(8));
+
+    expect(await prune()).toMatchObject({ pruned: 1 });
+
+    expect(await rowsOf(recentlyDisconnected)).toMatchObject({ oauthClient: 1, oauthClientResource: 1, oauthRefreshToken: 1 });
+    expect(await rowsOf(longDisconnected)).toEqual(NONE);
+    const [activity] = await sql('select count(*)::int as count from better_auth."mcpOAuthClientActivity" where "clientId" = ?', [longDisconnected]);
+    expect(activity).toEqual({ count: 0 });
+  });
+
+  it('removes at most the limit in one run, those unused longest first, and says when more are left', async () => {
+    const byAge: string[] = [];
+    for (const days of [40, 35, 30, 20, 10]) byAge.push(await addClient(ago(days)));
+    // Registered first, but disconnected after all the others were registered.
+    const disconnected = await addClient(ago(50));
+    await disconnectedAt(disconnected, ago(9));
+    const info = vi.fn();
+    const run = () => handleMcpOAuthClientPruneJob(job, { em: db.em(), isEnabled: () => true, limit: 2, logger: { info, warn: vi.fn() }, now: () => NOW });
+
+    expect(await run()).toMatchObject({ more: true, pruned: 2 });
+    expect(await registered([...byAge, disconnected])).toEqual([byAge[2], byAge[3], byAge[4], disconnected]);
+    expect(JSON.stringify(info.mock.calls)).toContain('next run');
+
+    expect(await run()).toMatchObject({ more: true, pruned: 2 });
+    expect(await registered([...byAge, disconnected])).toEqual([byAge[4], disconnected]);
+
+    info.mockClear();
+    expect(await run()).toMatchObject({ more: false, pruned: 2 });
+    expect(await registered([...byAge, disconnected])).toEqual([]);
+    expect(JSON.stringify(info.mock.calls)).not.toContain('next run');
   });
 
   it('keeps an old client with a consent or a live refresh token, and every row of it', async () => {
@@ -168,6 +218,26 @@ describe('the MCP OAuth client prune job', () => {
 
     expect(await running).toMatchObject({ kept: 1, pruned: 0 });
     expect(await rowsOf(client)).toMatchObject({ oauthClient: 1, oauthClientResource: 1, oauthConsent: 1 });
+  });
+
+  it.runIf(process.env['TEST_POSTGRES_URL'])('counts a client another run removed meanwhile as gone, not kept', async () => {
+    const client = await addClient(ago(10));
+
+    // Another run holds the client and removes it while this one waits for the row.
+    const other = db.em();
+    await other.begin();
+    const otherContext = other.getTransactionContext();
+    await other.getConnection().execute('select 1 from better_auth."oauthClient" where "clientId" = ? for update', [client], 'all', otherContext);
+    const running = prune();
+    await waitFor(async () => {
+      const [row] = await sql(`select count(*)::int as waiting from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`);
+      return (row as { waiting: number }).waiting === 1;
+    });
+    await other.getConnection().execute('delete from better_auth."oauthClientResource" where "clientId" = ?', [client], 'run', otherContext);
+    await other.getConnection().execute('delete from better_auth."oauthClient" where "clientId" = ?', [client], 'run', otherContext);
+    await other.commit();
+
+    expect(await running).toMatchObject({ failed: 0, gone: 1, kept: 0, pruned: 0 });
   });
 
   it('does nothing while OAuth for the MCP server is off', async () => {

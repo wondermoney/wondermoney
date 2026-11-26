@@ -107,6 +107,8 @@ Select **Revoke** next to the token in **Settings → API tokens**. Revocation i
 
 For a client connected with OAuth, select **Disconnect** next to it under **Connected with OAuth**. Its tokens stop working at once, and its next request gets `401 Unauthorized`. To use it again, connect it again from the client. Changing or resetting your password, and signing out of other devices or everywhere, disconnects every OAuth client too.
 
+The server removes a client that has gone seven days without a connection: one nobody allowed within seven days of it registering, or one disconnected more than seven days ago. If ChatGPT or another client stops connecting after that, remove the app (connector) in the client and add it again.
+
 ## Rate limits
 
 MCP traffic uses the token's own request budget, and each token may make a limited number of tool calls per minute (60 by default). A client over either limit gets an error and can retry shortly. The budget is separate from your browser session.

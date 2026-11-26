@@ -20,6 +20,7 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
+import { pruneUnusedMcpOAuthClients } from '@service/mcp/mcp-oauth-client-prune.service';
 import { FRONTEND_URL } from '@utils/constants';
 
 const PASSWORD = 'correct horse battery staple';
@@ -352,6 +353,27 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
   const sql = <T extends object>(text: string, values: unknown[] = []) => db.em().getConnection().execute<T[]>(text, values);
 
+  /** When `clientId` lost its last grant, as the prune reads it: undefined while none was recorded. */
+  async function grantEndOf(clientId: string): Promise<Date | null | undefined> {
+    const [row] = await sql<{ lastGrantEndedAt: null | string }>('select "lastGrantEndedAt" from better_auth."mcpOAuthClientActivity" where "clientId" = ?', [clientId]);
+    if (!row) return undefined;
+    return row.lastGrantEndedAt === null ? null : new Date(row.lastGrantEndedAt);
+  }
+
+  /** Wait until `count` sessions wait on a lock. */
+  async function waitForLockWaiters(count: number): Promise<void> {
+    const deadline = Date.now() + 10_000;
+    for (;;) {
+      const [row] = await sql<{ waiting: number }>(`select count(*)::int as waiting from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`);
+      if (row?.waiting === count) return;
+      if (Date.now() > deadline) throw new Error(`Timed out waiting for ${count} sessions to block`);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  }
+
+  const isRegistered = async (clientId: string) => (await sql('select 1 from better_auth."oauthClient" where "clientId" = ?', [clientId])).length === 1;
+  const DAY = 24 * 60 * 60 * 1000;
+
   it('asks for a fresh session to consent, and the authenticator code when the account has two-factor on', async () => {
     const { household } = await householdWithPartner();
     const cookie = await signInAs(household.appuser);
@@ -389,12 +411,13 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     ['signing out other devices', async (cookie: string) => request(app).post('/api/auth/revoke-other-sessions').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({}).expect(200)],
   ])('takes back every OAuth grant on %s', async (_name, secure) => {
     const { household } = await householdWithPartner();
-    const { cookie, tokens } = await connect(household.appuser);
+    const { clientId, cookie, tokens } = await connect(household.appuser);
     expect((await listAccounts(tokens.access_token)).status).toBe(200);
 
     await secure(cookie);
 
     expect((await listAccounts(tokens.access_token)).status).toBe(401);
+    expect(await grantEndOf(clientId)).toBeInstanceOf(Date);
   });
 
   it('registers only https redirects, or http on a loopback host', async () => {
@@ -457,7 +480,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
   it('refuses and revokes a grant once its person is in another household', async () => {
     const { household } = await householdWithPartner();
-    const { cookie, tokens } = await connect(household.appuser);
+    const { clientId, cookie, tokens } = await connect(household.appuser);
     const em = db.em();
     const elsewhere = await seedHousehold(em);
     await em.nativeUpdate(AppuserTenant, { appuserKey: household.appuser }, { recordActive: false });
@@ -466,6 +489,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
     expect((await listAccounts(tokens.access_token)).status).toBe(401);
     expect((await request(app).get('/v1/user/mcp-clients').set('Cookie', cookie).expect(200)).body.clients).toEqual([]);
+    expect(await grantEndOf(clientId)).toBeInstanceOf(Date);
   });
 
   it('never issues a code without the consent step, even for a client the person allowed before', async () => {
@@ -516,6 +540,121 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     expect((await request(app).get(`/api/auth/oauth2/get-consent?id=${clientId}`).set('Cookie', cookie)).status).toBe(403);
     expect((await request(app).post('/api/auth/oauth2/delete-consent').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({ id: clientId })).status).toBe(403);
     expect((await request(app).post('/api/auth/oauth2/update-consent').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({ id: clientId, update: { scopes: ['mcp:read'] } })).status).toBe(403);
+  });
+
+  it('counts a disconnected client\'s seven days from its disconnection, not its registration, until someone consents again', async () => {
+    const { household } = await householdWithPartner();
+    const { clientId, cookie, discovery } = await connect(household.appuser);
+    expect(await grantEndOf(clientId)).toBeUndefined();
+    // Registered a month ago, disconnected in Settings today.
+    await sql(`update better_auth."oauthClient" set "createdAt" = now() - interval '30 days' where "clientId" = ?`, [clientId]);
+    await request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', cookie).expect(204);
+    const disconnected = await grantEndOf(clientId);
+    expect(disconnected).toBeInstanceOf(Date);
+    expect(Math.abs((disconnected?.getTime() ?? 0) - Date.now())).toBeLessThan(60_000);
+
+    // Other tests' clients share this database, so only this one's fate is checked.
+    await pruneUnusedMcpOAuthClients(db.em(), new Date(Date.now() + 6 * DAY));
+    expect(await isRegistered(clientId)).toBe(true);
+
+    // Connecting again clears it; the client is in use again.
+    await consent(discovery, clientId, cookie, { challenge: pkce().challenge });
+    expect(await grantEndOf(clientId)).toBeNull();
+
+    await request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', cookie).expect(204);
+    await pruneUnusedMcpOAuthClients(db.em(), new Date(Date.now() + 8 * DAY));
+    expect(await isRegistered(clientId)).toBe(false);
+  });
+
+  it('records no disconnection while another person still has the client connected', async () => {
+    const { household, partner } = await householdWithPartner();
+    const { clientId, cookie, discovery } = await connect(household.appuser);
+    await consent(discovery, clientId, await signInAs(partner), { challenge: pkce().challenge });
+
+    await request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', cookie).expect(204);
+
+    expect(await grantEndOf(clientId)).toBeUndefined();
+  });
+
+  it('answers invalid_client to a consent for a client removed since the consent page opened', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const oauthQuery = await consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge });
+    await pruneUnusedMcpOAuthClients(db.em(), new Date(Date.now() + 8 * DAY));
+    expect(await isRegistered(clientId)).toBe(false);
+
+    const response = await postConsent(cookie, { accept: true, oauth_query: oauthQuery });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ error: 'invalid_client', error_description: expect.any(String) });
+  });
+
+  it('answers invalid_client to a consent sent while the prune is removing the client', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const oauthQuery = await consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge });
+
+    // The prune's transaction, holding the client's row while it removes it.
+    const removal = db.em();
+    await removal.begin();
+    const context = removal.getTransactionContext();
+    await removal.getConnection().execute('select 1 from better_auth."oauthClient" where "clientId" = ? for update', [clientId], 'all', context);
+    const answered = postConsent(cookie, { accept: true, oauth_query: oauthQuery }).then((response) => response);
+    await waitForLockWaiters(1);
+    for (const table of ['oauthClientResource', 'oauthClient']) {
+      await removal.getConnection().execute(`delete from better_auth."${table}" where "clientId" = ?`, [clientId], 'run', context);
+    }
+    await removal.commit();
+
+    const response = await answered;
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('answers invalid_client to a consent whose client is removed after the check, as better-auth stores it', async () => {
+    const { household } = await householdWithPartner();
+    const cookie = await signInAs(household.appuser);
+    const discovery = await discover();
+    const clientId = await register(discovery);
+    const oauthQuery = await consentQuery(discovery, clientId, cookie, { challenge: pkce().challenge });
+
+    // Hold back every consent insert, so the client goes between the hook's check and the insert.
+    const removal = db.em();
+    await removal.begin();
+    const context = removal.getTransactionContext();
+    await removal.getConnection().execute('lock table better_auth."oauthConsent" in share mode', [], 'run', context);
+    const answered = postConsent(cookie, { accept: true, oauth_query: oauthQuery }).then((response) => response);
+    await waitForLockWaiters(1);
+    for (const table of ['oauthClientResource', 'oauthClient']) {
+      await removal.getConnection().execute(`delete from better_auth."${table}" where "clientId" = ?`, [clientId], 'run', context);
+    }
+    await removal.commit();
+
+    const response = await answered;
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ error: 'invalid_client' });
+  });
+
+  it('records the disconnection when the last two people disconnect one client at the same moment', async () => {
+    const { household, partner } = await householdWithPartner();
+    const { clientId, cookie, discovery } = await connect(household.appuser);
+    const partnerCookie = await signInAs(partner);
+    await consent(discovery, clientId, partnerCookie, { challenge: pkce().challenge });
+
+    // Both revocations get as far as the access tokens before either commits.
+    const hold = db.em();
+    await hold.begin();
+    await hold.getConnection().execute('lock table better_auth."oauthAccessToken" in share mode', [], 'run', hold.getTransactionContext());
+    const revokes = Promise.all([cookie, partnerCookie].map((session) => request(app).delete(`/v1/user/mcp-clients/${clientId}`).set('Cookie', session).then((response) => response.status)));
+    await waitForLockWaiters(2);
+    await hold.commit();
+
+    expect(await revokes).toEqual([204, 204]);
+    expect(await grantEndOf(clientId)).toBeInstanceOf(Date);
   });
 
   it('names the household in a token by an opaque reference, never its key', async () => {
