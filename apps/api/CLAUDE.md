@@ -21,8 +21,10 @@ The local compose Postgres is on **5434**, so it is never confused with a forwar
 `grep -E '^DB_|DATABASE_URL' .env` and confirm the target before anything that writes. They
 need only the database settings, not the app's secrets.
 
-- `scripts/assert-local-db.mjs` guards the scripts, checking the host of `DATABASE_URL` when it
-  is set (one that doesn't parse is refused) and `DB_HOST` otherwise: `*:fresh` refuses any non-local host;
+- `scripts/assert-local-db.mjs` guards the scripts, checking the host of `DATABASE_URL` as `pg`
+  reads it when it is set and `DB_HOST` otherwise. A `DATABASE_URL` that doesn't parse, or whose
+  query sets `host`, `hostaddr`, `port`, `user`, `password` or `options` (which `pg` would use
+  instead of the URL's own), is refused everywhere. `*:fresh` refuses any non-local host;
   `migrate:dev`, `migrate:manual`, `seed:dev` and `demo:{seed,reset,refresh}:dev` need
   `ALLOW_REMOTE_DB=1` for one. All of them refuse a non-local `MIKRO_ORM_HOST` or
   `MIKRO_ORM_CLIENT_URL` and any `MIKRO_ORM_DB_NAME`, which MikroORM merges over the config.

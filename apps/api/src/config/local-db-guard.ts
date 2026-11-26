@@ -5,11 +5,12 @@
  * two tiers and the limits of a host-only check.
  *
  * The target is the one the scripts connect to (`database-target.ts`): the host and database of
- * `DATABASE_URL` when it is set, else `DB_HOST` and `DB_DATABASE`. A `DATABASE_URL` that does not
- * parse, or one set beside `DB_*`, is refused, as the scripts themselves refuse it.
+ * `DATABASE_URL` as `pg` reads it when it is set, else `DB_HOST` and `DB_DATABASE`. A
+ * `DATABASE_URL` that does not parse, one whose query would replace its host, port or user, and
+ * one set beside `DB_*` are refused, as the scripts themselves refuse them.
  *
- * Plain TypeScript importing only plain TypeScript, so the script can import it under Node's type
- * stripping (hence the `.ts` extension).
+ * Plain TypeScript, so the script can import it under Node's type stripping (hence the `.ts`
+ * extension on the import).
  */
 import { databaseUrlProblem, databaseUrlSetting, parseDatabaseUrl } from './database-target.ts';
 
@@ -51,7 +52,7 @@ export function isLocalDbHost(host: string): boolean {
   return LOCAL_HOSTS.has(normalized);
 }
 
-/** Why a `MIKRO_ORM_*` connection override is refused, or null when none is set to one. */
+/** May `command` run against the target `env` resolves to, and what to print either way. */
 export function checkLocalDbTarget({ command, env, optIn }: LocalDbGuardInput): LocalDbGuardResult {
   const urlProblem = databaseUrlProblem(env);
   if (urlProblem) {
@@ -129,18 +130,13 @@ export function checkLocalDbTarget({ command, env, optIn }: LocalDbGuardInput): 
   };
 }
 
-/**
- * The host, port and database the scripts will connect to. Only called once `databaseUrlProblem`
- * passed, so a set `DATABASE_URL` parses. Never the credentials.
- */
+/** A URL whose host, as `pg` reads it, is local; one that does not parse is not. */
 function isLocalUrl(value: string): boolean {
-  try {
-    return isLocalDbHost(new URL(value).hostname);
-  } catch {
-    return false;
-  }
+  const target = parseDatabaseUrl(value);
+  return target !== null && isLocalDbHost(target.host);
 }
 
+/** Why a `MIKRO_ORM_*` connection override is refused, or null when none is set to one. */
 function mikroOrmOverrideProblem(env: LocalDbGuardInput['env']): null | string {
   for (const key of MIKRO_ORM_TARGET_KEYS) {
     const value = env[key]?.trim();
@@ -154,6 +150,10 @@ function mikroOrmOverrideProblem(env: LocalDbGuardInput['env']): null | string {
   return null;
 }
 
+/**
+ * The host, port and database the scripts will connect to. Only called once `databaseUrlProblem`
+ * passed, so a set `DATABASE_URL` parses. Never the credentials.
+ */
 function resolveTarget(env: LocalDbGuardInput['env']): { database: string; host: string; port: string; source: 'DATABASE_URL' | 'DB_*' } {
   const url = databaseUrlSetting(env);
   const parsed = url === null ? null : parseDatabaseUrl(url);

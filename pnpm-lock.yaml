@@ -377,6 +377,9 @@ importers:
       pg-boss:
         specifier: 12.18.2
         version: 12.18.2
+      pg-connection-string:
+        specifier: 2.14.1
+        version: 2.14.1
       pino:
         specifier: ^10.3.1
         version: 10.4.0

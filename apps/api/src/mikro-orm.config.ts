@@ -92,16 +92,24 @@ export function createMikroOrmOptions(
 }
 
 /**
- * Where MikroORM connects. A `DATABASE_URL` goes in as `clientUrl`, from which MikroORM takes the
- * database name, and to `pg` whole as `connectionString`: MikroORM itself keeps only the host,
- * port, credentials and database of a `clientUrl`, which would drop `?sslmode=require` and connect
- * without TLS. `pg` applies the URL over the fields MikroORM derived from it.
+ * Where MikroORM connects. A `DATABASE_URL` goes to `pg` whole as `connectionString`: MikroORM
+ * itself keeps only the host, port, credentials and database of a `clientUrl`, which would drop
+ * `?sslmode=require` and connect without TLS. MikroORM is also given the target as `pg` reads the
+ * URL (`config.database`, from `parseDatabaseUrl`), so its own view (the database name it reports
+ * and diffs against) is the one `pg` connects to.
  */
 function connectionTarget(
   database: ReturnType<typeof loadConfiguration<'migration' | 'orm-cli'>>['database'],
 ): Partial<Options<PostgreSqlDriver>> {
   if (database.connectionString) {
-    return { clientUrl: database.connectionString, driverOptions: { connectionString: database.connectionString } };
+    return {
+      clientUrl: database.connectionString,
+      dbName: database.database ?? undefined,
+      driverOptions: { connectionString: database.connectionString },
+      host: database.host ?? undefined,
+      port: database.port ?? undefined,
+      user: database.username ?? undefined,
+    };
   }
   return {
     dbName: database.database ?? undefined,

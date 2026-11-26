@@ -221,7 +221,8 @@ describe('the database given as DATABASE_URL', () => {
 
   it('connects to DATABASE_URL alone, on every role', () => {
     for (const role of ['api', 'worker', 'migration', 'orm-cli'] as const) {
-      expect(loadConfiguration(role, { ...withoutDb, DATABASE_URL: url }).database.connectionString).toBe(url);
+      expect(loadConfiguration(role, { ...withoutDb, DATABASE_URL: url }).database)
+        .toMatchObject({ connectionString: url, database: 'wondermoney', host: 'db.example.test', port: 6432, username: 'wm' });
     }
   });
 

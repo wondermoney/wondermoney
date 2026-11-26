@@ -34,7 +34,7 @@
 import { z } from 'zod';
 
 import { CRYPTO_EXPLORER_ENV, isCryptoExplorerUrl } from './crypto-explorers';
-import { databaseUrlProblem } from './database-target';
+import { databaseUrlProblem, parseDatabaseUrl } from './database-target';
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
 import { loadDotenv } from './load-dotenv';
 import { parseMarketDataProviders } from './market-data-providers';
@@ -380,13 +380,15 @@ function buildAuth(parsed: z.infer<typeof authSchema>) {
 
 function buildDatabase(parsed: z.infer<typeof databaseSchema>) {
   if (parsed.DATABASE_URL) {
+    // The target as `pg` reads the URL (`parseDatabaseUrl`); the password stays in the URL.
+    const target = parseDatabaseUrl(parsed.DATABASE_URL);
     return {
       connectionString: parsed.DATABASE_URL,
-      database: null as null | string,
-      host: null as null | string,
+      database: (target?.database ?? null),
+      host: (target?.host ?? null),
       password: null as null | string,
-      port: null as null | number,
-      username: null as null | string,
+      port: (target?.port ?? null),
+      username: (target?.username ?? null),
     };
   }
   if (parsed.DB_HOST && parsed.DB_PORT && parsed.DB_DATABASE && parsed.DB_USERNAME) {
