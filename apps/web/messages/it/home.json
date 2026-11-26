@@ -162,6 +162,14 @@
       "empty-title": "Ancora nessuna transazione",
       "empty-body": "Collega una banca o aggiungi una transazione per vederla qui.",
       "action": "Vai ai conti"
+    },
+    "noAccounts": {
+      "title": "Aggiungi il tuo primo conto",
+      "connect": "Collega una banca",
+      "import": "Importa un estratto conto",
+      "importHint": "Un file esportato dalla tua banca",
+      "manual": "Aggiungi un conto a mano",
+      "manualHint": "Un nome e un saldo"
     }
   }
 }
