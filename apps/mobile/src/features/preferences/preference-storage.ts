@@ -12,7 +12,7 @@ const LANGUAGE_KEY = 'wondermoney.language-preference'
 const PRIVACY_MODE_KEY = 'wondermoney.privacy-mode'
 
 const THEMES: readonly ThemePreference[] = ['system', 'light', 'dark']
-const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es']
+const LANGUAGES: readonly LanguagePreference[] = ['device', 'en', 'pt-PT', 'es', 'it']
 
 export type StoredPreferences = Readonly<{
   theme: ThemePreference | null

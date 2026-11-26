@@ -4,7 +4,7 @@ import { Appearance, type ColorSchemeName, useColorScheme } from 'react-native'
 import { type PreferenceStorage, secureStorePreferenceStorage } from '@/features/preferences/preference-storage'
 
 export type ThemePreference = 'system' | 'light' | 'dark'
-export type LanguagePreference = 'device' | 'en' | 'pt-PT' | 'es'
+export type LanguagePreference = 'device' | 'en' | 'pt-PT' | 'es' | 'it'
 export type SupportedLocale = Exclude<LanguagePreference, 'device'>
 
 type SessionPreferences = Readonly<{
@@ -30,6 +30,7 @@ export const resolveLocale = (preference: LanguagePreference, deviceLocale: stri
   const base = deviceLocale.trim().replace(/_/g, '-').toLowerCase().split('-')[0]
   if (base === 'pt') return 'pt-PT'
   if (base === 'es') return 'es'
+  if (base === 'it') return 'it'
   return 'en'
 }
 

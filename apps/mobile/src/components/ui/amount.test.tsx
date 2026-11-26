@@ -103,6 +103,11 @@ describe('Amount', () => {
       const ptLabel = pt.getByLabelText(/1.?234,50/).props.accessibilityLabel as string
       expect(ptLabel).toBe(new original('pt-PT', { style: 'currency', currency: 'EUR' }).format(-1234.5))
 
+      // The app's Italian is `it`, which Intl formats as it-IT: "-1234,50 €".
+      const it = await render(<Amount currency="EUR" locale="it" value={-1234.5} />)
+      const itLabel = it.getByLabelText(/1.?234,50/).props.accessibilityLabel as string
+      expect(itLabel).toBe(new original('it-IT', { style: 'currency', currency: 'EUR' }).format(-1234.5))
+
       const delta = await render(<Amount currency="USD" delta locale="en" value={42} />)
       expect(delta.getByLabelText('+$42.00')).toBeTruthy()
     } finally {

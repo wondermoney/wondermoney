@@ -18,10 +18,13 @@ root; there is no app-local lockfile. Scripts are in `package.json`.
   `docs/telemetry-adr-sentry.md` (Sentry). Change those boundaries only together with the ADR.
 - Visual rules are in `DESIGN.md`; `DESIGN_HISTORY.md` holds the accepted-debt log and the
   cross-platform gaps code comments cite.
-- Copy lives in `src/lib/i18n/resources/` (en, es, pt-PT). pt-PT addresses the reader as
+- Copy lives in `src/lib/i18n/resources/` (en, es, pt-PT, it). pt-PT addresses the reader as
   **tu** ("Toca para atualizar", "a tua conta"), never "você" or the formal third person;
   labels stay infinitive. `CONTRIBUTING.md` has the rule and examples, and
-  `src/lib/i18n/pt-form-of-address.test.ts` enforces it.
+  `src/lib/i18n/pt-form-of-address.test.ts` enforces it. Italian uses the informal **tu**
+  ("Tocca per aggiornare", "il tuo conto"), never "Lei", greets without a gender ("Ti diamo il
+  benvenuto") and keeps the web app's terms (`apps/web/messages/it`);
+  `src/lib/i18n/it-form-of-address.test.ts` enforces the form of address.
 
 ## Expo
 

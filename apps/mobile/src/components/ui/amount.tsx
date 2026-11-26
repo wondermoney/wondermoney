@@ -201,7 +201,7 @@ function decimalSeparator(locale: string): string {
  * device while Jest, on Node, rendered "€265,000.00". It formats the magnitude
  * the way `formatCurrency` does, finds the bare number inside that string, and
  * marks what surrounds it as the currency. The sign is written in front, which
- * is where `Intl` puts it for every locale the app ships (en, pt-PT, es).
+ * is where `Intl` puts it for every locale the app ships (en, pt-PT, es, it).
  */
 function formatParts(value: number, locale: string, currency: string | null | undefined, signed: boolean): Part[] {
   const sign = value < 0 ? '-' : signed && value > 0 ? '+' : ''

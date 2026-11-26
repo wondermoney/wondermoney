@@ -4,6 +4,7 @@ describe('resolveSignupLocale', () => {
   it('maps device language to a supported route locale', () => {
     expect(resolveSignupLocale(() => [{ languageCode: 'pt' }])).toBe('pt')
     expect(resolveSignupLocale(() => [{ languageCode: 'es' }])).toBe('es')
+    expect(resolveSignupLocale(() => [{ languageCode: 'it' }])).toBe('it')
     expect(resolveSignupLocale(() => [{ languageCode: 'en' }])).toBe('en')
   })
 
@@ -21,6 +22,9 @@ describe('toSignupLocale', () => {
     ['en', 'en'],
     ['pt_BR', 'pt'],
     ['ES-419', 'es'],
+    ['it', 'it'],
+    ['it-IT', 'it'],
+    ['it_CH', 'it'],
   ])('maps the app language %s to %s', (tag, locale) => {
     expect(toSignupLocale(tag)).toBe(locale)
   })
