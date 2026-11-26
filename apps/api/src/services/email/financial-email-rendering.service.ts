@@ -60,7 +60,7 @@ const COPY = {
     above: 'sopra',
     below: 'sotto',
     budgetPressure: {
-      near: { detail: 'Questo mese sei vicino ai limiti del tuo budget.', status: 'Vicino al budget' },
+      near: { detail: 'Questo mese il tuo budget è vicino ai limiti.', status: 'Vicino al budget' },
       over: { detail: 'Questo mese hai superato il budget in una o più categorie.', status: 'Oltre il budget' },
     },
     comparisonText: 'Rispetto alla settimana precedente',
@@ -287,6 +287,16 @@ function formatWeekRange(range: { end: Date; start: Date }, language: CopyLang) 
     if (sameMonth) return `${day(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     if (sameYear) return `${day(range.start)} de ${month(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
     return `${day(range.start)} de ${month(range.start)} de ${year(range.start)} al ${day(lastDay)} de ${month(lastDay)} de ${year(lastDay)}`;
+  }
+  // Italian reads "Settimana conclusa: dal 6 al 12 luglio 2026", the range carrying its own
+  // prepositions, elided before a day said with a vowel: "dall'1", "all'8", "dall'11".
+  if (language === 'it') {
+    const elided = (date: Date) => ['1', '8', '11'].includes(day(date));
+    const from = (date: Date) => (elided(date) ? `dall'${day(date)}` : `dal ${day(date)}`);
+    const to = (date: Date) => (elided(date) ? `all'${day(date)}` : `al ${day(date)}`);
+    if (sameMonth) return `${from(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
+    if (sameYear) return `${from(range.start)} ${month(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
+    return `${from(range.start)} ${month(range.start)} ${year(range.start)} ${to(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
   }
   if (sameMonth) return `${day(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
   if (sameYear) return `${day(range.start)} ${month(range.start)} to ${day(lastDay)} ${month(lastDay)} ${year(lastDay)}`;
