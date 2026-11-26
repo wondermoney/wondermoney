@@ -9,8 +9,10 @@ import { addAccount, addPartner, addTransaction, type Household, seedHousehold }
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { Account } from '@entity/Account';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
+import { NordigenRequisition, NordigenRequisitionStatus } from '@entity/NordigenRequisition';
 import { Tenant, TenantType } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { TransactionAuditEventType, TransactionAuditLog } from '@entity/TransactionAuditLog';
@@ -193,13 +195,12 @@ describe('deleting transactions', () => {
       expect(response.status).toBe(204);
     });
 
-    it('treats a legacy provider id on a bank-linked account as bank-synced', async () => {
+    it('treats a legacy provider id on an account linked through a legacy requisition as bank-synced', async () => {
       const owner = await seedHousehold(db.em());
       const em = db.em();
-      const credential = em.create(EnableBankingCredential, { applicationId: 'app-1', appuserKey: owner.appuser, encryptionKeyVersion: 1, privateKeyAuthTag: 'tag', privateKeyCiphertext: 'cipher', privateKeyIv: 'iv', tenantKey: owner.tenant }, { partial: true });
-      const connection = em.create(EnableBankingConnection, { appuserKey: owner.appuser, aspspCountry: 'PT', aspspName: 'Bank', enableBankingCredentialKey: credential, sessionId: 'session-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED, tenantKey: owner.tenant }, { partial: true });
+      const requisition = em.create(NordigenRequisition, { appuserKey: owner.appuser, internalReference: 'ref-1', requisitionId: 'requisition-1', status: NordigenRequisitionStatus.LN, tenantKey: owner.tenant }, { partial: true });
       await em.flush();
-      await em.nativeUpdate(Account, { accountKey: owner.account.accountKey }, { enableBankingConnectionKey: connection });
+      await em.nativeUpdate(Account, { accountKey: owner.account.accountKey }, { nordigenRequisitionKey: requisition });
       const legacy = await addTransaction(db.em(), owner, { amount: -10, date: new Date('2026-03-01T12:00:00Z'), status: 'BOOKED' });
       await db.em().nativeUpdate(Transaction, { transactionKey: legacy.transactionKey }, { nordigenInternalTransactionId: 'gocardless-1' });
 
@@ -207,6 +208,51 @@ describe('deleting transactions', () => {
 
       expect(response.status).toBe(409);
       expect(response.body).toMatchObject({ code: 'transaction_bank_synced' });
+    });
+
+    it('treats a row on an account linked only through its bank connection, as a SimpleFIN one is, as bank-synced', async () => {
+      const owner = await seedHousehold(db.em());
+      const em = db.em();
+      const connection = em.create(BankConnection, { appuserKey: owner.appuser, externalId: 'simplefin-1', provider: 'simplefin', status: BankConnectionStatus.LINKED, tenantKey: owner.tenant }, { partial: true });
+      await em.flush();
+      await em.nativeUpdate(Account, { accountKey: owner.account.accountKey }, { accountId: 'sf-account-1', bankConnectionKey: connection });
+      const synced = await addTransaction(db.em(), owner, { amount: -10, date: new Date('2026-03-01T12:00:00Z'), status: 'BOOKED' });
+      // The id SimpleFIN's mapping stores (`simplefin-mapping.ts`).
+      await db.em().nativeUpdate(Transaction, { transactionKey: synced.transactionKey }, { nordigenInternalTransactionId: 'simplefin:TRN-1' });
+
+      const response = await http.as(owner.appuser).delete(`/v1/account/transaction/${synced.transactionKey}`);
+      const list = await http.as(owner.appuser).get('/v1/account/transaction?fromDate=2026-03-01T00:00:00.000Z&toDate=2026-03-31T23:59:59.999Z');
+
+      expect(response.status).toBe(409);
+      expect(response.body).toMatchObject({ code: 'transaction_bank_synced' });
+      expect((await db.em().findOneOrFail(Transaction, { transactionKey: synced.transactionKey }, { filters: false })).deletedAt).toBeNull();
+      // The list says so too, so web and mobile offer it the way they offer an Enable Banking row.
+      expect((list.body.transactions as { bankSynced: boolean; transactionKey: number }[]).find((row) => row.transactionKey === synced.transactionKey)?.bankSynced).toBe(true);
+    });
+
+    it('deletes a row imported from a file into an account linked through SimpleFIN or Enable Banking', async () => {
+      const owner = await seedHousehold(db.em());
+      const em = db.em();
+      const connection = em.create(BankConnection, { appuserKey: owner.appuser, externalId: 'simplefin-1', provider: 'simplefin', status: BankConnectionStatus.LINKED, tenantKey: owner.tenant }, { partial: true });
+      const credential = em.create(EnableBankingCredential, { applicationId: 'app-1', appuserKey: owner.appuser, encryptionKeyVersion: 1, privateKeyAuthTag: 'tag', privateKeyCiphertext: 'cipher', privateKeyIv: 'iv', tenantKey: owner.tenant }, { partial: true });
+      const enableBanking = em.create(EnableBankingConnection, { appuserKey: owner.appuser, aspspCountry: 'PT', aspspName: 'Bank', enableBankingCredentialKey: credential, sessionId: 'session-1', state: 'state-1', status: EnableBankingConnectionStatus.LINKED, tenantKey: owner.tenant }, { partial: true });
+      await em.flush();
+      const ebAccount = await addAccount(em, owner, { balance: 500 });
+      await em.nativeUpdate(Account, { accountKey: owner.account.accountKey }, { accountId: 'sf-account-1', bankConnectionKey: connection });
+      await em.nativeUpdate(Account, { accountKey: ebAccount.accountKey }, { accountId: 'eb-account-1', enableBankingConnectionKey: enableBanking });
+      const onSimplefin = await addTransaction(db.em(), owner, { amount: -10, date: new Date('2026-03-01T12:00:00Z'), status: 'BOOKED' });
+      const onEnableBanking = await addTransaction(db.em(), owner, { account: ebAccount, amount: -10, date: new Date('2026-03-01T12:00:00Z'), status: 'BOOKED' });
+      // A file import stores its statement row id in the same column SimpleFIN uses.
+      await db.em().nativeUpdate(Transaction, { transactionKey: onSimplefin.transactionKey }, { nordigenInternalTransactionId: 'statement-row-1' });
+      await db.em().nativeUpdate(Transaction, { transactionKey: onEnableBanking.transactionKey }, { nordigenInternalTransactionId: 'statement-row-2' });
+
+      const list = await http.as(owner.appuser).get('/v1/account/transaction?fromDate=2026-03-01T00:00:00.000Z&toDate=2026-03-31T23:59:59.999Z');
+      const rows = list.body.transactions as { bankSynced: boolean; transactionKey: number }[];
+      expect(rows.find((row) => row.transactionKey === onSimplefin.transactionKey)?.bankSynced).toBe(false);
+      expect(rows.find((row) => row.transactionKey === onEnableBanking.transactionKey)?.bankSynced).toBe(false);
+
+      expect((await http.as(owner.appuser).delete(`/v1/account/transaction/${onSimplefin.transactionKey}`)).status).toBe(204);
+      expect((await http.as(owner.appuser).delete(`/v1/account/transaction/${onEnableBanking.transactionKey}`)).status).toBe(204);
     });
 
     it('deletes the manual rows of a mixed request and reports the synced ones it skipped', async () => {

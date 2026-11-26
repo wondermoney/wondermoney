@@ -5,9 +5,10 @@ import { Account } from '@entity/Account';
 import { LoanRepaymentLink } from '@entity/LoanRepaymentLink';
 import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
+import { SIMPLEFIN_ID_PREFIX } from '@service/simplefin/simplefin-mapping';
 import { ConflictError, ERROR_CODE } from '@utils/errors';
 
-import { isBankLinkedAccount, isManualAccount, recalculateChainFromAccountBalance, removeFromChain } from './balance-chain.service';
+import { isBankLinkedAccount, recalculateChainFromAccountBalance, removeFromChain } from './balance-chain.service';
 import { TransactionAuditService } from './transaction-audit.service';
 import { removeReimbursementLinksOf } from './transaction-reimbursement.service';
 import { reconcileTransfers } from './transfer-matching.service';
@@ -62,16 +63,22 @@ interface Actor {
 
 /**
  * Whether the bank sent this row, so it cannot be deleted. An Enable Banking id always says so. The
- * legacy provider column also holds a statement file's row id on an imported row, so it counts only
- * on an account linked to a bank. Needs `accountKey` loaded: an unloaded account cannot say.
+ * legacy provider column is shared: SimpleFIN stores its rows there under `simplefin:<id>`, the
+ * removed GoCardless integration stored its rows there on accounts with a legacy requisition, and a
+ * file import stores its statement row ids there on any account, a SimpleFIN one included. So the
+ * column counts only for a SimpleFIN id, or on an account with a legacy requisition; an imported row
+ * stays deletable wherever it is. Needs `accountKey` loaded for the requisition check: an unloaded
+ * account cannot say.
  */
 export function isBankSyncedTransaction(transaction: Pick<Transaction, 'accountKey' | 'enableBankingTransactionId' | 'nordigenInternalTransactionId'>): boolean {
   if (transaction.enableBankingTransactionId != null) return true;
-  if (transaction.nordigenInternalTransactionId == null) return false;
+  const providerId = transaction.nordigenInternalTransactionId;
+  if (providerId == null) return false;
+  if (providerId.startsWith(`${SIMPLEFIN_ID_PREFIX}:`)) return true;
   const account = transaction.accountKey;
   if (!account) return false;
   if (!wrap(account).isInitialized()) throw new Error('isBankSyncedTransaction needs the transaction\'s account loaded');
-  return !isManualAccount(account);
+  return account.nordigenRequisitionKey != null;
 }
 
 const ascending = (a: number, b: number) => a - b;

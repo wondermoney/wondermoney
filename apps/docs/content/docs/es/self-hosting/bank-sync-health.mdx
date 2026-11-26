@@ -49,6 +49,7 @@ Una conexión **tiene fallos** cuando su última sincronización falló y los fa
 | `consent_expired`, `authentication`, `invalid_requisition`, `cancelled` | El banco ya no acepta el consentimiento. La persona tiene que volver a conectar el banco en **Configuración → Conexiones** |
 | `rate_limited` | El banco limitó la frecuencia de las peticiones. Las sincronizaciones se reanudan cuando pasa el límite |
 | `provider_unavailable`, `institution_unavailable`, `timeout` | El agregador o el banco estuvo caído o lento. Normalmente se resuelve solo |
+| `balance_unavailable` | Las transacciones se sincronizaron, pero el banco no envió el saldo de una cuenta, así que se calculó a partir de las transacciones. Desaparece cuando el banco vuelve a enviar el saldo |
 | `account_phase_failed`, `transaction_phase_failed`, `data_validation`, `internal`, `unknown` | Algo falló en este servidor. El registro del worker (`docker compose logs worker`) tiene los detalles |
 
 ## Qué no muestra

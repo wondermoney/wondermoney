@@ -46,6 +46,11 @@ export interface AccountInitialSyncAccountsResult {
    * the run is worth retrying. A bank that refuses balances or sends none will do so again.
    */
   balanceUnavailableRetryable?: boolean;
+  /**
+   * Accounts whose balance had been derived from their chain (`Account.balanceDerivedAt`) and that
+   * the bank gave a balance for again. The transaction phase logs whether the two agreed.
+   */
+  derivedBalanceReplacedAccountIds?: string[];
   failedAccountIds: string[];
   institutionIds: string[];
   /** Every account failed, and each with a provider 400 or 401: a likely sign of ended consent. */
@@ -174,6 +179,7 @@ class AccountInitialSyncAccountService {
     const fulfilled: { accountId: string; created: boolean; institutionId: string }[] = [];
     const failedAccountIds: string[] = [];
     const balanceUnavailableAccountIds: string[] = [];
+    const derivedBalanceReplacedAccountIds: string[] = [];
     let balanceUnavailableCode: BankReportedErrorCode | undefined;
     let balanceUnavailableRetryable = false;
     let rateLimited: ProviderRateLimit | undefined;
@@ -237,6 +243,8 @@ class AccountInitialSyncAccountService {
       const account = existingActive ?? em.create(Account, { accountId });
       balanceBefore.push({ account, fields: pickBalanceFields(account) });
       const wasExisting = Boolean(existingActive);
+      // The bank's own figure replaces one the last sync derived from the chain.
+      let replacesDerivedBalance = balance !== undefined && account.balanceDerivedAt != null;
       account.accountId = accountId;
       account.accountOwnerAppuserKey = tenant.appuserKey;
       account.accountName ||= providerAccount.name ?? institutionId;
@@ -256,6 +264,7 @@ class AccountInitialSyncAccountService {
         account.fxStatus = converted.fxStatus;
         // `refreshedAt` says when the balance was last read from the bank, so only a new one moves it.
         account.refreshedAt = new Date();
+        account.balanceDerivedAt = undefined;
       }
       account.currencyKey = currency;
       account.accountFinancialInstitutionKey = institution;
@@ -279,6 +288,8 @@ class AccountInitialSyncAccountService {
         const reloaded = await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: undefined });
         if (!reloaded) throw error;
         balanceBefore.push({ account: reloaded, fields: pickBalanceFields(reloaded) });
+        // The row stored is the reloaded one, so whether a derived balance is replaced is its to say.
+        replacesDerivedBalance = balanceRefreshed && reloaded.balanceDerivedAt != null;
         reloaded.accountName = account.accountName;
         reloaded.accountNumber = account.accountNumber;
         reloaded.accountTypeKey = account.accountTypeKey;
@@ -287,6 +298,7 @@ class AccountInitialSyncAccountService {
           reloaded.appuserCurrencyBalance = account.appuserCurrencyBalance;
           reloaded.fxStatus = account.fxStatus;
           reloaded.refreshedAt = account.refreshedAt;
+          reloaded.balanceDerivedAt = undefined;
         }
         reloaded.currencyKey = account.currencyKey;
         reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
@@ -304,6 +316,7 @@ class AccountInitialSyncAccountService {
       }
       fulfilled.push({ accountId, created: !wasExisting, institutionId });
       if (!balanceRefreshed) balanceUnavailableAccountIds.push(accountId);
+      if (replacesDerivedBalance) derivedBalanceReplacedAccountIds.push(accountId);
       } catch (error) {
         // The phases share one entity manager. An account whose update failed after its new balance
         // was set, but before it was flushed, would otherwise carry that balance into the
@@ -340,6 +353,7 @@ class AccountInitialSyncAccountService {
       balanceUnavailableAccountIds,
       ...(balanceUnavailableCode ? { balanceUnavailableCode } : {}),
       ...(balanceUnavailableAccountIds.length > 0 ? { balanceUnavailableRetryable } : {}),
+      ...(derivedBalanceReplacedAccountIds.length > 0 ? { derivedBalanceReplacedAccountIds } : {}),
       failedAccountIds,
       institutionIds: [...institutionIds],
       requisitionId,
@@ -408,7 +422,7 @@ function balanceReferenceDate(balances: { referenceDate?: string }[]): Date | un
 }
 
 /** The fields the account phase writes from a provider balance. */
-type BalanceField = 'appuserCurrencyBalance' | 'balance' | 'fxStatus' | 'openingBalance' | 'openingBalanceDate' | 'refreshedAt';
+type BalanceField = 'appuserCurrencyBalance' | 'balance' | 'balanceDerivedAt' | 'fxStatus' | 'openingBalance' | 'openingBalanceDate' | 'refreshedAt';
 
 function getAppuserKey(appuserKey?: unknown): number {
   if (typeof appuserKey === 'number') return appuserKey;
@@ -430,6 +444,7 @@ function pickBalanceFields(account: Account): Pick<Account, BalanceField> {
   return {
     appuserCurrencyBalance: account.appuserCurrencyBalance,
     balance: account.balance,
+    balanceDerivedAt: account.balanceDerivedAt,
     fxStatus: account.fxStatus,
     openingBalance: account.openingBalance,
     openingBalanceDate: account.openingBalanceDate,

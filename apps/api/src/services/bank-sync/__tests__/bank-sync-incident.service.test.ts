@@ -348,6 +348,18 @@ describe('BankSyncIncidentService', () => {
     expect(h.deliveries[0]?.status).toBe('pending');
   });
 
+  it('sends no recovery for a first sync short only of balances: its transactions synced', async () => {
+    const h = harness();
+    const incident = await h.service.allocateIncident(identity);
+    await h.service.startAttempt({ incidentId: incident.incidentId, queueAttempt: 1, queueJobId: 'balances' });
+
+    const result = await h.service.finalizeAttempt({ attempt: 1, errorCategory: 'provider', errorCode: 'balance_unavailable', final: true, incidentId: incident.incidentId, result: 'partial', treatmentMode: 'live' });
+
+    expect(result.scheduleIntent).toBeUndefined();
+    expect(h.deliveries).toHaveLength(0);
+    expect(incident.eligibleAfter).toBeUndefined();
+  });
+
   it('never schedules eligibility for non-terminal or scheduled attempts', async () => {
     for (const [flow, producer] of [['initial-add', 'pgboss-initial'], ['scheduled-refresh', 'pgboss-scheduled']] as const) {
       const h = harness();

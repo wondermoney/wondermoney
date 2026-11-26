@@ -34,6 +34,7 @@ import { createEnableBankingClient } from '@service/enable-banking/enable-bankin
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { deleteTransactions } from '@service/transaction/transaction-deletion.service';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
+import logger from '@utils/logger';
 
 import { EnableBankingProvider } from '../enable-banking.provider';
 
@@ -173,16 +174,17 @@ describe('an Enable Banking bank that answers badly still syncs what it can', ()
 
   describe('when the balances call fails', () => {
     it.each([
-      ['rejects it (400)', balancesRefused(), 'institution_unavailable', false],
-      ['times out', timeout(), 'provider_unavailable', true],
-    ] as const)('syncs the transactions and keeps the last balance when Enable Banking %s', async (_case, failure, code, retryable) => {
+      ['rejects it (400)', balancesRefused(), false],
+      ['times out', timeout(), true],
+    ] as const)('syncs the transactions and keeps the last balance when Enable Banking %s', async (_case, failure, retryable) => {
       const { account, connection, earlier, household } = await linkedBank();
       stubEnableBanking({ balances: failure, transactions: () => ({ data: { transactions: [booked('new-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 }) });
 
       const result = await sync(household, connection, 5);
 
-      // Partial, recorded under a code that waits and retries, not one that asks for a reconnect.
-      expect(result).toMatchObject({ reportedErrorCode: code, status: 'partial' });
+      // Partial, recorded under the code that says the transactions synced without a balance: it
+      // waits, never asks for a reconnect, and is not the generic "your bank isn't available".
+      expect(result).toMatchObject({ reportedErrorCode: 'balance_unavailable', status: 'partial' });
       expect(result.everyAccountRejected).toBeFalsy();
       // A refusal would be refused again tomorrow, so it is not retried; a timeout may pass.
       expect(result.partialRetryable).toBe(retryable ? undefined : false);
@@ -198,6 +200,8 @@ describe('an Enable Banking bank that answers badly still syncs what it can', ()
       const after = await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false });
       expect(after).toMatchObject({ appuserCurrencyBalance: 487.5, balance: 487.5 });
       expect(after.refreshedAt).toEqual(LAST_REFRESH);
+      // Marked as derived, so web and mobile say how old the bank's own figure is.
+      expect(after.balanceDerivedAt).toBeInstanceOf(Date);
       const earlierAfter = await db.em().findOneOrFail(Transaction, { transactionKey: earlier.transactionKey }, { filters: false });
       expect(earlierAfter.balance).toBe(500);
       expect(rows[1]?.balance).toBe(487.5);
@@ -240,6 +244,68 @@ describe('an Enable Banking bank that answers badly still syncs what it can', ()
 
       expect((await rowsOf(account)).map((row) => [row.enableBankingTransactionId, row.balance])).toEqual([['earlier', 500], ['new-1', 487.5]]);
       expect((await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false })).balance).toBe(487.5);
+    });
+
+    it('keeps no derived mark once the bank sends a balance again', async () => {
+      const { account, connection, household } = await linkedBank();
+      stubEnableBanking({ balances: balancesRefused(), transactions: () => ({ data: { transactions: [booked('new-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 }) });
+      await sync(household, connection, 5);
+      stubEnableBanking({ balances: balancesOk('487.50'), transactions: () => ({ data: { transactions: [] }, status: 200 }) });
+
+      const result = await sync(household, connection, 5);
+
+      expect(result.status).toBe('full_success');
+      const after = await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false });
+      expect(after.balanceDerivedAt).toBeNull();
+      expect(after.refreshedAt?.getTime()).toBeGreaterThan(LAST_REFRESH.getTime());
+    });
+
+    it('does not mark the balance derived when the bank gives one', async () => {
+      const { account, connection, household } = await linkedBank();
+      stubEnableBanking({ balances: balancesOk('487.50'), transactions: () => ({ data: { transactions: [booked('new-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 }) });
+
+      await sync(household, connection, 5);
+
+      expect((await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false })).balanceDerivedAt).toBeNull();
+    });
+
+    describe('when the bank sends a balance again after one was derived', () => {
+      /** Derives 487.50 (500 - 12.50), then syncs a 10.00 debit with the bank's balance `real`. */
+      async function realBalanceAfterDerived(real: string) {
+        const bank = await linkedBank();
+        stubEnableBanking({ balances: balancesRefused(), transactions: () => ({ data: { transactions: [booked('new-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 }) });
+        await sync(bank.household, bank.connection, 5);
+        const info = vi.spyOn(logger, 'info');
+        stubEnableBanking({ balances: balancesOk(real), transactions: () => ({ data: { transactions: [booked('new-2', '2026-11-22', '10.00', 'DBIT')] }, status: 200 }) });
+        await sync(bank.household, bank.connection, 5);
+        const drift = info.mock.calls.filter(([, message]) => message === 'Bank balance replaced a derived balance').map(([context]) => context);
+        info.mockRestore();
+        return { ...bank, drift };
+      }
+
+      it.each([
+        ['matches what the chain would have derived', '477.50', false],
+        ['differs from what the chain would have derived', '470.00', true],
+      ] as const)('logs, with no amount, whether the bank\'s balance %s', async (_case, real, differed) => {
+        const { account, connection, drift } = await realBalanceAfterDerived(real);
+
+        // Only the ids and the yes or no: never a balance or an amount.
+        expect(drift).toEqual([{ accountKey: account.accountKey, bankConnectionKey: connection.bankConnectionKey, differed }]);
+        // The bank's figure wins either way: the chain is rebuilt backwards from it.
+        const rows = await rowsOf(account);
+        expect(rows.at(-1)?.balance).toBe(Number(real));
+      });
+
+      it('logs nothing on the syncs after that', async () => {
+        const { connection, household } = await realBalanceAfterDerived('477.50');
+        const info = vi.spyOn(logger, 'info');
+        stubEnableBanking({ balances: balancesOk('477.50'), transactions: () => ({ data: { transactions: [] }, status: 200 }) });
+
+        await sync(household, connection, 5);
+
+        expect(info.mock.calls.some(([, message]) => message === 'Bank balance replaced a derived balance')).toBe(false);
+        info.mockRestore();
+      });
     });
 
     it('keeps the account balance right when a member edits a row the sync added without a balance', async () => {
@@ -422,6 +488,79 @@ describe('an Enable Banking bank that answers badly still syncs what it can', ()
       }, { provider });
 
       expect(result.historyShortened).toEqual([{ accountId: ACCOUNT_UID, fetchedFrom: fallbackFrom() }]);
+    });
+
+    it('asks the next full sync for the shorter window straight away', async () => {
+      const { account, connection, household } = await linkedBank();
+      const answers = {
+        balances: { data: { balances: [{ balance_amount: { amount: '487.50', currency: 'EUR' }, balance_type: 'CLBD' }] }, status: 200 },
+        transactions: (params: { date_from?: string }) => (params.date_from ?? '') < fallbackFrom() ? wrongPeriod() : { data: { transactions: [booked('recent-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 },
+      };
+      stubEnableBanking(answers);
+      await sync(household, connection, 365);
+      const { transactionCalls } = stubEnableBanking(answers);
+
+      const result = await sync(household, connection, 365);
+
+      // One call, for the window the bank served last time: no refused request first.
+      expect(transactionCalls.map((call) => call.date_from)).toEqual([fallbackFrom()]);
+      expect(result.status).toBe('full_success');
+      expect((await rowsOf(account)).map((row) => row.enableBankingTransactionId)).toEqual(['earlier', 'recent-1']);
+    });
+
+    it('still asks a short refresh for its own short window', async () => {
+      const { connection, household } = await linkedBank();
+      const answers = {
+        balances: { data: { balances: [{ balance_amount: { amount: '487.50', currency: 'EUR' }, balance_type: 'CLBD' }] }, status: 200 },
+        transactions: (params: { date_from?: string }) => (params.date_from ?? '') < fallbackFrom() ? wrongPeriod() : { data: { transactions: [] }, status: 200 },
+      };
+      stubEnableBanking(answers);
+      await sync(household, connection, 365);
+      const { transactionCalls } = stubEnableBanking(answers);
+
+      await sync(household, connection, 5);
+
+      const fiveDaysAgo = new Date();
+      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+      expect(transactionCalls.map((call) => call.date_from)).toEqual([fiveDaysAgo.toISOString().slice(0, 10)]);
+    });
+
+    it('keeps the long window for an account the bank did not refuse, or did not serve', async () => {
+      const { account, connection, household } = await linkedBank();
+      const em = db.em();
+      // A second account on the same connection, and a third.
+      const second = em.create(Account, { accountFinancialInstitutionKey: account.accountFinancialInstitutionKey, accountId: 'eb-account-2', accountName: 'Savings', accountOwnerAppuserKey: household.appuser, balance: 100, bankConnectionKey: connection, closed: false, currencyKey: household.currency, enableBankingConnectionKey: account.enableBankingConnectionKey, isPrivate: false, tenantKey: household.tenant }, { partial: true });
+      const third = em.create(Account, { accountFinancialInstitutionKey: account.accountFinancialInstitutionKey, accountId: 'eb-account-3', accountName: 'Card', accountOwnerAppuserKey: household.appuser, balance: 0, bankConnectionKey: connection, closed: false, currencyKey: household.currency, enableBankingConnectionKey: account.enableBankingConnectionKey, isPrivate: false, tenantKey: household.tenant }, { partial: true });
+      await em.flush();
+      const calls: { account: string; date_from?: string }[] = [];
+      let firstRun = true;
+      http.get.mockImplementation((url: string, config?: { params?: { date_from?: string } }) => {
+        if (url.endsWith('/balances')) return Promise.resolve({ data: { balances: [{ balance_amount: { amount: '100.00', currency: 'EUR' }, balance_type: 'CLBD' }] } });
+        const uid = url.split('/').at(-2) ?? '';
+        const from = config?.params?.date_from ?? '';
+        calls.push({ account: uid, date_from: from });
+        // The first account's bank refuses a year; the second times out on the first run.
+        if (uid === ACCOUNT_UID && from < fallbackFrom()) return Promise.reject(wrongPeriod());
+        if (uid === 'eb-account-2' && firstRun) return Promise.reject(timeout());
+        return Promise.resolve({ data: { transactions: [] } });
+      });
+
+      await sync(household, connection, 365);
+      firstRun = false;
+      calls.length = 0;
+      // The retry of that first sync.
+      await sync(household, connection, 365);
+
+      const yearAgo = new Date();
+      yearAgo.setDate(yearAgo.getDate() - 365);
+      const longFrom = yearAgo.toISOString().slice(0, 10);
+      expect([...calls].sort((a, b) => a.account.localeCompare(b.account))).toEqual([
+        { account: ACCOUNT_UID, date_from: fallbackFrom() },
+        { account: 'eb-account-2', date_from: longFrom },
+        { account: 'eb-account-3', date_from: longFrom },
+      ]);
+      const stored = await db.em().fork().find(Account, { accountKey: { $in: [account.accountKey, second.accountKey, third.accountKey] } }, { filters: false, orderBy: { accountKey: 'ASC' } });
+      expect(stored.map((row) => row.historyWindowDays ?? null)).toEqual([88, null, null]);
     });
 
     it('fails the account as before when the shorter window is refused too', async () => {

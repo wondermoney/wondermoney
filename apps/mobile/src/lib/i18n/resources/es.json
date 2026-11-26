@@ -4939,6 +4939,7 @@
     "viewAll": "Ver todo",
     "cashflow": "Flujo de caja",
     "accountBalance": "Saldo de la cuenta",
+    "balanceAsOf": "Saldo a {{date}}",
     "available": "Disponible",
     "private": "Privada",
     "viewOnly": "Solo lectura",
@@ -5130,6 +5131,7 @@
     "errors": {
       "account-phase-failed": "Tu banco no envió la lista de cuentas.",
       "authentication": "Hay que volver a configurar el acceso a tu banco.",
+      "balance-unavailable": "Tus transacciones se sincronizaron, pero tu banco no envió el saldo.",
       "cancelled": "La conexión con el banco se canceló antes de terminar.",
       "consent-expired": "Tu acceso a este banco ha caducado.",
       "data-validation": "Tu banco envió datos que no pudimos leer.",

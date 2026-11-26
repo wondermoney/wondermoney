@@ -4939,6 +4939,7 @@
     "viewAll": "Vedi tutte",
     "cashflow": "Flusso di cassa",
     "accountBalance": "Saldo del conto",
+    "balanceAsOf": "Saldo al {{date}}",
     "available": "Disponibile",
     "private": "Privato",
     "viewOnly": "Sola visualizzazione",
@@ -5130,6 +5131,7 @@
     "errors": {
       "account-phase-failed": "La tua banca non ha inviato l'elenco dei conti.",
       "authentication": "L'accesso alla tua banca va configurato di nuovo.",
+      "balance-unavailable": "Le tue transazioni sono state sincronizzate, ma la tua banca non ha inviato il saldo.",
       "cancelled": "La connessione bancaria è stata annullata prima di terminare.",
       "consent-expired": "Il tuo accesso a questa banca è scaduto.",
       "data-validation": "La tua banca ha inviato dati che non siamo riusciti a leggere.",

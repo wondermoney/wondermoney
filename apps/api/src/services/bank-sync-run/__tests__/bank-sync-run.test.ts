@@ -165,6 +165,44 @@ describe('runBankSyncPhases', () => {
     expect(result.status).toBe('partial');
   });
 
+  describe('a partial run with balances the bank did not give', () => {
+    const run = (h: ReturnType<typeof harness>) => runBankSyncPhases({ accountService: h.accountService, connection, correlationId, fetchWindowDays: 5, provider, queueJobId, transactionService: h.transactionService });
+
+    it('is recorded as balance_unavailable when that is all it is short of', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'institution_unavailable', balanceUnavailableRetryable: false, failedAccountIds: [], status: 'partial' });
+      h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'completed' });
+
+      expect(await run(h)).toMatchObject({ partialRetryable: false, reportedErrorCode: 'balance_unavailable', status: 'partial' });
+    });
+
+    it('keeps the code of what else went wrong when an account failed too', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'provider_unavailable', balanceUnavailableRetryable: true, failedAccountIds: ['acc-2'], status: 'partial' });
+      h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'completed' });
+
+      expect(await run(h)).toMatchObject({ reportedErrorCode: 'provider_unavailable', status: 'partial' });
+    });
+
+    it('keeps the code of what else went wrong when transactions failed on an account too', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], failedAccountIds: [], status: 'partial' });
+      h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'partial' });
+
+      expect((await run(h)).reportedErrorCode).not.toBe('balance_unavailable');
+    });
+
+    it('names to the transaction phase the accounts whose derived balance the bank replaced', async () => {
+      const h = harness();
+      h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ derivedBalanceReplacedAccountIds: ['acc-1'], failedAccountIds: [], status: 'completed' });
+      h.transactionService.syncTransactionsForRequisition.mockResolvedValueOnce({ status: 'completed' });
+
+      await run(h);
+
+      expect(h.transactionService.syncTransactionsForRequisition).toHaveBeenCalledWith(expect.objectContaining({ derivedBalanceReplacedAccountIds: ['acc-1'] }), expect.anything());
+    });
+  });
+
   it('stops after a rate-limited account phase, even a partial one, and reports the rate limit', async () => {
     const h = harness();
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ rateLimited: { retryAfterSeconds: 120 }, status: 'partial' });

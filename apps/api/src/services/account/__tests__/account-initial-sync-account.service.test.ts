@@ -344,6 +344,30 @@ describe('account initial sync account service', () => {
     expect(createdAccount?.appuserCurrencyBalance).toBe(10);
   });
 
+  it.each([
+    ['had a derived balance', new Date('2026-11-20T00:00:00Z'), ['acc-1']],
+    ['had the bank\u2019s own balance', undefined, undefined],
+  ] as const)('on a duplicate create, says a derived balance was replaced when the reloaded row %s', async (_case, balanceDerivedAt, replaced) => {
+    const reloaded: Record<string, unknown> = { accountKey: 9, balanceDerivedAt };
+    const em = createEm({ currency: { code: 'EUR' }, institution: { accountFinancialInstitutionKey: 1 }, tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } } });
+    let reloadCount = 0;
+    em.findOne.mockImplementation((entity: unknown) => {
+      const name = (entity as { name?: string }).name;
+      if (name === 'AppuserTenant') return { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } };
+      if (name === 'Currency') return { code: 'EUR' };
+      if (name === 'AccountFinancialInstitution') return { accountFinancialInstitutionKey: 1 };
+      if (name === 'Account') return reloadCount++ < 2 ? null : reloaded;
+      return null;
+    });
+    em.flush.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new UniqueConstraintViolationException(new Error('unique'))).mockResolvedValue(undefined);
+
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
+
+    // The new row this sync built had no mark; the stored one is what counts.
+    expect(result.derivedBalanceReplacedAccountIds).toEqual(replaced);
+    expect(reloaded['balanceDerivedAt']).toBeUndefined();
+  });
+
   it('records the first provider balance it sees as the opening balance', async () => {
     const em = createEm();
     await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '250.5' })) });

@@ -27,7 +27,7 @@ import { convertWithStatus, type RateScope, rateScope } from '@service/currency/
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { getAccountOwnership, setAccountOwnership } from '@service/household/account-ownership';
 import { accountAttributionDto, loadActiveMembers } from '@service/household/member-attribution';
-import { isManualAccount } from '@service/transaction/balance-chain.service';
+import { isBankLinkedAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
@@ -358,6 +358,9 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,
     availableBalance: account.balance == null && !pending ? null : computeAvailableBalance(account.balance, [pending?.settlement]),
     balance: account.balance ?? null,
+    // Set while the balance is derived from the transactions because the bank gave none; clients
+    // then show it as of `refreshedAt`, the last time the bank confirmed it.
+    balanceDerivedAt: account.balanceDerivedAt?.toISOString() ?? null,
     creditCard,
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
@@ -445,9 +448,9 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
   }
   const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
   if (opensDifferently) {
-    // A synced account's balance is the bank's; only a manual or CSV account opens on a figure
-    // the person typed.
-    if (!isManualAccount(account)) {
+    // A synced account's balance is the bank's, whichever provider links it (a SimpleFIN account
+    // has only its bank connection); only a manual or CSV account opens on a figure the person typed.
+    if (isBankLinkedAccount(account)) {
       next(new BadRequestError('Only a manual account has an opening balance to edit', ERROR_CODE.OPENING_BALANCE_MANUAL_ONLY));
       return;
     }

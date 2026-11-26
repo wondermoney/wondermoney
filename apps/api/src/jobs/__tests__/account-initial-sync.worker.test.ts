@@ -103,14 +103,15 @@ describe('account initial sync producer contract worker', () => {
   it.each([
     ['refused', 'institution_unavailable', false, true],
     ['timed out', 'provider_unavailable', true, false],
-  ] as const)('a first sync short only of a balance the bank %s finishes %s, retried: %s', async (_case, code, retryable, final) => {
+  ] as const)('a first sync short only of a balance the bank %s is recorded as such, and finishes unless it may pass', async (_case, code, retryable, final) => {
     const h = harness();
     // eslint-disable-next-line @typescript-eslint/unbound-method
     vi.mocked(h.account.syncAccountsForRequisition).mockResolvedValueOnce({ ...accountsResult('partial'), balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: code, balanceUnavailableRetryable: retryable });
     const outcome = await handleAccountInitialSyncJob(job(payload, 'job-2', 1), { accountInitialSyncAccountService: h.account, accountInitialSyncTransactionService: h.transactions, backgroundOperationService: h.background, bankSyncIncidentService: h.incident }).catch((error: unknown) => error);
     // A finished run returns false; one left for a retry throws so pg-boss runs it again.
     expect(outcome instanceof Error ? 'retry' : outcome).toBe(final ? false : 'retry');
-    expect(h.incident.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: code, final, result: 'partial' }));
+    // The transactions synced: not the code of why the bank gave no balance.
+    expect(h.incident.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'balance_unavailable', final, result: 'partial' }));
   });
 
   it('records the aggregator\'s reported code on a partial first sync', async () => {

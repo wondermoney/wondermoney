@@ -69,14 +69,14 @@ describe('scheduled bank sync producer contract worker', () => {
     const h = harness();
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'institution_unavailable', balanceUnavailableRetryable: false, failedAccountIds: [], status: 'partial' } as { status: string });
     await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-2', retryCount: 0, retryLimit: 1 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
-    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'institution_unavailable', final: true, result: 'partial' }));
+    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'balance_unavailable', final: true, result: 'partial' }));
   });
 
   it('still retries a refresh whose balance timed out', async () => {
     const h = harness();
     h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'provider_unavailable', balanceUnavailableRetryable: true, failedAccountIds: [], status: 'partial' } as { status: string });
     await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-2', retryCount: 0, retryLimit: 1 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).rejects.toThrow('partial');
-    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'provider_unavailable', final: false, result: 'partial' }));
+    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'balance_unavailable', final: false, result: 'partial' }));
   });
 
   it('does not reinterpret persistence rollback as a second failed provider outcome', async () => {

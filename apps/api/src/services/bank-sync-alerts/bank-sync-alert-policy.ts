@@ -52,6 +52,7 @@ const SYNC_FAILING_AFTER_MS = 48 * HOUR_MS;
  * should not ask the user to act on a failure nobody has classified.
  */
 const TRANSIENT_ERROR_CODES: ReadonlySet<string> = new Set([
+  'balance_unavailable',
   'cancelled',
   'institution_unavailable',
   'internal',

@@ -9,6 +9,7 @@ import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { Account } from '@entity/Account';
 import { BackgroundOperation, BackgroundOperationStatus } from '@entity/BackgroundOperation';
+import { BankConnection, BankConnectionStatus } from '@entity/BankConnection';
 import { EnableBankingConnection, EnableBankingConnectionStatus } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential } from '@entity/EnableBankingCredential';
 import accountRoutes from '@route/account';
@@ -111,6 +112,21 @@ describe('recalculating an account over HTTP', () => {
       const response = await http.as(owner.appuser).patch(`/v1/account/${owner.account.accountKey}`).send({ openingBalance: 10 });
 
       expect(response.status).toBe(400);
+      expect(send).not.toHaveBeenCalled();
+    });
+
+    it('refuses it on an account linked only through its bank connection, as a SimpleFIN one is', async () => {
+      const { owner } = await household();
+      const em = db.em();
+      const connection = em.create(BankConnection, { appuserKey: owner.appuser, externalId: 'simplefin-1', provider: 'simplefin', status: BankConnectionStatus.LINKED, tenantKey: owner.tenant }, { partial: true });
+      await em.flush();
+      await em.nativeUpdate(Account, { accountKey: owner.account.accountKey }, { accountId: 'sf-account-1', bankConnectionKey: connection, openingBalance: 500 });
+
+      const response = await http.as(owner.appuser).patch(`/v1/account/${owner.account.accountKey}`).send({ openingBalance: 10 });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({ code: 'opening_balance_manual_only' });
+      expect((await db.em().findOneOrFail(Account, { accountKey: owner.account.accountKey }, { filters: false })).openingBalance).toBe(500);
       expect(send).not.toHaveBeenCalled();
     });
 

@@ -28,6 +28,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     balance: null,
     appuserCurrencyBalance: null,
     refreshedAt: null,
+    balanceDerivedAt: null,
     source: "manual",
     accountType: null,
     csvImportFormat: "generic",
@@ -46,6 +47,21 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     creditCard: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
+});
+
+test("reads when a balance was derived, and drops an unreadable date", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), balanceDerivedAt: "2026-11-20T08:00:00.000Z" },
+      { ...requiredAccountFields(2), balanceDerivedAt: "not a date" },
+      { ...requiredAccountFields(3), balanceDerivedAt: null },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.balanceDerivedAt),
+    ["2026-11-20T08:00:00.000Z", null, null],
+  );
 });
 
 test("reads the caller's access, and derives it for an API that does not send it", () => {

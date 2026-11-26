@@ -513,8 +513,16 @@ function applyMonotonicAggregate(
   if (input.final) incident.finality = BankSyncFinality.TERMINAL_FAILURE;
 }
 
+/**
+ * Codes a first sync can end on that need no recovery email: the connection works. A run short only
+ * of balances (`balance_unavailable`) has its transactions in; asking the person to resume it would
+ * be wrong, and resuming would not bring the balance back.
+ */
+const NO_RECOVERY_ERROR_CODES: ReadonlySet<string> = new Set(['balance_unavailable']);
+
 function isEligibleTerminalFailure(incident: BankSyncIncident, input: FinalizeBankSyncAttemptInput, enteringTerminalFailure: boolean): boolean {
   return incident.recoveryTreatmentModeSnapshot != null
+    && !NO_RECOVERY_ERROR_CODES.has(input.errorCode ?? '')
     && incident.recoveryTreatmentModeSnapshot !== BankSyncRolloutMode.OFF
     && enteringTerminalFailure
     && input.final
