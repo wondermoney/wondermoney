@@ -48,9 +48,11 @@ jest.mock('./use-complete-onboarding', () => ({
 }))
 
 let capturedOnCreateAccount: (() => void) | undefined
+let capturedOnImportStatement: (() => void) | undefined
 jest.mock('./onboarding-screen', () => ({
-  OnboardingScreen: (props: { onCreateAccount: () => void }) => {
+  OnboardingScreen: (props: { onCreateAccount: () => void; onImportStatement: () => void }) => {
     capturedOnCreateAccount = props.onCreateAccount
+    capturedOnImportStatement = props.onImportStatement
     return null
   },
 }))
@@ -136,5 +138,13 @@ describe('OnboardingRoute — create-account navigation', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7')
     expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ params: expect.anything() }))
+  })
+
+  it('importing a statement takes the same screen first, then on to the import', async () => {
+    await render(<OnboardingRoute />)
+
+    capturedOnImportStatement?.()
+
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7&then=import')
   })
 })

@@ -50,6 +50,7 @@ import {
 import { balanceSheet, formatMonthName, netWorthChanges, type CashflowView, type NetWorthChange, type ResolvedHistoryPoint } from './home-model'
 import type { NetWorthRowDto } from './net-worth-contract'
 import { NetWorthChart } from './net-worth-chart'
+import { NoAccountsCard } from './no-accounts-card'
 import { PortfolioLinkSuggestion, type PortfolioLinkSaveResult, type PortfolioLinkSuggestionModel } from './portfolio-link-suggestion'
 import type { PortfolioAccountLinkInput } from '@/features/portfolios/portfolio-account-link'
 import type { LoanDto } from '@/features/loans/loans-contract'
@@ -89,6 +90,8 @@ export type HomeSections = {
   freshness: Date | null
   /** null while its inputs load, or once dismissed. */
   setup: SetupSteps | null
+  /** The account list loaded and holds nothing: Home offers the ways in (web `NoAccountsCard`). */
+  noAccounts?: boolean
   /** The bank connection alerts not yet dismissed; null or absent shows nothing. */
   bankAlert?: BankAlertBannerModel | null
   month: SectionState<readonly BudgetMonthRow[]>
@@ -221,6 +224,8 @@ export function NetWorthScreen(props: NetWorthScreenProps) {
             <BankAlertBanner locale={locale} model={sections.bankAlert} onDismiss={() => props.onDismissBankAlert?.()} onNavigate={props.onNavigate} />
           ) : null}
 
+          {sections.noAccounts ? <NoAccountsCard onNavigate={props.onNavigate} /> : null}
+
           {sections.setup ? <SetupChecklist onDismiss={props.onDismissSetup} onNavigate={props.onNavigate} steps={sections.setup} /> : null}
 
           {layout
@@ -291,7 +296,8 @@ function NetWorthHero({ state, sections, today, locale, onRefresh, onLogout, onV
       <View style={styles.hero}>
         {header}
         <SectionEmpty
-          action={<Button label={t('home.netWorth.emptyAction')} onPress={() => onNavigate('/accounts')} />}
+          // Beside the no-accounts card, the adding is the card's.
+          action={sections.noAccounts ? undefined : <Button label={t('home.netWorth.emptyAction')} onPress={() => onNavigate('/accounts')} />}
           body={t('home.netWorth.emptyBody')}
           title={t('home.netWorth.emptyTitle')}
         />

@@ -458,6 +458,14 @@
       "more_other": "E mais {{count}} alertas bancários.",
       "reconnect": "Voltar a ligar",
       "dismiss": "Dispensar"
+    },
+    "noAccounts": {
+      "title": "Adiciona a tua primeira conta",
+      "connect": "Ligar um banco",
+      "import": "Importar um extrato",
+      "importHint": "Um ficheiro exportado do teu banco",
+      "manual": "Adicionar uma conta à mão",
+      "manualHint": "Um nome e um saldo"
     }
   },
   "netWorthHistory": {
@@ -4160,6 +4168,15 @@
           "title": "Património líquido como referência",
           "description": "Contas e investimentos combinam-se num só número para te ajudar a perceber a tua posição."
         }
+      },
+      "noBank": {
+        "headline": "Começar sem banco",
+        "description": "Importa um extrato ou adiciona uma conta com o saldo.",
+        "import": "Importar um extrato",
+        "importHint": "Um ficheiro exportado do teu banco",
+        "manual": "Adicionar uma conta à mão",
+        "manualHint": "Um nome e um saldo",
+        "skip": "Saltar por agora"
       }
     },
     "heading": "Bem-vindo ao WonderMoney",

@@ -22,7 +22,7 @@ const mockClear = jest.fn()
 const mockCompletionMutate = jest.fn()
 let mockCreatePending = false
 let mockCompletionPending = false
-let mockSearchParams: { version?: string } = { version: '3' }
+let mockSearchParams: { version?: string; then?: string } = { version: '3' }
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockSearchParams,
@@ -63,6 +63,16 @@ describe('onboarding create-account route', () => {
     expect(mockCreateMutate).toHaveBeenCalledTimes(1)
     expect(mockCompletionMutate).toHaveBeenCalledWith({ version: 3 })
     expect(mockReplace).toHaveBeenCalledWith('/')
+  })
+
+  it('opens the import on the new account when the person came to import a statement', async () => {
+    mockSearchParams = { version: '3', then: 'import' }
+    mockCreateMutate.mockResolvedValue(undefined)
+    mockCompletionMutate.mockResolvedValue(undefined)
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm' }))
+    expect(mockCompletionMutate).toHaveBeenCalledWith({ version: 3 })
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
   })
 
   it('still returns to the authenticated shell if completing onboarding fails after the account was created', async () => {

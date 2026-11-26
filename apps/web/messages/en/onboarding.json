@@ -316,6 +316,15 @@
         "description": "Already use WonderMoney on another server, or kept an export? Load it here and pick up where you left off.",
         "done": "Go to the dashboard",
         "back": "Set up from scratch instead"
+      },
+      "noBank": {
+        "headline": "Start without a bank",
+        "description": "Bring in a statement, or add an account with its balance.",
+        "import": "Import a statement",
+        "importHint": "A file exported from your bank",
+        "manual": "Add an account by hand",
+        "manualHint": "A name and a balance",
+        "skip": "Skip for now"
       }
     },
     "dashboard": {

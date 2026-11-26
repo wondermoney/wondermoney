@@ -101,10 +101,13 @@ function Change({
 export function NetWorthHero({
   member = null,
   actions,
+  hideEmptyAction = false,
 }: {
   /** One member's net worth, or Shared's; null for the household's. */
   member?: MemberFilter;
   actions?: ReactNode;
+  /** The empty state's "Add an account" is left out where the no-accounts card offers the ways in. */
+  hideEmptyAction?: boolean;
 } = {}) {
   const t = useTranslations("homeOverview.net-worth");
   const tSheet = useTranslations("homeOverview.sheet");
@@ -181,12 +184,14 @@ export function NetWorthHero({
         title={t("empty-title")}
         body={t("empty-body")}
         action={
-          <Link
-            href="/accounts"
-            className={buttonVariants({ variant: "default" })}
-          >
-            {t("empty-action")}
-          </Link>
+          hideEmptyAction ? undefined : (
+            <Link
+              href="/accounts"
+              className={buttonVariants({ variant: "default" })}
+            >
+              {t("empty-action")}
+            </Link>
+          )
         }
       />,
     );

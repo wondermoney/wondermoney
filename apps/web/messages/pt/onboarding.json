@@ -316,6 +316,15 @@
         "description": "Já usas o WonderMoney noutro servidor, ou guardaste uma exportação? Carrega-a aqui e continua onde ficaste.",
         "done": "Ir para o painel",
         "back": "Configurar do zero"
+      },
+      "noBank": {
+        "headline": "Começar sem banco",
+        "description": "Importa um extrato ou adiciona uma conta com o saldo.",
+        "import": "Importar um extrato",
+        "importHint": "Um ficheiro exportado do teu banco",
+        "manual": "Adicionar uma conta à mão",
+        "manualHint": "Um nome e um saldo",
+        "skip": "Saltar por agora"
       }
     },
     "dashboard": {

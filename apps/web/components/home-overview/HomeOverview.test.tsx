@@ -10,6 +10,8 @@ import { HomeOverview } from "./HomeOverview";
 
 const state = vi.hoisted(() => ({
   preferences: {} as Record<string, unknown>,
+  noAccounts: true,
+  heroHidesEmptyAction: undefined as boolean | undefined,
 }));
 
 vi.mock("@/lib/api/user-preferences/useUserPreferences", () => ({
@@ -31,6 +33,10 @@ vi.mock("./CustomizeHomeSheet", () => ({ CustomizeHomeSheet: () => null }));
 vi.mock("@/components/activation/SetupChecklistCard", () => ({
   SetupChecklistCard: () => null,
 }));
+vi.mock("@/components/activation/NoAccountsCard", () => ({
+  NoAccountsCard: () => <div data-testid="no-accounts-card" />,
+  useHasNoAccounts: () => state.noAccounts,
+}));
 vi.mock("@/lib/api/account/useAccounts", () => ({
   default: () => ({ data: { accounts: [] }, isSuccess: true }),
 }));
@@ -48,9 +54,16 @@ vi.mock("@/lib/api/portfolio/usePortfolios", () => ({
 }));
 
 vi.mock("./NetWorthHero", () => ({
-  NetWorthHero: ({ actions }: { actions?: import("react").ReactNode }) => (
-    <div data-testid="section-net-worth">net-worth{actions}</div>
-  ),
+  NetWorthHero: ({
+    actions,
+    hideEmptyAction,
+  }: {
+    actions?: import("react").ReactNode;
+    hideEmptyAction?: boolean;
+  }) => {
+    state.heroHidesEmptyAction = hideEmptyAction;
+    return <div data-testid="section-net-worth">net-worth{actions}</div>;
+  },
 }));
 vi.mock("./InsightsSection", () => ({
   InsightsSection: () => <div data-testid="section-insights">insights</div>,
@@ -77,7 +90,11 @@ vi.mock("./LatestTransactionsSection", () => ({
   ),
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  state.noAccounts = true;
+  state.heroHidesEmptyAction = undefined;
+});
 
 function renderHome(dashboardLayout?: { id: string; hidden: boolean }[]) {
   state.preferences = {
@@ -134,4 +151,18 @@ test("shows the customize affordance", () => {
   renderHome();
 
   assert.ok(screen.getByRole("button", { name: "Customize" }));
+});
+
+test("with no accounts, the no-accounts card offers the ways in and net worth drops its own button", () => {
+  renderHome();
+
+  assert.ok(screen.getByTestId("no-accounts-card"));
+  assert.equal(state.heroHidesEmptyAction, true);
+});
+
+test("with an account, net worth keeps its empty-state button", () => {
+  state.noAccounts = false;
+  renderHome();
+
+  assert.equal(state.heroHidesEmptyAction, false);
 });

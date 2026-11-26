@@ -9,6 +9,10 @@ import { useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useState } from "react";
 
 import AccountsFreshness from "@/components/account/AccountsFreshness";
+import {
+  NoAccountsCard,
+  useHasNoAccounts,
+} from "@/components/activation/NoAccountsCard";
 import { SetupChecklistCard } from "@/components/activation/SetupChecklistCard";
 import { MemberFilterControl } from "@/components/household/MemberFilterSelect";
 import { Button } from "@/components/ui/button";
@@ -37,7 +41,7 @@ const ANY_UNREVIEWED = {
   unreviewedOnly: true,
 } as const;
 
-/** The activation checklist. */
+/** The ways in for a household with no accounts, then the activation checklist. */
 function HomeActivation() {
   const { data: accountsData, isSuccess: accountsLoaded } = useAccounts();
   const { data: portfoliosData } = usePortfolios();
@@ -51,6 +55,7 @@ function HomeActivation() {
 
   return (
     <>
+      <NoAccountsCard />
       {accountsLoaded ? (
         <SetupChecklistCard
           hasAccount={accountCount > 0}
@@ -85,6 +90,8 @@ export function HomeOverview() {
   // One member's (or Shared) home, from the URL's `member`. The budget month and loans stay the
   // household's: their figures come from endpoints that do not take the filter.
   const { filter: member } = useMemberFilter();
+  // The no-accounts card offers the ways in, so the net worth's own "Add an account" steps aside.
+  const noAccounts = useHasNoAccounts();
 
   const sections: Record<
     Exclude<DashboardSectionId, "net-worth">,
@@ -105,6 +112,7 @@ export function HomeOverview() {
       <div className="flex flex-col gap-2">
         <NetWorthHero
           member={member}
+          hideEmptyAction={hydrated && noAccounts}
           actions={
             <>
               <MemberFilterControl iconOnly />

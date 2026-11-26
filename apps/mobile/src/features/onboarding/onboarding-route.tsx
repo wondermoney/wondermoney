@@ -93,6 +93,12 @@ export function OnboardingRoute() {
         if (state.status !== 'loaded') return
         router.push(`/onboarding/create-account?version=${state.view.version}` as Href)
       }}
+      onImportStatement={() => {
+        // A statement goes into an account: the same manual-account screen first, which then
+        // opens the import on it (`then=import`) instead of going home.
+        if (state.status !== 'loaded') return
+        router.push(`/onboarding/create-account?version=${state.view.version}&then=import` as Href)
+      }}
     />
   )
 }

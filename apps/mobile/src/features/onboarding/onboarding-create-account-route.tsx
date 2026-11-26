@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native'
 
 import { SafeAreaView } from '@/components/ui/screen-safe-area'
+import { afterAccountCreated } from '@/features/accounts/after-account-created'
 import { OfflineAccountCreateScreen } from '@/features/accounts/offline-account-create-screen'
 import { classifyOfflineAccountCreateFailure, useCreateOfflineAccount } from '@/features/accounts/use-create-offline-account'
 import { useOfflineAccountOptions } from '@/features/accounts/use-offline-account-options'
@@ -25,6 +26,9 @@ import { useCompleteOnboarding } from './use-complete-onboarding'
  * The onboarding gate is idempotent, so a user in that edge case simply sees
  * the journey again next launch (with an account already visible) rather
  * than losing their work.
+ *
+ * `then=import` is onboarding's "Import a statement": a statement goes into an account, so this
+ * screen comes first and the import opens on the new account instead of Home.
  */
 function parseVersion(raw: string | string[] | undefined): number | null {
   const value = Array.isArray(raw) ? raw[0] : raw
@@ -34,8 +38,9 @@ function parseVersion(raw: string | string[] | undefined): number | null {
 }
 
 export function OnboardingCreateAccountRoute() {
-  const params = useLocalSearchParams<{ version?: string }>()
+  const params = useLocalSearchParams<{ version?: string; then?: string }>()
   const version = parseVersion(params.version)
+  const destination = afterAccountCreated(params.then, '/')
   const options = useOfflineAccountOptions()
   // The activation path: reaching this screen means onboarding is
   // still required, so a successful creation here is a first account by
@@ -75,13 +80,13 @@ export function OnboardingCreateAccountRoute() {
         // See file header: the account was created, so we still proceed.
       }
       unlockNavigation()
-      router.replace('/' as Href)
+      router.replace(destination)
       return null
     }}
     onCheckAccounts={async () => {
       await create.reconcile()
       unlockNavigation()
-      router.replace('/' as Href)
+      router.replace(destination)
     }}
     onCreateAnother={create.clearUnknownGuard}
   />

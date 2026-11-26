@@ -1,4 +1,4 @@
-import { type Href, usePreventRemove, useRouter } from 'expo-router'
+import { type Href, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native'
@@ -8,11 +8,14 @@ import { ApiError } from '@/lib/api/errors'
 import { themeTokens } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { afterAccountCreated } from './after-account-created'
 import { OfflineAccountCreateScreen } from './offline-account-create-screen'
 import { classifyOfflineAccountCreateFailure, useCreateOfflineAccount } from './use-create-offline-account'
 import { useOfflineAccountOptions } from './use-offline-account-options'
 
 export function OfflineAccountCreateRoute() {
+  const params = useLocalSearchParams<{ then?: string }>()
+  const destination = afterAccountCreated(params.then, '/accounts')
   const options = useOfflineAccountOptions()
   const create = useCreateOfflineAccount()
   const router = useRouter()
@@ -36,7 +39,7 @@ export function OfflineAccountCreateRoute() {
       try {
         await create.mutateAsync(payload)
         unlockNavigation()
-        router.replace('/accounts' as Href)
+        router.replace(destination)
         return null
       } catch (error) {
         return classifyOfflineAccountCreateFailure(error)
@@ -44,7 +47,7 @@ export function OfflineAccountCreateRoute() {
     }}
     onCheckAccounts={async () => {
       await create.reconcile()
-      router.replace('/accounts' as Href)
+      router.replace(destination)
     }}
     onCreateAnother={create.clearUnknownGuard}
   />

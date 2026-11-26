@@ -182,6 +182,7 @@ export function NetWorthRoute() {
     history: historyState,
     freshness,
     setup,
+    noAccounts: accounts.data !== undefined && accounts.data.accounts.length === 0,
     bankAlert: bankAlerts.banner,
     month: monthRows,
     cashflow: sectionOf(cashflow, (data) => ({
