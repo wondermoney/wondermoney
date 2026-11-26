@@ -1465,7 +1465,7 @@
   "budget-starter-profile-description": "Usa un punto di partenza suggerito basato su categorie comuni. Puoi modificare ogni importo prima di finire.",
   "budget-starter-profile-selected-summary": "In base alle tue entrate mensili di {income}, questo punto di partenza suggerito prevede {total} distribuiti su categorie comuni, da rivedere.",
   "budget-starter-profile-suggested-total": "Totale mensile suggerito",
-  "budget-starter-profile-empty": "Personalizzato mantiene la configurazione manuale attuale. Aggiungi o modifica le categorie qui sotto quando sei pronto.",
+  "budget-starter-profile-empty": "Personalizzato mantiene la configurazione manuale attuale. Aggiungi o modifica le categorie qui sotto quando vuoi.",
   "budget-starter-profile-apply": "Applica suggerimenti",
   "budget-starter-profile-apply-note": "Si applica solo alle categorie corrispondenti. Potrai modificare gli importi in seguito.",
   "budget-starter-profile-applied": "Gli importi suggeriti sono stati salvati nelle categorie corrispondenti. Puoi ancora modificarli qui sotto.",
