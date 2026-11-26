@@ -233,6 +233,18 @@ describe('rule presets', () => {
       expect((await list(household.appuser)).suggested).toBe('pt-BR');
     });
 
+    it('offers an Italian account the Italian preset', async () => {
+      const household = await seedHousehold(db.em());
+      const em = db.em();
+      const appuser = await em.findOneOrFail(Appuser, { appuserKey: household.appuser.appuserKey });
+      appuser.language = SupportedLanguages.IT;
+      appuser.currencyKey = await currencyFor(em, 'EUR');
+      await em.flush();
+
+      expect((await list(household.appuser)).suggested).toBe('it-IT');
+      expect((await list(household.appuser, '?language=it')).suggested).toBe('it-IT');
+    });
+
     it('prefers the country the person banks in', async () => {
       const household = await seedHousehold(db.em());
       const em = db.em();

@@ -15,14 +15,16 @@
  *   transfer matching marks transfers), never `hide`, tags, notes or reviews;
  * - a rule that sets a spending category also requires money out, so a refund, a salary or a
  *   payment from a friend is never recategorised as spending;
- * - a payment rail (MB WAY, PIX, Bizum, SEPA, a transfer) is never mapped to a category, because
- *   it carries income and spending alike. Securo's Brazil pack marked incoming PIX payments as
- *   transfers and silently dropped real income from reports; this is the guard against that.
+ * - a payment rail (MB WAY, PIX, Bizum, Satispay, SEPA, a transfer or bonifico) is never mapped
+ *   to a category, because it carries income and spending alike. Securo's Brazil pack marked
+ *   incoming PIX payments as transfers and silently dropped real income from reports; this is
+ *   the guard against that.
  *
  * Plain data and pure functions, no dependencies.
  */
 import en from './en.json';
 import esES from './es-ES.json';
+import itIT from './it-IT.json';
 import ptBR from './pt-BR.json';
 import ptPT from './pt-PT.json';
 
@@ -59,6 +61,12 @@ export const PAYMENT_RAIL_TERMS: readonly string[] = [
   'transferencias',
   'transf',
   'trf',
+  'bonifico',
+  'bonifici',
+  'giroconto',
+  'girofondi',
+  'postagiro',
+  'satispay',
   'wire',
   'faster payment',
   'faster payments',
@@ -120,7 +128,7 @@ export interface RulePreset {
 }
 
 /** Every preset that ships, by code. */
-export const RULE_PRESETS: readonly RulePreset[] = [ptPT, esES, ptBR, en] as RulePreset[];
+export const RULE_PRESETS: readonly RulePreset[] = [ptPT, esES, itIT, ptBR, en] as RulePreset[];
 
 export function getRulePreset(code: string): RulePreset | undefined {
   const wanted = code.trim().toLowerCase();
@@ -131,7 +139,7 @@ export function getRulePreset(code: string): RulePreset | undefined {
  * The preset a language falls back to when no country settles it: the language's home market,
  * where the merchants in the list are.
  */
-const LANGUAGE_DEFAULT_PRESET: Readonly<Record<string, string>> = { en: 'en', es: 'es-ES', pt: 'pt-PT' };
+const LANGUAGE_DEFAULT_PRESET: Readonly<Record<string, string>> = { en: 'en', es: 'es-ES', it: 'it-IT', pt: 'pt-PT' };
 
 /** Countries a currency belongs to without doubt. The euro says nothing about the country. */
 const CURRENCY_COUNTRY: Readonly<Record<string, string>> = { BRL: 'BR', GBP: 'GB', USD: 'US' };
@@ -153,9 +161,9 @@ export interface RulePresetSignals {
  * Countries decide first, strongest first: bank connections, the locale's own country, the
  * device region, then a currency that names one country. The first country a preset covers
  * wins; when two presets cover it, the one in the person's language does. Only when no country
- * is known does the language alone choose (Portuguese → Portugal, Spanish → Spain, English → the
- * UK/US list). A known country no preset covers (Spanish in Mexico) offers nothing: a list of
- * another country's shops would only add noise.
+ * is known does the language alone choose (Portuguese → Portugal, Spanish → Spain, Italian →
+ * Italy, English → the UK/US list). A known country no preset covers (Spanish in Mexico) offers
+ * nothing: a list of another country's shops would only add noise.
  */
 export function matchRulePreset(signals: RulePresetSignals, presets: readonly RulePreset[] = RULE_PRESETS): RulePreset | undefined {
   const [languagePart, localeRegion] = (signals.language ?? '').trim().replace('_', '-').split('-');

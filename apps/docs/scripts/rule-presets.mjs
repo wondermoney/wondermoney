@@ -71,23 +71,23 @@ const COPY = {
     columns: ['Rule', 'Description contains', 'Category', 'Merchant'],
     excludes: (values) => `but not ${values}`,
     heading: (name, code, count) => `### ${name} (\`${code}\`, ${count} rules)`,
-    names: { en: 'United Kingdom and United States', 'es-ES': 'Spain', 'pt-BR': 'Brazil', 'pt-PT': 'Portugal' },
+    names: { en: 'United Kingdom and United States', 'es-ES': 'Spain', 'it-IT': 'Italy', 'pt-BR': 'Brazil', 'pt-PT': 'Portugal' },
   },
   es: {
     columns: ['Regla', 'La descripción contiene', 'Categoría', 'Comercio'],
     excludes: (values) => `pero no ${values}`,
     heading: (name, code, count) => `### ${name} (\`${code}\`, ${count} reglas)`,
-    names: { en: 'Reino Unido y Estados Unidos', 'es-ES': 'España', 'pt-BR': 'Brasil', 'pt-PT': 'Portugal' },
+    names: { en: 'Reino Unido y Estados Unidos', 'es-ES': 'España', 'it-IT': 'Italia', 'pt-BR': 'Brasil', 'pt-PT': 'Portugal' },
   },
   pt: {
     columns: ['Regra', 'A descrição contém', 'Categoria', 'Comerciante'],
     excludes: (values) => `mas não ${values}`,
     heading: (name, code, count) => `### ${name} (\`${code}\`, ${count} regras)`,
-    names: { en: 'Reino Unido e Estados Unidos', 'es-ES': 'Espanha', 'pt-BR': 'Brasil', 'pt-PT': 'Portugal' },
+    names: { en: 'Reino Unido e Estados Unidos', 'es-ES': 'Espanha', 'it-IT': 'Itália', 'pt-BR': 'Brasil', 'pt-PT': 'Portugal' },
   },
 };
 
-const ORDER = ['pt-PT', 'es-ES', 'pt-BR', 'en'];
+const ORDER = ['pt-PT', 'es-ES', 'it-IT', 'pt-BR', 'en'];
 
 const presets = readdirSync(presetsDirectory)
   .filter((name) => name.endsWith('.json'))
