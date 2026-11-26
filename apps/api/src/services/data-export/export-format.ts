@@ -149,10 +149,10 @@ inicia uma nova exportação.
 
 Exportación de datos de WonderMoney (protegida con contraseña)
 
-Los archivos de este zip están cifrados con AES-256 (WinZip AES). Ábralo con 7-Zip
-(Windows, Linux), Keka (macOS), WinRAR o la restauración de WonderMoney, e introduzca la
-contraseña que eligió al iniciar la exportación. Las herramientas de zip integradas de algunos
-sistemas no abren archivos cifrados. Una contraseña olvidada no se puede recuperar: inicie una
+Los archivos de este zip están cifrados con AES-256 (WinZip AES). Ábrelo con 7-Zip
+(Windows, Linux), Keka (macOS), WinRAR o la restauración de WonderMoney, e introduce la
+contraseña que elegiste al iniciar la exportación. Las herramientas de zip integradas de algunos
+sistemas no abren archivos cifrados. Una contraseña olvidada no se puede recuperar: inicia una
 nueva exportación.
 
 ---
