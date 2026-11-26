@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, test, vi } from "vitest";
 
 import type { McpCall } from "@/lib/api/user/useMcpCalls";
+import type { McpOAuthClient } from "@/lib/api/user/useMcpOAuthClients";
 
 import enCommon from "../../messages/en/common.json";
 import enConnectAiClient from "../../messages/en/connect-ai-client.json";
@@ -16,15 +17,21 @@ const state = vi.hoisted(() => ({
   calls: [] as McpCall[],
   create: vi.fn(),
   mcpEnabled: true,
+  mcpOAuthEnabled: false,
+  oauthClients: [] as McpOAuthClient[],
+  revoke: vi.fn(),
 }));
 
 vi.mock("@/lib/api/api", () => ({
   getApiUrl: () => "https://api.example.test",
 }));
 
-vi.mock("@/lib/api/instance/useInstance", () => ({
-  useFeature: () => state.mcpEnabled,
-}));
+vi.mock("@/lib/api/instance/useInstance", () => {
+  const useFeature = (
+    select: (features: { mcp?: boolean; mcpOAuth?: boolean }) => boolean,
+  ) => select({ mcp: state.mcpEnabled, mcpOAuth: state.mcpOAuthEnabled });
+  return { useConfirmedFeature: useFeature, useFeature };
+});
 
 vi.mock("@/lib/api/user/useApiTokens", () => ({
   useCreateApiToken: () => ({ isPending: false, mutateAsync: state.create }),
@@ -32,6 +39,11 @@ vi.mock("@/lib/api/user/useApiTokens", () => ({
 
 vi.mock("@/lib/api/user/useMcpCalls", () => ({
   useMcpCalls: () => ({ data: state.calls, isLoading: false }),
+}));
+
+vi.mock("@/lib/api/user/useMcpOAuthClients", () => ({
+  useMcpOAuthClients: () => ({ data: state.oauthClients, isLoading: false }),
+  useRevokeMcpOAuthClient: () => ({ mutateAsync: state.revoke }),
 }));
 
 beforeAll(() => {
@@ -48,6 +60,9 @@ afterEach(() => {
   state.create.mockReset();
   state.calls = [];
   state.mcpEnabled = true;
+  state.mcpOAuthEnabled = false;
+  state.oauthClients = [];
+  state.revoke.mockReset();
 });
 
 function renderPanel() {
@@ -65,10 +80,18 @@ test("shows the MCP endpoint and a copy-paste client config", () => {
   renderPanel();
 
   assert.ok(screen.getByDisplayValue("https://api.example.test/v1/mcp"));
-  const [claudeConfig, httpConfig] = Array.from(document.querySelectorAll("pre"));
-  assert.match(claudeConfig?.textContent ?? "", /https:\/\/api\.example\.test\/v1\/mcp/);
+  const [claudeConfig, httpConfig] = Array.from(
+    document.querySelectorAll("pre"),
+  );
+  assert.match(
+    claudeConfig?.textContent ?? "",
+    /https:\/\/api\.example\.test\/v1\/mcp/,
+  );
   assert.match(claudeConfig?.textContent ?? "", /mcp-remote/);
-  assert.match(httpConfig?.textContent ?? "", /"Authorization": "Bearer <your-token>"/);
+  assert.match(
+    httpConfig?.textContent ?? "",
+    /"Authorization": "Bearer <your-token>"/,
+  );
 });
 
 test("creates a token with the mcp:read scope and shows it once", async () => {
@@ -118,7 +141,10 @@ test("adds the mcp:propose scope only when the person allows proposals", async (
 
 test("lists recent MCP calls by tool name", () => {
   state.calls = [
-    { createdAt: "2026-11-11T10:00:00.000Z", toolName: "get_net_worth_summary" },
+    {
+      createdAt: "2026-11-11T10:00:00.000Z",
+      toolName: "get_net_worth_summary",
+    },
     { createdAt: "2026-11-11T09:00:00.000Z", toolName: "list_accounts" },
   ];
   renderPanel();
@@ -132,4 +158,62 @@ test("renders nothing when the instance has MCP disabled", () => {
   renderPanel();
 
   assert.equal(screen.queryByText("Connect an AI client"), null);
+});
+
+test("offers no OAuth section while the server does not offer OAuth and nothing is connected", () => {
+  renderPanel();
+
+  assert.equal(screen.queryByText("Connect ChatGPT"), null);
+  assert.equal(screen.queryByText("Connected with OAuth"), null);
+});
+
+test("with OAuth turned off, still lists clients allowed earlier so they can be disconnected", () => {
+  state.oauthClients = [
+    {
+      clientId: "client-1",
+      connectedAt: "2026-11-20T10:00:00.000Z",
+      lastUsedAt: null,
+      name: "ChatGPT",
+      redirectOrigins: ["https://chatgpt.com"],
+      scopes: ["mcp:read"],
+    },
+  ];
+  renderPanel();
+
+  assert.equal(screen.queryByText("Connect ChatGPT"), null);
+  assert.ok(screen.getByText(/OAuth is turned off on this server/));
+  assert.ok(screen.getByRole("button", { name: "Disconnect" }));
+});
+
+test("lists the OAuth clients the member allowed and disconnects one", async () => {
+  state.mcpOAuthEnabled = true;
+  state.revoke.mockResolvedValue(undefined);
+  state.oauthClients = [
+    {
+      clientId: "client-1",
+      connectedAt: "2026-11-20T10:00:00.000Z",
+      lastUsedAt: null,
+      name: "ChatGPT",
+      redirectOrigins: ["https://chatgpt.com", "http://127.0.0.1:8976"],
+      scopes: ["mcp:read", "offline_access"],
+    },
+  ];
+  const user = userEvent.setup();
+  renderPanel();
+
+  assert.ok(screen.getByText("Connect ChatGPT"));
+  assert.ok(screen.getByText("ChatGPT"));
+  assert.ok(screen.getByText("https://chatgpt.com"));
+  assert.ok(screen.getByText("http://127.0.0.1:8976"));
+
+  await user.click(screen.getByRole("button", { name: "Disconnect" }));
+  const dialog = await screen.findByRole("alertdialog");
+  await user.click(
+    Array.from(dialog.querySelectorAll("button")).find(
+      (button) => button.textContent === "Disconnect",
+    )!,
+  );
+
+  await waitFor(() => assert.equal(state.revoke.mock.calls.length, 1));
+  assert.equal(state.revoke.mock.calls[0]?.[0], "client-1");
 });

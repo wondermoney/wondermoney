@@ -90,6 +90,9 @@ services:
             handle /api/auth/* {
               reverse_proxy {$API_HOSTPORT}
             }
+            handle /.well-known/oauth-* {
+              reverse_proxy {$API_HOSTPORT}
+            }
             handle {
               reverse_proxy {$WEB_HOSTPORT}
             }

@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { requireMcpEnabled, requireMcpToken } from '@middleware/mcp-auth';
-import { apiTokenRateLimit } from '@middleware/rate-limit';
+import { apiTokenRateLimit, mcpBearerRateLimit } from '@middleware/rate-limit';
 import { handleMcpRequest, methodNotAllowed } from '@service/mcp/mcp.service';
 
 const router = express.Router();
@@ -11,10 +11,11 @@ const router = express.Router();
 router.use(requireMcpEnabled);
 
 /*
- * Stateless Streamable HTTP. The token is resolved before the limiter so the `apiToken`
- * family keys its bucket on the token's own row (see `middleware/rate-limit.ts`).
+ * Stateless Streamable HTTP. While OAuth is on, a bearer call is counted per address first
+ * (`mcpBearer`, in place of the backstop). The token is resolved before the `apiToken` limiter so
+ * that family keys its bucket on the token's own row (see `middleware/rate-limit.ts`).
  */
-router.post('/', requireMcpToken, apiTokenRateLimit(), handleMcpRequest);
+router.post('/', mcpBearerRateLimit(), requireMcpToken, apiTokenRateLimit(), handleMcpRequest);
 
 // A stateless server has no stream to resume and no session to delete.
 router.get('/', methodNotAllowed);

@@ -1,17 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import { verifyTotpForSession } from '@service/auth/better-auth';
+import { SENSITIVE_SESSION_MAX_AGE_MS } from '@service/auth/sensitive-session-age';
 import { ERROR_CODE, ForbiddenError, UnauthorizedError } from '@utils/errors';
 
-/**
- * How old a better-auth session may be for a sensitive action.
- *
- * better-auth's own `freshSessionMiddleware` treats a session as fresh for `session.freshAge`
- * (24 hours by default); we reuse that notion rather than inventing a second one. Creating a
- * long-lived personal API token is exactly the kind of action that should not be possible from
- * a session someone left open on a shared machine weeks ago.
- */
-export const SENSITIVE_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export { SENSITIVE_SESSION_MAX_AGE_MS };
 
 /**
  * Gate a sensitive account action on a fresh session, plus TOTP when the user has it enabled.

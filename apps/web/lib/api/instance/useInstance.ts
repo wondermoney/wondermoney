@@ -52,6 +52,11 @@ export interface InstanceDescription {
     /** The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`). */
     mcp?: boolean;
     /**
+     * OAuth for the MCP server (`MCP_OAUTH_ENABLED`): ChatGPT and other clients connect with the
+     * person's consent instead of a token. Absent on an older API, which reads as off.
+     */
+    mcpOAuth?: boolean;
+    /**
      * Single sign-on through the operator's OIDC provider ("Sign in with <name>"). Null when
      * none is configured; absent on an API older than single sign-on.
      */

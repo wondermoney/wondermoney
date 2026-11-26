@@ -122,6 +122,8 @@ export const webFeatureScreens = [
   'forgot_password',
   'reset_password',
   'settings_household_join',
+  // Allowing an MCP client (ChatGPT) to read the person's finances, from its OAuth sign-in.
+  'oauth_consent',
   'faq',
   // Activation
   'onboarding',

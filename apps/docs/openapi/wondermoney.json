@@ -17581,7 +17581,7 @@
     },
     "/v1/mcp": {
       "post": {
-        "description": "**Required scope:** any of `mcp:read`, `mcp:propose`.\n\nUses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change.",
+        "description": "**Required scope:** any of `mcp:read`, `mcp:propose`.\n\nUses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change. With `MCP_OAUTH_ENABLED` on, an OAuth access token carrying `mcp:read` is accepted too (the read tools only), and a 401 carries `WWW-Authenticate` with the protected resource metadata URL.",
         "security": [
           {
             "bearerAuth": []

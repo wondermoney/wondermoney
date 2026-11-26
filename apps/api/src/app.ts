@@ -18,6 +18,7 @@ import { connectDatabase, DI } from '@app/database/di';
 import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV, TRUST_PROXY } from '@config/env';
 import { enableBankingCallback } from '@controller/enable-banking-callback';
 import { validateInviteController } from '@controller/household';
+import { getMcpAuthorizationServerMetadataAtIssuer } from '@controller/mcp';
 import { adminAuth, optionalAuth } from '@middleware/auth';
 import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
@@ -70,6 +71,7 @@ import loanRoutes from '@route/loan';
 import manualAssetRoutes from '@route/manual-asset';
 import marketingRoutes from '@route/marketing';
 import mcpRoutes from '@route/mcp';
+import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
 import netWorthRoutes from '@route/net-worth';
 import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
@@ -167,7 +169,8 @@ export default class Application {
       // is untouched. The shared `authExchangeRateLimit` family in
       // `@middleware/rate-limit` already implements the per-family budget.
       this.host.use(
-        ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor'],
+        // The OAuth consent checks the authenticator code, so it shares the two-factor budget.
+        ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor', '/api/auth/oauth2/consent'],
         authExchangeRateLimit(),
       );
       // Passkey sign-in and passkey management: the same family, its own store (see the factory).
@@ -182,6 +185,9 @@ export default class Application {
       // (it reads the raw request body itself — express.json would consume it and
       // hang sign-in) and BEFORE csrfOriginProtection (it runs its own origin check).
       // Express 5 requires the named wildcard (`*splat`) rather than a bare `*`.
+      // The OAuth server metadata at the issuer's own path. better-auth would answer it itself,
+      // advertising DPoP; served by the API ahead of its handler so it matches the root document.
+      this.host.get('/api/auth/.well-known/oauth-authorization-server', getMcpAuthorizationServerMetadataAtIssuer);
       this.host.all('/api/auth/*splat', authHandler);
 
       this.host.use((_req, _res, next) => {
@@ -255,10 +261,16 @@ export default class Application {
       this.host.use('/v1/manual-assets', ...authedTenant(), manualAssetRoutes);
       this.host.use('/v1/marketing', publicMarketingRateLimit(), marketingRoutes);
       // The read-only MCP server. Deliberately outside `authedTenant`: an MCP client is a
-      // machine credential, so the route accepts only a personal API token with `mcp:read`
-      // and never a session cookie (see `middleware/mcp-auth.ts`).
+      // machine credential, so the route accepts a personal API token with `mcp:read`, or an
+      // OAuth access token when `MCP_OAUTH_ENABLED` is on, and never a session cookie (see
+      // `middleware/mcp-auth.ts`).
       this.host.use('/v1/installment-plans', ...authedTenant(), installmentPlanRoutes);
       this.host.use('/v1/mcp', mcpRoutes);
+      // Its OAuth discovery documents (RFC 9728, RFC 8414), at the API's root as the RFCs place
+      // them. Public and cheap; 404 unless `MCP_OAUTH_ENABLED` is on.
+      // No per-IP limit: many people's clients fetch them from the same few addresses (ChatGPT's),
+      // and they are static documents that read nothing.
+      this.host.use('/.well-known', mcpOAuthMetadataRoutes);
       // Net worth is protected at mount level; route stays auth-agnostic.
       this.host.use('/v1/net-worth', ...authedTenant(), netWorthRoutes);
       this.host.use('/v1/portfolio', ...authedTenant(), portfolioRoutes);

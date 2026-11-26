@@ -16,6 +16,8 @@ interface AssistantAuditLogInput {
   eventType: AssistantAuditEventType;
   metadata?: Record<string, unknown>;
   model?: string;
+  /** The OAuth client behind an MCP call (`oauthClient.clientId`); omitted otherwise. */
+  oauthClientId?: string;
   provider?: string;
   source?: AssistantAuditSource;
   tenantKey: number;
@@ -34,6 +36,7 @@ export class AssistantAuditService {
       auditLog.eventType = input.eventType;
       auditLog.metadata = sanitizeAuditMetadata(input.metadata);
       auditLog.model = input.model;
+      auditLog.oauthClientId = input.oauthClientId;
       auditLog.provider = input.provider;
       auditLog.source = input.source ?? AssistantAuditSource.ASSISTANT;
       auditLog.tenantKey = getRef(em, Tenant, input.tenantKey);

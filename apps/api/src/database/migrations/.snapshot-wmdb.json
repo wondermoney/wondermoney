@@ -3678,6 +3678,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "oauth_client_id": {
+          "name": "oauth_client_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "provider": {
           "name": "provider",
           "type": "varchar(255)",
