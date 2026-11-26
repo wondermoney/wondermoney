@@ -613,6 +613,15 @@ describe('app auth adapter — passkeys', () => {
     })
   })
 
+  it('reads when the current session was created, and null when it cannot', async () => {
+    const withDate = createPort({ getSession: jest.fn().mockResolvedValue({ data: { session: { token: 't', createdAt: new Date('2026-11-26T08:00:00.000Z') }, user: { id: 'u1' } }, error: null }) })
+    await expect(createAppAuthAdapter(withDate).sessionStartedAt()).resolves.toBe('2026-11-26T08:00:00.000Z')
+    const signedOut = createPort()
+    await expect(createAppAuthAdapter(signedOut).sessionStartedAt()).resolves.toBeNull()
+    const failing = createPort({ getSession: jest.fn().mockRejectedValue(new Error('offline')) })
+    await expect(createAppAuthAdapter(failing).sessionStartedAt()).resolves.toBeNull()
+  })
+
   it('deletes a passkey by id', async () => {
     const port = createPort()
     const $fetch = fakeFetch({ '/passkey/delete-passkey': { data: { status: true }, error: null } })

@@ -26,7 +26,8 @@ export function useEnableBankingCredential() {
 /** A sensitive step's input: the authenticator code, when two-factor is on. */
 export type SensitiveStepInput = Readonly<{ totpCode?: string }>
 
-function useInvalidateCredential() {
+/** Re-reads the credential, so the setup and the connect screen see what the server now holds. */
+export function useInvalidateEnableBankingCredential() {
   const { runtime } = useProductRuntime()
   const queryClient = useQueryClient()
   return () => runtime
@@ -41,7 +42,7 @@ function useInvalidateCredential() {
 export function useCreateEnableBankingCertificate() {
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useCreateEnableBankingCertificate requires an authenticated runtime')
-  const invalidate = useInvalidateCredential()
+  const invalidate = useInvalidateEnableBankingCredential()
   return useMutation({
     retry: false,
     networkMode: 'always',
@@ -55,12 +56,14 @@ export function useCreateEnableBankingCertificate() {
 
 /**
  * Activates the generated key under the application ID Enable Banking gave its certificate. On
- * success the credential reads active, so the connect screen moves on to the bank list.
+ * success the answer goes into the cache before the re-read, so the credential reads active (and
+ * the connect screen moves on to the bank list) even if the re-read fails.
  */
 export function useActivateEnableBankingCredential() {
   const { runtime } = useProductRuntime()
   if (!runtime) throw new Error('useActivateEnableBankingCredential requires an authenticated runtime')
-  const invalidate = useInvalidateCredential()
+  const queryClient = useQueryClient()
+  const invalidate = useInvalidateEnableBankingCredential()
   return useMutation({
     retry: false,
     networkMode: 'always',
@@ -68,6 +71,9 @@ export function useActivateEnableBankingCredential() {
     mutationFn: ({ applicationId, totpCode }: SensitiveStepInput & { applicationId: string }) => (
       runtime.apiClient.write(activateEnableBankingCredentialEndpoint, { body: { applicationId }, commit: () => undefined, totpCode })
     ),
-    onSuccess: () => invalidate(),
+    onSuccess: (credential) => {
+      queryClient.setQueryData(enableBankingCredentialKey(runtime.epochId), credential)
+      return invalidate()
+    },
   })
 }

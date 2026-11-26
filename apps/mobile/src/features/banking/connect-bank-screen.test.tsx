@@ -39,6 +39,8 @@ describe('ConnectBankScreen', () => {
 
   it('says the key is active when the setup just finished, above the bank list', async () => {
     const { view } = await setup({ keyActivated: true })
+    expect(view.getByText('Step 5 of 5')).toBeOnTheScreen()
+    expect(view.getByText('Choose your bank')).toBeOnTheScreen()
     expect(view.getByText('Your Enable Banking key is active. Choose your bank to connect it.')).toBeOnTheScreen()
     expect(view.getByText('Revolut')).toBeOnTheScreen()
   })

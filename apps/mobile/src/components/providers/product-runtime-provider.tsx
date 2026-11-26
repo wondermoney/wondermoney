@@ -113,6 +113,8 @@ export type ProductRuntimeContextValue = Readonly<{
   changePassword: (email: string, currentPassword: string, newPassword: string) => Promise<ChangePasswordOutcome>
   /** Thin proxies to the injected auth adapter's passkey management (Settings, Security). */
   listPasskeys: () => Promise<PasskeyListOutcome>
+  /** When the current session was created (ISO), or null when unknown. */
+  sessionStartedAt: () => Promise<string | null>
   addPasskey: () => Promise<PasskeyAddOutcome>
   deletePasskey: (id: string) => Promise<PasskeyDeleteOutcome>
   /** Thin proxy to the injected auth adapter's resend-verification-email operation. */
@@ -473,6 +475,7 @@ export function ProductRuntimeProvider({
   )
   const sendVerificationEmail = useCallback((email: string) => auth.sendVerificationEmail(email), [auth])
   const listPasskeys = useCallback(() => auth.listPasskeys(), [auth])
+  const sessionStartedAt = useCallback(() => auth.sessionStartedAt(), [auth])
   const addPasskey = useCallback(() => auth.addPasskey(), [auth])
   const deletePasskey = useCallback((id: string) => auth.deletePasskey(id), [auth])
   const validateHouseholdInvite = useCallback(
@@ -522,6 +525,7 @@ export function ProductRuntimeProvider({
     changePassword,
     sendVerificationEmail,
     listPasskeys,
+    sessionStartedAt,
     addPasskey,
     deletePasskey,
     completeMfaVerification,
@@ -530,6 +534,7 @@ export function ProductRuntimeProvider({
     addPasskey,
     deletePasskey,
     listPasskeys,
+    sessionStartedAt,
     signInWithPasskey,
     acknowledgeDeactivation,
     activationError,

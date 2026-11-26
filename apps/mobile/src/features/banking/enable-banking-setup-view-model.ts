@@ -19,7 +19,10 @@ export const ENABLE_BANKING_SETUP_STEP = {
 
 export type EnableBankingSetupStepId = (typeof ENABLE_BANKING_SETUP_STEP)[keyof typeof ENABLE_BANKING_SETUP_STEP]
 
-/** In order. The last one is the bank list itself, which the connect screen shows once the key is active. */
+/**
+ * In order. The setup screen shows the first four; the fifth is the connect screen's bank list,
+ * which takes over once the key is active and shows itself as this step.
+ */
 export const ENABLE_BANKING_SETUP_STEPS: readonly EnableBankingSetupStepId[] = [
   ENABLE_BANKING_SETUP_STEP.signIn,
   ENABLE_BANKING_SETUP_STEP.createApplication,
@@ -42,26 +45,48 @@ export function enableBankingSetupStepNumber(step: EnableBankingSetupStepId): nu
   return ENABLE_BANKING_SETUP_STEPS.indexOf(step) + 1
 }
 
-export function nextEnableBankingSetupStep(step: EnableBankingSetupStepId): EnableBankingSetupStepId {
-  const index = ENABLE_BANKING_SETUP_STEPS.indexOf(step)
-  return ENABLE_BANKING_SETUP_STEPS[Math.min(index + 1, ENABLE_BANKING_SETUP_STEPS.length - 1)] ?? step
+const SCREEN_STEPS = ENABLE_BANKING_SETUP_STEPS.filter((step): step is EnableBankingSetupScreenStepId => step !== ENABLE_BANKING_SETUP_STEP.chooseBank)
+
+/** The next step on the setup screen; the last one (pasting the ID) moves on by activating, not by this. */
+export function nextEnableBankingSetupStep(step: EnableBankingSetupScreenStepId): EnableBankingSetupScreenStepId {
+  const index = SCREEN_STEPS.indexOf(step)
+  return SCREEN_STEPS[Math.min(index + 1, SCREEN_STEPS.length - 1)] ?? step
 }
 
-export function previousEnableBankingSetupStep(step: EnableBankingSetupStepId): EnableBankingSetupStepId | null {
-  const index = ENABLE_BANKING_SETUP_STEPS.indexOf(step)
-  return index > 0 ? (ENABLE_BANKING_SETUP_STEPS[index - 1] ?? null) : null
+export function previousEnableBankingSetupStep(step: EnableBankingSetupScreenStepId): EnableBankingSetupScreenStepId | null {
+  const index = SCREEN_STEPS.indexOf(step)
+  return index > 0 ? (SCREEN_STEPS[index - 1] ?? null) : null
 }
+
+/** The steps the setup screen itself shows: all but choosing the bank. */
+export type EnableBankingSetupScreenStepId = Exclude<EnableBankingSetupStepId, typeof ENABLE_BANKING_SETUP_STEP.chooseBank>
 
 /**
  * Where the setup opens. The server's pending credential is the progress: with a certificate
  * waiting for its application ID, the person has already been through the Control Panel at least
  * as far as creating it, so they resume at pasting the ID (an error there points back to the step
- * to redo). An active key is past the setup: the bank list.
+ * to redo). The setup only shows without an active key, so it never opens on the bank list.
  */
-export function initialEnableBankingSetupStep(credential: EnableBankingCredential | undefined): EnableBankingSetupStepId {
-  if (credential?.status === 'active') return ENABLE_BANKING_SETUP_STEP.chooseBank
-  if (credential?.pending) return ENABLE_BANKING_SETUP_STEP.applicationId
-  return ENABLE_BANKING_SETUP_STEP.signIn
+export function initialEnableBankingSetupStep(credential: EnableBankingCredential | undefined): EnableBankingSetupScreenStepId {
+  return credential?.pending ? ENABLE_BANKING_SETUP_STEP.applicationId : ENABLE_BANKING_SETUP_STEP.signIn
+}
+
+/**
+ * How old a session may be for the API's sensitive actions (`SENSITIVE_SESSION_MAX_AGE_MS`, 24
+ * hours), less the time the setup may take, so a session that is fresh at step 1 is still fresh
+ * at step 4.
+ */
+export const SETUP_SESSION_MAX_AGE_MS = 22 * 60 * 60 * 1000
+
+/**
+ * Whether to offer "Sign in again" before step 1: the session is too old to finish the setup.
+ * Unknown (null, or a date that doesn't parse) reads as fresh; the server still says if not.
+ */
+export function sessionTooOldForSetup(startedAt: string | null, now: number = Date.now()): boolean {
+  if (!startedAt) return false
+  const started = Date.parse(startedAt)
+  if (Number.isNaN(started)) return false
+  return now - started > SETUP_SESSION_MAX_AGE_MS
 }
 
 /** When a certificate made earlier lapses, or null when none is waiting. */
@@ -112,7 +137,7 @@ export type EnableBankingSetupFailureReason =
 export type EnableBankingSetupFailure = Readonly<{
   reason: EnableBankingSetupFailureReason
   /** The step to go back to and redo, when the fix is there; null when it is on this step. */
-  revisit: EnableBankingSetupStepId | null
+  revisit: EnableBankingSetupScreenStepId | null
 }>
 
 /** The API's codes (#695), each with its own reason and the step where the person fixes it. */

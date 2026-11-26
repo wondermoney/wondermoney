@@ -1,5 +1,6 @@
 import { act, fireEvent, render } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
+import { Platform } from 'react-native'
 
 import { initMobileI18n } from '@/lib/i18n'
 
@@ -23,9 +24,12 @@ const CERTIFICATE = '-----BEGIN CERTIFICATE-----\nMIIBfixture\n-----END CERTIFIC
 async function setup(overrides: Partial<EnableBankingSetupScreenProps> = {}) {
   const i18n = await initMobileI18n('en')
   const props: EnableBankingSetupScreenProps = {
+    gate: 'steps',
     initialStep: 'sign_in',
     sharedUnavailable: false,
     values,
+    valuesStatus: 'ready',
+    onRetryValues: jest.fn(),
     certificatePem: null,
     pendingExpiresAt: null,
     creatingCertificate: false,
@@ -33,7 +37,7 @@ async function setup(overrides: Partial<EnableBankingSetupScreenProps> = {}) {
     failure: null,
     askForCode: false,
     onBack: jest.fn(),
-    onOpenUrl: jest.fn(),
+    onOpenUrl: jest.fn().mockResolvedValue(true),
     onCreateCertificate: jest.fn(),
     onActivate: jest.fn(),
     onCopy: jest.fn().mockResolvedValue(true),
@@ -51,6 +55,54 @@ const press = async (view: Awaited<ReturnType<typeof setup>>['view'], name: stri
 }
 
 describe('EnableBankingSetupScreen', () => {
+  const originalOS = Platform.OS
+  afterEach(() => { Object.defineProperty(Platform, 'OS', { value: originalOS }) })
+
+  it('shows a household viewer the read-only notice instead of the steps', async () => {
+    const { view } = await setup({ gate: 'read-only' })
+    expect(view.getByText(/You have view-only access to this household, so you can't add a bank key/)).toBeOnTheScreen()
+    expect(view.queryByText('Step 1 of 5')).not.toBeOnTheScreen()
+    expect(view.queryByRole('button', { name: 'Open Enable Banking' })).not.toBeOnTheScreen()
+  })
+
+  it('offers to sign in again before step 1 when the session is too old to finish', async () => {
+    const { view, props } = await setup({ gate: 'sign-in-again' })
+    expect(view.getByText('Sign in again first')).toBeOnTheScreen()
+    expect(view.queryByText('Step 1 of 5')).not.toBeOnTheScreen()
+    await press(view, 'Sign in again')
+    expect(props.onSignInAgain).toHaveBeenCalledTimes(1)
+  })
+
+  it('says so when the browser does not open', async () => {
+    const { view } = await setup({ onOpenUrl: jest.fn().mockResolvedValue(false) })
+    await press(view, 'Open Enable Banking')
+    expect(view.getByText("Couldn't open the browser. Go to enablebanking.com in your browser instead.")).toBeOnTheScreen()
+  })
+
+  it.each([
+    ['ios', 'Switch between Safari and WonderMoney to copy each value'],
+    ['android', 'return to that tab from your recent apps'],
+  ])('on %s, says how to go back and forth with the Control Panel', async (os, hint) => {
+    Object.defineProperty(Platform, 'OS', { value: os })
+    const { view } = await setup({ initialStep: 'create_application' })
+    expect(view.getByText(new RegExp(hint))).toBeOnTheScreen()
+  })
+
+  it.each([
+    ['failed', "Couldn't load the values to enter in Enable Banking. Check your connection and try again.", true],
+    ['missing', "This server didn't send the values to enter in Enable Banking. Try again, or ask the person who runs it.", true],
+    ['loading', 'Loading the values to enter in Enable Banking…', false],
+  ] as const)('says when the Control Panel values are %s', async (valuesStatus, message, retry) => {
+    const { view, props } = await setup({ initialStep: 'create_application', values: [], valuesStatus })
+    expect(view.getByText(message)).toBeOnTheScreen()
+    if (retry) {
+      await press(view, 'Retry')
+      expect(props.onRetryValues).toHaveBeenCalledTimes(1)
+    } else {
+      expect(view.queryByRole('button', { name: 'Retry' })).not.toBeOnTheScreen()
+    }
+  })
+
   it('opens on signing in, and opens Enable Banking\'s sign-in page in the browser sheet', async () => {
     const { view, props } = await setup()
     expect(view.getByText('Step 1 of 5')).toBeOnTheScreen()

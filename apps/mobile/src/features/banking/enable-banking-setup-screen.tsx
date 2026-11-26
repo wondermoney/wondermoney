@@ -20,7 +20,7 @@ import {
   ENABLE_BANKING_SIGN_IN_URL,
   type EnableBankingControlPanelValue,
   type EnableBankingSetupFailure,
-  type EnableBankingSetupStepId,
+  type EnableBankingSetupScreenStepId,
   enableBankingSetupFailureMessageKey,
   enableBankingSetupStepNumber,
   nextEnableBankingSetupStep,
@@ -28,13 +28,26 @@ import {
   previousEnableBankingSetupStep,
 } from './enable-banking-setup-view-model'
 
+/**
+ * What the screen shows: the steps; or, before any step, why the person can't do them now. A
+ * household viewer can't add a key; a session too old for the server's sensitive actions is
+ * renewed first, so nobody does steps 1 and 2 only to be sent to sign in.
+ */
+export type EnableBankingSetupGate = 'steps' | 'read-only' | 'sign-in-again'
+
+/** Where the Control Panel values stand (`useEnableBankingSetup`). */
+export type EnableBankingSetupValuesStatus = 'loading' | 'failed' | 'missing' | 'ready'
+
 export type EnableBankingSetupScreenProps = Readonly<{
+  gate: EnableBankingSetupGate
   /** Where the setup opens (`initialEnableBankingSetupStep`). */
-  initialStep: EnableBankingSetupStepId
+  initialStep: EnableBankingSetupScreenStepId
   /** The server's shared credential serves another household, so this one needs its own key. */
   sharedUnavailable: boolean
   /** This server's Control Panel values, in the form's order. */
   values: readonly EnableBankingControlPanelValue[]
+  valuesStatus: EnableBankingSetupValuesStatus
+  onRetryValues: () => void
   /** The certificate made in this visit; the server never hands it out again. */
   certificatePem: string | null
   /** When a certificate made earlier lapses (ISO), if one is waiting for its application ID. */
@@ -45,7 +58,8 @@ export type EnableBankingSetupScreenProps = Readonly<{
   /** Two-factor is on: the server asked for the code, so each sensitive step shows the field. */
   askForCode: boolean
   onBack: () => void
-  onOpenUrl: (url: string) => void
+  /** Opens Enable Banking beside the app; false when no browser would take it. */
+  onOpenUrl: (url: string) => Promise<boolean>
   onCreateCertificate: (totpCode: string | undefined) => void
   onActivate: (applicationId: string, totpCode: string | undefined) => void
   onCopy: (value: string) => Promise<boolean>
@@ -57,22 +71,26 @@ export type EnableBankingSetupScreenProps = Readonly<{
 type CopyState = Readonly<{ key: string; ok: boolean }> | null
 
 /**
- * The Enable Banking key setup, step by step beside the Control Panel, which opens in the in-app
- * browser sheet. The web wizard's steps (#696): sign in, create the application, activate it by
- * linking accounts, paste the application ID; the fifth, choosing the bank, is the connect
- * screen's bank list, which takes over once the key is active. A flow route, without the shell bar.
+ * The Enable Banking key setup, step by step beside the Control Panel, which opens in Safari on
+ * iOS and a Custom Tab on Android (`enable-banking-setup-device.ts`). The web wizard's steps
+ * (#696): sign in, create the application, activate it by linking accounts, paste the
+ * application ID; the fifth, choosing the bank, is the connect screen's bank list, which takes
+ * over once the key is active. A flow route, without the shell bar.
  */
 export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
   const { t, i18n } = useTranslation()
   const palette = usePalette()
   const { failure, askForCode } = props
-  const [step, setStep] = useState<EnableBankingSetupStepId>(props.initialStep)
+  const [step, setStep] = useState<EnableBankingSetupScreenStepId>(props.initialStep)
   const [applicationId, setApplicationId] = useState('')
   const [totpCode, setTotpCode] = useState('')
   const [copyState, setCopyState] = useState<CopyState>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [openFailed, setOpenFailed] = useState(false)
+  // iOS opens Safari, Android a Custom Tab: the copy says how to go back and forth with each.
+  const browser = Platform.OS === 'ios' ? 'ios' : 'android'
 
-  const stepTitle = (id: EnableBankingSetupStepId) => t(`banking.keySetup.steps.${id}`)
+  const stepTitle = (id: EnableBankingSetupScreenStepId) => t(`banking.keySetup.steps.${id}`)
   const formatDate = (iso: string) => {
     const date = new Date(iso)
     return Number.isNaN(date.getTime()) ? iso : date.toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })
@@ -87,10 +105,11 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
     setCopyState({ key, ok: await props.onCopy(value) })
   }
 
-  const goTo = (next: EnableBankingSetupStepId) => {
-    // "Copied." and a paste notice belong to the step they were said on.
+  const goTo = (next: EnableBankingSetupScreenStepId) => {
+    // "Copied." and a paste or browser notice belong to the step they were said on.
     setNotice(null)
     setCopyState(null)
+    setOpenFailed(false)
     setStep(next)
   }
 
@@ -139,14 +158,25 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
     </Text>
   ) : null
 
+  const open = async (url: string) => {
+    setOpenFailed(!(await props.onOpenUrl(url)))
+  }
+
+  const openFailedNotice = openFailed ? (
+    <Text accessibilityRole="alert" tone="destructive" variant="meta">{t('banking.keySetup.openFailed')}</Text>
+  ) : null
+
   const openControlPanel = (
-    <Button
-      accessibilityHint={t('banking.keySetup.openHint')}
-      icon="external-link"
-      label={t('banking.keySetup.create.openControlPanel')}
-      onPress={() => props.onOpenUrl(ENABLE_BANKING_APPLICATIONS_URL)}
-      variant="outline"
-    />
+    <>
+      <Button
+        accessibilityHint={t(`banking.keySetup.openHint.${browser}`)}
+        icon="external-link"
+        label={t('banking.keySetup.create.openControlPanel')}
+        onPress={() => open(ENABLE_BANKING_APPLICATIONS_URL)}
+        variant="outline"
+      />
+      {openFailedNotice}
+    </>
   )
 
   const navigation = (primary: ReactNode) => (
@@ -168,34 +198,49 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: palette.background }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          <View style={styles.page} testID={`enable-banking-setup-${step}`}>
+          <View style={styles.page} testID={`enable-banking-setup-${props.gate === 'steps' ? step : props.gate}`}>
             <BackControl disabled={busy} fallback="/more/banking" label={t('banking.connect.back')} onPress={props.onBack} />
             <PageHeader title={t('banking.keySetup.heading')} instruction={t('banking.keySetup.helper')} />
             {props.sharedUnavailable ? (
               <Text tone="muted" variant="meta">{t('banking.connect.credentialRequired.sharedUnavailable')}</Text>
             ) : null}
 
-            <View style={styles.stepHead}>
-              <Text tone="muted" variant="label">{t('banking.keySetup.stepOf', { number: enableBankingSetupStepNumber(step), total })}</Text>
-              <Text accessibilityRole="header" variant="section">{stepTitle(step)}</Text>
-            </View>
+            {props.gate === 'read-only' ? (
+              <SettingsNotice message={t('banking.keySetup.viewerNotice')} title={t('banking.keySetup.viewerTitle')} />
+            ) : null}
 
-            {step === ENABLE_BANKING_SETUP_STEP.signIn ? (
+            {props.gate === 'sign-in-again' ? (
+              <SettingsNotice
+                action={<Button label={t('banking.keySetup.signInAgain')} onPress={props.onSignInAgain} />}
+                message={t('banking.keySetup.staleSessionMessage')}
+                title={t('banking.keySetup.staleSessionTitle')}
+              />
+            ) : null}
+
+            {props.gate === 'steps' ? (
+              <View style={styles.stepHead}>
+                <Text tone="muted" variant="label">{t('banking.keySetup.stepOf', { number: enableBankingSetupStepNumber(step), total })}</Text>
+                <Text accessibilityRole="header" variant="section">{stepTitle(step)}</Text>
+              </View>
+            ) : null}
+
+            {props.gate === 'steps' && step === ENABLE_BANKING_SETUP_STEP.signIn ? (
               <>
                 <Text variant="body">{t('banking.keySetup.signIn.body')}</Text>
                 <Text tone="muted" variant="meta">{t('banking.keySetup.signIn.mailHint')}</Text>
                 <Button
-                  accessibilityHint={t('banking.keySetup.openHint')}
+                  accessibilityHint={t(`banking.keySetup.openHint.${browser}`)}
                   icon="external-link"
                   label={t('banking.keySetup.signIn.open')}
-                  onPress={() => props.onOpenUrl(ENABLE_BANKING_SIGN_IN_URL)}
+                  onPress={() => open(ENABLE_BANKING_SIGN_IN_URL)}
                   variant="outline"
                 />
+                {openFailedNotice}
                 {navigation(continueButton())}
               </>
             ) : null}
 
-            {step === ENABLE_BANKING_SETUP_STEP.createApplication ? (
+            {props.gate === 'steps' && step === ENABLE_BANKING_SETUP_STEP.createApplication ? (
               <>
                 <Text variant="body">{t('banking.keySetup.create.certificateIntro')}</Text>
                 {props.certificatePem ? (
@@ -245,6 +290,15 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
                   tone="warning"
                 />
                 <Text variant="body">{t('banking.keySetup.create.formIntro')}</Text>
+                {props.valuesStatus !== 'ready' ? (
+                  <SettingsNotice
+                    action={props.valuesStatus === 'loading' ? undefined : (
+                      <Button label={t('common.retry')} onPress={props.onRetryValues} size="sm" variant="outline" />
+                    )}
+                    message={t(`banking.keySetup.values.${props.valuesStatus}`)}
+                    tone={props.valuesStatus === 'loading' ? 'default' : 'destructive'}
+                  />
+                ) : null}
                 <View style={[styles.values, { borderColor: palette.border }]}>
                   <ValueRow first label={t('banking.keySetup.fields.environment')} value={t('banking.keySetup.fields.production')} />
                   {props.values.map(({ field, value }) => {
@@ -264,11 +318,12 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
                 </View>
                 <Text variant="body">{t('banking.keySetup.create.keyChoice')}</Text>
                 {openControlPanel}
+                <Text tone="muted" variant="meta">{t(`banking.keySetup.create.switchHint.${browser}`)}</Text>
                 {navigation(props.certificatePem || props.pendingExpiresAt ? continueButton() : null)}
               </>
             ) : null}
 
-            {step === ENABLE_BANKING_SETUP_STEP.activate ? (
+            {props.gate === 'steps' && step === ENABLE_BANKING_SETUP_STEP.activate ? (
               <>
                 <Text variant="body">{t('banking.keySetup.activate.body')}</Text>
                 <Banner message={t('banking.keySetup.activate.warning')} tone="warning" />
@@ -278,7 +333,7 @@ export function EnableBankingSetupScreen(props: EnableBankingSetupScreenProps) {
               </>
             ) : null}
 
-            {step === ENABLE_BANKING_SETUP_STEP.applicationId ? (
+            {props.gate === 'steps' && step === ENABLE_BANKING_SETUP_STEP.applicationId ? (
               <>
                 <Text variant="body">{t('banking.keySetup.applicationId.body')}</Text>
                 {props.pendingExpiresAt ? (

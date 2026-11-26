@@ -4397,7 +4397,10 @@
       },
       "continue": "Continuar",
       "previous": "Voltar",
-      "openHint": "Abre a Enable Banking no navegador",
+      "openHint": {
+        "ios": "Abre a Enable Banking no Safari",
+        "android": "Abre a Enable Banking num separador do navegador"
+      },
       "signIn": {
         "body": "A Enable Banking liga o teu banco ao WonderMoney, só para leitura. Introduz lá o teu email: recebes uma ligação para iniciar sessão, sem palavra-passe para criar.",
         "mailHint": "Abre a ligação do email neste telemóvel e volta aqui.",
@@ -4417,7 +4420,11 @@
         "productionMessage": "Define Environment como Production. Uma aplicação Sandbox nunca chega a um banco real.",
         "formIntro": "Na Enable Banking, abre Applications e adiciona uma nova aplicação. Copia cada valor para o seu campo.",
         "keyChoice": "Na geração da chave, escolhe “Generate outside the browser and import public certificate” e cola o certificado.",
-        "openControlPanel": "Abrir o Control Panel"
+        "openControlPanel": "Abrir o Control Panel",
+        "switchHint": {
+          "ios": "A Enable Banking abre no Safari. Alterna entre o Safari e o WonderMoney para copiares cada valor: o formulário fica como o deixaste.",
+          "android": "A Enable Banking abre num separador do navegador. Para colares o valor seguinte, volta aqui para o copiares e regressa a esse separador pelas apps recentes: o formulário continua lá."
+        }
       },
       "fields": {
         "environment": "Ambiente",
@@ -4464,6 +4471,16 @@
         "network": "Verifica a tua ligação e tenta novamente.",
         "unavailable": "Não foi possível contactar a Enable Banking ou este servidor. Tenta novamente daqui a pouco.",
         "general": "Algo correu mal. Tenta novamente."
+      },
+      "openFailed": "Não foi possível abrir o navegador. Vai a enablebanking.com no teu navegador.",
+      "viewerTitle": "Acesso só de leitura",
+      "viewerNotice": "Tens acesso só de leitura a este agregado, por isso não podes adicionar uma chave bancária. Pede a um titular ou administrador que ligue o banco.",
+      "staleSessionTitle": "Primeiro, inicia sessão novamente",
+      "staleSessionMessage": "Configurar a chave exige uma sessão iniciada há pouco. Inicia sessão novamente agora e o WonderMoney traz-te de volta aqui para começares.",
+      "values": {
+        "loading": "A carregar os valores a introduzir na Enable Banking…",
+        "failed": "Não foi possível carregar os valores a introduzir na Enable Banking. Verifica a tua ligação e tenta novamente.",
+        "missing": "Este servidor não enviou os valores a introduzir na Enable Banking. Tenta novamente ou pergunta a quem o gere."
       }
     }
   },

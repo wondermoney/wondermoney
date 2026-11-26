@@ -19,6 +19,7 @@ import {
   normalizeApplicationId,
   pendingCertificateExpiry,
   previousEnableBankingSetupStep,
+  sessionTooOldForSetup,
 } from '../enable-banking-setup-view-model'
 
 const httpError = (status: number, serverCode?: string) => new ApiError('http', status, serverCode ? { serverCode } : undefined)
@@ -44,7 +45,8 @@ describe('Enable Banking setup steps', () => {
     expect(enableBankingSetupStepNumber('sign_in')).toBe(1)
     expect(enableBankingSetupStepNumber('application_id')).toBe(4)
     expect(nextEnableBankingSetupStep('sign_in')).toBe('create_application')
-    expect(nextEnableBankingSetupStep('choose_bank')).toBe('choose_bank')
+    // Pasting the ID moves on by activating; the bank list is the connect screen's.
+    expect(nextEnableBankingSetupStep('application_id')).toBe('application_id')
     expect(previousEnableBankingSetupStep('activate')).toBe('create_application')
     expect(previousEnableBankingSetupStep('sign_in')).toBeNull()
   })
@@ -63,9 +65,21 @@ describe('Enable Banking setup steps', () => {
     expect(initialEnableBankingSetupStep({ status: 'invalid', pending: { expiresAt: '2026-12-03T10:00:00.000Z' } })).toBe('application_id')
   })
 
-  it('is past the setup with an active key', () => {
-    expect(initialEnableBankingSetupStep({ status: 'active', pending: null })).toBe('choose_bank')
+  it('never opens on the bank list, which is the connect screen\'s', () => {
+    expect(initialEnableBankingSetupStep({ status: 'active', pending: null })).toBe('sign_in')
     expect(pendingCertificateExpiry({ status: 'active', pending: null })).toBeNull()
+  })
+
+  it('asks for a new sign-in before step 1 when the session would go stale during the setup', () => {
+    const now = Date.parse('2026-11-26T12:00:00.000Z')
+    expect(sessionTooOldForSetup('2026-11-26T11:00:00.000Z', now)).toBe(false)
+    expect(sessionTooOldForSetup('2026-11-25T14:00:00.000Z', now)).toBe(false)
+    // 23 hours old: still under the server's 24, but the setup could outlast it.
+    expect(sessionTooOldForSetup('2026-11-25T13:00:00.000Z', now)).toBe(true)
+    expect(sessionTooOldForSetup('2026-11-20T12:00:00.000Z', now)).toBe(true)
+    // Unknown reads as fresh: the server still answers session_not_fresh if not.
+    expect(sessionTooOldForSetup(null, now)).toBe(false)
+    expect(sessionTooOldForSetup('not a date', now)).toBe(false)
   })
 
   it('lists the Control Panel values in the form\'s order, from the server', () => {

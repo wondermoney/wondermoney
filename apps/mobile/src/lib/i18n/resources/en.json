@@ -4397,7 +4397,10 @@
       },
       "continue": "Continue",
       "previous": "Back",
-      "openHint": "Opens Enable Banking in the browser",
+      "openHint": {
+        "ios": "Opens Enable Banking in Safari",
+        "android": "Opens Enable Banking in a browser tab"
+      },
       "signIn": {
         "body": "Enable Banking connects your bank to WonderMoney, read-only. Enter your email there: it emails you a sign-in link, with no password to create.",
         "mailHint": "Open the emailed link on this phone, then come back here.",
@@ -4417,7 +4420,11 @@
         "productionMessage": "Set Environment to Production. A Sandbox application never reaches a real bank.",
         "formIntro": "In Enable Banking, open Applications and add a new application. Copy each value into its field.",
         "keyChoice": "Under key generation, choose “Generate outside the browser and import public certificate”, then paste the certificate.",
-        "openControlPanel": "Open Control Panel"
+        "openControlPanel": "Open Control Panel",
+        "switchHint": {
+          "ios": "Enable Banking opens in Safari. Switch between Safari and WonderMoney to copy each value: the form stays as you left it.",
+          "android": "Enable Banking opens in a browser tab. To paste the next value, come back here to copy it, then return to that tab from your recent apps: the form stays in it."
+        }
       },
       "fields": {
         "environment": "Environment",
@@ -4464,6 +4471,16 @@
         "network": "Check your connection and try again.",
         "unavailable": "Enable Banking or this server couldn't be reached. Try again in a moment.",
         "general": "Something went wrong. Please try again."
+      },
+      "openFailed": "Couldn't open the browser. Go to enablebanking.com in your browser instead.",
+      "viewerTitle": "View-only access",
+      "viewerNotice": "You have view-only access to this household, so you can't add a bank key. Ask an owner or admin to connect the bank.",
+      "staleSessionTitle": "Sign in again first",
+      "staleSessionMessage": "Setting up the key needs a recent sign-in. Sign in again now, and WonderMoney brings you back here to start.",
+      "values": {
+        "loading": "Loading the values to enter in Enable Banking…",
+        "failed": "Couldn't load the values to enter in Enable Banking. Check your connection and try again.",
+        "missing": "This server didn't send the values to enter in Enable Banking. Try again, or ask the person who runs it."
       }
     }
   },

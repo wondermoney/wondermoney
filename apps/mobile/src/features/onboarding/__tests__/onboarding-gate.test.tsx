@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react-native'
 import type { ReactNode } from 'react'
 
-import { requestReturnAfterSignIn, takeReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
+import { clearReturnAfterSignIn, hasReturnAfterSignIn, requestReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
 
 import { useOnboardingGate } from '../onboarding-gate.hook'
 
@@ -10,8 +10,15 @@ const mockRead = jest.fn()
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
 jest.mock('@/components/providers/product-runtime-provider', () => ({
-  useProductRuntime: () => ({ runtime: { epochId: 4, apiClient: { read: mockRead } }, blockAccess: jest.fn() }),
+  useProductRuntime: () => ({ runtime: { epochId: 4, principalId: 'user-1', apiClient: { read: mockRead } }, blockAccess: jest.fn() }),
 }))
+jest.mock('@/components/providers/server-switch-provider', () => ({
+  useServerSwitch: () => ({ apiBaseUrl: 'https://api.example.test' }),
+}))
+
+const returnRequest = (overrides: Partial<Parameters<typeof requestReturnAfterSignIn>[0]> = {}) => (
+  requestReturnAfterSignIn({ href: '/more/banking/connect', principalId: 'user-1', server: 'https://api.example.test', ...overrides })
+)
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace, push: mockPush, canGoBack: () => true, back: jest.fn() }),
@@ -56,27 +63,53 @@ const legacyCompleted = {
 }
 
 describe('useOnboardingGate', () => {
-  beforeEach(() => { mockRead.mockReset(); mockReplace.mockReset(); mockPush.mockReset(); takeReturnAfterSignIn() })
+  beforeEach(() => { mockRead.mockReset(); mockReplace.mockReset(); mockPush.mockReset(); clearReturnAfterSignIn() })
 
   it('after signing in again, opens the screen that asked for it on top of first run', async () => {
     const client = new QueryClient()
     mockRead.mockResolvedValue(newUser)
-    requestReturnAfterSignIn('/more/banking/connect')
+    returnRequest()
     const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/more/banking/connect'))
     expect(mockReplace).toHaveBeenCalledWith('/onboarding')
     expect(mockReplace.mock.invocationCallOrder[0]).toBeLessThan(mockPush.mock.invocationCallOrder[0] ?? 0)
-    expect(takeReturnAfterSignIn()).toBeNull()
+    expect(hasReturnAfterSignIn()).toBe(false)
     await hook.unmount(); client.clear()
   })
 
   it('after signing in again with first run done, opens the screen that asked for it', async () => {
     const client = new QueryClient()
     mockRead.mockResolvedValue(legacyCompleted)
-    requestReturnAfterSignIn('/more/banking/connect')
+    returnRequest()
     const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
     await waitFor(() => expect(mockPush).toHaveBeenCalledTimes(1))
     expect(mockReplace).not.toHaveBeenCalled()
+    // A later bootstrap update runs the effect again; the return is not taken twice.
+    returnRequest()
+    await client.invalidateQueries()
+    await waitFor(() => expect(mockRead).toHaveBeenCalledTimes(2))
+    expect(mockPush).toHaveBeenCalledTimes(1)
+    await hook.unmount(); client.clear()
+  })
+
+  it('ignores a return asked for by someone else', async () => {
+    const client = new QueryClient()
+    mockRead.mockResolvedValue(legacyCompleted)
+    returnRequest({ principalId: 'user-2' })
+    const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
+    await waitFor(() => expect(hook.result.current.bootstrapReady).toBe(true))
+    expect(mockPush).not.toHaveBeenCalled()
+    expect(hasReturnAfterSignIn()).toBe(false)
+    await hook.unmount(); client.clear()
+  })
+
+  it('ignores a return asked for on another server', async () => {
+    const client = new QueryClient()
+    mockRead.mockResolvedValue(legacyCompleted)
+    returnRequest({ server: 'https://other.example.test' })
+    const hook = await renderHook(() => useOnboardingGate(), { wrapper: wrap(client) })
+    await waitFor(() => expect(hook.result.current.bootstrapReady).toBe(true))
+    expect(mockPush).not.toHaveBeenCalled()
     await hook.unmount(); client.clear()
   })
 

@@ -2,6 +2,7 @@ import { type Href, useRouter } from 'expo-router'
 import { useEffect, useRef } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
+import { useServerSwitch } from '@/components/providers/server-switch-provider'
 import { takeReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
 
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
@@ -29,6 +30,9 @@ export function useOnboardingGate(): OnboardingGateView {
   const { runtime } = useProductRuntime()
   const router = useRouter()
   const lastAction = useRef<'none' | 'pushed' | 'dismissed'>('none')
+  // A return after signing in again is taken once per mount, however often the effect runs.
+  const returnChecked = useRef(false)
+  const server = useServerSwitch()?.apiBaseUrl ?? null
 
   // The bootstrap hook requires an authenticated runtime; gate the call so
   // the root router test (which renders every route state without a runtime)
@@ -51,9 +55,11 @@ export function useOnboardingGate(): OnboardingGateView {
     }
     // Back to the screen that asked for a fresh sign-in (lib/auth/return-after-sign-in.ts), on
     // top of first run when it is still required, so leaving that screen returns there.
-    const returnTo = takeReturnAfterSignIn()
+    if (returnChecked.current) return
+    returnChecked.current = true
+    const returnTo = server === null ? null : takeReturnAfterSignIn(runtime.principalId, server)
     if (returnTo) router.push(returnTo as Href)
-  }, [bootstrap.data, bootstrap.isAccessTransition, bootstrap.isLoading, router, runtime])
+  }, [bootstrap.data, bootstrap.isAccessTransition, bootstrap.isLoading, router, runtime, server])
 
   const onboarding = bootstrap.data?.onboarding
   return {

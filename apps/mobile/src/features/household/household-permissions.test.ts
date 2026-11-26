@@ -1,5 +1,6 @@
 import type { HouseholdRoleValue } from './household-contract'
 import {
+  canAddBankKey,
   canInviteToHousehold,
   canLeaveHousehold,
   canManageInvite,
@@ -80,5 +81,16 @@ describe('household permissions', () => {
     expect(canManageInvite('member', 'viewer')).toBe(false)
     expect(canManageInvite('owner', 'unknown')).toBe(true)
     expect(canManageInvite('admin', 'unknown')).toBe(false)
+  })
+})
+
+describe('canAddBankKey', () => {
+  it('lets everyone but a viewer add a bank key; an unknown role is left to the server', () => {
+    expect(canAddBankKey('owner')).toBe(true)
+    expect(canAddBankKey('admin')).toBe(true)
+    expect(canAddBankKey('member')).toBe(true)
+    expect(canAddBankKey('viewer')).toBe(false)
+    expect(canAddBankKey('unknown')).toBe(true)
+    expect(canAddBankKey(null)).toBe(true)
   })
 })

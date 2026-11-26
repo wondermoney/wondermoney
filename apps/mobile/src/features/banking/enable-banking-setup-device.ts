@@ -1,5 +1,6 @@
 import * as Clipboard from 'expo-clipboard'
 import { File, Paths } from 'expo-file-system'
+import * as Linking from 'expo-linking'
 import * as Sharing from 'expo-sharing'
 import * as WebBrowser from 'expo-web-browser'
 import { Platform } from 'react-native'
@@ -7,7 +8,7 @@ import { Platform } from 'react-native'
 import { ENABLE_BANKING_CERTIFICATE_FILE_NAME } from './enable-banking-setup-view-model'
 
 /**
- * The native pieces of the Enable Banking setup (clipboard, share sheet, browser sheet), kept in
+ * The native pieces of the Enable Banking setup (clipboard, share sheet, browser), kept in
  * one module so the screen's tests mock them without touching the device.
  */
 
@@ -48,26 +49,26 @@ export async function shareCertificate(certificatePem: string, dialogTitle: stri
   }
 }
 
-/** A return address Enable Banking never visits: the iOS session stays open until the person closes it. */
-const CONTROL_PANEL_SESSION_RETURN_URL = 'wondermoney://more/banking/connect'
-
 /**
- * Opens Enable Banking's Control Panel in the in-app browser sheet, as bank consent does.
+ * Opens Enable Banking's Control Panel beside the app. True once it opened; false when no
+ * browser would take it, so the step can say so.
  *
- * - iOS: an authentication session, which shares Safari's cookies. Enable Banking signs people in
- *   with an emailed link, and Mail opens that link in Safari; a plain Safari sheet keeps its own
- *   cookies and would stay signed out.
- * - Android: a Custom Tab, which shares Chrome's cookies and, launched through its proxy activity,
- *   survives switching back to the app to copy the next value.
+ * - iOS: Safari itself. Enable Banking signs people in with an emailed link that Mail opens in
+ *   Safari, so the session is there; and Safari keeps the half-filled form while the person
+ *   switches back to WonderMoney to copy the next value. A sheet over the app would lose the form
+ *   each time it closed.
+ * - Android: a Custom Tab, which shares Chrome's cookies and, launched through its proxy
+ *   activity, stays in recents with the form while the person copies the next value here.
  */
-export async function openControlPanel(url: string): Promise<void> {
+export async function openControlPanel(url: string): Promise<boolean> {
   try {
     if (Platform.OS === 'ios') {
-      await WebBrowser.openAuthSessionAsync(url, CONTROL_PANEL_SESSION_RETURN_URL)
+      await Linking.openURL(url)
     } else {
       await WebBrowser.openBrowserAsync(url, { showInRecents: true })
     }
+    return true
   } catch {
-    // The sheet didn't open (no browser): nothing to undo, the step stays as it was.
+    return false
   }
 }

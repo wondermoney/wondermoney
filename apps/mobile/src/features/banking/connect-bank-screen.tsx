@@ -8,6 +8,7 @@ import { SafeAreaView } from '@/components/ui/screen-safe-area'
 import { themeTokens, type Palette } from '@/theme/tokens'
 import { textStyles } from '@/theme/typography'
 
+import { ENABLE_BANKING_SETUP_STEP, ENABLE_BANKING_SETUP_STEPS, enableBankingSetupStepNumber } from './enable-banking-setup-view-model'
 import type { BankInstitutionRow } from './institutions-view-model'
 import { filterBankInstitutions } from './institutions-view-model'
 import { startBankConnectionFailureMessageKey, type StartBankConnectionFailure } from './use-start-bank-connection'
@@ -47,6 +48,18 @@ export function ConnectBankScreen({ state, pendingBankId, startFailure, keyActiv
         <View style={styles.page}>
           <BackControl fallback="/more/banking" label={t('banking.connect.back')} onPress={onBack} />
           <PageHeader palette={palette} title={t('banking.connect.heading')} instruction={t('banking.connect.helper')} />
+
+          {keyActivated ? (
+            // The setup's last step: choosing the bank (enable-banking-setup-view-model.ts).
+            <View style={styles.heading}>
+              <Text allowFontScaling style={[styles.meta, { color: palette.mutedForeground }]}>
+                {t('banking.keySetup.stepOf', { number: enableBankingSetupStepNumber(ENABLE_BANKING_SETUP_STEP.chooseBank), total: ENABLE_BANKING_SETUP_STEPS.length })}
+              </Text>
+              <Text accessibilityRole="header" allowFontScaling style={[styles.institution, { color: palette.foreground }]}>
+                {t(`banking.keySetup.steps.${ENABLE_BANKING_SETUP_STEP.chooseBank}`)}
+              </Text>
+            </View>
+          ) : null}
 
           {keyActivated ? (
             <View style={[styles.notice, { borderColor: palette.border }]}>
