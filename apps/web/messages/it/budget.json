@@ -1,0 +1,59 @@
+{
+  "budgetPage": {
+    "left-in": "Rimanente a {month}",
+    "overspent-in": "Oltre il piano a {month} di",
+    "spent": "Speso",
+    "planned": "Previsto",
+    "over-plan": "Oltre il piano",
+    "over-plan-unit": "{count, plural, =0 {voci} one {voce} other {voci}}",
+    "measure-header": "Speso rispetto al piano",
+    "measure-label": "{name}: {spent} spesi su {planned} previsti",
+    "key-label": "Come leggere le barre",
+    "key-plan": "Piano",
+    "key-spent": "Speso entro il piano",
+    "key-over": "Speso oltre il piano",
+    "rolled-over-surplus": "<money>+{amount}</money> dal mese scorso",
+    "rolled-over-overspend": "<money>−{amount}</money> di spesa in eccesso il mese scorso",
+    "rollover-incomplete": "Non è stato possibile convertire parte delle spese del mese scorso, quindi questo importo potrebbe essere troppo alto",
+    "rollover-incomplete-month": "Non è stato possibile convertire parte delle spese precedenti, quindi un importo riportato potrebbe essere troppo alto."
+  },
+  "budgetForecast": {
+    "title": "Previsione",
+    "months-label": "Mesi da mostrare",
+    "months-option": "{count} mesi",
+    "basis": "Da questo mese in poi. Le spese di questo mese sono reali fino al {date}; tutto il resto è una proiezione basata sul piano del budget, sulle entrate previste e su {count, plural, =0 {nessuna voce ricorrente} one {# voce ricorrente} other {# voci ricorrenti}}, non su denaro speso.",
+    "incomplete": "Alcuni importi {count, plural, =0 {non sono stati convertiti} other {in {currencies} non sono stati convertiti}} nella valuta del budget, quindi i mesi contrassegnati risultano incompleti.",
+    "chart-caption": "Entrate previste a confronto con le spese attese per mese. Le spese attese sono il piano di ogni categoria, o di più se le spese finora e le voci ricorrenti in arrivo lo superano già.",
+    "month": "Mese",
+    "planned": "Previsto",
+    "carried": "Riportato",
+    "spent-so-far": "Speso finora",
+    "recurring-projected": "Ricorrenti (stimati)",
+    "expected-spending": "Spese attese",
+    "planned-income": "Entrate previste",
+    "net": "Avanzo",
+    "kind-current": "Reale finora, poi stimato",
+    "kind-future": "Stimato",
+    "month-incomplete": "incompleto",
+    "recurring-items": "{count, plural, one {# voce ricorrente} other {# voci ricorrenti}} in questa previsione",
+    "cadence": {
+      "weekly": "settimanale",
+      "biweekly": "ogni due settimane",
+      "monthly": "mensile",
+      "quarterly": "trimestrale",
+      "yearly": "annuale"
+    }
+  },
+  "budgetVisibility": {
+    "household": "Famiglia",
+    "personal": "Personale",
+    "household-budgets": "Budget della famiglia",
+    "personal-budgets": "Budget personali",
+    "personal-hint": "Solo tu puoi vedere questo budget",
+    "wizard-title": "Per chi è questo budget?",
+    "wizard-description": "Lo scegli una volta sola: in seguito un budget non può passare da familiare a personale o viceversa.",
+    "household-description": "Tutti nella tua famiglia possono vederlo.",
+    "personal-description": "Solo tu puoi vederlo. Le altre persone della tua famiglia no, compresi il proprietario e gli amministratori.",
+    "private-accounts-excluded": "I conti privati possono essere collegati solo a un budget personale."
+  }
+}

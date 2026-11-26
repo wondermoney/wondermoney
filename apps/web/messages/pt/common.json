@@ -1523,7 +1523,7 @@
   "appearance-description": "Altera a aparência da aplicação.",
   "language-email-hint": "Os teus emails seguem este idioma quando já estão traduzidos; caso contrário, chegam em inglês.",
   "language-email-save-error": "Não foi possível mudar o idioma dos teus emails. Escolhe-o de novo para tentares outra vez.",
-  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 Inglês} es {🇪🇸 Espanhol} other {Desconhecido}}",
+  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 Inglês} es {🇪🇸 Espanhol} it {🇮🇹 Italiano} other {Desconhecido}}",
   "current-month": "Mês atual",
   "last-month": "Mês passado",
   "last-3-months": "Últimos 3 meses",
