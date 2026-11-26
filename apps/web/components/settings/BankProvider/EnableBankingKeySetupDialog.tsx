@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,16 +22,24 @@ import { Input } from "@/components/ui/input";
 import { Link } from "@/components/ui/Link";
 import { Textarea } from "@/components/ui/textarea";
 import { Text } from "@/components/ui/Typography";
+import { getApiErrorCode } from "@/lib/api/errors";
 import {
   type EnableBankingCredentialApiError,
   useSaveEnableBankingCredential,
 } from "@/lib/api/user/useEnableBankingCredential";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 
+import AuthenticatorCodeField from "./AuthenticatorCodeField";
 import {
   enableBankingErrorKey,
   isKnownEnableBankingError,
 } from "./enable-banking-errors";
+import { isTotpError } from "./enable-banking-setup-steps";
+import {
+  useReopenAfterSignIn,
+  useSensitiveSession,
+  useSignInAgain,
+} from "./sign-in-again";
 
 const FORM_ID = "enable-banking-key-setup-form";
 
@@ -65,6 +73,11 @@ interface Props {
  * The private key never leaves this form's own React Hook Form state except
  * as the mutation's request body — never logged, never captured, and cleared
  * whenever the dialog closes.
+ *
+ * Saving a key needs a session from the last 24 hours and, with two-factor on,
+ * the authenticator code. A session too old says so before anything is typed,
+ * and signing in again comes back to this form; the code is cleared after
+ * every attempt.
  */
 export default function EnableBankingKeySetupDialog({
   triggerLabel,
@@ -75,7 +88,10 @@ export default function EnableBankingKeySetupDialog({
   onOpenChange,
 }: Props) {
   const t = useTranslations("bankProvider");
+  const id = useId();
   const notifyIfRateLimited = useRateLimitToast();
+  const { sessionFresh, twoFactorEnabled } = useSensitiveSession();
+  const signInAgain = useSignInAgain();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const open = controlledOpen ?? uncontrolledOpen;
   const setOpen = (next: boolean) => {
@@ -83,6 +99,15 @@ export default function EnableBankingKeySetupDialog({
     onOpenChange?.(next);
   };
   const [error, setError] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState("");
+  const [totpAsked, setTotpAsked] = useState(false);
+  // The server said the session is too old, though this browser thought it recent enough.
+  const [staleSession, setStaleSession] = useState(false);
+  const needsSignIn = !sessionFresh || staleSession;
+  const showTotp = twoFactorEnabled || totpAsked;
+
+  // Back from signing in again for this form: open it again.
+  useReopenAfterSignIn("paste", () => setOpen(true));
 
   const schema = z.object({
     applicationId: z
@@ -109,18 +134,24 @@ export default function EnableBankingKeySetupDialog({
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (!next && !saveCredential.isPending) {
-      // Drop the private key from memory as soon as the dialog closes.
+      // Drop the private key and the code from memory as soon as the dialog closes.
       setError(null);
+      setTotpCode("");
+      setStaleSession(false);
       form.reset(emptyValues);
     }
   };
 
   const onSubmit = form.handleSubmit((values) => {
     setError(null);
+    // The code is used once: whatever the answer, the next attempt asks for a fresh one.
+    const code = totpCode.trim();
+    setTotpCode("");
     saveCredential.mutate(
       {
         applicationId: values.applicationId,
         privateKeyPem: values.privateKeyPem,
+        ...(code ? { totpCode: code } : {}),
       },
       {
         onSuccess: () => {
@@ -131,6 +162,13 @@ export default function EnableBankingKeySetupDialog({
         },
         onError: (err) => {
           if (notifyIfRateLimited(err)) return;
+          if (isTotpError(err)) setTotpAsked(true);
+          if (getApiErrorCode(err) === "session_not_fresh") {
+            // Signing in again drops what was typed: the key is not kept anywhere meanwhile.
+            form.reset(emptyValues);
+            setStaleSession(true);
+            return;
+          }
           // An unknown, Sandbox or not yet activated application has its own message.
           setError(
             isKnownEnableBankingError(err)
@@ -144,7 +182,13 @@ export default function EnableBankingKeySetupDialog({
 
   return (
     <DrawerDialog
-      title={isUpdate ? t("setup.titleUpdate") : t("setup.titleAdd")}
+      title={
+        needsSignIn
+          ? t("wizard.signInAgain.title")
+          : isUpdate
+            ? t("setup.titleUpdate")
+            : t("setup.titleAdd")
+      }
       trigger={
         triggerLabel ? (
           <Button
@@ -158,82 +202,105 @@ export default function EnableBankingKeySetupDialog({
       open={open}
       onOpenChange={handleOpenChange}
       footer={
-        <Button
-          type="submit"
-          form={FORM_ID}
-          loading={saveCredential.isPending}
-          disabled={saveCredential.isPending}
-        >
-          {t("setup.submit")}
-        </Button>
+        needsSignIn ? (
+          <Button
+            type="button"
+            className="w-full sm:w-auto"
+            onClick={() => void signInAgain("paste")}
+          >
+            {t("wizard.signInAgain.action")}
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            form={FORM_ID}
+            loading={saveCredential.isPending}
+            disabled={saveCredential.isPending}
+          >
+            {t("setup.submit")}
+          </Button>
+        )
       }
     >
-      <div className="flex flex-col gap-4">
+      {needsSignIn ? (
         <Text variant="mutedText" className="text-sm">
-          {t("setup.intro")}{" "}
-          <Link
-            href="/faq"
-            className="font-medium underline underline-offset-4"
-          >
-            {t("setup.helpCta")}
-          </Link>
+          {t("wizard.signInAgain.body")}
         </Text>
+      ) : (
+        <div className="flex flex-col gap-4">
+          <Text variant="mutedText" className="text-sm">
+            {t("setup.intro")}{" "}
+            <Link
+              href="/faq"
+              className="font-medium underline underline-offset-4"
+            >
+              {t("setup.helpCta")}
+            </Link>
+          </Text>
 
-        <Form {...form}>
-          <form
-            id={FORM_ID}
-            onSubmit={onSubmit}
-            className="flex flex-col gap-4"
-          >
-            <FormField
-              control={form.control}
-              name="applicationId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("setup.applicationIdLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      autoComplete="off"
-                      spellCheck={false}
-                      placeholder={t("setup.applicationIdPlaceholder")}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="privateKeyPem"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("setup.privateKeyLabel")}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      rows={8}
-                      className="font-mono text-xs"
-                      autoComplete="off"
-                      autoCorrect="off"
-                      autoCapitalize="off"
-                      spellCheck={false}
-                      placeholder={t("setup.privateKeyPlaceholder")}
-                    />
-                  </FormControl>
-                  <Text variant="mutedText" className="text-xs">
-                    {t("setup.privateKeyHint")}
-                  </Text>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </form>
-        </Form>
+          <Form {...form}>
+            <form
+              id={FORM_ID}
+              onSubmit={onSubmit}
+              className="flex flex-col gap-4"
+            >
+              <FormField
+                control={form.control}
+                name="applicationId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("setup.applicationIdLabel")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        autoComplete="off"
+                        spellCheck={false}
+                        placeholder={t("setup.applicationIdPlaceholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="privateKeyPem"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("setup.privateKeyLabel")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        rows={8}
+                        className="font-mono text-xs"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
+                        placeholder={t("setup.privateKeyPlaceholder")}
+                      />
+                    </FormControl>
+                    <Text variant="mutedText" className="text-xs">
+                      {t("setup.privateKeyHint")}
+                    </Text>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {showTotp ? (
+                <AuthenticatorCodeField
+                  id={`${id}-totp`}
+                  value={totpCode}
+                  onChange={setTotpCode}
+                />
+              ) : null}
+            </form>
+          </Form>
 
-        {error && <Alert variant="destructive">{error}</Alert>}
-      </div>
+          {error && <Alert variant="destructive">{error}</Alert>}
+        </div>
+      )}
     </DrawerDialog>
   );
 }

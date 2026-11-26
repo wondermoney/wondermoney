@@ -98,6 +98,8 @@ If you registered your application with **Generate in the browser and export pri
 3. Paste the Application ID into **Application ID**, and the full contents of the `.pem` file into **Private key**.
 4. Select **Test & Save**. WonderMoney tests the credential against Enable Banking before storing it, so a mistyped ID, an incomplete key, a Sandbox application or one not yet activated is rejected straight away rather than failing later.
 
+If two-factor authentication is on for your account, the form also asks for your authenticator code.
+
 The mobile app links banks with a saved key, but the key itself is set up on the web.
 
 ## What WonderMoney does with your key
@@ -105,6 +107,8 @@ The mobile app links banks with a saved key, but the key itself is set up on the
 Your private key is encrypted at rest (AES-256-GCM) and never leaves the server: a key WonderMoney created is never shown to you, and a pasted one is never shown back. It is not in any response, log or data export. WonderMoney uses it only to authenticate your own requests to Enable Banking — it is never shared with anyone else, including other WonderMoney users.
 
 A new key replaces your old one only for new bank links: accounts you already linked keep using the key they were linked with.
+
+To remove your key, select **Remove key** in **Settings → Bank Provider**. Saving or removing a key needs a recent sign-in, and your authenticator code when two-factor authentication is on. If you signed in more than a day ago, WonderMoney asks you to sign in again and then brings you back.
 
 ## Common issues
 

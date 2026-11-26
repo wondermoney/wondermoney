@@ -84,13 +84,14 @@ router.post('/me/restores/:restoreId/commit', dataRestoreRateLimit(), commitData
 router.post('/me/onboarding/complete', completeOnboarding);
 // Registered before `/:userId` (single path segment, would otherwise shadow it) —
 // same reasoning as `/me/profile` above.
-router.post('/enable-banking-credential', saveEnableBankingCredential);
+// Pasting or removing a key decides which application reads the person's banks, so like API
+// tokens it needs a fresh session and TOTP when the account has it, and a per-person limit.
+router.post('/enable-banking-credential', requireSensitiveSession, bankConnectRateLimit(), saveEnableBankingCredential);
 router.get('/enable-banking-credential', getEnableBankingCredential);
-router.delete('/enable-banking-credential', deleteEnableBankingCredential);
+router.delete('/enable-banking-credential', requireSensitiveSession, bankConnectRateLimit(), deleteEnableBankingCredential);
 // Let WonderMoney generate the key: the certificate creates a pending key pair (the private key
 // never leaves the server), and activate checks it against Enable Banking under the application ID
-// the person registered it as. Both hand out bank access, so like API tokens they need a fresh
-// session and TOTP when the account has it.
+// the person registered it as. Both hand out bank access, so they are gated the same way.
 router.post('/enable-banking-credential/certificate', requireSensitiveSession, enableBankingCertificateRateLimit(), createEnableBankingCertificate);
 router.post('/enable-banking-credential/activate', requireSensitiveSession, bankConnectRateLimit(), activateEnableBankingCredential);
 router.get('/:userId', getUserAccountInformation);

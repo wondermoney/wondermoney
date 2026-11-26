@@ -121,8 +121,10 @@ export const RATE_LIMIT_FAMILIES = {
   dataRestore: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
 
   /**
-   * Connecting a bank with a pasted credential (a SimpleFIN setup token): each request makes the
-   * server call out to the aggregator, and a token is a secret worth guessing. Never relaxed.
+   * Connecting a bank with a pasted credential (a SimpleFIN setup token), and pasting, activating
+   * or removing an Enable Banking key: each request makes the server call out to the aggregator or
+   * changes which application reads the person's banks, and a token is a secret worth guessing.
+   * Each route counts on its own. Never relaxed.
    */
   bankConnect: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 

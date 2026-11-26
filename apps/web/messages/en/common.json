@@ -2680,6 +2680,7 @@
     "removeDialogTitle": "Remove your Enable Banking key?",
     "removeDialogDescription": "You won't be able to connect or sync any bank accounts until you add a new key. Accounts already linked will stop refreshing.",
     "removeDialogConfirm": "Remove key",
+    "removeSignInAgain": "For your security, removing your key needs a recent sign-in. You'll come straight back here.",
     "cancel": "Cancel",
     "loadError": "Couldn't load your Enable Banking key. Try again shortly.",
     "toastRemoveSuccess": "Enable Banking key removed.",

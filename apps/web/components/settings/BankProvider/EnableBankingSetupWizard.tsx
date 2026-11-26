@@ -12,14 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import {
-  type ClipboardEvent,
-  useEffect,
-  useEffectEvent,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { type ClipboardEvent, useEffect, useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Alert } from "@/components/ui/Alert";
@@ -42,16 +35,14 @@ import { authClient } from "@/lib/auth/client";
 import { docsLocaleFor } from "@/lib/docs-links";
 import { instanceConfig } from "@/lib/instance";
 
+import AuthenticatorCodeField from "./AuthenticatorCodeField";
 import { enableBankingErrorKey } from "./enable-banking-errors";
 import {
-  claimReopenAfterSignIn,
   ENABLE_BANKING_SETUP_STEP as STEP,
   ENABLE_BANKING_SETUP_STEPS,
   type EnableBankingSetupStep,
   forgetRememberedStep,
-  isSessionFreshForSetup,
   isTotpError,
-  markReopenAfterSignIn,
   readRememberedStep,
   rememberStep,
   resolveResumeStep,
@@ -59,6 +50,11 @@ import {
   stepNumber,
 } from "./enable-banking-setup-steps";
 import EnableBankingKeySetupDialog from "./EnableBankingKeySetupDialog";
+import {
+  useReopenAfterSignIn,
+  useSensitiveSession,
+  useSignInAgain,
+} from "./sign-in-again";
 
 const CERTIFICATE_FILE_NAME = "wondermoney-enable-banking.crt";
 export const ENABLE_BANKING_SIGN_IN_URL = "https://enablebanking.com/sign-in/";
@@ -122,9 +118,9 @@ export default function EnableBankingSetupWizard({
   const notifyIfRateLimited = useRateLimitToast();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id;
-  const twoFactorEnabled = Boolean(session?.user?.twoFactorEnabled);
   // Both server calls need a session from the last 24 hours: say so before step 1, not at step 2.
-  const sessionFresh = isSessionFreshForSetup(session?.session?.createdAt);
+  const { sessionFresh, twoFactorEnabled } = useSensitiveSession();
+  const signInAgain = useSignInAgain();
   const setup = useEnableBankingSetup();
   const credentialQuery = useEnableBankingCredential({ enabled: open });
   const createCertificate = useCreateEnableBankingCertificate();
@@ -205,19 +201,7 @@ export default function EnableBankingSetupWizard({
   };
 
   // Back from signing in again: open where the person left off.
-  const reopenAfterSignIn = useEffectEvent(() => onOpenChange(true));
-  useEffect(() => {
-    if (claimReopenAfterSignIn(window.location.pathname)) reopenAfterSignIn();
-  }, []);
-
-  const signInAgain = async () => {
-    const next = `${window.location.pathname}${window.location.search}`;
-    markReopenAfterSignIn(window.location.pathname);
-    await authClient.signOut().catch(() => undefined);
-    const login = new URL(`/${locale}/auth/login`, window.location.origin);
-    login.searchParams.set("next", next);
-    window.location.assign(login.toString());
-  };
+  useReopenAfterSignIn("wizard", () => onOpenChange(true));
 
   const handleOpenChange = (next: boolean) => {
     if (!next) {
@@ -353,18 +337,11 @@ export default function EnableBankingSetupWizard({
       : [];
 
   const totpField = showTotp ? (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={`${id}-totp`}>{tGenerated("totp")}</Label>
-      <Input
-        id={`${id}-totp`}
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        value={totpCode}
-        maxLength={6}
-        className="font-mono sm:max-w-40"
-        onChange={(event) => setTotpCode(event.target.value)}
-      />
-    </div>
+    <AuthenticatorCodeField
+      id={`${id}-totp`}
+      value={totpCode}
+      onChange={setTotpCode}
+    />
   ) : null;
 
   const guideLink = (
@@ -422,7 +399,7 @@ export default function EnableBankingSetupWizard({
       <Button
         type="button"
         className="w-full sm:w-auto"
-        onClick={() => void signInAgain()}
+        onClick={() => void signInAgain("wizard")}
       >
         {t("signInAgain.action")}
       </Button>
@@ -666,7 +643,7 @@ export default function EnableBankingSetupWizard({
                 type="button"
                 variant="secondary"
                 className="self-start"
-                onClick={() => void signInAgain()}
+                onClick={() => void signInAgain("wizard")}
               >
                 {t("signInAgain.action")}
               </Button>
