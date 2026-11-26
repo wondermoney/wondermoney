@@ -29,6 +29,8 @@ export function accountLanguageEndpoint(userId: string) {
 /**
  * Sends the app language the person picked to their account, so their emails follow it. Nothing
  * without a signed-in runtime; a failed send is dropped, and picking the language again retries.
+ * A server without the Italian account language refuses `IT`: the app switches to Italian and
+ * the account, with its emails, keeps the language it had.
  */
 export function useAccountLanguageSync(): (locale: SupportedLocale) => void {
   const runtime = useOptionalProductRuntime()?.runtime

@@ -44,19 +44,23 @@ export async function provisionAppUser(
     await postCallback(apiClient, locale, inviteToken)
     return 'provisioned'
   } catch (error) {
-    if (locale !== 'en' && isBadRequest(error)) return provisionAppUser(apiClient, 'en', inviteToken)
+    if (locale === 'it' && isLocaleRejected(error)) return provisionAppUser(apiClient, 'en', inviteToken)
     return isTransient(error) ? 'unavailable' : 'failed'
   }
 }
 
 /*
- * A server older than one of the app's languages (one without the Italian account language,
- * for `it`) rejects that locale with a 400 before the callback runs, which would sign the
- * person out on every launch. The app then asks again in English: an existing account keeps
- * its language, and a new one starts in English, the language that server's web app would have
- * given it. A refusal for any other reason is refused again, and the result is `failed`.
+ * A server without the Italian account language rejects `it` in the request's locale enum: a
+ * plain validation 400 (`bad_request`) before the callback runs, which would sign the person
+ * out on every launch. The app then asks once more in English: an existing account keeps its
+ * language, and a new one starts in English, the language that server's web app would have
+ * given it. Every other refusal stands, a 400 with its own code above all: the unverified
+ * reconnect (`account_reconnect_email_unverified`) has already sent an email, and asking again
+ * would send a second one.
  */
-const isBadRequest = (error: unknown): boolean => error instanceof ApiError && error.code === 'http' && error.status === 400
+const isLocaleRejected = (error: unknown): boolean => (
+  error instanceof ApiError && error.code === 'http' && error.status === 400 && error.serverCode === 'bad_request'
+)
 
 function postCallback(apiClient: ApiClient, locale: SignupLocale, inviteToken?: string) {
   const body = inviteToken ? { inviteToken, locale } : { locale }
