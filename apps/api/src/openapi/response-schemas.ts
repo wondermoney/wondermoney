@@ -78,6 +78,7 @@ export const accountSchema = open('Account', {
   availableBalance: nullableNumber,
   balance: nullableNumber,
   balanceDerivedAt: nullableString.openapi({ description: 'When the balance was last derived from the transactions because the bank sent none; null while it is the bank\u2019s own figure. The bank last confirmed it at `refreshedAt`.' }),
+  closed: z.boolean().openapi({ description: 'A closed account: it keeps its history and takes no statement imports (409).' }),
   creditCard: z.record(z.string(), z.unknown()).nullable(),
   currencyKey: z.object({ code: z.string() }),
   fxStatus: z.string(),

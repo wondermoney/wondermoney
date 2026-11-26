@@ -361,6 +361,9 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     // Set while the balance is derived from the transactions because the bank gave none; clients
     // then show it as of `refreshedAt`, the last time the bank confirmed it.
     balanceDerivedAt: account.balanceDerivedAt?.toISOString() ?? null,
+    // A closed account keeps its history but takes no new transactions from a file, so the
+    // clients leave it out of the accounts an import maps to.
+    closed: account.closed,
     creditCard,
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,

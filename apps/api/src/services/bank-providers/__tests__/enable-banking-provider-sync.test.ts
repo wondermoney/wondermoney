@@ -17,8 +17,11 @@ vi.mock('axios', async (importOriginal) => {
 vi.mock('@service/enable-banking/enable-banking-jwt.service', () => ({ signEnableBankingJwt: vi.fn().mockResolvedValue('signed.jwt') }));
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 
+import type { transactionImport } from '@wondermoney/shared';
+
 import { addTransaction, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
+import { DI } from '@app/database/di';
 import { updateTransaction } from '@controller/account/transactions';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution, AccountFinancialInstitutionProvider } from '@entity/AccountFinancialInstitution';
@@ -31,6 +34,9 @@ import accountInitialSyncTransactionService from '@service/account/account-initi
 import { recalculateAccount } from '@service/account/account-recalculation.service';
 import { runBankSyncPhases } from '@service/bank-sync-run/bank-sync-run';
 import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
+import type { Enqueue } from '@service/queue/enqueue';
+import { TransactionImportService, type TransactionImportStorage } from '@service/transaction-import/transaction-import.service';
+import { deriveChainWithoutProviderBalance } from '@service/transaction/balance-chain.service';
 import { transactionCreationService } from '@service/transaction/transaction-creation.service';
 import { deleteTransactions } from '@service/transaction/transaction-deletion.service';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
@@ -305,6 +311,61 @@ describe('an Enable Banking bank that answers badly still syncs what it can', ()
 
         expect(info.mock.calls.some(([, message]) => message === 'Bank balance replaced a derived balance')).toBe(false);
         info.mockRestore();
+      });
+    });
+
+    describe('when a statement import adds rows newer than the last sync to a derived balance', () => {
+      /** A one-step statement import of `rows` into the account, run as its worker would. */
+      async function importRows(household: Household, account: Account, rows: { amount: number; date: string; id: string }[]) {
+        const adapter: transactionImport.ImportAdapter = {
+          format: 'statement',
+          parse: () => Promise.resolve({
+            rows: rows.map((row, index) => ({ normalized: { amount: row.amount, date: row.date, description: `Statement ${row.id}`, externalId: row.id }, raw: {}, sourceRow: index + 2 })),
+            sourceAccounts: [],
+            warnings: [],
+          }),
+        };
+        const sent: { correlationId: string; mode: 'commit' | 'parse' }[] = [];
+        const enqueue: Enqueue = { send: (_queue, data) => Promise.resolve(`job-${sent.push(data as (typeof sent)[number])}`), sendAfter: () => Promise.resolve(null) };
+        const storage: TransactionImportStorage = {
+          getAccountCsvBucketName: () => 'csv',
+          getObjectBuffer: () => Promise.resolve(Buffer.from('ignored')),
+          getObjectSize: () => Promise.resolve(7),
+          presignAccountUpload: () => Promise.reject(new Error('not used')),
+        };
+        const service = () => new TransactionImportService(DI.em.fork(), { adapters: { statement: adapter }, enqueue, storage });
+        const scope = { appuserKey: household.appuser.appuserKey, tenantKey: household.tenant.tenantKey };
+        await service().create(scope, { accountId: account.accountKey, autoCommit: true, format: 'statement', key: `account-${account.accountKey}-generic-statement.csv` });
+        const job = sent.at(-1)!;
+        await expect(service().run(job.correlationId, `job-${sent.length}`, job.mode)).resolves.toBe(true);
+      }
+
+      it('settles them so that the next derivation, and the next refused sync, agree with what it wrote', async () => {
+        const { account, connection, household } = await linkedBank();
+        stubEnableBanking({ balances: balancesRefused(), transactions: () => ({ data: { transactions: [booked('new-1', '2026-11-20', '12.50', 'DBIT')] }, status: 200 }) });
+        await sync(household, connection, 5);
+        const derived = await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false });
+        expect(derived.balance).toBe(487.5);
+        expect(derived.balanceDerivedAt).toBeInstanceOf(Date);
+
+        await importRows(household, account, [{ amount: -20, date: '2026-11-22T00:00:00.000Z', id: 'statement-1' }, { amount: 100, date: '2026-11-24T00:00:00.000Z', id: 'statement-2' }]);
+
+        // The import continues the chain from the last synced row, and the account ends where it does.
+        const imported = await rowsOf(account);
+        expect(imported.map((row) => row.balance)).toEqual([500, 487.5, 467.5, 567.5]);
+        const afterImport = await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false });
+        expect(afterImport.balance).toBe(567.5);
+
+        // Deriving again from the stored chain changes nothing and lands on the same balance.
+        const em = db.em().fork();
+        const again = await deriveChainWithoutProviderBalance(em, await em.findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false }));
+        expect(again).toMatchObject({ changed: 0, derived: true, tail: { balance: 567.5 } });
+
+        // So does the next sync whose balance the bank refuses again.
+        stubEnableBanking({ balances: balancesRefused(), transactions: () => ({ data: { transactions: [] }, status: 200 }) });
+        await sync(household, connection, 5);
+        expect((await rowsOf(account)).map((row) => row.balance)).toEqual([500, 487.5, 467.5, 567.5]);
+        expect((await db.em().findOneOrFail(Account, { accountKey: account.accountKey }, { filters: false })).balance).toBe(567.5);
       });
     });
 

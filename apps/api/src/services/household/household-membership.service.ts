@@ -27,11 +27,15 @@ export interface RemoveMemberDeps {
   endSessions?: (externalUserId: string) => Promise<void>;
 }
 
-export function findActiveMembership(em: EntityManager, tenant: number | Tenant, appuserKey: number): Promise<AppuserTenant | null> {
+/**
+ * The person's active membership of the household, or null. `refresh` reads it from the database
+ * even when the entity manager already holds it: a long-running job checks the role it has today.
+ */
+export function findActiveMembership(em: EntityManager, tenant: number | Tenant, appuserKey: number, options: { refresh?: boolean } = {}): Promise<AppuserTenant | null> {
   return em.findOne(
     AppuserTenant,
     { appuserKey: { appuserKey }, deletedAt: null, recordActive: true, tenantKey: typeof tenant === 'number' ? { tenantKey: tenant } : tenant },
-    { populate: ['appuserKey'] },
+    { populate: ['appuserKey'], refresh: options.refresh === true },
   );
 }
 

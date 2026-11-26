@@ -218,6 +218,10 @@
             ],
             "description": "When the balance was last derived from the transactions because the bank sent none; null while it is the bank’s own figure. The bank last confirmed it at `refreshedAt`."
           },
+          "closed": {
+            "type": "boolean",
+            "description": "A closed account: it keeps its history and takes no statement imports (409)."
+          },
           "creditCard": {
             "type": [
               "object",
@@ -294,6 +298,7 @@
           "availableBalance",
           "balance",
           "balanceDerivedAt",
+          "closed",
           "creditCard",
           "currencyKey",
           "fxStatus",
