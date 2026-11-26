@@ -94,3 +94,13 @@ export function hasEnableBankingProductionContract(env: InstanceCredentialSource
   const value = env['ENABLE_BANKING_PRODUCTION_CONTRACT']?.trim().toLowerCase();
   return value === 'true' || value === '1' || value === 'yes' || value === 'on';
 }
+
+/**
+ * `ENABLE_BANKING_ALLOW_SANDBOX`: accept a Sandbox Enable Banking application as a person's own
+ * credential, for developing against Enable Banking's mock banks. Off unless set to a true value:
+ * a Sandbox application never reaches a real bank, so it is refused by default.
+ */
+export function isEnableBankingSandboxAllowed(env: InstanceCredentialSource = process.env): boolean {
+  const value = env['ENABLE_BANKING_ALLOW_SANDBOX']?.trim().toLowerCase();
+  return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}

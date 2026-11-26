@@ -5694,6 +5694,26 @@
         }
       }
     },
+    "/v1/user/enable-banking-credential/certificate": {
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/v1/user/enable-banking-credential/activate": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/v1/user/{userId}": {
       "get": {
         "description": "",

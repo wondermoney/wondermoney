@@ -15,6 +15,7 @@ import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
 import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
+import { enableBankingApplicationSetup } from '@service/enable-banking/enable-banking-application-setup';
 import { isMarketDataEnabled, marketDataFeatures } from '@service/market-data/registry';
 import { resolveStorageConfig } from '@service/storage/s3';
 import { buildInfo, FRONTEND_URL } from '@utils/constants';
@@ -89,6 +90,9 @@ export async function getInstance(_req: Request, res: Response) {
       // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.
       statementImport: statementProvider ? { ...statementImportLimits(), providerKind: statementProvider.kind } : null,
     },
+    // The values to enter when registering an Enable Banking application for this server (redirect,
+    // privacy and terms URLs, a suggested name and description). Null when Enable Banking is off.
+    enableBankingSetup: enableBankingApplicationSetup(),
     firstAccountAdmin: firstAccountIsAdmin(),
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

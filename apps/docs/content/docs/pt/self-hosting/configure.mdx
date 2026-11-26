@@ -181,6 +181,7 @@ Um identificador que esta versão não tenha é ignorado, por isso `BANK_PROVIDE
 
 | Definição | O que faz |
 |---|---|
+| `ENABLE_BANKING_ALLOW_SANDBOX` | `true` deixa guardar uma aplicação Sandbox da Enable Banking como chave própria, que o WonderMoney recusa de outro modo por nunca chegar a um banco real. Só para desenvolver com os bancos fictícios da Enable Banking; não o definas num servidor que as pessoas usam. Define-o na API |
 | `SIMPLEFIN_BRIDGE_HOSTS` | Os anfitriões que o servidor pode contactar para o SimpleFIN, separados por vírgulas. Vazio significa o SimpleFIN Bridge, `bridge.simplefin.org` e `beta-bridge.simplefin.org`. Define-a só para outro servidor que fale o protocolo SimpleFIN; substitui a lista por omissão. Cada endereço SimpleFIN tem de ser `https` na porta 443, estar num destes anfitriões e resolver só para endereços públicos ([SimpleFIN](/pt/docs/self-hosting/simplefin#privacidade-e-segurança)). Define-a na API e no worker |
 
 O worker sincroniza cada ligação bancária no máximo uma vez a cada `BANK_SYNC_MIN_INTERVAL_HOURS` horas, 20 por omissão. Ao abrigo da PSD2, um banco pode limitar o acesso não assistido a quatro chamadas por dia por conta, por isso define-a como `6` ou mais para ficares dentro desse limite. O SimpleFIN Bridge espera cerca de 24 pedidos por dia ou menos por ligação, por isso não a baixes muito se ofereceres o SimpleFIN. Uma sincronização falhada espera o mesmo intervalo antes da tentativa seguinte. Define-a no worker; um valor que não seja um número positivo impede o worker de arrancar.

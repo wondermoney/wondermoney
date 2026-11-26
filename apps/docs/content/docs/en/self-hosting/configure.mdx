@@ -181,6 +181,7 @@ An id this version does not have is ignored, so `BANK_PROVIDERS=none` turns bank
 
 | Setting | What it does |
 |---|---|
+| `ENABLE_BANKING_ALLOW_SANDBOX` | `true` lets people save an Enable Banking Sandbox application as their own key, which WonderMoney otherwise refuses because it never reaches a real bank. For developing against Enable Banking's mock banks only; leave it unset on a server people use. Set it on the API |
 | `SIMPLEFIN_BRIDGE_HOSTS` | The hosts the server may call for SimpleFIN, separated by commas. Empty means SimpleFIN Bridge, `bridge.simplefin.org` and `beta-bridge.simplefin.org`. Set it only for another server that speaks the SimpleFIN protocol; it replaces the default list. Every SimpleFIN address must be `https` on port 443, on one of these hosts, and resolve only to public addresses ([SimpleFIN](/en/docs/self-hosting/simplefin#privacy-and-security)). Set it on the API and the worker |
 
 The worker syncs each bank connection at most once every `BANK_SYNC_MIN_INTERVAL_HOURS` hours, 20 by default. Under PSD2 a bank may limit unattended access to four calls a day per account, so set it to `6` or more to stay inside that limit. SimpleFIN Bridge expects about 24 requests a day or fewer for each connection, so don't lower it far if you offer SimpleFIN. A failed sync waits the same interval before the next try. Set it on the worker; a value that is not a positive number stops the worker at start-up.

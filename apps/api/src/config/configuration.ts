@@ -185,6 +185,8 @@ const sharedSchema = z.object({
   DB_PORT: z.string().trim().optional(),
   DB_USERNAME: z.string().trim().optional(),
   EMAIL_OPT_OUT_SIGNING_SECRET: nonEmpty('Unsubscribe-link signing secret is required (minted by worker emails, verified by the API)'),
+  // Accepts a Sandbox application as a person's own credential (`enable-banking-application-check.ts`). Development only.
+  ENABLE_BANKING_ALLOW_SANDBOX: boolFlag('Enable Banking sandbox flag').optional(),
   // The instance-wide Enable Banking credential (`config/enable-banking-instance.ts`), read by the
   // API (linking) and the worker (syncing). The two turn it on together; `config/env.ts` reads the
   // key file at start-up and refuses one that is unreadable or not an RSA private key.

@@ -38,7 +38,7 @@ export async function requireSensitiveSession(req: Request, _res: Response, next
 
   const createdAt = new Date(authUser.session.createdAt).getTime();
   if (!Number.isFinite(createdAt) || Date.now() - createdAt > SENSITIVE_SESSION_MAX_AGE_MS) {
-    next(new ForbiddenError('Please sign in again before managing API tokens.', ERROR_CODE.SESSION_NOT_FRESH));
+    next(new ForbiddenError('Please sign in again to continue.', ERROR_CODE.SESSION_NOT_FRESH));
     return;
   }
 

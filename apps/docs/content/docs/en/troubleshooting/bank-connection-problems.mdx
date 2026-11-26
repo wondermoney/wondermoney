@@ -50,7 +50,7 @@ Most connection problems trace back to how the Enable Banking application was se
 - **"Request activation" was clicked instead of "Activate by linking accounts."** Enable Banking's Control Panel shows both buttons after an application is registered. "Request activation" starts a business verification (KYB) process that isn't needed for personal use and won't activate a personal application on its own. Use "Activate by linking accounts" instead, which activates the application by walking you through linking one of your own bank accounts.
 
 <Callout type="error" title="Lost the downloaded private key">
-  Enable Banking shows the private key exactly once, at the moment it's generated, and cannot show it again — not even through their own support. If the `.pem` file wasn't backed up and can no longer be found, there is no way to recover it. The only fix is to register a brand-new application in the Control Panel and generate a new key.
+  Enable Banking shows the private key exactly once, at the moment it's generated, and cannot show it again — not even through their own support. If the `.pem` file wasn't backed up and can no longer be found, there is no way to recover it. The only fix is to register a brand-new application in the Control Panel. This time, let WonderMoney create the key (**Settings → Bank Provider → Let WonderMoney create the key**): you register only its certificate, and there is no key file to lose.
 </Callout>
 
 ## Sync errors and history

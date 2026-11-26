@@ -212,7 +212,12 @@ Every integration is optional and fails closed: unconfigured, its feature report
   `services/enable-banking/instance-credential-policy.ts`). A user's own credential always wins;
   without `ENABLE_BANKING_PRODUCTION_CONTRACT` the instance one serves a single household
   (Restricted Production mode). A connection keeps the credential it was made with
-  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). There is no
+  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). A user pastes
+  a key from Enable Banking, or lets the server generate one: `POST
+  /v1/user/enable-banking-credential/certificate` stores a `pending` credential (RSA 2048, private
+  key encrypted, never returned) and answers its certificate, and `.../activate` checks it under
+  the application ID (`enable-banking-application-check.ts`) and makes it active. A pending
+  credential signs nothing else and lapses after 7 days. There is no
   sandbox bank; testing the connect flow needs a real credential. Legacy `nordigen*` names (`NordigenRequisition`,
   `Account.nordigenRequisitionKey`, `Transaction.nordigenInternalTransactionId`, the
   `DELETE /v1/banking/requisition/:requisitionId` route) are from the removed GoCardless
