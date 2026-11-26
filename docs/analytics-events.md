@@ -23,7 +23,7 @@ follow are in `packages/shared/lib/analytics/README.md`.
 | `bank_connection_started` | web, mobile | behavioural | Bank connection health | The person began connecting a bank: left for the bank to give consent (Enable Banking), or opened the SimpleFIN setup. How it ends is the service event `bank_connection_completed` or `bank_connection_failed`.<br>`provider` (optional): `enable_banking`, `simplefin`. The bank data provider. |
 | `bank_sync_completed` | server | service | Bank connection health | A bank sync attempt ended, other than the two cases below (`analytics/bank-sync-contract.ts` in the API).<br>`account_count` (optional): a count. Accounts the sync covered.<br>`attempt`: a count. Which attempt this was, from 1.<br>`contract_version`: `bank-sync.v1`. The version of these properties.<br>`environment`: `production`, `staging`, `development`. The server that ran the sync.<br>`error_category` (optional): one of 9 values, [listed below](#bank_sync_completed-error_category). The kind of failure.<br>`error_code` (optional): one of 17 values, [listed below](#bank_sync_completed-error_code). The failure, as a fixed code.<br>`final`: true or false. Whether no further attempt will follow.<br>`flow`: `initial-add`, `scheduled-refresh`. The first sync of a new connection, or a scheduled refresh.<br>`producer`: `pgboss-initial`, `pgboss-scheduled`. The job that ran it.<br>`result`: `full_success`, `partial`, `failed`. How it ended. |
 | `budget_created` | server | service | Activation | A budget was created.<br>`platform` (optional): `web`, `mobile`, `api`. Which client sent the request: the web app, the mobile app, or a personal API token or MCP client. |
-| `feature_screen_viewed` | web, mobile | behavioural | Retention | A screen of the app was shown. Web sends it on each navigation, in place of a pageview.<br>`screen`: one of 90 values, [listed below](#feature_screen_viewed-screen). The screen's identifier, never its path. |
+| `feature_screen_viewed` | web, mobile | behavioural | Retention | A screen of the app was shown. Web sends it on each navigation, in place of a pageview.<br>`screen`: one of 91 values, [listed below](#feature_screen_viewed-screen). The screen's identifier, never its path. |
 | `feedback_submitted` | web, mobile | behavioural | none | The person sent feedback from the app. The message itself is never sent.<br>`category`: `bug`, `feature_request`, `other`. The kind of feedback chosen. |
 | `first_account_created` | server | service | Activation | The first account_created of this person; later ones repeat its event id, so the outbox keeps only the first.<br>`method`: `manual`, `bank_connection`, `import`. As on account_created.<br>`platform` (optional): `web`, `mobile`, `api`. Which client sent the request: the web app, the mobile app, or a personal API token or MCP client. |
 | `first_budget_created` | server | service | Activation | The first budget_created of this person; later ones repeat its event id.<br>`platform` (optional): `web`, `mobile`, `api`. Which client sent the request: the web app, the mobile app, or a personal API token or MCP client. |
@@ -263,6 +263,7 @@ Values of `screen` on `feature_screen_viewed`:
 - `settings_security`
 - `sign_in_mfa`
 - `sign_in_error`
+- `oauth_consent`
 - `faq`
 - `transaction_review`
 - `portfolio_holdings`

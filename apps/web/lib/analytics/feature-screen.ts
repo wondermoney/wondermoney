@@ -19,6 +19,7 @@ const SCREENS: readonly (readonly [RegExp, WebFeatureScreen | null])[] = [
   [/^\/auth\/forgot$/u, "forgot_password"],
   [/^\/auth\/reset$/u, "reset_password"],
   [/^\/join$/u, "settings_household_join"],
+  [/^\/oauth\/consent$/u, "oauth_consent"],
   [/^\/faq$/u, "faq"],
   [/^\/onboarding(?:\/[^/]+)?$/u, "onboarding"],
   [/^\/accounts$/u, "accounts"],
