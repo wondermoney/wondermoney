@@ -13,6 +13,7 @@ import { AccountMark } from "@/components/account/AccountMark";
 import AccountTransactionAddModal from "@/components/account/AccountTransactionAddModal";
 import AccountTransactionImportModal from "@/components/account/AccountTransactionImportModal";
 import AccountTransactionsTable from "@/components/account/AccountTransactionsTable";
+import { BalanceAsOf } from "@/components/account/BalanceAsOf";
 import CreditCardStatements from "@/components/account/CreditCardStatements";
 import CreditCardStatementSummary from "@/components/account/CreditCardStatementSummary";
 import MetricsCards from "@/components/account/MetricsCards";
@@ -379,6 +380,14 @@ export default function AccountClient({
         valueLabel={t("account-balance")}
         secondaryValue={isMultiCurrency ? account.balance : undefined}
         secondaryCurrency={account.currencyKey.code}
+        provenance={
+          account.balanceDerivedAt ? (
+            <BalanceAsOf
+              balanceDerivedAt={account.balanceDerivedAt}
+              refreshedAt={account.refreshedAt}
+            />
+          ) : undefined
+        }
         actions={
           transactionAccount && canEdit ? (
             <>

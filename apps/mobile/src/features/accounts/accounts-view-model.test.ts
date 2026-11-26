@@ -30,6 +30,7 @@ describe('accounts view model', () => {
       originalCurrencyCode: 'USD',
       primaryCurrencyCode: 'GBP',
       refreshedAt: '2026-07-17T12:00:00.000Z',
+      balanceDerivedAt: null,
       source: 'manual',
       csvImportFormat: null,
       ownerFirstName: null,

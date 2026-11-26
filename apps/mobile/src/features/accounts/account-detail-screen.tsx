@@ -31,7 +31,7 @@ import { InstallmentPlansSection, type InstallmentPlansSectionState } from '@/fe
 
 import { canWriteAccount } from './account-access'
 import { accountFreshness } from './account-freshness'
-import type { AccountDetailViewModel } from './account-detail-view-model'
+import { type AccountDetailViewModel, balanceAsOfDate } from './account-detail-view-model'
 import { CreditCardStatementSection, type CreditCardStatementState } from './credit-card-statement-section'
 import { ForecastCard, type AccountForecastState } from './forecast-card'
 import type { AccountRecalculationState } from './use-account-recalculation'
@@ -150,6 +150,11 @@ function AccountDetailContent({ state, recentTransactions, onBack, onRetry, onRe
     : formatMoney(primaryValue, { locale, currency: primaryCurrency })
   const mark = accountMark({ logoUrl: data.institutionLogoUrl, institutionName: data.institutionDisplayName, type: data.accountType })
   const shared = !data.isOwnedByViewer && data.ownerFirstName ? t('accountsOverview.sharedBy', { name: data.ownerFirstName }) : null
+  // The bank sent no balance, so it was derived from the transactions: say when the bank last gave one.
+  const asOf = primaryValue === null ? null : balanceAsOfDate(data, locale)
+  const balanceNote = primaryValue === null
+    ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text>
+    : fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-balance-fx-status" /> : null
 
   const moreActions = [
     writable ? { value: 'edit' as const, label: t('accountDetail.edit') } : { value: 'edit' as const, label: t('accountDetail.sharing') },
@@ -203,9 +208,12 @@ function AccountDetailContent({ state, recentTransactions, onBack, onRetry, onRe
             <HeadlineFigure
               accessibilityLabel={[`${t('accountsOverview.accountBalance')}, ${primaryText}`, fxCopy ? `${fxCopy.label}. ${fxCopy.hint}` : null].filter(Boolean).join(', ')}
               currency={primaryCurrency}
-              footer={primaryValue === null
-                ? <Text tone="muted" variant="label">{t('accounts.balanceUnavailable')}</Text>
-                : fxCopy ? <FxStatusLabel locale={locale} state={fx} testID="account-balance-fx-status" /> : undefined}
+              footer={balanceNote || asOf ? (
+                <>
+                  {balanceNote}
+                  {asOf ? <Text testID="account-balance-as-of" tone="muted" variant="label">{t('accountsOverview.balanceAsOf', { date: asOf })}</Text> : null}
+                </>
+              ) : undefined}
               label={t('accountsOverview.accountBalance')}
               locale={locale}
               secondary={multiCurrency ? { value: data.originalBalance, currency: data.originalCurrencyCode } : null}

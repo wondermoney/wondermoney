@@ -161,6 +161,23 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "balance_derived_at": {
+          "name": "balance_derived_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "bank_connection_key": {
           "name": "bank_connection_key",
           "type": "int",
@@ -283,6 +300,23 @@
             "provisional"
           ],
           "mappedType": "enum"
+        },
+        "history_window_days": {
+          "name": "history_window_days",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
         },
         "holder_name": {
           "name": "holder_name",

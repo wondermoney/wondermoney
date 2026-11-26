@@ -49,6 +49,7 @@ A connection is **failing** when its latest sync failed and the failures started
 | `consent_expired`, `authentication`, `invalid_requisition`, `cancelled` | The bank no longer accepts the consent. The person has to reconnect the bank in **Settings → Connections** |
 | `rate_limited` | The bank limited how often it may be asked. Syncs resume once the limit has passed |
 | `provider_unavailable`, `institution_unavailable`, `timeout` | The aggregator or the bank was down or slow. Usually passes on its own |
+| `balance_unavailable` | The transactions synced, but the bank sent no balance for an account, so it was worked out from the transactions. Clears once the bank sends a balance again |
 | `account_phase_failed`, `transaction_phase_failed`, `data_validation`, `internal`, `unknown` | Something failed on this server. The worker log (`docker compose logs worker`) has the detail |
 
 ## What it does not show

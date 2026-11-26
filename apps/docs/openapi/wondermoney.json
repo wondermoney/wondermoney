@@ -211,6 +211,13 @@
               "null"
             ]
           },
+          "balanceDerivedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "When the balance was last derived from the transactions because the bank sent none; null while it is the bank’s own figure. The bank last confirmed it at `refreshedAt`."
+          },
           "creditCard": {
             "type": [
               "object",
@@ -286,6 +293,7 @@
           "attribution",
           "availableBalance",
           "balance",
+          "balanceDerivedAt",
           "creditCard",
           "currencyKey",
           "fxStatus",

@@ -125,6 +125,7 @@ const BANK_SYNC_PROPERTIES = {
     values: [
       'account_phase_failed',
       'authentication',
+      'balance_unavailable',
       'cancelled',
       'consent_expired',
       'data_validation',

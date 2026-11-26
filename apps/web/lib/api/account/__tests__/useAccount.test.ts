@@ -128,6 +128,7 @@ test("supports finalized detail payloads", async () => {
     ...finalizedAccount,
     accountType: null,
     appuserCurrencyAvailableBalance: null,
+    balanceDerivedAt: null,
     csvImportFormat: "generic",
     availableBalance: null,
     syncStatus: null,

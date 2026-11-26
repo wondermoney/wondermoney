@@ -32,7 +32,7 @@ import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
-import { deriveChainWithoutProviderBalance, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { balancesDiffer, deriveChainWithoutProviderBalance, derivedBalanceFromChain, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { DEFAULT_PENDING_GRACE_DAYS, logDryRunExpirations, planPendingExpirations } from '@service/transaction/pending-expiry.service';
@@ -69,7 +69,7 @@ const INCLUDE_HIDDEN = { includeHidden: true } as const;
 
 class AccountInitialSyncTransactionService {
   async syncTransactionsForRequisition(
-    input: { connection: BankConnectionRef; correlationId?: string; fetchWindowDays?: number; queueJobId?: string; /** Accounts the account phase did not refresh a balance for (refused, missing, or the account failed). */ staleBalanceAccountIds?: string[] },
+    input: { connection: BankConnectionRef; correlationId?: string; /** Accounts whose derived balance the account phase has just replaced with the bank's. */ derivedBalanceReplacedAccountIds?: string[]; fetchWindowDays?: number; queueJobId?: string; /** Accounts the account phase did not refresh a balance for (refused, missing, or the account failed). */ staleBalanceAccountIds?: string[] },
     deps: Deps = {},
   ): Promise<AccountInitialSyncTransactionsResult> {
     const em = deps.em ?? DI.em;
@@ -120,14 +120,18 @@ class AccountInitialSyncTransactionService {
     // bank gave. Rebuilding a chain backwards from it would shift every older row by whatever this
     // batch added; the balance is derived from the stored chain instead (`deriveStaleBalance`).
     const staleBalanceAccountIds = new Set(input.staleBalanceAccountIds ?? []);
+    const derivedBalanceReplacedAccountIds = new Set(input.derivedBalanceReplacedAccountIds ?? []);
     for (const [index, account] of accounts.entries()) {
       let accountCreated = 0; let accountFailed = 0; let accountSkipped = 0;
       try {
-        const response = await client.getTransactions(connection, account.accountId ?? '', { country: '', dateFrom: dateOffset(new Date(), input.fetchWindowDays ?? 365), dateTo: isoDate(new Date()) });
+        const response = await client.getTransactions(connection, account.accountId ?? '', { country: '', dateFrom: dateOffset(new Date(), historyWindowFor(account, input.fetchWindowDays ?? 365)), dateTo: isoDate(new Date()) });
         const transactions = response;
         if (transactions.fetchedFrom) {
-          // The bank refused the asked period and served a shorter one; recorded on the run's result.
+          // The bank refused the asked period and served a shorter one; recorded on the run's result,
+          // and on the account, so the next sync that asks for more asks for this instead.
           historyShortened.push({ accountId: account.accountId ?? String(account.accountKey), fetchedFrom: transactions.fetchedFrom });
+          const servedDays = windowDaysFrom(transactions.fetchedFrom);
+          if (servedDays !== undefined) account.historyWindowDays = servedDays;
           log.info({ accountId: account.accountId, fetchedFrom: transactions.fetchedFrom, requisitionId }, 'Account initial sync fetched a shorter transaction history');
         }
         const accountStableId = account.accountId ?? String(account.accountKey);
@@ -183,6 +187,7 @@ class AccountInitialSyncTransactionService {
           const derived = await this.deriveStaleBalance(em, account, tenant);
           if (derived) log.info({ accountId: account.accountId, derived: derived.derived, rewritten: derived.changed }, 'Rebuilt account running-balance chain without a new balance');
         } else {
+          if (derivedBalanceReplacedAccountIds.has(account.accountId ?? '')) await this.logDerivedBalanceDrift(em, account, connection, log);
           const { changed: rewritten } = await recalculateChainFromAccountBalance(em, account);
           if (rewritten > 0) log.info({ accountId: account.accountId, rewritten }, 'Rebuilt account running-balance chain');
         }
@@ -319,6 +324,8 @@ class AccountInitialSyncTransactionService {
     const derived = await deriveChainWithoutProviderBalance(em, account);
     if (!derived?.derived) return derived;
     account.balance = derived.tail.balance;
+    // Until the bank sends a balance again, clients show this one as of `refreshedAt`.
+    account.balanceDerivedAt = new Date();
     const ownerCurrency = (tenant.appuserKey as unknown as undefined | { currencyKey?: Currency })?.currencyKey;
     const converted = ownerCurrency
       ? await convertWithStatus(em, derived.tail.balance, account.currencyKey, ownerCurrency, new Date(), rateScope(tenant.tenantKey))
@@ -331,6 +338,23 @@ class AccountInitialSyncTransactionService {
   private emptyResult(requisitionId: string, requisitionKey: number, appuserRef: number): AccountInitialSyncTransactionsResult { return { accountsFailed: 0, accountsProcessed: 0, accountsTotal: 0, appuserKey: getAppuserKey(appuserRef), failedAccountIds: [], requisitionId, requisitionKey, status: 'failed', transactionsCategorized: 0, transactionsCreated: 0, transactionsFailed: 0, transactionsFetched: 0, transactionsSkipped: 0 }; }
   private async findTransactionStatus(em: EntityManager, names: string[]) { for (const name of names) { const status = await em.findOne(TransactionStatus, { name }); if (status) return status; } return null; }
   private async loadTransactionTypes(em: EntityManager) { const names = ['TRANSFER_IN', 'TRANSFER_OUT', 'PAYMENT', 'CARD_PAYMENT', 'DEPOSIT', 'TOPUP', 'FEE']; const out = new Map<string, TransactionType>(); for (const name of names) { const type = await em.findOne(TransactionType, { name }); if (type) out.set(name, type); } return out; }
+  /**
+   * The bank has sent a balance again for an account whose balance the last syncs derived from its
+   * chain. Logs whether what the chain would derive now differs from the bank's figure, so the known
+   * edges of the derivation (a wrong stored row balance, a cancelled oldest row, a late row the
+   * bank had already counted) can be seen in practice. The ids and the yes or no only: never an
+   * amount. Best-effort: a failed read never fails the account.
+   */
+  private async logDerivedBalanceDrift(em: EntityManager, account: Account, connection: BankConnectionRef, log: Pick<typeof logger, 'info' | 'warn'>) {
+    if (account.balance == null) return;
+    try {
+      const derived = await derivedBalanceFromChain(em, account);
+      if (derived === null) return;
+      log.info({ accountKey: account.accountKey, bankConnectionKey: connection.bankConnectionKey, differed: balancesDiffer(derived, account.balance) }, 'Bank balance replaced a derived balance');
+    } catch (error) {
+      log.warn({ accountKey: account.accountKey, error: sanitizeError(error) }, 'Could not compare a derived balance with the bank\'s');
+    }
+  }
   private resolveSyncTarget(
     input: { connection: BankConnectionRef },
     deps: Deps,
@@ -736,10 +760,26 @@ function isSameEnableBankingTransaction(stored: Transaction, row: BankSyncTransa
 }
 
 /** A synced row's date. `transactionDate` is only a fallback, for a pending row with no booking or value date yet. */
+/**
+ * How far back to ask the bank for an account's transactions: `askedDays`, or the shorter window
+ * the bank served the account after refusing a longer one (`Account.historyWindowDays`). An account
+ * the bank never refused, or never served, keeps `askedDays`.
+ */
+export function historyWindowFor(account: Pick<Account, 'historyWindowDays'>, askedDays: number): number {
+  const served = account.historyWindowDays;
+  return served != null && Number.isInteger(served) && served > 0 && served < askedDays ? served : askedDays;
+}
+
+/** The window, in days back from today (as `dateOffset` counts them), that began on `fetchedFrom`. */
 function dateOffset(date: Date, days: number) { const copy = new Date(date); copy.setDate(copy.getDate() - days); return isoDate(copy); }
 
 function getAppuserKey(appuserKey?: unknown): number { if (typeof appuserKey === 'number') return appuserKey; if (appuserKey && typeof appuserKey === 'object' && typeof (appuserKey as { appuserKey?: unknown }).appuserKey === 'number') return (appuserKey as { appuserKey: number }).appuserKey; return 0; }
+
 function isDuplicate(error: unknown) { if (error instanceof UniqueConstraintViolationException) return true; if (error && typeof error === 'object' && typeof (error as { code?: unknown }).code === 'string' && DUPLICATE_ERROR_CODES.has((error as { code: string }).code)) return true; if (error instanceof Error && /unique|duplicate/i.test(error.message)) return true; return false; }
+function windowDaysFrom(fetchedFrom: string): number | undefined {
+  const days = Math.round((Date.parse(isoDate(new Date())) - Date.parse(fetchedFrom)) / 86_400_000);
+  return Number.isInteger(days) && days > 0 ? days : undefined;
+}
 /** Whether a stored pending is still in this fetch's pending feed, under any identity it is stored with. */
 function isoDate(date: Date) { return date.toISOString().slice(0, 10); }
 function isStillPending(pending: Transaction, seenIdentities: Set<string>): boolean { return [pending.nordigenInternalTransactionId, pending.externalTransactionId, pending.enableBankingTransactionId].some((id) => id != null && seenIdentities.has(id)); }

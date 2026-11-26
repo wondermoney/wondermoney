@@ -78,6 +78,9 @@ const accountSummaryObjectSchema = z.object({
   isOwnedByViewer: z.boolean(),
   isPrivate: z.boolean(),
   refreshedAt: z.iso.datetime().nullable(),
+  // Set while the balance is derived from the transactions because the bank sent none; the
+  // balance then reads as of `refreshedAt`. Lenient: an older API omits it.
+  balanceDerivedAt: z.iso.datetime().nullish().catch(null),
   source: accountSourceSchema,
   csvImportFormat: csvImportFormatSchema.optional(),
   // Web reads these too (lib/api/account/useAccounts.ts). Each is optional and falls back to

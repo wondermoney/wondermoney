@@ -393,6 +393,27 @@ export async function deriveChainWithoutProviderBalance(em: ChainEntityManager, 
 }
 
 /**
+ * The balance {@link deriveChainWithoutProviderBalance} would derive for the account now, read
+ * without writing anything: the first stored row balance's opening plus every chain row's amount.
+ * Null when no row holds a stored balance, so there is nothing it would derive.
+ *
+ * For telling, once the bank sends a balance again, whether the one derived meanwhile had drifted
+ * from it (a wrong stored row balance, a cancelled oldest row, a late row the bank had already
+ * counted). Call it before the chain is rebuilt from the bank's figure.
+ */
+export async function derivedBalanceFromChain(em: ChainEntityManager, account: Account): Promise<null | number> {
+  const rows = await loadChainRows(em, account, { transactionDate: { $ne: null } });
+  const opening = openingFromFirstStoredBalance(rows);
+  if (!opening) return null;
+  return toNumber(rows.reduce((sum, row) => sum.plus(big(row.settlementAmount)), big(opening.balance)));
+}
+
+/** Whether two balances differ by more than accumulated float noise. */
+export function balancesDiffer(a: number, b: number): boolean {
+  return Math.abs(a - b) > BALANCE_TOLERANCE;
+}
+
+/**
  * What the account held before `rows`, read off the first of them (in chain order) that has a stored
  * balance: that balance minus the amounts up to and including it. Accumulating every row from it
  * reproduces each stored balance that was consistent. Null when no row has one.

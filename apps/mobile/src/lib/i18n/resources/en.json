@@ -4939,6 +4939,7 @@
     "viewAll": "View all",
     "cashflow": "Cashflow",
     "accountBalance": "Account balance",
+    "balanceAsOf": "Balance as of {{date}}",
     "available": "Available",
     "private": "Private",
     "viewOnly": "View only",
@@ -5130,6 +5131,7 @@
     "errors": {
       "account-phase-failed": "Your bank didn't send the account list.",
       "authentication": "Your bank sign-in needs to be set up again.",
+      "balance-unavailable": "Your transactions synced, but your bank didn't send a balance.",
       "cancelled": "The bank connection was cancelled before it finished.",
       "consent-expired": "Your access to this bank has expired.",
       "data-validation": "Your bank sent data we couldn't read.",

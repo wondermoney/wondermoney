@@ -25,6 +25,13 @@ import { providerIncidentCodeOf, type ProviderRateLimit, providerRateLimitOf } f
 export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
 
 /**
+ * The code a run is recorded under when it has one of its own: what the aggregator reported, or
+ * `balance_unavailable` for a run whose only shortfall is balances the bank did not give (the
+ * transactions synced; the balances were derived from them).
+ */
+export type BankSyncRunErrorCode = 'balance_unavailable' | BankReportedErrorCode;
+
+/**
  * What a phase learned about why its accounts failed, beyond the status:
  *  - `rateLimited`: the provider answered 429 and the phase stopped calling it;
  *  - `everyAccountRejected`: no account succeeded and every one failed with 400 or 401, the
@@ -33,8 +40,11 @@ export type BankSyncPhaseStatus = 'failed' | 'full_success' | 'partial';
 export interface BankSyncPhaseSignals {
   everyAccountRejected?: boolean;
   rateLimited?: ProviderRateLimit;
-  /** What the aggregator itself reported (SimpleFIN's error list); the run is recorded under it. */
-  reportedErrorCode?: BankReportedErrorCode;
+  /**
+   * What the aggregator itself reported (SimpleFIN's error list), or `balance_unavailable` on a run
+   * short only of balances; the run is recorded under it.
+   */
+  reportedErrorCode?: BankSyncRunErrorCode;
 }
 
 /**
@@ -58,6 +68,8 @@ interface ServicePhaseResult extends BankSyncPhaseSignals {
   balanceUnavailableCode?: BankReportedErrorCode;
   /** Account phase: whether one of those failures may pass on a retry (an outage, a timeout). */
   balanceUnavailableRetryable?: boolean;
+  /** Account phase: accounts whose derived balance the bank's own figure has just replaced. */
+  derivedBalanceReplacedAccountIds?: string[];
   failedAccountIds?: string[];
   institutionIds?: string[];
   status: ServicePhaseStatus;
@@ -139,6 +151,8 @@ export interface RunBankSyncPhasesInput {
       correlationId: string;
       fetchWindowDays: number;
       queueJobId: string;
+      /** Accounts whose derived balance the bank's own figure has just replaced. */
+      derivedBalanceReplacedAccountIds?: string[];
       /** Accounts whose balance the account phase did not refresh: refused, missing, or failed. */
       staleBalanceAccountIds?: string[];
     }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue; provider?: BankProvider }) => Promise<ServicePhaseResult>;
@@ -212,7 +226,8 @@ export interface RunBankSyncPhasesResult extends BankSyncPhaseSignals {
  *    so the transaction phase does not call a provider that has just refused us
  *  - the failing phase's signals (`rateLimited`, `everyAccountRejected`) are passed up
  *  - `partial` collapses: any partial anywhere returns `partial`; one whose only shortfall is
- *    balances the bank refused or did not send is marked `partialRetryable: false`
+ *    balances the bank refused or did not send is recorded as `balance_unavailable`, and marked
+ *    `partialRetryable: false` unless one of those failures may pass on a retry
  *  - both full success returns `full_success`
  */
 export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<RunBankSyncPhasesResult> {
@@ -228,7 +243,9 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
   }
   // An account the account phase failed on has a stale balance too, so it gets the same treatment.
   const staleBalanceAccountIds = [...new Set([...rawAccount.balanceUnavailableAccountIds ?? [], ...rawAccount.failedAccountIds ?? []])];
+  const derivedBalanceReplacedAccountIds = rawAccount.derivedBalanceReplacedAccountIds ?? [];
   const rawTransaction = await input.transactionService.syncTransactionsForRequisition({
+    ...(derivedBalanceReplacedAccountIds.length > 0 ? { derivedBalanceReplacedAccountIds } : {}),
     ...(staleBalanceAccountIds.length > 0 ? { staleBalanceAccountIds } : {}),
     connection: input.connection,
     correlationId: input.correlationId,
@@ -243,11 +260,15 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
     return { account, failedAt: 'transaction', rateLimited: transaction.rateLimited, status: 'partial', transaction };
   }
   if (account.status === 'partial' || transaction.status === 'partial') {
-    const reportedErrorCode = account.reportedErrorCode ?? transaction.reportedErrorCode ?? rawAccount.balanceUnavailableCode;
     const onlyBalancesMissing = transaction.status === 'full_success'
       && !account.reportedErrorCode
       && (rawAccount.failedAccountIds?.length ?? 0) === 0
       && (rawAccount.balanceUnavailableAccountIds?.length ?? 0) > 0;
+    // Short only of balances, the transactions are in: the run says so, rather than the code of
+    // why the bank gave no balance, which reads as though nothing synced.
+    const reportedErrorCode: BankSyncRunErrorCode | undefined = onlyBalancesMissing
+      ? 'balance_unavailable'
+      : account.reportedErrorCode ?? transaction.reportedErrorCode ?? rawAccount.balanceUnavailableCode;
     const partialRetryable = !onlyBalancesMissing || rawAccount.balanceUnavailableRetryable === true;
     return { account, failedAt: undefined, ...(partialRetryable ? {} : { partialRetryable: false as const }), ...(reportedErrorCode ? { reportedErrorCode } : {}), status: 'partial', transaction };
   }

@@ -15,6 +15,7 @@
 export const BANK_SYNC_ERROR_CODES = [
   'account_phase_failed',
   'authentication',
+  'balance_unavailable',
   'cancelled',
   'consent_expired',
   'data_validation',
@@ -58,6 +59,11 @@ export const BANK_SYNC_ERROR_COPY = {
   authentication: {
     action: 'reconnect',
     messageKey: 'bank-sync.errors.authentication',
+  },
+  /** The transactions synced but the bank gave no balance; the balance was derived from them. */
+  balance_unavailable: {
+    action: 'wait',
+    messageKey: 'bank-sync.errors.balance-unavailable',
   },
   cancelled: {
     action: 'reconnect',

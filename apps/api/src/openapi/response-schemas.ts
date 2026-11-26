@@ -77,6 +77,7 @@ export const accountSchema = open('Account', {
   attribution: z.object(attributionFields).openapi({ description: 'The account\u2019s attribution: its owner, or Shared when joint.' }),
   availableBalance: nullableNumber,
   balance: nullableNumber,
+  balanceDerivedAt: nullableString.openapi({ description: 'When the balance was last derived from the transactions because the bank sent none; null while it is the bank\u2019s own figure. The bank last confirmed it at `refreshedAt`.' }),
   creditCard: z.record(z.string(), z.unknown()).nullable(),
   currencyKey: z.object({ code: z.string() }),
   fxStatus: z.string(),

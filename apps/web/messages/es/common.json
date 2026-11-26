@@ -1359,6 +1359,7 @@
   "balance-growth": "Evolución del saldo",
   "account-overview": "Resumen de la cuenta",
   "account-balance": "Saldo de la cuenta",
+  "balance-as-of": "Saldo a {date}",
   "projected-balance": "Saldo previsto",
   "all-transactions": "Todas las transacciones",
   "account-overview-description": "Este es un resumen de tu cuenta, incluyendo evolución del saldo, últimas transacciones e insights.",
@@ -2913,6 +2914,7 @@
     "errors": {
       "account-phase-failed": "Tu banco no envió la lista de cuentas.",
       "authentication": "Hay que volver a configurar el acceso a tu banco.",
+      "balance-unavailable": "Tus transacciones se sincronizaron, pero tu banco no envió el saldo.",
       "cancelled": "La conexión con el banco se canceló antes de terminar.",
       "consent-expired": "Tu acceso a este banco ha caducado.",
       "data-validation": "Tu banco envió datos que no pudimos leer.",

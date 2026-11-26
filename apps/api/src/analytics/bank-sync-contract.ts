@@ -15,7 +15,7 @@ export const bankSyncResultSchema = z.enum(['full_success', 'partial', 'failed']
 const canonicalUuidSchema = z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
 const safeDimensionSchema = z.string().min(1).max(128).regex(/^[\w.:/-]+$/);
 const errorCategorySchema = z.enum(['authentication', 'cancelled', 'consent', 'data_validation', 'internal', 'provider', 'queue', 'timeout', 'unknown']);
-const errorCodeSchema = z.enum(['account_phase_failed', 'authentication', 'cancelled', 'consent_expired', 'data_validation', 'institution_action_required', 'institution_unavailable', 'internal', 'invalid_requisition', 'provider_unavailable', 'queue_unavailable', 'rate_limited', 'timeout', 'transaction_phase_failed', 'unknown', 'unsupported_currency']);
+const errorCodeSchema = z.enum(['account_phase_failed', 'authentication', 'balance_unavailable', 'cancelled', 'consent_expired', 'data_validation', 'institution_action_required', 'institution_unavailable', 'internal', 'invalid_requisition', 'provider_unavailable', 'queue_unavailable', 'rate_limited', 'timeout', 'transaction_phase_failed', 'unknown', 'unsupported_currency']);
 
 const bankSyncEventSchema = z.object({
   account_count: z.number().int().nonnegative().optional(),
@@ -87,6 +87,7 @@ const NORMALIZED_ERRORS: Readonly<Record<string, Readonly<{ error_category: stri
   aborted: { error_category: 'cancelled', error_code: 'cancelled' },
   account_phase_failed: { error_category: 'provider', error_code: 'account_phase_failed' },
   authentication: { error_category: 'authentication', error_code: 'authentication' },
+  balance_unavailable: { error_category: 'provider', error_code: 'balance_unavailable' },
   consent_expired: { error_category: 'consent', error_code: 'consent_expired' },
   data_validation: { error_category: 'data_validation', error_code: 'data_validation' },
   etimedout: { error_category: 'timeout', error_code: 'timeout' },
