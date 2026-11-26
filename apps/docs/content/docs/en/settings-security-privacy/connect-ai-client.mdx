@@ -115,7 +115,7 @@ MCP traffic uses the token's own request budget, and each token may make a limit
 
 The server is on by default. Set `MCP_ENABLED=false` on the API to turn it off: `POST /v1/mcp` then answers `404`, and `GET /v1/instance` reports `features.mcp: false`, so the settings panel disappears. See [Configure](/en/docs/self-hosting/configure).
 
-OAuth, which ChatGPT needs, is off by default. Set `MCP_OAUTH_ENABLED=true` on the API to offer it. It needs an `https` `API_URL`, and it lets any client register itself, as MCP clients expect; each still needs a person's consent. With it on, the API serves the discovery documents at `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`, and a `401` from `POST /v1/mcp` points the client at them. On one hostname, route `/.well-known/oauth-*` to the API as well; the bundled proxy does.
+OAuth, which ChatGPT needs, is off by default. Set `MCP_OAUTH_ENABLED=true` on the API to offer it. It needs an `https` `API_URL`, and it lets any client register itself, as MCP clients expect; each still needs a person's consent. With it on, the API serves the discovery documents at `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`, and a `401` from `POST /v1/mcp` points the client at them. On one hostname, route `/.well-known/oauth-*` to the API as well; the bundled proxy does. Turned off again, no client can connect or call the server with OAuth, and clients connected earlier stay listed in Settings so people can disconnect them.
 
 ## Related pages
 

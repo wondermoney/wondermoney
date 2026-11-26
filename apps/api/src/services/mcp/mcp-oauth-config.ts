@@ -14,7 +14,8 @@ export const MCP_OAUTH_READ_SCOPE = 'mcp:read';
 export const MCP_OAUTH_SCOPES = [MCP_OAUTH_READ_SCOPE, 'offline_access'] as const;
 
 /**
- * The access-token claim naming the household (tenant key, as a string) the person consented for.
+ * The access-token claim naming the household the person consented for, as an opaque reference
+ * (`mcpOAuthHouseholdReference` in services/auth/better-auth.ts), never the tenant key itself.
  * `middleware/mcp-auth.ts` refuses the token once the person is in another household.
  */
 export const MCP_OAUTH_HOUSEHOLD_CLAIM = 'wm_household';

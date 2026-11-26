@@ -45,7 +45,8 @@
     "oauth-cancel": "Cancel",
     "oauth-revoked": "Client disconnected",
     "oauth-error-revoke": "Could not disconnect the client. Try again.",
-    "oauth-device-redirect": "an app on this device (<code>{app}</code>)"
+    "oauth-device-redirect": "an app on this device (<code>{app}</code>)",
+    "oauth-off-note": "OAuth is turned off on this server, so these clients can no longer connect. You can still disconnect them."
   },
   "oauthConsent": {
     "title": "{client} wants to read your finances on {instanceName}",

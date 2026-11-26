@@ -419,10 +419,8 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     expect(tokens.status).toBe(200);
     expect((await listAccounts((tokens.body as { access_token: string }).access_token)).status).toBe(200);
 
-    // Consent given, the next authorization comes straight back with a code.
     const second = pkce();
-    const again = await request(app).get(authorizeUrl(discovery, clientId, { challenge: second.challenge })).set('Cookie', cookie).expect(302);
-    const secondCode = new URL(String(again.headers['location'])).searchParams.get('code') ?? '';
+    const secondCode = await consent(discovery, clientId, cookie, { challenge: second.challenge });
     const dpop = await request(app).post(pathOf(discovery.token_endpoint)).set('DPoP', 'eyJhbGciOiJFUzI1NiJ9.e30.c2ln').type('form')
       .send({ client_id: clientId, code: secondCode, code_verifier: second.verifier, grant_type: 'authorization_code', redirect_uri: REDIRECT_URI, resource: discovery.resource });
     expect(dpop.status).toBe(400);
@@ -468,5 +466,65 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
 
     expect((await listAccounts(tokens.access_token)).status).toBe(401);
     expect((await request(app).get('/v1/user/mcp-clients').set('Cookie', cookie).expect(200)).body.clients).toEqual([]);
+  });
+
+  it('never issues a code without the consent step, even for a client the person allowed before', async () => {
+    const { household } = await householdWithPartner();
+    const { clientId, cookie, discovery } = await connect(household.appuser);
+    const login = loginOf.get(household.appuser.appuserKey);
+    if (!login) throw new Error('no login');
+    // Since then: the session is 20 days old and two-factor is on.
+    await sql(`update better_auth.session set "createdAt" = now() - interval '20 days' where "userId" = ?`, [login.userId]);
+    await sql(`update better_auth."user" set "twoFactorEnabled" = true where id = ?`, [login.userId]);
+
+    const silent = await request(app).get(`${authorizeUrl(discovery, clientId, { challenge: pkce().challenge })}&prompt=none`).set('Cookie', cookie);
+    expect(silent.status).toBe(302);
+    const silentTarget = new URL(String(silent.headers['location']));
+    expect(`${silentTarget.origin}${silentTarget.pathname}`).toBe(REDIRECT_URI);
+    expect(silentTarget.searchParams.get('error')).toBe('consent_required');
+    expect(silentTarget.searchParams.get('code')).toBeNull();
+
+    const plain = await request(app).get(authorizeUrl(discovery, clientId, { challenge: pkce().challenge })).set('Cookie', cookie);
+    const plainTarget = new URL(String(plain.headers['location']));
+    expect(`${plainTarget.origin}${plainTarget.pathname}`).toBe(new URL('oauth/consent', `${FRONTEND_URL}/`).toString());
+
+    // better-auth's continue step dispatches an authorization of its own: that too ends on the consent page.
+    const continued = await request(app).post('/api/auth/oauth2/continue').set('Origin', FRONTEND_URL).set('Cookie', cookie)
+      .send({ oauth_query: plainTarget.search.slice(1), postLogin: true });
+    expect(JSON.stringify(continued.body)).not.toContain('code=');
+
+    // And the consent itself now asks for a fresh session.
+    expect((await postConsent(cookie, { accept: true, oauth_query: plainTarget.search.slice(1) })).body.code).toBe('session_not_fresh');
+  });
+
+  it('refuses a refresh that drops offline_access, so every token from the grant stays tied to its refresh tokens', async () => {
+    const { household } = await householdWithPartner();
+    const { clientId, discovery, tokens } = await connect(household.appuser);
+
+    const narrowed = await request(app).post(pathOf(discovery.token_endpoint)).type('form')
+      .send({ client_id: clientId, grant_type: 'refresh_token', refresh_token: tokens.refresh_token, resource: discovery.resource, scope: 'mcp:read' });
+
+    expect(narrowed.status).toBe(400);
+    expect(narrowed.body.error).toBe('invalid_scope');
+  });
+
+  it('keeps better-auth\'s own consent routes closed: grants are managed in Settings', async () => {
+    const { household } = await householdWithPartner();
+    const { clientId, cookie } = await connect(household.appuser);
+
+    expect((await request(app).get('/api/auth/oauth2/get-consents').set('Cookie', cookie)).status).toBe(403);
+    expect((await request(app).get(`/api/auth/oauth2/get-consent?id=${clientId}`).set('Cookie', cookie)).status).toBe(403);
+    expect((await request(app).post('/api/auth/oauth2/delete-consent').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({ id: clientId })).status).toBe(403);
+    expect((await request(app).post('/api/auth/oauth2/update-consent').set('Origin', FRONTEND_URL).set('Cookie', cookie).send({ id: clientId, update: { scopes: ['mcp:read'] } })).status).toBe(403);
+  });
+
+  it('names the household in a token by an opaque reference, never its key', async () => {
+    const { household } = await householdWithPartner();
+    const { tokens } = await connect(household.appuser);
+
+    const claims = JSON.parse(Buffer.from(tokens.access_token.split('.')[1] ?? '', 'base64url').toString()) as Record<string, unknown>;
+
+    expect(claims['wm_household']).toEqual(expect.stringMatching(/^[\w-]{43}$/));
+    expect(claims['wm_household']).not.toBe(String(household.tenant.tenantKey));
   });
 });

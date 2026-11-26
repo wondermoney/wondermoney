@@ -199,23 +199,32 @@ describe('POST /v1/mcp', () => {
     expect(response.status).toBe(401);
   });
 
-  it('refuses junk tokens from one address past 300 failures a quarter hour, and still lets a valid token through', async () => {
+  it('leaves junk tokens to the per-IP backstop while OAuth is off, as before', async () => {
     const { token } = await seedToken();
-    const statuses: number[] = [];
-    for (let i = 0; i < 300; i += 1) {
-      statuses.push((await post(i % 2 === 0 ? `not-a-token-${i}` : `wm_pat_unknown${i}`, initialize)).status);
-    }
-    expect(new Set(statuses)).toEqual(new Set([401]));
+    for (let i = 0; i < 301; i += 1) expect((await post(`wm_pat_unknown${i}`, initialize)).status).toBe(401);
+    expect((await post(token, initialize)).status).toBe(200);
+  });
 
-    const overBudget = await post('not-a-token-301', initialize);
+  it('with OAuth on, refuses unknown personal tokens from one address past 300 a quarter hour, before looking them up', async () => {
+    vi.stubEnv('MCP_OAUTH_ENABLED', 'true');
+    const { apiToken, token } = await seedToken();
+    for (let i = 0; i < 300; i += 1) expect((await post(`wm_pat_unknown${i}`, initialize)).status).toBe(401);
+
+    const overBudget = await post('wm_pat_unknown301', initialize);
     expect(overBudget.status).toBe(429);
     expect(Number(overBudget.headers['retry-after'])).toBeGreaterThan(0);
+    // Over budget, a personal token from that address is refused before its lookup, so its
+    // last use is not recorded.
+    expect((await post(token, initialize)).status).toBe(429);
+    expect((await db.em().findOneOrFail(ApiToken, { apiTokenKey: apiToken.apiTokenKey })).lastUsedAt ?? null).toBeNull();
+  });
 
-    // A valid token from the same address is never counted, so it still works, and again.
-    expect((await post(token, initialize)).status).toBe(200);
-    expect((await post(token, initialize)).status).toBe(200);
-    // A request with no bearer at all is the per-IP backstop's, not this budget's.
-    expect((await post(null, initialize)).status).toBe(401);
+  it('does not count an expired or revoked personal token as a failed authentication', async () => {
+    vi.stubEnv('MCP_OAUTH_ENABLED', 'true');
+    const { token } = await seedToken();
+    await db.em().nativeUpdate(ApiToken, { secretHash: hashApiToken(token) }, { expiresAt: new Date(Date.now() - 1_000) });
+
+    for (let i = 0; i < 301; i += 1) expect((await post(token, initialize)).status).toBe(401);
   });
 
   it('answers 404 when MCP_ENABLED is false', async () => {

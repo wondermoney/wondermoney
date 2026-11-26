@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { createHmac, randomUUID } from 'crypto';
 import type { IncomingHttpHeaders } from 'http';
 
 import { expo } from '@better-auth/expo';
@@ -300,7 +300,10 @@ const auth = betterAuth({
     ...(mcpOAuthResource
       ? mcpOAuthPlugins({
         appUrl: FRONTEND_URL,
-        householdOf: (userId) => householdOfUser(userId),
+        householdReferenceOf: async (userId) => {
+          const household = await householdOfUser(userId);
+          return household === null ? null : mcpOAuthHouseholdReference(household);
+        },
         resource: mcpOAuthResource,
         // Called from a hook once a request is under way, by which time `auth` exists.
         verifyTotp: async (headers, code) => {
@@ -722,6 +725,16 @@ export const findMcpOAuthGrant = async (
 function stringList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
 }
+
+/**
+ * The household an OAuth consent and its tokens are bound to, as they carry it: an HMAC of the
+ * tenant key with the auth secret, so a token neither reveals the sequential key nor can name
+ * another household. `/v1/mcp` recomputes it for the person's current household and compares.
+ */
+export const mcpOAuthHouseholdReference = (tenantKey: number): string =>
+  createHmac('sha256', authConfig.betterAuthSecret ?? 'wondermoney-development-secret')
+    .update(`mcp-oauth-household:${tenantKey}`)
+    .digest('base64url');
 
 /**
  * The household `userId` (a better-auth user id) belongs to now: their one active membership's

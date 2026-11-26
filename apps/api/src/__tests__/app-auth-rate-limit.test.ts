@@ -140,6 +140,17 @@ describe('Auth endpoint rate limiting', () => {
     expect(overLimit.status).toBe(429);
   });
 
+  it('rate-limits OAuth consent, which checks the authenticator code, on the same budget', async () => {
+    const app = await loadApp();
+
+    for (let i = 0; i < AUTH_LIMIT; i += 1) {
+      expect((await request(app.host).post('/api/auth/oauth2/consent').send({ accept: true })).status).toBe(200);
+    }
+
+    const overLimit = await request(app.host).post('/api/auth/oauth2/consent').send({ accept: true });
+    expect(overLimit.status).toBe(429);
+  });
+
   it('rate-limits passkey sign-in on the auth budget', async () => {
     const app = await loadApp();
 

@@ -4,6 +4,7 @@ import { ipKeyGenerator, MemoryStore, rateLimit, type RateLimitInfo, type Option
 import { StatusCodes } from 'http-status-codes';
 
 import { IS_PROD } from '@config/env';
+import { isMcpOAuthRequested } from '@config/mcp';
 import { mcpCredentialKey } from '@service/mcp/mcp-types';
 import { ERROR_CODE } from '@utils/errors';
 import logger from '@utils/logger';
@@ -165,11 +166,13 @@ export const RATE_LIMIT_FAMILIES = {
   marketData: { limit: 600, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
 
   /**
-   * Failed authentications on `POST /v1/mcp`, per address: a bearer that is malformed, an unknown
-   * or revoked personal token, an OAuth token with a bad signature, the wrong audience, expired
-   * or revoked. MCP calls with a bearer skip the per-IP backstop (`isSharedEgressRequest`), so
-   * this is what bounds junk tokens from one address. Only failures count: a valid credential
-   * from the same address always gets through, budgeted per token or grant instead. Never
+   * Failed authentications on `POST /v1/mcp` while OAuth is on (`MCP_OAUTH_ENABLED`), per address:
+   * an OAuth token whose signature or issuer does not check out, a bearer that is no token at all,
+   * and an unknown personal token. A token that is genuine but expired, for another audience or
+   * revoked is refused without counting. MCP calls with a bearer skip the per-IP backstop then
+   * (`isSharedEgressRequest`), so this bounds junk from one address. The count is read before
+   * anything is looked up: once an address is over it, a personal-token-shaped bearer is refused
+   * without a database lookup, and an OAuth token only gets past with a valid signature. Never
    * relaxed: it guards a credential check.
    */
   mcpAuthFailure: { limit: 300, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
@@ -356,44 +359,47 @@ function buildLimitHandler(family: RateLimitFamilyName) {
   };
 }
 
-/** One counted credential check: settle it as a success (uncounted) or ask whether a failure is over budget. */
-export interface AuthAttempt {
+/** One address's failed credential checks, read before the credential is looked at. */
+export interface AuthFailureBudget {
+  /** The address has used its budget: the next failure would be refused. */
+  overBudget: boolean;
+  /** Answer 429 with `Retry-After`, as every limiter here does. */
+  refuse: (res: Response) => void;
   /**
-   * The credential failed. True when the address is over the family's budget: a 429 with
-   * `Retry-After` has been sent, as every limiter here sends it, and the caller stops.
+   * Count one failed check. True when that takes the address past its budget: a 429 has been
+   * sent and the caller stops; false, and the caller sends its own 401.
    */
-  failedOverLimit: (res: Response) => boolean;
-  /** The credential was valid: the attempt is taken back off the count. */
-  succeeded: () => Promise<void>;
+  failed: (res: Response) => Promise<boolean>;
 }
 
 /**
  * A per-address budget on failed credential checks, in the same kind of store as every other
- * family (express-rate-limit's in-process `MemoryStore`, one per limiter).
- *
- * Unlike a limiter, it never refuses a request up front: `attempt` counts the request before the
- * credential is looked at (so even a reject that costs nothing, a malformed or wrong-prefix
- * bearer, is counted, and a lookup that fails half-way still is), a valid credential takes its
- * count back, and only a failure past the budget answers 429. A valid credential from an address
- * that is over budget therefore still works.
+ * family (express-rate-limit's in-process `MemoryStore`, one per limiter). Unlike a limiter it
+ * counts only what the caller reports as a failure, and it lets the caller read the count before
+ * looking anything up, so an address over budget can be turned away before any database work.
  */
-export function createAuthFailureLimiter(family: RateLimitFamilyName): { attempt: (req: Request) => Promise<AuthAttempt>; reset: () => Promise<void> } {
+export function createAuthFailureLimiter(family: RateLimitFamilyName): { check: (req: Request) => Promise<AuthFailureBudget>; reset: () => Promise<void> } {
   const { windowMs } = RATE_LIMIT_FAMILIES[family];
   const limit = resolveFamilyLimit(family);
   const store = new MemoryStore();
   store.init({ windowMs } as RateLimitOptions);
+  const refuse = (req: Request, res: Response, resetTime: Date | undefined) => {
+    (req as Request & { rateLimit?: Partial<RateLimitInfo> }).rateLimit = { limit, resetTime };
+    buildLimitHandler(family)(req, res, () => undefined);
+  };
   return {
-    attempt: async (req) => {
+    check: async (req) => {
       const key = buildRateLimitKey(req, 'ip');
-      const info = await store.increment(key);
+      const current = await store.get(key);
       return {
-        failedOverLimit: (res) => {
+        failed: async (res) => {
+          const info = await store.increment(key);
           if (info.totalHits <= limit) return false;
-          (req as Request & { rateLimit?: Partial<RateLimitInfo> }).rateLimit = { limit, resetTime: info.resetTime };
-          buildLimitHandler(family)(req, res, () => undefined);
+          refuse(req, res, info.resetTime);
           return true;
         },
-        succeeded: () => store.decrement(key),
+        overBudget: (current?.totalHits ?? 0) >= limit,
+        refuse: (res) => { refuse(req, res, current?.resetTime); },
       };
     },
     reset: async () => {
@@ -428,15 +434,24 @@ export const isHealthCheckPath = (req: Request): boolean =>
 
 /**
  * Traffic that arrives from a shared egress, many people behind one address: ChatGPT and other
- * hosted MCP clients call the MCP server and read its OAuth discovery documents from a handful
- * of their own addresses. A per-IP budget would let one busy client lock everyone out, so these
- * skip the backstop: an MCP call with a bearer credential is budgeted per credential (the
- * `apiToken` family and the per-minute tool-call cap, both keyed on the token or the OAuth grant),
- * and the discovery documents are static.
+ * hosted MCP clients call the MCP server, read its OAuth discovery documents and refresh tokens
+ * from a handful of their own addresses. A per-IP budget would let one busy client lock everyone
+ * out, so, while OAuth is on (off, nothing changes), these skip the backstop: an MCP call with a
+ * bearer credential is budgeted per credential (the `apiToken` family and the per-minute tool-call
+ * cap, keyed on the token or the OAuth grant) and its failures per address (`mcpAuthFailure`),
+ * the token and registration endpoints by better-auth's own limits, and the discovery documents
+ * are static.
  */
 export const isSharedEgressRequest = (req: Request): boolean =>
-  (req.path === '/v1/mcp' && /^bearer\s+\S/i.test(req.get('authorization') ?? ''))
-  || req.path.startsWith('/.well-known/oauth-');
+  // The switch as set (`MCP_OAUTH_ENABLED` and the MCP server on), read here without the API
+  // address so this module loads before the instance URLs are known.
+  isMcpOAuthRequested() && (
+    (req.path === '/v1/mcp' && /^bearer\s+\S/i.test(req.get('authorization') ?? ''))
+    || req.path.startsWith('/.well-known/oauth-')
+    // Budgeted by better-auth's own OAuth limits instead (services/auth/mcp-oauth.ts).
+    || req.path === '/api/auth/oauth2/token'
+    || req.path === '/api/auth/oauth2/register'
+  );
 
 // ---------------------------------------------------------------------------
 // Ready-made limiters.

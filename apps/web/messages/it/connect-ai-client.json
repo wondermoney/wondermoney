@@ -45,7 +45,8 @@
     "oauth-cancel": "Annulla",
     "oauth-revoked": "Client scollegato",
     "oauth-error-revoke": "Impossibile scollegare il client. Riprova.",
-    "oauth-device-redirect": "un'app su questo dispositivo (<code>{app}</code>)"
+    "oauth-device-redirect": "un'app su questo dispositivo (<code>{app}</code>)",
+    "oauth-off-note": "OAuth è disattivato su questo server, quindi questi client non possono più collegarsi. Puoi comunque scollegarli."
   },
   "oauthConsent": {
     "title": "{client} vuole leggere le tue finanze su {instanceName}",

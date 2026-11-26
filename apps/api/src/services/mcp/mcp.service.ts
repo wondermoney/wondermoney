@@ -125,7 +125,6 @@ export function methodNotAllowed(_req: Request, res: Response): void {
   res.status(405).json(jsonRpcError(-32000, 'Method not allowed.'));
 }
 
-/** MCP's `structuredContent` is a JSON object; a tool whose data is anything else is wrapped. */
 async function audit(
   identity: McpRequestIdentity,
   toolName: string,
@@ -155,6 +154,7 @@ function toolError(message: string) {
   return { content: [{ text: message, type: 'text' as const }], isError: true };
 }
 
+/** MCP's `structuredContent` is a JSON object; a tool whose data is anything else is wrapped. */
 function toStructuredContent(data: unknown): Record<string, unknown> {
   return typeof data === 'object' && data !== null && !Array.isArray(data) ? data as Record<string, unknown> : { result: data };
 }

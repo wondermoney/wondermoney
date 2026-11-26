@@ -32,9 +32,18 @@ function clientLabel(client: McpOAuthClient, fallback: string): string {
 /**
  * Settings > API tokens > Connect an AI client > Connected with OAuth: how to add the server to
  * ChatGPT (or any client that signs in with OAuth), and the clients the member has allowed, each
- * revocable. Shown only when the server offers OAuth (`features.mcpOAuth`).
+ * revocable. While the server offers OAuth (`features.mcpOAuth`) it says how to connect; once the
+ * operator turns it off, the clients allowed earlier stay listed, with a note that they no
+ * longer work, so the member can still disconnect them. Nothing shows when it is off and there
+ * are none.
  */
-export default function McpOAuthClients({ endpoint }: { endpoint: string }) {
+export default function McpOAuthClients({
+  endpoint,
+  oauthEnabled,
+}: {
+  endpoint: string;
+  oauthEnabled: boolean;
+}) {
   const t = useTranslations("connectAiClient");
   const locale = useLocale();
   const { data: clients = [], isLoading } = useMcpOAuthClients();
@@ -53,6 +62,8 @@ export default function McpOAuthClients({ endpoint }: { endpoint: string }) {
     }
   };
 
+  if (!oauthEnabled && (isLoading || clients.length === 0)) return null;
+
   return (
     <section className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
       <div>
@@ -63,12 +74,16 @@ export default function McpOAuthClients({ endpoint }: { endpoint: string }) {
       </div>
 
       <div className="bg-card flex flex-col gap-4 rounded p-4 md:col-span-2">
-        <div className="flex flex-col gap-1.5">
-          <Text className="font-medium">{t("oauth-chatgpt-title")}</Text>
-          <Text variant="mutedText">
-            {t("oauth-chatgpt-steps", { endpoint })}
-          </Text>
-        </div>
+        {oauthEnabled ? (
+          <div className="flex flex-col gap-1.5">
+            <Text className="font-medium">{t("oauth-chatgpt-title")}</Text>
+            <Text variant="mutedText">
+              {t("oauth-chatgpt-steps", { endpoint })}
+            </Text>
+          </div>
+        ) : (
+          <Text variant="mutedText">{t("oauth-off-note")}</Text>
+        )}
 
         {isLoading ? (
           <Text variant="mutedText">{t("oauth-loading")}</Text>

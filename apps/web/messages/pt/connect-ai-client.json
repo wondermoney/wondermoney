@@ -45,7 +45,8 @@
     "oauth-cancel": "Cancelar",
     "oauth-revoked": "Cliente desligado",
     "oauth-error-revoke": "Não foi possível desligar o cliente. Tenta novamente.",
-    "oauth-device-redirect": "uma app neste dispositivo (<code>{app}</code>)"
+    "oauth-device-redirect": "uma app neste dispositivo (<code>{app}</code>)",
+    "oauth-off-note": "O OAuth está desligado neste servidor, por isso estes clientes já não se conseguem ligar. Podes continuar a desligá-los."
   },
   "oauthConsent": {
     "title": "{client} quer ler as tuas finanças em {instanceName}",

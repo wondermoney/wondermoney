@@ -381,8 +381,22 @@ describe('rate-limit families', () => {
   });
 
   describe('shared egress exemption', () => {
-    it('lets authenticated MCP calls and the OAuth discovery documents past the per-IP backstop, and nothing else', async () => {
+    it('with OAuth off, exempts nothing, as before', async () => {
       const { globalBackstopRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.all('/*splat', (_req, res) => res.sendStatus(200));
+
+      const mcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.78').set('Authorization', 'Bearer some-access-token');
+      const token = await request(app).post('/api/auth/oauth2/token').set('X-Forwarded-For', '198.51.100.78');
+
+      expect(mcp.headers['ratelimit']).toBeDefined();
+      expect(token.headers['ratelimit']).toBeDefined();
+    });
+
+    it('lets authenticated MCP calls, the OAuth discovery documents and the token and registration endpoints past the per-IP backstop, and nothing else', async () => {
+      const { globalBackstopRateLimit } = await loadRateLimitModule({ ...PRODUCTION_ENV, MCP_OAUTH_ENABLED: 'true' });
       const app = express();
       app.set('trust proxy', true);
       app.use(globalBackstopRateLimit());
@@ -395,8 +409,15 @@ describe('rate-limit families', () => {
       const anonymousMcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', ip);
       const other = await request(app).get('/v1/budget').set('X-Forwarded-For', ip).set('Authorization', 'Bearer some-access-token');
 
+      const token = await request(app).post('/api/auth/oauth2/token').set('X-Forwarded-For', ip);
+      const register = await request(app).post('/api/auth/oauth2/register').set('X-Forwarded-For', ip);
+      const consent = await request(app).post('/api/auth/oauth2/consent').set('X-Forwarded-For', ip);
+
       expect(mcp.headers['ratelimit']).toBeUndefined();
       expect(metadata.headers['ratelimit']).toBeUndefined();
+      expect(token.headers['ratelimit']).toBeUndefined();
+      expect(register.headers['ratelimit']).toBeUndefined();
+      expect(consent.headers['ratelimit']).toBeDefined();
       expect(anonymousMcp.headers['ratelimit']).toBeDefined();
       expect(other.headers['ratelimit']).toBeDefined();
     });

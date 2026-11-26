@@ -160,10 +160,29 @@ test("renders nothing when the instance has MCP disabled", () => {
   assert.equal(screen.queryByText("Connect an AI client"), null);
 });
 
-test("offers no OAuth section while the server does not offer OAuth", () => {
+test("offers no OAuth section while the server does not offer OAuth and nothing is connected", () => {
   renderPanel();
 
   assert.equal(screen.queryByText("Connect ChatGPT"), null);
+  assert.equal(screen.queryByText("Connected with OAuth"), null);
+});
+
+test("with OAuth turned off, still lists clients allowed earlier so they can be disconnected", () => {
+  state.oauthClients = [
+    {
+      clientId: "client-1",
+      connectedAt: "2026-11-20T10:00:00.000Z",
+      lastUsedAt: null,
+      name: "ChatGPT",
+      redirectOrigins: ["https://chatgpt.com"],
+      scopes: ["mcp:read"],
+    },
+  ];
+  renderPanel();
+
+  assert.equal(screen.queryByText("Connect ChatGPT"), null);
+  assert.ok(screen.getByText(/OAuth is turned off on this server/));
+  assert.ok(screen.getByRole("button", { name: "Disconnect" }));
 });
 
 test("lists the OAuth clients the member allowed and disconnects one", async () => {

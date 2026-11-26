@@ -169,7 +169,8 @@ export default class Application {
       // is untouched. The shared `authExchangeRateLimit` family in
       // `@middleware/rate-limit` already implements the per-family budget.
       this.host.use(
-        ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor'],
+        // The OAuth consent checks the authenticator code, so it shares the two-factor budget.
+        ['/api/auth/sign-in', '/api/auth/forget-password', '/api/auth/reset-password', '/api/auth/two-factor', '/api/auth/oauth2/consent'],
         authExchangeRateLimit(),
       );
       // Passkey sign-in and passkey management: the same family, its own store (see the factory).

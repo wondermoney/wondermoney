@@ -115,7 +115,7 @@ O tráfego MCP usa o orçamento de pedidos do próprio token, e cada token pode 
 
 O servidor está ligado por omissão. Define `MCP_ENABLED=false` na API para o desligar: `POST /v1/mcp` passa a responder `404`, e `GET /v1/instance` reporta `features.mcp: false`, pelo que o painel das definições desaparece. Consulta [Configurar](/pt/docs/self-hosting/configure).
 
-O OAuth, de que o ChatGPT precisa, está desligado por omissão. Define `MCP_OAUTH_ENABLED=true` na API para o oferecer. Precisa de um `API_URL` com `https`, e permite que qualquer cliente se registe, como os clientes MCP esperam; cada um continua a precisar do consentimento de uma pessoa. Com ele ligado, a API serve os documentos de descoberta em `/.well-known/oauth-protected-resource` e `/.well-known/oauth-authorization-server`, e um `401` de `POST /v1/mcp` indica-os ao cliente. Com um só nome de anfitrião, encaminha também `/.well-known/oauth-*` para a API; o proxy incluído já o faz.
+O OAuth, de que o ChatGPT precisa, está desligado por omissão. Define `MCP_OAUTH_ENABLED=true` na API para o oferecer. Precisa de um `API_URL` com `https`, e permite que qualquer cliente se registe, como os clientes MCP esperam; cada um continua a precisar do consentimento de uma pessoa. Com ele ligado, a API serve os documentos de descoberta em `/.well-known/oauth-protected-resource` e `/.well-known/oauth-authorization-server`, e um `401` de `POST /v1/mcp` indica-os ao cliente. Com um só nome de anfitrião, encaminha também `/.well-known/oauth-*` para a API; o proxy incluído já o faz. Se o voltares a desligar, nenhum cliente se consegue ligar nem chamar o servidor com OAuth, e os clientes ligados antes continuam nas definições para que as pessoas os possam desligar.
 
 ## Páginas relacionadas
 

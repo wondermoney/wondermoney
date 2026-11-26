@@ -3,16 +3,16 @@ import type { NextFunction, Request, Response } from 'express';
 import { DI } from '@app/app';
 import { setTenantContext } from '@app/database/filters/tenant-filter';
 import { isMcpEnabled } from '@config/mcp';
-import type { ApiTokenScope } from '@entity/ApiToken';
+import { ApiToken, type ApiTokenScope } from '@entity/ApiToken';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import type { Tenant } from '@entity/Tenant';
 import { MCP_SCOPES } from '@middleware/api-token-policy';
 import { getBearerToken } from '@middleware/auth-helpers';
-import { type AuthAttempt, createAuthFailureLimiter } from '@middleware/rate-limit';
+import { type AuthFailureBudget, createAuthFailureLimiter } from '@middleware/rate-limit';
 import { recordUserActive } from '@service/analytics/service-events.service';
-import { authenticateApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
-import { revokeMcpOAuthGrant } from '@service/auth/better-auth';
+import { authenticateApiToken, hashApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
+import { mcpOAuthHouseholdReference, revokeMcpOAuthGrant } from '@service/auth/better-auth';
 import { MCP_OAUTH_READ_SCOPE, mcpOAuthResourceIfEnabled, protectedResourceMetadataUrl } from '@service/mcp/mcp-oauth-config';
 import { verifyMcpOAuthAccessToken } from '@service/mcp/mcp-oauth-token.service';
 import type { McpCredential } from '@service/mcp/mcp-types';
@@ -66,16 +66,22 @@ function setChallenge(res: Response, resource: null | string, error?: 'insuffici
 export async function requireMcpToken(req: Request, res: Response, next: NextFunction): Promise<void> {
   const oauthResource = mcpOAuthResourceIfEnabled();
   const bearer = getBearerToken(req.headers.authorization);
-  // A request without any bearer is still under the per-IP backstop; one with a bearer is not
-  // (`isSharedEgressRequest`), so its check is counted here, before anything is looked up.
+  // While OAuth is on, a request with a bearer skips the per-IP backstop
+  // (`isSharedEgressRequest`), so its failures are budgeted per address here; the count is read
+  // now, before anything is looked up. Off, the backstop applies as it always has.
   const hasBearerHeader = /^bearer\s+\S/i.test(req.get('authorization') ?? '');
-  const attempt = hasBearerHeader ? await mcpAuthFailures.attempt(req) : null;
-  const outcome = createOutcome(res, next, attempt);
+  const budget = oauthResource && hasBearerHeader ? await mcpAuthFailures.check(req) : null;
+  const outcome = createOutcome(res, next, budget);
 
   // Anything that is not a personal API token is read as an OAuth access token. (Asked as a plain
   // boolean: `isApiTokenShaped` is a type guard, which would narrow every other bearer away.)
   const isPersonalToken = (value: string): boolean => isApiTokenShaped(value);
   if (bearer !== null && isPersonalToken(bearer)) {
+    // Over budget, a personal-token-shaped bearer is turned away before its database lookup.
+    if (budget?.overBudget) {
+      budget.refuse(res);
+      return;
+    }
     await authenticateWithApiToken(req, res, outcome, bearer, oauthResource);
     return;
   }
@@ -86,14 +92,14 @@ export async function requireMcpToken(req: Request, res: Response, next: NextFun
   }
 
   setChallenge(res, oauthResource);
-  outcome.rejected(new UnauthorizedError(oauthResource
+  await outcome.rejected(bearer !== null, new UnauthorizedError(oauthResource
     ? 'An MCP request needs an OAuth access token or a personal API token with the mcp:read scope.'
     : 'An MCP request needs a personal API token with the mcp:read or mcp:propose scope.'));
 }
 
 /**
- * Failed bearer checks on `/v1/mcp`, per address (`mcpAuthFailure`, 300 per quarter hour). Only
- * failures count: a valid credential takes its attempt back and is never refused here.
+ * Failed bearer checks on `/v1/mcp` while OAuth is on, per address (`mcpAuthFailure`, 300 per
+ * quarter hour): forged OAuth tokens and unknown personal tokens.
  */
 const mcpAuthFailures = createAuthFailureLimiter('mcpAuthFailure');
 
@@ -104,12 +110,16 @@ export function resetMcpAuthFailures(): Promise<void> {
 
 /** How one check ends: the credential was valid (whatever it may reach), or it was not. */
 interface McpAuthOutcome {
-  /** Valid credential, refused for what it carries (a missing scope): not a failed authentication. */
-  forbidden: (error: Error) => Promise<void>;
+  /** Valid credential, refused for what it carries (a missing scope). */
+  forbidden: (error: Error) => void;
   /** Valid credential: on to the server. */
-  passed: () => Promise<void>;
-  /** Failed authentication: counted, and a 429 instead of the 401 once the address is over budget. */
-  rejected: (error: Error) => void;
+  passed: () => void;
+  /**
+   * Refused credential. `counted` when it is a failed authentication (`mcpAuthFailure`): a forged
+   * token or an unknown personal token, which answers 429 instead of 401 past the budget. A
+   * genuine token that is expired, for another audience or revoked is not counted.
+   */
+  rejected: (counted: boolean, error: Error) => Promise<void>;
 }
 
 async function authenticateWithApiToken(req: Request, res: Response, outcome: McpAuthOutcome, bearer: string, oauthResource: null | string): Promise<void> {
@@ -119,18 +129,21 @@ async function authenticateWithApiToken(req: Request, res: Response, outcome: Mc
   } catch (error) {
     logger.error(`MCP token lookup failed: ${error}`);
     setChallenge(res, oauthResource, 'invalid_token');
-    outcome.rejected(new UnauthorizedError('Invalid API token'));
+    await outcome.rejected(false, new UnauthorizedError('Invalid API token'));
     return;
   }
   if (!authenticated) {
     setChallenge(res, oauthResource, 'invalid_token');
-    outcome.rejected(new UnauthorizedError('Invalid API token'));
+    // Only a token that was never issued counts; an expired or revoked one is genuine. Asked only
+    // when there is a budget to count against (OAuth on).
+    const unknown = oauthResource ? !await isIssuedApiToken(bearer) : false;
+    await outcome.rejected(unknown, new UnauthorizedError('Invalid API token'));
     return;
   }
 
   const { apiToken, appuser, tenant } = authenticated;
   if (!MCP_SCOPES.some((scope) => apiToken.scopes.includes(scope))) {
-    await outcome.forbidden(new ForbiddenError('This API token has neither the mcp:read nor the mcp:propose scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
+    outcome.forbidden(new ForbiddenError('This API token has neither the mcp:read nor the mcp:propose scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
     return;
   }
 
@@ -142,7 +155,7 @@ async function authenticateWithApiToken(req: Request, res: Response, outcome: Mc
     sessionId: `api-token:${apiToken.apiTokenKey}`,
     tenant,
   });
-  await outcome.passed();
+  outcome.passed();
 }
 
 async function authenticateWithOAuth(req: Request, res: Response, outcome: McpAuthOutcome, bearer: string, resource: string): Promise<void> {
@@ -151,15 +164,15 @@ async function authenticateWithOAuth(req: Request, res: Response, outcome: McpAu
     verification = await verifyMcpOAuthAccessToken(bearer, resource);
   } catch (error) {
     logger.error({ err: error }, 'MCP OAuth token check failed');
-    verification = { error: 'invalid_token' as const, ok: false as const };
+    verification = { error: 'invalid_token' as const, forged: false, ok: false as const };
   }
 
   if (!verification.ok) {
     setChallenge(res, resource, verification.error);
     if (verification.error === 'insufficient_scope') {
-      await outcome.forbidden(new ForbiddenError('This access token does not carry the mcp:read scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
+      outcome.forbidden(new ForbiddenError('This access token does not carry the mcp:read scope.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
     } else {
-      outcome.rejected(new UnauthorizedError('Invalid or revoked access token'));
+      await outcome.rejected(verification.forged, new UnauthorizedError('Invalid or revoked access token'));
     }
     return;
   }
@@ -172,14 +185,15 @@ async function authenticateWithOAuth(req: Request, res: Response, outcome: McpAu
   const appuser = await DI.em.findOne(Appuser, { deletedAt: null, externalUserId: userId, recordActive: true }, { filters: false });
   const membership = appuser ? await DI.em.getRepository(AppuserTenant).getAppuserTenantByAppuser(appuser) : null;
   const tenant = membership?.tenantKey;
-  if (!appuser || !tenant || tenant.deletedAt || !tenant.recordActive || String(tenant.tenantKey) !== household) {
-    if (appuser && tenant && String(tenant.tenantKey) !== household) {
+  const sameHousehold = tenant ? mcpOAuthHouseholdReference(tenant.tenantKey) === household : false;
+  if (!appuser || !tenant || tenant.deletedAt || !tenant.recordActive || !sameHousehold) {
+    if (appuser && tenant && !sameHousehold) {
       await revokeMcpOAuthGrant(userId, clientId).catch((error: unknown) => {
         logger.error({ err: error }, 'Revoking an MCP OAuth grant for a former household failed');
       });
     }
     setChallenge(res, resource, 'invalid_token');
-    outcome.rejected(new UnauthorizedError('Invalid or revoked access token'));
+    await outcome.rejected(false, new UnauthorizedError('Invalid or revoked access token'));
     return;
   }
 
@@ -190,26 +204,21 @@ async function authenticateWithOAuth(req: Request, res: Response, outcome: McpAu
     sessionId: `oauth:${clientId}`,
     tenant,
   });
-  await outcome.passed();
+  outcome.passed();
 }
 
-function createOutcome(res: Response, next: NextFunction, attempt: AuthAttempt | null): McpAuthOutcome {
+function createOutcome(res: Response, next: NextFunction, budget: AuthFailureBudget | null): McpAuthOutcome {
   return {
-    forbidden: async (error) => {
-      await attempt?.succeeded();
-      next(error);
-    },
-    passed: async () => {
-      await attempt?.succeeded();
-      next();
-    },
-    rejected: (error) => {
-      if (attempt?.failedOverLimit(res)) return;
+    forbidden: (error) => { next(error); },
+    passed: () => { next(); },
+    rejected: async (counted, error) => {
+      if (counted && budget && await budget.failed(res)) return;
       next(error);
     },
   };
 }
 
+/** Whether a personal-token-shaped bearer was ever issued here, live or not. */
 async function establishCaller(req: Request, input: {
   appuser: Appuser;
   credential: McpCredential;
@@ -239,4 +248,8 @@ async function establishCaller(req: Request, input: {
   // `resolveTenantForRequest` does for a session.
   setTenantContext(DI.em, { appuserKey: appuser.appuserKey, tenantKey: tenant.tenantKey });
   await recordUserActive(DI.em, appuser, 'api');
+}
+
+async function isIssuedApiToken(token: string): Promise<boolean> {
+  return (await DI.em.count(ApiToken, { secretHash: hashApiToken(token) }, { filters: false })) > 0;
 }

@@ -38,8 +38,8 @@ export default function ConnectAiClient() {
   const id = useId();
   // An older API that does not report `mcp` reads as on, like every other feature.
   const mcpEnabled = useFeature((features) => features.mcp !== false);
-  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default: shown
-  // only once the server has confirmed it.
+  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default: how to
+  // connect shows only once the server has confirmed it; clients allowed earlier stay revocable.
   const mcpOAuthEnabled = useConfirmedFeature((features) => features.mcpOAuth === true);
   const create = useCreateApiToken();
   const { data: calls = [], isLoading: callsLoading } = useMcpCalls(mcpEnabled);
@@ -252,7 +252,7 @@ export default function ConnectAiClient() {
         </div>
       </section>
 
-      {mcpOAuthEnabled ? <McpOAuthClients endpoint={endpoint} /> : null}
+      <McpOAuthClients endpoint={endpoint} oauthEnabled={mcpOAuthEnabled} />
 
       <section className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
         <div>

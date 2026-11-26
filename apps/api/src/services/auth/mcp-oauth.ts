@@ -1,3 +1,4 @@
+import { defineRequestState } from '@better-auth/core/context';
 import { mcp } from '@better-auth/mcp';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
@@ -27,8 +28,8 @@ const LOOPBACK_HOSTS = new Set(['127.0.0.1', '[::1]', 'localhost']);
  * the person's answer goes.
  */
 interface McpOAuthPolicyDeps {
-  /** The household (tenant key) `userId` belongs to now, or null when they have none. */
-  householdOf: (userId: string) => Promise<null | number>;
+  /** The opaque reference of the household `userId` belongs to now, or null when they have none. */
+  householdReferenceOf: (userId: string) => Promise<null | string>;
   /** The MCP resource identifier, defaulted onto an authorization request that names none. */
   resource: string;
   /** Throws unless `code` is the signed-in person's current TOTP code. */
@@ -53,6 +54,53 @@ function refuse(status: 'BAD_REQUEST' | 'FORBIDDEN', body: Record<string, string
 }
 
 /**
+ * Set, within one request, once the consent hook has passed (fresh session, TOTP): only the
+ * authorization that consent dispatches may then issue a code. Every other authorization
+ * request, including one with a consent already stored, is sent to the consent page.
+ */
+const consentApproved = defineRequestState(() => false);
+
+const CONSENT_MANAGEMENT_PATHS: ReadonlySet<string> = new Set(['/oauth2/delete-consent', '/oauth2/get-consent', '/oauth2/get-consents', '/oauth2/update-consent']);
+
+/** Whether `requested` is one of `registered`, a loopback one up to its port (RFC 8252 §7.3). */
+function isRegisteredRedirect(registered: unknown, requested: string): boolean {
+  const uris = Array.isArray(registered) ? registered.filter((uri): uri is string => typeof uri === 'string') : [];
+  const withoutLoopbackPort = (uri: string) => {
+    try {
+      const url = new URL(uri);
+      if (url.protocol === 'http:' && LOOPBACK_HOSTS.has(url.hostname)) url.port = '';
+      return url.toString();
+    } catch {
+      return uri;
+    }
+  };
+  return uris.some((uri) => uri === requested || withoutLoopbackPort(uri) === withoutLoopbackPort(requested));
+}
+
+/**
+ * `prompt=none` asks for a code without showing the person anything, which consent here never
+ * allows. A request from a known client to one of its own redirects gets `consent_required`
+ * there (the RFC 6749 authorization error response, with `iss`, RFC 9207); anything else falls through to better-auth,
+ * which refuses an unknown client or redirect on its own error page.
+ */
+async function refuseSilentAuthorization(ctx: Parameters<Parameters<typeof createAuthMiddleware>[0]>[0], params: Record<string, unknown>): Promise<void> {
+  const clientId = typeof params['client_id'] === 'string' ? params['client_id'] : '';
+  const redirectUri = typeof params['redirect_uri'] === 'string' ? params['redirect_uri'] : '';
+  if (!clientId || !redirectUri) return;
+  const client = await ctx.context.adapter.findOne<{ disabled?: boolean | null; redirectUris?: unknown }>({
+    model: 'oauthClient',
+    where: [{ field: 'clientId', value: clientId }],
+  });
+  if (!client || client.disabled || !isRegisteredRedirect(client.redirectUris, redirectUri)) return;
+  const target = new URL(redirectUri);
+  target.searchParams.set('error', 'consent_required');
+  target.searchParams.set('error_description', 'End-User consent is required');
+  if (typeof params['state'] === 'string') target.searchParams.set('state', params['state']);
+  target.searchParams.set('iss', ctx.context.baseURL.replace(/\/+$/, ''));
+  throw ctx.redirect(target.toString());
+}
+
+/**
  * WonderMoney's rules around better-auth's OAuth endpoints, as before-hooks:
  *
  * - Consent is a sensitive action, like creating a personal API token: accepting needs a session
@@ -61,8 +109,16 @@ function refuse(status: 'BAD_REQUEST' | 'FORBIDDEN', body: Record<string, string
  *   for the `/v1` routes). Answers 403 with `session_not_fresh`, `totp_required` or `invalid_totp`.
  * - Registration takes `https` redirects, or `http` on a loopback host, and nothing else
  *   (`isAllowedMcpRedirectUri`), and no DPoP-bound clients.
+ * - Every authorization request shows the consent page (`prompt=consent` is added, and
+ *   `prompt=none` answers `consent_required`), even for a client the person allowed before: a
+ *   stored consent never issues a code on its own, so the freshness and TOTP check above runs
+ *   for every code. This covers authorizations better-auth dispatches itself, after a sign-in or
+ *   from `/oauth2/continue`, as they pass through the same hook.
  * - An authorization request that names no `resource` is for the MCP server, the only resource
  *   here, so it gets that one: a token without the audience would be refused at `/v1/mcp`.
+ * - A refresh may not drop `offline_access`, so the refresh-family check applies to every token.
+ * - better-auth's consent read and edit routes answer 403: grants are listed and revoked in
+ *   Settings (`/v1/user/mcp-clients`).
  * - The token endpoint refuses DPoP proofs. `/v1/mcp` checks no proof, so it accepts bearer
  *   tokens only, and a DPoP-bound token would never work there.
  */
@@ -88,6 +144,8 @@ function mcpOAuthPolicy(deps: McpOAuthPolicyDeps): BetterAuthPlugin {
                 refuse('FORBIDDEN', { code: 'invalid_totp', message: 'That authenticator code is not valid.' });
               }
             }
+            // The one way to a code: the authorization this consent dispatches may issue it.
+            await consentApproved.set(true);
           }),
           matcher: (ctx) => ctx.path === '/oauth2/consent' && (ctx.body as undefined | { accept?: unknown })?.accept === true,
         },
@@ -112,24 +170,40 @@ function mcpOAuthPolicy(deps: McpOAuthPolicyDeps): BetterAuthPlugin {
           matcher: (ctx) => ctx.path === '/oauth2/register',
         },
         {
+          // An authorization request, from a client (GET query or POST form) or dispatched inside
+          // better-auth (after a sign-in or `/oauth2/continue`), never issues a code by itself.
           handler: createAuthMiddleware(async (ctx) => {
-            const query = (ctx.query ?? {}) as Record<string, unknown>;
-            if (query['resource'] === undefined || query['resource'] === '') {
-              return Promise.resolve({ context: { query: { ...query, resource: deps.resource } } });
+            const fromBody = ctx.method === 'POST' && (ctx as { authorizeSettings?: unknown }).authorizeSettings === undefined;
+            const params = ((fromBody ? ctx.body : ctx.query) ?? {}) as Record<string, unknown>;
+            const resource = params['resource'] === undefined || params['resource'] === '' ? { resource: deps.resource } : {};
+            if (await consentApproved.get()) {
+              return { context: fromBody ? { body: { ...params, ...resource } } : { query: { ...params, ...resource } } };
             }
-            return Promise.resolve();
+            const prompts = new Set(typeof params['prompt'] === 'string' ? params['prompt'].split(' ').filter(Boolean) : []);
+            if (prompts.has('none')) await refuseSilentAuthorization(ctx, params);
+            prompts.add('consent');
+            const forced = { ...params, ...resource, prompt: [...prompts].join(' ') };
+            return { context: fromBody ? { body: forced } : { query: forced } };
           }),
-          matcher: (ctx) => ctx.path === '/oauth2/authorize' && ctx.method !== 'POST',
+          matcher: (ctx) => ctx.path === '/oauth2/authorize',
         },
         {
+          // Consent is given once per authorization, on the consent page; better-auth's own consent
+          // routes would let a session read or change grants behind `revokeMcpOAuthGrant`.
+          handler: createAuthMiddleware(() => Promise.reject(new APIError('FORBIDDEN', { error: 'access_denied', error_description: 'Manage connected clients in Settings.' }))),
+          matcher: (ctx) => CONSENT_MANAGEMENT_PATHS.has(ctx.path ?? ''),
+        },
+        {
+          // A refresh may not narrow away `offline_access`: every access token from a grant with a
+          // refresh family must carry it, so `/v1/mcp` checks that family for each of them.
           handler: createAuthMiddleware(async (ctx) => {
-            const body = (ctx.body ?? {}) as Record<string, unknown>;
-            if (body['resource'] === undefined || body['resource'] === '') {
-              return Promise.resolve({ context: { body: { ...body, resource: deps.resource } } });
+            const body = (ctx.body ?? {}) as { grant_type?: unknown; scope?: unknown };
+            if (body.grant_type === 'refresh_token' && typeof body.scope === 'string' && !body.scope.split(' ').includes('offline_access')) {
+              refuse('BAD_REQUEST', { error: 'invalid_scope', error_description: 'A refresh must keep the offline_access scope.' });
             }
             return Promise.resolve();
           }),
-          matcher: (ctx) => ctx.path === '/oauth2/authorize' && ctx.method === 'POST',
+          matcher: (ctx) => ctx.path === '/oauth2/token',
         },
         {
           handler: createAuthMiddleware(async (ctx) => {
@@ -179,9 +253,9 @@ export function mcpOAuthPlugins(input: McpOAuthPolicyDeps & { appUrl: string }):
   const consentPage = new URL('oauth/consent', input.appUrl.endsWith('/') ? input.appUrl : `${input.appUrl}/`).toString();
   const scopes = [...MCP_OAUTH_SCOPES];
   const householdReference = async (userId: string): Promise<string> => {
-    const household = await input.householdOf(userId);
+    const household = await input.householdReferenceOf(userId);
     if (household === null) refuse('FORBIDDEN', { error: 'access_denied', error_description: 'This account has no household yet.' });
-    return String(household);
+    return household;
   };
   return [
     mcp({

@@ -55,7 +55,7 @@ const post = (bearer: null | string, body: unknown) => {
 /** A verified OAuth caller: the household's owner, through one client, for their household. */
 const callerFor = (household: Household, scopes = ['mcp:read']) => ({
   clientId: 'chatgpt-client',
-  household: String(household.tenant.tenantKey),
+  household: `household-${household.tenant.tenantKey}`,
   scopes,
   userId: household.appuser.externalUserId,
 });
@@ -181,7 +181,7 @@ describe('OAuth on the MCP server', () => {
     });
 
     it('answers a revoked or invalid token with 401 and an invalid_token challenge', async () => {
-      verify.mockResolvedValue({ error: 'invalid_token', ok: false });
+      verify.mockResolvedValue({ error: 'invalid_token', forged: false, ok: false });
 
       const response = await post('a-revoked-access-token', initialize);
 
@@ -189,20 +189,38 @@ describe('OAuth on the MCP server', () => {
       expect(response.headers['www-authenticate']).toContain('error="invalid_token"');
     });
 
-    it('counts failed OAuth tokens per address, but never a valid one', async () => {
+    it('counts forged tokens per address, then refuses a junk personal token without a lookup, while a valid OAuth token still works', async () => {
       const household = await seedHousehold(db.em());
       verify.mockImplementation((token) => Promise.resolve(token === 'valid'
         ? { caller: callerFor(household), ok: true as const }
-        : { error: 'invalid_token' as const, ok: false as const }));
+        : { error: 'invalid_token' as const, forged: true, ok: false as const }));
 
       for (let i = 0; i < 300; i += 1) expect((await post(`forged-${i}`, initialize)).status).toBe(401);
-
       expect((await post('forged-301', initialize)).status).toBe(429);
+
+      const em = DI.em;
+      const findOne = vi.spyOn(em, 'findOne');
+      const count = vi.spyOn(em, 'count');
+      const find = vi.spyOn(em, 'find');
+      const junk = await post('wm_pat_junkjunkjunkjunkjunkjunkjunkjunk', initialize);
+      expect(junk.status).toBe(429);
+      expect(Number(junk.headers['retry-after'])).toBeGreaterThan(0);
+      expect([findOne.mock.calls.length, count.mock.calls.length, find.mock.calls.length]).toEqual([0, 0, 0]);
+      findOne.mockRestore();
+      count.mockRestore();
+      find.mockRestore();
+
       expect((await post('valid', initialize)).status).toBe(200);
     });
 
+    it('never counts a genuine token that is expired, for another audience or revoked', async () => {
+      verify.mockResolvedValue({ error: 'invalid_token', forged: false, ok: false });
+
+      for (let i = 0; i < 301; i += 1) expect((await post(`expired-${i}`, initialize)).status).toBe(401);
+    });
+
     it('answers a token without mcp:read with 403 and an insufficient_scope challenge', async () => {
-      verify.mockResolvedValue({ error: 'insufficient_scope', ok: false });
+      verify.mockResolvedValue({ error: 'insufficient_scope', forged: false, ok: false });
 
       const response = await post('an-offline-access-only-token', initialize);
 

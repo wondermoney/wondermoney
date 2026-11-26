@@ -130,3 +130,5 @@ export const listMcpOAuthGrants = vi
 export const revokeMcpOAuthGrant = vi.fn<(userId: string, clientId: string) => Promise<boolean>>().mockResolvedValue(false);
 
 export const revokeAllMcpOAuthGrants = vi.fn<(userId: string) => Promise<void>>().mockResolvedValue(undefined);
+
+export const mcpOAuthHouseholdReference = vi.fn((tenantKey: number) => `household-${tenantKey}`);
