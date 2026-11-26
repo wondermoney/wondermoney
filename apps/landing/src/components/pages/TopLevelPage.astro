@@ -25,7 +25,8 @@ import NotABank from "@/components/shared/NotABank";
 import RelatedSeoPages from "@/components/landing/sections/RelatedSeoPages";
 import type { Lang } from "@/lib/i18nLocale";
 import { getTranslations } from "@/lib/translations";
-import { buildAlternateLinks, toLocalizedPath, type RouteId } from "@/lib/routes";
+import { buildAlternateLinks, type RouteId } from "@/lib/routes";
+import { buildSoftwarePageSchema, isSoftwarePageRouteId } from "@/lib/structuredData";
 import type { TopLevelRouteId } from "@/lib/pageStaticPaths";
 import { ogImageFor, toolOgCard } from "@/lib/og/ogImages";
 
@@ -36,84 +37,6 @@ interface Props {
 
 const { locale, routeId } = Astro.props;
 const t = getTranslations(locale);
-
-const localizedUrl = (route: RouteId): string =>
-  `https://wonder.money${toLocalizedPath(route, locale)}`;
-
-const softwareSchemas: Partial<Record<RouteId, Record<string, unknown>>> = {
-  pageEtfTracker: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.etfTracker.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageEtfTracker"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.etfTracker.metaDescription"),
-  },
-  pagePortfolioTracker: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.portfolioTracker.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pagePortfolioTracker"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.portfolioTracker.metaDescription"),
-  },
-  pageNetWorthTracker: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.netWorthTracker.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageNetWorthTracker"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.netWorthTracker.metaDescription"),
-  },
-  pageYnabAlternative: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.ynabAlternative.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageYnabAlternative"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.ynabAlternative.metaDescription"),
-  },
-  pageFireCalculator: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.fireCalculator.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageFireCalculator"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.fireCalculator.metaDescription"),
-  },
-  pagePersonalFinanceApp: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.personalFinanceApp.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pagePersonalFinanceApp"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.personalFinanceApp.metaDescription"),
-  },
-  pageOpenBankingApp: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.openBankingApp.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageOpenBankingApp"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.openBankingApp.metaDescription"),
-  },
-  pageBudgetApp: {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `WonderMoney — ${t("lp.budgetApp.metaTitle").split("—")[0].trim()}`,
-    url: localizedUrl("pageBudgetApp"),
-    applicationCategory: "FinanceApplication",
-    operatingSystem: "Web",
-    description: t("lp.budgetApp.metaDescription"),
-  },
-};
 
 const FAQ_ROUTE_IDS: Partial<Record<RouteId, string>> = {
   pagePersonalFinanceApp: "lp.personalFinanceApp",
@@ -214,8 +137,8 @@ const NOT_A_BANK_ROUTE_IDS = new Set<TopLevelRouteId>([
   "pageBudgetApp",
 ]);
 const showNotABank = NOT_A_BANK_ROUTE_IDS.has(routeId);
-const structuredData = softwareSchemas[routeId]
-  ? [softwareSchemas[routeId], faqSchemas[routeId]].filter(
+const structuredData = isSoftwarePageRouteId(routeId)
+  ? [buildSoftwarePageSchema(routeId, locale), faqSchemas[routeId]].filter(
       (item): item is Record<string, unknown> => Boolean(item),
     )
   : null;
