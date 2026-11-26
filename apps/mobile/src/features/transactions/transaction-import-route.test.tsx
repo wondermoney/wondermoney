@@ -72,6 +72,21 @@ describe('TransactionImportRoute', () => {
     expect(view.getByRole('radio', { name: 'Unnamed account' })).toBeOnTheScreen()
   })
 
+  it('offers every account the person may write to, another member\'s shared one by whose it is, and no view-only one', async () => {
+    mockParams = { accountId: '7' }
+    mockUseAccounts = () => ({ data: { accounts: [
+      accountsData.accounts[0],
+      { ...accountsData.accounts[0], accountKey: 9, accountName: 'Joint', isOwnedByViewer: false, ownerFirstName: 'Ana', myAccess: 'write' as const },
+      { ...accountsData.accounts[0], accountKey: 10, accountName: 'Ana savings', isOwnedByViewer: false, ownerFirstName: 'Ana', isPrivate: true, myAccess: 'read' as const },
+    ] }, isLoading: false })
+    mockGetDocumentAsync.mockResolvedValue({ canceled: false, assets: [{ uri: 'file:///a.xml', name: 'a.xml' }] })
+    mockStart.mockResolvedValue({ id: '0b3c9a52-7d3e-4c4e-9d55-6f1b2a3c4d5e', expiresAt: '2026-11-19T10:00:00.000Z' })
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: 'Choose file' }))
+    await view.findByTestId('review')
+    expect(mockReviewProps?.accounts).toEqual([{ id: 7, name: 'Daily account' }, { id: 9, name: 'Joint · Shared by Ana' }])
+  })
+
   it('preselects the account id from route params', async () => {
     mockParams = { accountId: '7' }
     const view = await renderRoute()

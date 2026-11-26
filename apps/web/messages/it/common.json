@@ -2765,6 +2765,7 @@
   "import-review-reading": "Lettura del file…",
   "import-review-importing": "Importazione… {imported} transazioni su {total} finora.",
   "import-review-stalled": "L'importazione si è interrotta prima di finire. Riprova per riprendere da dove si è fermata: nulla viene importato due volte.",
+  "import-review-access-lost": "Non puoi più importare in questo conto, quindi non è stato importato nulla.",
   "import-review-read-failed": "Non siamo riusciti a leggere questo file. Scegli un'esportazione dell'estratto conto in CSV o Excel.",
   "import-pdf-entry": "Importa estratto conto PDF",
   "import-pdf-title": "Importa un estratto conto PDF",

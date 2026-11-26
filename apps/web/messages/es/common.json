@@ -2765,6 +2765,7 @@
   "import-review-reading": "Leyendo el archivo…",
   "import-review-importing": "Importando… {imported} de {total} transacciones hasta ahora.",
   "import-review-stalled": "La importación se detuvo antes de terminar. Vuelve a intentarlo para seguir donde se quedó; nada se importa dos veces.",
+  "import-review-access-lost": "Ya no puedes importar en esta cuenta, así que no se importó nada.",
   "import-review-read-failed": "No pudimos leer este archivo. Elige una exportación del extracto en CSV o Excel.",
   "import-pdf-entry": "Importar extracto en PDF",
   "import-pdf-title": "Importar un extracto en PDF",

@@ -2765,6 +2765,7 @@
   "import-review-reading": "Reading your file…",
   "import-review-importing": "Importing… {imported} of {total} transactions so far.",
   "import-review-stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
+  "import-review-access-lost": "You can no longer import into this account, so nothing was imported.",
   "import-review-read-failed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
   "import-pdf-entry": "Import PDF statement",
   "import-pdf-title": "Import a PDF statement",

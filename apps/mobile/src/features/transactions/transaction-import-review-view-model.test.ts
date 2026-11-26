@@ -98,6 +98,8 @@ describe('importStage', () => {
 
   it('tells a file that could not be read (a code) from a commit whose rows all failed (no code)', () => {
     expect(importStage(session({ status: 'failed', errorCode: 'unreadable' }))).toEqual({ kind: 'read-failed' })
+    // Refused because the person can no longer write to the account: not a file problem.
+    expect(importStage(session({ status: 'failed', errorCode: 'account_access' }))).toEqual({ kind: 'read-failed', reason: 'access' })
     expect(importStage(session({ status: 'failed', counts: { ...counts, failed: 2 } }))).toEqual({ kind: 'done', outcome: 'failed', imported: 0, skipped: 0, failed: 2, detailsDeleted: false })
   })
 
@@ -213,7 +215,11 @@ describe('account mapping', () => {
   const sourceAccounts = [{ label: 'Checking', rowCount: 3 }, { label: 'DE89370400440532013000', rowCount: 1, suggestedAccountId: 9 }]
 
   it('pre-fills a suggested account, keeping what was saved', () => {
-    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }))).toEqual({ Checking: 7, DE89370400440532013000: 9 })
+    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }), [{ id: 7 }, { id: 9 }])).toEqual({ Checking: 7, DE89370400440532013000: 9 })
+  })
+
+  it('pre-fills no suggestion the picker does not offer, so nothing is sent to an account it hides', () => {
+    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }), [{ id: 7 }])).toEqual({ Checking: 7 })
   })
 
   it('is complete once every account in the file has a target', () => {
