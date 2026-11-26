@@ -218,6 +218,7 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
         onOpenChange={setIsSimplefinOpen}
       />
       <EnableBankingSetupWizard
+        entry="add_account"
         open={isWizardOpen}
         onOpenChange={setIsWizardOpen}
         onChooseBank={onAddSyncAccountClick}

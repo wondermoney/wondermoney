@@ -5,6 +5,8 @@ import { DI } from '@app/database/di';
 import { Appuser } from '@entity/Appuser';
 import { EnableBankingCredential, EnableBankingCredentialStatus } from '@entity/EnableBankingCredential';
 import type { Tenant } from '@entity/Tenant';
+import { bankKeyEventId } from '@service/analytics/bank-key-setup-events';
+import { recordServiceEvent } from '@service/analytics/service-events.service';
 import { decryptSecret, encryptSecret } from '@service/crypto/secret-encryption.service';
 import { getRef } from '@utils/em-helpers';
 import { ConflictError, EnableBankingCredentialInvalidError, ERROR_CODE } from '@utils/errors';
@@ -174,14 +176,45 @@ export class EnableBankingCredentialService {
 
   /**
    * Deletes every pending credential older than its seven days, in every household (the worker
-   * has no tenant context). They were never activated, so no connection points at them. Returns
-   * how many went.
+   * has no tenant context). They were never activated, so no connection points at them. Each one
+   * deleted is a `bank_key_setup_abandoned` service event for its owner, recorded once the delete
+   * has committed. Returns how many went.
+   *
+   * The rows are locked before they are deleted, so one activated in the same instant is either
+   * activated or deleted, never both. Only the credential rows are locked: every other write locks
+   * the person first and their credentials after, and taking the person here too could deadlock.
    */
-  purgeLapsedPendingCredentials(now: Date = new Date()): Promise<number> {
-    return this.em.nativeDelete(EnableBankingCredential, {
-      createdAt: { $lte: new Date(now.getTime() - PENDING_ENABLE_BANKING_CREDENTIAL_TTL_MS) },
-      status: EnableBankingCredentialStatus.PENDING,
+  async purgeLapsedPendingCredentials(now: Date = new Date()): Promise<number> {
+    const lapsed = await this.em.transactional(async (tx) => {
+      const rows = await tx.find(
+        EnableBankingCredential,
+        {
+          createdAt: { $lte: new Date(now.getTime() - PENDING_ENABLE_BANKING_CREDENTIAL_TTL_MS) },
+          status: EnableBankingCredentialStatus.PENDING,
+        },
+        { fields: ['enableBankingCredentialKey', 'appuserKey'], lockMode: LockMode.PESSIMISTIC_WRITE },
+      );
+      if (rows.length === 0) return [];
+      await tx.nativeDelete(EnableBankingCredential, {
+        enableBankingCredentialKey: { $in: rows.map((row) => row.enableBankingCredentialKey) },
+        status: EnableBankingCredentialStatus.PENDING,
+      });
+      return rows.map((row) => ({ appuserKey: row.appuserKey.appuserKey, credentialKey: row.enableBankingCredentialKey }));
     });
+    if (lapsed.length === 0) return 0;
+
+    const owners = await this.em.find(
+      Appuser,
+      { appuserKey: { $in: [...new Set(lapsed.map((row) => row.appuserKey))] } },
+      { fields: ['accountType', 'analyticsObjectedAt', 'appuserKey', 'externalUserId'] },
+    );
+    const ownerOf = new Map(owners.map((owner) => [owner.appuserKey, owner]));
+    for (const { appuserKey, credentialKey } of lapsed) {
+      await recordServiceEvent(this.em, ownerOf.get(appuserKey), 'bank_key_setup_abandoned', {}, {
+        eventId: bankKeyEventId('bank_key_setup_abandoned', credentialKey),
+      });
+    }
+    return lapsed.length;
   }
 
   /** The person's pending credential, unless it has lapsed. */

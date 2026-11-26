@@ -14,7 +14,7 @@ type Open = { isOpen?: boolean; open?: boolean };
 const h = vi.hoisted(() => ({
   credential: null as null | { pending?: { expiresAt: string } | null; status: string },
   viewer: false,
-  wizard: null as null | { onChooseBank: () => void },
+  wizard: null as null | { entry?: string; onChooseBank: () => void },
 }));
 
 vi.mock("@/lib/api/user/useEnableBankingCredential", () => ({
@@ -26,7 +26,7 @@ vi.mock("@/lib/household/useIsHouseholdViewer", () => ({ useIsHouseholdViewer: (
 vi.mock("@/lib/api/useRateLimitToast", () => ({ useRateLimitToast: () => () => false }));
 vi.mock("./EnableBankingKeySetupDialog", () => ({ default: () => null }));
 vi.mock("./EnableBankingSetupWizard", () => ({
-  default: (props: Open & { onChooseBank: () => void }) => {
+  default: (props: Open & { entry: string; onChooseBank: () => void }) => {
     h.wizard = props;
     return props.open ? <div data-testid="setup-wizard" /> : null;
   },
@@ -57,6 +57,7 @@ test("Bank Provider settings open the setup wizard, and finishing it opens the b
 
   await userEvent.click(screen.getByRole("button", { name: copy.createKeyCta }));
   screen.getByTestId("setup-wizard");
+  assert.equal(h.wizard?.entry, "settings");
   act(() => h.wizard!.onChooseBank());
   screen.getByTestId("bank-list");
 });

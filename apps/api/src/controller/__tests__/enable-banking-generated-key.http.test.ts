@@ -1,4 +1,4 @@
-import { createPrivateKey, generateKeyPairSync, randomUUID } from 'node:crypto';
+import { createHash, createPrivateKey, generateKeyPairSync, randomUUID } from 'node:crypto';
 import { PassThrough } from 'node:stream';
 
 import { strFromU8, unzipSync } from 'fflate';
@@ -88,6 +88,8 @@ import { addPartner, type Household, seedHousehold } from '@app/__tests__/__help
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
 import { handleBankSyncAlertSweepJob } from '@app/jobs/bank-sync-alert.worker';
+import { AnalyticsOutbox } from '@entity/AnalyticsOutbox';
+import { Appuser } from '@entity/Appuser';
 import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { EnableBankingCredential, EnableBankingCredentialStatus } from '@entity/EnableBankingCredential';
 import bankingRoutes from '@route/banking';
@@ -512,5 +514,126 @@ describe('a server-generated Enable Banking key', () => {
 
     expect(statuses.slice(0, 10).every((status) => status === 201)).toBe(true);
     expect(statuses[10]).toBe(429);
+  });
+
+  describe('measuring the setup (#698)', () => {
+    /** The service events the outbox holds, oldest first, as PostHog would receive them. */
+    const outbox = async () => (await db.em().fork().find(AnalyticsOutbox, {}, { orderBy: { analyticsOutboxKey: 'asc' } }))
+      .map(({ distinctId, eventId, eventName, properties }) => ({ distinctId, eventId, eventName, properties }));
+    const keySetupEvents = async () => (await outbox()).filter((row) => row.eventName.startsWith('bank_key_'));
+    const sweep = () => RequestContext.create(db.orm.em, () => handleBankSyncAlertSweepJob({ enqueue: { send: () => Promise.resolve(null), sendAfter: () => Promise.resolve(null) }, logger: { info: () => undefined, warn: () => undefined } }));
+    const lapse = (...households: Household[]) => db.em().fork().nativeUpdate(EnableBankingCredential, { appuserKey: households.map((household) => household.appuser) }, { createdAt: new Date(Date.now() - 8 * DAY_MS) });
+
+    beforeEach(() => {
+      vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'live');
+    });
+
+    it('records the certificate, each failed activation with its reason, and the activation, once each, for the person', async () => {
+      const household = await seedHousehold(db.em());
+      const person = household.appuser.externalUserId;
+      const { certificatePem } = (await createCertificate(household)).body as { certificatePem: string };
+      const notActivated = register(certificatePem, { accountsLinked: false });
+      const sandbox = register(certificatePem, { environment: 'SANDBOX' });
+
+      await activate(household, randomUUID());
+      await activate(household, notActivated);
+      await activate(household, sandbox);
+      expect((await activate(household, register(certificatePem))).status).toBe(200);
+
+      expect((await keySetupEvents()).map(({ distinctId, eventName, properties }) => ({ distinctId, eventName, properties }))).toEqual([
+        { distinctId: person, eventName: 'bank_key_certificate_created', properties: { $insert_id: expect.any(String) as unknown } },
+        { distinctId: person, eventName: 'bank_key_activation_failed', properties: { $insert_id: expect.any(String) as unknown, reason: 'application_not_found' } },
+        { distinctId: person, eventName: 'bank_key_activation_failed', properties: { $insert_id: expect.any(String) as unknown, reason: 'application_not_activated' } },
+        { distinctId: person, eventName: 'bank_key_activation_failed', properties: { $insert_id: expect.any(String) as unknown, reason: 'application_sandbox' } },
+        { distinctId: person, eventName: 'bank_key_activated', properties: { $insert_id: expect.any(String) as unknown } },
+      ]);
+    });
+
+    it('records a missing pending key as its own reason, and an activation replaced meanwhile as no activation', async () => {
+      const household = await seedHousehold(db.em());
+      await activate(household, randomUUID());
+      const { certificatePem } = (await createCertificate(household)).body as { certificatePem: string };
+      await lapse(household);
+      await activate(household, register(certificatePem));
+
+      const events = await keySetupEvents();
+      expect(events.map((row) => [row.eventName, row.properties['reason']])).toEqual([
+        ['bank_key_activation_failed', 'pending_credential_missing'],
+        ['bank_key_certificate_created', undefined],
+        ['bank_key_activation_failed', 'pending_credential_missing'],
+      ]);
+    });
+
+    it('carries no application ID, certificate, key or code, and only a keyed hash or a random id as its event id', async () => {
+      const household = await seedHousehold(db.em());
+      const { certificatePem } = (await createCertificate(household)).body as { certificatePem: string };
+      const wrong = randomUUID();
+      const applicationId = register(certificatePem);
+      await activate(household, wrong);
+      await activate(household, applicationId);
+      const [row] = await rowsOf(household);
+      if (!row) throw new Error('no credential stored');
+      const waiting = await seedHousehold(db.em());
+      await createCertificate(waiting);
+      await lapse(waiting);
+      await sweep();
+
+      const events = await keySetupEvents();
+      expect(events.map((event) => event.eventName).sort()).toEqual([
+        'bank_key_activated',
+        'bank_key_activation_failed',
+        'bank_key_certificate_created',
+        'bank_key_certificate_created',
+        'bank_key_setup_abandoned',
+      ]);
+      for (const event of events) {
+        expect(Object.keys(event.properties).filter((key) => key !== '$insert_id' && key !== 'reason')).toEqual([]);
+        expect(event.eventId).toMatch(/^bank_key_[a-z_]+\.v1:[0-9a-f]{64}$|^bank_key_[a-z_]+\.v1:[0-9a-f-]{36}$/u);
+      }
+      const sent = JSON.stringify(events);
+      for (const secret of [applicationId, wrong, ...certificatePem.split('\n').filter((line) => line.length === 64).slice(0, 3), ...storedKeyLines(row)]) {
+        expect(sent).not.toContain(secret);
+      }
+      expect(sent).not.toMatch(/CERTIFICATE|PRIVATE KEY|Banco Exemplo/u);
+      // The credential keys are small sequential numbers: hashing each one recovers none of them.
+      const plainHashes = Array.from({ length: 100 }, (_, key) => createHash('sha256').update(`enable-banking-credential:${key}`).digest('hex'));
+      for (const event of events) expect(plainHashes).not.toContain(event.eventId.split(':')[1]);
+    });
+
+    it("records a lapsed pending key as abandoned for its owner only, once, and nothing for anyone else's", async () => {
+      const lapsed = await seedHousehold(db.em());
+      const objected = await seedHousehold(db.em());
+      const waiting = await seedHousehold(db.em());
+      const active = await seedHousehold(db.em());
+      const replacing = await seedHousehold(db.em());
+      for (const household of [lapsed, objected, waiting]) await createCertificate(household);
+      await activate(active, register(await certificateFor(active)));
+      await activate(replacing, register(await certificateFor(replacing)));
+      await createCertificate(replacing);
+      await lapse(lapsed, objected, active, replacing);
+      await db.em().fork().nativeUpdate(Appuser, { appuserKey: objected.appuser.appuserKey }, { analyticsObjectedAt: new Date() });
+      const before = (await keySetupEvents()).length;
+
+      await sweep();
+      await sweep();
+
+      const abandoned = (await keySetupEvents()).slice(before);
+      expect(abandoned.map(({ distinctId, eventName }) => ({ distinctId, eventName })).sort((a, b) => a.distinctId.localeCompare(b.distinctId))).toEqual(
+        [lapsed, replacing].map((household) => ({ distinctId: household.appuser.externalUserId, eventName: 'bank_key_setup_abandoned' })).sort((a, b) => a.distinctId.localeCompare(b.distinctId)),
+      );
+      expect(await rowsOf(objected)).toEqual([]);
+      expect((await rowsOf(replacing)).map((row) => row.status)).toEqual([EnableBankingCredentialStatus.ACTIVE]);
+    });
+
+    it('records nothing while analytics delivery is off', async () => {
+      vi.stubEnv('ANALYTICS_OUTBOX_MODE', '');
+      const household = await seedHousehold(db.em());
+      await activate(household, register(await certificateFor(household)));
+      await createCertificate(household);
+      await lapse(household);
+      await sweep();
+
+      expect(await outbox()).toEqual([]);
+    });
   });
 });

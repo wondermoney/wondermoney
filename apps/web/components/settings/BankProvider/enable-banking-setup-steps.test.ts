@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import assert from "node:assert/strict";
 
+import { ANALYTICS_BANK_KEY_SETUP_STEPS } from "@wondermoney/shared/analytics";
 import { afterEach, test, vi } from "vitest";
 
 import type { EnableBankingCredentialResponse } from "@/lib/api/user/useEnableBankingCredential";
@@ -110,4 +111,8 @@ test.each([
   ["something_else", null],
 ])("%s points to step %s", (code, step) => {
   assert.equal(revisitStepForError({ response: { data: { code } } }), step);
+});
+
+test("the steps are the ones analytics names, in the same order", () => {
+  assert.deepEqual([...ENABLE_BANKING_SETUP_STEPS], [...ANALYTICS_BANK_KEY_SETUP_STEPS]);
 });

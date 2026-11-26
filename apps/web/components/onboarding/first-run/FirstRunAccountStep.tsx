@@ -344,6 +344,7 @@ export default function FirstRunAccountStep() {
       />
       {/* Done closes it: the key is active, so the bank list is already showing. */}
       <EnableBankingSetupWizard
+        entry="first_run"
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onChooseBank={() => {}}

@@ -1,5 +1,6 @@
 "use client";
 
+import type { AnalyticsBankKeySetupEntry } from "@wondermoney/shared/analytics";
 import {
   ArrowLeft,
   Check,
@@ -16,6 +17,7 @@ import {
   useEffect,
   useEffectEvent,
   useId,
+  useRef,
   useState,
 } from "react";
 import { toast } from "sonner";
@@ -27,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
 import { Spinner } from "@/components/ui/Spinner";
 import { Text } from "@/components/ui/Typography";
+import { track } from "@/lib/analytics/track";
 import { API_ERROR_CODE, getApiErrorCode } from "@/lib/api/errors";
 import { useEnableBankingSetup } from "@/lib/api/instance/useInstance";
 import useEnableBankingCredential, {
@@ -82,6 +85,8 @@ function downloadCertificate(certificatePem: string) {
 }
 
 interface Props {
+  /** Where it was opened from, for analytics (`bank_key_setup_started`). */
+  entry: AnalyticsBankKeySetupEntry;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /**
@@ -100,9 +105,11 @@ interface Props {
  *
  * Where it opens is the server's pending credential first (a certificate waiting for its ID
  * means steps 2 to 4), then the step this browser remembers. The step ids are stable
- * (`ENABLE_BANKING_SETUP_STEP`), for analytics to name.
+ * (`ENABLE_BANKING_SETUP_STEP`), for analytics to name: each opening sends
+ * `bank_key_setup_started`, then `bank_key_setup_step_viewed` once for each step it shows.
  */
 export default function EnableBankingSetupWizard({
+  entry,
   open,
   onOpenChange,
   onChooseBank,
@@ -160,6 +167,33 @@ export default function EnableBankingSetupWizard({
       ? certificate
       : null;
   const showTotp = twoFactorEnabled || totpAsked;
+  // A step behind the "sign in again" notice is not shown yet.
+  const needsSignIn = Boolean(step && step !== STEP.done && !sessionFresh);
+  const shownStep = open && !needsSignIn ? step : null;
+
+  // Once per opening, then once per step shown in it: a re-render, or coming back to a step,
+  // sends nothing more. Closing starts the count again.
+  const tracked = useRef<{
+    started: boolean;
+    steps: Set<EnableBankingSetupStep>;
+  }>({
+    started: false,
+    steps: new Set(),
+  });
+  useEffect(() => {
+    if (!open) {
+      tracked.current = { started: false, steps: new Set() };
+      return;
+    }
+    if (!tracked.current.started) {
+      tracked.current.started = true;
+      track("bank_key_setup_started", { entry });
+    }
+    if (shownStep && !tracked.current.steps.has(shownStep)) {
+      tracked.current.steps.add(shownStep);
+      track("bank_key_setup_step_viewed", { step: shownStep });
+    }
+  }, [entry, open, shownStep]);
   const docsUrl = `${instanceConfig.docsUrl}/${docsLocaleFor(locale)}/docs/${DOCS_PAGE}`;
 
   const goTo = (next: EnableBankingSetupStep) => {
@@ -378,7 +412,6 @@ export default function EnableBankingSetupWizard({
   );
   let footer: React.ReactNode = undefined;
 
-  const needsSignIn = Boolean(step && step !== STEP.done && !sessionFresh);
   if (needsSignIn) {
     body = (
       <Text variant="mutedText" className="text-sm">
