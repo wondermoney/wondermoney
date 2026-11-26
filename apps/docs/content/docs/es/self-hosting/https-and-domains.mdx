@@ -29,7 +29,7 @@ Para probarlo en local, define `APP_URL=http://localhost` y `API_URL=http://loca
 
 ## Otro proxy inverso
 
-Cualquier otro proxy inverso funciona: dale un solo dominio y enruta los mismos dos prefijos de ruta a la API. Con Caddy en la máquina:
+Cualquier otro proxy inverso funciona: dale un solo dominio y enruta los mismos prefijos de ruta a la API (`/.well-known/oauth-*` solo importa con `MCP_OAUTH_ENABLED`). Con Caddy en la máquina:
 
 ```
 money.example.com {
@@ -37,6 +37,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/oauth-* {
     reverse_proxy localhost:3001
   }
   handle {
