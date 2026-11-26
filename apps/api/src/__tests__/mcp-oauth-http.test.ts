@@ -6,11 +6,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { addAccount, addPartner, addShare, type Household, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { DI } from '@app/database/di';
+import { getMcpAuthorizationServerMetadataAtIssuer } from '@controller/mcp';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
 import { errorHandler } from '@middleware/error-handler';
 import mcpRoutes from '@route/mcp';
-import mcpOAuthMetadataRoutes, { issuerPathMetadataRoutes } from '@route/mcp-oauth-metadata';
+import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
 import { createApiToken } from '@service/api-token/api-token.service';
 import { getMcpOAuthServerMetadata, revokeMcpOAuthGrant } from '@service/auth/better-auth';
 import { verifyMcpOAuthAccessToken } from '@service/mcp/mcp-oauth-token.service';
@@ -223,7 +224,7 @@ describe('OAuth on the MCP server', () => {
     it('does not advertise DPoP, at the root or at the issuer path', async () => {
       vi.mocked(getMcpOAuthServerMetadata).mockResolvedValue({ dpop_signing_alg_values_supported: ['ES256'], issuer: 'http://localhost:3001/api/auth' });
       const host = express();
-      host.use('/api/auth', issuerPathMetadataRoutes);
+      host.get('/api/auth/.well-known/oauth-authorization-server', getMcpAuthorizationServerMetadataAtIssuer);
       host.use('/.well-known', mcpOAuthMetadataRoutes);
 
       const root = await request(host).get('/.well-known/oauth-authorization-server/api/auth');

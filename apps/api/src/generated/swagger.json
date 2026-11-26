@@ -78,6 +78,16 @@
     }
   ],
   "paths": {
+    "/api/auth/.well-known/oauth-authorization-server": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/banking/enable-banking/callback": {
       "get": {
         "description": "",

@@ -18,6 +18,7 @@ import { connectDatabase, DI } from '@app/database/di';
 import { APP_ENV, IS_PRODUCTION_LIKE, NODE_ENV, TRUST_PROXY } from '@config/env';
 import { enableBankingCallback } from '@controller/enable-banking-callback';
 import { validateInviteController } from '@controller/household';
+import { getMcpAuthorizationServerMetadataAtIssuer } from '@controller/mcp';
 import { adminAuth, optionalAuth } from '@middleware/auth';
 import { requireCalendarFeedToken } from '@middleware/calendar-feed';
 import { configureClientIp } from '@middleware/client-ip';
@@ -70,7 +71,7 @@ import loanRoutes from '@route/loan';
 import manualAssetRoutes from '@route/manual-asset';
 import marketingRoutes from '@route/marketing';
 import mcpRoutes from '@route/mcp';
-import mcpOAuthMetadataRoutes, { issuerPathMetadataRoutes } from '@route/mcp-oauth-metadata';
+import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
 import netWorthRoutes from '@route/net-worth';
 import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
@@ -183,9 +184,9 @@ export default class Application {
       // (it reads the raw request body itself — express.json would consume it and
       // hang sign-in) and BEFORE csrfOriginProtection (it runs its own origin check).
       // Express 5 requires the named wildcard (`*splat`) rather than a bare `*`.
-      // The OAuth server metadata at the issuer's own path, served by the API ahead of better-auth's
-      // copy so the two never differ (routes/v1/mcp-oauth-metadata.ts).
-      this.host.use('/api/auth', issuerPathMetadataRoutes);
+      // The OAuth server metadata at the issuer's own path. better-auth would answer it itself,
+      // advertising DPoP; served by the API ahead of its handler so it matches the root document.
+      this.host.get('/api/auth/.well-known/oauth-authorization-server', getMcpAuthorizationServerMetadataAtIssuer);
       this.host.all('/api/auth/*splat', authHandler);
 
       this.host.use((_req, _res, next) => {
