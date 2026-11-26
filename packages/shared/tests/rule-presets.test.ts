@@ -43,6 +43,18 @@ describe('every shipped rule preset', () => {
     expect(file.rules.length).toBeLessThanOrEqual(25);
   });
 
+  it('files an Italian salary as income, only when the money comes in', () => {
+    const salaryRules = (getRulePreset('it-IT')?.rules ?? []).filter((rule) =>
+      rule.actions.some((action) => action.type === 'set_category' && typeof action['category'] === 'object' && (action['category'] as { system?: string }).system === 'SALARY'),
+    );
+    expect(salaryRules.length).toBeGreaterThan(0);
+    for (const rule of salaryRules) {
+      expect(rule.match ?? 'all').toBe('all');
+      expect(rule.conditions).toContainEqual({ field: 'direction', operator: 'is', value: 'in' });
+      expect(rule.actions.map((action) => action.type)).toEqual(['set_category']);
+    }
+  });
+
   it('covers Portugal, Spain, Italy, Brazil and English', () => {
     expect(RULE_PRESETS.map((preset) => preset.preset.code).sort()).toEqual(['en', 'es-ES', 'it-IT', 'pt-BR', 'pt-PT']);
   });

@@ -17,7 +17,7 @@
     "browse-hint": "Regole pronte per i commercianti più noti di un Paese",
     "dialog": {
       "title": "Regole predefinite: {name}",
-      "description": "Ogni regola riconosce un commerciante nella descrizione bancaria di un'uscita, poi ne imposta la categoria e il commerciante. Entrate, trasferimenti e tutto ciò che hai impostato a mano non vengono mai modificati. Le regole vengono aggiunte dopo le tue e puoi modificarle o eliminarle in seguito.",
+      "description": "Ogni regola riconosce un commerciante o uno stipendio nella descrizione bancaria, poi ne imposta la categoria o il commerciante. Le regole di spesa valgono solo per le uscite e quelle sullo stipendio solo per le entrate, quindi a un'entrata non viene mai assegnata una categoria di spesa. Trasferimenti e tutto ciò che hai impostato a mano non vengono mai modificati. Le regole vengono aggiunte dopo le tue e puoi modificarle o eliminarle in seguito.",
       "choose": "Paese",
       "list-label": "Regole predefinite: {name}",
       "loading": "Caricamento delle regole…",

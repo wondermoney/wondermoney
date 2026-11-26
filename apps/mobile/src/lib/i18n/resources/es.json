@@ -5582,7 +5582,7 @@
     },
     "dialog": {
       "title": "Reglas para {{name}}",
-      "description": "Cada regla reconoce un comercio en la descripción del banco de un pago y fija su categoría y su comercio. Los ingresos, las transferencias y lo que hayas fijado a mano nunca cambian. Las reglas se añaden después de las tuyas y puedes editarlas o eliminarlas después.",
+      "description": "Cada regla reconoce un comercio o una nómina en la descripción del banco y fija su categoría o su comercio. Las reglas de gasto solo se aplican al dinero que sale y las de nómina solo al que entra, así que un ingreso nunca recibe una categoría de gasto. Las transferencias y lo que hayas fijado a mano nunca cambian. Las reglas se añaden después de las tuyas y puedes editarlas o eliminarlas después.",
       "loading": "Cargando las reglas…",
       "error": "No se pudieron cargar las reglas.",
       "matches": "La descripción contiene «{{values}}»",

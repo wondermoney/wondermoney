@@ -124,7 +124,7 @@ O WonderMoney inclui listas curtas de regras para lojas e serviços conhecidos e
 - **Onde são sugeridas.** No fim da configuração inicial e no topo de **Definições → Regras**, o WonderMoney sugere a predefinição que te corresponde. Olha primeiro para os países das tuas ligações bancárias, depois para o teu idioma e a região do navegador ou do dispositivo, e por fim para a tua moeda. Na web, **Predefinições** no topo de **Definições → Regras** mostra todas. A app móvel sugere a predefinição correspondente no ecrã Regras.
 - **Nada é adicionado sozinho.** A sugestão abre uma pré-visualização de todas as regras da predefinição e do que cada uma define. As regras só são adicionadas quando escolhes **Adicionar N regras**, depois das tuas. **Agora não** esconde a sugestão.
 - **Adicionar duas vezes não duplica.** Uma regra da predefinição é ignorada quando já tens uma regra com o mesmo nome, por isso adicionar de novo, ou depois de eliminar algumas, só acrescenta o que falta.
-- **O que uma predefinição pode fazer.** Uma regra predefinida só corresponde a dinheiro que sai e só define uma categoria, um comerciante ou uma descrição. Nunca marca uma transação como transferência, nunca a esconde, nunca dá a uma receita uma categoria de despesa e nunca decide uma categoria a partir de um meio de pagamento como MB WAY, PIX, Bizum, SEPA ou uma transferência, porque por eles passa dinheiro nos dois sentidos. Um teste verifica cada predefinição antes de ser publicada.
+- **O que uma predefinição pode fazer.** Uma regra predefinida só define uma categoria, um comerciante ou uma descrição. Uma regra que define uma categoria de despesa só corresponde a dinheiro que sai, e uma que define uma categoria de receita, como a regra do salário da predefinição italiana, só a dinheiro que entra. Uma predefinição nunca marca uma transação como transferência, nunca a esconde, nunca dá a uma receita uma categoria de despesa e nunca decide uma categoria a partir de um meio de pagamento como MB WAY, PIX, Bizum, SEPA ou uma transferência, porque por eles passa dinheiro nos dois sentidos. Um teste verifica cada predefinição antes de ser publicada.
 - Depois de adicionares uma predefinição, podes aplicar as regras às transações que já tens (ver acima) e editá-las ou eliminá-las como qualquer outra regra.
 
 Cada regra compara a descrição original do banco, sem distinguir maiúsculas nem acentos. As predefinições contêm:
@@ -178,7 +178,7 @@ Cada regra compara a descrição original do banco, sem distinguir maiúsculas n
 | Spotify | “Spotify” | Serviços de "Streaming" | Spotify |
 | Farmacia | “Farmacia” | Saúde | — |
 
-### Itália (`it-IT`, 22 regras)
+### Itália (`it-IT`, 23 regras)
 
 | Regra | A descrição contém | Categoria | Comerciante |
 | --- | --- | --- | --- |
@@ -204,6 +204,7 @@ Cada regra compara a descrição original do banco, sem distinguir maiúsculas n
 | Farmacia | “Farmacia” | Saúde | — |
 | Modello F24 | “F24” | — | Modello F24 |
 | pagoPA | “pagoPA” | — | pagoPA |
+| Stipendio | “Stipendio” | Salário | — |
 
 ### Brasil (`pt-BR`, 14 regras)
 

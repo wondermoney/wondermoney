@@ -631,6 +631,31 @@
           "merchant": "pagoPA"
         }
       ]
+    },
+    {
+      "name": "Stipendio",
+      "match": "all",
+      "conditions": [
+        {
+          "field": "direction",
+          "operator": "is",
+          "value": "in"
+        },
+        {
+          "field": "description",
+          "operator": "contains",
+          "source": "raw",
+          "value": "Stipendio"
+        }
+      ],
+      "actions": [
+        {
+          "type": "set_category",
+          "category": {
+            "system": "SALARY"
+          }
+        }
+      ]
     }
   ]
 }
