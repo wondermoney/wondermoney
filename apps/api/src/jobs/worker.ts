@@ -152,6 +152,12 @@ import {
 } from '@app/jobs/instance-heartbeat.queue';
 import { instrumentedBatch } from '@app/jobs/job-instrumentation';
 import {
+  ensureMcpOAuthClientPruneQueue,
+  MCP_OAUTH_CLIENT_PRUNE_CRON,
+  MCP_OAUTH_CLIENT_PRUNE_QUEUE,
+  scheduleMcpOAuthClientPruneJob,
+} from '@app/jobs/mcp-oauth-client-prune.queue';
+import {
   ensurePortfolioCsvImportConfirmedQueue,
   PORTFOLIO_CSV_IMPORT_CONFIRMED_QUEUE,
   type PortfolioCsvImportConfirmedJobPayload,
@@ -355,6 +361,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureBudgetYearExtensionQueue(boss);
     await ensureApiTokenExpiryQueue(boss);
     await ensureAssistantProposalExpiryQueue(boss);
+    await ensureMcpOAuthClientPruneQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
     await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
@@ -401,6 +408,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleBudgetYearExtensionJob(boss);
       await scheduleApiTokenExpiryJob(boss);
       await scheduleAssistantProposalExpiryJob(boss);
+      await scheduleMcpOAuthClientPruneJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
@@ -718,6 +726,18 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         async (job) => {
           const { handleAssistantProposalExpiryJob } = await import('@app/jobs/assistant-proposal-expiry.worker');
           await runInRequestContext(() => handleAssistantProposalExpiryJob(job, { logger: log }));
+        },
+      ),
+    );
+
+    await boss.work<Record<string, never>>(
+      MCP_OAUTH_CLIENT_PRUNE_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        MCP_OAUTH_CLIENT_PRUNE_QUEUE,
+        { checkinMarginMinutes: 120, maxRuntimeMinutes: 30, monitorSlug: MCP_OAUTH_CLIENT_PRUNE_QUEUE, schedule: MCP_OAUTH_CLIENT_PRUNE_CRON },
+        async (job) => {
+          const { handleMcpOAuthClientPruneJob } = await import('@app/jobs/mcp-oauth-client-prune.worker');
+          await runInRequestContext(() => handleMcpOAuthClientPruneJob(job, { logger: log }));
         },
       ),
     );
