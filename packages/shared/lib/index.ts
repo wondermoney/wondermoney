@@ -3,6 +3,7 @@ import * as transactionImport from './import';
 export { csv, transactionImport };
 
 export * from './bank-sync';
+export * from './enable-banking';
 
 // EODHD exports
 export {

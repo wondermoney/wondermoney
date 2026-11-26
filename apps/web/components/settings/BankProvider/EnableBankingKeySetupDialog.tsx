@@ -41,13 +41,17 @@ const apiMessage = (error: unknown): string | undefined =>
 const emptyValues = { applicationId: "", privateKeyPem: "" };
 
 interface Props {
-  triggerLabel: string;
+  /** Without one there is no trigger: the caller opens it through `open`. */
+  triggerLabel?: string;
   /** `outline` when it sits beside the generated-key path, the primary way in. */
   triggerVariant?: "default" | "outline";
   isUpdate: boolean;
   /** Optional extra hook for callers — the query itself is already
    * invalidated by the mutation, so most callers don't need this. */
   onSaved?: () => void;
+  /** Controlled open state, for a caller that opens it from elsewhere (the setup wizard). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /**
@@ -67,10 +71,17 @@ export default function EnableBankingKeySetupDialog({
   triggerVariant = "default",
   isUpdate,
   onSaved,
+  open: controlledOpen,
+  onOpenChange,
 }: Props) {
   const t = useTranslations("bankProvider");
   const notifyIfRateLimited = useRateLimitToast();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = (next: boolean) => {
+    setUncontrolledOpen(next);
+    onOpenChange?.(next);
+  };
   const [error, setError] = useState<string | null>(null);
 
   const schema = z.object({
@@ -135,12 +146,14 @@ export default function EnableBankingKeySetupDialog({
     <DrawerDialog
       title={isUpdate ? t("setup.titleUpdate") : t("setup.titleAdd")}
       trigger={
-        <Button
-          variant={triggerVariant}
-          className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2"
-        >
-          {triggerLabel}
-        </Button>
+        triggerLabel ? (
+          <Button
+            variant={triggerVariant}
+            className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2"
+          >
+            {triggerLabel}
+          </Button>
+        ) : undefined
       }
       open={open}
       onOpenChange={handleOpenChange}

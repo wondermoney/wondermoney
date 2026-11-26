@@ -2621,9 +2621,9 @@
   "transaction": "Transaction",
   "transaction-hidden": "Hidden",
   "bankProviderCredentialRequired": {
-    "title": "Add your Enable Banking key first",
-    "body": "Connecting a bank now needs your own Enable Banking application ID and key. Add them in Settings, then come back here.",
-    "cta": "Go to Bank Provider settings",
+    "title": "Set up bank sync first",
+    "body": "Linking a bank needs your own free Enable Banking application. The setup takes a few minutes.",
+    "cta": "Set up bank sync",
     "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
   },
   "faq": {
@@ -2708,33 +2708,21 @@
     "continueSetup": "Continue setup",
     "pendingWaiting": "A certificate is waiting for its application ID until {date}.",
     "generated": {
-      "title": "Create your Enable Banking key",
-      "intro": "WonderMoney creates the key and keeps it encrypted on this server; you never see it. Register its certificate with Enable Banking, then paste the application ID here.",
-      "step1Title": "1. Get the certificate",
       "create": "Create certificate",
       "recreate": "Create a new certificate",
-      "pendingNotice": "A certificate is already waiting until {date}. If you have registered it, go to step 3. A new certificate replaces it.",
       "download": "Download certificate",
       "copyCertificate": "Copy certificate",
-      "step2Title": "2. Register the application in Enable Banking",
-      "step2Intro": "In the Enable Banking Control Panel, add a new application with these values. Under key generation, choose \"Generate outside the browser and import public certificate\" and paste the certificate.",
-      "fieldEnvironment": "Environment",
-      "valueProduction": "Production",
       "fieldName": "Application name",
       "fieldDescription": "Description",
       "fieldRedirectUrl": "Redirect URL",
       "fieldPrivacyUrl": "Privacy URL",
       "fieldTermsUrl": "Terms URL",
       "copyValue": "Copy {field}",
-      "activateHint": "After you register it, choose \"Activate by linking accounts\" and link one of your own bank accounts.",
-      "step3Title": "3. Paste the application ID",
       "applicationIdPlaceholder": "e.g. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
       "activate": "Activate",
       "totp": "Authenticator code",
-      "totpHint": "Only needed if you use two-factor authentication.",
       "copied": "Copied.",
       "copyFailed": "Couldn't copy. Select the text and copy it instead.",
-      "toastActivated": "Enable Banking key activated.",
       "errorApplicationNotFound": "Enable Banking doesn't recognise this application ID with this key. Check the ID, that the application was registered with this certificate, and that this server's clock is right.",
       "errorRefused": "Enable Banking refused this key. Try again later, or register the application again.",
       "errorSandbox": "This is a Sandbox application, which can't reach a real bank. Register a new application with Environment set to Production.",
@@ -2744,6 +2732,54 @@
       "errorInvalidTotp": "That authenticator code is not valid.",
       "errorSessionNotFresh": "For your security, sign in again before setting up your key.",
       "errorGeneric": "Something went wrong. Please try again."
+    },
+    "wizard": {
+      "title": "Set up bank sync",
+      "progress": "Step {current} of {total}",
+      "guide": "Step-by-step guide",
+      "back": "Back",
+      "next": "Next",
+      "signIn": {
+        "title": "Sign in to Enable Banking",
+        "body": "Enable Banking is free. Enter your email on its sign-in page and open the link it emails you. There's no password.",
+        "open": "Open Enable Banking"
+      },
+      "create": {
+        "title": "Create the application",
+        "body": "In the Control Panel, open Applications and add a new application with these values.",
+        "environment": "Environment: Production",
+        "environmentWhy": "Not Sandbox. A Sandbox application never reaches a real bank.",
+        "urlsRequired": "Production needs both URLs, even though the form doesn't mark them as required.",
+        "certificate": "Public certificate",
+        "certificateHint": "Choose \"Generate outside the browser and import public certificate\", then paste this certificate.",
+        "waiting": "A certificate is waiting until {date}. If you haven't registered it, create a new one.",
+        "haveKey": "I already have a key"
+      },
+      "activate": {
+        "title": "Activate the application",
+        "body": "Once you submit, the application's page shows two buttons.",
+        "link": "Activate by linking accounts",
+        "linkHint": "Choose this and link one of your own bank accounts.",
+        "request": "Request activation",
+        "requestHint": "Skip this: it's for businesses and needs company verification."
+      },
+      "applicationId": {
+        "title": "Paste the application ID",
+        "label": "Application ID",
+        "hint": "Shown near the top of the application's page.",
+        "checking": "Checking with Enable Banking…",
+        "revisit": "Go to step {step}: {title}"
+      },
+      "done": {
+        "title": "Bank sync is ready",
+        "body": "Your Enable Banking application is active. Choose your bank to link your first account.",
+        "chooseBank": "Choose your bank"
+      },
+      "signInAgain": {
+        "title": "Sign in again first",
+        "body": "For your security, setting up bank sync needs a recent sign-in. You'll come straight back here.",
+        "action": "Sign in again"
+      }
     }
   },
   "emailVerification": {

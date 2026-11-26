@@ -2621,9 +2621,9 @@
   "transaction": "Transazione",
   "transaction-hidden": "Nascosta",
   "bankProviderCredentialRequired": {
-    "title": "Aggiungi prima la tua chiave Enable Banking",
-    "body": "Ora per collegare una banca servono l'ID applicazione e la chiave Enable Banking tuoi. Aggiungili nelle Impostazioni, poi torna qui.",
-    "cta": "Vai alle impostazioni del provider bancario",
+    "title": "Configura prima la sincronizzazione bancaria",
+    "body": "Per collegare una banca ti serve una tua applicazione Enable Banking, gratuita. La configurazione richiede pochi minuti.",
+    "cta": "Configura la sincronizzazione bancaria",
     "sharedUnavailable": "La connessione bancaria condivisa di questo server copre una sola famiglia, quindi la tua ha bisogno di una chiave propria."
   },
   "faq": {
@@ -2708,33 +2708,21 @@
     "continueSetup": "Continua la configurazione",
     "pendingWaiting": "Un certificato è in attesa dell'ID dell'applicazione fino al {date}.",
     "generated": {
-      "title": "Crea la tua chiave Enable Banking",
-      "intro": "WonderMoney crea la chiave e la conserva cifrata su questo server; non la vedi mai. Registra il suo certificato su Enable Banking, poi incolla qui l'ID dell'applicazione.",
-      "step1Title": "1. Ottieni il certificato",
       "create": "Crea certificato",
       "recreate": "Crea un nuovo certificato",
-      "pendingNotice": "Un certificato è già in attesa fino al {date}. Se lo hai già registrato, vai al passo 3. Un nuovo certificato lo sostituisce.",
       "download": "Scarica certificato",
       "copyCertificate": "Copia certificato",
-      "step2Title": "2. Registra l'applicazione su Enable Banking",
-      "step2Intro": "Nel Control Panel di Enable Banking, aggiungi una nuova applicazione con questi valori. Nella generazione della chiave, scegli \"Generate outside the browser and import public certificate\" e incolla il certificato.",
-      "fieldEnvironment": "Ambiente",
-      "valueProduction": "Production",
       "fieldName": "Nome dell'applicazione",
       "fieldDescription": "Descrizione",
       "fieldRedirectUrl": "URL di reindirizzamento",
       "fieldPrivacyUrl": "URL della privacy",
       "fieldTermsUrl": "URL dei termini",
       "copyValue": "Copia {field}",
-      "activateHint": "Dopo averla registrata, scegli \"Activate by linking accounts\" e collega uno dei tuoi conti bancari.",
-      "step3Title": "3. Incolla l'ID dell'applicazione",
       "applicationIdPlaceholder": "es. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
       "activate": "Attiva",
       "totp": "Codice dell'autenticatore",
-      "totpHint": "Serve solo se usi l'autenticazione a due fattori.",
       "copied": "Copiato.",
       "copyFailed": "Impossibile copiare. Seleziona il testo e copialo.",
-      "toastActivated": "Chiave Enable Banking attivata.",
       "errorApplicationNotFound": "Enable Banking non riconosce questo ID dell'applicazione con questa chiave. Controlla l'ID, che l'applicazione sia stata registrata con questo certificato e che l'orologio di questo server sia corretto.",
       "errorRefused": "Enable Banking ha rifiutato questa chiave. Riprova più tardi o registra di nuovo l'applicazione.",
       "errorSandbox": "Questa è un'applicazione Sandbox, che non raggiunge nessuna banca reale. Registra una nuova applicazione con l'ambiente Production.",
@@ -2744,6 +2732,54 @@
       "errorInvalidTotp": "Questo codice dell'autenticatore non è valido.",
       "errorSessionNotFresh": "Per sicurezza, accedi di nuovo prima di configurare la tua chiave.",
       "errorGeneric": "Qualcosa è andato storto. Riprova."
+    },
+    "wizard": {
+      "title": "Configura la sincronizzazione bancaria",
+      "progress": "Passaggio {current} di {total}",
+      "guide": "Guida passo passo",
+      "back": "Indietro",
+      "next": "Avanti",
+      "signIn": {
+        "title": "Accedi a Enable Banking",
+        "body": "Enable Banking è gratuito. Inserisci la tua email nella pagina di accesso e apri il link che ti invia. Non serve una password.",
+        "open": "Apri Enable Banking"
+      },
+      "create": {
+        "title": "Crea l'applicazione",
+        "body": "Nel Control Panel, apri Applications e aggiungi una nuova applicazione con questi valori.",
+        "environment": "Environment: Production",
+        "environmentWhy": "Non Sandbox. Un'applicazione Sandbox non raggiunge mai una banca reale.",
+        "urlsRequired": "In Production servono entrambi gli URL, anche se il modulo non li segna come obbligatori.",
+        "certificate": "Certificato pubblico",
+        "certificateHint": "Scegli \"Generate outside the browser and import public certificate\" e incolla questo certificato.",
+        "waiting": "Un certificato è in attesa fino al {date}. Se non l'hai ancora registrato, creane uno nuovo.",
+        "haveKey": "Ho già una chiave"
+      },
+      "activate": {
+        "title": "Attiva l'applicazione",
+        "body": "Dopo l'invio, la pagina dell'applicazione mostra due pulsanti.",
+        "link": "Activate by linking accounts",
+        "linkHint": "Scegli questo e collega uno dei tuoi conti bancari.",
+        "request": "Request activation",
+        "requestHint": "Saltalo: è per le aziende e richiede la verifica aziendale."
+      },
+      "applicationId": {
+        "title": "Incolla l'ID dell'applicazione",
+        "label": "ID dell'applicazione",
+        "hint": "Si trova in alto nella pagina dell'applicazione.",
+        "checking": "Verifica con Enable Banking in corso…",
+        "revisit": "Vai al passaggio {step}: {title}"
+      },
+      "done": {
+        "title": "La sincronizzazione bancaria è pronta",
+        "body": "La tua applicazione Enable Banking è attiva. Scegli la tua banca per collegare il primo conto.",
+        "chooseBank": "Scegli la tua banca"
+      },
+      "signInAgain": {
+        "title": "Accedi di nuovo prima",
+        "body": "Per sicurezza, configurare la sincronizzazione bancaria richiede un accesso recente. Tornerai subito qui.",
+        "action": "Accedi di nuovo"
+      }
     }
   },
   "emailVerification": {

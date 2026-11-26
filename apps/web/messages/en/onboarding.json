@@ -55,7 +55,7 @@
         },
         "credentialRequired": {
           "title": "Connecting a bank needs a quick one-time setup",
-          "body": "Before you can link a real bank, add your own Enable Banking key from Settings. You can do that anytime after setup. For now, add an account manually above or skip this step and connect later."
+          "body": "Linking a real bank needs your own free Enable Banking application. It takes a few minutes, and you can also do it later."
         }
       },
       "connect": {

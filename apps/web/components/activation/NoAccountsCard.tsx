@@ -10,16 +10,21 @@ import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
 import StatementImportFlow, {
   useStatementImportAvailable,
 } from "@/components/account/StatementImportFlow";
+import EnableBankingSetupWizard from "@/components/settings/BankProvider/EnableBankingSetupWizard";
+import { useSimplefinAvailable } from "@/components/settings/Connections/SimplefinConnectButton";
 import useAccounts from "@/lib/api/account/useAccounts";
+import { useFeature, useInstanceKnown } from "@/lib/api/instance/useInstance";
+import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 
 import { NoAccountOptionList } from "./NoAccountOptions";
 
 /**
  * Home for a household with no accounts at all: the three ways in, each opening the flow the
- * rest of the app already uses. "Connect a bank" opens the add-account dialog, which knows
- * which bank providers this server has and whether a key is still needed; the other two are
- * the ones first run offers after skipping the bank.
+ * rest of the app already uses. "Connect a bank" opens the Enable Banking setup wizard when a
+ * key is still needed and Enable Banking is the only bank provider, and the wizard goes on to
+ * the bank list; otherwise it opens the add-account dialog, which knows which bank providers
+ * this server has. The other two are the ones first run offers after skipping the bank.
  *
  * It shows only while the account list is loaded and empty, so the first account takes it
  * away, and never to a household viewer, who cannot add one. A dialog already open stays mounted after that, until it is closed: importing a
@@ -35,8 +40,39 @@ export function NoAccountsCard() {
   const [syncOpen, setSyncOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  // Asked only while the card shows, so a household with accounts makes no request for it.
+  const { credentialRequired, loading: credentialLoading } =
+    useBankLinkCredential({ enabled: visible });
+  const instanceKnown = useInstanceKnown();
+  const enableBankingAvailable = useFeature(
+    (features) =>
+      features.bankSyncProviders?.includes("enable_banking") ?? true,
+  );
+  const simplefinAvailable = useSimplefinAvailable();
+  // Where "Connect a bank" leads, once the server's providers and the key are known; until
+  // then a press waits for the answer rather than guess (SimpleFIN reads as off while unknown).
+  const connectPath =
+    !instanceKnown || credentialLoading
+      ? null
+      : credentialRequired && enableBankingAvailable && !simplefinAvailable
+        ? "wizard"
+        : "add";
+  const [connectRequested, setConnectRequested] = useState(false);
+  if (connectRequested && connectPath) {
+    setConnectRequested(false);
+    if (connectPath === "wizard") setWizardOpen(true);
+    else setAddOpen(true);
+  }
 
-  if (!visible && !addOpen && !syncOpen && !manualOpen && !importOpen)
+  if (
+    !visible &&
+    !addOpen &&
+    !syncOpen &&
+    !manualOpen &&
+    !importOpen &&
+    !wizardOpen
+  )
     return null;
 
   return (
@@ -55,7 +91,7 @@ export function NoAccountsCard() {
                 key: "connect",
                 icon: Landmark,
                 label: t("connect"),
-                onSelect: () => setAddOpen(true),
+                onSelect: () => setConnectRequested(true),
               },
               ...(importAvailable
                 ? [
@@ -94,6 +130,11 @@ export function NoAccountsCard() {
         trigger={false}
       />
       <AccountAddSyncModal isOpen={syncOpen} setOpen={setSyncOpen} />
+      <EnableBankingSetupWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onChooseBank={() => setSyncOpen(true)}
+      />
       <AccountAddOfflineModal
         isOpen={manualOpen}
         closeModal={() => setManualOpen(false)}

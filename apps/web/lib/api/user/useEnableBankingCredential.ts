@@ -23,10 +23,7 @@ import api from "../api";
  */
 
 export type EnableBankingCredentialStatus =
-  | "active"
-  | "invalid"
-  | "pending"
-  | "revoked";
+  "active" | "invalid" | "pending" | "revoked";
 
 export interface EnableBankingCredential {
   /** Null only while the sole credential is a generated key waiting for its application ID. */
@@ -187,10 +184,23 @@ export function useCreateEnableBankingCertificate() {
   >({
     mutationFn: (input) => createEnableBankingCertificate(input),
     scope: { id: "enable-banking-credential" },
-    onSuccess: () =>
-      queryClient.invalidateQueries({
+    onSuccess: (created) => {
+      // The new key is the pending one straight away, so a caller comparing its certificate with
+      // the server's pending key (the setup wizard) never sees them disagree while this refetches.
+      queryClient.setQueryData<EnableBankingCredentialResponse>(
+        enableBankingCredentialQueryKeys.all,
+        (current) => ({
+          applicationId: current?.applicationId ?? null,
+          lastValidatedAt: current?.lastValidatedAt ?? null,
+          lastValidationError: current?.lastValidationError ?? null,
+          status: current?.status ?? "pending",
+          pending: { expiresAt: created.expiresAt },
+        }),
+      );
+      return queryClient.invalidateQueries({
         queryKey: enableBankingCredentialQueryKeys.all,
-      }),
+      });
+    },
   });
 }
 
@@ -215,7 +225,8 @@ export function useActivateEnableBankingCredential() {
   >({
     mutationFn: (input) => activateEnableBankingCredential(input),
     scope: { id: "enable-banking-credential" },
-    onSuccess: () =>
+    // Settled, not only on success: a refusal can mean the pending key lapsed or was replaced.
+    onSettled: () =>
       queryClient.invalidateQueries({
         queryKey: enableBankingCredentialQueryKeys.all,
       }),

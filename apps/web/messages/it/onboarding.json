@@ -55,7 +55,7 @@
         },
         "credentialRequired": {
           "title": "Per collegare una banca serve una breve configurazione una tantum",
-          "body": "Prima di collegare una banca reale, aggiungi la tua chiave Enable Banking dalle Impostazioni. Puoi farlo in qualsiasi momento dopo la configurazione. Per ora aggiungi un conto manualmente qui sopra oppure salta questo passaggio e collegalo più tardi."
+          "body": "Per collegare una banca reale ti serve una tua applicazione Enable Banking, gratuita. Richiede pochi minuti e puoi farlo anche più tardi."
         }
       },
       "connect": {

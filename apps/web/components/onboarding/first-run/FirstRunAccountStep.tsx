@@ -9,6 +9,7 @@ import StatementImportFlow, {
   useStatementImportAvailable,
 } from "@/components/account/StatementImportFlow";
 import { NoAccountOptionList } from "@/components/activation/NoAccountOptions";
+import EnableBankingSetupWizard from "@/components/settings/BankProvider/EnableBankingSetupWizard";
 import { useSimplefinAvailable } from "@/components/settings/Connections/SimplefinConnectButton";
 import SimplefinConnectDialog from "@/components/settings/Connections/SimplefinConnectDialog";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,7 @@ export default function FirstRunAccountStep() {
   const [manualFrom, setManualFrom] = useState<"list" | "choice">("list");
   const [bankId, setBankId] = useState<string | null>(null);
   const [simplefinOpen, setSimplefinOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [country, setCountry] = useState<string>(
     () => getCountryCodeClient() || "PT",
   );
@@ -264,30 +266,36 @@ export default function FirstRunAccountStep() {
                 <Spinner />
               </div>
             ) : credentialRequired ? (
-              // Onboarding-specific copy, not the shared bankProviderCredentialRequired
-              // keys: those point to /settings, which is under (full-layout) and
-              // guarded by FirstRunOnboardingRedirectGate — following that link mid
-              // onboarding would bounce the user straight back to the welcome step
-              // instead of Settings. This copy stays local and instead points at the
-              // manual-account card above and the skip control in the footer, both of
-              // which already work here.
-              <div className="border-border bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-md border p-3">
-                <FirstRunIconTile icon={KeyRound} tone="slate" size="sm" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-foreground text-sm font-medium">
-                    {t("account.credentialRequired.title")}
-                  </p>
-                  <p className="text-muted-foreground text-[13px] leading-5">
-                    {t("account.credentialRequired.body")}
-                  </p>
-                  {sharedCredentialUnavailable ? (
-                    <p className="text-muted-foreground text-[13px] leading-5">
-                      {tCommon(
-                        "bankProviderCredentialRequired.sharedUnavailable",
-                      )}
+              // The setup wizard opens here, in place: Settings is under (full-layout) and
+              // guarded by FirstRunOnboardingRedirectGate, so a link there mid onboarding would
+              // bounce back to the welcome step. Once the key is active the bank list below
+              // replaces this card, so finishing the wizard lands on it.
+              <div className="border-border text-muted-foreground flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <FirstRunIconTile icon={KeyRound} tone="slate" size="sm" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-foreground text-sm font-medium">
+                      {t("account.credentialRequired.title")}
                     </p>
-                  ) : null}
+                    <p className="text-muted-foreground text-[13px] leading-5">
+                      {t("account.credentialRequired.body")}
+                    </p>
+                    {sharedCredentialUnavailable ? (
+                      <p className="text-muted-foreground text-[13px] leading-5">
+                        {tCommon(
+                          "bankProviderCredentialRequired.sharedUnavailable",
+                        )}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
+                <Button
+                  type="button"
+                  className="min-h-11 shrink-0"
+                  onClick={() => setWizardOpen(true)}
+                >
+                  {tCommon("bankProviderCredentialRequired.cta")}
+                </Button>
               </div>
             ) : (
               <>
@@ -333,6 +341,12 @@ export default function FirstRunAccountStep() {
         open={simplefinOpen}
         onOpenChange={setSimplefinOpen}
         onConnected={onSimplefinConnected}
+      />
+      {/* Done closes it: the key is active, so the bank list is already showing. */}
+      <EnableBankingSetupWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onChooseBank={() => {}}
       />
     </>
   );

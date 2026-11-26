@@ -65,15 +65,21 @@ const selectBankSyncCredentials = (
   profile: Profile,
 ): BankSyncCredentials => profile.bankSyncCredentials ?? "user";
 
-export default function useBankLinkCredential(): BankLinkCredential {
-  const own = useEnableBankingCredential();
-  const caller = useProfileField(selectBankSyncCredentials);
+/**
+ * `enabled: false` makes no request (for a caller that only sometimes needs the answer); the
+ * result then reads as still loading.
+ */
+export default function useBankLinkCredential({
+  enabled = true,
+}: { enabled?: boolean } = {}): BankLinkCredential {
+  const own = useEnableBankingCredential({ enabled });
+  const caller = useProfileField(selectBankSyncCredentials, { enabled });
   const instanceCredentials = useInstanceBankSyncCredentials();
   return resolveBankLinkCredential({
     callerCredentials: caller.data,
     callerLoading: caller.isLoading,
     instanceCredentials,
     ownCredentialActive: own.data?.status === "active",
-    ownCredentialLoading: own.isLoading,
+    ownCredentialLoading: own.isLoading || !enabled,
   });
 }

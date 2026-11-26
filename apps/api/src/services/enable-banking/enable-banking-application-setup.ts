@@ -1,10 +1,8 @@
+import { ENABLE_BANKING_DEFAULT_PRIVACY_URL, ENABLE_BANKING_DEFAULT_TERMS_URL } from '@wondermoney/shared';
+
 import { instanceName } from '@config/instance-name';
 import { ENABLE_BANKING_PROVIDER_ID, isBankProviderEnabled } from '@service/bank-providers/registry';
 import { ENABLE_BANKING_CALLBACK_URL } from '@utils/constants';
-
-/** WonderMoney's own policies, which a person registering an application for personal use can point at. */
-const DEFAULT_PRIVACY_URL = 'https://docs.wonder.money/about/privacy-policy';
-const DEFAULT_TERMS_URL = 'https://docs.wonder.money/about/terms-of-service';
 
 /**
  * What a person enters in Enable Banking's Control Panel to register their own application for
@@ -27,8 +25,8 @@ export function enableBankingApplicationSetup(env: Readonly<Record<string, strin
   return {
     applicationDescription: `Personal use: reads my own bank accounts into ${name}.`,
     applicationName: name,
-    privacyUrl: env['PRIVACY_POLICY_URL']?.trim().replaceAll('{lang}', 'en') || DEFAULT_PRIVACY_URL,
+    privacyUrl: env['PRIVACY_POLICY_URL']?.trim().replaceAll('{lang}', 'en') || ENABLE_BANKING_DEFAULT_PRIVACY_URL,
     redirectUrl: ENABLE_BANKING_CALLBACK_URL,
-    termsUrl: DEFAULT_TERMS_URL,
+    termsUrl: ENABLE_BANKING_DEFAULT_TERMS_URL,
   };
 }

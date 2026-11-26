@@ -157,6 +157,17 @@ function useHydrated(): boolean {
   );
 }
 
+/**
+ * Whether the server has described itself yet (and the page has hydrated), so a choice between
+ * features can wait for the real answer instead of guessing with `useFeature` or
+ * `useConfirmedFeature`.
+ */
+export function useInstanceKnown(): boolean {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated && Boolean(data);
+}
+
 /** True unless the server has said the feature is off. */
 export function useFeature(select: (features: InstanceDescription["features"]) => boolean): boolean {
   const { data } = useInstance();
