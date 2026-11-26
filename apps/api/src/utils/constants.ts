@@ -1,3 +1,4 @@
+import { ENABLE_BANKING_CALLBACK_PATH } from '@wondermoney/shared';
 import { template } from 'lodash-es';
 
 import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
@@ -150,12 +151,16 @@ export const FRONTEND_URL = INSTANCE_URLS.appUrl;
 export const BACKEND_URL = INSTANCE_URLS.apiUrl;
 
 /**
- * The privacy-policy link in email footers: `PRIVACY_POLICY_URL` (a `{lang}` placeholder is
- * replaced with `en`, `pt` or `es`), or the app's own privacy settings.
+ * The privacy-policy link in email footers: `PRIVACY_POLICY_URL`, or the app's own privacy
+ * settings in the account's locale. The configured URL usually points at the docs site, which is
+ * written in English, Portuguese and Spanish, so its `{lang}` placeholder becomes `en`, `pt` or
+ * `es`, and any other locale (Italian) reads the English page.
  */
+const PRIVACY_POLICY_LANGS: readonly string[] = ['en', 'pt', 'es'];
+
 export function privacyPolicyUrl(lang: string): string {
   const configured = process.env['PRIVACY_POLICY_URL']?.trim();
-  if (configured) return configured.replaceAll('{lang}', lang);
+  if (configured) return configured.replaceAll('{lang}', PRIVACY_POLICY_LANGS.includes(lang) ? lang : 'en');
   return `${FRONTEND_URL}/${lang}/settings?tab=privacy`;
 }
 
@@ -189,7 +194,7 @@ export function readBuildInfo(commit: string, version: string): { commit: null |
  * Production value confirmed already registered in Enable Banking's Control
  * Panel: https://api.wonder.money/v1/banking/enable-banking/callback.
  */
-export const ENABLE_BANKING_CALLBACK_URL = `${BACKEND_URL}/v1/banking/enable-banking/callback`;
+export const ENABLE_BANKING_CALLBACK_URL = `${BACKEND_URL}${ENABLE_BANKING_CALLBACK_PATH}`;
 
 /** The mobile app's URL scheme (`scheme` in `apps/mobile/app.config.ts`). */
 export const MOBILE_APP_SCHEME = 'wondermoney';

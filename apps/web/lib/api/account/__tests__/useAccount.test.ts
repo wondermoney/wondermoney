@@ -128,6 +128,7 @@ test("supports finalized detail payloads", async () => {
     ...finalizedAccount,
     accountType: null,
     appuserCurrencyAvailableBalance: null,
+    balanceDerivedAt: null,
     csvImportFormat: "generic",
     availableBalance: null,
     syncStatus: null,
@@ -135,5 +136,6 @@ test("supports finalized detail payloads", async () => {
     fxRateDate: null,
     creditCard: null,
     myAccess: "write",
+    closed: false,
   });
 });

@@ -21,6 +21,8 @@ import { getTranslations } from "@/lib/translations";
 import { featureOgCard, ogImageFor } from "@/lib/og/ogImages";
 import type { FeatureRouteId } from "@/lib/pageStaticPaths";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
+import { featureFaq } from "@/lib/faq";
+import { buildFaqPageSchema } from "@/lib/structuredData";
 
 interface Props {
   locale: Lang;
@@ -98,15 +100,6 @@ const detailStructuredData = (ns: string): Record<string, unknown>[] => [
     operatingSystem: "Web",
     description: t(`lp.${ns}.schemaDescription`),
   },
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [1, 2, 3].map((n) => ({
-      "@type": "Question",
-      name: t(`lp.${ns}.faq${n}Q`),
-      acceptedAnswer: { "@type": "Answer", text: t(`lp.${ns}.faq${n}A`) },
-    })),
-  },
 ];
 
 const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unknown>[]> = {
@@ -142,8 +135,8 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
       applicationCategory: "FinanceApplication",
       operatingSystem: "Web",
-      description:
-        "WonderMoney automatically categorises your bank transactions using AI. Spend less time on data entry and more time understanding your spending habits.",
+      // The page's own lead, in its language: what the page says about how categories are set.
+      description: t("lp.featureCategorization.heroSubtitle"),
     },
   ],
   featureCredits: [
@@ -156,36 +149,6 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       operatingSystem: "Web",
       description: t("lp.featureCredits.schemaDescription"),
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featureCredits.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureCredits.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureCredits.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureCredits.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureCredits.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureCredits.faq3A"),
-          },
-        },
-      ],
-    },
   ],
   featureFinancialMarkets: [
     {
@@ -196,36 +159,6 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       applicationCategory: "FinanceApplication",
       operatingSystem: "Web",
       description: t("lp.featureFinancialMarkets.schemaDescription"),
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featureFinancialMarkets.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureFinancialMarkets.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureFinancialMarkets.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureFinancialMarkets.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureFinancialMarkets.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureFinancialMarkets.faq3A"),
-          },
-        },
-      ],
     },
   ],
   featureGoals: [
@@ -238,36 +171,6 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       operatingSystem: "Web",
       description: t("lp.featureGoals.schemaDescription"),
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featureGoals.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureGoals.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureGoals.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureGoals.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureGoals.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureGoals.faq3A"),
-          },
-        },
-      ],
-    },
   ],
   featureNetWorth: [
     {
@@ -278,36 +181,6 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       applicationCategory: "FinanceApplication",
       operatingSystem: "Web",
       description: t("lp.featureNetWorth.schemaDescription"),
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featureNetWorth.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureNetWorth.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureNetWorth.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureNetWorth.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureNetWorth.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureNetWorth.faq3A"),
-          },
-        },
-      ],
     },
   ],
   featurePrivacy: [
@@ -330,36 +203,6 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       operatingSystem: "Web",
       description: t("lp.featurePortfolio.schemaDescription"),
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featurePortfolio.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featurePortfolio.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featurePortfolio.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featurePortfolio.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featurePortfolio.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featurePortfolio.faq3A"),
-          },
-        },
-      ],
-    },
   ],
   featureReports: [
     {
@@ -371,38 +214,14 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       operatingSystem: "Web",
       description: t("lp.featureReports.schemaDescription"),
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: t("lp.featureReports.faq1Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureReports.faq1A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureReports.faq2Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureReports.faq2A"),
-          },
-        },
-        {
-          "@type": "Question",
-          name: t("lp.featureReports.faq3Q"),
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: t("lp.featureReports.faq3A"),
-          },
-        },
-      ],
-    },
   ],
 };
+
+// Every feature page shows its FAQ (`featureFaq`); the FAQPage JSON-LD is built from the same entries.
+const structuredData = [
+  ...(detailNs ? detailStructuredData(detailNs) : structuredDataByRouteId[routeId as ClassicFeatureRouteId]),
+  buildFaqPageSchema(featureFaq(locale, routeId)),
+];
 ---
 
 <Layout
@@ -433,5 +252,5 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
     )}
   </main>
   <Footer locale={locale} client:idle />
-  <StructuredData data={detailNs ? detailStructuredData(detailNs) : structuredDataByRouteId[routeId as ClassicFeatureRouteId]} />
+  <StructuredData data={structuredData} />
 </Layout>

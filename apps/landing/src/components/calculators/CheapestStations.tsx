@@ -339,7 +339,7 @@ export default function CheapestStations() {
             {showMap && (
               <Suspense
                 fallback={
-                  <div className="grid h-80 place-items-center rounded-card border border-border bg-paper-2 text-sm text-muted-foreground sm:h-96">
+                  <div className="grid h-80 place-items-center rounded-card border border-border bg-paper-2 text-sm text-muted-foreground sm:h-96 lg:h-[32rem]">
                     {t(k("mapLoading"))}
                   </div>
                 }

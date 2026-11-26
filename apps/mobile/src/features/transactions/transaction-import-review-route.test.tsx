@@ -323,4 +323,22 @@ describe('TransactionImportReviewRoute', () => {
     expect(server.writes()).not.toContain('POST commit')
     client.clear()
   })
+
+  it('pre-selects a suggested account another member shares, and saves the file\'s account to it', async () => {
+    fakeServer({ status: 'needs_mapping' })
+    mockRead.mockImplementation(async (endpoint: { schema: { parse: (value: unknown) => unknown } }) => endpoint.schema.parse({
+      rows: { items: [], page: 1, pageSize: 50, total: 0 },
+      session: {
+        accountId: 7, accountMapping: {}, canCommit: false, canRetry: false, committedAt: null, correlationId: 'c', counts: { ...emptyCounts, new: 2 }, createdAt: '2026-11-10T10:00:00.000Z',
+        decisions: { import: 2, skip: 0 }, detailsDeletedAt: null, errorCode: null, expiresAt: '2026-11-17T10:00:00.000Z', fileName: 'export.xml', format: 'camt053', id: SESSION_ID,
+        sourceAccounts: [{ label: 'PT50000201231234567890154', rowCount: 2, suggestedAccountId: 9 }], status: 'needs_mapping', upload: null, warnings: [],
+      },
+    }))
+    const { view, client } = await renderReview({ accounts: [{ id: 7, name: 'Daily account' }, { id: 9, name: 'Joint · Shared by Ana' }] })
+    expect(await view.findByText('Joint · Shared by Ana')).toBeOnTheScreen()
+    await fireEvent.press(view.getByRole('button', { name: 'Save accounts' }))
+    await waitFor(() => expect(mockWrite.mock.calls.at(-1)?.[0].path).toBe(`${BASE}/account-mapping`))
+    expect(mockWrite.mock.calls.at(-1)?.[1].body).toEqual({ mapping: { PT50000201231234567890154: 9 } })
+    client.clear()
+  })
 })

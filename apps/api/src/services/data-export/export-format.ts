@@ -127,7 +127,7 @@ export const EXPORT_PASSWORD_MAX_LENGTH = 256;
 
 export const ENCRYPTED_EXPORT_README_PATH = 'README.txt';
 
-/** The one unencrypted file of a protected export, in the three languages the app speaks. */
+/** The one unencrypted file of a protected export, in the languages the app speaks. */
 export const ENCRYPTED_EXPORT_README = `WonderMoney data export (password protected)
 
 The files in this archive are encrypted with AES-256 (WinZip AES). Open it with 7-Zip
@@ -149,11 +149,21 @@ inicia uma nova exportação.
 
 Exportación de datos de WonderMoney (protegida con contraseña)
 
-Los archivos de este zip están cifrados con AES-256 (WinZip AES). Ábralo con 7-Zip
-(Windows, Linux), Keka (macOS), WinRAR o la restauración de WonderMoney, e introduzca la
-contraseña que eligió al iniciar la exportación. Las herramientas de zip integradas de algunos
-sistemas no abren archivos cifrados. Una contraseña olvidada no se puede recuperar: inicie una
+Los archivos de este zip están cifrados con AES-256 (WinZip AES). Ábrelo con 7-Zip
+(Windows, Linux), Keka (macOS), WinRAR o la restauración de WonderMoney, e introduce la
+contraseña que elegiste al iniciar la exportación. Las herramientas de zip integradas de algunos
+sistemas no abren archivos cifrados. Una contraseña olvidada no se puede recuperar: inicia una
 nueva exportación.
+
+---
+
+Esportazione dei dati di WonderMoney (protetta da password)
+
+I file di questo archivio sono cifrati con AES-256 (WinZip AES). Aprilo con 7-Zip
+(Windows, Linux), Keka (macOS), WinRAR o il ripristino di WonderMoney e inserisci la password
+che hai scelto quando hai avviato l'esportazione. Gli strumenti zip integrati di alcuni sistemi
+non aprono gli archivi cifrati. Una password dimenticata non si può recuperare: avvia una nuova
+esportazione.
 `;
 
 /** `wondermoney-export-2026-11-08.zip`, dated in UTC. */

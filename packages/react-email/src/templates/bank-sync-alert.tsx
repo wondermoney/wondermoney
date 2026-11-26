@@ -130,6 +130,42 @@ export const COPY: Record<TransactionalEmailLanguage, LanguageCopy> = {
     settingsLink: "ajustes de notificaciones",
     footer: (brand) => `Recibes este correo porque tienes un banco conectado a tu cuenta de ${brand}.`,
   },
+  it: {
+    kinds: {
+      consent_expiring_7d: {
+        subject: (bank, _brand, date) => `La tua connessione con ${bank} scade il ${date}`,
+        preheader: (bank, date) => `Ricollega ${bank} entro il ${date} perché continui a sincronizzarsi.`,
+        heading: "È ora di rinnovare la connessione bancaria",
+        intro: (bank, brand, date) =>
+          `${brand} può leggere i dati di ${bank} fino al ${date}. Dopo quella data, nuove transazioni e saldi non verranno più sincronizzati. Ricollegare la banca richiede un minuto e mantiene i tuoi conti e lo storico.`,
+      },
+      consent_expiring_1d: {
+        subject: (bank) => `La tua connessione con ${bank} scade entro un giorno`,
+        preheader: (bank, date) => `L'accesso a ${bank} scade il ${date}. Ricollega ora la banca perché continui a sincronizzarsi.`,
+        heading: "La connessione con la tua banca scade a breve",
+        intro: (bank, _brand, date) =>
+          `L'accesso a ${bank} scade il ${date}. Ricollega ora la banca perché nuove transazioni e saldi continuino a sincronizzarsi. I tuoi conti e lo storico restano come sono.`,
+      },
+      consent_revoked: {
+        subject: (bank, brand) => `${bank} ha smesso di condividere i dati con ${brand}`,
+        preheader: (bank) => `${bank} ha chiuso la connessione in anticipo. Ricollega la banca per riprendere la sincronizzazione.`,
+        heading: "La tua banca ha chiuso la connessione",
+        intro: (bank, brand) =>
+          `${bank} ha revocato l'accesso di ${brand} prima della scadenza, quindi i tuoi conti presso quella banca non si aggiornano più. Ricollega la banca per riprendere la sincronizzazione. I tuoi conti e lo storico restano come sono.`,
+      },
+      sync_failing: {
+        subject: (bank) => `Non riusciamo ad aggiornare ${bank}`,
+        preheader: (bank, date) => `${bank} non si sincronizza dal ${date}. Di solito basta ricollegare la banca.`,
+        heading: "La tua banca non si sincronizza",
+        intro: (bank, _brand, date) =>
+          `Non riusciamo ad aggiornare i tuoi conti di ${bank} dal ${date}. Di solito basta ricollegare la banca. Se il problema continua, controlla la tua chiave Enable Banking nelle impostazioni.`,
+      },
+    },
+    cta: "Ricollega la tua banca",
+    settingsNote: "Puoi disattivare gli avvisi sulla connessione bancaria nelle",
+    settingsLink: "impostazioni delle notifiche",
+    footer: (brand) => `Ricevi questa email perché hai una banca collegata al tuo account ${brand}.`,
+  },
 };
 
 /** The date the copy of `kind` names: the consent end, or the first failed sync. */

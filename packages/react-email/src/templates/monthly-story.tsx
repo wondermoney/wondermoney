@@ -69,6 +69,26 @@ export const COPY = {
     marketingFooterText: (brand: string) => `Recibes este correo porque activaste el resumen mensual en ${brand}.`,
     dataContext: "Según las transacciones disponibles actualmente.",
   },
+  it: {
+    heading: "La tua storia finanziaria del mese",
+    insufficientHeading: "Stiamo preparando la tua storia finanziaria",
+    insufficientBody: (monthsNeeded: number) => `Ci servono ancora ${monthsNeeded} ${monthsNeeded === 1 ? "mese" : "mesi"} di storico prima di poter confrontare questo mese con il tuo solito andamento. Quando avremo abbastanza dati, la tua storia inizierà ad apparire qui.`,
+    zeroActivityBody: "Non abbiamo trovato transazioni per questo mese, quindi non c'è ancora nulla da confrontare. Se ti sembra strano, verifica che i tuoi conti siano ancora collegati.",
+    income: "Entrate rispetto al solito",
+    spending: "Spese rispetto al solito",
+    usual: "Di solito",
+    previousValue: (formattedBaseline: string) => `prima ${formattedBaseline}`,
+    metricsSummary: "I tuoi numeri",
+    categoryChanges: "Cosa è cambiato di più",
+    recurringChanges: "Pagamenti ricorrenti",
+    recurringNew: "Nuovo",
+    budgetPressure: "Pressione sul budget",
+    savingsRate: "Tasso di risparmio",
+    netWorth: "Patrimonio netto",
+    ctaLabel: "Vedi i tuoi report",
+    marketingFooterText: (brand: string) => `Ricevi questa email perché hai attivato la storia finanziaria mensile su ${brand}.`,
+    dataContext: "In base alle transazioni attualmente disponibili.",
+  },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
 export function getMonthlyStorySubject(props: Pick<MonthlyStoryProps, "language" | "monthLabel" | "status">) {
@@ -91,8 +111,8 @@ function widthPercent(baseline: number, subject: number): [number, number] {
  * Parses a pre-formatted money string (e.g. `formatMoney` output) back into a
  * plain number, honoring the thousands/decimal separator convention of the
  * given language. `en` uses `,` for thousands and `.` for decimals (e.g.
- * `"1,200.50"`); `pt` and `es` use `.` for thousands and `,` for decimals (e.g.
- * `"1.200,50 €"`, and es-ES leaves four-digit amounts ungrouped: `"1200,50 €"`) —
+ * `"1,200.50"`); `pt`, `es` and `it` use `.` for thousands and `,` for decimals (e.g.
+ * `"1.200,50 €"`, and es-ES and it-IT leave four-digit amounts ungrouped: `"1200,50 €"`) —
  * a locale-blind digit strip mis-parses either one.
  */
 function parseFormattedAmount(formatted: string, language: TransactionalEmailLanguage): number {

@@ -162,6 +162,14 @@
       "empty-title": "Ainda sem transações",
       "empty-body": "Liga um banco ou adiciona uma transação para a ver aqui.",
       "action": "Ver contas"
+    },
+    "noAccounts": {
+      "title": "Adiciona a tua primeira conta",
+      "connect": "Ligar um banco",
+      "import": "Importar um extrato",
+      "importHint": "Um ficheiro exportado do teu banco",
+      "manual": "Adicionar uma conta à mão",
+      "manualHint": "Um nome e um saldo"
     }
   }
 }

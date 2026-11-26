@@ -1,0 +1,9 @@
+WonderMoney
+Copyright (C) 2026 The WonderMoney contributors
+
+Unless a directory carries its own LICENSE, everything in this repository is licensed under
+the GNU Affero General Public License, version 3, whose text is in LICENSE. Exceptions:
+
+  packages/shared, packages/react-email   MIT (see their LICENSE files)
+  apps/docs                               MIT for the site code; CC BY 4.0 for the
+                                          documentation in apps/docs/content

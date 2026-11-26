@@ -72,7 +72,7 @@ describe('budget alerts as push', () => {
 
     const payload = JSON.stringify(sent);
     for (const figure of ['493', '400', '93.8', '123', 'EUR', '€']) expect(payload).not.toContain(figure);
-    for (const language of ['en', 'pt', 'es'] as const) {
+    for (const language of ['en', 'pt', 'es', 'it'] as const) {
       const [first] = sent;
       if (!first) throw new Error('nothing was queued');
       const rendered = renderPush(first.notification, language);

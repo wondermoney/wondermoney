@@ -596,8 +596,6 @@ jobs:
           DB_DATABASE: wmdb
           DB_USERNAME: postgres
           DB_PASSWORD: ci
-          CREDENTIAL_ENCRYPTION_KEY_V1: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-          EMAIL_OPT_OUT_SIGNING_SECRET: ci-only
         run: |
           pnpm run migrate:dev
           if [ -n "$(git status --porcelain -- src/database/migrations)" ]; then

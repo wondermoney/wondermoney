@@ -11,10 +11,12 @@ dashboard in the hosted PostHog project, in the same order:
 | Retention by signup week | Share of each signup week active in its 4th and 12th week | [`retention.sql`](retention.sql) |
 | Bank connections per week | Started, abandoned, completed and failed connections per week and provider | [`bank-connections.sql`](bank-connections.sql) |
 | Bank connection failures | Why connections fail, by provider and step | [`bank-connection-failures.sql`](bank-connection-failures.sql) |
+| Bank key setup | Per week: Enable Banking key setup wizard openings and the steps they reached, then the people who created a certificate, activated it or let it lapse, and why activations failed | [`bank-key-setup-funnel.sql`](bank-key-setup-funnel.sql) |
 | Bank syncs per week | Syncs that succeeded, were retried, or ended partial or failed with no retry left | [`bank-sync-incidents.sql`](bank-sync-incidents.sql) |
 | Bank sync incidents by cause | Why syncs end in an incident, by kind and code | [`bank-sync-failures.sql`](bank-sync-failures.sql) |
 | Imports | Each import step and failure, by kind and format | [`imports.sql`](imports.sql) |
 | Landing attribution | Per website tool or list: visits to signups and activations | [`landing-funnel.sql`](landing-funnel.sql) ([how it works](../landing-attribution.md)) |
+| Signups by referrer class | Per kind of source a website visit came from (AI assistant, search, social, direct, other): visits to signups and activations | [`referrer-class.sql`](referrer-class.sql) ([how it works](../landing-attribution.md#signups-from-ai-assistants)) |
 
 The dashboard is **Product analytics** in the hosted PostHog project:
 <https://eu.posthog.com/project/3621/dashboard/1142647>. Its tiles are grouped by question.
@@ -36,13 +38,17 @@ events WonderMoney never sent; they are kept for their history and nothing new l
 ## Reading it
 
 - **Two kinds of event.** Service events (`signup`, `user_active`, `first_*_created`,
-  `bank_connection_completed` and `_failed`, `import_committed`, the sync events) come from the
+  `bank_connection_completed` and `_failed`, `import_committed`, the sync events, and the
+  Enable Banking key's `bank_key_certificate_created`, `bank_key_activation_failed`,
+  `bank_key_activated` and `bank_key_setup_abandoned`) come from the
   server for every account on the hosted instance that has not objected, keyed by the account's
   random external id. Behavioural events (`*_started`, `import_mapped`, `import_reviewed`,
-  `import_failed`, `bank_connection_abandoned`) come from the apps only with the person's
+  `import_failed`, `bank_connection_abandoned`, `bank_key_setup_step_viewed`) come from the apps
+  only with the person's
   analytics opt-in, and carry no identity.
-- **So only activation and retention follow people.** The bank connection and import insights
-  count each step per week; a behavioural step undercounts against a service step by roughly the
+- **So only activation, retention and the key setup's server steps follow people.** The bank
+  connection and import insights, and the key setup wizard's openings and steps, count each step
+  per week; a behavioural step undercounts against a service step by roughly the
   share of people who decline the opt-in, and the two can't be joined into one person's funnel.
 - **Platform at signup** is the client of the person's first `user_active`, since `signup`
   itself carries none.
@@ -50,7 +56,8 @@ events WonderMoney never sent; they are kept for their history and nothing new l
 - **Some tiles start empty.** `user_active` is recorded from 2026-11-22, so retention and the
   week-2 column fill in from then on (the queries show NULL rather than a false zero before it),
   and platform at signup is `unknown` for earlier signups. The bank connection and import events
-  of #625 and #626 appear once those releases reach production.
+  of #625 and #626, and the key setup events of #698, appear once those
+  releases reach production.
 - Events renamed by the catalogue are in the legacy tables at the end of
   `docs/analytics-events.md`, for an insight that reaches back before #625 and #626.
 

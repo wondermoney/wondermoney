@@ -1,17 +1,20 @@
 import type { NextFunction, Request, Response } from 'express';
 
+import { createAuthFailureLimiter } from '@middleware/rate-limit';
 import { verifyTotpForSession } from '@service/auth/better-auth';
+import { SENSITIVE_SESSION_MAX_AGE_MS } from '@service/auth/sensitive-session-age';
 import { ERROR_CODE, ForbiddenError, UnauthorizedError } from '@utils/errors';
 
-/**
- * How old a better-auth session may be for a sensitive action.
- *
- * better-auth's own `freshSessionMiddleware` treats a session as fresh for `session.freshAge`
- * (24 hours by default); we reuse that notion rather than inventing a second one. Creating a
- * long-lived personal API token is exactly the kind of action that should not be possible from
- * a session someone left open on a shared machine weeks ago.
- */
-export const SENSITIVE_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+export { SENSITIVE_SESSION_MAX_AGE_MS };
+
+/** Wrong codes per person (5) and per address (30) in 15 minutes (`sensitiveTotpFailure*`). */
+const totpFailuresPerPerson = createAuthFailureLimiter('sensitiveTotpFailure');
+const totpFailuresPerAddress = createAuthFailureLimiter('sensitiveTotpFailureIp');
+
+/** For tests: forget every counted wrong code. */
+export async function resetSensitiveSessionTotpFailures(): Promise<void> {
+  await Promise.all([totpFailuresPerPerson.reset(), totpFailuresPerAddress.reset()]);
+}
 
 /**
  * Gate a sensitive account action on a fresh session, plus TOTP when the user has it enabled.
@@ -22,9 +25,12 @@ export const SENSITIVE_SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
  *
  * TOTP is revalidated through better-auth's own `/two-factor/verify-totp` endpoint
  * (`verifyTotpForSession`), which verifies the code against the stored secret and throws on a
- * wrong or expired one. The code arrives in `x-totp-code`, never in the URL.
+ * wrong or expired one. The code arrives in `x-totp-code`, never in the URL. Called in-process,
+ * that check passes no HTTP limiter, so wrong codes are counted here, per person and per address:
+ * once either is over its budget, the request answers 429 with `Retry-After` before any code is
+ * checked, right or wrong. A missing code is not counted, and a right one does not clear the count.
  */
-export async function requireSensitiveSession(req: Request, _res: Response, next: NextFunction): Promise<void> {
+export async function requireSensitiveSession(req: Request, res: Response, next: NextFunction): Promise<void> {
   if (req.apiToken) {
     next(new ForbiddenError('API tokens cannot manage API tokens.', ERROR_CODE.API_TOKEN_SCOPE_REQUIRED));
     return;
@@ -38,7 +44,7 @@ export async function requireSensitiveSession(req: Request, _res: Response, next
 
   const createdAt = new Date(authUser.session.createdAt).getTime();
   if (!Number.isFinite(createdAt) || Date.now() - createdAt > SENSITIVE_SESSION_MAX_AGE_MS) {
-    next(new ForbiddenError('Please sign in again before managing API tokens.', ERROR_CODE.SESSION_NOT_FRESH));
+    next(new ForbiddenError('Please sign in again to continue.', ERROR_CODE.SESSION_NOT_FRESH));
     return;
   }
 
@@ -48,9 +54,17 @@ export async function requireSensitiveSession(req: Request, _res: Response, next
       next(new ForbiddenError('Enter your authenticator code to continue.', ERROR_CODE.TOTP_REQUIRED));
       return;
     }
+    const [person, address] = await Promise.all([totpFailuresPerPerson.check(req), totpFailuresPerAddress.check(req)]);
+    const spent = [person, address].find((budget) => budget.overBudget);
+    if (spent) {
+      spent.refuse(res);
+      return;
+    }
     try {
       await verifyTotpForSession(req.headers, code);
     } catch {
+      // Past either budget (a race of concurrent guesses), the failure itself answers 429.
+      if (await person.failed(res) || await address.failed(res)) return;
       next(new ForbiddenError('That authenticator code is not valid.', ERROR_CODE.INVALID_TOTP));
       return;
     }

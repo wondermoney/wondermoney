@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
+import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { buildBalanceSeries } from '@/features/account-insights/balance-growth'
 import { summarizeMetrics } from '@/features/account-insights/metrics-summary'
 import { useAccountMetrics } from '@/features/account-insights/use-account-metrics'
@@ -48,6 +49,8 @@ export function AccountDetailRoute() {
   const params = useLocalSearchParams<{ accountId?: string | string[] }>()
   const accountId = parseAccountId(params.accountId)
   const query = useAccount(accountId)
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
   // No fromDate, as web's account page: the API's default period and its
   // comparison. (A fresh `new Date()` here would also churn the query key.)
   const metrics = useAccountMetrics(accountId)
@@ -126,7 +129,7 @@ export function AccountDetailRoute() {
         params: { accountId: String(accountId) },
       })}
       onCreateTransaction={() => router.push({ pathname: '/accounts/transactions/create', params: { accountId: String(accountId) } })}
-      onImportTransactions={query.data?.account.source === 'manual'
+      onImportTransactions={importAvailable && query.data?.account.source === 'manual'
         ? () => router.push({ pathname: '/accounts/transactions/import', params: { accountId: String(accountId) } })
         : undefined}
       onEdit={() => router.push({ pathname: '/accounts/[accountId]/edit', params: { accountId: String(accountId) } })}

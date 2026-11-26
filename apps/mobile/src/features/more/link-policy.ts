@@ -14,7 +14,10 @@ export const selfHostingDocs = {
   pt: 'https://docs.wonder.money/pt/docs/self-hosting',
 } as const
 
-/** The self-hosting guide in the app's language: pt-PT reads the pt docs, anything unknown en. */
+/**
+ * The self-hosting guide in the app's language: pt-PT reads the pt docs, and Italian, which the
+ * docs are not written in, or anything unknown reads en.
+ */
 export function selfHostingDocsUrl(locale: string): string {
   const base = locale.trim().toLowerCase().split(/[-_]/)[0]
   if (base === 'pt') return selfHostingDocs.pt

@@ -1,0 +1,253 @@
+{
+  "assets": {
+    "page": {
+      "title": "Beni",
+      "description": "Case, veicoli e altri beni di tua proprietà a cui nessuna banca o mercato dà un prezzo. Sei tu a stabilire quanto valgono."
+    },
+    "actions": {
+      "add": "Aggiungi bene",
+      "edit": "Modifica bene",
+      "save": "Salva modifiche",
+      "updateValue": "Aggiorna valore",
+      "archive": "Archivia",
+      "unarchive": "Ripristina",
+      "delete": "Elimina bene",
+      "back": "Beni",
+      "import": "Importa CSV"
+    },
+    "empty": {
+      "title": "Conta casa e auto nel tuo patrimonio netto",
+      "description": "Aggiungi ciò che possiedi e che nessuna banca o mercato riporta: una casa, un veicolo, un oggetto di valore. Indichi tu quanto vale e lo aggiorni quando cambia. Aggiornare un valore non crea mai una transazione."
+    },
+    "kinds": {
+      "property": "Immobile",
+      "vehicle": "Veicolo",
+      "valuable": "Oggetto di valore",
+      "other": "Altro",
+      "crypto_wallet": "Wallet crypto"
+    },
+    "summary": {
+      "total": "Valore totale",
+      "count": "Beni conteggiati",
+      "unconverted": "{count, plural, one {# bene è escluso dal totale} other {# beni sono esclusi dal totale}}: non c'è ancora un tasso di cambio per {currencies}."
+    },
+    "table": {
+      "asset": "Bene",
+      "lastValued": "Ultima valutazione",
+      "value": "Valore",
+      "valueIn": "In {currency}",
+      "noRate": "Nessun tasso di cambio",
+      "private": "Privato",
+      "archivedTitle": "Archiviati",
+      "archivedDescription": "Non più conteggiati nel patrimonio netto. Il loro storico resta."
+    },
+    "fields": {
+      "name": "Nome",
+      "namePlaceholder": "es. Casa di famiglia",
+      "kind": "Tipo",
+      "value": "Valore attuale",
+      "currency": "Valuta",
+      "valuationDate": "Valutato il",
+      "purchasePrice": "Prezzo di acquisto",
+      "purchaseDate": "Data di acquisto",
+      "purchaseHint": "Facoltativo. Con un prezzo e una data, lo storico del valore parte dall'acquisto.",
+      "growthRate": "Variazione annua",
+      "growthRateHint": "Facoltativo. Il valore cambia di questa percentuale ogni anno dopo l'ultima valutazione. Usa un numero negativo per qualcosa che perde valore, come un'auto.",
+      "growthStartDate": "Variazione dal",
+      "growthStartDateHint": "Facoltativo. Il valore resta invariato fino a questa data.",
+      "private": "Bene privato",
+      "privateDescription": "Solo tu vedi questo bene. Resta fuori dal patrimonio netto degli altri membri della famiglia.",
+      "notes": "Note",
+      "notesPlaceholder": "Qualsiasi cosa da ricordare su questo bene",
+      "datePlaceholder": "Scegli una data",
+      "projectionDetails": "Dettagli della proiezione (facoltativi)"
+    },
+    "validation": {
+      "required": "Questo campo è obbligatorio",
+      "growthRange": "Inserisci una percentuale superiore a -100 e fino a 1000",
+      "negative": "Inserisci zero o più"
+    },
+    "valuation": {
+      "addTitle": "Aggiorna valore",
+      "editTitle": "Modifica valutazione",
+      "description": "Registrare un valore non crea mai una transazione. Un valore già registrato per la stessa data viene sostituito.",
+      "value": "Valore",
+      "date": "Data",
+      "note": "Nota",
+      "notePlaceholder": "es. Stima dell'agenzia",
+      "save": "Salva valore"
+    },
+    "detail": {
+      "loading": "Caricamento del bene",
+      "valueLabel": "Valore oggi",
+      "archivedOn": "Archiviato il {date}",
+      "estimated": "Stimato in base alla variazione annua dalla valutazione del {date}.",
+      "errors": {
+        "loadFailed": "Impossibile caricare questo bene",
+        "loadFailedBody": "Potrebbe essere stato eliminato, oppure è privato di un altro membro della tua famiglia."
+      },
+      "history": {
+        "title": "Valore nel tempo",
+        "seriesLabel": "Valore"
+      },
+      "valuations": {
+        "title": "Valutazioni",
+        "date": "Data",
+        "value": "Valore",
+        "note": "Nota",
+        "actions": "Azioni",
+        "edit": "Modifica",
+        "remove": "Rimuovi",
+        "removeTitle": "Rimuovere questa valutazione?",
+        "removeConfirm": "Il valore e il suo storico vengono ricalcolati dalle valutazioni rimaste.",
+        "lastOne": "Un bene deve avere almeno una valutazione. Elimina invece il bene."
+      },
+      "facts": {
+        "title": "Dettagli",
+        "kind": "Tipo",
+        "purchased": "Acquistato",
+        "purchasedOn": "<amount></amount> il {date}",
+        "changeSincePurchase": "Variazione dall'acquisto",
+        "growth": "Variazione annua",
+        "growthFrom": "{rate} dal {date}",
+        "visibility": "Visibilità",
+        "private": "Privato: solo tu",
+        "shared": "Condiviso con la tua famiglia",
+        "owner": "Proprietario",
+        "notes": "Note"
+      },
+      "equity": {
+        "title": "Valore netto",
+        "value": "Valore oggi",
+        "linkedDebt": "Debito residuo sui prestiti garantiti",
+        "equity": "Valore netto",
+        "loans": "Prestiti garantiti da questo bene",
+        "converted": "<amount></amount> al cambio di oggi",
+        "noRate": "Impossibile calcolare il valore netto: non c'è ancora un tasso di cambio da {currencies} a {currency}.",
+        "archived": "Un bene archiviato non ha un valore attuale, quindi non ha valore netto.",
+        "underwater": "Valore netto negativo: sui suoi prestiti devi più di quanto vale."
+      },
+      "archiveTitle": "Archiviare questo bene?",
+      "archiveConfirm": "Da oggi smette di essere conteggiato nel patrimonio netto. Il suo storico resta.",
+      "deleteTitle": "Eliminare questo bene?",
+      "deleteConfirm": "Le sue valutazioni vengono eliminate con esso e il bene esce dallo storico del tuo patrimonio netto. Questa operazione non può essere annullata.",
+      "ownerOnlyPrivacy": "Solo il proprietario del bene può cambiare se è privato."
+    },
+    "import": {
+      "title": "Importa beni manuali",
+      "description": "Una riga per bene, con il suo valore a una certa data. Ogni bene viene creato con quella valutazione, oppure nessuno se una riga ha un problema.",
+      "download-template": "Scarica il modello",
+      "columns-hint": "Colonne: Name (nome), Kind (property, vehicle, valuable o other), Value (valore), Valuation date (AAAA-MM-GG, facoltativa: oggi se vuota), Currency (un codice di tre lettere) e Private (yes o no, facoltativa).",
+      "file-problem-title": "Impossibile importare questo file",
+      "rows-problem-title": "{count, plural, one {# riga da correggere} other {# righe da correggere}}",
+      "row-problem": "Riga {line}: {problems}",
+      "issues": {
+        "missing-columns": "Il file deve avere le colonne Name, Kind, Value e Currency.",
+        "empty-file": "Il file non contiene righe.",
+        "too-many-rows": "Un file può contenere al massimo 500 beni.",
+        "name": "nome",
+        "kind": "tipo",
+        "value": "valore",
+        "valuation-date": "data di valutazione",
+        "currency": "valuta",
+        "private": "privato"
+      },
+      "preview-caption": "I beni che questo file crea",
+      "column-name": "Bene",
+      "column-kind": "Tipo",
+      "column-date": "Valutato il",
+      "column-value": "Valore",
+      "private": "Privato",
+      "today": "Oggi",
+      "failed": "Impossibile importare i beni, e non ne è stato creato nessuno. Riprova.",
+      "action": "{count, plural, =0 {Importa beni} one {Importa # bene} other {Importa # beni}}",
+      "close": "Chiudi",
+      "done-title": "Beni importati",
+      "done-description": "{count, plural, one {# bene è stato aggiunto con la sua valutazione.} other {# beni sono stati aggiunti con le loro valutazioni.}}"
+    },
+    "wallet": {
+      "addTitle": "Aggiungi wallet crypto",
+      "actions": {
+        "add": "Aggiungi wallet crypto",
+        "addRow": "Aggiungi un altro indirizzo",
+        "removeRow": "Rimuovi indirizzo {number}",
+        "removeRowShort": "Rimuovi",
+        "addAddress": "Aggiungi indirizzo",
+        "editLabel": "Modifica etichetta",
+        "editLabelOf": "Modifica l'etichetta di {title}",
+        "removeAddress": "Rimuovi indirizzo",
+        "removeAddressOf": "Rimuovi {title}",
+        "syncNow": "Sincronizza ora"
+      },
+      "publicOnly": {
+        "title": "Solo indirizzi pubblici",
+        "body": "Inserisci un indirizzo pubblico, oppure una xpub, ypub o zpub per Bitcoin. Non inserire mai una chiave privata o una frase di recupero: chiunque abbia l'una o l'altra può spendere le tue monete, e questa app non ne ha mai bisogno."
+      },
+      "fields": {
+        "namePlaceholder": "es. Hardware wallet",
+        "private": "Wallet privato",
+        "chain": "Rete",
+        "address": "Indirizzo pubblico",
+        "addressOrXpub": "Indirizzo pubblico o xpub",
+        "addressPlaceholder": {
+          "bitcoin": "bc1q…, 1…, 3… o xpub…",
+          "ethereum": "0x…"
+        },
+        "label": "Etichetta",
+        "labelPlaceholder": "es. Risparmi",
+        "addressNumber": "Indirizzo {number}"
+      },
+      "chains": {
+        "bitcoin": "Bitcoin",
+        "ethereum": "Ethereum"
+      },
+      "addressKinds": {
+        "address": "Indirizzo",
+        "xpub": "Chiave pubblica estesa"
+      },
+      "explorerNote": "I saldi vengono letti una volta al giorno da un block explorer configurato dal gestore di questo server. L'explorer vede gli indirizzi su cui viene interrogato e può capire che appartengono allo stesso wallet. Non viene inviato nient'altro.",
+      "validation": {
+        "labelTooLong": "Usa al massimo 100 caratteri"
+      },
+      "errors": {
+        "secretBlocked": "Sembra una chiave privata o una frase di recupero, quindi è stata cancellata e non inviata. Inserisci invece un indirizzo pubblico.",
+        "secretRejected": "Sembrava una chiave privata o una frase di recupero, quindi è stata rifiutata e non conservata. Inserisci invece un indirizzo pubblico.",
+        "addressInvalid": "Non è un indirizzo pubblico valido per la rete scelta.",
+        "addressExists": "Questo indirizzo è già in questo wallet.",
+        "featureDisabled": "Questo server non può leggere i saldi su quella rete."
+      },
+      "status": {
+        "pending": "In attesa della prima lettura dei saldi.",
+        "ok": "Saldi letti il {date}.",
+        "okNoDate": "Saldi letti.",
+        "failed": "L'ultima lettura non è riuscita: {reason}.",
+        "balancesFrom": "I saldi mostrati risalgono al {date}."
+      },
+      "failure": {
+        "timeout": "l'explorer ha impiegato troppo a rispondere",
+        "rate_limited": "l'explorer ha chiesto di rallentare",
+        "unavailable": "non è stato possibile raggiungere l'explorer",
+        "rejected": "l'explorer ha rifiutato questo indirizzo",
+        "invalid_response": "l'explorer ha inviato una risposta illeggibile",
+        "disabled": "questo server non legge più quella rete"
+      },
+      "tokens": {
+        "title": "Saldi",
+        "count": "Conta {symbol} nel valore",
+        "noPrice": "Nessun prezzo",
+        "none": "Ancora nessun saldo letto."
+      },
+      "detail": {
+        "title": "Indirizzi e saldi",
+        "howItWorks": "Il valore è dato dai saldi selezionati ai prezzi di oggi, in dollari USA, letti una volta al giorno. La moneta nativa della rete è selezionata fin dall'inizio. Gli altri token trovati su un indirizzo vengono ignorati finché non li selezioni, quindi seleziona solo i token che riconosci.",
+        "unpriced": "Il valore di oggi non è stato aggiornato: non c'è un prezzo per {symbols}. Deselezionali per contare il resto.",
+        "noValueYet": "Ancora nessun valore: i suoi saldi non sono stati letti.",
+        "lastSynced": "Ultima lettura dei saldi il {date}.",
+        "noValuations": "Viene registrato un valore ogni giorno in cui i saldi vengono letti."
+      },
+      "removeAddressTitle": "Rimuovere questo indirizzo?",
+      "removeAddressConfirm": "Dalla prossima lettura i suoi saldi non contano più nel valore del wallet. I valori già registrati restano.",
+      "syncQueued": "Rilettura dei saldi in corso. Il valore si aggiorna quando arrivano."
+    }
+  }
+}

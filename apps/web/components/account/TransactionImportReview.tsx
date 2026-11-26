@@ -681,6 +681,12 @@ function Working({
   );
 }
 
+/**
+ * The API's `errorCode` for a session it refused once the person could no longer write to its
+ * account: on a failed session nothing was imported, on a partial one the commit stopped part way.
+ */
+const ACCOUNT_ACCESS_ERROR = "account_access";
+
 function Outcome({
   status,
   session,
@@ -702,9 +708,11 @@ function Outcome({
       PDF_FAILURES.find((code) => code === session.errorCode) ?? "unreadable";
     return (
       <p className="text-destructive-text text-sm" role="alert">
-        {session.format === "pdf"
-          ? t(`import-review-pdf-failed-${pdfFailure}`)
-          : t("import-review-read-failed")}
+        {session.errorCode === ACCOUNT_ACCESS_ERROR
+          ? t("import-review-access-lost")
+          : session.format === "pdf"
+            ? t(`import-review-pdf-failed-${pdfFailure}`)
+            : t("import-review-read-failed")}
       </p>
     );
   }
@@ -722,6 +730,12 @@ function Outcome({
       {session.counts.failed > 0 ? (
         <p className="text-muted-foreground">
           {t("import-review-done-failed", { failed: session.counts.failed })}
+        </p>
+      ) : null}
+      {/* The commit stopped part way: what it wrote before stays. */}
+      {session.errorCode === ACCOUNT_ACCESS_ERROR ? (
+        <p className="text-muted-foreground">
+          {t("import-review-access-lost-partway")}
         </p>
       ) : null}
       {session.detailsDeletedAt ? (
@@ -887,19 +901,26 @@ function AccountMapping({
   onSave: (mapping: TransactionImportAccountMapping) => void;
 }) {
   const t = useTranslations();
+  // A closed account takes no import (the API answers 409), so it is not offered.
+  const offeredAccounts = accounts.filter((account) => !account.closed);
   const [mapping, setMapping] = useState<
     Record<string, number | typeof NEW_ACCOUNT>
   >(() => {
     // The file's own identifier pre-fills the mapping where the server matched it (a CAMT.053
     // statement's IBAN against the account's number, an account of the same name); the person
-    // still confirms it.
+    // still confirms it. Only an account listed here: one the select does not offer would show
+    // its placeholder while Save sent the rows to it.
+    const offered = new Set(
+      offeredAccounts.map((account) => account.accountKey),
+    );
     const initial: Record<string, number | typeof NEW_ACCOUNT> = {
       ...session.accountMapping,
     };
     for (const source of session.sourceAccounts) {
       if (
         initial[source.label] === undefined &&
-        source.suggestedAccountId !== undefined
+        source.suggestedAccountId !== undefined &&
+        offered.has(source.suggestedAccountId)
       ) {
         initial[source.label] = source.suggestedAccountId;
       }
@@ -955,12 +976,15 @@ function AccountMapping({
               <SelectValue placeholder={t("account")} />
             </SelectTrigger>
             <SelectContent>
-              {accounts.map((account) => (
+              {offeredAccounts.map((account) => (
                 <SelectItem
                   key={account.accountKey}
                   value={String(account.accountKey)}
                 >
-                  {account.accountName ?? t("unknown")}
+                  {/* Another member's account says whose it is, as on the accounts list. */}
+                  {!account.isOwnedByViewer && account.ownerFirstName
+                    ? `${account.accountName ?? t("unknown")} · ${t("shared-by", { name: account.ownerFirstName })}`
+                    : (account.accountName ?? t("unknown"))}
                 </SelectItem>
               ))}
               <SelectItem value={NEW_ACCOUNT}>

@@ -19,7 +19,9 @@ Tudo vive em `apps/api/src/services/bank-providers/`:
   incidente (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), por
   isso os serviços de sincronização nunca conhecem a forma de erro do teu fornecedor.
   `ProviderReportedError` leva um problema que o agregador indicou para uma conta (um
-  `BankReportedErrorCode`, como `unsupported_currency`).
+  `BankReportedErrorCode`, como `unsupported_currency`). `RequestRejectedError` é um pedido que
+  o banco recusou por um motivo que não é o consentimento (`institution_unavailable`), que voltar a
+  ligar o banco não resolveria.
 - `registry.ts` — os fornecedores compilados e o filtro de ativação `BANK_PROVIDERS`.
 - `enable-banking.provider.ts` — a implementação de referência, com redirecionamento de
   consentimento.
@@ -42,8 +44,8 @@ Cria `my-provider.provider.ts` e implementa:
 | `completeConnection` | Troca o código do callback, marca a ligação como ativa e persiste as contas. Devolve `bankConnectionKey`, `accountsCreated` e o destino do navegador. |
 | `getSessionStatus` | Se o consentimento ainda é válido (`active`, `ended`, `unknown`), usado depois de todas as contas serem rejeitadas. |
 | `listAccounts` | As contas da ligação com moeda, IBAN, titular e id da instituição. Define `reportedErrorCode` para um problema que o agregador indicou sem deixar de responder, como a lista de erros do SimpleFIN: a execução fica então registada como parcial com esse código. |
-| `getBalances` | Os saldos da conta, com um `balanceType` que a lista de preferências entende (`closingBooked`, `interimBooked`, `expected`, …). |
-| `getTransactions` | A janela completa, já dividida em `booked`, `pending` e `voided`. Pagina internamente; a sincronização chama isto uma vez por conta. |
+| `getBalances` | Os saldos da conta, com um `balanceType` que a lista de preferências entende (`closingBooked`, `interimBooked`, `expected`, …). Quando o saldo não pode ser lido agora, lança `UnavailableError` (em baixo ou sem resposta a tempo) ou `RequestRejectedError` (o banco recusa o pedido): a conta mantém o último saldo, as transações continuam a sincronizar e a execução fica parcial. Lança `ConsentExpiredError` ou `UserActionRequiredError` só quando a pessoa tem de voltar a ligar o banco. |
+| `getTransactions` | A janela completa, já dividida em `booked`, `pending` e `voided`. Pagina internamente; a sincronização chama isto uma vez por conta. Se o banco só serve uma janela mais curta do que a pedida, devolve o que ele serve e define `fetchedFrom` com o primeiro dia dessa janela. |
 
 Declara também estas capacidades:
 

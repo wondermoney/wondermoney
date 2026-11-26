@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { getApiUrl } from "@/lib/api/api";
 import { getApiErrorCode } from "@/lib/api/errors";
-import { useFeature } from "@/lib/api/instance/useInstance";
+import { useConfirmedFeature, useFeature } from "@/lib/api/instance/useInstance";
 import { useCreateApiToken } from "@/lib/api/user/useApiTokens";
 import { useMcpCalls } from "@/lib/api/user/useMcpCalls";
 import { formatShortDateForLocale } from "@/lib/utils/formatDate";
@@ -16,6 +16,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
 import { Heading, Text } from "../ui/Typography";
+import McpOAuthClients from "./McpOAuthClients";
 
 /** The token name the shortcut creates, so it is recognisable in the API-token list. */
 export const MCP_TOKEN_NAME = "AI client";
@@ -28,8 +29,8 @@ export const MCP_TOKEN_EXPIRY_DAYS = 90;
  * than the member's `read` token: it reaches only `POST /v1/mcp` and nothing on the ordinary
  * data routes. With proposals allowed it also carries `mcp:propose`: the client may draft
  * changes, which wait for the member to apply them in Settings › Assistant and which the client
- * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config and
- * the recent calls the server recorded.
+ * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config,
+ * the OAuth clients the member allowed when the server offers OAuth, and the recent calls.
  */
 export default function ConnectAiClient() {
   const t = useTranslations("connectAiClient");
@@ -37,6 +38,9 @@ export default function ConnectAiClient() {
   const id = useId();
   // An older API that does not report `mcp` reads as on, like every other feature.
   const mcpEnabled = useFeature((features) => features.mcp !== false);
+  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default: how to
+  // connect shows only once the server has confirmed it; clients allowed earlier stay revocable.
+  const mcpOAuthEnabled = useConfirmedFeature((features) => features.mcpOAuth === true);
   const create = useCreateApiToken();
   const { data: calls = [], isLoading: callsLoading } = useMcpCalls(mcpEnabled);
 
@@ -247,6 +251,8 @@ export default function ConnectAiClient() {
           </div>
         </div>
       </section>
+
+      <McpOAuthClients endpoint={endpoint} oauthEnabled={mcpOAuthEnabled} />
 
       <section className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
         <div>

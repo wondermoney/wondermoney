@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { DI } from '@app/database/di';
 import { authedContext } from '@middleware/authed-context';
@@ -15,7 +15,7 @@ import { commitTransactionImportSchema, createPdfTransactionImportSchema, create
 const serviceFor = (req: Request) => new TransactionImportService(DI.em, { enqueue: req.enqueue });
 const scopeOf = (req: Request) => {
   const { appuserKey, tenantKey } = authedContext(req);
-  return { appuserKey, tenantKey };
+  return { appuserKey, householdRole: req.householdRole, tenantKey };
 };
 
 /** `POST /`: start an import on an account. With `key` (a file uploaded for it) it is read at once; without, the response carries the upload link. */
@@ -24,6 +24,20 @@ export async function createTransactionImport(req: Request, res: Response) {
   const session = await serviceFor(req).create(scopeOf(req), body);
   res.setHeader('Cache-Control', 'no-store');
   return res.status(201).json({ session });
+}
+
+/**
+ * Before `POST /pdf` spends the household's AI allowance: the account must be one the person may
+ * import into (the service's own rule), so a refused import costs nothing.
+ */
+export async function requirePdfImportAccount(req: Request, _res: Response, next: NextFunction) {
+  try {
+    const { body } = await zParse(createPdfTransactionImportSchema, req);
+    await serviceFor(req).assertImportableAccount(scopeOf(req), body.accountId);
+    next();
+  } catch (error) {
+    next(error);
+  }
 }
 
 /**

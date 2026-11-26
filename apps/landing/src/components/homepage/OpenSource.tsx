@@ -1,7 +1,7 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import { GITHUB_URL, selfHostingDocsUrl } from "@/lib/openSource";
 
@@ -19,7 +19,7 @@ const linkClass =
 // Two ways to use it: the hosted instance, or your own server.
 function OpenSourceContent({ locale }: { locale: Lang }) {
   const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <section className="border-t border-border bg-background">

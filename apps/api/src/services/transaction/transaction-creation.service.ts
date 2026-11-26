@@ -16,7 +16,7 @@ import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { linkTags, resolveTags } from '@service/tag/tag.service';
-import { accumulateChain, loadChainRows, SETTLED_TRANSACTION_STATUSES, storedAppuserBalance } from '@service/transaction/balance-chain.service';
+import { accumulateChain, isBankLinkedAccount, loadChainRows, SETTLED_TRANSACTION_STATUSES, storedAppuserBalance } from '@service/transaction/balance-chain.service';
 import { findAssignableCategory } from '@service/transaction/household-category';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { signTransactionAmount } from '@service/transaction/transaction-direction';
@@ -320,6 +320,10 @@ class TransactionCreationService {
    * order is irrelevant: only the position in that total order matters.
    */
   private async calculateAndSetBalance(transaction: Transaction, account: Account): Promise<void> {
+    // A bank account the bank has never given a balance for, whose rows hold none either, has no
+    // chain to place the row in: it is stored without a running balance and the account keeps none,
+    // as the bank sync and an edit leave it. 0 would be a balance nobody reported.
+    if (await this.hasNoKnownBalance(account)) return;
     const preceding = await this.findPrecedingBalance(transaction, account);
 
     transaction.balance = addMoney(preceding.balance, transaction.settlementAmount);
@@ -329,6 +333,17 @@ class TransactionCreationService {
       : addMoney(preceding.appuserCurrencyBalance, transaction.appuserSettlementAmount);
 
     await this.recalculateFutureBalances(transaction, account);
+  }
+
+  /** A bank-linked account with no balance of its own and none on any settled row. */
+  private async hasNoKnownBalance(account: Account): Promise<boolean> {
+    if (!isBankLinkedAccount(account) || account.balance != null) return false;
+    const withBalance = await DI.em.count(
+      Transaction,
+      { accountKey: account, balance: { $ne: null }, deletedAt: null, transactionStatusKey: { name: { $in: [...SETTLED_TRANSACTION_STATUSES] } } },
+      { filters: { [HIDDEN_FILTER]: false } },
+    );
+    return withBalance === 0;
   }
 
   /**

@@ -39,8 +39,8 @@ export const ASSISTANT_SYSTEM_PROMPT = [
  * The formatting locale per app locale, matching the web's `normalizeFinancialLocale`:
  * Portuguese is European Portuguese (`1234,56 €`), not Intl's Brazilian default for `pt`.
  */
-const FORMATTING_LOCALE: Readonly<Record<AssistantLocale, string>> = { en: 'en', es: 'es', pt: 'pt-PT' };
-const LANGUAGE_NAME: Readonly<Record<AssistantLocale, string>> = { en: 'English', es: 'Spanish', pt: 'European Portuguese' };
+const FORMATTING_LOCALE: Readonly<Record<AssistantLocale, string>> = { en: 'en', es: 'es', it: 'it-IT', pt: 'pt-PT' };
+const LANGUAGE_NAME: Readonly<Record<AssistantLocale, string>> = { en: 'English', es: 'Spanish', it: 'Italian', pt: 'European Portuguese' };
 
 interface StreamChatInput {
   appuserKey: number;

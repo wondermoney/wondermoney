@@ -149,10 +149,13 @@ describe('push sending', () => {
     expect(later[0]?.at.getTime()).toBe(NOW.getTime() + 15 * 60 * 1000);
   });
 
-  it('writes to a Spanish account in Spanish', async () => {
+  it.each([
+    [SupportedLanguages.ES, 'es'],
+    [SupportedLanguages.IT, 'it'],
+  ] as const)('writes to a %s account in its own language', async (language, pushLanguage) => {
     const em = db.em();
     const household = await seedHousehold(em);
-    await em.nativeUpdate(Appuser, { appuserKey: household.appuser.appuserKey }, { language: SupportedLanguages.ES });
+    await em.nativeUpdate(Appuser, { appuserKey: household.appuser.appuserKey }, { language });
     await device(em, household, await session(em, household));
     const requests: unknown[][] = [];
     const fetch = vi.fn((_url: string, init: RequestInit) => {
@@ -170,9 +173,9 @@ describe('push sending', () => {
       now: () => NOW,
     });
 
-    const spanish = renderPush({ kind: 'test' }, 'es');
-    expect(spanish.title).not.toBe(renderPush({ kind: 'test' }, 'en').title);
-    expect(requests[0]).toEqual([expect.objectContaining({ body: spanish.body, title: spanish.title })]);
+    const translated = renderPush({ kind: 'test' }, pushLanguage);
+    expect(translated.title).not.toBe(renderPush({ kind: 'test' }, 'en').title);
+    expect(requests[0]).toEqual([expect.objectContaining({ body: translated.body, title: translated.title })]);
   });
 
   it('batches at most 100 messages per request', async () => {

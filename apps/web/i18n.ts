@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { type IntlError, IntlErrorCode } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
 
-export const locales = ["en", "pt", "es"] as const;
+export const locales = ["en", "pt", "es", "it"] as const;
 
 export const localePrefix = "always";
 

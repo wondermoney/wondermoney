@@ -78,6 +78,9 @@ const accountSummaryObjectSchema = z.object({
   isOwnedByViewer: z.boolean(),
   isPrivate: z.boolean(),
   refreshedAt: z.iso.datetime().nullable(),
+  // Set while the balance is derived from the transactions because the bank sent none; the
+  // balance then reads as of `refreshedAt`. Lenient: an older API omits it.
+  balanceDerivedAt: z.iso.datetime().nullish().catch(null),
   source: accountSourceSchema,
   csvImportFormat: csvImportFormatSchema.optional(),
   // Web reads these too (lib/api/account/useAccounts.ts). Each is optional and falls back to
@@ -95,6 +98,9 @@ const accountSummaryObjectSchema = z.object({
   // older API does not send it.
   creditCard: creditCardSettingsSchema.nullish().catch(null),
   myAccess: accountAccessSchema.optional(),
+  // A closed account takes no statement import. Optional: an older API does not send it, and the
+  // account then reads as open.
+  closed: z.boolean().optional().catch(undefined),
   // Who the account's money is attributed to (issue #96): a joint account's is Shared. Each is
   // optional and lenient: an older API omits them and the app shows no member UI for the account.
   isJoint: z.boolean().optional().catch(undefined),

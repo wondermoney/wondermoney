@@ -9,8 +9,8 @@
 //   node scripts/scratch-db.mjs list              # this worktree's databases on the server
 //   node scripts/scratch-db.mjs drop-all          # drop every one of them
 //
-// The printed env is one line of KEY=value pairs for `env`, with inert values for the secrets the
-// API's scripts require:
+// The printed env is one line of KEY=value pairs for `env`: the database settings, all the API's
+// migrate and seed scripts need:
 //   env $(pnpm -s scratch-db create mig) pnpm --filter @wondermoney/api migrate:dev
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
@@ -47,13 +47,11 @@ async function admin(sql, params = []) {
 export function databaseEnv(database) {
   const server = new URL(serverUrl());
   return {
-    CREDENTIAL_ENCRYPTION_KEY_V1: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
     DB_DATABASE: database,
     DB_HOST: server.hostname,
     DB_PASSWORD: decodeURIComponent(server.password),
     DB_PORT: server.port || '5432',
     DB_USERNAME: decodeURIComponent(server.username),
-    EMAIL_OPT_OUT_SIGNING_SECRET: 'scratch-only',
   };
 }
 

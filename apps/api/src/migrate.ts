@@ -2,8 +2,10 @@ import { pathToFileURL } from 'node:url';
 
 import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { Client } from 'pg';
+import { Client, type ClientConfig } from 'pg';
 
+import { loadConfiguration } from './config/configuration.js';
+import { loadDotenv } from './config/load-dotenv.js';
 import { ensureInvestmentsAndSavingsCategory } from './database/seeders/InvestmentsAndSavingsCategorySeeder.js';
 import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
@@ -138,21 +140,30 @@ export function planBaseline(executed: readonly string[]): BaselinePlan {
  * run, and closing it releases the lock even if the process dies mid-migration.
  */
 async function createLockClient(): Promise<Client> {
-  // Read the connection details straight from the env rather than off `config`.
-  // Importing `./mikro-orm.config.js` has already run `dotenv.config()`, and that
-  // config object is itself built from exactly these five variables — but its
-  // `password` is typed as MikroORM's dynamic-credential union, which `pg` does
-  // not accept.
-  const { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } = process.env;
-  const client = new Client({
-    database: DB_DATABASE,
-    host: DB_HOST,
-    password: DB_PASSWORD,
-    port: DB_PORT === undefined ? undefined : Number(DB_PORT),
-    user: DB_USERNAME,
-  });
+  const client = new Client(lockClientConfig());
   await client.connect();
   return client;
+}
+
+/**
+ * The lock client's connection settings: the target the migration configuration resolves, the
+ * same one MikroORM connects to (`DATABASE_URL`, or the `DB_*` settings; `config/database-target.ts`).
+ * It loads `.env` itself (`loadDotenv`: the process environment wins, then the last assignment in
+ * `.env`) because no import can be relied on to have done so (`./mikro-orm.config.js` resolves
+ * lazily). Without a database setting it throws instead of letting `pg` fall back to the shell's
+ * `PG*` variables.
+ */
+export function lockClientConfig(): ClientConfig {
+  loadDotenv();
+  const { database } = loadConfiguration('migration', { ...process.env });
+  if (database.connectionString) return { connectionString: database.connectionString };
+  return {
+    database: database.database ?? undefined,
+    host: database.host ?? undefined,
+    password: database.password ?? undefined,
+    port: database.port ?? undefined,
+    user: database.username ?? undefined,
+  };
 }
 
 /**

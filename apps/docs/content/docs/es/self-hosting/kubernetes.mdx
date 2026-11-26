@@ -13,12 +13,12 @@ Con el Postgres incluido:
 
 ```sh
 helm install wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.11.1 \
+  --version 1.12.0 \
   --namespace wondermoney --create-namespace \
   --set postgresql.enabled=true
 ```
 
-El chart 1.11.1 usa las imágenes 1.11.1; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
+El chart 1.12.0 usa las imágenes 1.12.0; `image.tag` elige otras. En el primer arranque, la API crea la base de datos y carga los datos de referencia, lo que tarda uno o dos minutos. Sin Ingress, llega a ella con un port forward:
 
 ```sh
 kubectl -n wondermoney port-forward svc/wondermoney-web 3000:3000 &
@@ -34,7 +34,7 @@ Después abre http://localhost:3000: un servidor nuevo se abre en su página de 
 Para ver todos los ajustes:
 
 ```sh
-helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.11.1
+helm show values oci://ghcr.io/wondermoney/charts/wondermoney --version 1.12.0
 ```
 
 ## Tu propio Postgres
@@ -50,7 +50,7 @@ database:
   existingSecret: wondermoney-db
 ```
 
-O da una cadena de conexión en `database.url` (añade `?sslmode=require` para TLS), o una guardada en tu Secret con `database.existingSecretUrlKey`. El chart se niega a instalar sin ninguna base de datos.
+O da una cadena de conexión en `database.url` (añade `?sslmode=require` para TLS), o una guardada en tu Secret con `database.existingSecretUrlKey`. El chart se niega a instalar sin ninguna base de datos. Una cadena de conexión llega a la API y al worker como `DATABASE_URL`: no añadas ajustes `DB_*` en `extraEnv` o `existingSecret`, o se niegan a arrancar. `pg`, el driver que usa WonderMoney, trata `sslmode=require` como `verify-full`: el certificado del servidor tiene que ser válido para su nombre de host. Para un certificado autofirmado, usa `?uselibpqcompat=true&sslmode=require`, que da a `require` el significado de libpq (conexión cifrada, certificado sin verificar).
 
 ## Un solo nombre de host
 
@@ -135,7 +135,7 @@ helm test wondermoney -n wondermoney --logs
 
 ```sh
 helm upgrade wondermoney oci://ghcr.io/wondermoney/charts/wondermoney \
-  --version 1.11.1 -n wondermoney --reuse-values
+  --version 1.12.0 -n wondermoney --reuse-values
 ```
 
 La API aplica las nuevas migraciones de la base de datos al arrancar, y los secretos generados se quedan como están.

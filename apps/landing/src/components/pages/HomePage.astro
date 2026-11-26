@@ -6,7 +6,7 @@ import HowItWorks from "@/components/homepage/HowItWorks";
 import FeatureStack from "@/components/homepage/FeatureStack";
 import PrivacyStatement from "@/components/homepage/PrivacyStatement";
 import OpenSource from "@/components/homepage/OpenSource";
-import Faq from "@/components/homepage/Faq";
+import Faq from "@/components/homepage/Faq.astro";
 import BottomCTA from "@/components/homepage/BottomCTA";
 import Header from "@/components/shared/Header";
 import Footer from "@/components/shared/Footer";
@@ -15,7 +15,8 @@ import StructuredData from "@/components/shared/StructuredData.astro";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
 import { buildAlternateLinksForPath } from "@/lib/routes";
-import { buildWebSiteSchema } from "@/lib/structuredData";
+import { homepageFaq } from "@/lib/faq";
+import { buildFaqPageSchema, buildSoftwareApplicationSchema, buildWebSiteSchema } from "@/lib/structuredData";
 
 interface Props {
   locale: Lang;
@@ -25,28 +26,8 @@ const { locale } = Astro.props;
 const t = getTranslations(locale);
 const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}`);
 
-const webApplicationSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "WonderMoney",
-  "url": "https://app.wonder.money",
-  "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-};
-
-// Built from the same keys the FAQ accordion renders, in the page's language.
-const homepageFaqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": ["faq1", "faq2", "faq3", "faq5"].map((key) => ({
-    "@type": "Question",
-    "name": t(`homepage.faq.${key}.question`),
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": t(`homepage.faq.${key}.answer`),
-    },
-  })),
-};
+// The FAQ section and its FAQPage JSON-LD are built from the same entries.
+const faqItems = homepageFaq(locale);
 ---
 
 <Layout
@@ -62,12 +43,12 @@ const homepageFaqSchema = {
     <HowItWorks locale={locale} />
     <PrivacyStatement locale={locale} />
     <OpenSource locale={locale} client:idle />
-    <Faq locale={locale} client:idle />
+    <Faq locale={locale} items={faqItems} />
     <BottomCTA locale={locale} client:idle />
     <div class="bg-paper-2 px-6 pb-16 lg:px-8">
       <NotABank locale={locale} client:idle />
     </div>
   </main>
   <Footer locale={locale} className="mt-0 md:mt-0" client:idle />
-  <StructuredData data={[buildWebSiteSchema(locale), webApplicationSchema, homepageFaqSchema]} />
+  <StructuredData data={[buildWebSiteSchema(locale), buildSoftwareApplicationSchema(locale), buildFaqPageSchema(faqItems)]} />
 </Layout>

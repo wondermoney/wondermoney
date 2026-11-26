@@ -16,3 +16,15 @@ export function formatAccountFreshness(value: string | null, locale: string): st
     timeStyle: 'short',
   }).format(timestamp)
 }
+
+/**
+ * The date for "Balance as of …" under a bank account's balance while it is derived from the
+ * transactions because the bank sent none (`balanceDerivedAt`): `refreshedAt`, the last time the
+ * bank itself confirmed the balance. Null while the balance is the bank's own, or with no valid date.
+ */
+export function balanceAsOfDate(account: Pick<AccountDetailViewModel, 'balanceDerivedAt' | 'refreshedAt'>, locale: string): string | null {
+  if (!account.balanceDerivedAt || !account.refreshedAt) return null
+  const confirmedAt = new Date(account.refreshedAt)
+  if (Number.isNaN(confirmedAt.getTime())) return null
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(confirmedAt)
+}

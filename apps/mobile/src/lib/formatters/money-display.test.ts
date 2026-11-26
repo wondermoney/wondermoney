@@ -5,6 +5,9 @@ describe('maskMoney', () => {
     expect(maskMoney('en', 'EUR')).toBe(`€${PRIVACY_MASK}`)
     expect(maskMoney('pt-PT', 'EUR').endsWith('€')).toBe(true)
     expect(maskMoney('pt-PT', 'EUR').startsWith(PRIVACY_MASK)).toBe(true)
+    expect(maskMoney('it', 'EUR')).toBe(maskMoney('it-IT', 'EUR'))
+    expect(maskMoney('it', 'EUR').endsWith('€')).toBe(true)
+    expect(maskMoney('it', 'EUR').startsWith(PRIVACY_MASK)).toBe(true)
   })
 
   it('is the bare mask when the currency is unknown', () => {

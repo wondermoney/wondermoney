@@ -458,6 +458,14 @@
       "more_other": "And {{count}} more bank alerts.",
       "reconnect": "Reconnect",
       "dismiss": "Dismiss"
+    },
+    "noAccounts": {
+      "title": "Add your first account",
+      "connect": "Connect a bank",
+      "import": "Import a statement",
+      "importHint": "A file exported from your bank",
+      "manual": "Add an account by hand",
+      "manualHint": "A name and a balance"
     }
   },
   "netWorthHistory": {
@@ -1259,6 +1267,8 @@
       "readStalled": "Reading the file stopped before it finished. Try again to read it again.",
       "importing": "Importing… {{imported}} of {{total}} transactions so far.",
       "stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
+      "accessLost": "You can no longer import into this account, so nothing was imported.",
+      "accessLostPartway": "You can no longer import into this account, so the rest of the file wasn't imported.",
       "readFailed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
       "expired": "This import expired before it was finished. Start again with the file.",
       "unsupported": "This version of the app can't show this import. Update the app, or finish it on the web.",
@@ -1649,7 +1659,8 @@
       "device": "Device language",
       "en": "English",
       "pt-PT": "Português (Portugal)",
-      "es": "Español"
+      "es": "Español",
+      "it": "Italiano"
     },
     "languageScope": "Language changes the app interface on this device and the language of your emails. Emails that are not translated yet arrive in English."
   },
@@ -4159,6 +4170,15 @@
           "title": "Net worth as the north star",
           "description": "Accounts and investments combine into one number that helps you understand your position."
         }
+      },
+      "noBank": {
+        "headline": "Start without a bank",
+        "description": "Bring in a statement, or add an account with its balance.",
+        "import": "Import a statement",
+        "importHint": "A file exported from your bank",
+        "manual": "Add an account by hand",
+        "manualHint": "A name and a balance",
+        "skip": "Skip for now"
       }
     },
     "heading": "Welcome to WonderMoney",
@@ -4920,6 +4940,7 @@
     "viewAll": "View all",
     "cashflow": "Cashflow",
     "accountBalance": "Account balance",
+    "balanceAsOf": "Balance as of {{date}}",
     "available": "Available",
     "private": "Private",
     "viewOnly": "View only",
@@ -5111,6 +5132,7 @@
     "errors": {
       "account-phase-failed": "Your bank didn't send the account list.",
       "authentication": "Your bank sign-in needs to be set up again.",
+      "balance-unavailable": "Your transactions synced, but your bank didn't send a balance.",
       "cancelled": "The bank connection was cancelled before it finished.",
       "consent-expired": "Your access to this bank has expired.",
       "data-validation": "Your bank sent data we couldn't read.",
@@ -5551,6 +5573,7 @@
     "names": {
       "pt-PT": "Portugal",
       "es-ES": "Spain",
+      "it-IT": "Italy",
       "pt-BR": "Brazil",
       "en": "the UK and US"
     },
@@ -5563,7 +5586,7 @@
     },
     "dialog": {
       "title": "Rules for {{name}}",
-      "description": "Each rule recognizes a merchant in the bank's description of money going out, then sets its category and merchant. Income, transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
+      "description": "Each rule recognizes a merchant or a salary in the bank's description, then sets its category or merchant. Spending rules only match money going out and salary rules only money coming in, so income never gets a spending category. Transfers and anything you set by hand are never changed. The rules are added after yours, and you can edit or delete them afterwards.",
       "loading": "Loading the rules…",
       "error": "The rules could not be loaded.",
       "matches": "Description contains “{{values}}”",

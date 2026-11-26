@@ -300,6 +300,122 @@ test("pre-fills the mapping with the account the file's IBAN matched", () => {
   );
 });
 
+test("pre-fills a suggested account another member shares, named by whose it is, and saves the file's account to it", async () => {
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        sourceAccounts: [
+          {
+            label: "PT50000201231234567890154",
+            rowCount: 2,
+            suggestedAccountId: 9,
+          },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [
+      {
+        accountKey: 7,
+        accountName: "Checking",
+        isOwnedByViewer: true,
+      } as Account,
+      {
+        accountKey: 9,
+        accountName: "Joint",
+        isOwnedByViewer: false,
+        ownerFirstName: "Ana",
+      } as Account,
+    ],
+  );
+  const user = userEvent.setup();
+
+  assert.ok(screen.getByText("Joint · Shared by Ana"));
+  await user.click(
+    screen.getByRole("button", {
+      name: messages["import-review-mapping-save"],
+    }),
+  );
+  await waitFor(() => assert.equal(mocks.map.mock.calls.length, 1));
+  assert.deepEqual(mocks.map.mock.calls[0], [
+    {
+      id: "import-1",
+      input: { create: [], mapping: { PT50000201231234567890154: 9 } },
+    },
+  ]);
+});
+
+test("pre-fills no suggestion the select does not offer, so nothing goes to an account it hides", () => {
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        sourceAccounts: [
+          {
+            label: "PT50000201231234567890154",
+            rowCount: 2,
+            suggestedAccountId: 9,
+          },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [{ accountKey: 7, accountName: "Checking" } as Account],
+  );
+
+  assert.equal(
+    screen
+      .getByRole("button", { name: messages["import-review-mapping-save"] })
+      .hasAttribute("disabled"),
+    true,
+  );
+});
+
+test("offers no closed account, and pre-fills no suggestion of one", async () => {
+  renderReview(
+    {
+      rows,
+      session: session({
+        canCommit: false,
+        sourceAccounts: [
+          {
+            label: "PT50000201231234567890154",
+            rowCount: 2,
+            suggestedAccountId: 9,
+          },
+        ],
+        status: "needs_mapping",
+      }),
+    },
+    vi.fn(),
+    [
+      { accountKey: 7, accountName: "Checking", closed: false } as Account,
+      { accountKey: 9, accountName: "Old savings", closed: true } as Account,
+    ],
+  );
+  const user = userEvent.setup();
+
+  assert.equal(
+    screen
+      .getByRole("button", { name: messages["import-review-mapping-save"] })
+      .hasAttribute("disabled"),
+    true,
+  );
+  await user.click(
+    screen.getByRole("combobox", { name: "PT50000201231234567890154" }),
+  );
+  const options = (await screen.findAllByRole("option")).map(
+    (option) => option.textContent,
+  );
+  assert.ok(options.includes("Checking"));
+  assert.ok(!options.some((name) => name?.includes("Old savings")));
+});
+
 test("offers a new manual account for each account of a YNAB export, and saves the choice", async () => {
   renderReview(
     {
@@ -841,6 +957,37 @@ test("a PDF statement with no balances to check says so, and commits without ask
     ).disabled,
     false,
   );
+});
+
+test("an import refused because the person can no longer write to the account says so, not that the file is unreadable", () => {
+  renderReview({
+    rows: { ...rows, items: [], total: 0 },
+    session: session({ errorCode: "account_access", status: "failed" }),
+  });
+  assert.ok(screen.getByText(messages["import-review-access-lost"]));
+  assert.equal(screen.queryByText(messages["import-review-read-failed"]), null);
+});
+
+test("a commit stopped part way because the person can no longer write to the account says what it imported and why the rest was not", () => {
+  renderReview({
+    rows: { ...rows, items: [], total: 0 },
+    session: session({
+      counts: {
+        duplicate: 0,
+        failed: 0,
+        imported: 2,
+        invalid: 0,
+        new: 0,
+        possible_duplicate: 0,
+        skipped: 3,
+      },
+      errorCode: "account_access",
+      status: "partial",
+    }),
+  });
+  assert.ok(screen.getByText("2 transactions imported, 3 skipped."));
+  assert.ok(screen.getByText(messages["import-review-access-lost-partway"]));
+  assert.equal(screen.queryByText(messages["import-review-access-lost"]), null);
 });
 
 test("a PDF statement that could not be read says why", () => {

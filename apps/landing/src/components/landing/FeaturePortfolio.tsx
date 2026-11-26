@@ -10,9 +10,10 @@ import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function StepCard({
 	number,
@@ -30,15 +31,6 @@ function StepCard({
 			</div>
 			<h3 className="text-base font-semibold text-foreground">{title}</h3>
 			<p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
-		</div>
-	);
-}
-
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-	return (
-		<div className="rounded-card border border-border bg-background p-5">
-			<h3 className="text-base font-semibold text-foreground">{question}</h3>
-			<p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>
 		</div>
 	);
 }
@@ -89,7 +81,7 @@ function FeaturePortfolioContent({ locale }: { locale: Lang }) {
 								<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
 									<Button asChild size="lg">
 										<a
-											href={CTA_URL}
+											href={appSignupUrl(locale)}
 											onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
 										>
 											{t("lp.shared.ctaPrimary")}
@@ -143,27 +135,7 @@ function FeaturePortfolioContent({ locale }: { locale: Lang }) {
 
 			<FeatureExplainer title={t("lp.featurePortfolio.featuresTitle")} points={features} reverse />
 
-			<section className="bg-paper-2 py-16 md:py-20">
-				<div className="mx-auto max-w-4xl px-6 lg:px-8">
-					<h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-foreground">
-						{t("lp.featurePortfolio.faqTitle")}
-					</h2>
-					<div className="grid gap-4">
-						<FaqItem
-							question={t("lp.featurePortfolio.faq1Q")}
-							answer={t("lp.featurePortfolio.faq1A")}
-						/>
-						<FaqItem
-							question={t("lp.featurePortfolio.faq2Q")}
-							answer={t("lp.featurePortfolio.faq2A")}
-						/>
-						<FaqItem
-							question={t("lp.featurePortfolio.faq3Q")}
-							answer={t("lp.featurePortfolio.faq3A")}
-						/>
-					</div>
-				</div>
-			</section>
+			<FeatureFaq routeId="featurePortfolio" />
 
 			<TrustStripInline />
 

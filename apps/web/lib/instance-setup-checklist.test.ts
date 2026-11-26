@@ -65,3 +65,13 @@ test("links each feature to its section of the self-hosting docs, in the page's 
     for (const item of items) assert.match(item.docsHref, /^https:\/\/docs\.example\.com\/(en|pt|es)\/docs\/self-hosting\//u);
   }
 });
+
+test("links an Italian page to the English docs, which have no Italian pages", () => {
+  const it = setupChecklist(instanceFeatures(), "it", DOCS);
+  const en = setupChecklist(instanceFeatures(), "en", DOCS);
+
+  assert.deepEqual(
+    it.map((item) => item.docsHref),
+    en.map((item) => item.docsHref),
+  );
+});

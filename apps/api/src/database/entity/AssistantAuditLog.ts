@@ -55,6 +55,14 @@ export class AssistantAuditLog extends Base {
   @Property({ length: 255, nullable: true })
   model?: string;
 
+  /**
+   * The OAuth client (better-auth's `oauthClient.clientId`) an MCP call was made through, such as
+   * ChatGPT; null for a personal API token and for the in-app assistant. A plain id rather than a
+   * relation: the client lives in the `better_auth` schema and outlives no revocation here.
+   */
+  @Property({ length: 255, nullable: true })
+  oauthClientId?: string;
+
   @Property({ length: 255, nullable: true })
   provider?: string;
 

@@ -160,6 +160,22 @@ describe('recordSignup', () => {
     expect(db.outbox[0]?.properties).not.toHaveProperty('landing_source');
   });
 
+  it('records the referrer class on the signup event, beside the landing source', async () => {
+    const db = fakeDatabase();
+
+    await recordSignup({ ...signupInput, landingSource: 'toolMortgage', referrerClass: 'ai_assistant' });
+
+    expect(db.outbox[0]?.properties).toMatchObject({ landing_source: 'toolMortgage', referrer_class: 'ai_assistant' });
+  });
+
+  it('leaves the referrer class off a signup sent without one', async () => {
+    const db = fakeDatabase();
+
+    await recordSignup(signupInput);
+
+    expect(db.outbox[0]?.properties).not.toHaveProperty('referrer_class');
+  });
+
   it('creates the appuser but no analytics event while delivery is off', async () => {
     vi.stubEnv('ANALYTICS_OUTBOX_MODE', 'off');
     const db = fakeDatabase();

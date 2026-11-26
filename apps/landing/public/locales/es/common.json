@@ -249,7 +249,7 @@
       },
       "faq2": {
         "question": "¿Qué bancos están disponibles?",
-        "answer": "WonderMoney se conecta a la mayoría de los bancos de Portugal y a muchos bancos de Europa mediante Open Banking certificado de Enable Banking. La disponibilidad se confirma en el selector de bancos al conectarte y la cobertura sigue ampliándose."
+        "answer": "WonderMoney se conecta a la mayoría de los bancos de Portugal y a muchos bancos de Europa mediante Open Banking certificado de Enable Banking. La disponibilidad se confirma en el selector de bancos al conectarte y la cobertura sigue ampliándose. Para conectar un banco, registras una vez una aplicación gratuita de Enable Banking propia; la guía de docs.wonder.money te lo explica paso a paso."
       },
       "faq3": {
         "question": "¿WonderMoney es gratis?",
@@ -258,6 +258,20 @@
       "faq5": {
         "question": "¿También puedo hacer seguimiento de inversiones?",
         "answer": "Sí. WonderMoney hace seguimiento de acciones, ETFs y otros activos junto con tus cuentas bancarias — dándote una visión completa de tu patrimonio neto."
+      },
+      "faq6": {
+        "question": "¿Puedo instalar WonderMoney en mi propio servidor?",
+        "answer": "Sí. WonderMoney es de código abierto bajo la AGPL, y en tu propio servidor tienes la misma app que en wonder.money, con tus datos en tu propia base de datos. Funciona con un solo archivo de Docker Compose; la guía de autoalojamiento de docs.wonder.money explica la instalación, y la app móvil también se conecta a tu servidor."
+      },
+      "faq7": {
+        "question": "¿Hay una app para el móvil?",
+        "answer": "Sí. La app de WonderMoney es gratuita en la App Store para iPhone y en Google Play para Android, y la app web está en app.wonder.money. La misma cuenta funciona en ambas, y la app también puede conectarse a tu propio servidor.",
+        "appStore": "App Store",
+        "googlePlay": "Google Play"
+      },
+      "faq8": {
+        "question": "¿Cómo se compara WonderMoney con una hoja de cálculo o con YNAB?",
+        "answer": "Como YNAB, WonderMoney presupuesta con sobres: cada categoría tiene un importe mensual. A diferencia de una hoja de cálculo, trae las transacciones de tu banco mediante Open Banking y las categoriza con reglas que defines una vez. Además sigue inversiones y patrimonio neto junto al presupuesto, y es gratuito y de código abierto."
       }
     }
   },
@@ -5460,7 +5474,7 @@
           "prices": "En la parte superior está el último precio medio nacional por litro del gasóleo, la gasolina 95 y el GLP, tal como lo publicó la DGEG para el {{asOf}}, y cuánto se movió cada uno en una semana: gasóleo {{dieselChange}} y gasolina {{gasolineChange}} respecto a la semana anterior.",
           "calculator": "La calculadora convierte tu conducción en un coste mensual de combustible. Indicas la distancia, el consumo en litros por 100 km y el combustible; el precio empieza en la última media y puedes cambiarlo por el que pagas de verdad.",
           "noForecast": "Esta página no hace previsiones. Muestra lo que midió la DGEG y lo que cuesta tu conducción a ese precio; no dice cuál será el precio la semana que viene.",
-          "stations": "Debajo están las gasolineras más baratas: las {{stationsDistrict}} más baratas de Portugal continental o de un distrito, o las {{stationsMunicipality}} más baratas de un municipio, para el combustible que elijas. Cada una muestra el precio, la estación y su marca, la dirección, un enlace al mapa y cuándo actualizó la estación el precio por última vez."
+          "stations": "Debajo están las gasolineras más baratas: las {{stationsDistrict}} más baratas de Portugal continental o de un distrito, o las {{stationsMunicipality}} más baratas de un municipio, para el combustible que elijas. Cada una muestra el precio, la estación y su marca, la dirección, un enlace al mapa y cuándo actualizó la estación el precio por última vez. En el mapa, las estaciones muy cercanas comparten un marcador con el precio más bajo entre ellas y cuántas son; tócalo para acercar."
         },
         "example": {
           "title": "Ejemplo práctico",
@@ -5580,6 +5594,7 @@
         "mapUnavailable": "El mapa no se abre en este navegador. Usa el enlace de cada estación.",
         "directions": "Cómo llegar",
         "you": "Tu ubicación",
+        "mapCluster": "{{count}} estaciones, la más barata a {{price}}. Acercar",
         "mapUi": {
           "zoomIn": "Acercar",
           "zoomOut": "Alejar",
@@ -7063,7 +7078,7 @@
     },
     "ynabAlternative": {
       "metaTitle": "Alternativa a YNAB para Europa — WonderMoney",
-      "metaDescription": "¿Buscas una alternativa a YNAB que funcione con bancos europeos? WonderMoney se conecta a tu banco mediante Open Banking, hace seguimiento de tu presupuesto e inversiones, y cuesta menos.",
+      "metaDescription": "¿Buscas una alternativa a YNAB para bancos europeos? WonderMoney se conecta a tu banco mediante Open Banking, sigue tu presupuesto e inversiones y cuesta menos.",
       "heroTitle": "La alternativa a YNAB diseñada para bancos europeos",
       "heroSubtitle": "YNAB es una gran app de presupuestos — pero no fue diseñada para Europa. WonderMoney se conecta a tu banco de forma nativa mediante Open Banking, hace seguimiento de tus inversiones junto con tus gastos, y cuesta un 80% menos.",
       "painTitle": "Por qué los europeos superan YNAB",
@@ -7112,7 +7127,7 @@
     },
     "netWorthTracker": {
       "metaTitle": "App de seguimiento de patrimonio neto — WonderMoney",
-      "metaDescription": "Consulta tus datos financieros conectados en un solo lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan y los valores de mercado se actualizan regularmente cuando están disponibles.",
+      "metaDescription": "Consulta tus datos financieros conectados en un lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan; los de mercado, regularmente.",
       "heroTitle": "Consulta tus datos financieros conectados en un solo lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan y los valores de mercado se actualizan regularmente cuando están disponibles.",
       "heroSubtitle": "WonderMoney se conecta a tus cuentas bancarias y carteras de inversión para calcular tu patrimonio neto completo automáticamente — actualizado cada día, sin necesidad de hojas de cálculo.",
       "whatTitle": "¿Qué es el patrimonio neto y por qué importa?",
@@ -7156,8 +7171,8 @@
       "vs5Spreadsheet": "Regular"
     },
     "portfolioTracker": {
-      "metaTitle": "Portfolio Tracker: Importa desde DEGIRO, IBKR y más — WonderMoney",
-      "metaDescription": "Haz seguimiento de tu cartera de DEGIRO e Interactive Brokers junto con tus cuentas bancarias. Importa posiciones mediante CSV, obtén actualizaciones diarias de precios y ve tu patrimonio neto completo en un solo lugar.",
+      "metaTitle": "Portfolio Tracker: Importa desde DEGIRO, IBKR — WonderMoney",
+      "metaDescription": "Sigue tu cartera de DEGIRO e Interactive Brokers junto a tus cuentas bancarias. Importa posiciones por CSV, con precios diarios y patrimonio neto en un lugar.",
       "heroTitle": "Seguimiento de cartera para DEGIRO e Interactive Brokers",
       "heroSubtitle": "Importa tus posiciones de DEGIRO, Interactive Brokers o cualquier bróker. Los precios de los activos se actualizan diariamente. Ve el rendimiento de tu cartera y tu patrimonio neto en un solo lugar.",
       "howWorksTitle": "Cómo funciona",
@@ -7184,7 +7199,7 @@
     },
     "fireCalculator": {
       "metaTitle": "Calculadora FIRE: tu número y cuándo llegas — WonderMoney",
-      "metaDescription": "Calculadora FIRE gratuita. Introduce tu gasto, tus inversiones y tu aportación mensual para ver tu número FIRE, tu progreso y el año en que podrías alcanzar la independencia financiera.",
+      "metaDescription": "Calculadora FIRE gratuita. Introduce tu gasto, inversiones y aportación mensual y verás tu número FIRE, tu progreso y el año de tu independencia financiera.",
       "heroTitle": "Calcula tu camino hacia la independencia financiera",
       "heroSubtitle": "Descubre cuánto necesitas tener invertido para cubrir tu gasto y cuándo llegas a tu ritmo actual. Después sigue tu progreso hacia ese número en WonderMoney.",
       "whatTitle": "¿Qué es FIRE?",
@@ -7205,8 +7220,8 @@
       "eyebrow": "Calculadora FIRE"
     },
     "howToCalculateNetWorth": {
-      "metaTitle": "Cómo calcular el patrimonio neto — Guía completa | WonderMoney",
-      "metaDescription": "Aprende a calcular tu patrimonio neto paso a paso. Qué incluir, qué excluir y cómo hacer seguimiento a lo largo del tiempo. Seguimiento de patrimonio neto gratuito incluido.",
+      "metaTitle": "Cómo calcular el patrimonio neto: guía — WonderMoney",
+      "metaDescription": "Aprende a calcular tu patrimonio neto paso a paso. Qué incluir, qué excluir y cómo seguirlo en el tiempo. Seguimiento de patrimonio neto gratuito incluido.",
       "heroTitle": "Cómo calcular tu patrimonio neto",
       "heroSubtitle": "El patrimonio neto es el número más importante en las finanzas personales. Aquí te explicamos exactamente cómo calcularlo — y cómo hacer seguimiento automáticamente.",
       "whatTitle": "¿Qué es el patrimonio neto?",
@@ -7267,8 +7282,8 @@
       "ctaBody": "Conecta tus cuentas y WonderMoney calcula tu patrimonio neto completo cada día. Sin hojas de cálculo. Gratis y de código abierto."
     },
     "etfTracker": {
-      "metaTitle": "Seguimiento de ETFs — Haz seguimiento de tu cartera de ETFs | WonderMoney",
-      "metaDescription": "Haz seguimiento del rendimiento, asignación y rentabilidad de tu cartera de ETFs. Importa desde DEGIRO, Interactive Brokers o cualquier bróker mediante CSV. Actualizaciones diarias de precios.",
+      "metaTitle": "Seguimiento de ETFs: Sigue tu cartera de ETFs — WonderMoney",
+      "metaDescription": "Sigue rendimiento, asignación y rentabilidad de tu cartera de ETFs. Importa desde DEGIRO, Interactive Brokers u otro bróker por CSV. Precios diarios.",
       "heroTitle": "Haz seguimiento del rendimiento de tu cartera de ETFs",
       "heroSubtitle": "Los valores de mercado se actualizan regularmente cuando los datos están disponibles.",
       "howTitle": "Cómo hacer seguimiento de tus ETFs con WonderMoney",
@@ -7298,7 +7313,7 @@
     "featureBudgeting": {
       "eyebrow": "Presupuesto por sobres",
       "metaTitle": "App de presupuesto por sobres para Europa — WonderMoney",
-      "metaDescription": "Presupuesto por sobres de base cero con importación automática de transacciones. WonderMoney lleva el presupuesto estilo YNAB a las cuentas bancarias europeas mediante Open Banking.",
+      "metaDescription": "Presupuesto por sobres de base cero con importación automática. WonderMoney lleva el presupuesto estilo YNAB a cuentas bancarias europeas con Open Banking.",
       "heroTitle": "Asigna cada euro antes de gastarlo",
       "heroSubtitle": "Presupuesto por sobres: el método que te dice exactamente a dónde va tu dinero. WonderMoney da un trabajo a cada euro antes de que empiece el mes.",
       "whatTitle": "¿Qué es el presupuesto por sobres?",
@@ -7320,11 +7335,18 @@
       "feature5": "Comparación de presupuesto vs real por categoría",
       "feature6": "Modo hogar: presupuesta junto con tu pareja",
       "ctaHeadline": "Empieza a presupuestar con intención",
-      "ctaBody": "Crea tu primer presupuesto y deja que WonderMoney haga el seguimiento automático de las transacciones. Gratis y de código abierto."
+      "ctaBody": "Crea tu primer presupuesto y deja que WonderMoney haga el seguimiento automático de las transacciones. Gratis y de código abierto.",
+      "faqTitle": "Preguntas sobre presupuestos",
+      "faq1Q": "¿Cómo funciona el presupuesto por sobres en WonderMoney?",
+      "faq1A": "Cada categoría del presupuesto es un sobre con un importe mensual, y cada gasto en ella reduce lo que queda. Una categoría puede pasar lo que le sobró, o lo que se excedió, al mes siguiente.",
+      "faq2Q": "¿Tengo que apuntar mis gastos a mano?",
+      "faq2A": "No. Las transacciones de tus bancos vinculados y de los archivos importados cuentan en el presupuesto según su categoría. Aun así puedes añadir una transacción a mano, como un pago en efectivo.",
+      "faq3Q": "¿Puedo compartir un presupuesto con mi hogar?",
+      "faq3A": "Sí. Un presupuesto del hogar se comparte con todas las personas del hogar, y los miembros con permiso de edición pueden cambiarlo. Un presupuesto personal es solo tuyo: nadie más del hogar lo ve."
     },
     "featureAccounts": {
-      "metaTitle": "Conecta cuentas bancarias europeas mediante Open Banking — WonderMoney",
-      "metaDescription": "Conecta tus cuentas bancarias automáticamente mediante PSD2 Open Banking. Las transacciones se sincronizan diariamente. Funciona con la mayoría de los bancos de toda Europa. Acceso de solo lectura.",
+      "metaTitle": "Cuentas bancarias europeas con Open Banking — WonderMoney",
+      "metaDescription": "Conecta tus cuentas bancarias automáticamente con PSD2 Open Banking. Sincronización diaria de transacciones, en la mayoría de bancos de Europa. Solo lectura.",
       "eyebrow": "Sincronización de cuentas bancarias",
       "heroTitle": "Conecta todas tus cuentas bancarias en un solo lugar",
       "heroSubtitle": "WonderMoney se conecta a tus cuentas bancarias mediante Open Banking (PSD2). Las transacciones y saldos se sincronizan automáticamente, sin entrada manual, sin descargas de CSV.",
@@ -7345,12 +7367,19 @@
       "sync3": "Saldos y transacciones de tarjetas de crédito",
       "sync4": "Saldos de préstamos",
       "ctaHeadline": "Conecta tus cuentas con Open Banking guiado",
-      "ctaBody": "Vincula tus cuentas bancarias y ve el panorama financiero completo automáticamente. Gratis y de código abierto."
+      "ctaBody": "Vincula tus cuentas bancarias y ve el panorama financiero completo automáticamente. Gratis y de código abierto.",
+      "faqTitle": "Preguntas sobre cuentas bancarias",
+      "faq1Q": "¿Necesito una clave de Enable Banking propia?",
+      "faq1A": "En wonder.money, sí: registras una vez una aplicación gratuita de Enable Banking y añades su clave en los ajustes de WonderMoney, y todos los bancos que conectes después la usan. En un servidor propio, quien lo gestiona puede configurar una para todo el hogar.",
+      "faq2Q": "¿Y si mi banco no aparece en la lista?",
+      "faq2A": "Añádelo como cuenta no vinculada y actualiza tú el saldo, o importa sus transacciones desde un archivo CSV, OFX o QIF, o desde un extracto en PDF cuando el servidor tiene un modelo de IA configurado. Las cuentas no vinculadas cuentan en tus presupuestos y tu patrimonio igual que las vinculadas.",
+      "faq3Q": "¿Qué pasa cuando caduca una conexión bancaria?",
+      "faq3A": "El consentimiento del banco dura un periodo fijo. Los ajustes de conexiones de WonderMoney muestran cuándo termina cada uno y ofrecen volver a conectar en sus últimos 14 días: entonces apruebas de nuevo el acceso en tu banco."
     },
     "featureCategorization": {
       "eyebrow": "Categorización de transacciones",
       "metaTitle": "Categorización automática de transacciones — WonderMoney",
-      "metaDescription": "WonderMoney categoriza automáticamente tus transacciones bancarias mediante IA. Corrige errores con un clic. Crea un sistema de categorías personalizado que aprende tus hábitos.",
+      "metaDescription": "WonderMoney categoriza automáticamente tus transacciones bancarias con IA. Corrige errores con un clic. Crea un sistema de categorías que aprende tus hábitos.",
       "heroTitle": "Transacciones categorizadas automáticamente",
       "heroSubtitle": "WonderMoney lee tus transacciones bancarias y las asigna a categorías automáticamente. Sin etiquetado manual. Y cuando comete un error, corregirlo lleva un clic.",
       "howTitle": "Cómo funciona la categorización",
@@ -7376,12 +7405,19 @@
       "rulesPoint3": "Una vista previa de lo que coincide con una regla antes de guardarla",
       "rulesPoint4": "Aplica una regla a las transacciones que ya tienes",
       "rulesPoint5": "Una regla sugerida cuando corriges tres veces el mismo tipo de transacción",
-      "rulesPoint6": "Exporta las reglas como archivo e impórtalas en otro servidor"
+      "rulesPoint6": "Exporta las reglas como archivo e impórtalas en otro servidor",
+      "faqTitle": "Preguntas sobre la categorización",
+      "faq1Q": "¿Cómo categoriza WonderMoney mis transacciones?",
+      "faq1A": "Las reglas de tu hogar se aplican primero a cada transacción nueva. Después, WonderMoney sugiere una categoría a partir de las que ya confirmaste y, donde hay IA configurada, sugiere el resto. Las sugerencias esperan a que las apruebes o las cambies.",
+      "faq2Q": "¿Tengo que usar IA?",
+      "faq2A": "No. Las reglas y las sugerencias aprendidas de tus propias elecciones no necesitan ningún servicio de IA ni le envían nada. Puedes desactivar las funciones de IA de tu cuenta en los ajustes de privacidad.",
+      "faq3Q": "¿Una regla puede cambiar una categoría que elegí yo?",
+      "faq3A": "No. Las reglas se aplican a las transacciones nuevas y, cuando las aplicas, a las que ya tienes; en ambos casos, nunca cambian una categoría que pusiste tú."
     },
     "featurePrivacy": {
       "eyebrow": "Privacidad y seguridad",
       "metaTitle": "Privacidad y seguridad — WonderMoney",
-      "metaDescription": "Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking. WonderMoney no puede iniciar transferencias. Introduces tus credenciales con el banco o proveedor y WonderMoney no las ve.",
+      "metaDescription": "Open Banking de solo lectura con Enable Banking: WonderMoney no puede iniciar transferencias. Introduces tus credenciales en tu banco y WonderMoney no las ve.",
       "heroTitle": "Tus datos financieros son privados por diseño",
       "heroSubtitle": "Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking. WonderMoney no puede iniciar transferencias. Introduces tus credenciales con el banco o proveedor y WonderMoney no las ve.",
       "principlesTitle": "Nuestros principios de privacidad",
@@ -7412,7 +7448,14 @@
       "securityPoint3Title": "Bloqueo de la app",
       "securityPoint3Body": "La app móvil pide Face ID, Touch ID o el código de tu dispositivo cada vez que se abre.",
       "securityPoint4Title": "Modo privacidad",
-      "securityPoint4Body": "Oculta todos los importes de la pantalla con un toque, o con Shift+P en la web, en el tren o mientras compartes pantalla."
+      "securityPoint4Body": "Oculta todos los importes de la pantalla con un toque, o con Shift+P en la web, en el tren o mientras compartes pantalla.",
+      "faqTitle": "Preguntas sobre privacidad",
+      "faq1Q": "¿Puede WonderMoney mover dinero de mis cuentas?",
+      "faq1A": "No. Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking: WonderMoney lee saldos y transacciones, y no puede iniciar transferencias ni pagos.",
+      "faq2Q": "¿Ve WonderMoney la contraseña de mi banco?",
+      "faq2A": "No. Inicias sesión en la página de tu banco, y WonderMoney nunca ve tus credenciales. Puedes revocar el acceso en cualquier momento, desde WonderMoney o en tu banco.",
+      "faq3Q": "¿Puedo llevarme mis datos o borrarlos?",
+      "faq3A": "Sí. Desde los ajustes de privacidad exportas todo lo que ves de tu hogar en un archivo zip, que otro servidor de WonderMoney puede restaurar. Eliminar tu cuenta también detiene todas las conexiones bancarias; el consentimiento en tu banco termina cuando caduca o cuando lo retiras allí."
     },
     "pricing": {
       "metaTitle": "Precios — WonderMoney",
@@ -7423,24 +7466,24 @@
       "metaDescription": "WonderMoney es el centro financiero para europeos. Creado en Portugal, diseñado para toda Europa."
     },
     "accounts": {
-      "metaTitle": "Conecta cuentas bancarias europeas mediante Open Banking — WonderMoney",
-      "metaDescription": "Conecta tus cuentas bancarias automáticamente mediante PSD2 Open Banking. Las transacciones se sincronizan diariamente. Funciona con la mayoría de los bancos de toda Europa. Acceso de solo lectura."
+      "metaTitle": "Cuentas bancarias europeas con Open Banking — WonderMoney",
+      "metaDescription": "Conecta tus cuentas bancarias automáticamente con PSD2 Open Banking. Sincronización diaria de transacciones, en la mayoría de bancos de Europa. Solo lectura."
     },
     "budgeting": {
       "metaTitle": "App de presupuesto por sobres para Europa — WonderMoney",
-      "metaDescription": "Presupuesto por sobres de base cero con importación automática de transacciones. WonderMoney lleva el presupuesto estilo YNAB a las cuentas bancarias europeas mediante Open Banking."
+      "metaDescription": "Presupuesto por sobres de base cero con importación automática. WonderMoney lleva el presupuesto estilo YNAB a cuentas bancarias europeas con Open Banking."
     },
     "categorization": {
       "metaTitle": "Categorización automática de transacciones — WonderMoney",
-      "metaDescription": "WonderMoney categoriza automáticamente tus transacciones bancarias mediante IA. Corrige errores con un clic. Crea un sistema de categorías personalizado que aprende tus hábitos."
+      "metaDescription": "WonderMoney categoriza automáticamente tus transacciones bancarias con IA. Corrige errores con un clic. Crea un sistema de categorías que aprende tus hábitos."
     },
     "privacy": {
       "metaTitle": "Privacidad y seguridad — WonderMoney",
-      "metaDescription": "Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking. WonderMoney no puede iniciar transferencias. Introduces tus credenciales con el banco o proveedor y WonderMoney no las ve."
+      "metaDescription": "Open Banking de solo lectura con Enable Banking: WonderMoney no puede iniciar transferencias. Introduces tus credenciales en tu banco y WonderMoney no las ve."
     },
     "featurePortfolio": {
-      "metaTitle": "Portfolio Tracker: Importa desde Interactive Brokers, DEGIRO, Trading 212 y más — WonderMoney",
-      "metaDescription": "Haz seguimiento de tu cartera de inversión con importaciones CSV de brókeres principales, valoraciones diarias, insights de asignación e integración con patrimonio neto.",
+      "metaTitle": "Portfolio Tracker: IBKR, DEGIRO, Trading 212 — WonderMoney",
+      "metaDescription": "Haz seguimiento de tu cartera con importación CSV de los principales brókeres, valoraciones diarias, insights de asignación e integración con patrimonio neto.",
       "eyebrow": "Seguimiento de cartera",
       "heroTitle": "Seguimiento de Cartera para Interactive Brokers, DEGIRO, Trading 212 y más",
       "heroSubtitle": "Importa posiciones en CSV y haz seguimiento del rendimiento, asignación, ingresos por dividendos y patrimonio neto en un solo lugar.",
@@ -7479,7 +7522,7 @@
       "ctaBody": "Une inversiones, cuentas y patrimonio neto en un panel claro."
     },
     "featureReports": {
-      "metaTitle": "Informes de finanzas personales para gastos, flujo de caja y salud financiera — WonderMoney",
+      "metaTitle": "Informes de finanzas personales y de gastos — WonderMoney",
       "metaDescription": "Entiende patrones de gasto, tendencias de flujo de caja y señales de salud financiera con informes prácticos para mejores decisiones semanales.",
       "eyebrow": "Informes financieros",
       "heroTitle": "Informes de Finanzas Personales para Gastos, Flujo de Caja y Salud Financiera",
@@ -7560,7 +7603,7 @@
     },
     "gestaoFinanceira": {
       "metaTitle": "App de Gestión Financiera Personal — WonderMoney",
-      "metaDescription": "Toma el control de tus finanzas personales con WonderMoney. Sincronización bancaria automática, presupuestos inteligentes, seguimiento del patrimonio neto y cartera de inversiones — todo en una sola app.",
+      "metaDescription": "Toma el control de tus finanzas personales con WonderMoney. Sincronización bancaria automática, presupuesto, patrimonio neto e inversiones en una sola app.",
       "heroBadge": "Gestión Financiera Personal",
       "heroTitle": "Tu app de finanzas personales completa",
       "heroSubtitle": "Consulta tus datos financieros conectados en un solo lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan y los valores de mercado se actualizan regularmente cuando están disponibles.",
@@ -7582,8 +7625,8 @@
       "ctaBody": "WonderMoney es gratuito y de código abierto. Úsalo en wonder.money o en tu propio servidor."
     },
     "appFinancasPortugal": {
-      "metaTitle": "App de Finanzas para Portugal | WonderMoney",
-      "metaDescription": "La app de finanzas diseñada para bancos portugueses. WonderMoney se conecta a Caixa, Millennium, Novo Banco y más a través de Open Banking. Presupuesta, haz seguimiento de tu patrimonio neto y gestiona inversiones.",
+      "metaTitle": "App de Finanzas para Portugal — WonderMoney",
+      "metaDescription": "App de finanzas para bancos portugueses. WonderMoney se conecta a Caixa, Millennium, Novo Banco y más por Open Banking. Presupuesto, patrimonio e inversiones.",
       "heroBadge": "App de Finanzas Portugal",
       "heroTitle": "La app de finanzas diseñada para bancos portugueses",
       "heroSubtitle": "Conéctate a CGD, Millennium, Novo Banco, Santander y más a través de Open Banking. Presupuesta, haz seguimiento de tu patrimonio neto y gestiona inversiones. En portugués o inglés.",
@@ -7605,8 +7648,8 @@
       "ctaBody": "WonderMoney es gratuito y de código abierto. Úsalo en wonder.money o en tu propio servidor."
     },
     "controloGastos": {
-      "metaTitle": "App de Seguimiento de Gastos Automático | WonderMoney",
-      "metaDescription": "Haz seguimiento de tus gastos automáticamente con WonderMoney. Sincronización bancaria a través de Open Banking, categorización inteligente y alertas de presupuesto. Sin entrada manual.",
+      "metaTitle": "App de Seguimiento de Gastos Automático — WonderMoney",
+      "metaDescription": "Sigue tus gastos automáticamente con WonderMoney. Sincronización por Open Banking, categorización inteligente y alertas de presupuesto. Sin entrada manual.",
       "heroBadge": "Seguimiento de Gastos",
       "heroTitle": "Seguimiento de gastos automático, sin esfuerzo",
       "heroSubtitle": "Tus transacciones bancarias se sincronizan cada día. Cada gasto está categorizado. Las alertas de presupuesto se activan antes de que te pases. Sin hojas de cálculo, sin recibos, nada manual.",
@@ -7635,8 +7678,8 @@
       "ctaBody": "Conecta tu banco y deja que la automatización haga el trabajo. Gratis y de código abierto."
     },
     "alternativaExcel": {
-      "metaTitle": "Alternativa a Excel para Finanzas Personales | WonderMoney",
-      "metaDescription": "Consulta tus datos financieros conectados en un solo lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan y los valores de mercado se actualizan regularmente cuando están disponibles.",
+      "metaTitle": "Alternativa a Excel para Finanzas Personales — WonderMoney",
+      "metaDescription": "Consulta tus datos financieros conectados en un lugar. Los datos bancarios se actualizan cuando los proveedores los facilitan; los de mercado, regularmente.",
       "heroBadge": "Alternativa a Excel",
       "heroTitle": "Deja de gestionar tus finanzas en hojas de cálculo",
       "heroSubtitle": "Has estado gestionando el dinero en Excel, y más o menos funciona. WonderMoney hace todo lo que hace tu hoja de cálculo, pero automáticamente. Sincronización bancaria, categorización, informes, paneles. Sin fórmulas.",
@@ -7720,7 +7763,7 @@
     "featureNetWorth": {
       "eyebrow": "Patrimonio neto",
       "metaTitle": "Seguimiento de patrimonio neto para Europa — WonderMoney",
-      "metaDescription": "Ve tu panorama financiero completo en un solo lugar. WonderMoney une cuentas, inversiones y deudas en un único número — tu patrimonio neto. Gratis y de código abierto.",
+      "metaDescription": "Ve tu panorama financiero completo en un lugar. WonderMoney une cuentas, inversiones y deudas en un número — tu patrimonio neto. Gratis y de código abierto.",
       "heroTitle": "Tu vida financiera, en un solo número",
       "heroSubtitle": "WonderMoney une tus cuentas, inversiones y deudas en un único número de patrimonio neto. Ve el panorama completo, sigue su crecimiento y planifica con confianza.",
       "howTitle": "Cómo funciona el seguimiento del patrimonio neto",
@@ -7749,8 +7792,8 @@
     },
     "featureFinancialMarkets": {
       "eyebrow": "Mercados financieros",
-      "metaTitle": "Seguimiento de mercados financieros para Europa — WonderMoney",
-      "metaDescription": "Explora acciones, ETFs y watchlists. WonderMoney lleva datos de mercado actualizados, fundamentals y resultados a tu dashboard financiero. Gratis y de código abierto.",
+      "metaTitle": "Seguimiento de mercados financieros en Europa — WonderMoney",
+      "metaDescription": "Explora acciones, ETFs y watchlists. WonderMoney lleva datos de mercado actualizados, fundamentals y resultados a tu dashboard. Gratis y de código abierto.",
       "heroTitle": "El mercado, en tu dashboard",
       "heroSubtitle": "WonderMoney lleva datos de mercado actualizados, fundamentals y resultados al mismo lugar que tus cuentas y patrimonio neto. Explora, observa y decide — todo en un solo lugar.",
       "howTitle": "Cómo funcionan los mercados financieros en WonderMoney",
@@ -7819,7 +7862,7 @@
       "heroTitle": "Una App de Finanzas Personales para Toda tu Vida Financiera",
       "heroSubtitle": "WonderMoney conecta tus cuentas bancarias, hace seguimiento de tu patrimonio, organiza tu presupuesto y sigue tus inversiones — todo en una sola app, pensada para Europa.",
       "metaTitle": "App de Finanzas Personales para Europa — WonderMoney",
-      "metaDescription": "WonderMoney es una app de finanzas personales que conecta tus cuentas mediante Open Banking, hace seguimiento del patrimonio y las inversiones, y organiza tu presupuesto — todo en un solo lugar, para hogares en toda Europa.",
+      "metaDescription": "App de finanzas personales que conecta tus cuentas mediante Open Banking, sigue patrimonio e inversiones y organiza tu presupuesto. Para hogares de toda Europa.",
       "featuresTitle": "Todo lo Que tu Dinero Necesita, en una Sola App",
       "feature1Title": "Todas tus cuentas en un solo lugar",
       "feature1Body": "Conecta cuentas corrientes, ahorros, tarjetas de crédito y préstamos mediante Open Banking. Los saldos y las transacciones se sincronizan automáticamente — sin introducir datos a mano, sin archivos CSV.",
@@ -7857,7 +7900,7 @@
       "heroTitle": "La App de Open Banking Que Reúne Todas tus Cuentas",
       "heroSubtitle": "WonderMoney se conecta a tus cuentas bancarias mediante Open Banking (PSD2) — de forma segura, de solo lectura y automática. Ve cómo se actualizan saldos, transacciones, presupuestos y patrimonio sin mover un dedo.",
       "metaTitle": "App de Open Banking para Europa — WonderMoney",
-      "metaDescription": "WonderMoney es una app de Open Banking que conecta tus cuentas bancarias de forma segura mediante PSD2. Acceso de solo lectura, sincronización automática de transacciones y un solo panel para toda tu vida financiera.",
+      "metaDescription": "App de Open Banking que conecta tus cuentas bancarias de forma segura con PSD2. Solo lectura, sincronización automática y un panel para tu vida financiera.",
       "featuresTitle": "Lo Que el Open Banking Desbloquea en WonderMoney",
       "feature1Title": "Conexiones bancarias de solo lectura",
       "feature1Body": "Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking. WonderMoney no puede iniciar transferencias. Introduces tus credenciales junto a tu banco o proveedor, y WonderMoney nunca las ve.",
@@ -7895,7 +7938,7 @@
       "heroTitle": "La App de Presupuesto Que Se Actualiza Sola",
       "heroSubtitle": "WonderMoney se conecta a tu banco mediante Open Banking, importa y categoriza tus transacciones automáticamente, y te muestra exactamente cuánto queda en cada categoría del presupuesto — sin introducir datos a mano.",
       "metaTitle": "App de Presupuesto para Europa — WonderMoney",
-      "metaDescription": "WonderMoney es una app de presupuesto que conecta tus cuentas bancarias europeas mediante Open Banking, categoriza las transacciones automáticamente, y te ayuda a organizar el presupuesto por categoría — solo o con tu pareja.",
+      "metaDescription": "App de presupuesto que conecta tus cuentas bancarias europeas mediante Open Banking, categoriza transacciones y te ayuda a presupuestar, solo o con tu pareja.",
       "featuresTitle": "Funciones de Presupuesto",
       "feature1Title": "Presupuestos por categoría que se controlan solos",
       "feature1Body": "Define un presupuesto mensual para alquiler, compra, transporte y más. WonderMoney asigna las transacciones a la categoría correcta automáticamente.",
@@ -7976,7 +8019,7 @@
     },
     "adOpenBanking": {
       "metaTitle": "Tu Banco Debe Compartir Tus Datos — WonderMoney",
-      "metaDescription": "La ley de la UE obliga a tu banco a compartir tus datos con las apps que autorices. WonderMoney usa esto para mostrarte tu panorama financiero completo, automáticamente. Gratis y de código abierto.",
+      "metaDescription": "La ley europea obliga a tu banco a compartir tus datos con apps que autorices. WonderMoney te muestra así tu panorama completo. Gratis y de código abierto.",
       "heroBadge": "Open Banking",
       "heroTitle": "Tu banco está obligado por ley a compartir tus datos con las apps que autorices. Casi nadie lo sabe.",
       "heroSubtitle": "El Open Banking (PSD2) te da el derecho de conectar tus cuentas a apps como WonderMoney — de forma segura, y solo con tu autorización. Convierte cinco inicios de sesión en una sola imagen clara.",
@@ -7999,8 +8042,8 @@
     },
     "featureHousehold": {
       "eyebrow": "Hogar",
-      "metaTitle": "Finanzas compartidas del hogar con cuentas privadas | WonderMoney",
-      "metaDescription": "Gestiona el dinero con tu pareja o tu familia: cada persona entra con su propio usuario, comparte las cuentas que elige y mantiene el resto en privado. Divide gastos con amigos en grupos.",
+      "metaTitle": "Finanzas del hogar con cuentas privadas — WonderMoney",
+      "metaDescription": "Gestiona el dinero con tu pareja o familia: cada uno tiene su usuario, comparte las cuentas que elige y mantiene el resto privado. Divide gastos con amigos.",
       "heroTitle": "Gestiona el dinero en común y mantén lo tuyo en privado",
       "heroSubtitle": "Invita a las personas con las que vives a un mismo hogar. Cada una entra con su propio usuario, comparte las cuentas que elige y ve las cifras del hogar en su propia moneda.",
       "schemaName": "WonderMoney Finanzas del hogar",
@@ -8040,8 +8083,8 @@
     },
     "featureImports": {
       "eyebrow": "Importación",
-      "metaTitle": "Importa extractos bancarios: CSV, Excel, OFX, QIF y CAMT.053 | WonderMoney",
-      "metaDescription": "Importa transacciones desde la exportación CSV, Excel, OFX, QIF o CAMT.053 de cualquier banco, o trae tu historial desde YNAB o Actual Budget. Revisa cada fila antes de que se añada nada.",
+      "metaTitle": "Importa extractos bancarios: CSV, Excel, OFX — WonderMoney",
+      "metaDescription": "Importa transacciones en CSV, Excel, OFX, QIF o CAMT.053 de cualquier banco, o trae tu historial de YNAB o Actual Budget. Revisa cada fila antes de añadirla.",
       "heroTitle": "Trae cualquier extracto, y nada por duplicado",
       "heroSubtitle": "Cuando no se puede conectar un banco, o quieres el historial de antes de conectarlo, importa el archivo que te da tu banco. Revisas cada fila antes de que se añada nada.",
       "schemaName": "WonderMoney Importación de transacciones",
@@ -8081,8 +8124,8 @@
     },
     "featureRecurring": {
       "eyebrow": "Facturas y suscripciones",
-      "metaTitle": "Controla facturas, suscripciones y pagos recurrentes | WonderMoney",
-      "metaDescription": "WonderMoney encuentra los pagos que se repiten, del alquiler a las suscripciones, los muestra en un calendario, prevé el saldo de cada cuenta para los próximos 30 días y puede poner tus facturas en tu propia app de calendario.",
+      "metaTitle": "Facturas, suscripciones y pagos recurrentes — WonderMoney",
+      "metaDescription": "WonderMoney muestra en un calendario los pagos recurrentes, del alquiler a las suscripciones, prevé el saldo a 30 días y puede añadirlos a tu calendario.",
       "heroTitle": "Ve lo que viene antes de que salga de tu cuenta",
       "heroSubtitle": "WonderMoney detecta el alquiler, la nómina, las suscripciones y los demás pagos que se repiten, para que sepas qué está pagado, qué vence y hacia dónde va tu saldo.",
       "schemaName": "WonderMoney Facturas y suscripciones",
@@ -8118,8 +8161,8 @@
     },
     "featureAssistant": {
       "eyebrow": "Asistente de IA",
-      "metaTitle": "Asistente de IA para tus finanzas personales | WonderMoney",
-      "metaDescription": "Pregunta por tus gastos, presupuestos, metas y cartera con palabras sencillas. El asistente lee tus datos, propone cambios para que los apliques y permanece desactivado hasta que lo activas. Conecta Claude Desktop o Cursor mediante MCP.",
+      "metaTitle": "Asistente de IA para tus finanzas personales — WonderMoney",
+      "metaDescription": "Pregunta por tus finanzas. El asistente propone cambios que tú aplicas y está apagado hasta que lo activas. Conecta Claude Desktop o Cursor por MCP.",
       "heroTitle": "Hazle una pregunta a tu dinero",
       "heroSubtitle": "¿Cuánto se ha ido en restaurantes este mes? ¿Qué presupuesto se está pasando? El asistente responde a partir de tus propias cuentas y no cambia nada sin ti.",
       "schemaName": "WonderMoney Asistente de IA",
@@ -8155,8 +8198,8 @@
     },
     "featureMultiCurrency": {
       "eyebrow": "Multidivisa",
-      "metaTitle": "App de finanzas personales multidivisa | WonderMoney",
-      "metaDescription": "Ten cuentas en euros, dólares, libras o cualquier otra moneda y ve cada total en la tuya, convertido a los tipos diarios del Banco Central Europeo. Un importe sin tipo se marca, no se inventa.",
+      "metaTitle": "App de finanzas personales multidivisa — WonderMoney",
+      "metaDescription": "Ten cuentas en euros, dólares, libras u otra moneda y ve cada total en la tuya, a los tipos diarios del BCE. Un importe sin tipo se marca, no se inventa.",
       "heroTitle": "Todas las monedas, un total honesto",
       "heroSubtitle": "Las cuentas y transacciones pueden estar en cualquier moneda. WonderMoney muestra cada total en la tuya y dice claramente cuándo un importe no se ha podido convertir.",
       "schemaName": "WonderMoney Multidivisa",
@@ -8193,8 +8236,8 @@
     },
     "featureSelfHosting": {
       "eyebrow": "Autoalojamiento y API",
-      "metaTitle": "App de finanzas personales autoalojada con API | WonderMoney",
-      "metaDescription": "WonderMoney es de código abierto bajo la AGPL. Ejecútalo en tu propio servidor con un solo archivo de Docker Compose, inicia sesión con tu propio proveedor de identidad y conecta scripts mediante la API REST.",
+      "metaTitle": "App de finanzas personales autoalojada con API — WonderMoney",
+      "metaDescription": "WonderMoney es de código abierto (AGPL). Ejecútalo en tu servidor con Docker Compose, entra con tu proveedor de identidad y conecta scripts por la API REST.",
       "heroTitle": "Ejecútalo en tu propio servidor",
       "heroSubtitle": "WonderMoney es gratuito y de código abierto. Úsalo en wonder.money, o ejecuta la misma app en un servidor doméstico, un NAS o un VPS pequeño, con tus datos en tu propia base de datos.",
       "schemaName": "WonderMoney Autoalojamiento",
@@ -8265,6 +8308,32 @@
       "wallet": "Dibujo lineal de una cartera abierta con tres tarjetas en ranuras escalonadas, una de ellas deslizándose hacia fuera.",
       "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas.",
       "deckchair": "Dibujo lineal de una tumbona junto a una pila de monedas que sube hacia una moneda discontinua, la cantidad que paga tus gastos para siempre, y la tumbona se reclina cuando la pila llega."
+    }
+  },
+  "llms": {
+    "summary": "WonderMoney es una app de finanzas personales gratuita y de código abierto: sincronización bancaria mediante Open Banking, presupuestos por sobres, objetivos, inversiones y patrimonio neto, en la web, iOS y Android, en wonder.money o en tu propio servidor.",
+    "about": "WonderMoney es gratuito y de código abierto bajo la AGPL, y cualquiera puede instalarlo en su propio servidor con un solo archivo de Docker Compose. Conecta cuentas bancarias de Portugal, España, Reino Unido, Alemania, Francia y otros países europeos mediante el Open Banking de solo lectura de Enable Banking, con una aplicación gratuita de Enable Banking que cada persona registra una vez; un servidor propio puede proporcionar una aplicación de Enable Banking para todo el hogar, y también puede ofrecer SimpleFIN para bancos de Estados Unidos y Canadá. Las demás cuentas se añaden a mano o se importan desde archivos CSV, OFX y QIF, o desde extractos en PDF cuando el servidor tiene un modelo de IA configurado. Cubre presupuestos, objetivos, préstamos, pagos recurrentes, inversiones y patrimonio neto, para una persona o para todo el hogar, en la web en app.wonder.money y en las apps para iOS y Android.",
+    "sections": {
+      "start": "Para empezar",
+      "features": "Funciones",
+      "tools": "Herramientas y calculadoras gratuitas",
+      "guides": "Guías",
+      "more": "Más"
+    },
+    "links": {
+      "home": "Página de inicio de WonderMoney",
+      "webApp": "App web",
+      "webAppDescription": "Regístrate y usa WonderMoney en la web",
+      "appStore": "App para iOS",
+      "appStoreDescription": "WonderMoney para iPhone en la App Store",
+      "googlePlay": "App para Android",
+      "googlePlayDescription": "WonderMoney para Android en Google Play",
+      "docs": "Documentación",
+      "docsDescription": "Cómo usar WonderMoney, instalarlo en tu servidor y usar la API",
+      "selfHosting": "Guía de autoalojamiento",
+      "selfHostingDescription": "Instala WonderMoney en tu servidor con Docker Compose",
+      "source": "Código fuente",
+      "sourceDescription": "El repositorio público en GitHub, bajo la AGPL"
     }
   }
 }

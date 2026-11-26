@@ -68,5 +68,5 @@ pnpm build
 ## License
 
 [AGPL-3.0](LICENSE) for the apps; MIT for `packages/*`; CC BY 4.0 for the documentation
-text in `apps/docs/content`. Running a modified version as a service for others means
+text in `apps/docs/content` ([NOTICE](NOTICE) has the copyright and which directory is which). Running a modified version as a service for others means
 offering them its source.

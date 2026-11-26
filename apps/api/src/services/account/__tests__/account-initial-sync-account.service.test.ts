@@ -9,6 +9,7 @@ vi.mock('@service/operations/background-operation.service', () => ({ default: { 
 
 import { BankConnectionStatus } from '@entity/BankConnection';
 import { connectionRef as conn, providerFromClient } from '@service/bank-providers/__tests__/helpers';
+import { ConsentExpiredError, RequestRejectedError, UnavailableError, UserActionRequiredError } from '@service/bank-providers/errors';
 
 import service, { selectProviderBalanceAmount } from '../account-initial-sync-account.service';
 
@@ -223,16 +224,76 @@ describe('account initial sync account service', () => {
       expect(result.everyAccountRejected).toBeFalsy();
     });
 
-    it('fails an account whose provider answered with no balances, leaving its balance and freshness alone', async () => {
+    it('keeps the balance and freshness of an account whose provider answered with no balances, and goes on', async () => {
       const existingAccount = { accountId: 'acc-1', accountKey: 9, balance: 250, refreshedAt: new Date('2026-01-01T00:00:00Z') };
       const { fake } = balancesClient(['acc-1'], { 'acc-1': { balances: [] } });
-      // Served from the first `Account` lookup, so the sync would update it if it got that far.
-      const em = createEm({ deletedAccount: existingAccount });
+      const em = emWithActiveAccount(existingAccount);
       const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(fake) });
-      expect(result).toMatchObject({ accountsFailed: 1, status: 'failed' });
+      // Partial, not failed: the transaction phase still runs for it.
+      expect(result).toMatchObject({ accountsFailed: 0, accountsFetched: 1, balanceUnavailableAccountIds: ['acc-1'], status: 'partial' });
+      expect(result.reportedErrorCode).toBeUndefined();
       expect(existingAccount.balance).toBe(250);
       expect(existingAccount.refreshedAt).toEqual(new Date('2026-01-01T00:00:00Z'));
     });
+
+    describe('a balance the bank does not give', () => {
+      const lastRefresh = new Date('2026-01-01T00:00:00Z');
+      const linkedAccount = () => ({ accountId: 'acc-1', accountKey: 9, appuserCurrencyBalance: 250, balance: 250, refreshedAt: lastRefresh });
+
+      it.each([
+        ['rejects the balances call (400)', new RequestRejectedError('Enable Banking rejected the request'), 'institution_unavailable', false],
+        ['times out', new UnavailableError('Enable Banking is temporarily unavailable'), 'provider_unavailable', true],
+      ] as const)('keeps the last balance and syncs on when the bank %s', async (_case, error, code, retryable) => {
+        const account = linkedAccount();
+        const { fake } = balancesClient(['acc-1'], { 'acc-1': error });
+        const em = emWithActiveAccount(account);
+        const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(fake) });
+        expect(result).toMatchObject({ accountsFailed: 0, accountsFetched: 1, balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: code, balanceUnavailableRetryable: retryable, status: 'partial' });
+        // The provider's own report stays reserved for what the aggregator said.
+        expect(result.reportedErrorCode).toBeUndefined();
+        // Not a consent problem: nothing asks the worker to check the consent or the user to reconnect.
+        expect(result.everyAccountRejected).toBeFalsy();
+        expect(account).toMatchObject({ appuserCurrencyBalance: 250, balance: 250, refreshedAt: lastRefresh });
+      });
+
+      it('still refreshes the accounts whose balance came back', async () => {
+        const { fake } = balancesClient(['acc-1', 'acc-2'], { 'acc-1': new RequestRejectedError(), 'acc-2': { balances: [{ balanceAmount: { amount: '75.50' } }] } });
+        const em = createEm();
+        const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(fake) });
+        expect(result).toMatchObject({ accountsFetched: 2, balanceUnavailableAccountIds: ['acc-1'], failedAccountIds: [], status: 'partial' });
+        const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-2')?.[1];
+        expect(created?.['balance']).toBe(75.5);
+      });
+
+      it.each([
+        ['the consent ended', new ConsentExpiredError()],
+        ['the user must act', new UserActionRequiredError()],
+      ] as const)('still fails the account when %s', async (_case, error) => {
+        const account = linkedAccount();
+        const { fake } = balancesClient(['acc-1'], { 'acc-1': error });
+        const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(emWithActiveAccount(account)), provider: providerFromClient(fake) });
+        expect(result).toMatchObject({ accountsFailed: 1, everyAccountRejected: true, status: 'failed' });
+      });
+
+      it('logs the provider error code and message, redacted, with the skipped balance', async () => {
+        const error = Object.assign(new RequestRejectedError(), { providerError: { code: 'ASPSP_ERROR', message: 'Error interacting with ASPSP', status: 400 } });
+        const { fake } = balancesClient(['acc-1'], { 'acc-1': error });
+        const log = { error: vi.fn(), info: vi.fn(), warn: vi.fn() };
+        await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(emWithActiveAccount(linkedAccount())), logger: log, provider: providerFromClient(fake) });
+        const [context] = log.warn.mock.calls.find(([, message]) => String(message).includes('balance fetch failed')) ?? [];
+        expect(context).toMatchObject({ error: { providerError: { code: 'ASPSP_ERROR', message: 'Error interacting with ASPSP' } } });
+      });
+    });
+  });
+
+  it('puts back the balance of an account whose update failed before it was stored', async () => {
+    // The transaction phase shares this entity manager, so an unstored balance must not linger on it.
+    const existingAccount = { accountId: 'acc-1', accountKey: 9, appuserCurrencyBalance: 250, balance: 250, fxStatus: 'exact', refreshedAt: new Date('2026-01-01T00:00:00Z') };
+    const em = emWithActiveAccount(existingAccount);
+    em.flush.mockRejectedValueOnce(new Error('connection lost'));
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '99' })) });
+    expect(result).toMatchObject({ failedAccountIds: ['acc-1'], status: 'failed' });
+    expect(existingAccount).toMatchObject({ appuserCurrencyBalance: 250, balance: 250, fxStatus: 'exact', refreshedAt: new Date('2026-01-01T00:00:00Z') });
   });
 
   it('marks non-duplicate institution create errors as failed', async () => {
@@ -283,6 +344,30 @@ describe('account initial sync account service', () => {
     expect(createdAccount?.appuserCurrencyBalance).toBe(10);
   });
 
+  it.each([
+    ['had a derived balance', new Date('2026-11-20T00:00:00Z'), ['acc-1']],
+    ['had the bank\u2019s own balance', undefined, undefined],
+  ] as const)('on a duplicate create, says a derived balance was replaced when the reloaded row %s', async (_case, balanceDerivedAt, replaced) => {
+    const reloaded: Record<string, unknown> = { accountKey: 9, balanceDerivedAt };
+    const em = createEm({ currency: { code: 'EUR' }, institution: { accountFinancialInstitutionKey: 1 }, tenant: { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } } });
+    let reloadCount = 0;
+    em.findOne.mockImplementation((entity: unknown) => {
+      const name = (entity as { name?: string }).name;
+      if (name === 'AppuserTenant') return { appuserKey: { appuserKey: 9, currencyKey: { code: 'EUR' } }, tenantKey: { tenantKey: 3 } };
+      if (name === 'Currency') return { code: 'EUR' };
+      if (name === 'AccountFinancialInstitution') return { accountFinancialInstitutionKey: 1 };
+      if (name === 'Account') return reloadCount++ < 2 ? null : reloaded;
+      return null;
+    });
+    em.flush.mockResolvedValueOnce(undefined).mockRejectedValueOnce(new UniqueConstraintViolationException(new Error('unique'))).mockResolvedValue(undefined);
+
+    const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client()) });
+
+    // The new row this sync built had no mark; the stored one is what counts.
+    expect(result.derivedBalanceReplacedAccountIds).toEqual(replaced);
+    expect(reloaded['balanceDerivedAt']).toBeUndefined();
+  });
+
   it('records the first provider balance it sees as the opening balance', async () => {
     const em = createEm();
     await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '250.5' })) });
@@ -322,11 +407,13 @@ describe('account initial sync account service', () => {
     expect(existingAccount.holderName).toBe('Existing Holder');
   });
 
-  it('marks invalid balance as failed', async () => {
+  it('keeps the account, without a balance, when the provider sends one it cannot read', async () => {
     const em = createEm();
     const result = await service.syncAccountsForRequisition({ connection: conn(1) }, { em: asEm(em), provider: providerFromClient(client({ balance: '10abc' })) });
-    expect(result.status).toBe('failed');
-    expect(result.accountsFailed).toBe(1);
+    expect(result).toMatchObject({ accountsFailed: 0, balanceUnavailableAccountIds: ['acc-1'], status: 'partial' });
+    const created = (em.create as unknown as { mock: { calls: [unknown, Record<string, unknown>][] } }).mock.calls.find(([, data]) => data['accountId'] === 'acc-1')?.[1];
+    expect(created?.['balance']).toBeUndefined();
+    expect(created?.['refreshedAt']).toBeUndefined();
   });
 
   it('returns failed when requisition has no accounts', async () => {

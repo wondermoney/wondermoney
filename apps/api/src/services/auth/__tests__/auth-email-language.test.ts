@@ -16,10 +16,13 @@ describe('authEmailLanguage', () => {
     expect(language).toBe(SupportedLanguages.PT);
   });
 
-  it('uses the sign-up page locale while the account does not exist yet', async () => {
-    const link = `https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=${encodeURIComponent(`${appUrl}/es`)}`;
+  it.each([
+    ['es', SupportedLanguages.ES],
+    ['it', SupportedLanguages.IT],
+  ])('uses the sign-up page locale (%s) while the account does not exist yet', async (locale, language) => {
+    const link = `https://api.example.test/api/auth/verify-email?token=T0K3N&callbackURL=${encodeURIComponent(`${appUrl}/${locale}`)}`;
 
-    expect(await authEmailLanguage({ appUrl, link, user }, () => Promise.resolve(null))).toBe(SupportedLanguages.ES);
+    expect(await authEmailLanguage({ appUrl, link, user }, () => Promise.resolve(null))).toBe(language);
   });
 
   it('knows no language without an account or a page locale, so the email reads English', async () => {

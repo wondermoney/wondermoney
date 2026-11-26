@@ -1,9 +1,9 @@
 import { QueryOrder } from '@mikro-orm/core';
-import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { pick } from 'lodash-es';
 
+import { loadDotenv } from '@config/load-dotenv';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { AccountType } from '@entity/AccountType';
@@ -27,7 +27,7 @@ import { convertWithStatus, type RateScope, rateScope } from '@service/currency/
 import { describeFx, type FxDisplay, UNKNOWN_FX } from '@service/currency/fx-display';
 import { getAccountOwnership, setAccountOwnership } from '@service/household/account-ownership';
 import { accountAttributionDto, loadActiveMembers } from '@service/household/member-attribution';
-import { isManualAccount } from '@service/transaction/balance-chain.service';
+import { isBankLinkedAccount } from '@service/transaction/balance-chain.service';
 import { BadRequestError, ERROR_CODE, ForbiddenError, InternalServerError, NotFoundError } from '@utils/errors';
 
 /*
@@ -45,7 +45,7 @@ import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccou
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
-dotenv.config({ quiet: true });
+loadDotenv();
 
 export async function createOfflineAccount(req: Request, res: Response, next: NextFunction) {
   const authedUser_ = authedUser(req);
@@ -358,6 +358,12 @@ export function mapAccountSummary(account: Account, syncContext?: AccountSyncCon
     appuserCurrencyBalance: account.appuserCurrencyBalance ?? null,
     availableBalance: account.balance == null && !pending ? null : computeAvailableBalance(account.balance, [pending?.settlement]),
     balance: account.balance ?? null,
+    // Set while the balance is derived from the transactions because the bank gave none; clients
+    // then show it as of `refreshedAt`, the last time the bank confirmed it.
+    balanceDerivedAt: account.balanceDerivedAt?.toISOString() ?? null,
+    // A closed account keeps its history but takes no new transactions from a file, so the
+    // clients leave it out of the accounts an import maps to.
+    closed: account.closed,
     creditCard,
     // Which file the account's CSV import reads: the bank's statement export, or the generic format.
     csvImportFormat: resolveAccountCsvImportFormat(institution?.name).format,
@@ -445,9 +451,9 @@ export async function updateAccount(req: Request, res: Response, next: NextFunct
   }
   const opensDifferently = openingBalance !== undefined || openingBalanceDate !== undefined;
   if (opensDifferently) {
-    // A synced account's balance is the bank's; only a manual or CSV account opens on a figure
-    // the person typed.
-    if (!isManualAccount(account)) {
+    // A synced account's balance is the bank's, whichever provider links it (a SimpleFIN account
+    // has only its bank connection); only a manual or CSV account opens on a figure the person typed.
+    if (isBankLinkedAccount(account)) {
       next(new BadRequestError('Only a manual account has an opening balance to edit', ERROR_CODE.OPENING_BALANCE_MANUAL_ONLY));
       return;
     }

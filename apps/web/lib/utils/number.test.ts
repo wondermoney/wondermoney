@@ -52,7 +52,7 @@ describe("formatLocaleNumberInput", () => {
   });
 
   it("round-trips through parseLocaleNumber in every locale", () => {
-    for (const locale of ["en", "pt", "es"]) {
+    for (const locale of ["en", "pt", "es", "it"]) {
       for (const value of [1.234, 1234.567, 0.5, -12.3, 1000, 0.00012345]) {
         expect(
           parseLocaleNumber(formatLocaleNumberInput(value, locale), locale),
@@ -81,7 +81,7 @@ describe("formatWireDecimalInput", () => {
   });
 
   it("is read back as the same figure", () => {
-    for (const locale of ["en", "pt", "es"]) {
+    for (const locale of ["en", "pt", "es", "it"]) {
       expect(parseLocaleNumber(formatWireDecimalInput("1.234", locale), locale)).toBe(1.234);
       expect(parseLocaleNumber(formatWireDecimalInput("1000", locale), locale)).toBe(1000);
     }

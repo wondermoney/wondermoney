@@ -8,6 +8,7 @@ import {
   formatSavingsRate,
   monthComparisonRange,
   netWorthChanges,
+  noAccountsCard,
   oldestRefresh,
   savingsSummary,
   upcomingLoanPayments,
@@ -177,5 +178,21 @@ describe('home model', () => {
     expect(upcomingLoanPayments(undefined, today)).toEqual([])
     expect(oldestRefresh(undefined, new Date())).toBeNull()
     expect(mapNetWorthSummary({ currencyCode: 'EUR', totalNetWorth: 5 } as never)).toMatchObject({ rows: [], completeness: 'unknown' })
+  })
+})
+
+describe('noAccountsCard', () => {
+  it('shows only once the account list has loaded empty', () => {
+    expect(noAccountsCard({ accounts: undefined, readOnly: false, fileStorage: true })).toBeNull()
+    expect(noAccountsCard({ accounts: [{}], readOnly: false, fileStorage: true })).toBeNull()
+    expect(noAccountsCard({ accounts: [], readOnly: false, fileStorage: true })).toEqual({ importAvailable: true })
+  })
+
+  it('is never offered to a household viewer, who cannot add an account', () => {
+    expect(noAccountsCard({ accounts: [], readOnly: true, fileStorage: true })).toBeNull()
+  })
+
+  it('leaves the import out where the server stores no files', () => {
+    expect(noAccountsCard({ accounts: [], readOnly: false, fileStorage: false })).toEqual({ importAvailable: false })
   })
 })

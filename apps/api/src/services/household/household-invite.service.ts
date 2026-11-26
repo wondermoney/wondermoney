@@ -20,8 +20,8 @@ import { householdCan } from './household-permissions';
 
 const INVITE_TTL_DAYS = 7;
 const INVITE_TTL_MS = INVITE_TTL_DAYS * 24 * 60 * 60 * 1000;
-/** The invite email is written in English, Portuguese and Spanish. */
-const INVITE_EMAIL_LOCALES = ['en', 'pt', 'es'] as const;
+/** The invite email is written in English, Portuguese, Spanish and Italian. */
+const INVITE_EMAIL_LOCALES = ['en', 'pt', 'es', 'it'] as const;
 
 const normalizeEmail = (email: string) => email.toLowerCase().trim();
 // 64 hex chars — opaque, unguessable, single-use.

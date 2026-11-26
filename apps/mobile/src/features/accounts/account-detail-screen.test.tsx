@@ -101,6 +101,19 @@ describe('AccountDetailScreen', () => {
     expect(edit).toHaveBeenCalledTimes(1)
   })
 
+  it('dates a balance derived without the bank by when the bank last gave one', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, balanceDerivedAt: '2026-07-20T06:00:00.000Z' } })
+    const hint = view.getByTestId('account-balance-as-of')
+    // The bank's date, not the day the balance was derived.
+    expect(hint).toHaveTextContent(/Jul 17, 2026/)
+    expect(hint).not.toHaveTextContent(/Jul 20/)
+  })
+
+  it('shows no as-of line while the balance is the bank\u2019s own', async () => {
+    const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, balanceDerivedAt: null } })
+    expect(view.queryByTestId('account-balance-as-of')).toBeNull()
+  })
+
   it('leads an account with no exchange rate with its own balance, marked not converted', async () => {
     const { view } = await renderScreen({ status: 'loaded', data: { ...openBanking, convertedBalance: null, fx: { status: 'missing', amount: 100, currency: 'USD' } } })
     const original = formatCurrency(100, { locale: 'en', currency: 'USD' })

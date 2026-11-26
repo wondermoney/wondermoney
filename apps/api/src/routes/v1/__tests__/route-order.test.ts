@@ -76,11 +76,22 @@ vi.mock('@middleware/rate-limit', () => ({
   dataRestoreRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
     next();
   },
+  enableBankingCertificateRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
   marketDataRateLimit: () => (_req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.setHeader('x-market-data-limiter', 'applied');
     next();
   },
   pushTestRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
+}));
+
+// Ordering is the question here, not the fresh-session gate (`sensitive-session.test.ts`), so
+// requests without a session still reach the gated routes' handlers.
+vi.mock('@middleware/sensitive-session', () => ({
+  requireSensitiveSession: (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
     next();
   },
 }));

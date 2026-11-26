@@ -1,5 +1,5 @@
 import type { AccountSummaryDto } from './accounts-contract'
-import { formatAccountFreshness, mapAccountDetail } from './account-detail-view-model'
+import { balanceAsOfDate, formatAccountFreshness, mapAccountDetail } from './account-detail-view-model'
 
 const dto: AccountSummaryDto = {
   accountFinancialInstitutionKey: { displayName: 'Wonder Bank', logoUrl: null },
@@ -30,6 +30,7 @@ describe('account detail view model', () => {
       originalCurrencyCode: 'USD',
       primaryCurrencyCode: 'EUR',
       refreshedAt: '2026-07-17T10:00:00.000Z',
+      balanceDerivedAt: null,
       source: 'open_banking',
       csvImportFormat: null,
       ownerFirstName: null,
@@ -40,6 +41,7 @@ describe('account detail view model', () => {
       accountType: null,
       creditCard: null,
       myAccess: 'owner',
+      closed: false,
       fx: { status: 'exact' },
     })
     expect(mapAccountDetail(dto)).not.toHaveProperty('logoUrl')
@@ -49,5 +51,17 @@ describe('account detail view model', () => {
     const formatted = formatAccountFreshness(dto.refreshedAt!, 'en')
     expect(formatted).toContain('2026')
     expect(formatAccountFreshness(null, 'en')).toBeNull()
+  })
+})
+
+describe('balance as-of date', () => {
+  it('gives the date the bank last confirmed a derived balance', () => {
+    expect(balanceAsOfDate({ balanceDerivedAt: '2026-07-20T06:00:00.000Z', refreshedAt: '2026-07-17T10:00:00.000Z' }, 'en')).toMatch(/Jul 17, 2026/)
+  })
+
+  it('gives none while the balance is the bank\u2019s own, or with no valid date', () => {
+    expect(balanceAsOfDate({ balanceDerivedAt: null, refreshedAt: '2026-07-17T10:00:00.000Z' }, 'en')).toBeNull()
+    expect(balanceAsOfDate({ balanceDerivedAt: '2026-07-20T06:00:00.000Z', refreshedAt: null }, 'en')).toBeNull()
+    expect(balanceAsOfDate({ balanceDerivedAt: '2026-07-20T06:00:00.000Z', refreshedAt: 'garbage' }, 'en')).toBeNull()
   })
 })

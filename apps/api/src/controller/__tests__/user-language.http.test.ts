@@ -24,7 +24,7 @@ describe('PATCH /v1/user/:userId language', () => {
 
   const languageOf = async (appuser: Appuser) => (await db.em().findOne(Appuser, { appuserKey: appuser.appuserKey }))?.language;
 
-  it.each([SupportedLanguages.ES, SupportedLanguages.PT, SupportedLanguages.EN])('sets the account language to %s', async (language) => {
+  it.each([SupportedLanguages.ES, SupportedLanguages.PT, SupportedLanguages.IT, SupportedLanguages.EN])('sets the account language to %s', async (language) => {
     const { appuser } = await seedHousehold(db.em());
 
     const response = await http.as(appuser).patch(`/v1/user/${appuser.externalUserId}`).send({ language });

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { ogImagePath, toolOgCard } from "./og/ogImages"
 import { SUPPORTED_LANGS, TOOL_ROUTE_IDS, toLocalizedPath, toToolsHubPath } from "./routes"
-import { buildToolStructuredData, buildWebSiteSchema, inLanguage } from "./structuredData"
+import {
+	SOFTWARE_PAGE_NAMESPACES,
+	buildSoftwarePageSchema,
+	buildToolStructuredData,
+	buildWebSiteSchema,
+	inLanguage,
+	pageNameFromTitle,
+} from "./structuredData"
 import { DATASET_TOOL_ROUTE_IDS, loadToolDatasets, toolDataLastmod } from "./toolDatasets"
 import { getToolCatalogEntry } from "./toolsCatalog"
 import { getTranslations } from "./translations"
@@ -114,5 +121,79 @@ describe("buildWebSiteSchema", () => {
 			inLanguage: "pt-PT",
 			publisher: { "@id": "https://wonder.money/#organization" },
 		})
+	})
+})
+
+describe("pageNameFromTitle", () => {
+	it("removes only the trailing brand, whatever the separator", () => {
+		expect(pageNameFromTitle("Budget App for Europe — WonderMoney")).toBe("Budget App for Europe")
+		expect(pageNameFromTitle("Finance App for Portugal | WonderMoney")).toBe("Finance App for Portugal")
+		expect(pageNameFromTitle("Pricing - WonderMoney")).toBe("Pricing")
+		expect(pageNameFromTitle("Pricing – WonderMoney")).toBe("Pricing")
+	})
+
+	it("keeps dashes and colons inside the title", () => {
+		expect(pageNameFromTitle("ETF Tracker — Track Your ETF Portfolio | WonderMoney")).toBe(
+			"ETF Tracker — Track Your ETF Portfolio",
+		)
+		expect(pageNameFromTitle("ETF Tracker: Track Your ETF Portfolio — WonderMoney")).toBe(
+			"ETF Tracker: Track Your ETF Portfolio",
+		)
+		expect(pageNameFromTitle("Sobre WonderMoney — WonderMoney")).toBe("Sobre WonderMoney")
+	})
+
+	it("leaves a title without the brand suffix as it is", () => {
+		expect(pageNameFromTitle("ETF Tracker — Track Your ETF Portfolio")).toBe("ETF Tracker — Track Your ETF Portfolio")
+		expect(pageNameFromTitle("WonderMoney")).toBe("WonderMoney")
+	})
+})
+
+/** Every `lp.<namespace>` with a `metaTitle`, read from the locale's catalogue. */
+function landingTitles(locale: (typeof SUPPORTED_LANGS)[number]): Array<[string, string]> {
+	const lp = getTranslations(locale)<Record<string, unknown>>("lp", { returnObjects: true })
+	return Object.entries(lp).flatMap(([namespace, node]) => {
+		const title = (node as Record<string, unknown> | null)?.metaTitle
+		return typeof title === "string" ? [[namespace, title] as [string, string]] : []
+	})
+}
+
+const BRAND_SUFFIX = /\s[—–|-]\s*WonderMoney\s*$/u
+
+describe("landing page structured-data names", () => {
+	describe.each(SUPPORTED_LANGS)("%s", (locale) => {
+		const titles = landingTitles(locale)
+
+		it("finds the landing pages' titles", () => {
+			expect(titles.length).toBeGreaterThan(20)
+			for (const namespace of Object.values(SOFTWARE_PAGE_NAMESPACES)) {
+				expect(titles.map(([ns]) => ns)).toContain(namespace)
+			}
+		})
+
+		it.each(titles)("lp.%s: the title without the brand suffix", (_namespace, title) => {
+			const name = pageNameFromTitle(title)
+			expect(name.trim()).not.toBe("")
+			expect(name).toBe(name.trim())
+			expect(name).not.toMatch(BRAND_SUFFIX)
+			expect(title.startsWith(name)).toBe(true)
+			expect(title.slice(name.length)).toMatch(/^\s[—–|-]\s*WonderMoney$/u)
+		})
+
+		it.each(Object.entries(SOFTWARE_PAGE_NAMESPACES))(
+			"%s: the SoftwareApplication is named after its title",
+			(routeId, namespace) => {
+				const t = getTranslations(locale)
+				const schema = asPrinted([buildSoftwarePageSchema(routeId as keyof typeof SOFTWARE_PAGE_NAMESPACES, locale)])[0]
+				expect(schema).toEqual({
+					"@context": "https://schema.org",
+					"@type": "SoftwareApplication",
+					name: pageNameFromTitle(t(`lp.${namespace}.metaTitle`)),
+					url: `https://wonder.money${toLocalizedPath(routeId as keyof typeof SOFTWARE_PAGE_NAMESPACES, locale)}`,
+					applicationCategory: "FinanceApplication",
+					operatingSystem: "Web",
+					description: t(`lp.${namespace}.metaDescription`),
+				})
+			},
+		)
 	})
 })

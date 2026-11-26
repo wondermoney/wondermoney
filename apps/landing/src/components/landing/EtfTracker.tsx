@@ -4,7 +4,7 @@ import CTABanner from "@/components/shared/CTABanner";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function StepCard({
   number,
@@ -50,7 +50,7 @@ export default function EtfTracker({ locale }: { locale: Lang }) {
 }
 
 function EtfTrackerContent() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
 
   return (
     <>
@@ -67,7 +67,7 @@ function EtfTrackerContent() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg">
               <a
-                href={CTA_URL}
+                href={appSignupUrl(locale)}
                 onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
               >
                 {t("lp.shared.ctaPrimary")}

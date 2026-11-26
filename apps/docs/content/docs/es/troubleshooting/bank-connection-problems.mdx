@@ -50,12 +50,14 @@ La mayoría de los problemas de conexión vienen de cómo se configuró la aplic
 - **Se pulsó "Request activation" en lugar de "Activate by linking accounts".** El Panel de Control de Enable Banking muestra ambos botones después de registrar una aplicación. "Request activation" inicia un proceso de verificación empresarial (KYB) que no hace falta para uso personal y no activa por sí solo una aplicación personal. Usa "Activate by linking accounts" en su lugar, que activa la aplicación guiándote para vincular una de tus propias cuentas bancarias.
 
 <Callout type="error" title="Se perdió la clave privada descargada">
-  Enable Banking muestra la clave privada una sola vez, en el momento en que se genera, y no puede volver a mostrarla — ni siquiera a través de su propio soporte. Si el archivo `.pem` no se guardó a salvo y ya no se puede encontrar, no hay forma de recuperarlo. La única solución es registrar una aplicación completamente nueva en el Panel de Control y generar una clave nueva.
+  Enable Banking muestra la clave privada una sola vez, en el momento en que se genera, y no puede volver a mostrarla — ni siquiera a través de su propio soporte. Si el archivo `.pem` no se guardó a salvo y ya no se puede encontrar, no hay forma de recuperarlo. La única solución es registrar una aplicación completamente nueva en el Panel de Control. Esta vez, deja que WonderMoney cree la clave (**Configuración → Proveedor bancario → Dejar que WonderMoney cree la clave**): solo registras su certificado, y no hay ningún archivo de clave que perder.
 </Callout>
 
 ## Errores e historial de sincronización
 
 Una sincronización que falla queda registrada en el historial de la conexión. Selecciona **Historial de sincronizaciones** en la conexión, en la web o en la app móvil, para ver las últimas 20 veces que WonderMoney intentó sincronizarla y cómo terminó cada una. **Error** en **Configuración → Conexiones** significa que la propia conexión no se completó, no que una sincronización falló. WonderMoney sincroniza cada conexión automáticamente más o menos una vez al día, y una sincronización fallida puede reintentarse una vez, media hora después. Una conexión que sigue fallando suele necesitar **Volver a conectar**.
+
+A veces un banco envía las transacciones pero no el saldo de la cuenta. WonderMoney sincroniza igualmente las transacciones y calcula el saldo a partir de ellas, y el historial de sincronizaciones indica **Tus transacciones se sincronizaron, pero tu banco no envió el saldo.** Hasta que tu banco vuelva a enviar el saldo, la página de la cuenta muestra, bajo el saldo, **Saldo a** y la fecha en que tu banco lo envió por última vez, en la web y en la app móvil. La nota desaparece en la próxima sincronización en la que tu banco envíe el saldo; no hace falta volver a conectar nada.
 
 Durante una caída del proveedor, como Enable Banking, la lista de bancos no se puede cargar: la app móvil lo indica y ofrece **Reintentar**, y en la web la lista queda vacía. Tus datos existentes no cambian. Puedes iniciar la conexión de nuevo en cuanto el proveedor esté disponible.
 

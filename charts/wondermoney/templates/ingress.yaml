@@ -43,11 +43,12 @@ spec:
                 port:
                   name: http
     {{- else }}
-    # One hostname: /v1 and /api/auth to the API, everything else to the web app.
+    # One hostname: /v1, /api/auth and the MCP server's OAuth discovery documents to the API,
+    # everything else to the web app.
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          {{- range $path := list "/v1" "/api/auth" }}
+          {{- range $path := list "/v1" "/api/auth" "/.well-known/oauth-authorization-server" "/.well-known/oauth-protected-resource" }}
           - path: {{ $path }}
             pathType: Prefix
             backend:

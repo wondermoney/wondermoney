@@ -15,7 +15,9 @@ import { resolveSignupMode } from '@service/auth/signup-policy';
 import { isGoogleSignInConfigured } from '@service/auth/social-sign-in';
 import { bankSyncFeatures } from '@service/bank-providers/registry';
 import { feedbackInbox, resolveEmailDriver, supportInbox } from '@service/email/email-transport';
+import { enableBankingApplicationSetup } from '@service/enable-banking/enable-banking-application-setup';
 import { isMarketDataEnabled, marketDataFeatures } from '@service/market-data/registry';
+import { isMcpOAuthEnabled } from '@service/mcp/mcp-oauth-config';
 import { resolveStorageConfig } from '@service/storage/s3';
 import { buildInfo, FRONTEND_URL } from '@utils/constants';
 
@@ -73,6 +75,9 @@ export async function getInstance(_req: Request, res: Response) {
       marketDataProviders: market.marketDataProviders,
       // The read-only MCP server at `POST /v1/mcp` (`MCP_ENABLED`, on by default).
       mcp: isMcpEnabled(),
+      // OAuth for the MCP server, so ChatGPT and other clients can connect with the person's
+      // consent instead of a personal token (`MCP_OAUTH_ENABLED`, off by default).
+      mcpOAuth: isMcpOAuthEnabled(),
       // Single sign-on through the operator's OIDC provider: "Sign in with <name>". Null when off.
       oidc: signIn.oidc,
       // Passkey sign-in on the web app (better-auth's passkey plugin, always on, OIDC_ONLY too).
@@ -89,6 +94,9 @@ export async function getInstance(_req: Request, res: Response) {
       // address; signed-in clients read the provider's name from `GET /v1/user/me/profile`.
       statementImport: statementProvider ? { ...statementImportLimits(), providerKind: statementProvider.kind } : null,
     },
+    // The values to enter when registering an Enable Banking application for this server (redirect,
+    // privacy and terms URLs, a suggested name and description). Null when Enable Banking is off.
+    enableBankingSetup: enableBankingApplicationSetup(),
     firstAccountAdmin: firstAccountIsAdmin(),
     minAppVersion: process.env['MIN_APP_VERSION']?.trim() || null,
     name: instanceName(),

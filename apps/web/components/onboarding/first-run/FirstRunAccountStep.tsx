@@ -1,22 +1,28 @@
 "use client";
 
-import { KeyRound, Link as LinkIcon, ShieldCheck } from "lucide-react";
+import { FileText, KeyRound, Pencil, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import BankList from "@/components/account/BankList";
+import StatementImportFlow, {
+  useStatementImportAvailable,
+} from "@/components/account/StatementImportFlow";
+import { NoAccountOptionList } from "@/components/activation/NoAccountOptions";
+import EnableBankingSetupWizard from "@/components/settings/BankProvider/EnableBankingSetupWizard";
 import { useSimplefinAvailable } from "@/components/settings/Connections/SimplefinConnectButton";
 import SimplefinConnectDialog from "@/components/settings/Connections/SimplefinConnectDialog";
 import { Button } from "@/components/ui/button";
 import { ComboBox } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
-import { Link } from "@/components/ui/Link";
 import { Spinner } from "@/components/ui/Spinner";
 import { useRouter } from "@/i18n/navigation";
+import { writableAccounts } from "@/lib/account/account-access";
 import { saveBankAccountSyncReturnMarker } from "@/lib/account/bank-account-sync-return-marker";
 import { useBankConnectionResult } from "@/lib/account/useBankConnectionResult";
 import { track } from "@/lib/analytics/track";
+import useAccounts from "@/lib/api/account/useAccounts";
 import useCreateOfflineAccount from "@/lib/api/account/useCreateOfflineAccount";
 import useBankList from "@/lib/api/banking/useBankList";
 import useCreateRequisition from "@/lib/api/banking/useCreateRequisition";
@@ -25,7 +31,6 @@ import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
 import { useUser } from "@/lib/auth/user-context";
 import { buildOnboardingConnectRedirectPage } from "@/lib/onboarding/first-run/connect-redirect";
 import {
-  getFirstRunState,
   getFirstRunStepRoute,
   patchFirstRunState,
 } from "@/lib/onboarding/firstRunOnboarding";
@@ -37,10 +42,13 @@ import { parseLocaleNumber } from "@/lib/utils/number";
 
 import FirstRunIconTile from "./FirstRunIconTile";
 import { useFirstRunOnboardingFooter } from "./FirstRunOnboardingRouteShell";
-import FirstRunSkipAccountDialog from "./FirstRunSkipAccountDialog";
 import { FirstRunSplit, FirstRunStepIntro } from "./FirstRunStepScaffold";
 
-type Mode = "list" | "handoff" | "manual";
+/**
+ * `choice` is where skipping the bank lands: the two ways in that need no bank key, importing a
+ * statement or adding an account by hand, before going on without one.
+ */
+type Mode = "list" | "handoff" | "manual" | "choice";
 
 export default function FirstRunAccountStep() {
   const t = useTranslations("onboarding.firstRun");
@@ -53,9 +61,11 @@ export default function FirstRunAccountStep() {
   const setFooter = useFirstRunOnboardingFooter();
 
   const [mode, setMode] = useState<Mode>("list");
+  // Where the manual form's Back returns: the bank list or the no-bank choice.
+  const [manualFrom, setManualFrom] = useState<"list" | "choice">("list");
   const [bankId, setBankId] = useState<string | null>(null);
-  const [skipDialogOpen, setSkipDialogOpen] = useState(false);
   const [simplefinOpen, setSimplefinOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const [country, setCountry] = useState<string>(
     () => getCountryCodeClient() || "PT",
   );
@@ -124,11 +134,14 @@ export default function FirstRunAccountStep() {
     setMode("handoff");
   };
 
-  // Keep the skip control in the shell footer (empty while handing off).
+  // Keep the skip control in the shell footer (empty while handing off). The
+  // choice puts its own way on there; a child's effect runs before this one,
+  // so this one leaves the footer alone then.
   useEffect(() => {
+    if (mode === "choice") return;
     setFooter(
       mode === "handoff" ? null : (
-        <AccountStepSkipButton onSkip={() => setSkipDialogOpen(true)} />
+        <AccountStepSkipButton onSkip={() => setMode("choice")} />
       ),
     );
     return () => setFooter(null);
@@ -155,34 +168,25 @@ export default function FirstRunAccountStep() {
     return (
       <ManualPanel
         onDone={() => router.push(getFirstRunStepRoute("sync_value"))}
+        onBack={() => setMode(manualFrom)}
+      />
+    );
+  }
+
+  if (mode === "choice") {
+    return (
+      <NoBankChoice
         onBack={() => setMode("list")}
+        onManual={() => {
+          setManualFrom("choice");
+          setMode("manual");
+        }}
       />
     );
   }
 
   return (
     <>
-      <FirstRunSkipAccountDialog
-        open={skipDialogOpen}
-        title={t("account.skipWarning.headline")}
-        description={t("account.skipWarning.description")}
-        reassurance={t("account.skipWarning.reassurance")}
-        primaryLabel={t("account.skipWarning.primary")}
-        secondaryLabel={t("account.skipWarning.secondary")}
-        onOpenChange={setSkipDialogOpen}
-        onAddAccount={() => setSkipDialogOpen(false)}
-        onConfirmSkip={() => {
-          setSkipDialogOpen(false);
-          track("onboarding_step_skipped", { step: "account" });
-          if (user?.id)
-            patchFirstRunState(
-              { accountStep: "skipped", currentStep: "sync_value" },
-              user.id,
-            );
-          router.push(getFirstRunStepRoute("sync_value"));
-        }}
-      />
-
       <FirstRunSplit
         copy={
           <div className="space-y-6">
@@ -217,7 +221,10 @@ export default function FirstRunAccountStep() {
                 type="button"
                 variant="outline"
                 className="min-h-11 shrink-0"
-                onClick={() => setMode("manual")}
+                onClick={() => {
+                  setManualFrom("list");
+                  setMode("manual");
+                }}
               >
                 {t("account.manualCta")}
               </Button>
@@ -259,28 +266,36 @@ export default function FirstRunAccountStep() {
                 <Spinner />
               </div>
             ) : credentialRequired ? (
-              // Onboarding-specific copy, not the shared bankProviderCredentialRequired
-              // keys: those point to /settings, which is under (full-layout) and
-              // guarded by FirstRunOnboardingRedirectGate — following that link mid
-              // onboarding would bounce the user straight back to the welcome step
-              // instead of Settings. This copy stays local and instead points at the
-              // manual-account card above and the skip control in the footer, both of
-              // which already work here.
-              <div className="border-border bg-muted/40 text-muted-foreground flex items-start gap-3 rounded-md border p-3">
-                <FirstRunIconTile icon={KeyRound} tone="slate" size="sm" />
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-foreground text-sm font-medium">
-                    {t("account.credentialRequired.title")}
-                  </p>
-                  <p className="text-muted-foreground text-[13px] leading-5">
-                    {t("account.credentialRequired.body")}
-                  </p>
-                  {sharedCredentialUnavailable ? (
-                    <p className="text-muted-foreground text-[13px] leading-5">
-                      {tCommon("bankProviderCredentialRequired.sharedUnavailable")}
+              // The setup wizard opens here, in place: Settings is under (full-layout) and
+              // guarded by FirstRunOnboardingRedirectGate, so a link there mid onboarding would
+              // bounce back to the welcome step. Once the key is active the bank list below
+              // replaces this card, so finishing the wizard lands on it.
+              <div className="border-border text-muted-foreground flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center">
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <FirstRunIconTile icon={KeyRound} tone="slate" size="sm" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-foreground text-sm font-medium">
+                      {t("account.credentialRequired.title")}
                     </p>
-                  ) : null}
+                    <p className="text-muted-foreground text-[13px] leading-5">
+                      {t("account.credentialRequired.body")}
+                    </p>
+                    {sharedCredentialUnavailable ? (
+                      <p className="text-muted-foreground text-[13px] leading-5">
+                        {tCommon(
+                          "bankProviderCredentialRequired.sharedUnavailable",
+                        )}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
+                <Button
+                  type="button"
+                  className="min-h-11 shrink-0"
+                  onClick={() => setWizardOpen(true)}
+                >
+                  {tCommon("bankProviderCredentialRequired.cta")}
+                </Button>
               </div>
             ) : (
               <>
@@ -327,13 +342,19 @@ export default function FirstRunAccountStep() {
         onOpenChange={setSimplefinOpen}
         onConnected={onSimplefinConnected}
       />
+      {/* Done closes it: the key is active, so the bank list is already showing. */}
+      <EnableBankingSetupWizard
+        entry="first_run"
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onChooseBank={() => {}}
+      />
     </>
   );
 }
 
 function AccountStepSkipButton({ onSkip }: { onSkip: () => void }) {
   const t = useTranslations("onboarding.firstRun");
-  const user = useUser();
 
   return (
     <Button
@@ -509,5 +530,124 @@ function ManualPanel({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * After skipping the bank: the two ways in that work without a bank key, as one short choice,
+ * then on without an account. Both lead into the existing flows (the import dialog, the manual
+ * form) and come back here; an import that wrote its transactions moves on to the sync step as
+ * a manual account would.
+ */
+function NoBankChoice({
+  onBack,
+  onManual,
+}: {
+  onBack: () => void;
+  onManual: () => void;
+}) {
+  const t = useTranslations("onboarding.firstRun");
+  const router = useRouter();
+  const user = useUser();
+  const setFooter = useFirstRunOnboardingFooter();
+  const importAvailable = useStatementImportAvailable();
+  const [importOpen, setImportOpen] = useState(false);
+  // The import adds an account before its file, and leaving the import keeps
+  // it: going on then is going on with a manual account, not skipping. The
+  // account list says so, however the person got back here.
+  const { data: accountsData } = useAccounts();
+  const hasAccount = writableAccounts(accountsData?.accounts ?? []).length > 0;
+  const userId = user?.id;
+
+  useEffect(() => {
+    const goOn = () => {
+      if (hasAccount) {
+        if (userId)
+          patchFirstRunState(
+            { accountStep: "manual_added", currentStep: "sync_value" },
+            userId,
+          );
+      } else {
+        track("onboarding_step_skipped", { step: "account" });
+        if (userId)
+          patchFirstRunState(
+            { accountStep: "skipped", currentStep: "sync_value" },
+            userId,
+          );
+      }
+      router.push(getFirstRunStepRoute("sync_value"));
+    };
+    setFooter(
+      <Button
+        type="button"
+        variant="ghost"
+        className="text-muted-foreground min-h-11"
+        onClick={goOn}
+      >
+        {t("noBank.skip")}
+      </Button>,
+    );
+    return () => setFooter(null);
+  }, [hasAccount, router, setFooter, t, userId]);
+
+  const onImported = () => {
+    setImportOpen(false);
+    if (user?.id)
+      patchFirstRunState(
+        { accountStep: "manual_added", currentStep: "sync_value" },
+        user.id,
+      );
+    router.push(getFirstRunStepRoute("sync_value"));
+  };
+
+  return (
+    <FirstRunSplit
+      copy={
+        <div className="space-y-6">
+          <FirstRunStepIntro
+            headline={t("noBank.headline")}
+            sub={t("noBank.description")}
+          />
+          <NoAccountOptionList
+            options={[
+              ...(importAvailable
+                ? [
+                    {
+                      key: "import",
+                      icon: FileText,
+                      label: t("noBank.import"),
+                      hint: t("noBank.importHint"),
+                      onSelect: () => setImportOpen(true),
+                    },
+                  ]
+                : []),
+              {
+                key: "manual",
+                icon: Pencil,
+                label: t("noBank.manual"),
+                hint: t("noBank.manualHint"),
+                onSelect: onManual,
+              },
+            ]}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            className="text-muted-foreground min-h-11"
+            onClick={onBack}
+          >
+            {t("noBank.connectInstead")}
+          </Button>
+          {importAvailable ? (
+            <StatementImportFlow
+              open={importOpen}
+              onClose={() => setImportOpen(false)}
+              onImported={onImported}
+            />
+          ) : null}
+        </div>
+      }
+      preview={null}
+    />
   );
 }

@@ -26,16 +26,17 @@
  * - **One aggregated error.** Every problem is reported at once, not one redeploy at a
  *   time. The error never includes secret values.
  * - `bootConfiguration(role)` is the **only** place in the codebase that reads
- *   `process.env` or calls `dotenv.config()`. The returned value is deeply immutable.
+ *   `process.env` (after `loadDotenv` fills it from `.env`). The returned value is deeply immutable.
  * - Migration status: this module is the destination. `utils/constants.ts` and
- *   direct `dotenv.config()` calls are old readers still kept for compatibility;
+ *   direct `loadDotenv()` calls at import time are old readers still kept for compatibility;
  *   the ESLint restriction plus source-scan test reject new direct readers.
  */
-import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { CRYPTO_EXPLORER_ENV, isCryptoExplorerUrl } from './crypto-explorers';
+import { databaseUrlProblem, parseDatabaseUrl } from './database-target';
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { loadDotenv } from './load-dotenv';
 import { parseMarketDataProviders } from './market-data-providers';
 import { isMerchantLogoTemplate } from './merchant-logo-template';
 import { parseTrustProxy, TrustProxyError } from './trust-proxy';
@@ -98,20 +99,36 @@ const boolFlag = (description: string) => z.enum(['1', '0', 'true', 'false', 'on
 
 // -- Runtime and shared schema --------------------------------------------
 
+// What decides the app environment (`buildRuntime`): all the migration and ORM CLI targets read
+// of the runtime block.
+const appEnvironmentSchema = z.object({
+  APP_ENV: z.string().trim().optional(),
+  DEPLOY_ENV: z.string().trim().optional(),
+  NODE_ENV: z.enum(['development', 'production', 'staging', 'test']).default('development'),
+});
+
+// The database, given as DATABASE_URL or as DB_*, never both (`config/database-target.ts`).
+const databaseSchema = z.object({
+  DATABASE_URL: z.string().trim().optional(),
+  DB_DATABASE: z.string().trim().optional(),
+  DB_HOST: z.string().trim().optional(),
+  DB_PASSWORD: z.string().optional(),
+  DB_PORT: z.string().trim().optional(),
+  DB_USERNAME: z.string().trim().optional(),
+});
+
 const runtimeSchema = z.object({
+  ...appEnvironmentSchema.shape,
   ACCOUNT_AUTO_SYNC_MAX_ENQUEUED: positiveInt('Account auto-sync enqueue cap').optional(),
   API_URL: httpUrl('API base URL').optional(),
-  APP_ENV: z.string().trim().optional(),
   APP_URL: httpUrl('Web app base URL').optional(),
   CORS_ALLOWED_ORIGINS: z.string().trim().optional(),
-  DEPLOY_ENV: z.string().trim().optional(),
   // Minutes a due job may wait before `GET /v1/health/ready` reports the queue as backed up.
   HEALTH_MAX_JOB_AGE_MINUTES: positiveInt('Readiness maximum job age').optional(),
   // The most people in one household, owner and pending invites included (`config/household.ts`).
   HOUSEHOLD_MAX_MEMBERS: positiveInt('Household member cap').optional(),
   INSTANCE_NAME: z.string().trim().optional(),
   MIN_APP_VERSION: z.string().trim().regex(/^\d+\.\d+\.\d+$/u, 'MIN_APP_VERSION must be a semver version such as 2.1.0').optional(),
-  NODE_ENV: z.enum(['development', 'production', 'staging', 'test']).default('development'),
   PGBOSS_SCHEDULER_MODE: z.enum(['off', 'internal-allowlist', 'live']).optional(),
   PGBOSS_SUPERVISE_TIMEOUT_MS: positiveInt('Worker supervise timeout').optional(),
   PORT: positiveInt('HTTP port').optional(),
@@ -175,16 +192,13 @@ const authSchema = z.object({
 // secrets, and each feature whose integration is unset reports itself disabled (`GET /v1/configs`).
 // What *is* validated is the shape of a value that is present.
 const sharedSchema = z.object({
+  ...databaseSchema.shape,
   AWS_ACCESS_KEY_ID: z.string().trim().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().trim().optional(),
   CREDENTIAL_ENCRYPTION_KEY_V1: base64Key(32, 'Enable Banking credential encryption key is required'),
-  DATABASE_URL: z.string().trim().optional(),
-  DB_DATABASE: z.string().trim().optional(),
-  DB_HOST: z.string().trim().optional(),
-  DB_PASSWORD: z.string().optional(),
-  DB_PORT: z.string().trim().optional(),
-  DB_USERNAME: z.string().trim().optional(),
   EMAIL_OPT_OUT_SIGNING_SECRET: nonEmpty('Unsubscribe-link signing secret is required (minted by worker emails, verified by the API)'),
+  // Accepts a Sandbox application as a person's own credential (`enable-banking-application-check.ts`). Development only.
+  ENABLE_BANKING_ALLOW_SANDBOX: boolFlag('Enable Banking sandbox flag').optional(),
   // The instance-wide Enable Banking credential (`config/enable-banking-instance.ts`), read by the
   // API (linking) and the worker (syncing). The two turn it on together; `config/env.ts` reads the
   // key file at start-up and refuses one that is unreadable or not an RSA private key.
@@ -297,9 +311,13 @@ const workerSchema = sharedSchema.extend({
 
 // -- Operation schemas -----------------------------------------------------
 
-const migrationSchema = sharedSchema;
+// Migrations and the MikroORM CLI (`mikro-orm.config.ts`, `migrate.ts`) read the database and the
+// app environment, and nothing else validated here: no migration or seeder reads a secret or an
+// integration setting. The seeders that create users go through better-auth, which checks its own
+// settings when it loads. Requiring the app's secrets here made running a migration need them.
+const migrationSchema = databaseSchema.extend(appEnvironmentSchema.shape);
 
-const ormCliSchema = sharedSchema;
+const ormCliSchema = migrationSchema;
 
 const localDbGuardSchema = z.object({
   ALLOW_REMOTE_WRITE: boolFlag('Allow remote write flag').optional(),
@@ -360,15 +378,17 @@ function buildAuth(parsed: z.infer<typeof authSchema>) {
   };
 }
 
-function buildDatabase(parsed: { DATABASE_URL?: string; DB_DATABASE?: string; DB_HOST?: string; DB_PASSWORD?: string; DB_PORT?: string; DB_USERNAME?: string; }) {
+function buildDatabase(parsed: z.infer<typeof databaseSchema>) {
   if (parsed.DATABASE_URL) {
+    // The target as `pg` reads the URL (`parseDatabaseUrl`); the password stays in the URL.
+    const target = parseDatabaseUrl(parsed.DATABASE_URL);
     return {
       connectionString: parsed.DATABASE_URL,
-      database: null as null | string,
-      host: null as null | string,
+      database: (target?.database ?? null),
+      host: (target?.host ?? null),
       password: null as null | string,
-      port: null as null | number,
-      username: null as null | string,
+      port: (target?.port ?? null),
+      username: (target?.username ?? null),
     };
   }
   if (parsed.DB_HOST && parsed.DB_PORT && parsed.DB_DATABASE && parsed.DB_USERNAME) {
@@ -452,7 +472,7 @@ function buildPgBoss(parsed: z.infer<typeof sharedSchema>) {
   };
 }
 
-function buildRuntime(parsed: z.infer<typeof runtimeSchema>) {
+function buildRuntime(parsed: Partial<Pick<z.infer<typeof runtimeSchema>, 'PORT' | 'PUBLIC_DIAGNOSTICS_ENABLED'>> & z.infer<typeof appEnvironmentSchema>) {
   const nodeEnv = parsed.NODE_ENV;
   const appEnv = parseAppEnvironment(parsed.APP_ENV ?? parsed.DEPLOY_ENV ?? nodeEnv);
   const isProductionLike = appEnv === 'production' || appEnv === 'staging';
@@ -627,6 +647,19 @@ function parseOrigins(value: string): readonly string[] {
 }
 
 function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSource): ConfigurationByRole[R] {
+  if (role === 'migration' || role === 'orm-cli') {
+    const parsed = (role === 'migration' ? migrationSchema : ormCliSchema).safeParse(source);
+    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
+    const issues = databaseIssues(parsed.data);
+    if (issues.length > 0) throw new ConfigurationError(role, issues);
+    const config: MigrationConfiguration | OrmCliConfiguration = {
+      database: buildDatabase(parsed.data),
+      role: role === 'migration' ? 'migration' : 'orm-cli',
+      runtime: buildRuntime(parsed.data),
+    };
+    return freeze(config) as ConfigurationByRole[R];
+  }
+
   const runtimeParsed = runtimeSchema.safeParse(source);
   if (!runtimeParsed.success) {
     throw new ConfigurationError(role, parseIssues(runtimeParsed.error, source));
@@ -637,7 +670,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = apiSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = [...requireDbOrThrow(db, role), ...oidcIssues(parsed.data)];
+    const issues = [...databaseIssues(parsed.data), ...oidcIssues(parsed.data)];
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: ApiConfiguration = {
       auth: buildAuth(parsed.data),
@@ -664,7 +697,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = workerSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
+    const issues = databaseIssues(parsed.data);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: WorkerConfiguration = {
       database: db,
@@ -689,20 +722,6 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     return freeze(config) as ConfigurationByRole[R];
   }
 
-  if (role === 'migration' || role === 'orm-cli') {
-    const parsed = (role === 'migration' ? migrationSchema : ormCliSchema).safeParse(source);
-    if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
-    const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
-    if (issues.length > 0) throw new ConfigurationError(role, issues);
-    const config: MigrationConfiguration | OrmCliConfiguration = {
-      database: db,
-      role: role === 'migration' ? 'migration' : 'orm-cli',
-      runtime,
-    };
-    return freeze(config) as ConfigurationByRole[R];
-  }
-
   if (role === 'operation:local-db-guard') {
     const parsed = localDbGuardSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
@@ -719,7 +738,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = recoverySchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
+    const issues = databaseIssues(parsed.data);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: RecoveryConfiguration = {
       database: db,
@@ -735,7 +754,7 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
     const parsed = portfolioImportSmokeSchema.safeParse(source);
     if (!parsed.success) throw new ConfigurationError(role, parseIssues(parsed.error, source));
     const db = buildDatabase(parsed.data);
-    const issues = requireDbOrThrow(db, role);
+    const issues = databaseIssues(parsed.data);
     if (issues.length > 0) throw new ConfigurationError(role, issues);
     const config: PortfolioImportSmokeConfiguration = {
       database: db,
@@ -748,9 +767,13 @@ function parseRole<R extends ConfigurationRole>(role: R, source: ConfigurationSo
   throw new ConfigurationError(role, [{ code: 'role-invariant', message: `unsupported role ${String(role)}`, path: '(role)' }]);
 }
 
-function requireDbOrThrow(parsed: ReturnType<typeof buildDatabase>, _role: ConfigurationRole): ConfigurationIssue[] {
-  if (parsed.connectionString) return [];
-  if (parsed.host && parsed.port && parsed.database && parsed.username) return [];
+/** The database is given exactly one way, and completely (`config/database-target.ts`). */
+function databaseIssues(parsed: z.infer<typeof databaseSchema>): ConfigurationIssue[] {
+  const urlProblem = databaseUrlProblem(parsed);
+  if (urlProblem) return [{ code: urlProblem.code, message: urlProblem.message, path: 'DATABASE_URL' }];
+  const db = buildDatabase(parsed);
+  if (db.connectionString) return [];
+  if (db.host && db.port && db.database && db.username) return [];
   return [{ code: 'missing', message: 'set DATABASE_URL or all of DB_HOST / DB_PORT / DB_DATABASE / DB_USERNAME', path: 'database' }];
 }
 
@@ -794,7 +817,7 @@ export function loadAuthConfiguration(source: ConfigurationSource): ReturnType<t
 let installed: ConfigurationByRole[keyof ConfigurationByRole] | null = null;
 
 function readProcessSource(): ConfigurationSource {
-  dotenv.config({ quiet: true });
+  loadDotenv();
   return Object.freeze({ ...(process.env as Record<string, string | undefined>) });
 }
 
@@ -802,7 +825,7 @@ function readProcessSource(): ConfigurationSource {
  * Validate the runtime configuration for the current process and return a deeply
  * immutable value.
  *
- * The sole place in the codebase permitted to read `process.env` or call `dotenv.config()`.
+ * The sole place in the codebase permitted to read `process.env` (filled from `.env` by `loadDotenv`).
  * Subsequent calls in the same process return the cached result; calling `bootConfiguration`
  * twice with different roles throws `ConfigurationError`.
  */

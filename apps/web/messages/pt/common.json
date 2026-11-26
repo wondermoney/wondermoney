@@ -1341,6 +1341,7 @@
   "balance-growth": "Evolução do saldo",
   "account-overview": "Visão geral da conta",
   "account-balance": "Saldo da conta",
+  "balance-as-of": "Saldo de {date}",
   "projected-balance": "Saldo previsto",
   "all-transactions": "Todas as transações",
   "account-overview-description": "Esta é uma visão geral da tua conta, incluindo crescimento do saldo, últimas transações e insights.",
@@ -1523,7 +1524,7 @@
   "appearance-description": "Altera a aparência da aplicação.",
   "language-email-hint": "Os teus emails seguem este idioma quando já estão traduzidos; caso contrário, chegam em inglês.",
   "language-email-save-error": "Não foi possível mudar o idioma dos teus emails. Escolhe-o de novo para tentares outra vez.",
-  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 Inglês} es {🇪🇸 Espanhol} other {Desconhecido}}",
+  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 Inglês} es {🇪🇸 Espanhol} it {🇮🇹 Italiano} other {Desconhecido}}",
   "current-month": "Mês atual",
   "last-month": "Mês passado",
   "last-3-months": "Últimos 3 meses",
@@ -2620,9 +2621,9 @@
   "transaction": "Transação",
   "transaction-hidden": "Oculta",
   "bankProviderCredentialRequired": {
-    "title": "Adiciona primeiro a tua chave da Enable Banking",
-    "body": "Para ligar um banco é agora preciso o teu próprio ID de aplicação e chave da Enable Banking. Adiciona-os em Definições e volta depois aqui.",
-    "cta": "Ir para as definições do fornecedor bancário",
+    "title": "Configura primeiro a sincronização bancária",
+    "body": "Para ligar um banco, precisas da tua própria aplicação Enable Banking, que é gratuita. A configuração demora poucos minutos.",
+    "cta": "Configurar a sincronização bancária",
     "sharedUnavailable": "A ligação bancária partilhada deste servidor só serve um agregado, por isso o teu precisa da sua própria chave."
   },
   "faq": {
@@ -2679,6 +2680,7 @@
     "removeDialogTitle": "Remover a tua chave do Enable Banking?",
     "removeDialogDescription": "Não vais conseguir ligar nem sincronizar contas bancárias até adicionares uma nova chave. As contas já ligadas deixam de atualizar.",
     "removeDialogConfirm": "Remover chave",
+    "removeSignInAgain": "Por segurança, remover a tua chave exige um início de sessão recente. Voltas logo aqui a seguir.",
     "cancel": "Cancelar",
     "loadError": "Não foi possível carregar a tua chave do Enable Banking. Tenta novamente dentro de momentos.",
     "toastRemoveSuccess": "Chave do Enable Banking removida.",
@@ -2700,7 +2702,86 @@
       "submit": "Testar e guardar",
       "genericError": "Não foi possível verificar esta chave. Verifica-a e tenta novamente."
     },
-    "sharedAvailable": "Este servidor tem uma ligação partilhada à Enable Banking para o teu agregado, por isso podes ligar bancos sem uma chave tua. Se adicionares uma, as novas ligações passam a usá-la."
+    "sharedAvailable": "Este servidor tem uma ligação partilhada à Enable Banking para o teu agregado, por isso podes ligar bancos sem uma chave tua. Se adicionares uma, as novas ligações passam a usá-la.",
+    "statusPending": "À espera do ID da aplicação",
+    "createKeyCta": "Deixar o WonderMoney criar a chave",
+    "haveKeyCta": "Já tenho uma chave",
+    "continueSetup": "Continuar a configuração",
+    "pendingWaiting": "Há um certificado à espera do ID da aplicação até {date}.",
+    "generated": {
+      "create": "Criar certificado",
+      "recreate": "Criar um novo certificado",
+      "download": "Transferir certificado",
+      "copyCertificate": "Copiar certificado",
+      "fieldName": "Nome da aplicação",
+      "fieldDescription": "Descrição",
+      "fieldRedirectUrl": "URL de redirecionamento",
+      "fieldPrivacyUrl": "URL de privacidade",
+      "fieldTermsUrl": "URL dos termos",
+      "copyValue": "Copiar {field}",
+      "applicationIdPlaceholder": "p. ex. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
+      "activate": "Ativar",
+      "totp": "Código do autenticador",
+      "copied": "Copiado.",
+      "copyFailed": "Não foi possível copiar. Seleciona o texto e copia-o.",
+      "errorApplicationNotFound": "A Enable Banking não reconhece este ID de aplicação com esta chave. Verifica o ID, se a aplicação foi registada com este certificado e se o relógio deste servidor está certo.",
+      "errorRefused": "A Enable Banking recusou esta chave. Tenta novamente mais tarde ou regista a aplicação de novo.",
+      "errorSandbox": "Esta é uma aplicação Sandbox, que não chega a nenhum banco real. Regista uma nova aplicação com o ambiente Production.",
+      "errorNotActivated": "Esta aplicação ainda não está ativada. No Control Panel, escolhe \"Activate by linking accounts\", liga uma das tuas contas bancárias e tenta novamente.",
+      "errorPendingMissing": "Este certificado expirou ou foi substituído. Cria um novo certificado e regista-o novamente.",
+      "errorTotpRequired": "Introduz o código do autenticador para continuar.",
+      "errorInvalidTotp": "Esse código do autenticador não é válido.",
+      "errorSessionNotFresh": "Por segurança, inicia sessão novamente antes de configurares a tua chave.",
+      "errorGeneric": "Algo correu mal. Tenta novamente."
+    },
+    "wizard": {
+      "title": "Configurar a sincronização bancária",
+      "progress": "Passo {current} de {total}",
+      "guide": "Guia passo a passo",
+      "back": "Voltar",
+      "next": "Seguinte",
+      "signIn": {
+        "title": "Iniciar sessão na Enable Banking",
+        "body": "A Enable Banking é gratuita. Introduz o teu email na página de início de sessão e abre a ligação que recebes por email. Não há palavra-passe.",
+        "open": "Abrir a Enable Banking"
+      },
+      "create": {
+        "title": "Criar a aplicação",
+        "body": "No Control Panel, abre Applications e adiciona uma nova aplicação com estes valores.",
+        "environment": "Environment: Production",
+        "environmentWhy": "Não Sandbox. Uma aplicação Sandbox nunca chega a um banco real.",
+        "urlsRequired": "Em Production, os dois URLs são obrigatórios, embora o formulário não o indique.",
+        "certificate": "Certificado público",
+        "certificateHint": "Escolhe \"Generate outside the browser and import public certificate\" e cola este certificado.",
+        "waiting": "Há um certificado à espera até {date}. Se ainda não o registaste, cria um novo.",
+        "haveKey": "Já tenho uma chave"
+      },
+      "activate": {
+        "title": "Ativar a aplicação",
+        "body": "Depois de submeteres, a página da aplicação mostra dois botões.",
+        "link": "Activate by linking accounts",
+        "linkHint": "Escolhe este e liga uma das tuas contas bancárias.",
+        "request": "Request activation",
+        "requestHint": "Ignora este: é para empresas e exige a verificação da empresa."
+      },
+      "applicationId": {
+        "title": "Colar o ID da aplicação",
+        "label": "ID da aplicação",
+        "hint": "Aparece no topo da página da aplicação.",
+        "checking": "A verificar com a Enable Banking…",
+        "revisit": "Ir para o passo {step}: {title}"
+      },
+      "done": {
+        "title": "A sincronização bancária está pronta",
+        "body": "A tua aplicação Enable Banking está ativa. Escolhe o teu banco para ligar a primeira conta.",
+        "chooseBank": "Escolher o banco"
+      },
+      "signInAgain": {
+        "title": "Inicia sessão novamente primeiro",
+        "body": "Por segurança, configurar a sincronização bancária exige um início de sessão recente. Voltas logo aqui a seguir.",
+        "action": "Iniciar sessão novamente"
+      }
+    }
   },
   "emailVerification": {
     "message": "Verifica o teu email para usar esta funcionalidade. Enviámos um link para {email}.",
@@ -2765,6 +2846,7 @@
   "import-review-reading": "A ler o ficheiro…",
   "import-review-importing": "A importar… {imported} de {total} transações até agora.",
   "import-review-stalled": "A importação parou antes de terminar. Tenta outra vez para continuar onde parou; nada é importado duas vezes.",
+  "import-review-access-lost": "Já não podes importar para esta conta, por isso nada foi importado.",
   "import-review-read-failed": "Não conseguimos ler este ficheiro. Escolhe uma exportação do extrato em CSV ou Excel.",
   "import-pdf-entry": "Importar extrato em PDF",
   "import-pdf-title": "Importar um extrato em PDF",
@@ -2835,6 +2917,7 @@
   "import-review-date-order-hint-month-first": "O ficheiro não o indica, por isso foram lidas com o mês primeiro (01/15/2026 é 15 de janeiro). Escolhe a outra ordem se estiver errado.",
   "import-review-done": "{imported, plural, one {# transação importada} other {# transações importadas}}, {skipped} ignoradas.",
   "import-review-done-failed": "{failed, plural, one {# linha não pôde ser importada} other {# linhas não puderam ser importadas}}.",
+  "import-review-access-lost-partway": "Já não podes importar para esta conta, por isso o resto do ficheiro não foi importado.",
   "import-review-details-deleted": "Os detalhes linha a linha desta importação já não são guardados: são eliminados 7 dias depois de uma importação. As transações importadas continuam na conta.",
   "portfolioAccountLink": {
     "account-label": "Conta onde está este portefólio",
@@ -2912,6 +2995,7 @@
     "errors": {
       "account-phase-failed": "O teu banco não enviou a lista de contas.",
       "authentication": "O acesso ao teu banco tem de ser configurado novamente.",
+      "balance-unavailable": "As tuas transações foram sincronizadas, mas o teu banco não enviou o saldo.",
       "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
       "consent-expired": "O teu acesso a este banco expirou.",
       "data-validation": "O teu banco enviou dados que não conseguimos ler.",

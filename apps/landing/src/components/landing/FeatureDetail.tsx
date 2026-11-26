@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import CTABanner from "@/components/shared/CTABanner";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import type { Lang } from "@/lib/i18nLocale";
 import { FEATURE_DETAILS, type FeatureDetailRouteId, type FeatureDetailSection } from "./featureDetails";
 
@@ -36,15 +37,6 @@ function StepCard({ number, title, body }: { number: number; title: string; body
 	);
 }
 
-function FaqItem({ question, answer }: { question: string; answer: string }) {
-	return (
-		<div className="rounded-card border border-border bg-background p-5">
-			<h3 className="text-base font-semibold text-foreground">{question}</h3>
-			<p className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</p>
-		</div>
-	);
-}
-
 function DetailSection({ ns, section }: { ns: string; section: FeatureDetailSection }) {
 	const { t } = useTranslations();
 	const key = (suffix: string) => `lp.${ns}.${section.key}${suffix}`;
@@ -69,7 +61,6 @@ function DetailSection({ ns, section }: { ns: string; section: FeatureDetailSect
 }
 
 const STEP_NUMBERS = [1, 2, 3] as const;
-const FAQ_NUMBERS = [1, 2, 3] as const;
 
 function FeatureDetailContent({ locale, routeId }: { locale: Lang; routeId: FeatureDetailRouteId }) {
 	const { t } = useTranslations();
@@ -90,7 +81,7 @@ function FeatureDetailContent({ locale, routeId }: { locale: Lang; routeId: Feat
 							<div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
 								<Button asChild size="lg">
 									<a
-										href={CTA_URL}
+										href={appSignupUrl(locale)}
 										onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
 									>
 										{t("lp.shared.ctaPrimary")}
@@ -132,18 +123,7 @@ function FeatureDetailContent({ locale, routeId }: { locale: Lang; routeId: Feat
 				<DetailSection key={section.key} ns={ns} section={section} />
 			))}
 
-			<section className="bg-paper-2 py-16 md:py-20">
-				<div className="mx-auto max-w-4xl px-6 lg:px-8">
-					<h2 className="mb-10 text-center text-3xl font-semibold tracking-tight text-foreground">
-						{t(`lp.${ns}.faqTitle`)}
-					</h2>
-					<div className="grid gap-4">
-						{FAQ_NUMBERS.map((n) => (
-							<FaqItem key={n} question={t(`lp.${ns}.faq${n}Q`)} answer={t(`lp.${ns}.faq${n}A`)} />
-						))}
-					</div>
-				</div>
-			</section>
+			<FeatureFaq routeId={routeId} />
 
 			<TrustStripInline />
 

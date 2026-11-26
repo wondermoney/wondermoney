@@ -1,9 +1,10 @@
 import { foundationResources, initMobileI18n, validateFoundationResources } from './index'
 import en from './resources/en.json'
 import es from './resources/es.json'
+import italian from './resources/it.json'
 import ptPT from './resources/pt-PT.json'
 
-const resources = { en, 'pt-PT': ptPT, es } as const
+const resources = { en, 'pt-PT': ptPT, es, it: italian } as const
 
 type LocaleResource = Record<string, unknown>
 
@@ -28,7 +29,7 @@ const placeholders = (message: string): string[] => [
 
 describe('mobile product i18n', () => {
   it('keeps exact locale and key parity', () => {
-    expect(Object.keys(foundationResources).sort()).toEqual(['en', 'es', 'pt-PT'])
+    expect(Object.keys(foundationResources).sort()).toEqual(['en', 'es', 'it', 'pt-PT'])
     expect(validateFoundationResources(resources)).toBe(true)
   })
 
@@ -38,6 +39,7 @@ describe('mobile product i18n', () => {
     for (const [locale, resource] of [
       ['pt-PT', ptPT],
       ['es', es],
+      ['it', italian],
     ] as const) {
       const translated = new Map(leafValues(resource))
 
@@ -222,6 +224,7 @@ describe('mobile product i18n', () => {
     ['en', '1 loan balance is not included', '2 loan balances are not included'],
     ['pt-PT', '1 saldo de empréstimo não está incluído', '2 saldos de empréstimos não estão incluídos'],
     ['es', 'No se incluye 1 saldo de préstamo', 'No se incluyen 2 saldos de préstamos'],
+    ['it', '1 saldo di prestito non è incluso', '2 saldi di prestiti non sono inclusi'],
   ])('resolves singular and plural warnings for %s', async (locale, singular, plural) => {
     const i18n = await initMobileI18n(locale)
     expect(i18n.t('netWorth.unsupportedLoan', { count: 1 })).toBe(singular)
@@ -240,9 +243,26 @@ describe('mobile product i18n', () => {
     expect(esI18n.t('transactions.split.remaining')).toBe('Falta asignar')
   })
 
+  it('provides the Italian destinations, terms and plurals', async () => {
+    const itI18n = await initMobileI18n('it')
+    expect(itI18n.t('netWorth.title')).toBe("A colpo d'occhio")
+    expect([itI18n.t('navigation.home'), itI18n.t('navigation.accounts'), itI18n.t('navigation.budgets'), itI18n.t('navigation.more')]).toEqual(['Home', 'Conti', 'Budget', 'Altro'])
+    expect(itI18n.t('accounts.unnamed')).toBe('Conto senza nome')
+    expect(itI18n.t('transactions.markReviewed')).toBe('Segna come rivista')
+    expect(itI18n.t('transactions.split.summary', { count: 1 })).toBe('Divisa · 1 categoria')
+    expect(itI18n.t('transactions.split.summary', { count: 3 })).toBe('Divisa · 3 categorie')
+    // Italian has a CLDR "many" form; without a `_many` key i18next falls back to `_other`.
+    expect(itI18n.t('common.relativeTime.minutes', { count: 1_000_000 })).toBe('1000000 minuti fa')
+    expect(itI18n.t('auth.submit')).toBe('Accedi')
+    expect(itI18n.t('preferences.locale.it')).toBe('Italiano')
+  })
+
   it('normalizes supported variants and falls back safely', async () => {
     await expect(initMobileI18n('pt-BR')).resolves.toMatchObject({ language: 'pt-PT' })
     await expect(initMobileI18n('es-MX')).resolves.toMatchObject({ language: 'es' })
+    await expect(initMobileI18n('it')).resolves.toMatchObject({ language: 'it' })
+    await expect(initMobileI18n('it-IT')).resolves.toMatchObject({ language: 'it' })
+    await expect(initMobileI18n('it_CH')).resolves.toMatchObject({ language: 'it' })
     const fallback = await initMobileI18n('xx')
     expect(fallback.language).toBe('en')
     expect(fallback.t('auth.submit')).toBe('Sign in')
@@ -259,7 +279,7 @@ describe('mobile product i18n', () => {
   })
 
   it('has signup keys in every locale', async () => {
-    for (const locale of ['en', 'pt-PT', 'es'] as const) {
+    for (const locale of ['en', 'pt-PT', 'es', 'it'] as const) {
       const i18n = await initMobileI18n(locale)
       expect(i18n.t('auth.signup.title')).not.toBe('auth.signup.title')
       expect(i18n.t('auth.errors.emailTaken')).not.toBe('auth.errors.emailTaken')
@@ -273,6 +293,7 @@ describe('mobile product i18n', () => {
       en,
       'pt-PT': { ...ptPT, common: commonWithoutRefresh as typeof ptPT.common },
       es,
+      it: italian,
     })).toThrow(/missing/i)
   })
 })

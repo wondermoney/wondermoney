@@ -42,4 +42,25 @@ describe('auth callback request boundary', () => {
 
     expect(parsed.body).toEqual({ locale: 'pt' });
   });
+
+  it.each(['ai_assistant', 'search', 'social', 'direct', 'other'])('keeps the referrer class %s', (referrerClass) => {
+    const parsed = authCallbackRequestSchema.parse({ body: { referrerClass } });
+
+    expect(parsed.body.referrerClass).toBe(referrerClass);
+  });
+
+  // Only the coarse class is accepted: a referrer URL, a hostname or a utm value is dropped,
+  // never stored and never a 400.
+  it.each([
+    'https://chatgpt.com/',
+    'chatgpt.com',
+    'AI_ASSISTANT',
+    'newsletter',
+    '',
+    7,
+  ])('drops an unknown referrer class: %s', (referrerClass) => {
+    const parsed = authCallbackRequestSchema.parse({ body: { locale: 'pt', referrerClass } });
+
+    expect(parsed.body).toEqual({ locale: 'pt' });
+  });
 });

@@ -1,6 +1,6 @@
 ---
 title: Connect an AI client
-description: Let Claude Desktop, Cursor or another MCP client ask about your own finances with a read-only token.
+description: Let ChatGPT, Claude Desktop, Cursor or another MCP client ask about your own finances, read-only.
 ---
 
 WonderMoney runs a read-only [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server. An MCP client such as Claude Desktop, Cursor or VS Code can ask it about your accounts, spending, budgets, goals, net worth and portfolio, and answer in the client's own chat.
@@ -15,7 +15,7 @@ The client sees exactly what you see:
 - Your own private accounts and the private accounts shared with you, and **not** a household member's private accounts that are hidden from you.
 - Never another household's data.
 
-Every tool takes your identity from the token, so the same privacy rules that apply in the app apply here.
+Every tool takes your identity from the token, or from the OAuth connection you allowed, so the same privacy rules that apply in the app apply here.
 
 ## What the client can do
 
@@ -83,13 +83,31 @@ Cursor and other clients that speak Streamable HTTP directly use the URL and hea
 
 Replace the API address with your own and `<your-token>` with the value you copied. The endpoint is stateless: the client sends the token on every request, and there is no session to keep.
 
+## Connect ChatGPT
+
+ChatGPT, and other clients that sign in with OAuth, connect without a token, on a server that offers it (see [Self-hosting](#self-hosting)). Settings then shows **Connect ChatGPT** under **Connect an AI client**.
+
+1. In ChatGPT, add an app (a connector) and give it the MCP endpoint, `https://api.example.com/v1/mcp` with your API address, and choose OAuth.
+2. ChatGPT sends you to WonderMoney. Sign in if you are not signed in already, with your second factor if you use one.
+3. The consent page names the client, the address it sends you back to and your household, and lists what it may do. Select **Allow**. Allowing needs a sign-in from the last 24 hours and, if you use two-factor authentication, your authenticator code, as creating a token does.
+
+The client gets read access only (`mcp:read`): the read-only tools above, never the proposal tools, which stay behind a personal token. It stays connected until you disconnect it; its access token lasts 15 minutes and is renewed without asking you again. Clients you allowed are listed under **Connected with OAuth**, with when they last called a tool.
+
+Check the address on the consent page before you allow: any client can register itself under any name, and only the address it sends you back to (such as `https://chatgpt.com`) says where your answer goes. A client that answers to an app on your own computer is shown as one, with a warning. Clients can only register `https` addresses, or `http` on `127.0.0.1` or `localhost`.
+
+The connection belongs to the household you were in when you allowed it. If you leave it or join another, the client is disconnected.
+
 ## Audit log
 
-Every tool call is written to the assistant audit log with the tool name, the token and the time. Amounts and descriptions are never written there. **Settings → API tokens → Connect an AI client** lists the most recent calls.
+Every tool call is written to the assistant audit log with the tool name, the token or OAuth client, and the time. Amounts and descriptions are never written there. **Settings → API tokens → Connect an AI client** lists the most recent calls.
 
 ## Revoke access
 
 Select **Revoke** next to the token in **Settings → API tokens**. Revocation is immediate: the next request from the client gets `401 Unauthorized`. Delete the server entry from the client's configuration as well, so it stops retrying.
+
+For a client connected with OAuth, select **Disconnect** next to it under **Connected with OAuth**. Its tokens stop working at once, and its next request gets `401 Unauthorized`. To use it again, connect it again from the client. Changing or resetting your password, and signing out of other devices or everywhere, disconnects every OAuth client too.
+
+The server removes a client that has gone seven days without a connection: one nobody allowed within seven days of it registering, or one disconnected more than seven days ago. If ChatGPT or another client stops connecting after that, remove the app (connector) in the client and add it again.
 
 ## Rate limits
 
@@ -98,6 +116,8 @@ MCP traffic uses the token's own request budget, and each token may make a limit
 ## Self-hosting
 
 The server is on by default. Set `MCP_ENABLED=false` on the API to turn it off: `POST /v1/mcp` then answers `404`, and `GET /v1/instance` reports `features.mcp: false`, so the settings panel disappears. See [Configure](/en/docs/self-hosting/configure).
+
+OAuth, which ChatGPT needs, is off by default. Set `MCP_OAUTH_ENABLED=true` on the API to offer it. It needs an `https` `API_URL`, and it lets any client register itself, as MCP clients expect; each still needs a person's consent. With it on, the API serves the discovery documents at `/.well-known/oauth-protected-resource` and `/.well-known/oauth-authorization-server`, and a `401` from `POST /v1/mcp` points the client at them. On one hostname, route `/.well-known/oauth-*` to the API as well; the bundled proxy does. Turned off again, no client can connect or call the server with OAuth, and clients connected earlier stay listed in Settings so people can disconnect them.
 
 ## Related pages
 

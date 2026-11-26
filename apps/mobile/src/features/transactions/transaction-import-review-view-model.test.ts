@@ -92,13 +92,19 @@ describe('importStage', () => {
   })
 
   it('reads a finished commit as its outcome and counts', () => {
-    expect(importStage(session({ status: 'succeeded', counts: { ...counts, imported: 3, skipped: 1 } }))).toEqual({ kind: 'done', outcome: 'succeeded', imported: 3, skipped: 1, failed: 0, detailsDeleted: false })
-    expect(importStage(session({ status: 'partial', counts: { ...counts, imported: 2, failed: 1 }, detailsDeletedAt: '2026-11-20T00:00:00.000Z' }))).toEqual({ kind: 'done', outcome: 'partial', imported: 2, skipped: 0, failed: 1, detailsDeleted: true })
+    expect(importStage(session({ status: 'succeeded', counts: { ...counts, imported: 3, skipped: 1 } }))).toEqual({ kind: 'done', outcome: 'succeeded', imported: 3, skipped: 1, failed: 0, detailsDeleted: false, accessLost: false })
+    expect(importStage(session({ status: 'partial', counts: { ...counts, imported: 2, failed: 1 }, detailsDeletedAt: '2026-11-20T00:00:00.000Z' }))).toEqual({ kind: 'done', outcome: 'partial', imported: 2, skipped: 0, failed: 1, detailsDeleted: true, accessLost: false })
+  })
+
+  it('reads a commit stopped part way by lost access as its outcome, saying why the rest was not imported', () => {
+    expect(importStage(session({ status: 'partial', errorCode: 'account_access', counts: { ...counts, imported: 2, skipped: 3 } }))).toEqual({ kind: 'done', outcome: 'partial', imported: 2, skipped: 3, failed: 0, detailsDeleted: false, accessLost: true })
   })
 
   it('tells a file that could not be read (a code) from a commit whose rows all failed (no code)', () => {
     expect(importStage(session({ status: 'failed', errorCode: 'unreadable' }))).toEqual({ kind: 'read-failed' })
-    expect(importStage(session({ status: 'failed', counts: { ...counts, failed: 2 } }))).toEqual({ kind: 'done', outcome: 'failed', imported: 0, skipped: 0, failed: 2, detailsDeleted: false })
+    // Refused because the person can no longer write to the account: not a file problem.
+    expect(importStage(session({ status: 'failed', errorCode: 'account_access' }))).toEqual({ kind: 'read-failed', reason: 'access' })
+    expect(importStage(session({ status: 'failed', counts: { ...counts, failed: 2 } }))).toEqual({ kind: 'done', outcome: 'failed', imported: 0, skipped: 0, failed: 2, detailsDeleted: false, accessLost: false })
   })
 
   it.each(['expired', 'cancelled'] as const)('reads a %s session as expired, as web does', (status) => {
@@ -110,7 +116,7 @@ describe('importStage', () => {
   })
 
   it('treats only an outcome as finished', () => {
-    expect(isFinishedStage({ kind: 'done', outcome: 'succeeded', imported: 1, skipped: 0, failed: 0, detailsDeleted: false })).toBe(true)
+    expect(isFinishedStage({ kind: 'done', outcome: 'succeeded', imported: 1, skipped: 0, failed: 0, detailsDeleted: false, accessLost: false })).toBe(true)
     expect(isFinishedStage({ kind: 'read-failed' })).toBe(true)
     expect(isFinishedStage({ kind: 'expired' })).toBe(true)
     expect(isFinishedStage({ kind: 'review', needsMapping: false })).toBe(false)
@@ -213,7 +219,11 @@ describe('account mapping', () => {
   const sourceAccounts = [{ label: 'Checking', rowCount: 3 }, { label: 'DE89370400440532013000', rowCount: 1, suggestedAccountId: 9 }]
 
   it('pre-fills a suggested account, keeping what was saved', () => {
-    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }))).toEqual({ Checking: 7, DE89370400440532013000: 9 })
+    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }), [{ id: 7 }, { id: 9 }])).toEqual({ Checking: 7, DE89370400440532013000: 9 })
+  })
+
+  it('pre-fills no suggestion the picker does not offer, so nothing is sent to an account it hides', () => {
+    expect(initialAccountMapping(session({ sourceAccounts, accountMapping: { Checking: 7 } }), [{ id: 7 }])).toEqual({ Checking: 7 })
   })
 
   it('is complete once every account in the file has a target', () => {

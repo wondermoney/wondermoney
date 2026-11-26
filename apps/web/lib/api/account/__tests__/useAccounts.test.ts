@@ -28,6 +28,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     balance: null,
     appuserCurrencyBalance: null,
     refreshedAt: null,
+    balanceDerivedAt: null,
     source: "manual",
     accountType: null,
     csvImportFormat: "generic",
@@ -35,6 +36,7 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     isOwnedByViewer: false,
     ownerFirstName: null,
     myAccess: "write",
+    closed: false,
     isJoint: false,
     ownerAppuserKey: null,
     attribution: { appuserKey: null, displayName: null },
@@ -46,6 +48,21 @@ test("normalizes omitted legacy fields and derives source when omitted", () => {
     creditCard: null,
   });
   assert.equal(response.accounts[1].source, "open_banking");
+});
+
+test("reads when a balance was derived, and drops an unreadable date", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), balanceDerivedAt: "2026-11-20T08:00:00.000Z" },
+      { ...requiredAccountFields(2), balanceDerivedAt: "not a date" },
+      { ...requiredAccountFields(3), balanceDerivedAt: null },
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.balanceDerivedAt),
+    ["2026-11-20T08:00:00.000Z", null, null],
+  );
 });
 
 test("reads the caller's access, and derives it for an API that does not send it", () => {
@@ -62,6 +79,21 @@ test("reads the caller's access, and derives it for an API that does not send it
   assert.deepEqual(
     response.accounts.map((account) => account.myAccess),
     ["read", "write", "owner", "write", "write"],
+  );
+});
+
+test("reads whether an account is closed; an API that does not say reads as open", () => {
+  const response = normalizeAccountsResponse({
+    accounts: [
+      { ...requiredAccountFields(1), closed: true },
+      { ...requiredAccountFields(2), closed: false },
+      requiredAccountFields(3),
+    ],
+  });
+
+  assert.deepEqual(
+    response.accounts.map((account) => account.closed),
+    [true, false, false],
   );
 });
 

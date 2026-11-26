@@ -1,0 +1,294 @@
+{
+  "loans": {
+    "page": {
+      "title": "Prestiti",
+      "description": "Tieni traccia di prestiti, piani di rimborso e saldi in un unico posto."
+    },
+    "actions": {
+      "add": "Aggiungi prestito",
+      "edit": "Modifica prestito",
+      "delete": "Elimina prestito",
+      "linkRepayment": "Collega rimborso",
+      "unlinkRepayment": "Scollega rimborso",
+      "save": "Salva modifiche"
+    },
+    "fields": {
+      "name": "Nome del prestito",
+      "currency": "Valuta",
+      "includeInNetWorth": "Includi nel patrimonio netto",
+      "notes": "Note",
+      "providerName": "Fornitore",
+      "lender": "Finanziatore",
+      "type": "Tipo di prestito",
+      "status": "Stato",
+      "principal": "Capitale",
+      "originalPrincipal": "Importo originario del prestito",
+      "originalPrincipalHint": "Facoltativo. L'importo preso in prestito all'inizio, se diverso dal capitale indicato sopra (ad esempio quando aggiungi un prestito che stai già rimborsando). Serve a calcolare l'avanzamento del rimborso.",
+      "balance": "Saldo",
+      "interestRate": "Tasso di interesse",
+      "installment": "Rata mensile",
+      "termMonths": "Durata (mesi)",
+      "amortizationMethod": "Metodo di ammortamento",
+      "amortizationMethodHint": "Alla francese la rata resta costante; all'italiana la quota capitale è la stessa ogni mese, quindi la rata diminuisce.",
+      "startDate": "Data di inizio",
+      "dueDate": "Data di scadenza",
+      "linkedTransaction": "Rimborso collegato",
+      "namePlaceholder": "es. Mutuo casa",
+      "interestRatePlaceholder": "0.00",
+      "termMonthsPlaceholder": "es. 360",
+      "startDatePlaceholder": "Scegli la data di inizio",
+      "notesPlaceholder": "Qualsiasi cosa da ricordare su questo prestito",
+      "rateType": "Tipo di tasso",
+      "rateTypeVariableHelp": "Inserisci il tasso iniziale del prestito. Aggiungi ogni variazione successiva in Storico dei tassi, nella pagina del prestito.",
+      "securedAsset": "Garantito da",
+      "securedAssetNone": "Nessuno",
+      "securedAssetHint": "Facoltativo. Il bene a garanzia di questo prestito, come la casa acquistata con un mutuo. La sua pagina mostra poi il valore netto: quanto vale meno quanto resta da pagare."
+    },
+    "types": {
+      "personal": "Personale",
+      "mortgage": "Mutuo",
+      "auto": "Auto",
+      "student": "Studio",
+      "other": "Altro"
+    },
+    "methods": {
+      "french": "Alla francese (rata costante)",
+      "constantPrincipal": "All'italiana (quota capitale costante)"
+    },
+    "statuses": {
+      "active": "Attivo",
+      "paid": "Estinto",
+      "closed": "Chiuso",
+      "paused": "Sospeso",
+      "overdue": "Scaduto"
+    },
+    "repayment": {
+      "title": "Collegamento dei rimborsi",
+      "description": "Abbina i rimborsi alle transazioni dei conti per seguire il saldo con precisione."
+    },
+    "validation": {
+      "required": "Questo campo è obbligatorio.",
+      "positiveAmount": "Inserisci un importo positivo.",
+      "validRate": "Inserisci un tasso di interesse valido.",
+      "originalPrincipalTooLow": "L'importo originario del prestito deve essere almeno pari al capitale.",
+      "currencyRequired": "Scegli una valuta."
+    },
+    "errors": {
+      "loadFailed": "Impossibile caricare i prestiti.",
+      "loadFailedBody": "Non siamo riusciti a caricare il prestito selezionato. Riprova.",
+      "saveFailed": "Impossibile salvare il prestito.",
+      "deleteFailed": "Impossibile eliminare il prestito."
+    },
+    "empty": {
+      "title": "Ancora nessun prestito",
+      "description": "Aggiungi il tuo primo prestito per seguire saldi e rimborsi.",
+      "noData": "—"
+    },
+    "summary": {
+      "totalOutstanding": "Debito residuo",
+      "monthlyRepayment": "Rate mensili",
+      "interestAndFees": "Interessi e commissioni",
+      "netWorthImpact": "Impatto sul patrimonio netto",
+      "repaymentsNeedingReview": "Da rivedere",
+      "outstandingPrincipal": "Capitale residuo",
+      "regularPayment": "Rata ordinaria",
+      "annualRate": "Tasso annuo",
+      "remainingTerm": "Durata residua",
+      "progress": "Avanzamento del rimborso",
+      "progressLabel": "{value}% rimborsato"
+    },
+    "detail": {
+      "actions": {
+        "back": "Torna ai prestiti",
+        "title": "Azioni sul prestito",
+        "adjustBalance": "Aggiungi rettifica del saldo"
+      },
+      "providerUnavailable": "Fornitore non disponibile",
+      "providerUnavailableShort": "Metadati non disponibili",
+      "na": "—",
+      "unavailableAccount": "Conto non disponibile",
+      "months": "{count} mesi",
+      "description": "Descrizione",
+      "loading": "Caricamento dei dettagli del prestito...",
+      "errors": {
+        "loadFailed": "Impossibile caricare il prestito.",
+        "loadFailedBody": "Non siamo riusciti a caricare il prestito selezionato. Riprova."
+      },
+      "loadFailedBody": "Non siamo riusciti a caricare il prestito selezionato. Riprova.",
+      "assumptions": {
+        "title": "Ipotesi del prestito"
+      },
+      "repayments": {
+        "title": "Rimborsi",
+        "needsReview": "Da rivedere",
+        "date": "Data",
+        "account": "Conto",
+        "description": "Descrizione",
+        "payment": "Rata",
+        "principal": "Capitale",
+        "interest": "Interessi",
+        "fees": "Commissioni",
+        "status": "Stato",
+        "actions": "Azioni",
+        "empty": "Ancora nessun rimborso collegato.",
+        "noCandidates": "Nessun possibile rimborso disponibile.",
+        "candidatesTitle": "Collega rimborsi",
+        "candidatesDescription": "Scegli una transazione da rivedere e ripartire.",
+        "reviewTitle": "Rivedi la ripartizione",
+        "reviewDescription": "Conferma la ripartizione del rimborso prima di salvare.",
+        "linked": "Collegato",
+        "candidateConfidence": "Affidabilità: {value}",
+        "confidenceValue": "{value}%",
+        "confidence": {
+          "HIGH": "Alta",
+          "MEDIUM": "Media",
+          "LOW": "Bassa"
+        },
+        "confidenceUnavailable": "non disponibile",
+        "reasonsUnavailable": "Nessun motivo indicato",
+        "high": "alta",
+        "medium": "media",
+        "totalPayment": "Pagamento totale",
+        "saveAllocation": "Salva ripartizione",
+        "editAllocation": "Modifica ripartizione",
+        "removeAssociation": "Rimuovi collegamento",
+        "removeConfirm": "Rimuovere il collegamento a questo rimborso?",
+        "editAllocationLabel": "Modifica la ripartizione del rimborso",
+        "removeAssociationLabel": "Rimuovi il collegamento al rimborso",
+        "transaction": "Transazione bancaria",
+        "split": "<principal></principal> di capitale, <interest></interest> di interessi, <fees></fees> di commissioni"
+      },
+      "amortization": {
+        "title": "Piano di ammortamento",
+        "subtitle": "Ogni rata divisa in interessi e capitale, con il debito residuo dopo il pagamento.",
+        "unavailable": "Il piano di ammortamento non è disponibile al momento.",
+        "missingInputs": "Aggiungi il tasso di interesse e la durata per vedere il piano previsto dal contratto.",
+        "empty": "Nessuna rata da mostrare.",
+        "totalInterest": "Interessi totali",
+        "totalPaid": "Totale pagato",
+        "principal": "Capitale",
+        "interest": "Interessi",
+        "balance": "Debito residuo",
+        "paid": "Pagata",
+        "scheduled": "Prevista",
+        "rowLabel": "Rata {number}",
+        "split": "<principal></principal> di capitale, <interest></interest> di interessi",
+        "columns": {
+          "number": "#",
+          "date": "Data",
+          "payment": "Rata",
+          "principal": "Capitale",
+          "interest": "Interessi",
+          "balance": "Debito residuo",
+          "status": "Stato"
+        }
+      },
+      "payoff": {
+        "title": "Previsione di estinzione",
+        "subtitle": "Quando si estingue il prestito con la rata del contratto, e quanto prima ci arrivi con un versamento extra ogni mese.",
+        "extraLabel": "Versamento extra mensile",
+        "extraPlaceholder": "0",
+        "extraHelper": "Si somma alla rata del contratto. Lascia vuoto per vedere l'estinzione con la sola rata del contratto.",
+        "baseline": "Rata del contratto",
+        "withExtra": "Con extra",
+        "payoffDate": "Estinzione prevista",
+        "monthsSaved": "Mesi risparmiati",
+        "interestSaved": "Interessi risparmiati",
+        "monthCount": "{count, plural, one {# mese} other {# mesi}}",
+        "noSavings": "—",
+        "never": "Non si estingue",
+        "neverBody": "Con questa rata il debito non si azzera mai: la rata non copre gli interessi mensili. Aumenta la rata o aggiungi un versamento extra.",
+        "missingInputs": "Aggiungi il tasso di interesse e la durata per prevedere l'estinzione.",
+        "unavailable": "La previsione di estinzione non è disponibile al momento.",
+        "empty": "Nessuna previsione da mostrare."
+      },
+      "adjustment": {
+        "title": "Rettifica il saldo",
+        "editTitle": "Modifica rettifica",
+        "description": "Registra il saldo indicato dal finanziatore o un'altra variazione del prestito. Saldo, piano e previsione di estinzione ne tengono conto dalla sua data.",
+        "type": "Tipo di rettifica",
+        "date": "Data di efficacia",
+        "amount": "Importo",
+        "balanceAmount": "Saldo a questa data",
+        "reason": "Motivo (facoltativo)",
+        "history": "Rettifiche del saldo",
+        "loadError": "Impossibile caricare le rettifiche.",
+        "saveError": "Impossibile salvare questa modifica.",
+        "empty": "Nessuna rettifica del saldo",
+        "emptyBody": "Se il saldo indicato dal finanziatore è diverso da quello mostrato qui, registra la sua cifra. Sostituisce il saldo calcolato a partire da quella data, e i rimborsi successivi lo riducono da lì.",
+        "add": "Aggiungi rettifica",
+        "save": "Salva rettifica",
+        "edit": "Modifica rettifica",
+        "delete": "Elimina rettifica",
+        "deleteConfirm": "Eliminare questa rettifica? Il saldo viene ricalcolato senza di essa.",
+        "invalidAmount": "Inserisci un importo valido.",
+        "amountPositive": "Inserisci un importo maggiore di zero.",
+        "invalidDate": "Scegli la data da cui ha effetto.",
+        "setTo": "Impostato a <amount></amount>",
+        "increases": "Aumenta il saldo di",
+        "decreases": "Riduce il saldo di",
+        "types": {
+          "BALANCE_CORRECTION": "Correzione del saldo",
+          "FEE": "Commissione",
+          "CAPITALIZED_INTEREST": "Interessi capitalizzati",
+          "PRINCIPAL_INCREASE": "Aumento del capitale",
+          "PRINCIPAL_DECREASE": "Riduzione del capitale",
+          "WRITE_OFF": "Remissione del debito"
+        },
+        "typeHelp": {
+          "BALANCE_CORRECTION": "Imposta il saldo alla cifra del finanziatore in questa data. È ammesso lo zero.",
+          "FEE": "Aggiunge al saldo una commissione addebitata sul prestito.",
+          "CAPITALIZED_INTEREST": "Aggiunge al saldo gli interessi non pagati.",
+          "PRINCIPAL_INCREASE": "Aggiunge al saldo altro denaro preso in prestito.",
+          "PRINCIPAL_DECREASE": "Riduce il saldo al di fuori di un rimborso collegato.",
+          "WRITE_OFF": "Riduce il saldo di un importo condonato dal finanziatore."
+        }
+      },
+      "rateHistory": {
+        "title": "Storico dei tassi",
+        "description": "Ogni tasso si applica dalla sua data fino a quella del successivo. I tassi non vengono scaricati né previsti: aggiungi ogni variazione quando il finanziatore la comunica.",
+        "effectiveDate": "Data di efficacia",
+        "apr": "Tasso di interesse annuo (TAN)",
+        "loadError": "Impossibile caricare lo storico dei tassi.",
+        "saveError": "Impossibile salvare questo tasso.",
+        "empty": "Ancora nessuna variazione del tasso.",
+        "emptyWithRate": "Ancora nessuna variazione del tasso: {rate} vale per tutta la durata.",
+        "from": "Dal {date}: <rate></rate>",
+        "add": "Aggiungi variazione del tasso",
+        "save": "Salva variazione del tasso",
+        "cancel": "Annulla",
+        "edit": "Modifica variazione del tasso",
+        "delete": "Elimina variazione del tasso",
+        "deleteConfirm": "Eliminare questa variazione del tasso?",
+        "invalidRate": "Inserisci un tasso valido.",
+        "maxRate": "Il tasso deve essere compreso tra 0 e 100%.",
+        "invalidDate": "Scegli la data da cui ha effetto."
+      }
+    },
+    "table": {
+      "loan": "Prestito",
+      "outstanding": "Capitale residuo",
+      "payment": "Rata",
+      "rate": "Tasso",
+      "term": "Durata residua",
+      "progress": "Avanzamento",
+      "progressLabel": "Avanzamento",
+      "status": "Stato",
+      "actions": "Azioni",
+      "nextPayment": "Prossima rata"
+    },
+    "emptyPreview": {
+      "title": "Anteprima",
+      "subtitle": "Vista tipica di un prestito",
+      "sampleName": "Mutuo",
+      "sampleProvider": "Banca",
+      "sampleStatus": "Attivo",
+      "sampleTerm": "28a 4m"
+    },
+    "rateTypes": {
+      "FIXED": "Fisso",
+      "VARIABLE": "Variabile",
+      "UNKNOWN": "Non so"
+    }
+  }
+}

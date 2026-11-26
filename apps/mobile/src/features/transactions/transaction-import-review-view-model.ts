@@ -7,6 +7,9 @@ import type {
   TransactionImportViewDto,
 } from './transaction-import-contract'
 
+/** The API's `errorCode` for a session it refused once the person could no longer write to its account. */
+const ACCOUNT_ACCESS_ERROR = 'account_access'
+
 /*
  * The review step of a staged import, as web's TransactionImportReview reads it: which stage the
  * session is at, how each row shows, and what the person may decide. The rules are web's (and the
@@ -40,9 +43,11 @@ export type TransactionImportStage =
   | Readonly<{ kind: 'review'; needsMapping: boolean }>
   /** The commit is writing rows; `stalled` when its job stopped (asked again, it carries on). */
   | Readonly<{ kind: 'importing'; stalled: boolean; imported: number; total: number }>
-  | Readonly<{ kind: 'done'; outcome: 'succeeded' | 'partial' | 'failed'; imported: number; skipped: number; failed: number; detailsDeleted: boolean }>
+  /** `accessLost`: the commit stopped part way, the person no longer writing to its account; what it imported stays. */
+  | Readonly<{ kind: 'done'; outcome: 'succeeded' | 'partial' | 'failed'; imported: number; skipped: number; failed: number; detailsDeleted: boolean; accessLost: boolean }>
   /** The file could not be read (the session ended with a code). */
-  | Readonly<{ kind: 'read-failed' }>
+  /** `access`: the job refused it, the person no longer writing to its account; else the file did not read. */
+  | Readonly<{ kind: 'read-failed'; reason?: 'access' }>
   /** Closed without a commit: it expired (after seven days) or was cancelled. */
   | Readonly<{ kind: 'expired' }>
   /**
@@ -74,6 +79,7 @@ export function importStage(session: TransactionImportSessionDto): TransactionIm
     }
     case 'failed':
       // A file that could not be read ends the session with a code; a commit whose rows failed does not.
+      if (session.errorCode === ACCOUNT_ACCESS_ERROR) return { kind: 'read-failed', reason: 'access' }
       if (session.errorCode) return { kind: 'read-failed' }
       return doneStage(session, 'failed')
     case 'succeeded':
@@ -103,6 +109,7 @@ function doneStage(session: TransactionImportSessionDto, outcome: 'succeeded' | 
     failed: session.counts.failed,
     // Seven days after a commit only the summary is kept.
     detailsDeleted: session.detailsDeletedAt !== null,
+    accessLost: session.errorCode === ACCOUNT_ACCESS_ERROR,
   }
 }
 
@@ -195,11 +202,16 @@ export function dateOrderPrompt(session: Pick<TransactionImportSessionDto, 'warn
   return session.warnings.find((warning) => warning.code === 'date_order_ambiguous')?.detail === 'month-first' ? 'month-first' : 'day-first'
 }
 
-/** The saved mapping, with the account the server matched by the file's own identifier where none is chosen yet. */
-export function initialAccountMapping(session: Pick<TransactionImportSessionDto, 'accountMapping' | 'sourceAccounts'>): Record<string, number> {
+/**
+ * The saved mapping, with the account the server matched by the file's own identifier where none
+ * is chosen yet. A suggestion is taken only when it is one of the accounts the picker offers
+ * (`offered`): one it does not list would show the placeholder while Save sent the rows to it.
+ */
+export function initialAccountMapping(session: Pick<TransactionImportSessionDto, 'accountMapping' | 'sourceAccounts'>, offered: readonly Readonly<{ id: number }>[]): Record<string, number> {
+  const ids = new Set(offered.map((account) => account.id))
   const mapping: Record<string, number> = { ...session.accountMapping }
   for (const source of session.sourceAccounts) {
-    if (mapping[source.label] === undefined && source.suggestedAccountId !== undefined) mapping[source.label] = source.suggestedAccountId
+    if (mapping[source.label] === undefined && source.suggestedAccountId !== undefined && ids.has(source.suggestedAccountId)) mapping[source.label] = source.suggestedAccountId
   }
   return mapping
 }

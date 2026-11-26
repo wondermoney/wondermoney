@@ -34,6 +34,12 @@ export interface Account {
   appuserCurrencyBalance: number | null;
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt: string | null;
+  /**
+   * Set while the balance is derived from the transactions because the bank sent none; the
+   * balance is then shown as of `refreshedAt`. Optional so older fixtures still type-check;
+   * `normalizeAccount` always fills it.
+   */
+  balanceDerivedAt?: string | null;
   source: "manual" | "open_banking";
   /** The account type ('CHECKING', 'SAVINGS', 'INVESTMENT', ...), or null when none was set. */
   accountType?: string | null;
@@ -48,6 +54,12 @@ export interface Account {
   ownerFirstName: string | null;
   /** The caller's access; every edit action is hidden when it is `read`. */
   myAccess: AccountAccess;
+  /**
+   * A closed account keeps its history but takes no statement import, so the import's account
+   * mapping leaves it out. Optional so fixtures written before it still type-check; an API that
+   * does not send it reads as open.
+   */
+  closed?: boolean;
   /**
    * Member attribution (issue #96). Optional so fixtures written before it still type-check;
    * `normalizeAccount` always fills them. A joint account's spending counts as Shared; it does
@@ -108,6 +120,7 @@ export interface AccountWire {
   appuserCurrencyBalance?: number | null;
   accountOwnerAppuserKey: { currencyKey: { code: string } };
   refreshedAt?: string | null;
+  balanceDerivedAt?: string | null;
   source?: string | null;
   accountType?: string | null;
   csvImportFormat?: string | null;
@@ -317,6 +330,12 @@ function normalizeAccount(account: unknown): Account {
       },
     },
     refreshedAt,
+    // Lenient: an API from before derived balances sends none, and an unreadable date says nothing.
+    balanceDerivedAt:
+      typeof account.balanceDerivedAt === "string" &&
+      Number.isFinite(Date.parse(account.balanceDerivedAt))
+        ? account.balanceDerivedAt
+        : null,
     // Transitional compatibility for payloads deployed before `source` existed.
     source,
     accountType:
@@ -331,6 +350,7 @@ function normalizeAccount(account: unknown): Account {
       account.myAccess,
       account.isOwnedByViewer === true,
     ),
+    closed: account.closed === true,
     isJoint: account.isJoint === true,
     ownerAppuserKey: normalizeMemberKey(account.ownerAppuserKey),
     attribution: normalizeAttribution(account.attribution),

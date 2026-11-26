@@ -11,8 +11,8 @@ import { Currency } from '@entity/Currency';
 import { FxStatus } from '@entity/Transaction';
 import { recordAccountCreated } from '@service/analytics/service-events.service';
 import type { BankReportedErrorCode } from '@service/bank-providers/errors';
-import type { BankConnectionRef, BankProvider } from '@service/bank-providers/types';
-import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
+import type { BankConnectionRef, BankProvider, BankProviderBalance } from '@service/bank-providers/types';
+import { isProviderRejection, providerErrorInfoOf, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf, skippableBalanceFailureCodeOf } from '@service/bank-sync-run/provider-failure';
 import { convertWithStatus, type FxConversion, rateScope } from '@service/currency/exchange-rate';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
@@ -33,6 +33,24 @@ export interface AccountInitialSyncAccountsResult {
   accountsTotal: number;
   accountsUpdated: number;
   appuserKey: number;
+  /**
+   * Accounts synced without a new balance: the bank did not give one (an error the sync can go on
+   * without, or no usable amount). Each keeps its last balance and freshness, and the transaction
+   * phase leaves its running-balance chain alone. The run is partial.
+   */
+  balanceUnavailableAccountIds?: string[];
+  /** Why the first of those balances failed, when the provider said (a refusal or an outage). */
+  balanceUnavailableCode?: BankReportedErrorCode;
+  /**
+   * True when one of those balances failed for a reason that may pass (an outage, a timeout), so
+   * the run is worth retrying. A bank that refuses balances or sends none will do so again.
+   */
+  balanceUnavailableRetryable?: boolean;
+  /**
+   * Accounts whose balance had been derived from their chain (`Account.balanceDerivedAt`) and that
+   * the bank gave a balance for again. The transaction phase logs whether the two agreed.
+   */
+  derivedBalanceReplacedAccountIds?: string[];
   failedAccountIds: string[];
   institutionIds: string[];
   /** Every account failed, and each with a provider 400 or 401: a likely sign of ended consent. */
@@ -148,6 +166,7 @@ class AccountInitialSyncAccountService {
         accountsTotal: 0,
         accountsUpdated: 0,
         appuserKey: getAppuserKey(appuserRef),
+        balanceUnavailableAccountIds: [],
         failedAccountIds: [],
         institutionIds: [...institutionIds],
         ...(providerAccounts.reportedErrorCode ? { reportedErrorCode: providerAccounts.reportedErrorCode } : {}),
@@ -159,13 +178,24 @@ class AccountInitialSyncAccountService {
 
     const fulfilled: { accountId: string; created: boolean; institutionId: string }[] = [];
     const failedAccountIds: string[] = [];
+    const balanceUnavailableAccountIds: string[] = [];
+    const derivedBalanceReplacedAccountIds: string[] = [];
+    let balanceUnavailableCode: BankReportedErrorCode | undefined;
+    let balanceUnavailableRetryable = false;
     let rateLimited: ProviderRateLimit | undefined;
     let rejectedCount = 0;
     let reportedErrorCode = providerAccounts.reportedErrorCode;
     for (const [index, providerAccount] of providerAccounts.accounts.entries()) {
       const accountId = providerAccount.externalId;
+      // The balance fields as they were before this account's update, put back if it fails (below).
+      const balanceBefore: { account: Account; fields: Pick<Account, BalanceField> }[] = [];
       try {
-      const balances = await client.getBalances(connection, accountId);
+      const fetched = await this.fetchBalance(client, connection, accountId, requisitionId, log);
+      const { balances } = fetched;
+      if (fetched.skippedCode) {
+        balanceUnavailableCode ??= fetched.skippedCode;
+        if (fetched.skippedCode === 'provider_unavailable') balanceUnavailableRetryable = true;
+      }
       const institutionId = providerAccount.institutionId ?? providerAccounts.institutionId ?? '';
       institutionIds.add(institutionId);
       const currencyCode = providerAccount.currency;
@@ -184,10 +214,12 @@ class AccountInitialSyncAccountService {
         }
       }
 
-      const balanceAmount = selectProviderBalanceAmount({ balances });
-      if (balanceAmount === undefined) throw new InternalServerError(`Provider returned no balance for account: ${accountId}`);
-      const balance = Number(balanceAmount);
-      if (!Number.isFinite(balance)) throw new InternalServerError(`Invalid balance for account: ${accountId}`);
+      // No usable amount is a failed fetch, not a zero balance: the account keeps the one it has.
+      const balanceAmount = balances ? selectProviderBalanceAmount({ balances }) : undefined;
+      const parsedBalance = balanceAmount === undefined ? undefined : Number(balanceAmount);
+      const balance = parsedBalance !== undefined && Number.isFinite(parsedBalance) ? parsedBalance : undefined;
+      const balanceRefreshed = balance !== undefined;
+      if (balances && !balanceRefreshed) log.warn({ accountId, requisitionId }, 'Account initial sync: provider sent no usable balance; keeping the last balance');
       const existingDeleted = await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: { $ne: null } });
       let existingActive = existingDeleted ?? await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: undefined });
       // A provider can issue a fresh external accountId per requisition/session, even for
@@ -209,7 +241,10 @@ class AccountInitialSyncAccountService {
         });
       }
       const account = existingActive ?? em.create(Account, { accountId });
+      balanceBefore.push({ account, fields: pickBalanceFields(account) });
       const wasExisting = Boolean(existingActive);
+      // The bank's own figure replaces one the last sync derived from the chain.
+      let replacesDerivedBalance = balance !== undefined && account.balanceDerivedAt != null;
       account.accountId = accountId;
       account.accountOwnerAppuserKey = tenant.appuserKey;
       account.accountName ||= providerAccount.name ?? institutionId;
@@ -218,20 +253,24 @@ class AccountInitialSyncAccountService {
       // worth history counts it from then until a transaction carries a running balance. An account
       // that already had a balance before opening balances existed gets one from the startup
       // backfill instead (`backfillAccountOpeningBalances`), which can derive it from its rows.
-      if (account.openingBalance == null && account.balance == null) {
-        account.openingBalance = balance;
-        account.openingBalanceDate = balanceReferenceDate(balances) ?? new Date();
+      if (balance !== undefined) {
+        if (account.openingBalance == null && account.balance == null) {
+          account.openingBalance = balance;
+          account.openingBalanceDate = balanceReferenceDate(balances ?? []) ?? new Date();
+        }
+        account.balance = balance;
+        const converted = await resolveAppuserCurrencyBalance(em, currency, tenant, balance);
+        account.appuserCurrencyBalance = converted.amount;
+        account.fxStatus = converted.fxStatus;
+        // `refreshedAt` says when the balance was last read from the bank, so only a new one moves it.
+        account.refreshedAt = new Date();
+        account.balanceDerivedAt = undefined;
       }
-      account.balance = balance;
-      const converted = await resolveAppuserCurrencyBalance(em, currency, tenant, balance);
-      account.appuserCurrencyBalance = converted.amount;
-      account.fxStatus = converted.fxStatus;
       account.currencyKey = currency;
       account.accountFinancialInstitutionKey = institution;
       account.bankConnectionKey = connection.bankConnectionKey as unknown as Account['bankConnectionKey'];
       account.tenantKey = tenant.tenantKey;
       account.holderName ||= providerAccount.ownerName;
-      account.refreshedAt = new Date();
       // The provider's ISO 20022 cash account type is the one authority on whether this is a card.
       // A provider that says nothing leaves the type as it was, so a user's choice is not cleared.
       if (providerAccount.cashAccountType === 'CARD') {
@@ -248,27 +287,41 @@ class AccountInitialSyncAccountService {
         createdHere = false;
         const reloaded = await em.findOne(Account, { accountId, accountOwnerAppuserKey: tenant.appuserKey, deletedAt: undefined });
         if (!reloaded) throw error;
+        balanceBefore.push({ account: reloaded, fields: pickBalanceFields(reloaded) });
+        // The row stored is the reloaded one, so whether a derived balance is replaced is its to say.
+        replacesDerivedBalance = balanceRefreshed && reloaded.balanceDerivedAt != null;
         reloaded.accountName = account.accountName;
         reloaded.accountNumber = account.accountNumber;
         reloaded.accountTypeKey = account.accountTypeKey;
-        reloaded.balance = account.balance;
-        reloaded.appuserCurrencyBalance = account.appuserCurrencyBalance;
-        reloaded.fxStatus = account.fxStatus;
+        if (balanceRefreshed) {
+          reloaded.balance = account.balance;
+          reloaded.appuserCurrencyBalance = account.appuserCurrencyBalance;
+          reloaded.fxStatus = account.fxStatus;
+          reloaded.refreshedAt = account.refreshedAt;
+          reloaded.balanceDerivedAt = undefined;
+        }
         reloaded.currencyKey = account.currencyKey;
         reloaded.accountFinancialInstitutionKey = account.accountFinancialInstitutionKey;
         reloaded.bankConnectionKey = account.bankConnectionKey;
         reloaded.tenantKey = account.tenantKey;
         reloaded.holderName = account.holderName;
-        reloaded.refreshedAt = account.refreshedAt;
         await em.persist(reloaded).flush();
       }
+      // Stored: nothing to put back any more, and putting it back would undo the write.
+      balanceBefore.length = 0;
 
       // A new bank-linked account (SimpleFIN's arrive here; Enable Banking's usually already exist).
       if (createdHere && 'upsert' in em) {
         await recordAccountCreated(em as Pick<EntityManager, 'upsert'>, tenant.appuserKey, { method: 'bank_connection' });
       }
       fulfilled.push({ accountId, created: !wasExisting, institutionId });
+      if (!balanceRefreshed) balanceUnavailableAccountIds.push(accountId);
+      if (replacesDerivedBalance) derivedBalanceReplacedAccountIds.push(accountId);
       } catch (error) {
+        // The phases share one entity manager. An account whose update failed after its new balance
+        // was set, but before it was flushed, would otherwise carry that balance into the
+        // transaction phase (and its flushes) as though it had been stored.
+        for (const { account: touched, fields } of balanceBefore) Object.assign(touched, fields);
         failedAccountIds.push(accountId);
         if (isProviderRejection(error)) rejectedCount += 1;
         reportedErrorCode ??= providerReportedCodeOf(error);
@@ -282,8 +335,9 @@ class AccountInitialSyncAccountService {
         }
         log.warn({ accountId, error: sanitizeError(error), requisitionId }, 'Account initial sync account fetch failed');
         const providerResponse = sanitizeProviderResponse(error);
+        const providerError = providerErrorInfoOf(error);
         Sentry.captureException(error, {
-          ...(providerResponse ? { extra: { providerResponse } } : {}),
+          ...(providerResponse || providerError ? { extra: { ...(providerError ? { providerError } : {}), ...(providerResponse ? { providerResponse } : {}) } } : {}),
           tags: { accountId, requisitionId, stage: 'account-phase' },
         });
       }
@@ -296,12 +350,17 @@ class AccountInitialSyncAccountService {
       accountsTotal: accountIds.length,
       accountsUpdated: fulfilled.filter((r) => !r.created).length,
       appuserKey: getAppuserKey(appuserRef),
+      balanceUnavailableAccountIds,
+      ...(balanceUnavailableCode ? { balanceUnavailableCode } : {}),
+      ...(balanceUnavailableAccountIds.length > 0 ? { balanceUnavailableRetryable } : {}),
+      ...(derivedBalanceReplacedAccountIds.length > 0 ? { derivedBalanceReplacedAccountIds } : {}),
       failedAccountIds,
       institutionIds: [...institutionIds],
       requisitionId,
       requisitionKey,
-      // An aggregator's own error report keeps an otherwise complete run partial, so it is recorded.
-      status: accountIds.length === 0 || accountsFetched === 0 ? 'failed' : failedAccountIds.length === 0 && !reportedErrorCode ? 'completed' : 'partial',
+      // An aggregator's own error report, or a balance the bank did not give, keeps an otherwise
+      // complete run partial, so it is recorded.
+      status: accountIds.length === 0 || accountsFetched === 0 ? 'failed' : failedAccountIds.length === 0 && balanceUnavailableAccountIds.length === 0 && !reportedErrorCode ? 'completed' : 'partial',
       ...(accountsFetched === 0 && rejectedCount === accountIds.length ? { everyAccountRejected: true } : {}),
       ...(rateLimited ? { rateLimited } : {}),
       ...(reportedErrorCode ? { reportedErrorCode } : {}),
@@ -313,6 +372,29 @@ class AccountInitialSyncAccountService {
 
     log.info({ requisitionKey, status: result.status }, 'Account initial sync account domain completed');
     return result;
+  }
+
+  /**
+   * One account's balances. A failure the sync can go on without (`skippableBalanceFailureCodeOf`:
+   * the bank is down, timed out or refuses the balances call) is logged with the provider's own
+   * code and returns no balances, so the account keeps its last balance and its transactions still
+   * sync. Anything else (a rate limit, a lost consent) is thrown and fails the account as before.
+   */
+  private async fetchBalance(
+    client: BankProvider,
+    connection: BankConnectionRef,
+    accountId: string,
+    requisitionId: string,
+    log: Pick<typeof logger, 'warn'>,
+  ): Promise<{ balances?: BankProviderBalance[]; skippedCode?: BankReportedErrorCode }> {
+    try {
+      return { balances: await client.getBalances(connection, accountId) };
+    } catch (error) {
+      const skippedCode = skippableBalanceFailureCodeOf(error);
+      if (!skippedCode) throw error;
+      log.warn({ accountId, error: sanitizeError(error), requisitionId, skippedCode }, 'Account initial sync balance fetch failed; keeping the last balance');
+      return { skippedCode };
+    }
   }
 
   /**
@@ -339,6 +421,9 @@ function balanceReferenceDate(balances: { referenceDate?: string }[]): Date | un
   return date && !Number.isNaN(date.getTime()) ? date : undefined;
 }
 
+/** The fields the account phase writes from a provider balance. */
+type BalanceField = 'appuserCurrencyBalance' | 'balance' | 'balanceDerivedAt' | 'fxStatus' | 'openingBalance' | 'openingBalanceDate' | 'refreshedAt';
+
 function getAppuserKey(appuserKey?: unknown): number {
   if (typeof appuserKey === 'number') return appuserKey;
   if (appuserKey && typeof appuserKey === 'object' && typeof (appuserKey as { appuserKey?: unknown }).appuserKey === 'number') return (appuserKey as { appuserKey: number }).appuserKey;
@@ -355,6 +440,18 @@ function isUniqueConstraintError(error: unknown) {
   return false;
 }
 
+function pickBalanceFields(account: Account): Pick<Account, BalanceField> {
+  return {
+    appuserCurrencyBalance: account.appuserCurrencyBalance,
+    balance: account.balance,
+    balanceDerivedAt: account.balanceDerivedAt,
+    fxStatus: account.fxStatus,
+    openingBalance: account.openingBalance,
+    openingBalanceDate: account.openingBalanceDate,
+    refreshedAt: account.refreshedAt,
+  };
+}
+
 /** The balance in the owner's currency at today's rate; with no rate, none (`missing`), never the raw one. */
 async function resolveAppuserCurrencyBalance(em: NonNullable<Deps['em']>, accountCurrency: Currency, tenant: AppuserTenant, balance: number): Promise<FxConversion> {
   const appuserCurrency = (tenant.appuserKey as unknown as undefined | { currencyKey?: Currency })?.currencyKey;
@@ -369,6 +466,7 @@ function sanitizeError(error: unknown) {
     code: typeof safe.code === 'string' ? safe.code : undefined,
     message: typeof safe.message === 'string' ? safe.message : undefined,
     name: typeof safe.name === 'string' ? safe.name : undefined,
+    providerError: providerErrorInfoOf(error),
     providerResponse: sanitizeProviderResponse(error),
     status: typeof safe.status === 'number' || typeof safe.status === 'string' ? safe.status : undefined,
   };

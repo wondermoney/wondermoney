@@ -22,7 +22,7 @@ const mockClear = jest.fn()
 const mockCompletionMutate = jest.fn()
 let mockCreatePending = false
 let mockCompletionPending = false
-let mockSearchParams: { version?: string } = { version: '3' }
+let mockSearchParams: { version?: string; then?: string; from?: string } = { version: '3' }
 
 jest.mock('expo-router', () => ({
   useLocalSearchParams: () => mockSearchParams,
@@ -44,9 +44,9 @@ jest.mock('@/features/accounts/use-create-offline-account', () => ({
 jest.mock('../use-complete-onboarding', () => ({
   useCompleteOnboarding: () => ({ isPending: mockCompletionPending, mutateAsync: mockCompletionMutate }),
 }))
-jest.mock('@/features/accounts/offline-account-create-screen', () => ({ OfflineAccountCreateScreen: (props: { onConfirm: (payload: unknown) => Promise<unknown>; onCheckAccounts: () => Promise<void> }) => {
+jest.mock('@/features/accounts/offline-account-create-screen', () => ({ OfflineAccountCreateScreen: (props: { onConfirm: (payload: unknown) => Promise<unknown>; onCheckAccounts: () => Promise<void>; onBack: () => void }) => {
   const Native = jest.requireActual<typeof import('react-native')>('react-native')
-  return <><Native.Pressable accessibilityRole="button" accessibilityLabel="Confirm" onPress={() => void props.onConfirm({ name: 'Cash', currentBalance: 1, currencyId: 151 })}><Native.Text>Confirm</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Check" onPress={() => void props.onCheckAccounts()}><Native.Text>Check</Native.Text></Native.Pressable></>
+  return <><Native.Pressable accessibilityRole="button" accessibilityLabel="Confirm" onPress={() => void props.onConfirm({ name: 'Cash', currentBalance: 1, currencyId: 151 })}><Native.Text>Confirm</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Check" onPress={() => void props.onCheckAccounts()}><Native.Text>Check</Native.Text></Native.Pressable><Native.Pressable accessibilityRole="button" accessibilityLabel="Leave" onPress={props.onBack}><Native.Text>Leave</Native.Text></Native.Pressable></>
 } }))
 
 describe('onboarding create-account route', () => {
@@ -63,6 +63,29 @@ describe('onboarding create-account route', () => {
     expect(mockCreateMutate).toHaveBeenCalledTimes(1)
     expect(mockCompletionMutate).toHaveBeenCalledWith({ version: 3 })
     expect(mockReplace).toHaveBeenCalledWith('/')
+  })
+
+  it('Back returns to the view the screen was opened from, not to the first step', async () => {
+    mockSearchParams = { version: '3', from: 'no-bank' }
+    const fromChoice = await renderRoute()
+    await fireEvent.press(fromChoice.getByRole('button', { name: 'Leave' }))
+    expect(mockReplace).toHaveBeenLastCalledWith('/onboarding?resume=no-bank')
+    fromChoice.unmount()
+
+    mockSearchParams = { version: '3' }
+    const unknown = await renderRoute()
+    await fireEvent.press(unknown.getByRole('button', { name: 'Leave' }))
+    expect(mockReplace).toHaveBeenLastCalledWith('/onboarding')
+  })
+
+  it('opens the import on the new account when the person came to import a statement', async () => {
+    mockSearchParams = { version: '3', then: 'import' }
+    mockCreateMutate.mockResolvedValue(undefined)
+    mockCompletionMutate.mockResolvedValue(undefined)
+    const view = await renderRoute()
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm' }))
+    expect(mockCompletionMutate).toHaveBeenCalledWith({ version: 3 })
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
   })
 
   it('still returns to the authenticated shell if completing onboarding fails after the account was created', async () => {

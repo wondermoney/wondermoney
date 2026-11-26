@@ -91,6 +91,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('auth emails in the account lan
   it.each([
     [SupportedLanguages.PT, 'pt'],
     [SupportedLanguages.ES, 'es'],
+    [SupportedLanguages.IT, 'it'],
   ])('mails a %s account its reset link in %s, landing on the reset page in that locale', async (language, locale) => {
     const email = await accountWith(language);
 

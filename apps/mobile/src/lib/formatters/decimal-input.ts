@@ -3,7 +3,7 @@ import { evaluateAmountExpression } from '@wondermoney/shared/amount-expression'
 
 /**
  * Numbers people type into the app (amounts, prices, quantities, rates), read in the app's
- * language: "1.234,56" is 1234.56 in pt-PT and es, "1.000" is 1000 there and 1 in en.
+ * language: "1.234,56" is 1234.56 in pt-PT, es and it, "1.000" is 1000 there and 1 in en.
  * Anything that is not clearly a number is `null`, so the form shows an error instead of
  * saving a different number. Values from the API are dot decimals and never go through here.
  */

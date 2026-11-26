@@ -161,6 +161,23 @@
           "enumItems": [],
           "mappedType": "decimal"
         },
+        "balance_derived_at": {
+          "name": "balance_derived_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "bank_connection_key": {
           "name": "bank_connection_key",
           "type": "int",
@@ -283,6 +300,23 @@
             "provisional"
           ],
           "mappedType": "enum"
+        },
+        "history_window_days": {
+          "name": "history_window_days",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
         },
         "holder_name": {
           "name": "holder_name",
@@ -2237,6 +2271,7 @@
           "enumItems": [
             "EN",
             "ES",
+            "IT",
             "PT"
           ],
           "mappedType": "enum"
@@ -2480,8 +2515,8 @@
         },
         {
           "name": "appuser_language_check",
-          "expression": "\"language\" in ('EN', 'ES', 'PT')",
-          "definition": "check (\"language\" in ('EN', 'ES', 'PT'))",
+          "expression": "\"language\" in ('EN', 'ES', 'IT', 'PT')",
+          "definition": "check (\"language\" in ('EN', 'ES', 'IT', 'PT'))",
           "columnName": "language"
         }
       ],
@@ -3628,6 +3663,23 @@
         },
         "model": {
           "name": "model",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "oauth_client_id": {
+          "name": "oauth_client_id",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -5534,6 +5586,7 @@
           "enumItems": [
             "EN",
             "ES",
+            "IT",
             "PT"
           ],
           "mappedType": "enum"
@@ -5752,8 +5805,8 @@
         },
         {
           "name": "bank_recovery_delivery_language_at_send_check",
-          "expression": "\"language_at_send\" in ('EN', 'ES', 'PT')",
-          "definition": "check (\"language_at_send\" in ('EN', 'ES', 'PT'))",
+          "expression": "\"language_at_send\" in ('EN', 'ES', 'IT', 'PT')",
+          "definition": "check (\"language_at_send\" in ('EN', 'ES', 'IT', 'PT'))",
           "columnName": "language_at_send"
         },
         {
@@ -10925,7 +10978,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": 255,
           "precision": null,
@@ -11123,6 +11176,7 @@
           "enumItems": [
             "active",
             "invalid",
+            "pending",
             "revoked"
           ],
           "mappedType": "enum"
@@ -11188,9 +11242,14 @@
       ],
       "checks": [
         {
+          "name": "enable_banking_credential_application_id_check",
+          "expression": "\"status\" = 'pending' or \"application_id\" is not null",
+          "definition": "check (\"status\" = 'pending' or \"application_id\" is not null)"
+        },
+        {
           "name": "enable_banking_credential_status_check",
-          "expression": "\"status\" in ('active', 'invalid', 'revoked')",
-          "definition": "check (\"status\" in ('active', 'invalid', 'revoked'))",
+          "expression": "\"status\" in ('active', 'invalid', 'pending', 'revoked')",
+          "definition": "check (\"status\" in ('active', 'invalid', 'pending', 'revoked'))",
           "columnName": "status"
         }
       ],

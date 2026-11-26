@@ -37,7 +37,7 @@ test("a hidden quantity is the fixed mask, with no digit, sign or magnitude", ()
     "250.00000000",
     "n/a",
   ]) {
-    for (const locale of ["en", "pt", "es"]) {
+    for (const locale of ["en", "pt", "es", "it"]) {
       const masked = formatQuantityForDisplay(value, locale, { hidden: true });
       assert.equal(masked, AMOUNT_MASK);
       assert.ok(!/[\d+\-−]/.test(masked));

@@ -6,7 +6,7 @@ import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import { Check, X } from "lucide-react";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function PainCard({
   title,
@@ -144,7 +144,7 @@ export default function YnabAlternative({ locale }: { locale: Lang }) {
 }
 
 function YnabAlternativeContent() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
 
   const comparisonRows: ComparisonRow[] = [
     { feature: t("lp.ynabAlternative.row1Feature"), ynab: t("lp.ynabAlternative.row1Ynab"), wm: t("lp.ynabAlternative.row1Wm"), wmHighlight: true, wmStatus: "check" },
@@ -171,7 +171,7 @@ function YnabAlternativeContent() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg">
               <a
-                href={CTA_URL}
+                href={appSignupUrl(locale)}
                 onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
               >
                 {t("lp.shared.ctaPrimary")}

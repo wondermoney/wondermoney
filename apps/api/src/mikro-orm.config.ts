@@ -6,6 +6,7 @@ import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 import { type ConfigurationSource, loadConfiguration } from '@app/config/configuration';
+import { loadDotenv } from '@app/config/load-dotenv';
 
 import { NamingStrategy } from './database/naming-strategy.js';
 import { ExtendedEntityRepository } from './database/repositories/_ExtendedEntityRepository.js';
@@ -44,17 +45,13 @@ export function createMikroOrmOptions(
   } as const;
 
   const base: Partial<Options<PostgreSqlDriver>> = {
-    dbName: database.database ?? undefined,
+    ...connectionTarget(database),
     driver: PostgreSqlDriver,
     entityRepository: () => ExtendedEntityRepository,
     extensions: [Migrator, SeedManager],
-    host: database.host ?? undefined,
     metadataProvider: TsMorphMetadataProvider,
     namingStrategy: NamingStrategy,
-    password: database.password ?? undefined,
     pool: { ...pool },
-    port: database.port ?? undefined,
-    user: database.username ?? undefined,
   };
 
   if (runtime.isProduction || runtime.isStaging) {
@@ -95,10 +92,42 @@ export function createMikroOrmOptions(
 }
 
 /**
+ * Where MikroORM connects. A `DATABASE_URL` goes to `pg` whole as `connectionString`: MikroORM
+ * itself keeps only the host, port, credentials and database of a `clientUrl`, which would drop
+ * `?sslmode=require` and connect without TLS. MikroORM is also given the target as `pg` reads the
+ * URL (`config.database`, from `parseDatabaseUrl`), so its own view (the database name it reports
+ * and diffs against) is the one `pg` connects to.
+ */
+function connectionTarget(
+  database: ReturnType<typeof loadConfiguration<'migration' | 'orm-cli'>>['database'],
+): Partial<Options<PostgreSqlDriver>> {
+  if (database.connectionString) {
+    return {
+      clientUrl: database.connectionString,
+      dbName: database.database ?? undefined,
+      driverOptions: { connectionString: database.connectionString },
+      host: database.host ?? undefined,
+      port: database.port ?? undefined,
+      user: database.username ?? undefined,
+    };
+  }
+  return {
+    dbName: database.database ?? undefined,
+    host: database.host ?? undefined,
+    password: database.password ?? undefined,
+    port: database.port ?? undefined,
+    user: database.username ?? undefined,
+  };
+}
+
+/**
  * Legacy default export for tooling that imports `mikro-orm.config.ts` directly (the MikroORM
- * CLI and a number of database scripts). Validates lazily at access time so test environments
- * that lack secrets are not blocked at import; the validated Configuration module is the only
- * reader of `process.env`.
+ * CLI, `migrate.ts` and a number of database scripts). Validates lazily at access time so test
+ * environments that lack secrets are not blocked at import; the validated Configuration module is
+ * the only reader of `process.env`.
+ *
+ * It loads `.env` first (`loadDotenv`: the process environment wins, then the last assignment in
+ * `.env`), because nothing else on the MikroORM CLI's path does.
  *
  * The proxy must forward *every* object operation, not just `get`: `MikroORM.init` merges its
  * options with `Object.entries`, so a get-only proxy over `{}` enumerates as empty and MikroORM
@@ -107,6 +136,7 @@ export function createMikroOrmOptions(
 let resolvedOptions: Partial<Options<PostgreSqlDriver>> | undefined;
 function resolveOptions(): Partial<Options<PostgreSqlDriver>> {
   if (!resolvedOptions) {
+    loadDotenv();
     const source: ConfigurationSource = Object.freeze({ ...(process.env as Record<string, string | undefined>) });
     resolvedOptions = createMikroOrmOptions(loadConfiguration('orm-cli', source));
   }

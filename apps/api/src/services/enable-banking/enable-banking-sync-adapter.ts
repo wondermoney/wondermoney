@@ -2,9 +2,11 @@ import type { Account } from '@entity/Account';
 import type { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { buildEnableBankingInstitutionRecordId } from '@utils/enable-banking-institution-id';
 import { InternalServerError } from '@utils/errors';
+import logger from '@utils/logger';
 
 import { createEnableBankingClient, type EnableBankingClient } from './enable-banking-client.service';
 import { enableBankingCredentialService } from './enable-banking-credential.service';
+import { enableBankingErrorOf } from './enable-banking-error';
 
 /**
  * Shape adapter. Enable Banking's low-level client
@@ -146,7 +148,14 @@ export interface AdaptedTransaction {
  * `voided` holds rejected and cancelled rows (`RJCT`, `CNCL`): never to be ingested, but the sync
  * needs them to retract a copy it stored earlier.
  */
-export interface AdaptedTransactionsResponse { transactions?: { booked?: AdaptedTransaction[]; pending?: AdaptedTransaction[]; voided?: AdaptedTransaction[] } }
+export interface AdaptedTransactionsResponse {
+  /**
+   * Set when the bank refused the requested period and the rows come from the shorter fallback
+   * window instead (`SHORTENED_HISTORY_DAYS`): the first day actually fetched.
+   */
+  fetchedFrom?: string;
+  transactions?: { booked?: AdaptedTransaction[]; pending?: AdaptedTransaction[]; voided?: AdaptedTransaction[] };
+}
 /** Where a row goes, by its Enable Banking `status`. See "Transaction status" in the module docblock. */
 export type EnableBankingStatusClass = 'booked' | 'pending' | 'voided';
 export interface EnableBankingSyncAdapterDeps {
@@ -282,10 +291,10 @@ export function createEnableBankingSyncAdapter(connection: EnableBankingConnecti
         return { iban: account?.accountNumber, institution_id: institutionId };
       },
       getTransactions: async (input) => {
-        const rows = await fetchAllTransactionPages(client, accountId, input);
+        const { fetchedFrom, rows } = await fetchTransactionHistory(client, accountId, input);
         const split: Record<EnableBankingStatusClass, AdaptedTransaction[]> = { booked: [], pending: [], voided: [] };
         for (const row of rows) split[classifyStatus(row.status)].push(mapTransaction(row));
-        return { transactions: split };
+        return { ...(fetchedFrom ? { fetchedFrom } : {}), transactions: split };
       },
     }),
     requisition: {
@@ -307,6 +316,21 @@ function buildDefaultClient(connection: EnableBankingConnection): EnableBankingC
   return createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
 }
 
+/**
+ * Enable Banking's `ErrorCode` for a `date_from` further back than the bank serves
+ * (https://enablebanking.com/docs/api/reference/#errorcode: "Wrong transactions period requested").
+ * Its HTTP status is not documented per code; the first syncs that hit it answered 422.
+ */
+const WRONG_TRANSACTIONS_PERIOD = 'WRONG_TRANSACTIONS_PERIOD';
+
+/**
+ * The window asked for again when the bank refuses the first one, in days counting today. Enable
+ * Banking publishes no per-bank history depth (its ASPSP data has none) and PSD2 guarantees 90
+ * days; one day less leaves a margin for a bank that counts its 90 days in its own time zone, which
+ * can already be tomorrow late in the UTC day.
+ */
+export const SHORTENED_HISTORY_DAYS = 89;
+
 async function fetchAllTransactionPages(client: EnableBankingClient, accountId: string, input?: { dateFrom?: string; dateTo?: string }): Promise<RawEnableBankingTransaction[]> {
   const rows: RawEnableBankingTransaction[] = [];
   let continuationKey: string | undefined;
@@ -320,6 +344,27 @@ async function fetchAllTransactionPages(client: EnableBankingClient, accountId: 
     continuationKey = raw.continuation_key;
   }
   throw new InternalServerError(`Enable Banking transaction pagination for account ${accountId} did not terminate after ${MAX_PAGES} pages`);
+}
+
+/**
+ * The account's transactions over the asked window. A bank that refuses the period
+ * (`WRONG_TRANSACTIONS_PERIOD`) is asked once more for the last {@link SHORTENED_HISTORY_DAYS}
+ * days counting today, and `fetchedFrom` says where that window began. Any other failure, or a
+ * refusal of a window already that short, is thrown as it came.
+ */
+async function fetchTransactionHistory(client: EnableBankingClient, accountId: string, input?: { dateFrom?: string; dateTo?: string }): Promise<{ fetchedFrom?: string; rows: RawEnableBankingTransaction[] }> {
+  try {
+    return { rows: await fetchAllTransactionPages(client, accountId, input) };
+  } catch (error) {
+    const shorterFrom = shortenedDateFrom(input);
+    if (enableBankingErrorOf(error)?.code !== WRONG_TRANSACTIONS_PERIOD || !shorterFrom) throw error;
+    logger.warn(
+      { accountId, enableBankingError: enableBankingErrorOf(error), requestedFrom: input?.dateFrom, retryFrom: shorterFrom },
+      'Enable Banking refused the transaction period; retrying with a shorter window',
+    );
+    const rows = await fetchAllTransactionPages(client, accountId, { ...input, dateFrom: shorterFrom });
+    return { fetchedFrom: shorterFrom, rows };
+  }
 }
 
 function getDefaultEm(): EnableBankingSyncAdapterEm {
@@ -355,6 +400,19 @@ function mapTransaction(row: RawEnableBankingTransaction): AdaptedTransaction {
     transactionId: row.transaction_id,
     valueDate: row.value_date,
   };
+}
+
+/**
+ * The fallback `date_from`: {@link SHORTENED_HISTORY_DAYS} days counting the window's last day
+ * (today minus 88). Undefined when the asked window is no longer than that.
+ */
+function shortenedDateFrom(input?: { dateFrom?: string; dateTo?: string }): string | undefined {
+  const end = input?.dateTo ? new Date(`${input.dateTo}T00:00:00Z`) : new Date();
+  if (Number.isNaN(end.getTime())) return undefined;
+  const from = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate() - (SHORTENED_HISTORY_DAYS - 1)));
+  const shorter = from.toISOString().slice(0, 10);
+  // No `date_from` asks for everything the bank has, which is longer than any fallback.
+  return !input?.dateFrom || input.dateFrom < shorter ? shorter : undefined;
 }
 
 /** Signs an unsigned provider amount from its direction, keeping the provider's decimal string. */

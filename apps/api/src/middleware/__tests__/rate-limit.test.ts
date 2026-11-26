@@ -24,8 +24,8 @@ async function loadRateLimitModule(env: Record<string, string>): Promise<RateLim
   return import('../rate-limit');
 }
 
-const PRODUCTION_ENV = { APP_ENV: 'production', DEPLOY_ENV: 'production', NODE_ENV: 'production' };
-const STAGING_ENV = { APP_ENV: 'staging', DEPLOY_ENV: 'staging', NODE_ENV: 'staging' };
+const PRODUCTION_ENV = { API_URL: 'https://api.example.test', APP_ENV: 'production', APP_URL: 'https://app.example.test', DEPLOY_ENV: 'production', NODE_ENV: 'production' };
+const STAGING_ENV = { API_URL: 'https://api.example.test', APP_ENV: 'staging', APP_URL: 'https://app.example.test', DEPLOY_ENV: 'staging', NODE_ENV: 'staging' };
 
 const openServers: Server[] = [];
 
@@ -377,6 +377,82 @@ describe('rate-limit families', () => {
       expect(isHealthCheckPath({ path: '/v1/health' } as Request)).toBe(true);
       expect(isHealthCheckPath({ path: '/v1/health/deep' } as Request)).toBe(true);
       expect(isHealthCheckPath({ path: '/v1/budget' } as Request)).toBe(false);
+    });
+  });
+
+  describe('shared egress exemption', () => {
+    it('with MCP_OAUTH_ENABLED set but an API address that cannot be an OAuth resource, keeps every junk token under the backstop', async () => {
+      const { globalBackstopRateLimit, mcpBearerRateLimit } = await loadRateLimitModule({ ...PRODUCTION_ENV, API_URL: 'http://192.0.2.10:3001', MCP_OAUTH_ENABLED: 'true' });
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.post('/v1/mcp', mcpBearerRateLimit(), (_req, res) => res.sendStatus(401));
+
+      const limits = new Set<string>();
+      for (let i = 0; i < 301; i += 1) {
+        const response = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.79').set('Authorization', `Bearer wm_pat_junk${i}`);
+        limits.add(String(response.headers['ratelimit-policy'] ?? response.headers['ratelimit']));
+      }
+
+      // Every one counted by the backstop (3000), none by the MCP family (30000).
+      expect([...limits].every((value) => value.includes('3000') && !value.includes('30000'))).toBe(true);
+      const last = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.79').set('Authorization', 'Bearer wm_pat_junk-last');
+      expect(String(last.headers['ratelimit'])).toContain('remaining=2698');
+    });
+
+    it('with OAuth on, counts bearer MCP calls per address on a family ten times the backstop', async () => {
+      const { globalBackstopRateLimit, mcpBearerRateLimit } = await loadRateLimitModule({ ...PRODUCTION_ENV, MCP_OAUTH_ENABLED: 'true' });
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.post('/v1/mcp', mcpBearerRateLimit(), (_req, res) => res.sendStatus(200));
+
+      const first = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.80').set('Authorization', 'Bearer a-token');
+      const second = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.80').set('Authorization', 'Bearer another-token');
+
+      expect(String(first.headers['ratelimit-policy'])).toContain('30000');
+      expect(String(second.headers['ratelimit'])).toContain('remaining=29998');
+    });
+
+    it('with OAuth off, exempts nothing, as before', async () => {
+      const { globalBackstopRateLimit } = await loadRateLimitModule(PRODUCTION_ENV);
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.all('/*splat', (_req, res) => res.sendStatus(200));
+
+      const mcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', '198.51.100.78').set('Authorization', 'Bearer some-access-token');
+      const token = await request(app).post('/api/auth/oauth2/token').set('X-Forwarded-For', '198.51.100.78');
+
+      expect(mcp.headers['ratelimit']).toBeDefined();
+      expect(token.headers['ratelimit']).toBeDefined();
+    });
+
+    it('lets authenticated MCP calls, the OAuth discovery documents and the token and registration endpoints past the per-IP backstop, and nothing else', async () => {
+      const { globalBackstopRateLimit } = await loadRateLimitModule({ ...PRODUCTION_ENV, MCP_OAUTH_ENABLED: 'true' });
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.all('/*splat', (_req, res) => res.sendStatus(200));
+      const ip = '198.51.100.77';
+      // The backstop's budget is far above what a test sends; its own header says whether a
+      // request was counted at all.
+      const mcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', ip).set('Authorization', 'Bearer some-access-token');
+      const metadata = await request(app).get('/.well-known/oauth-protected-resource/v1/mcp').set('X-Forwarded-For', ip);
+      const anonymousMcp = await request(app).post('/v1/mcp').set('X-Forwarded-For', ip);
+      const other = await request(app).get('/v1/budget').set('X-Forwarded-For', ip).set('Authorization', 'Bearer some-access-token');
+
+      const token = await request(app).post('/api/auth/oauth2/token').set('X-Forwarded-For', ip);
+      const register = await request(app).post('/api/auth/oauth2/register').set('X-Forwarded-For', ip);
+      const consent = await request(app).post('/api/auth/oauth2/consent').set('X-Forwarded-For', ip);
+
+      expect(mcp.headers['ratelimit']).toBeUndefined();
+      expect(metadata.headers['ratelimit']).toBeUndefined();
+      expect(token.headers['ratelimit']).toBeUndefined();
+      expect(register.headers['ratelimit']).toBeUndefined();
+      expect(consent.headers['ratelimit']).toBeDefined();
+      expect(anonymousMcp.headers['ratelimit']).toBeDefined();
+      expect(other.headers['ratelimit']).toBeDefined();
     });
   });
 });

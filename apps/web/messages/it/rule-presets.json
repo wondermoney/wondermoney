@@ -1,0 +1,38 @@
+{
+  "rulePresets": {
+    "names": {
+      "pt-PT": "Portogallo",
+      "es-ES": "Spagna",
+      "it-IT": "Italia",
+      "pt-BR": "Brasile",
+      "en": "Regno Unito e Stati Uniti"
+    },
+    "offer": {
+      "title": "Inizia con le regole predefinite: {name}",
+      "description": "{count, plural, one {# regola riconosce negozi e fornitori di servizi noti e assegna loro} other {# regole riconoscono negozi e fornitori di servizi noti e assegnano loro}} una categoria. Non cambia nulla finché non le aggiungi.",
+      "preview": "Vedi le regole",
+      "dismiss": "Non ora"
+    },
+    "browse": "Predefinite",
+    "browse-hint": "Regole pronte per i commercianti più noti di un Paese",
+    "dialog": {
+      "title": "Regole predefinite: {name}",
+      "description": "Ogni regola riconosce un commerciante o uno stipendio nella descrizione bancaria, poi ne imposta la categoria o il commerciante. Le regole di spesa valgono solo per le uscite e quelle sullo stipendio solo per le entrate, quindi a un'entrata non viene mai assegnata una categoria di spesa. Trasferimenti e tutto ciò che hai impostato a mano non vengono mai modificati. Le regole vengono aggiunte dopo le tue e puoi modificarle o eliminarle in seguito.",
+      "choose": "Paese",
+      "list-label": "Regole predefinite: {name}",
+      "loading": "Caricamento delle regole…",
+      "error": "Impossibile caricare le regole.",
+      "matches": "La descrizione contiene “{values}”",
+      "excludes": "ma non “{value}”",
+      "merchant": "Commerciante: {name}",
+      "nothing": "Tutte queste regole sono già tra le tue.",
+      "install": "{count, plural, =0 {Niente da aggiungere} one {Aggiungi # regola} other {Aggiungi # regole}}"
+    },
+    "status": {
+      "installed": "Già aggiunta",
+      "unavailable": "Categoria non disponibile"
+    },
+    "installed": "{count, plural, =0 {Nessuna regola aggiunta} one {# regola aggiunta} other {# regole aggiunte}}",
+    "install-error": "Impossibile aggiungere le regole."
+  }
+}

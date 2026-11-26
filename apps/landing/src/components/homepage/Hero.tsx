@@ -4,7 +4,7 @@ import HeroMosaic from "./previews/HeroMosaic";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { DEMO_URL, useCtaUrl } from "@/hooks/useCtaUrl";
+import { appDemoUrl, appSignupUrl } from "@/lib/appLinks";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 export default function Hero({ locale }: { locale: Lang }) {
@@ -18,8 +18,8 @@ export default function Hero({ locale }: { locale: Lang }) {
 // The headline, its line and the action on five columns, the net worth card on
 // seven; all of it inside the first screen at 1280 x 800.
 function HeroContent() {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <section className="relative isolate bg-background">
@@ -50,7 +50,7 @@ function HeroContent() {
               </Button>
               <Button asChild size="lg" variant="secondary" className="px-6">
                 <a
-                  href={DEMO_URL}
+                  href={appDemoUrl(locale)}
                   onClick={() =>
                     pushGtmEvent({
                       event: "demo_cta_click",

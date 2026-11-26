@@ -17,7 +17,7 @@ interface LanguageCopy {
   subject: (account: string, days: number) => string;
 }
 
-export const COPY: Record<"en" | "pt" | "es", LanguageCopy> = {
+export const COPY: Record<"en" | "pt" | "es" | "it", LanguageCopy> = {
   en: {
     subject: (account, days) =>
       days <= 0 ? `Your ${account} payment is due today`
@@ -55,6 +55,19 @@ export const COPY: Record<"en" | "pt" | "es", LanguageCopy> = {
     settingsNote: "Puedes desactivar los recordatorios de pago en los",
     settingsLink: "ajustes de notificaciones",
     footer: (brand) => `Recibes este correo porque configuraste un ciclo de extracto para una tarjeta en ${brand}.`,
+  },
+  it: {
+    subject: (account, days) =>
+      days <= 0 ? `Il pagamento di ${account} scade oggi`
+        : days === 1 ? `Il pagamento di ${account} scade domani` : `Il pagamento di ${account} scade tra ${days} giorni`,
+    preheader: (amount, date) => `${amount} da pagare entro il ${date}.`,
+    heading: "Il pagamento della tua carta scade a breve",
+    intro: (account, amount, period, date) =>
+      `L'estratto conto di ${account} per ${period} si è chiuso con ${amount} ancora da pagare. Il pagamento scade il ${date}. Pagare prima di quella data ti evita interessi e penali di ritardo.`,
+    cta: "Vedi l'estratto conto",
+    settingsNote: "Puoi disattivare i promemoria di pagamento nelle",
+    settingsLink: "impostazioni delle notifiche",
+    footer: (brand) => `Ricevi questa email perché hai impostato un ciclo di estratto conto per una carta su ${brand}.`,
   },
 };
 

@@ -75,6 +75,8 @@ describe('self-hosting docs destination', () => {
     ['pt', selfHostingDocs.pt],
     ['es', selfHostingDocs.es],
     ['fr', selfHostingDocs.en],
+    // The docs are in en, pt and es only.
+    ['it', selfHostingDocs.en],
   ])('sends %s to its docs language', (locale, expected) => {
     expect(selfHostingDocsUrl(locale)).toBe(expected)
   })

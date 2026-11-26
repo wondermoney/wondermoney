@@ -8,8 +8,10 @@ const mockMutate = jest.fn()
 const mockReconcile = jest.fn()
 const mockClear = jest.fn()
 let mockPending = false
+let mockSearchParams: { then?: string } = {}
 
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => mockSearchParams,
   useRouter: () => ({ replace: mockReplace }),
   usePreventRemove: (preventRemove: boolean, onPrevented?: (options: { data: { action: object }; repeat: () => void }) => void) => mockUsePreventRemove(preventRemove, onPrevented),
 }))
@@ -32,7 +34,15 @@ jest.mock('./offline-account-create-screen', () => ({ OfflineAccountCreateScreen
 
 describe('manual account creation route', () => {
   beforeEach(() => {
-    mockReplace.mockReset(); mockUsePreventRemove.mockClear(); mockMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockPending = false
+    mockReplace.mockReset(); mockUsePreventRemove.mockClear(); mockMutate.mockReset(); mockReconcile.mockReset(); mockClear.mockReset(); mockPending = false; mockSearchParams = {}
+  })
+
+  it('goes on to the statement import when the account was added to import one', async () => {
+    mockSearchParams = { then: 'import' }
+    mockMutate.mockResolvedValue(undefined)
+    const view = await render(<OfflineAccountCreateRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Confirm' }))
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
   })
 
   it('awaits successful creation and returns to Accounts without inferring a created id', async () => {

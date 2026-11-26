@@ -1,4 +1,4 @@
-import type { EntityManager } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/postgresql';
 
 import { DI } from '@app/database/di';
 import { demoPersona } from '@app/database/seeders/demo/demo-fixtures';

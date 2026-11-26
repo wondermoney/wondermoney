@@ -7,10 +7,11 @@ import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import TransactionsPreview from "@/components/homepage/previews/TransactionsPreview";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function StepCard({ number, title, body }: { number: number; title: string; body: string }) {
 	return (
@@ -62,7 +63,7 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 								<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
 									<Button asChild size="lg">
 										<a
-											href={CTA_URL}
+											href={appSignupUrl(locale)}
 											onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
 										>
 											{t("lp.shared.ctaPrimary")}
@@ -115,6 +116,8 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 				]}
 				reverse
 			/>
+
+			<FeatureFaq routeId="featureCategorization" />
 
 			<TrustStripInline />
 

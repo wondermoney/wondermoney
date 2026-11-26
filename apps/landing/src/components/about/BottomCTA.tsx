@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 export default function BottomCTA({ locale }: { locale: Lang }) {
@@ -15,8 +15,8 @@ export default function BottomCTA({ locale }: { locale: Lang }) {
 }
 
 function BottomCTAContent() {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <SectionHighlight

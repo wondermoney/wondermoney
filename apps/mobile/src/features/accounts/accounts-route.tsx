@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 import { ApiError } from '@/lib/api/errors'
+import { useConfirmedFeature } from '@/lib/server/use-instance'
 import { DEFAULT_ACCOUNTS_TIMEFRAME, getAccountsTimeframeScope, type AccountsTimeframe } from '@/features/account-insights/accounts-timeframe'
 import { buildBalanceSeries } from '@/features/account-insights/balance-growth'
 import { mapCashflow, mapCategorySpending } from '@/features/account-insights/insights-view-model'
@@ -28,6 +29,8 @@ function section<T, R>(query: Resource<T>, map: (data: T) => R): SectionState<R>
 
 export function AccountsRoute() {
   const query = useAccounts()
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
   const reorderAccounts = useReorderAccounts()
   const [timeframe, setTimeframe] = useState<AccountsTimeframe>(DEFAULT_ACCOUNTS_TIMEFRAME)
   // Memoized per timeframe: the scope's `now` is part of every query key.
@@ -78,7 +81,7 @@ export function AccountsRoute() {
       onConnectBank={() => router.push('/more/banking/connect' as Href)}
       onCreateAccount={() => router.push('/accounts/create' as Href)}
       onCreateTransaction={() => router.push('/accounts/transactions/create' as Href)}
-      onImportTransactions={() => router.push('/accounts/transactions/import' as Href)}
+      onImportTransactions={importAvailable ? () => router.push('/accounts/transactions/import' as Href) : undefined}
       onEditAccount={(accountId) => router.push({ pathname: '/accounts/[accountId]/edit', params: { accountId: String(accountId) } } as unknown as Href)}
       onLogout={signOut}
       onRefresh={async () => { await Promise.all([query.refetch(), ...insightQueries.map((item) => item.refetch())]) }}

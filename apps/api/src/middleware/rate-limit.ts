@@ -1,9 +1,11 @@
 import * as Sentry from '@sentry/node';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import { ipKeyGenerator, rateLimit, type RateLimitInfo } from 'express-rate-limit';
+import { ipKeyGenerator, MemoryStore, rateLimit, type RateLimitInfo, type Options as RateLimitOptions } from 'express-rate-limit';
 import { StatusCodes } from 'http-status-codes';
 
 import { IS_PROD } from '@config/env';
+import { mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
+import { mcpCredentialKey } from '@service/mcp/mcp-types';
 import { ERROR_CODE } from '@utils/errors';
 import logger from '@utils/logger';
 
@@ -119,10 +121,18 @@ export const RATE_LIMIT_FAMILIES = {
   dataRestore: { limit: 20, relaxable: true, scope: 'identity', windowMs: HOUR_MS },
 
   /**
-   * Connecting a bank with a pasted credential (a SimpleFIN setup token): each request makes the
-   * server call out to the aggregator, and a token is a secret worth guessing. Never relaxed.
+   * Connecting a bank with a pasted credential (a SimpleFIN setup token), and pasting, activating
+   * or removing an Enable Banking key: each request makes the server call out to the aggregator or
+   * changes which application reads the person's banks, and a token is a secret worth guessing.
+   * Each route counts on its own. Never relaxed.
    */
   bankConnect: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
+
+  /**
+   * `POST /v1/user/enable-banking-credential/certificate` — each request generates an RSA key pair
+   * (CPU) and replaces the person's pending key. Setting up takes one or two; never relaxed.
+   */
+  enableBankingCertificate: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
   /** `/v1/feedback` — each request sends an email to the operator's inbox. */
   feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
@@ -133,6 +143,15 @@ export const RATE_LIMIT_FAMILIES = {
    * per-endpoint budget — the families below are — it is the ceiling on any single address.
    */
   globalBackstop: { limit: 3000, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * `POST /v1/mcp` with a bearer credential while OAuth is on, per address, in place of the
+   * backstop: ten times its budget, because ChatGPT brings many people's calls from a few shared
+   * addresses, yet still a ceiling, so replaying any token (valid, revoked or junk) cannot run
+   * unbounded lookups from one address. Each credential has its own budget besides (`apiToken`,
+   * the tool-call cap) and failures their own (`mcpAuthFailure`).
+   */
+  mcpBearer: { limit: 30000, relaxable: true, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /**
    * Portfolio and transaction import-session *mutations*: parsing, mapping, row decisions and
@@ -158,11 +177,38 @@ export const RATE_LIMIT_FAMILIES = {
   marketData: { limit: 600, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
 
   /**
+   * Failed authentications on `POST /v1/mcp` while OAuth is on (`MCP_OAUTH_ENABLED`), per address:
+   * an OAuth token whose signature or issuer does not check out, a bearer that is no token at all,
+   * and an unknown personal token. A token that is genuine but expired, for another audience or
+   * revoked is refused without counting. MCP calls with a bearer skip the per-IP backstop then
+   * (`isSharedEgressRequest`), so this bounds junk from one address. The count is read before
+   * anything is looked up: once an address is over it, a personal-token-shaped bearer is refused
+   * without a database lookup, and an OAuth token only gets past with a valid signature. Never
+   * relaxed: it guards a credential check.
+   */
+  mcpAuthFailure: { limit: 300, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
    * `POST /v1/auth/pair` — public, and takes a pairing code that is a credential. Codes are
    * 256-bit, single-use and short-lived, so guessing one is not realistic, but this is still
    * the unauthenticated edge of the session exchange: IP-keyed, strict, never relaxed.
    */
   pairing: { limit: 10, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * Wrong authenticator codes on the routes behind `requireSensitiveSession` (API tokens, pairing
+   * codes, the calendar feed, Enable Banking keys), per person. The code is checked in-process
+   * (`auth.api.verifyTOTP`), which neither the `/api/auth/two-factor` limiter nor better-auth's own
+   * sees, so without this a stolen session could try every 6-digit code. Only a wrong code counts,
+   * a right one does not clear it, and the count is read before any code is checked. Keyed on the
+   * person, as the session already names them, so one person's guesses never lock out others
+   * behind the same address; `sensitiveTotpFailureIp` bounds an address across accounts. Never
+   * relaxed: it guards a credential check.
+   */
+  sensitiveTotpFailure: { limit: 5, relaxable: false, scope: 'identity', windowMs: QUARTER_HOUR_MS },
+
+  /** The same wrong codes, per address, across every account it uses. Never relaxed. */
+  sensitiveTotpFailureIp: { limit: 30, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /** `/v1/marketing` — unauthenticated opt-out/lead endpoints. Unchanged from the previous rule. */
   publicMarketing: { limit: 50, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
@@ -212,6 +258,10 @@ export function buildRateLimitKey(req: Request, scope: RateLimitFamily['scope'])
     if (apiTokenKey !== undefined) {
       return `t:${apiTokenKey}`;
     }
+    // An MCP OAuth grant (one person, one client) has no token row: it keys on the grant, so
+    // everyone reaching the server through the same client's addresses keeps a budget of their own.
+    const mcpIdentity = req.mcpIdentity;
+    if (mcpIdentity) return mcpCredentialKey(mcpIdentity.credential);
     return `ip:${ipKeyGenerator(req.ip ?? 'unknown')}`;
   }
   if (scope === 'identity') {
@@ -335,6 +385,56 @@ function buildLimitHandler(family: RateLimitFamilyName) {
   };
 }
 
+/** One key's failed credential checks (an address, or a person), read before the credential is looked at. */
+export interface AuthFailureBudget {
+  /** The key has used its budget: the next failure would be refused. */
+  overBudget: boolean;
+  /** Answer 429 with `Retry-After`, as every limiter here does. */
+  refuse: (res: Response) => void;
+  /**
+   * Count one failed check. True when that takes the key past its budget: a 429 has been
+   * sent and the caller stops; false, and the caller sends its own refusal (401, 403).
+   */
+  failed: (res: Response) => Promise<boolean>;
+}
+
+/**
+ * A budget on failed credential checks, keyed as the family's scope says (per address, or per
+ * verified person), in the same kind of store as every other family (express-rate-limit's
+ * in-process `MemoryStore`, one per limiter). Unlike a limiter it counts only what the caller
+ * reports as a failure, and it lets the caller read the count before looking anything up, so a
+ * key over budget can be turned away before any database work.
+ */
+export function createAuthFailureLimiter(family: RateLimitFamilyName): { check: (req: Request) => Promise<AuthFailureBudget>; reset: () => Promise<void> } {
+  const { scope, windowMs } = RATE_LIMIT_FAMILIES[family];
+  const limit = resolveFamilyLimit(family);
+  const store = new MemoryStore();
+  store.init({ windowMs } as RateLimitOptions);
+  const refuse = (req: Request, res: Response, resetTime: Date | undefined) => {
+    (req as Request & { rateLimit?: Partial<RateLimitInfo> }).rateLimit = { limit, resetTime };
+    buildLimitHandler(family)(req, res, () => undefined);
+  };
+  return {
+    check: async (req) => {
+      const key = buildRateLimitKey(req, scope);
+      const current = await store.get(key);
+      return {
+        failed: async (res) => {
+          const info = await store.increment(key);
+          if (info.totalHits <= limit) return false;
+          refuse(req, res, info.resetTime);
+          return true;
+        },
+        overBudget: (current?.totalHits ?? 0) >= limit,
+        refuse: (res) => { refuse(req, res, current?.resetTime); },
+      };
+    },
+    reset: async () => {
+      await store.resetAll();
+    },
+  };
+}
+
 /**
  * Split a mount into separate read and write budgets. GET/HEAD/OPTIONS are cheap and
  * bursty; mutations are neither, and lumping them together is what made the old single
@@ -359,6 +459,29 @@ export function createMethodScopedRateLimiter(read: RateLimitFamilyName, write: 
 export const isHealthCheckPath = (req: Request): boolean =>
   req.path === '/v1/health' || req.path.startsWith('/v1/health/');
 
+/** `POST /v1/mcp` carrying a bearer credential, while OAuth for the MCP server is on. */
+export const isMcpBearerRequest = (req: Request): boolean =>
+  mcpOAuthResourceIfEnabled() !== null && /^bearer\s+\S/i.test(req.get('authorization') ?? '');
+
+/**
+ * Traffic that arrives from a shared egress, many people behind one address: ChatGPT and other
+ * hosted MCP clients call the MCP server, read its OAuth discovery documents and refresh tokens
+ * from a handful of their own addresses. A per-IP budget sized for one person would let one busy
+ * client lock everyone out, so, while OAuth is on (`mcpOAuthResourceIfEnabled`, the same test the
+ * failure budget uses; off, nothing changes), these skip the backstop: an MCP call with a bearer
+ * credential has its own, larger per-address family (`mcpBearer`) besides its per-credential
+ * budgets and the failure budget (`mcpAuthFailure`), the token and registration endpoints have
+ * better-auth's own limits, and the discovery documents are static.
+ */
+export const isSharedEgressRequest = (req: Request): boolean =>
+  mcpOAuthResourceIfEnabled() !== null && (
+    (req.path === '/v1/mcp' && isMcpBearerRequest(req))
+    || req.path.startsWith('/.well-known/oauth-')
+    // Budgeted by better-auth's own OAuth limits instead (services/auth/mcp-oauth.ts).
+    || req.path === '/api/auth/oauth2/token'
+    || req.path === '/api/auth/oauth2/register'
+  );
+
 // ---------------------------------------------------------------------------
 // Ready-made limiters.
 //
@@ -369,7 +492,15 @@ export const isHealthCheckPath = (req: Request): boolean =>
 
 /** Per-IP backstop in front of the whole app, including the auth middleware. */
 export const globalBackstopRateLimit = (): RequestHandler =>
-  createRateLimiter({ family: 'globalBackstop', skip: isHealthCheckPath });
+  createRateLimiter({ family: 'globalBackstop', skip: (req) => isHealthCheckPath(req) || isSharedEgressRequest(req) });
+
+/**
+ * `POST /v1/mcp` with a bearer while OAuth is on, per address (`mcpBearer`), where the backstop
+ * steps aside (`isSharedEgressRequest`). Every other request to the route skips it, the backstop
+ * having counted it already.
+ */
+export const mcpBearerRateLimit = (): RequestHandler =>
+  createRateLimiter({ family: 'mcpBearer', skip: (req) => !isMcpBearerRequest(req) });
 
 /** `/v1/admin` and the credential-gated Swagger UI. */
 export const adminApiRateLimit = (): RequestHandler => createRateLimiter({ family: 'adminApi' });
@@ -412,6 +543,9 @@ export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter(
 
 /** Connecting a bank with a pasted credential (SimpleFIN setup token). */
 export const bankConnectRateLimit = (): RequestHandler => createRateLimiter({ family: 'bankConnect' });
+
+/** Generating an Enable Banking key pair and certificate. */
+export const enableBankingCertificateRateLimit = (): RequestHandler => createRateLimiter({ family: 'enableBankingCertificate' });
 
 /** `/v1/feedback` — sends email. */
 export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });

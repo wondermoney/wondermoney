@@ -11,16 +11,26 @@ the repository root: `pnpm install && pnpm build:lib` first, since the API impor
 
 ## Database safety: read before any DB command
 
-**`.env` decides which database you touch.** Every `migrate:*` and `seed:*` script connects to
-whatever `DB_HOST`/`DB_PORT`/`DB_DATABASE` resolve to (process env first, then the *last*
-assignment in `.env`), regardless of the `dev`/`prd` in its name. A `.env` can hold a block
-for a remote database, and a port forward to one looks like `localhost`. The local compose
-Postgres is on **5434**, so it is never confused with a forwarded `5432`. Run
-`grep -E '^DB_' .env` and confirm the target before anything that writes.
+**`.env` decides which database you touch.** Every `migrate:*`, `seed:*` and `demo:*` script
+reads `.env` (`src/config/load-dotenv.ts`) and connects to whatever `DATABASE_URL`, or else
+`DB_HOST`/`DB_PORT`/`DB_DATABASE`, resolve to (process env first, then the *last* assignment in
+`.env`), regardless of the `dev`/`prd` in its name. `DATABASE_URL` beside any `DB_*` setting is
+refused, by every script and by the API and the worker (`src/config/database-target.ts`). A
+`.env` can hold a block for a remote database, and a port forward to one looks like `localhost`.
+The local compose Postgres is on **5434**, so it is never confused with a forwarded `5432`. Run
+`grep -E '^DB_|DATABASE_URL' .env` and confirm the target before anything that writes. They
+need only the database settings, not the app's secrets.
 
-- `scripts/assert-local-db.mjs` guards the scripts: `*:fresh` refuses any non-local host;
-  `migrate:dev` / `seed:dev` need `ALLOW_REMOTE_DB=1` for one. A port-forward passes as
-  local, so the guard is a seatbelt, not proof the target is disposable.
+- `scripts/assert-local-db.mjs` guards the scripts, checking the host of `DATABASE_URL` as `pg`
+  reads it when it is set and `DB_HOST` otherwise. A `DATABASE_URL` that doesn't parse, or whose
+  query sets `host`, `hostaddr`, `port`, `user`, `password` or `options` (which `pg` would use
+  instead of the URL's own), is refused everywhere. `*:fresh` refuses any non-local host;
+  `migrate:dev`, `migrate:manual`, `seed:dev` and `demo:{seed,reset,refresh}:dev` need
+  `ALLOW_REMOTE_DB=1` for one. All of them refuse a non-local `MIKRO_ORM_HOST` or
+  `MIKRO_ORM_CLIENT_URL` and any `MIKRO_ORM_DB_NAME`, which MikroORM merges over the config.
+  The rest (`migrate:prd`, `migrate:manual:prd`, `seed:prd`, `demo:*` without `:dev`, the
+  read-only ones) are unguarded. A port-forward passes as local, so the guard is a seatbelt,
+  not proof the target is disposable.
 - **`migrate:dev:fresh` / `migrate:prd:fresh` drop the whole database.** Run them only on a
   throwaway local or CI database, and only with the human's explicit approval for that run.
   Move a real database forward with `pnpm migrate:dev` (apply pending, non-destructive); try a
@@ -196,7 +206,8 @@ The suite is split into vitest projects (`vitest.config.ts`); `pnpm test` (`vite
   `services/auth/demo-sign-in.service.ts`; every demo session ends two hours after it starts
   (`services/auth/demo-session.ts`). `pnpm demo:seed` creates the account on a real database.
 - **Rate limits** are named families in `middleware/rate-limit.ts`. An auth or credential family
-  is never `relaxable` and is keyed on IP only. `TRUST_PROXY` sets Express `trust proxy`;
+  is never `relaxable` and is keyed on IP, or on the verified person when the session already
+  names them, with an IP family beside it (`sensitiveTotpFailure`). `TRUST_PROXY` sets Express `trust proxy`;
   `configureClientIp` copies the resolved `req.ip` into `x-wondermoney-client-ip`, the header
   better-auth's limiter reads, so both limiters key on the same address. Behind one proxy, set
   `TRUST_PROXY=1`.
@@ -212,7 +223,12 @@ Every integration is optional and fails closed: unconfigured, its feature report
   `services/enable-banking/instance-credential-policy.ts`). A user's own credential always wins;
   without `ENABLE_BANKING_PRODUCTION_CONTRACT` the instance one serves a single household
   (Restricted Production mode). A connection keeps the credential it was made with
-  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). There is no
+  (`EnableBankingConnection.enableBankingCredentialKey`, null for the instance one). A user pastes
+  a key from Enable Banking, or lets the server generate one: `POST
+  /v1/user/enable-banking-credential/certificate` stores a `pending` credential (RSA 2048, private
+  key encrypted, never returned) and answers its certificate, and `.../activate` checks it under
+  the application ID (`enable-banking-application-check.ts`) and makes it active. A pending
+  credential signs nothing else and lapses after 7 days. There is no
   sandbox bank; testing the connect flow needs a real credential. Legacy `nordigen*` names (`NordigenRequisition`,
   `Account.nordigenRequisitionKey`, `Transaction.nordigenInternalTransactionId`, the
   `DELETE /v1/banking/requisition/:requisitionId` route) are from the removed GoCardless

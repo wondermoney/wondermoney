@@ -6,11 +6,11 @@ import type { SupportedLocale } from '@/components/providers/session-preferences
 import { writeEndpoint } from '@/lib/api/runtime-schema'
 
 /** The account language the API stores: emails and other server-written texts go out in it. */
-export type AccountLanguage = 'EN' | 'ES' | 'PT'
+export type AccountLanguage = 'EN' | 'ES' | 'IT' | 'PT'
 
-const ACCOUNT_LANGUAGE: Readonly<Record<SupportedLocale, AccountLanguage>> = { en: 'EN', es: 'ES', 'pt-PT': 'PT' }
+const ACCOUNT_LANGUAGE: Readonly<Record<SupportedLocale, AccountLanguage>> = { en: 'EN', es: 'ES', it: 'IT', 'pt-PT': 'PT' }
 
-/** The account language for an app locale (`es` → `ES`, `pt-PT` → `PT`). */
+/** The account language for an app locale (`es` → `ES`, `it` → `IT`, `pt-PT` → `PT`). */
 export const toAccountLanguage = (locale: SupportedLocale): AccountLanguage => ACCOUNT_LANGUAGE[locale]
 
 /**
@@ -29,6 +29,8 @@ export function accountLanguageEndpoint(userId: string) {
 /**
  * Sends the app language the person picked to their account, so their emails follow it. Nothing
  * without a signed-in runtime; a failed send is dropped, and picking the language again retries.
+ * A server without the Italian account language refuses `IT`: the app switches to Italian and
+ * the account, with its emails, keeps the language it had.
  */
 export function useAccountLanguageSync(): (locale: SupportedLocale) => void {
   const runtime = useOptionalProductRuntime()?.runtime

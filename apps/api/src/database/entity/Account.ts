@@ -122,6 +122,25 @@ export class Account extends Base {
   @ManyToOne({ cascade: [], entity: () => NordigenRequisition, fieldName: 'nordigen_requisition_key', nullable: true })
   nordigenRequisitionKey?: Rel<NordigenRequisition>;
 
+  /**
+   * When a sync last derived `balance` from the running-balance chain because the bank gave none
+   * (`deriveChainWithoutProviderBalance`). Null while the balance is the bank's own figure: the
+   * account phase clears it when the bank sends one again. Clients then show the balance as of
+   * `refreshedAt`, the last time the bank confirmed it.
+   */
+  @Property({ columnType: 'timestamptz', nullable: true })
+  balanceDerivedAt?: Date;
+
+  /**
+   * The transaction history window, in days back from today, that the bank served this account
+   * after refusing a longer one (Enable Banking's `WRONG_TRANSACTIONS_PERIOD`). A later sync that
+   * asks for more, which is a retry of the first sync (or the first sync after a reconnect that keeps
+   * the account), asks for this instead, so the bank does not refuse it again. Null for an account
+   * the bank never refused, or never served: it keeps the long window.
+   */
+  @Property({ nullable: true })
+  historyWindowDays?: number;
+
   @Property({ columnType: 'timestamptz', nullable: true })
   refreshedAt?: Date;
 

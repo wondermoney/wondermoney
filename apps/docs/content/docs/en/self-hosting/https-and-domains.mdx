@@ -29,7 +29,7 @@ To try it locally, set `APP_URL=http://localhost` and `API_URL=http://localhost`
 
 ## Another reverse proxy
 
-Any other reverse proxy works: give it one hostname and route the same two path prefixes to the API. With Caddy on the host:
+Any other reverse proxy works: give it one hostname and route the same path prefixes to the API (`/.well-known/oauth-*` only matters with `MCP_OAUTH_ENABLED`). With Caddy on the host:
 
 ```
 money.example.com {
@@ -37,6 +37,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /api/auth/* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/oauth-* {
     reverse_proxy localhost:3001
   }
   handle {

@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import { appSignupUrl } from "@/lib/appLinks";
 import { buildAlternateLinksForPath } from "@/lib/routes";
 
 const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}`);
@@ -29,7 +30,7 @@ const alternateLinks = buildAlternateLinksForPath((lang) => `/${lang}`);
           Back to homepage
         </a>
         <a
-          href="https://app.wonder.money/auth/signup"
+          href={appSignupUrl("en")}
           class="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground hover:bg-accent"
         >
           Start free

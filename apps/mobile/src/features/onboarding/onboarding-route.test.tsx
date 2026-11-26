@@ -8,7 +8,10 @@ const mockBack = jest.fn()
 const mockCanGoBack = jest.fn(() => false)
 const mockAddListener = jest.fn(() => jest.fn())
 
+let mockSearchParams: { resume?: string } = {}
+let mockFileStorage = true
 jest.mock('expo-router', () => ({
+  useLocalSearchParams: () => mockSearchParams,
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: mockBack, canGoBack: mockCanGoBack }),
   useNavigation: () => ({ addListener: mockAddListener }),
 }))
@@ -38,19 +41,33 @@ const makeBootstrap = (onboarding: Record<string, unknown>) => ({
 
 let mockLoadedBootstrap = makeBootstrap({})
 
+jest.mock('@/lib/server/use-instance', () => ({
+  useConfirmedFeature: (select: (features: { fileStorage: boolean }) => boolean) => select({ fileStorage: mockFileStorage }),
+}))
+
 jest.mock('./use-onboarding-bootstrap', () => ({
   useOnboardingBootstrap: () => mockLoadedBootstrap,
 }))
 
+const mockCompleteOnboarding = jest.fn()
 jest.mock('./use-complete-onboarding', () => ({
-  useCompleteOnboarding: () => ({ isPending: false, mutateAsync: jest.fn() }),
+  useCompleteOnboarding: () => ({ isPending: false, mutateAsync: mockCompleteOnboarding, reset: jest.fn() }),
   classifyCompleteOnboardingFailure: jest.fn(),
 }))
 
-let capturedOnCreateAccount: (() => void) | undefined
+let mockHasWritableAccount = false
+jest.mock('./use-has-writable-account', () => ({
+  useHasWritableAccount: () => mockHasWritableAccount,
+}))
+
+let capturedOnCreateAccount: ((from: 'account' | 'no-bank') => void) | undefined
+let capturedOnImportStatement: (() => void | Promise<void>) | undefined
+let capturedScreen: { resumeAt?: string; importAvailable?: boolean } = {}
 jest.mock('./onboarding-screen', () => ({
-  OnboardingScreen: (props: { onCreateAccount: () => void }) => {
+  OnboardingScreen: (props: { onCreateAccount: (from: 'account' | 'no-bank') => void; onImportStatement: () => void | Promise<void>; resumeAt?: string; importAvailable?: boolean }) => {
     capturedOnCreateAccount = props.onCreateAccount
+    capturedOnImportStatement = props.onImportStatement
+    capturedScreen = { resumeAt: props.resumeAt, importAvailable: props.importAvailable }
     return null
   },
 }))
@@ -132,9 +149,58 @@ describe('OnboardingRoute — create-account navigation', () => {
     await render(<OnboardingRoute />)
     expect(capturedOnCreateAccount).toBeDefined()
 
-    capturedOnCreateAccount?.()
+    capturedOnCreateAccount?.('account')
 
-    expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7')
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7&from=account')
     expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ params: expect.anything() }))
+  })
+
+  it('importing a statement takes the same screen first, then on to the import', async () => {
+    await render(<OnboardingRoute />)
+
+    await capturedOnImportStatement?.()
+
+    expect(mockPush).toHaveBeenCalledWith('/onboarding/create-account?version=7&then=import&from=no-bank')
+    expect(mockCompleteOnboarding).not.toHaveBeenCalled()
+  })
+
+  it('imports into an account the person can already write to, completing onboarding, instead of creating one', async () => {
+    mockHasWritableAccount = true
+    mockCompleteOnboarding.mockResolvedValueOnce({})
+    await render(<OnboardingRoute />)
+
+    await capturedOnImportStatement?.()
+
+    expect(mockCompleteOnboarding).toHaveBeenCalledWith({ version: 7 })
+    expect(mockReplace).toHaveBeenCalledTimes(1)
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
+    expect(mockPush).not.toHaveBeenCalled()
+    mockHasWritableAccount = false
+  })
+
+  it('still opens the import on an existing account when completing onboarding fails', async () => {
+    mockHasWritableAccount = true
+    mockCompleteOnboarding.mockRejectedValueOnce(new Error('network'))
+    await render(<OnboardingRoute />)
+
+    await capturedOnImportStatement?.()
+
+    expect(mockReplace).toHaveBeenCalledWith('/accounts/transactions/import')
+    expect(mockPush).not.toHaveBeenCalled()
+    mockHasWritableAccount = false
+  })
+
+  it('reopens the journey where the manual-account screen was opened from', async () => {
+    mockSearchParams = { resume: 'no-bank' }
+    await render(<OnboardingRoute />)
+    expect(capturedScreen.resumeAt).toBe('no-bank')
+    mockSearchParams = {}
+  })
+
+  it('offers the import only where the server stores files', async () => {
+    mockFileStorage = false
+    await render(<OnboardingRoute />)
+    expect(capturedScreen.importAvailable).toBe(false)
+    mockFileStorage = true
   })
 })

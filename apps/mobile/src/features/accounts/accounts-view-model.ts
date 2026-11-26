@@ -17,6 +17,8 @@ export type AccountSummaryViewModel = Readonly<{
   originalCurrencyCode: string
   primaryCurrencyCode: string
   refreshedAt: string | null
+  /** Set while the balance is derived because the bank sent none; absent on older APIs and fixtures. */
+  balanceDerivedAt?: string | null
   source: AccountSource
   /** `null` when the API doesn't report it (older servers). */
   csvImportFormat: CsvImportFormat | null
@@ -40,6 +42,8 @@ export type AccountSummaryViewModel = Readonly<{
   fx?: FxState
   /** The caller's access (#95). `read` hides every edit action; absent on older fixtures: writable. */
   myAccess?: AccountAccess
+  /** A closed account takes no statement import; absent on older fixtures and APIs: open. */
+  closed?: boolean
 }>
 
 export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewModel => ({
@@ -53,6 +57,7 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   originalCurrencyCode: dto.currencyKey.code,
   primaryCurrencyCode: dto.accountOwnerAppuserKey.currencyKey.code,
   refreshedAt: dto.refreshedAt,
+  balanceDerivedAt: dto.balanceDerivedAt ?? null,
   source: dto.source,
   csvImportFormat: dto.csvImportFormat ?? null,
   ownerFirstName: dto.ownerFirstName ?? null,
@@ -63,6 +68,7 @@ export const mapAccountSummary = (dto: AccountSummaryDto): AccountSummaryViewMod
   accountType: dto.accountType ?? null,
   creditCard: dto.creditCard ?? null,
   myAccess: dto.myAccess,
+  closed: dto.closed === true,
   attribution: dto.attribution ?? null,
   fx: resolveFxState({
     fxStatus: dto.fxStatus,

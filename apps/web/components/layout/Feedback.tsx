@@ -8,7 +8,7 @@ import {
   MessageSquareIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,12 +63,24 @@ const Feedback = () => {
   const [selected, setSelected] = useState<FeedbackType | null>(null);
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  // The close animation's reset and the auto-close after sending. Cleared on unmount, so a
+  // timer never sets state on an unmounted panel, and a reopen cancels a pending reset.
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const later = (fn: () => void, ms: number) => {
+    timers.current.push(setTimeout(fn, ms));
+  };
+  const clearTimers = () => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+  };
+  useEffect(() => clearTimers, []);
 
   const handleOpenChange = (next: boolean) => {
+    clearTimers();
     setOpen(next);
     if (!next) {
-      // Reset state when closing
-      setTimeout(() => {
+      // Reset state once the close animation has run
+      later(() => {
         setSelected(null);
         setMessage("");
         setSubmitted(false);
@@ -96,7 +108,7 @@ const Feedback = () => {
     }
 
     setSubmitted(true);
-    setTimeout(() => handleOpenChange(false), 2000);
+    later(() => handleOpenChange(false), 2000);
   };
 
   const canShare = sendsToApi;

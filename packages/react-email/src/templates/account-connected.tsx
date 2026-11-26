@@ -37,6 +37,15 @@ export const COPY = {
     note: "¿No fuiste tú? Responde a este correo y lo revisaremos.",
     footer: (brand: string) => `Recibes este correo porque se conectó un banco a tu cuenta de ${brand}.`,
   },
+  it: {
+    subject: (bank: string, brand: string) => `La connessione con ${bank} è attiva su ${brand}`,
+    preheader: (bank: string) => `La connessione con ${bank} è attiva: i tuoi conti inizieranno a sincronizzarsi.`,
+    heading: "La tua banca è collegata",
+    intro: (bank: string, brand: string) => `La connessione tra ${bank} e ${brand} è ora attiva. I tuoi conti e le tue transazioni inizieranno a sincronizzarsi automaticamente, senza che tu debba fare nulla.`,
+    cta: "Vedi i tuoi conti",
+    note: "Non hai collegato tu questa banca? Rispondi a questa email e verificheremo.",
+    footer: (brand: string) => `Ricevi questa email perché è stata collegata una banca al tuo account ${brand}.`,
+  },
 } as const;
 
 export const getAccountConnectedSubject = (language: TransactionalEmailLanguage, bankName: string, brandName?: string) =>

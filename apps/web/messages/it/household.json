@@ -1,0 +1,134 @@
+{
+  "household": {
+    "title": "Famiglia",
+    "description": "Condividi conti, budget e obiettivi con le persone con cui vivi.",
+    "roles": {
+      "owner": "Proprietario",
+      "admin": "Amministratore",
+      "member": "Membro",
+      "viewer": "Osservatore"
+    },
+    "roleDescriptions": {
+      "owner": "Gestisce tutti i membri della famiglia e può cedere la proprietà a un'altra persona.",
+      "admin": "Invita e gestisce membri e osservatori, e modifica le finanze condivise.",
+      "member": "Vede e modifica conti, budget e obiettivi condivisi.",
+      "viewer": "Vede le finanze condivise ma non può modificare nulla."
+    },
+    "members": {
+      "heading": "Membri",
+      "you": "Tu",
+      "seats": "{used} posti occupati su {max}, inviti in sospeso inclusi",
+      "actionsLabel": "Azioni per {name}",
+      "changeRole": "Cambia ruolo",
+      "makeOwner": "Cedi la proprietà",
+      "remove": "Rimuovi dalla famiglia"
+    },
+    "invite": {
+      "heading": "Invita qualcuno",
+      "description": "Avrà un accesso personale e vedrà le tue finanze condivise. I conti che segni come privati restano privati. Chi ha già un account accetta dal link dell'invito.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@esempio.it",
+      "invalidEmail": "Inserisci un indirizzo email valido",
+      "roleLabel": "Ruolo",
+      "submit": "Invia invito",
+      "full": "La tua famiglia ha posto per {max} persone, inviti in sospeso inclusi. Revoca un invito o rimuovi qualcuno per invitare un'altra persona."
+    },
+    "pending": {
+      "heading": "Inviti in sospeso",
+      "sentTo": "Invitato: {email}",
+      "expires": "Scade il {date}",
+      "resend": "Invia di nuovo",
+      "revoke": "Revoca"
+    },
+    "actions": {
+      "leave": "Lascia la famiglia"
+    },
+    "removeDialog": {
+      "title": "Rimuovere {name}?",
+      "description": "Perde subito l'accesso a questa famiglia e tutte le sue sessioni vengono chiuse. I conti e le transazioni che ha aggiunto restano alla famiglia, e le sue connessioni bancarie vengono scollegate.",
+      "confirm": "Rimuovi"
+    },
+    "leaveDialog": {
+      "title": "Lasciare questa famiglia?",
+      "description": "Perdi l'accesso a conti, budget e obiettivi condivisi, e le tue connessioni bancarie vengono scollegate. L'operazione non può essere annullata.",
+      "confirm": "Lascia la famiglia"
+    },
+    "roleDialog": {
+      "title": "Cambia il ruolo di {name}",
+      "description": "Il nuovo ruolo si applica alla prossima apertura dell'app.",
+      "save": "Salva ruolo"
+    },
+    "transferDialog": {
+      "title": "Cedere la proprietà a {name}?",
+      "description": "La proprietà passa a {name}: gestirà tutti i membri della famiglia, anche te, e solo questa persona potrà cederla di nuovo. Tu diventi amministratore.",
+      "confirm": "Cedi la proprietà a {name}"
+    },
+    "cancel": "Annulla",
+    "errors": {
+      "already_household_member": "Questa persona fa già parte della famiglia.",
+      "demo_read_only": "L'account demo è in sola lettura.",
+      "household_full": "Questa famiglia è al completo. Prima revoca un invito o rimuovi qualcuno.",
+      "household_has_data": "La tua famiglia attuale contiene già conti o transazioni, quindi per ora non può unirsi a un'altra. Eliminali prima, oppure accetta con un altro account.",
+      "household_has_members": "Altre persone condividono la tua famiglia attuale. Cedi la proprietà a una di loro, o rimuovile, prima di unirti a un'altra famiglia.",
+      "household_owner_required": "Solo il proprietario può farlo.",
+      "household_role_required": "Il tuo ruolo non lo consente. Chiedi al proprietario o a un amministratore.",
+      "invite_already_used": "Questo invito è già stato usato.",
+      "invite_email_mismatch": "Questo invito è per un indirizzo email diverso da quello con cui hai effettuato l'accesso.",
+      "invite_expired": "Questo invito è scaduto. Chiedine uno nuovo.",
+      "invite_invalid": "Questo link di invito non è valido. Chiedine uno nuovo."
+    },
+    "readOnly": {
+      "title": "Accesso in sola lettura",
+      "description": "Puoi vedere le finanze di questa famiglia ma non modificarle. Chiedi al proprietario o a un amministratore un ruolo diverso."
+    },
+    "join": {
+      "greetingNamed": "{name} ti invita a unirti alla sua famiglia su {instanceName}",
+      "greetingGeneric": "Hai ricevuto un invito a unirti a una famiglia su {instanceName}",
+      "subtitle": "Crea il tuo account per condividere conti, budget e obiettivi.",
+      "emailLockedHint": "Questo invito è per {email}",
+      "signInToAccept": "Hai già un account? <link>Accedi per accettare</link>",
+      "invalidTitle": "Questo link di invito non è valido",
+      "invalidBody": "Potrebbe essere già stato usato, revocato o scaduto. Chiedi a chi ti ha mandato l'invito di inviartene uno nuovo.",
+      "backToApp": "Vai a {instanceName}",
+      "confirmTitleNamed": "Vuoi unirti a {household}?",
+      "confirmTitleInviter": "Vuoi unirti alla famiglia di {name}?",
+      "confirmTitleGeneric": "Vuoi unirti a questa famiglia?",
+      "confirmRole": "Entrerai con il ruolo di {role}.",
+      "signedInAs": "Accesso effettuato come {email}",
+      "dataHeading": "Cosa succede alla tua famiglia attuale",
+      "dataRequirement": "Puoi unirti solo se la tua famiglia attuale non ha conti né transazioni.",
+      "dataStaysBehind": "Budget, categorie, regole e obiettivi che hai impostato lì restano dove sono. Non vengono trasferiti.",
+      "dataBanks": "Le connessioni bancarie di quella famiglia vengono scollegate.",
+      "dataYours": "Il tuo profilo, l'accesso, le preferenze e i dispositivi restano tuoi.",
+      "accept": "Unisciti alla famiglia",
+      "useDifferentAccount": "Esci e usa un altro account",
+      "emailMismatchTitle": "Questo invito è per un altro indirizzo email",
+      "emailMismatchBody": "È stato inviato a {invited}, ma hai effettuato l'accesso come {current}. Esci, poi accedi o crea un account con {invited} per accettarlo.",
+      "errorTitle": "Non puoi ancora unirti"
+    },
+    "toast": {
+      "inviteSent": "Invito inviato",
+      "inviteResent": "Invito inviato di nuovo",
+      "inviteRevoked": "Invito revocato",
+      "memberRemoved": "Hai rimosso {name} dalla famiglia",
+      "roleChanged": "Il ruolo di {name} ora è {role}",
+      "ownershipTransferred": "La proprietà è passata a {name}",
+      "left": "Hai lasciato la famiglia",
+      "error": "Qualcosa è andato storto. Riprova."
+    },
+    "loadError": "Impossibile caricare la tua famiglia. Riprova.",
+    "attribution": {
+      "filterLabel": "Membro",
+      "everyone": "Tutti",
+      "shared": "Condiviso",
+      "spentBy": "Speso da",
+      "spentByDescription": "A chi viene attribuita questa spesa in report, budget e filtro per membro.",
+      "accountDefault": "Predefinito del conto ({name})",
+      "accountDefaultPlain": "Predefinito del conto",
+      "spentBySaved": "“Speso da” aggiornato",
+      "spentByError": "Impossibile cambiare a chi è attribuita questa spesa",
+      "jointAccount": "Conto cointestato",
+      "jointAccountDescription": "Le sue spese rientrano in Condiviso. Questo non cambia chi può vederlo."
+    }
+  }
+}

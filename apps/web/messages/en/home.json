@@ -162,6 +162,14 @@
       "empty-title": "No transactions yet",
       "empty-body": "Connect a bank or add a transaction to see it here.",
       "action": "Go to accounts"
+    },
+    "noAccounts": {
+      "title": "Add your first account",
+      "connect": "Connect a bank",
+      "import": "Import a statement",
+      "importHint": "A file exported from your bank",
+      "manual": "Add an account by hand",
+      "manualHint": "A name and a balance"
     }
   }
 }

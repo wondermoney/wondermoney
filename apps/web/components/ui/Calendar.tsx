@@ -8,6 +8,7 @@ import {
 } from "react-day-picker";
 import { enUS } from "react-day-picker/locale/en-US";
 import { es } from "react-day-picker/locale/es";
+import { it } from "react-day-picker/locale/it";
 import { pt } from "react-day-picker/locale/pt";
 
 import { cn } from "@/lib/utils";
@@ -29,6 +30,9 @@ const dayPickerLocale = (locale: string): DayPickerLocale => {
     case "es":
     case "es-ES":
       return es;
+    case "it":
+    case "it-IT":
+      return it;
     default:
       return enUS;
   }

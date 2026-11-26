@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
-
+import { loadDotenv } from '@config/load-dotenv';
 import type { RecoverOnceInput } from '@service/operations/background-operation-recovery.service';
 import { createOwnedProducerRuntime, type OwnedProducerRuntime } from '@service/queue/owned-producer-runtime';
 import logger from '@utils/logger';
 
-dotenv.config({ quiet: true });
+loadDotenv();
 
 interface RecoveryCommandDeps {
   app?: { connect: () => Promise<void>; orm?: { close: () => Promise<void> } };

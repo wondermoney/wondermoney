@@ -12,9 +12,10 @@ vi.mock('@service/storage/s3', () => ({
   },
 }));
 
-import { addPartner, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
+import { addAccount, addPartner, seedHousehold } from '@app/__tests__/__helpers__/finance-fixtures';
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
 import { tenantHttp, useRequestContextEm } from '@app/__tests__/__helpers__/tenant-http';
+import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import transactionImportRoutes from '@route/transaction-import';
 
@@ -24,7 +25,7 @@ const VISION_MODEL = { AI_BASE_URL: 'https://api.openai.com/v1', AI_MODEL: 'gpt-
 /*
  * Starting a PDF statement import over HTTP, through the real authenticated-tenant stack: it is
  * there only when the instance has a model for it and the person has not hidden AI, it spends the
- * household's daily allowance, it starts only on the person's own account, and the session is
+ * household's daily allowance, it starts only on an account the person may write to, and the session is
  * theirs alone.
  */
 describe('PDF statement imports over HTTP', () => {
@@ -77,6 +78,21 @@ describe('PDF statement imports over HTTP', () => {
     expect(refused.body.code).toBe('ai_allowance_exhausted');
   });
 
+  it('spends nothing on an import refused for its account', async () => {
+    vi.stubEnv('AI_DAILY_LIMIT_STATEMENT_IMPORT', '1');
+    const household = await seedHousehold(db.em());
+    const partner = await addPartner(db.em(), household);
+    const ownersPrivate = await addAccount(db.em(), household, { isPrivate: true });
+    const closed = await addAccount(db.em(), household, { name: 'Closed' });
+    await db.em().nativeUpdate(Account, { accountKey: closed.accountKey }, { closed: true });
+
+    expect((await start(partner, ownersPrivate.accountKey)).status).toBe(404);
+    expect((await start(partner, closed.accountKey)).status).toBe(409);
+    // The one statement import of the day is still there.
+    expect((await start(partner, household.account.accountKey)).status).toBe(201);
+    expect((await start(partner, household.account.accountKey)).status).toBe(403);
+  });
+
   it('refuses a PDF over the size limit, by its code', async () => {
     vi.stubEnv('STATEMENT_IMPORT_MAX_BYTES', '1024');
     const household = await seedHousehold(db.em());
@@ -85,13 +101,15 @@ describe('PDF statement imports over HTTP', () => {
     expect(response.body.code).toBe('statement_too_large');
   });
 
-  it('starts only on the person’s own account, and the session is theirs alone', async () => {
+  it('starts only on an account the person may write to, and the session is theirs alone', async () => {
     const household = await seedHousehold(db.em());
     const partner = await addPartner(db.em(), household);
     const neighbour = await seedHousehold(db.em());
+    const ownersPrivate = await addAccount(db.em(), household, { isPrivate: true });
     expect((await start(household.appuser, neighbour.account.accountKey)).status).toBe(404);
-    // The partner may not import into an account the owner holds.
-    expect((await start(partner, household.account.accountKey)).status).toBe(404);
+    // The partner may not import into the owner's private account, but may into a shared one.
+    expect((await start(partner, ownersPrivate.accountKey)).status).toBe(404);
+    expect((await start(partner, household.account.accountKey)).status).toBe(201);
 
     const created = await start(household.appuser, household.account.accountKey);
     const id = created.body.session.id as string;

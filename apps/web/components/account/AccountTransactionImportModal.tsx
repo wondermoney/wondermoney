@@ -14,6 +14,7 @@ import { DrawerDialog } from "@/components/ui/dialog-responsive";
 import { FileUploader } from "@/components/ui/FileUploader";
 import { Form, FormField, FormItem } from "@/components/ui/Form";
 import { FormControl, FormLabel, FormMessage } from "@/components/ui/Form";
+import { writableAccounts } from "@/lib/account/account-access";
 import type { AccountCsvImportSuccessCallback } from "@/lib/account/account-csv-import-completion";
 import { isStatementMappingComplete } from "@/lib/account/statement-mapping";
 import { track } from "@/lib/analytics/track";
@@ -111,8 +112,16 @@ interface FormProps {
 
 const AccountTransactionImportModal: React.FC<
   AccountTransactionImportModalProps
-> = ({ isOpen, setOpen, accounts, trigger, onImportSuccess }) => {
+> = ({
+  isOpen,
+  setOpen,
+  accounts: givenAccounts,
+  trigger,
+  onImportSuccess,
+}) => {
   const t = useTranslations();
+  // A closed account takes no import (the API answers 409), so it is neither offered nor the default.
+  const accounts = givenAccounts.filter((account) => !account.closed);
   const notifyIfRateLimited = useRateLimitToast();
   const canImportFiles = useFeature((features) => features.fileStorage);
   const aiHidden = useAiHidden();
@@ -130,7 +139,10 @@ const AccountTransactionImportModal: React.FC<
   // The staged import the file became: once set, the dialog shows its review.
   const [importId, setImportId] = useState<string | undefined>();
   const methods = useForm<FormProps>({
-    defaultValues: { accountId: accounts[0].accountKey.toString(), files: [] },
+    defaultValues: {
+      accountId: accounts[0]?.accountKey.toString() ?? "",
+      files: [],
+    },
   });
   const { clearErrors, handleSubmit, reset, setError } = methods;
   const selectedAccountId = useWatch({
@@ -445,12 +457,12 @@ const AccountTransactionImportModal: React.FC<
     isSubmitButtonLoading ||
     createImport.isPending ||
     createPdfImport.isPending;
-  const reviewAccounts = accounts.filter(
-    (account) => account.isOwnedByViewer !== false,
-  );
+  // A file's accounts map to any account the person may write to, another member's shared one too.
+  const reviewAccounts = writableAccounts(accounts);
 
-  // CSV imports upload the file to storage first; a server without storage offers none.
-  if (!canImportFiles) return null;
+  // CSV imports upload the file to storage first; a server without storage offers none. With
+  // only closed accounts there is nothing to import into.
+  if (!canImportFiles || accounts.length === 0) return null;
 
   return (
     <DrawerDialog

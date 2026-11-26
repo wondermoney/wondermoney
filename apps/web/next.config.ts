@@ -100,6 +100,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  /**
+   * The OAuth consent page grants an outside client access to the person's finances, so no
+   * other site may frame it and trick a click onto Allow (clickjacking).
+   */
+  async headers() {
+    const noFraming = [
+      { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+      { key: "X-Frame-Options", value: "DENY" },
+    ];
+    return [
+      { source: "/:locale/oauth/consent", headers: noFraming },
+      { source: "/oauth/consent", headers: noFraming },
+    ];
+  },
   // Dependencies are installed at the monorepo root, so both bundlers and the standalone
   // output's file tracing have to look there.
   turbopack: { root: path.join(__dirname, "../..") },

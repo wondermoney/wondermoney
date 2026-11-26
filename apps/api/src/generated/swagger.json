@@ -78,6 +78,16 @@
     }
   ],
   "paths": {
+    "/api/auth/.well-known/oauth-authorization-server": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/banking/enable-banking/callback": {
       "get": {
         "description": "",
@@ -5331,6 +5341,36 @@
         }
       }
     },
+    "/v1/user/mcp-clients": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/user/mcp-clients/{clientId}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/v1/user/calendar-feed-token": {
       "get": {
         "description": "",
@@ -5690,6 +5730,26 @@
         "responses": {
           "204": {
             "description": "No Content"
+          }
+        }
+      }
+    },
+    "/v1/user/enable-banking-credential/certificate": {
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/v1/user/enable-banking-credential/activate": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }

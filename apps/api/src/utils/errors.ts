@@ -107,6 +107,29 @@ export const ERROR_CODE = {
   DEMO_UNAVAILABLE: 'demo_unavailable',
   /** A per-user Enable Banking credential is missing, invalid or undecryptable. */
   BANK_CREDENTIAL_INVALID: 'bank_credential_invalid',
+  /**
+   * Enable Banking does not know this application ID, or the key it holds for it is not this one
+   * (400). The ID is mistyped, the certificate registered with it is another one, or this
+   * server's clock is off.
+   */
+  ENABLE_BANKING_APPLICATION_NOT_FOUND: 'enable_banking_application_not_found',
+  /** The Enable Banking application was registered in the Sandbox environment, which never reaches a real bank (400). */
+  ENABLE_BANKING_APPLICATION_SANDBOX: 'enable_banking_application_sandbox',
+  /**
+   * A Production Enable Banking application that is not activated yet (400): in Restricted
+   * Production it is activated by linking the owner's own bank accounts in the Control Panel.
+   */
+  ENABLE_BANKING_APPLICATION_NOT_ACTIVATED: 'enable_banking_application_not_activated',
+  /**
+   * Enable Banking refused the key for another reason than an unknown application (400). Try again
+   * later, or register the application again.
+   */
+  ENABLE_BANKING_CREDENTIAL_REFUSED: 'enable_banking_credential_refused',
+  /**
+   * Activating a generated Enable Banking key when there is none waiting (409): it was never
+   * created, it was replaced, or its seven days ran out. Create a new certificate.
+   */
+  ENABLE_BANKING_PENDING_CREDENTIAL_MISSING: 'enable_banking_pending_credential_missing',
   /** A personal API token lacks the scope this route needs (403). */
   API_TOKEN_SCOPE_REQUIRED: 'api_token_scope_required',
   /** Creating a personal API token from a session older than the freshness window (403). Sign in again. */

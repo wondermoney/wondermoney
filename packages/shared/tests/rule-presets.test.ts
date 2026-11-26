@@ -43,8 +43,20 @@ describe('every shipped rule preset', () => {
     expect(file.rules.length).toBeLessThanOrEqual(25);
   });
 
-  it('covers Portugal, Spain, Brazil and English', () => {
-    expect(RULE_PRESETS.map((preset) => preset.preset.code).sort()).toEqual(['en', 'es-ES', 'pt-BR', 'pt-PT']);
+  it('files an Italian salary as income, only when the money comes in', () => {
+    const salaryRules = (getRulePreset('it-IT')?.rules ?? []).filter((rule) =>
+      rule.actions.some((action) => action.type === 'set_category' && typeof action['category'] === 'object' && (action['category'] as { system?: string }).system === 'SALARY'),
+    );
+    expect(salaryRules.length).toBeGreaterThan(0);
+    for (const rule of salaryRules) {
+      expect(rule.match ?? 'all').toBe('all');
+      expect(rule.conditions).toContainEqual({ field: 'direction', operator: 'is', value: 'in' });
+      expect(rule.actions.map((action) => action.type)).toEqual(['set_category']);
+    }
+  });
+
+  it('covers Portugal, Spain, Italy, Brazil and English', () => {
+    expect(RULE_PRESETS.map((preset) => preset.preset.code).sort()).toEqual(['en', 'es-ES', 'it-IT', 'pt-BR', 'pt-PT']);
   });
 });
 
@@ -102,7 +114,7 @@ describe('the preset safety check', () => {
   });
 
   it('refuses to categorise by a payment rail name', () => {
-    for (const value of ['MB WAY', 'Compra MBWAY', 'PIX recebido', 'Bizum', 'SEPA Credit', 'Transferência', 'TRF 1234', 'Faster Payment']) {
+    for (const value of ['MB WAY', 'Compra MBWAY', 'PIX recebido', 'Bizum', 'SEPA Credit', 'Transferência', 'TRF 1234', 'Faster Payment', 'Bonifico SEPA', 'Bonifico istantaneo', 'Giroconto', 'Satispay']) {
       expect(kinds(presetWith(rule({ conditions: [{ field: 'direction', operator: 'is', value: 'out' }, { field: 'description', operator: 'contains', value }] })))).toEqual(['payment-rail-to-category']);
     }
   });
@@ -111,6 +123,7 @@ describe('the preset safety check', () => {
     expect(findPaymentRailTerms('PIXEL STORE')).toEqual([]);
     expect(findPaymentRailTerms('Transfer to savings')).toEqual(['transfer']);
     expect(findPaymentRailTerms('pagamento pix')).toEqual(['pix']);
+    expect(findPaymentRailTerms('Bonifico a vostro favore')).toEqual(['bonifico']);
   });
 
   it('refuses household-specific references, duplicate names and malformed files', () => {
@@ -129,29 +142,34 @@ describe('matching a person to a preset', () => {
     expect(code({ language: 'pt' })).toBe('pt-PT');
     expect(code({ language: 'es' })).toBe('es-ES');
     expect(code({ language: 'en' })).toBe('en');
+    expect(code({ language: 'it' })).toBe('it-IT');
   });
 
   it('lets a locale country choose between presets of one language', () => {
     expect(code({ language: 'pt-BR' })).toBe('pt-BR');
     expect(code({ language: 'pt_PT' })).toBe('pt-PT');
     expect(code({ language: 'en-GB' })).toBe('en');
+    expect(code({ language: 'it-IT' })).toBe('it-IT');
   });
 
   it('reads a device region and a single-country currency', () => {
     expect(code({ language: 'pt', region: 'BR' })).toBe('pt-BR');
     expect(code({ currency: 'BRL', language: 'pt' })).toBe('pt-BR');
     expect(code({ currency: 'EUR', language: 'pt' })).toBe('pt-PT');
+    expect(code({ currency: 'EUR', language: 'it' })).toBe('it-IT');
   });
 
   it('puts where the person banks before the language they read in', () => {
     expect(code({ bankCountries: ['PT'], language: 'en', region: 'US' })).toBe('pt-PT');
     expect(code({ bankCountries: ['es'], language: 'en' })).toBe('es-ES');
+    expect(code({ bankCountries: ['IT'], language: 'en' })).toBe('it-IT');
   });
 
   it('offers nothing for a country no preset covers, or with no signal at all', () => {
     expect(code({ language: 'es-MX' })).toBeUndefined();
     expect(code({ language: 'fr' })).toBeUndefined();
     expect(code({ language: 'pt', region: 'AO' })).toBeUndefined();
+    expect(code({ language: 'it-CH' })).toBeUndefined();
     expect(code({})).toBeUndefined();
   });
 

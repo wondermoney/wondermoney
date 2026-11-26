@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useTestDatabase } from '@app/__tests__/__helpers__/pg-test-db';
+import { DI } from '@app/database/di';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTransactionCategory } from '@entity/AppuserTransactionCategory';
@@ -8,6 +9,7 @@ import { Category } from '@entity/Category';
 import { Currency } from '@entity/Currency';
 import { Goal } from '@entity/Goal';
 import { ManualAsset } from '@entity/ManualAsset';
+import { PortfolioSnapshot } from '@entity/PortfolioSnapshot';
 import { RecurringSeries } from '@entity/RecurringSeries';
 import { Watchlist } from '@entity/Watchlist';
 
@@ -45,6 +47,7 @@ async function seededDemoData(db: ReturnType<typeof useTestDatabase>) {
     transactionCategories: await em.count(AppuserTransactionCategory, {}),
     goals: await em.count(Goal, { appuserKey: demoUser }),
     assets: await em.count(ManualAsset, { ownerAppuserKey: demoUser }),
+    portfolioSnapshots: await em.count(PortfolioSnapshot, { portfolioKey: { portfolioOwnerAppuserKey: demoUser } }),
     recurring: await em.count(RecurringSeries, { appuserKey: demoUser }),
     watchlist: await em.count(Watchlist, { appuserKey: demoUser }),
   };
@@ -56,6 +59,13 @@ async function seededDemoData(db: ReturnType<typeof useTestDatabase>) {
  */
 describe('seeding the development data set', () => {
   const db = useTestDatabase();
+  // The MikroORM CLI hands the seeders an entity manager and sets up nothing else: no `DI.em`, no
+  // request context. `useTestDatabase` installs `DI.em`, so take it away again, or a seeder that
+  // reaches for it passes here and crashes `pnpm seed:dev`.
+  beforeEach(() => {
+    DI.em = undefined as unknown as typeof DI.em;
+    DI.orm = null;
+  });
 
   it('builds on reference data that is already in the database, without inserting it again', async () => {
     await new ReferenceDataSeeder().run(db.em());
@@ -69,7 +79,7 @@ describe('seeding the development data set', () => {
     expect(seeded.demoAccounts.map((account) => account.currencyKey?.code).sort()).toEqual(['EUR', 'EUR', 'EUR', 'USD']);
     expect(seeded.demoCategories).toBeGreaterThan(0);
     expect(seeded.transactionCategories).toBeGreaterThan(0);
-    for (const feature of ['goals', 'assets', 'recurring', 'watchlist'] as const) {
+    for (const feature of ['goals', 'assets', 'recurring', 'watchlist', 'portfolioSnapshots'] as const) {
       expect(seeded[feature]).toBeGreaterThan(0);
     }
   }, 60_000);

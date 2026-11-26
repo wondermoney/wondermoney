@@ -13,6 +13,17 @@ export const docsLinks = {
 
 export type DocsLinkKey = keyof typeof docsLinks;
 
+/** The languages the docs site is written in. */
+export type DocsLocale = "en" | "es" | "pt";
+
+/**
+ * The docs site's locale for an app locale: the docs are in English, Portuguese and Spanish, so
+ * any other app language (Italian) links to the English pages.
+ */
+export function docsLocaleFor(locale: string): DocsLocale {
+  return locale === "pt" || locale === "es" ? locale : "en";
+}
+
 export function getDocsLink(key: DocsLinkKey, locale: string) {
   const baseUrl = docsLinks[key];
 

@@ -137,6 +137,8 @@ describe('the analytics event catalogue', () => {
     const web = entries.filter(([, spec]) => spec.surfaces.includes('web'));
     expect(web.map(([name]) => name).sort()).toEqual([
       'bank_connection_started',
+      'bank_key_setup_started',
+      'bank_key_setup_step_viewed',
       'feature_screen_viewed',
       'feedback_submitted',
       'import_failed',

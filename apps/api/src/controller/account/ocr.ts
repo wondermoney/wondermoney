@@ -1,7 +1,7 @@
 import { jsonSchema } from 'ai';
-import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
+import { loadDotenv } from '@config/load-dotenv';
 import { Account } from '@entity/Account';
 import { Appuser } from '@entity/Appuser';
 import { AppuserTenant } from '@entity/AppuserTenant';
@@ -29,7 +29,7 @@ import {
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
-dotenv.config({ quiet: true });
+loadDotenv();
 
 const MAX_LLM_RESPONSE_LENGTH = 1024;
 

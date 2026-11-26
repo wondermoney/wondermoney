@@ -1,0 +1,37 @@
+{
+  "exchangeRates": {
+    "title": "Tassi di cambio",
+    "description": "Imposta un tasso tuo per una coppia di valute in un dato giorno, per una valuta che il feed dei tassi non copre o per un giorno in cui il feed ha sbagliato. Tutti i membri della famiglia condividono questi tassi.",
+    "how-it-applies": "Un tasso vale dal suo giorno finché il feed, o un altro dei tuoi tassi, non ne ha uno più recente. Nel suo giorno sostituisce il tasso del feed. Gli importi già salvati vengono riconvertiti in background.",
+    "table-label": "I tuoi tassi di cambio",
+    "pair": "Coppia",
+    "date": "Giorno",
+    "rate": "Tasso",
+    "from": "Da",
+    "to": "A",
+    "rate-hint": "1 {from} = ? {to}",
+    "rate-reading": "1 {from} = {rate} {to}",
+    "empty": "Non hai ancora tassi di cambio tuoi. Le conversioni usano il feed dei tassi.",
+    "load-error": "Impossibile caricare i tuoi tassi di cambio.",
+    "currencies-load-error": "Impossibile caricare l'elenco delle valute.",
+    "add": "Aggiungi tasso",
+    "save-error": "Impossibile salvare il tasso.",
+    "created": "Tasso aggiunto. Gli importi vengono riconvertiti.",
+    "updated": "Tasso aggiornato. Gli importi vengono riconvertiti.",
+    "deleted": "Tasso eliminato. Gli importi vengono riconvertiti.",
+    "edit-named": "Modifica il tasso {pair} del {date}",
+    "delete-named": "Elimina il tasso {pair} del {date}",
+    "delete": "Elimina tasso",
+    "delete-title": "Eliminare il tasso {pair} del {date}?",
+    "delete-description": "Le conversioni che lo usavano tornano al feed dei tassi, oppure risultano non convertite se il feed non ha un tasso per questa coppia.",
+    "select-currency": "Seleziona una valuta",
+    "errors": {
+      "currency-required": "Scegli entrambe le valute.",
+      "same-currency": "Scegli due valute diverse.",
+      "date-required": "Inserisci un giorno.",
+      "date-future": "Il giorno non può essere nel futuro.",
+      "rate-invalid": "Inserisci un tasso maggiore di zero.",
+      "exists": "Hai già un tasso per questa coppia in questo giorno. Modifica quello."
+    }
+  }
+}

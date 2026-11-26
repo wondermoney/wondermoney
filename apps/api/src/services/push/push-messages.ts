@@ -20,7 +20,7 @@ export interface PushBudgetCrossing {
   year: number;
 }
 
-export type PushLanguage = 'en' | 'es' | 'pt';
+export type PushLanguage = 'en' | 'es' | 'it' | 'pt';
 
 export type PushNotification =
   | { accountKey: number; daysUntilDue: number; kind: 'credit_card_due' }
@@ -51,8 +51,8 @@ export function pushCategoryOf(notification: PushNotification): null | PushCateg
 
 /**
  * The recipient's language, picked as the emails pick it: from the person's account language,
- * English for anything without a translation. Every push text has English, Portuguese and Spanish
- * copy, so an `ES` account reads Spanish.
+ * English for anything without a translation. Every push text has English, Portuguese, Spanish
+ * and Italian copy, so an `ES` account reads Spanish.
  */
 interface Copy {
   bank: { body: Record<BankSyncAlertEventType, string>; title: string };
@@ -65,6 +65,7 @@ export function pushLanguageFor(language: string | SupportedLanguages | undefine
   const value = (language ?? '').toLowerCase();
   if (value === SupportedLanguages.PT.toLowerCase()) return 'pt';
   if (value === 'es') return 'es';
+  if (value === 'it') return 'it';
   return 'en';
 }
 
@@ -118,6 +119,31 @@ const COPY: Record<PushLanguage, Copy> = {
       title: 'Pago de tarjeta',
     },
     test: { body: 'Las notificaciones push funcionan en este teléfono.', title: 'Notificación de prueba' },
+  },
+  it: {
+    bank: {
+      body: {
+        [BankSyncAlertEventType.CONSENT_EXPIRING_1D]: 'Una connessione bancaria scade domani. Rinnovala per continuare a sincronizzare.',
+        [BankSyncAlertEventType.CONSENT_EXPIRING_7D]: 'Una connessione bancaria scade tra 7 giorni. Rinnovala per continuare a sincronizzare.',
+        [BankSyncAlertEventType.CONSENT_REVOKED]: 'La banca ha chiuso una connessione bancaria. Ricollegala per continuare a sincronizzare.',
+        [BankSyncAlertEventType.SYNC_FAILING]: "Una connessione bancaria ha smesso di sincronizzarsi. Apri l'app per controllarla.",
+      },
+      title: 'Connessione bancaria',
+    },
+    budget: {
+      many: (count) => `${count} budget richiedono la tua attenzione.`,
+      one: {
+        at_limit: (name) => `Il tuo budget ${name} ha raggiunto il limite.`,
+        near: (name) => `Il tuo budget ${name} è vicino al limite.`,
+        over: (name) => `Il tuo budget ${name} ha superato quanto previsto.`,
+      },
+      title: 'Avviso budget',
+    },
+    card: {
+      body: (days) => (days <= 0 ? 'Oggi scade un pagamento della carta.' : days === 1 ? 'Domani scade un pagamento della carta.' : `Un pagamento della carta scade tra ${days} giorni.`),
+      title: 'Pagamento della carta',
+    },
+    test: { body: 'Le notifiche push funzionano su questo telefono.', title: 'Notifica di prova' },
   },
   pt: {
     bank: {

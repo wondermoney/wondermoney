@@ -7,16 +7,31 @@ import type { BankSyncAlertChannels } from '@service/bank-sync-alerts/bank-sync-
 import { createBankSyncAlertEmailChannel } from '@service/bank-sync-alerts/bank-sync-alert-email.channel';
 import { createBankSyncAlertPushChannel } from '@service/bank-sync-alerts/bank-sync-alert-push.channel';
 import { sendBankSyncAlert, sweepBankSyncAlerts } from '@service/bank-sync-alerts/bank-sync-alert.service';
+import { EnableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import logger from '@utils/logger';
 
-export async function handleBankSyncAlertSweepJob(deps: { enqueue: Enqueue; logger?: Pick<Logger, 'info'>; now?: Date }) {
+/**
+ * The daily bank sync pass: first it deletes the generated Enable Banking keys whose seven days ran
+ * out unactivated (their encrypted private key has no further use), then it decides the alerts.
+ */
+export async function handleBankSyncAlertSweepJob(deps: { enqueue: Enqueue; logger?: Pick<Logger, 'info' | 'warn'>; now?: Date }) {
+  const now = deps.now ?? new Date();
+  const log = deps.logger ?? logger;
+  // A failed purge waits for tomorrow's run; it never costs today's alerts. The rows hold only
+  // ciphertext, and the error is logged by its message alone.
+  let purgedPendingCredentials: null | number = null;
+  try {
+    purgedPendingCredentials = await new EnableBankingCredentialService(DI.em).purgeLapsedPendingCredentials(now);
+  } catch (error) {
+    log.warn({ error: error instanceof Error ? error.message : String(error), queue: 'bank-sync-alert.sweep' }, 'Purging lapsed pending Enable Banking keys failed');
+  }
   const result = await sweepBankSyncAlerts({
     em: DI.em,
     enqueueSend: (deliveryKey) => enqueueBankSyncAlertSend(deliveryKey, { enqueue: deps.enqueue }),
-    now: deps.now ?? new Date(),
+    now,
   });
-  (deps.logger ?? logger).info({ ...result, queue: 'bank-sync-alert.sweep' }, 'Bank sync alert sweep finished');
+  log.info({ ...result, purgedPendingCredentials, queue: 'bank-sync-alert.sweep' }, 'Bank sync alert sweep finished');
   return result;
 }
 

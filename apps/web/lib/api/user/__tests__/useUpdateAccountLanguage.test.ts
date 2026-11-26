@@ -16,6 +16,7 @@ test("every web locale maps to the account language the API stores", () => {
       ["en", "EN"],
       ["pt", "PT"],
       ["es", "ES"],
+      ["it", "IT"],
     ],
   );
 });

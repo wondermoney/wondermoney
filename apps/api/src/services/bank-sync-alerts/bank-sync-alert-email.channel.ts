@@ -30,7 +30,7 @@ export function createBankSyncAlertEmailChannel(dependencies: EmailChannelDepend
 
   return {
     async deliver(message: BankSyncAlertMessage): Promise<BankSyncAlertChannelOutcome> {
-      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es']);
+      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es', 'it']);
       const link = accountLocale(message.recipient.language);
       const date = (value: Date | null) => (value
         ? new Intl.DateTimeFormat(INTL_LOCALE[lang], { day: 'numeric', month: 'long', timeZone: FINANCIAL_EMAIL_TIME_ZONE }).format(value)

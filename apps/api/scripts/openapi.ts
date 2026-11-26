@@ -16,6 +16,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Placeholder DB_* settings beside a shell's DATABASE_URL would be refused as two targets.
+delete process.env['DATABASE_URL'];
 Object.assign(process.env, {
   DB_DATABASE: process.env['DB_DATABASE'] ?? 'openapi-generation',
   DB_HOST: process.env['DB_HOST'] ?? 'localhost',

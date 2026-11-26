@@ -276,7 +276,7 @@ export const OPERATIONS: Record<string, OperationDefinition> = {
   'POST /v1/mcp': {
     tag: 'MCP',
     summary: 'Send a stateless MCP JSON-RPC request',
-    description: 'Uses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change.',
+    description: 'Uses JSON-RPC over the MCP Streamable HTTP transport. Notifications may return HTTP 202 with no body. `mcp:read` exposes the read-only tools; `mcp:propose` exposes the `propose_*` tools, which draft a change the person applies or dismisses in the app. No tool can apply a change. With `MCP_OAUTH_ENABLED` on, an OAuth access token carrying `mcp:read` is accepted too (the read tools only), and a 401 carries `WWW-Authenticate` with the protected resource metadata URL.',
     noContentStatuses: [202],
     request: z.object({ body: jsonRpcRequestSchema }),
     response: jsonRpcResponseSchema,

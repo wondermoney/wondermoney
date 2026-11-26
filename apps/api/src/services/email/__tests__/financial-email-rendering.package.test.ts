@@ -179,6 +179,79 @@ describe('installed React Email package rendering', () => {
     expect(thin.html).toContain('/es/settings?tab=notifications');
   });
 
+  describe('for an Italian account', () => {
+    const storyFacts = {
+      budgetPressure: 'near' as const,
+      categoryDeltas: [{ baselineAmount: '100', categoryKey: 4, direction: 'increase' as const, displayName: 'Ristoranti', percentOfBaseline: '420.00', subjectAmount: '520' }],
+      incomeBaseline: '2000',
+      incomeSubject: '2000',
+      recurringChanges: [],
+      savingsRateBaseline: '28',
+      savingsRateSubject: '19',
+      spendingBaseline: '1400',
+      spendingSubject: '1820',
+    };
+    const weeklyFacts = { activeBudgetStatus: 'near' as const, comparisonPercentage: '-12.5', comparisonWeekTotal: '80', isoWeek: 29, isoWeekYear: 2026, subjectWeekTotal: '1820', topCategory: { amount: '50', categoryKey: 4, displayName: 'Spesa alimentare' } };
+    const week = { end: new Date('2026-07-12T23:00:00Z'), start: new Date('2026-07-05T23:00:00Z') };
+    const weekly = (language: SupportedLanguages, subjectWeek = week) => rendering.renderWeekly({ appuserKey: 7, currencyCode: 'EUR', facts: weeklyFacts, language, recipient: 'user@example.com', subjectWeek });
+    const story = (language: SupportedLanguages) => rendering.renderMonthlyStory({ appuserKey: 7, currencyCode: 'EUR', facts: storyFacts, firstName: 'Giulia', language, monthLabel: 'luglio 2026', narrativeSentences: ['A luglio 2026 hai speso 420.00 € in più del solito: 1820.00 € in totale.'], netWorth: { subject: '50100', tone: 'positive' }, recipient: 'giulia@example.com' });
+    const thin = (language: SupportedLanguages) => rendering.renderMonthlyStoryInsufficient({ appuserKey: 7, currencyCode: 'EUR', incomeSubject: '1200', language, monthLabel: 'luglio 2026', monthsAvailable: 1, monthsNeeded: 2, reason: 'insufficient_history', recipient: 'user@example.com' });
+    const budget = (language: SupportedLanguages) => rendering.renderBudget({ appuserKey: 7, facts: [budgetFact], firstName: 'Giulia', language, recipient: 'user@example.com' });
+
+    /** The sentences of the English email: lines of three words or more, without figures, links or the household's own names. */
+    const englishSentences = (text: string) =>
+      text.split('\n').map((line) => line.trim()).filter((line) => line.split(/\s+/u).length >= 3 && !/\d|https?:|Giulia|WonderMoney|Supermercado|Casa|Ristoranti|Spesa alimentare/u.test(line));
+
+    // Each financial email, rendered for an English and an Italian account from the same facts:
+    // no sentence of the English one may reach the Italian reader.
+    it.each([
+      ['budget alert', budget],
+      ['weekly summary', (language: SupportedLanguages) => weekly(language)],
+      ['monthly story', story],
+      ['monthly story without enough history', thin],
+    ] as const)('writes the %s in Italian, with no English sentence left', async (_name, render) => {
+      const [english, italian] = await Promise.all([render(SupportedLanguages.EN), render(SupportedLanguages.IT)]);
+
+      expect(italian.subject).not.toBe(english.subject);
+      expect(englishSentences(english.text).length).toBeGreaterThan(0);
+      for (const sentence of englishSentences(english.text)) expect(italian.text).not.toContain(sentence);
+      expect(italian.html).toContain('/it/settings?tab=notifications');
+      expect(italian.html).not.toContain('/en/settings');
+    });
+
+    // The docs site has no Italian, so the configured privacy policy opens in English; links into the app stay Italian.
+    it('links the privacy policy in English and the app in Italian', async () => {
+      const alert = await budget(SupportedLanguages.IT);
+
+      expect(alert.html).toContain('https://docs.wonder.money/en/about/privacy-policy');
+      expect(alert.html).not.toContain('docs.wonder.money/it/');
+      expect(alert.html).toContain('next=%2Fit%2Fbudgets');
+      expect(alert.text).toContain('100%');
+      expect(alert.text).toContain('100,00\u00a0€');
+    });
+
+    it('formats the weekly figures with it-IT', async () => {
+      const summary = await weekly(SupportedLanguages.IT);
+
+      expect(summary.text).toContain('Settimana conclusa: dal 6 al 12 luglio 2026.');
+      expect(summary.text).toContain('Rispetto alla settimana precedente: 12,5% sotto');
+      expect(summary.text).toContain('1820,00\u00a0€');
+      expect(summary.html).toContain('next=%2Fit');
+    });
+
+    it.each([
+      ['a week inside one month', { end: new Date('2026-07-12T23:00:00Z'), start: new Date('2026-07-05T23:00:00Z') }, 'dal 6 al 12 luglio 2026'],
+      ['a week across two months', { end: new Date('2026-07-05T23:00:00Z'), start: new Date('2026-06-28T23:00:00Z') }, 'dal 29 giugno al 5 luglio 2026'],
+      ['a week across two years', { end: new Date('2026-01-05T00:00:00Z'), start: new Date('2025-12-29T00:00:00Z') }, 'dal 29 dicembre 2025 al 4 gennaio 2026'],
+      ['a week from the 1st', { end: new Date('2026-06-07T23:00:00Z'), start: new Date('2026-05-31T23:00:00Z') }, "dall'1 al 7 giugno 2026"],
+      ['a week from the 8th', { end: new Date('2026-06-14T23:00:00Z'), start: new Date('2026-06-07T23:00:00Z') }, "dall'8 al 14 giugno 2026"],
+      ['a week to the 1st', { end: new Date('2026-03-02T00:00:00Z'), start: new Date('2026-02-23T00:00:00Z') }, "dal 23 febbraio all'1 marzo 2026"],
+      ['a week to the 11th', { end: new Date('2026-05-11T23:00:00Z'), start: new Date('2026-05-04T23:00:00Z') }, "dal 5 all'11 maggio 2026"],
+    ] as const)('names %s with the Italian prepositions', async (_shape, subjectWeek, range) => {
+      expect((await weekly(SupportedLanguages.IT, subjectWeek)).text).toContain(`Settimana conclusa: ${range}.`);
+    });
+  });
+
   it('renders production weekly props without preview/sample values', async () => {
     const rendered = await rendering.renderWeekly({
       appuserKey: 7, currencyCode: 'EUR',

@@ -18,7 +18,9 @@ Everything lives in `apps/api/src/services/bank-providers/`:
   (`rate_limited`, `consent_expired`, `authentication`, `provider_unavailable`), so the sync
   services and the incident record never learn your provider's error shape.
   `ProviderReportedError` carries a problem the aggregator reported for one account (a
-  `BankReportedErrorCode`, such as `unsupported_currency`).
+  `BankReportedErrorCode`, such as `unsupported_currency`). `RequestRejectedError` is a request
+  the bank refused for a reason other than the consent (`institution_unavailable`), which a
+  reconnect would not fix.
 - `registry.ts` — the compiled-in providers and the `BANK_PROVIDERS` enablement filter.
 - `enable-banking.provider.ts` — the reference implementation, with a consent redirect.
 - `simplefin.provider.ts` — a provider connected with a setup token instead of a redirect. It
@@ -40,8 +42,8 @@ Create `my-provider.provider.ts` and implement:
 | `completeConnection` | Exchange the callback code, mark the connection linked, and persist its accounts. Return `bankConnectionKey`, `accountsCreated` and where the browser should go. |
 | `getSessionStatus` | Whether the consent still holds (`active`, `ended`, `unknown`), used after every account was rejected. |
 | `listAccounts` | The connection's accounts with currency, IBAN, holder name and institution id. Set `reportedErrorCode` for a problem the aggregator reported while still answering, such as SimpleFIN's error list: the run is then recorded as partial under that code. |
-| `getBalances` | The account's balances, with a `balanceType` the sync's preference list understands (`closingBooked`, `interimBooked`, `expected`, …). |
-| `getTransactions` | The full window, already split into `booked`, `pending` and `voided`. Page internally; the sync calls this once per account. |
+| `getBalances` | The account's balances, with a `balanceType` the sync's preference list understands (`closingBooked`, `interimBooked`, `expected`, …). When the balance cannot be read now, throw `UnavailableError` (down or timed out) or `RequestRejectedError` (the bank refuses the call): the account keeps its last balance, its transactions still sync and the run is partial. Throw `ConsentExpiredError` or `UserActionRequiredError` only when the person has to reconnect. |
+| `getTransactions` | The full window, already split into `booked`, `pending` and `voided`. Page internally; the sync calls this once per account. If the bank only serves a shorter window than asked, return what it serves and set `fetchedFrom` to its first day. |
 
 Also declare these capabilities:
 

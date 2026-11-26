@@ -87,6 +87,7 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('sign-up locale from Accept-Lan
   it.each([
     ['pt-PT', 'pt'],
     ['es', 'es'],
+    ['it-IT', 'it'],
   ])('mails a mobile sign-up in %s its verification in %s, landing on the app in that locale and verifying the address', async (acceptLanguage, locale) => {
     const email = `${randomUUID()}@example.test`;
 

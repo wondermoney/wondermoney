@@ -37,6 +37,16 @@ export const API_ERROR_CODE = {
   ASSISTANT_PROPOSAL_NOT_PENDING: "assistant_proposal_not_pending",
   BAD_REQUEST: "bad_request",
   BANK_CREDENTIAL_INVALID: "bank_credential_invalid",
+  /** Enable Banking does not know this application ID with the generated or pasted key (400). */
+  ENABLE_BANKING_APPLICATION_NOT_FOUND: "enable_banking_application_not_found",
+  /** A Production Enable Banking application not activated yet: link an account in its Control Panel (400). */
+  ENABLE_BANKING_APPLICATION_NOT_ACTIVATED: "enable_banking_application_not_activated",
+  /** A Sandbox Enable Banking application, which never reaches a real bank (400). */
+  ENABLE_BANKING_APPLICATION_SANDBOX: "enable_banking_application_sandbox",
+  /** Enable Banking refused the key for another reason than an unknown application (400). */
+  ENABLE_BANKING_CREDENTIAL_REFUSED: "enable_banking_credential_refused",
+  /** No generated key is waiting to be activated, or it lapsed after seven days (409). */
+  ENABLE_BANKING_PENDING_CREDENTIAL_MISSING: "enable_banking_pending_credential_missing",
   CONFLICT: "conflict",
   /** A crypto wallet address is already on that wallet (409); `details.addressIndex` on create. */
   CRYPTO_WALLET_ADDRESS_EXISTS: "crypto_wallet_address_exists",

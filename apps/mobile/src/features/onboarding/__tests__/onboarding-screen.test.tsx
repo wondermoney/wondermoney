@@ -51,6 +51,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
 
@@ -68,6 +69,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
 
@@ -103,6 +105,7 @@ describe('OnboardingScreen', () => {
       onSkip,
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
 
@@ -116,6 +119,7 @@ describe('OnboardingScreen', () => {
       onSkip,
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
     expect(pendingView.getByLabelText('Skip setup').props.accessibilityState?.disabled).toBe(true)
@@ -130,6 +134,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount,
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
 
@@ -155,6 +160,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry,
     })
     expect(view.getByText('Could not load the first-run journey')).toBeTruthy()
@@ -171,6 +177,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
     expect(view.getByText('Could not verify the first-run journey')).toBeTruthy()
@@ -184,6 +191,7 @@ describe('OnboardingScreen', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
     expect(view.toJSON()).toBeNull()
@@ -200,6 +208,7 @@ describe('OnboardingScreen for a user who is no longer required', () => {
       onSkip,
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
     expect(view.getByText('Bring your financial plan together here.')).toBeTruthy()
@@ -227,9 +236,143 @@ describe('OnboardingScreen for a user who is no longer required', () => {
       onSkip: jest.fn(),
       onConnectBank: jest.fn(),
       onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
       onRetry: jest.fn(),
     })
 
     expect(view.getByRole('alert', { name: /Demo profiles are read-only/ })).toBeTruthy()
+  })
+})
+
+describe('OnboardingScreen after skipping the bank', () => {
+  async function reachAccountStep(overrides: Partial<React.ComponentProps<typeof OnboardingScreen>> = {}) {
+    const props = {
+      state: { status: 'loaded' as const, view: newUserView },
+      pending: false,
+      outcome: 'idle' as const,
+      onSkip: jest.fn(),
+      onConnectBank: jest.fn(),
+      onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
+      onRetry: jest.fn(),
+      importAvailable: true,
+      ...overrides,
+    }
+    const view = await renderScreen(props)
+    await fireEvent.press(view.getByLabelText('Start setup'))
+    await waitFor(() => expect(view.getByText('Step 2 of 4')).toBeTruthy())
+    await fireEvent.press(view.getByText('See everything in one place'))
+    await waitFor(() => expect(view.getByLabelText('Continue').props.accessibilityState?.disabled).toBe(false))
+    await fireEvent.press(view.getByLabelText('Continue'))
+    await waitFor(() => expect(view.getByText('Step 3 of 4')).toBeTruthy())
+    await fireEvent.press(view.getByLabelText('Continue'))
+    await waitFor(() => expect(view.getByText('Step 4 of 4')).toBeTruthy())
+    return { view, props }
+  }
+
+  it('skipping on the account step offers the import and manual choices instead of finishing', async () => {
+    const { view, props } = await reachAccountStep()
+
+    await fireEvent.press(view.getByLabelText('Skip setup'))
+
+    await waitFor(() => expect(view.getByText('Start without a bank')).toBeTruthy())
+    expect(view.getByLabelText('Import a statement, A file exported from your bank')).toBeTruthy()
+    expect(view.getByLabelText('Add an account by hand, A name and a balance')).toBeTruthy()
+    expect(view.queryByLabelText('Skip setup')).toBeNull()
+    expect(props.onSkip).not.toHaveBeenCalled()
+  })
+
+  it('each choice leads into its flow, and going on finishes setup', async () => {
+    const { view, props } = await reachAccountStep()
+    await fireEvent.press(view.getByLabelText('Skip setup'))
+    await waitFor(() => expect(view.getByTestId('onboarding-no-bank')).toBeTruthy())
+
+    await fireEvent.press(view.getByTestId('no-account-option-import'))
+    expect(props.onImportStatement).toHaveBeenCalledTimes(1)
+    await fireEvent.press(view.getByTestId('no-account-option-manual'))
+    // Its Back comes back to this choice, not to the bank step.
+    expect(props.onCreateAccount).toHaveBeenCalledWith('no-bank')
+
+    await fireEvent.press(view.getByLabelText('Skip for now'))
+    expect(props.onSkip).toHaveBeenCalledTimes(1)
+  })
+
+  it('Back returns from the choice to the bank step', async () => {
+    const { view } = await reachAccountStep()
+    await fireEvent.press(view.getByLabelText('Skip setup'))
+    await waitFor(() => expect(view.getByTestId('onboarding-no-bank')).toBeTruthy())
+
+    await fireEvent.press(view.getByLabelText('Back'))
+
+    await waitFor(() => expect(view.getByLabelText('Add account manually')).toBeTruthy())
+    expect(view.queryByTestId('onboarding-no-bank')).toBeNull()
+    expect(view.getByText('Step 4 of 4')).toBeTruthy()
+  })
+
+  it('skipping on an earlier step still finishes setup straight away', async () => {
+    const onSkip = jest.fn()
+    const view = await renderScreen({
+      state: { status: 'loaded', view: newUserView },
+      pending: false,
+      outcome: 'idle',
+      onSkip,
+      onConnectBank: jest.fn(),
+      onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
+      onRetry: jest.fn(),
+    })
+
+    await fireEvent.press(view.getByLabelText('Skip setup'))
+
+    expect(onSkip).toHaveBeenCalledTimes(1)
+    expect(view.queryByTestId('onboarding-no-bank')).toBeNull()
+  })
+
+  it('a server that takes no statement files offers only the manual account', async () => {
+    const { view } = await reachAccountStep({ importAvailable: false })
+    await fireEvent.press(view.getByLabelText('Skip setup'))
+    await waitFor(() => expect(view.getByTestId('onboarding-no-bank')).toBeTruthy())
+
+    expect(view.queryByTestId('no-account-option-import')).toBeNull()
+    expect(view.getByTestId('no-account-option-manual')).toBeTruthy()
+  })
+
+  it('the account step\'s own manual button says it came from the account step', async () => {
+    const { view, props } = await reachAccountStep()
+    await fireEvent.press(view.getByLabelText('Add account manually'))
+    expect(props.onCreateAccount).toHaveBeenCalledWith('account')
+  })
+
+  it('coming back from the manual-account screen reopens where it was opened from', async () => {
+    const choice = await renderScreen({
+      state: { status: 'loaded', view: newUserView },
+      pending: false,
+      outcome: 'idle',
+      onSkip: jest.fn(),
+      onConnectBank: jest.fn(),
+      onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
+      onRetry: jest.fn(),
+      importAvailable: true,
+      resumeAt: 'no-bank',
+    })
+    expect(choice.getByText('Step 4 of 4')).toBeTruthy()
+    expect(choice.getByTestId('onboarding-no-bank')).toBeTruthy()
+    choice.unmount()
+
+    const account = await renderScreen({
+      state: { status: 'loaded', view: newUserView },
+      pending: false,
+      outcome: 'idle',
+      onSkip: jest.fn(),
+      onConnectBank: jest.fn(),
+      onCreateAccount: jest.fn(),
+      onImportStatement: jest.fn(),
+      onRetry: jest.fn(),
+      resumeAt: 'account',
+    })
+    expect(account.getByText('Step 4 of 4')).toBeTruthy()
+    expect(account.getByLabelText('Add account manually')).toBeTruthy()
+    expect(account.queryByTestId('onboarding-no-bank')).toBeNull()
   })
 })

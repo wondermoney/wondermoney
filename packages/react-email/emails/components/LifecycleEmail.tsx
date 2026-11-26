@@ -63,6 +63,14 @@ export const SHELL_COPY = {
     privacy: "Privacidad",
     transactionalFooter: (brand: string) => `Este es un aviso de facturación sobre tu cuenta de ${brand}.`,
   },
+  it: {
+    greeting: (name?: string) => (name ? `Ciao ${name},` : "Ciao,"),
+    marketingFooterDefault: (brand: string) => `Ricevi questa email perché hai un account ${brand} con le comunicazioni sul prodotto attive.`,
+    unsubscribe: "Annulla l'iscrizione agli aggiornamenti sul prodotto",
+    settings: "Impostazioni delle notifiche",
+    privacy: "Privacy",
+    transactionalFooter: (brand: string) => `Questo è un avviso di fatturazione relativo al tuo account ${brand}.`,
+  },
 } as const satisfies Record<TransactionalEmailLanguage, Record<string, unknown>>;
 
 export function LifecycleEmailLayout({

@@ -4,15 +4,16 @@ import { KeyRound, Link as LinkIcon, Plus, Unlink } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import EnableBankingSetupWizard from "@/components/settings/BankProvider/EnableBankingSetupWizard";
 import { useSimplefinAvailable } from "@/components/settings/Connections/SimplefinConnectButton";
 import SimplefinConnectDialog from "@/components/settings/Connections/SimplefinConnectDialog";
 import { Button } from "@/components/ui/button";
 import { DrawerDialog } from "@/components/ui/dialog-responsive";
-import { Link } from "@/components/ui/Link";
 import { Spinner } from "@/components/ui/Spinner";
 import { Heading, Text } from "@/components/ui/Typography";
 import { useFeature } from "@/lib/api/instance/useInstance";
 import useBankLinkCredential from "@/lib/api/user/useBankLinkCredential";
+import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 import { cn } from "@/lib/utils";
 
 import {
@@ -54,6 +55,8 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
   );
   const simplefinAvailable = useSimplefinAvailable();
   const [isSimplefinOpen, setIsSimplefinOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const isViewer = useIsHouseholdViewer();
 
   return (
     <>
@@ -83,7 +86,8 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
               <div className="border-border bg-muted/40 relative flex h-full flex-1 flex-col items-center justify-center gap-4 rounded-lg border p-4">
                 <Spinner />
               </div>
-            ) : credentialRequired ? (
+            ) : credentialRequired && isViewer ? (
+              // A viewer cannot link a bank, so there is nothing to set up: say why, offer nothing.
               <div
                 aria-disabled="true"
                 className="border-border bg-muted/40 text-muted-foreground relative flex h-full flex-1 flex-col items-center justify-start gap-4 rounded-lg border p-4 whitespace-normal"
@@ -92,23 +96,41 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
                   <KeyRound />
                 </div>
                 <Heading variant="h3" className="text-foreground text-lg">
-                  {t("bankProviderCredentialRequired.title")}
+                  {t("linked")}
                 </Heading>
                 <Text variant="smallText" className="text-muted-foreground">
                   {t("bankProviderCredentialRequired.body")}
                 </Text>
+              </div>
+            ) : credentialRequired ? (
+              // The linked option still leads somewhere without a key: the setup wizard, which
+              // goes on to the bank list once the key is active.
+              <Button
+                className="relative flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpen(false);
+                  setIsWizardOpen(true);
+                }}
+              >
+                <div className="bg-background text-primary rounded-full p-2">
+                  <KeyRound />
+                </div>
+                <Heading variant="h3" className="text-primary-foreground text-lg">
+                  {t("linked")}
+                </Heading>
+                <Text variant="smallText" className="text-primary-foreground">
+                  {t("bankProviderCredentialRequired.body")}
+                </Text>
                 {sharedCredentialUnavailable ? (
-                  <Text variant="smallText" className="text-muted-foreground">
+                  <Text variant="smallText" className="text-primary-foreground">
                     {t("bankProviderCredentialRequired.sharedUnavailable")}
                   </Text>
                 ) : null}
-                <Link
-                  href="/settings?tab=bank-provider"
-                  className="text-primary text-xs font-semibold underline underline-offset-2"
-                >
+                <span className="text-primary-foreground text-sm font-semibold underline underline-offset-2">
                   {t("bankProviderCredentialRequired.cta")}
-                </Link>
-              </div>
+                </span>
+              </Button>
             ) : (
               <Button
                 className="relative flex h-full flex-1 flex-col items-center justify-start gap-4 p-4 whitespace-normal"
@@ -194,6 +216,12 @@ const AccountAddModal: React.FC<AccountAddModalProps> = ({
       <SimplefinConnectDialog
         open={isSimplefinOpen}
         onOpenChange={setIsSimplefinOpen}
+      />
+      <EnableBankingSetupWizard
+        entry="add_account"
+        open={isWizardOpen}
+        onOpenChange={setIsWizardOpen}
+        onChooseBank={onAddSyncAccountClick}
       />
     </>
   );

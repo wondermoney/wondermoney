@@ -26,14 +26,20 @@ updates:
       mikro-orm:
         applies-to: version-updates
         patterns: ['@mikro-orm/*']
+      # Both groups below exclude @mikro-orm/*. The docs say a dependency goes to the first group
+      # it matches, but the updater gives it to the most specific one, and a group without
+      # `patterns` outranks a wildcard pattern: without the exclusion the runtime packages land in
+      # the production group and the CLI in the development group, at different versions.
       production-minor-and-patch:
         applies-to: version-updates
         dependency-type: production
         update-types: [minor, patch]
+        exclude-patterns: ['@mikro-orm/*']
       development-minor-and-patch:
         applies-to: version-updates
         dependency-type: development
         update-types: [minor, patch]
+        exclude-patterns: ['@mikro-orm/*']
     ignore:
       # Exact pins: timezone data, and a job-queue schema version coupled to the database.
       - dependency-name: date-fns-tz

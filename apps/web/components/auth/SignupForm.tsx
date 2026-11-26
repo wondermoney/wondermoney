@@ -24,8 +24,10 @@ import {
 import {
   captureSignupFunnelEvent,
   getConsentedLandingSource,
+  getConsentedReferrerClass,
   getSignupFailureCategory,
   LANDING_SOURCE_PARAM,
+  REFERRER_CLASS_PARAM,
   SIGNUP_FUNNEL_EVENTS,
 } from "@/lib/utils/analytics";
 import { SENTRY_CLIENT_ENABLED } from "@/lib/utils/sentry-enabled";
@@ -181,6 +183,7 @@ export default function SignupForm({
         inviteToken: values.inviteToken || undefined,
         landingSource: getConsentedLandingSource(searchParams),
         locale,
+        referrerClass: getConsentedReferrerClass(searchParams),
       },
       "signup_form",
     );
@@ -202,11 +205,15 @@ export default function SignupForm({
   };
 
   const signUpWithGoogle = async () => {
-    // `/auth/complete` hands the landing source to the API with the signup.
+    // `/auth/complete` hands the landing source and referrer class to the API with the signup.
     const callbackURL = new URL(getCallbackURL(locale));
     const landingSource = getConsentedLandingSource(searchParams);
     if (landingSource) {
       callbackURL.searchParams.set(LANDING_SOURCE_PARAM, landingSource);
+    }
+    const referrerClass = getConsentedReferrerClass(searchParams);
+    if (referrerClass) {
+      callbackURL.searchParams.set(REFERRER_CLASS_PARAM, referrerClass);
     }
     const { error } = await authClient.signIn.social({
       provider: "google",

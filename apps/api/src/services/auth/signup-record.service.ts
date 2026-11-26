@@ -1,3 +1,4 @@
+import type { AnalyticsReferrerClass } from '@wondermoney/shared';
 import { z } from 'zod';
 
 import { DI } from '@app/database/di';
@@ -27,6 +28,8 @@ export type SignupRecordInput = Readonly<{
   language?: SupportedLanguages;
   lastName?: string;
   method: string;
+  /** Where the visitor came to the website from (a coarse class), sent only with analytics consent. */
+  referrerClass?: AnalyticsReferrerClass;
 }>;
 
 export type SignupRecordResult = Readonly<{
@@ -43,7 +46,8 @@ export type SignupRecordResult = Readonly<{
  *
  * The `signup` analytics event commits in the same transaction, so it exists exactly when the
  * appuser does (and only while analytics delivery is on). It carries no email or name; its
- * `landing_source` is the landing page the signup came from, when the visitor consented.
+ * `landing_source` is the landing page the signup came from and `referrer_class` where the visitor
+ * came to the website from, each only when the visitor consented.
  */
 export async function recordSignup(input: SignupRecordInput): Promise<SignupRecordResult> {
   const externalUserId = externalUserIdSchema.parse(input.externalUserId);
@@ -71,6 +75,7 @@ export async function recordSignup(input: SignupRecordInput): Promise<SignupReco
         ...(input.landingSource ? { landing_source: input.landingSource } : {}),
         locale: appuser.language,
         method: analyticsSignInMethod(input.method),
+        ...(input.referrerClass ? { referrer_class: input.referrerClass } : {}),
       };
       if (isAnalyticsOutboxEnabled() && isValidSignupEvent(externalUserId, eventId, properties)) {
         const outbox = new AnalyticsOutbox();

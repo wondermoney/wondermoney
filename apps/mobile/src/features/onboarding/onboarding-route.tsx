@@ -1,22 +1,37 @@
-import { type Href, useRouter } from 'expo-router'
+import { type Href, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 
 import { useProductRuntime } from '@/components/providers/product-runtime-provider'
 
+import { useConfirmedFeature } from '@/lib/server/use-instance'
+
+import { parseAccountOrigin } from './onboarding-account-origin'
 import { OnboardingScreen } from './onboarding-screen'
 import { classifyCompleteOnboardingFailure, useCompleteOnboarding } from './use-complete-onboarding'
+import { useHasWritableAccount } from './use-has-writable-account'
 import { useOnboardingBootstrap } from './use-onboarding-bootstrap'
 import { mapOnboardingState } from './onboarding-view-model'
 
 type Outcome = 'idle' | 'skip' | 'connect-bank'
 
+const IMPORT_PATH = '/accounts/transactions/import' as Href
+
 export function OnboardingRoute() {
   const { runtime } = useProductRuntime()
   const router = useRouter()
+  // Back from the manual-account screen returns to the view it was opened from.
+  const params = useLocalSearchParams<{ resume?: string }>()
+  const resumeAt = parseAccountOrigin(params.resume)
+  // A statement upload needs the server's file storage; without it no import is offered.
+  const importAvailable = useConfirmedFeature((features) => features.fileStorage)
+  // With an account to write to already, the import opens on it instead of creating one.
+  const hasWritableAccount = useHasWritableAccount()
   const bootstrap = useOnboardingBootstrap()
   const completion = useCompleteOnboarding()
   const [outcome, setOutcome] = useState<Outcome>('idle')
   const hasLeft = useRef(false)
+  // Where leaving goes when a choice here named it (the import); otherwise back, or Home.
+  const leaveTo = useRef<Href | null>(null)
 
   const state = resolveViewState(bootstrap)
   // `access` hands over to the MFA/sign-in gate and `cancelled` is the user's
@@ -39,7 +54,8 @@ export function OnboardingRoute() {
   useEffect(() => {
     if (!runtime || !shouldLeave || hasLeft.current) return
     hasLeft.current = true
-    if (router.canGoBack()) router.back()
+    if (leaveTo.current) router.replace(leaveTo.current)
+    else if (router.canGoBack()) router.back()
     else router.replace('/')
   }, [router, runtime, shouldLeave])
 
@@ -57,6 +73,8 @@ export function OnboardingRoute() {
       pending={completion.isPending}
       completionFailure={completionFailure}
       outcome={outcome}
+      resumeAt={resumeAt}
+      importAvailable={importAvailable}
       onRetry={() => { void bootstrap.refetch() }}
       onConnectBank={async () => {
         setOutcome('connect-bank')
@@ -77,7 +95,7 @@ export function OnboardingRoute() {
           setOutcome('idle')
         }
       }}
-      onCreateAccount={() => {
+      onCreateAccount={(from) => {
         // Pure navigation — no mutation happens here. The destination screen
         // creates the account first and only then completes onboarding, so a
         // user who backs out mid-flow is left in the same required state.
@@ -91,7 +109,32 @@ export function OnboardingRoute() {
         // expects, and matches the existing recovery/invite deep-link
         // pushes elsewhere in the app.
         if (state.status !== 'loaded') return
-        router.push(`/onboarding/create-account?version=${state.view.version}` as Href)
+        router.push(`/onboarding/create-account?version=${state.view.version}&from=${from}` as Href)
+      }}
+      onImportStatement={async () => {
+        if (state.status !== 'loaded') return
+        if (!hasWritableAccount) {
+          // A statement goes into an account: the same manual-account screen first, which then
+          // opens the import on it (`then=import`) instead of going home.
+          router.push(`/onboarding/create-account?version=${state.view.version}&then=import&from=no-bank` as Href)
+          return
+        }
+        // An account to import into is already there (a shared one, say): choosing to import
+        // into it completes onboarding, as creating one does, and the import opens on the
+        // person's accounts. A completed journey leaves through the effect above, which goes
+        // to `leaveTo`; should completing fail, the import still opens, as the manual-account
+        // screen goes on after a failed completion. `hasLeft` keeps it to one navigation.
+        leaveTo.current = IMPORT_PATH
+        completion.reset()
+        try {
+          await completion.mutateAsync({ version: state.view.version })
+        } catch {
+          // Gone on to the import regardless, below.
+        }
+        if (!hasLeft.current) {
+          hasLeft.current = true
+          router.replace(IMPORT_PATH)
+        }
       }}
     />
   )

@@ -1,0 +1,201 @@
+{
+  "reports": {
+    "title": "Report",
+    "subtitle": "Capisci i tuoi soldi con analisi chiare e mirate.",
+    "filters": {
+      "title": "Filtri",
+      "accounts": "Conti",
+      "categories": "Categorie",
+      "merchants": "Commercianti",
+      "tags": "Tag",
+      "currency": "Valuta",
+      "dateRange": "Periodo",
+      "placeholder": {
+        "search": "Cerca…",
+        "allAccounts": "Tutti i conti",
+        "allCategories": "Tutte le categorie",
+        "allMerchants": "Tutti i commercianti",
+        "allCurrencies": "Tutte le valute",
+        "allTags": "Tutti i tag"
+      },
+      "noResults": "Nessun risultato.",
+      "selected": "{count, plural, =1 {1 selezionato} other {# selezionati}}",
+      "preset": {
+        "thisMonth": "Questo mese",
+        "lastMonth": "Mese scorso",
+        "last3Months": "Ultimi 3 mesi",
+        "last6Months": "Ultimi 6 mesi",
+        "last12Months": "Ultimi 12 mesi",
+        "allTime": "Da sempre"
+      },
+      "includePending": "Includi transazioni in sospeso",
+      "includeTransfers": "Includi trasferimenti",
+      "reset": "Reimposta filtri"
+    },
+    "export": {
+      "csv": "Esporta CSV",
+      "downloading": "Preparazione del download…",
+      "success": "Download avviato",
+      "error": "Impossibile generare l'esportazione. Riprova."
+    },
+    "trend": {
+      "up": "In aumento",
+      "down": "In calo",
+      "flat": "Stabile",
+      "vsPriorPeriod": "rispetto al periodo precedente"
+    },
+    "reports": {
+      "spendingByCategory": {
+        "title": "Spese per categoria",
+        "subtitle": "Dove sono andati i tuoi soldi nel periodo.",
+        "total": "Totale speso",
+        "viewTransactions": "Vedi le transazioni che compongono questo totale",
+        "noData": {
+          "title": "Nessuna spesa in questo periodo",
+          "description": "Prova un periodo più ampio o verifica che i conti siano collegati."
+        }
+      },
+      "cashflow": {
+        "title": "Flusso di cassa",
+        "subtitle": "Entrate e uscite nel tempo.",
+        "income": "Entrate",
+        "expenses": "Uscite",
+        "net": "Netto",
+        "trailingNetAverage": "Media mobile del netto a 3 mesi",
+        "partial": {
+          "monthToDate": "Mese in corso",
+          "partialMonth": "Mese parziale",
+          "footnoteCurrent": "{month} è ancora in corso: i suoi valori arrivano fino a oggi.",
+          "footnoteRange": "{month} rientra solo in parte nel periodo selezionato, quindi i suoi valori coprono una parte del mese."
+        },
+        "noData": {
+          "title": "Ancora nessun flusso di cassa",
+          "description": "Quando ci saranno transazioni contabilizzate, qui comparirà il tuo flusso di cassa mensile."
+        }
+      },
+      "sankey": {
+        "title": "Diagramma Sankey del flusso di cassa",
+        "subtitle": "Dalle entrate, attraverso le categorie, fino ai conti.",
+        "legendIncome": "Entrate",
+        "legendCategory": "Categoria",
+        "legendAccount": "Conto",
+        "ariaLabel": "Diagramma Sankey che mostra un flusso di cassa totale di {total}",
+        "linkTooltip": "{source} → {target}: {value}",
+        "nodeTooltip": "{label}: {value}",
+        "mobileNotice": "Questo grafico si vede meglio su uno schermo più ampio.",
+        "mobileTableSource": "Origine",
+        "mobileTableTarget": "Destinazione",
+        "mobileTableValue": "Valore",
+        "noData": {
+          "title": "Attività insufficiente",
+          "description": "Aggiungi altre transazioni per vedere il flusso dei tuoi soldi."
+        }
+      },
+      "netWorthHistory": {
+        "title": "Patrimonio netto nel tempo",
+        "subtitle": "Il totale delle tue attività meno le passività, mese per mese.",
+        "assets": "Attività",
+        "liabilities": "Passività",
+        "netWorth": "Patrimonio netto",
+        "noData": {
+          "title": "Ancora nessuno storico",
+          "description": "Il patrimonio netto si popolerà man mano che i conti registrano attività."
+        }
+      },
+      "budgetVsActual": {
+        "title": "Budget e consuntivo",
+        "subtitle": "Come sono andate le tue spese rispetto al budget.",
+        "budgeted": "Pianificato",
+        "actual": "Effettivo",
+        "variance": "Scostamento",
+        "percentUsed": "% usata",
+        "overBudget": "Oltre il budget",
+        "setupBudget": "Imposta un budget",
+        "category": "Categoria",
+        "noBudget": {
+          "title": "Nessun budget impostato",
+          "description": "Imposta un budget per vedere come vanno le tue spese rispetto a esso."
+        },
+        "noData": {
+          "title": "Niente da confrontare",
+          "description": "Ancora nessuna spesa o budget in questo periodo."
+        }
+      },
+      "portfolioPerformance": {
+        "title": "Rendimento dei portafogli",
+        "subtitle": "Come è cambiato il valore di ogni portafoglio nel periodo, al netto di versamenti e prelievi.",
+        "portfolio": "Portafoglio",
+        "startValue": "Valore iniziale",
+        "netContributions": "Versamenti netti",
+        "change": "Variazione",
+        "dividends": "Dividendi",
+        "endValue": "Valore finale",
+        "total": "Totale",
+        "unknownValue": "Nessun valore registrato",
+        "noExchangeRate": "Ancora nessun tasso di cambio",
+        "timeWeighted": "Ponderato per il tempo",
+        "moneyWeighted": "Ponderato per il capitale",
+        "timeWeightedDescription": "Come sono andati gli investimenti, a prescindere da quanto hai versato o prelevato.",
+        "moneyWeightedDescription": "Come sono andati i tuoi soldi, tenendo conto di quando li hai versati o prelevati. Tasso annuo per periodi di un anno o più.",
+        "perYear": "all'anno",
+        "returnUnavailable": "Storico insufficiente per il calcolo",
+        "notCombined": "Non aggregato tra portafogli",
+        "missingSnapshots": "{count, plural, one {# giorno senza istantanea, valore riportato} other {# giorni senza istantanea, valore riportato}}",
+        "noData": {
+          "title": "Nessun portafoglio da mostrare",
+          "description": "Aggiungi un portafoglio per vederne qui il rendimento."
+        }
+      },
+      "monthComparison": {
+        "title": "Confronta mesi",
+        "subtitle": "Cosa è cambiato tra due mesi, categoria per categoria.",
+        "baseMonth": "Mese",
+        "compareMonth": "Confrontato con",
+        "metric": "Metrica",
+        "income": "Entrate",
+        "expenses": "Uscite",
+        "net": "Netto",
+        "savingsRate": "Tasso di risparmio",
+        "change": "Variazione",
+        "category": "Categoria",
+        "viewTransactions": "Vedi le transazioni che compongono questo importo",
+        "largestChanges": "Il grafico mostra le {count} variazioni maggiori; la tabella elenca tutte le categorie.",
+        "noData": {
+          "title": "Nessuna spesa in nessuno dei due mesi",
+          "description": "Prova altri due mesi o verifica che i conti siano collegati."
+        },
+        "percentagePoints": "{value} p.p."
+      },
+      "spendingVsNormal": {
+        "title": "Spese rispetto alla norma",
+        "subtitle": "Dove sono andati i soldi questo mese e quali categorie sono state sopra o sotto la loro norma degli ultimi tre mesi.",
+        "month": "Mese",
+        "category": "Categoria",
+        "spent": "Speso",
+        "normal": "Norma",
+        "change": "Variazione rispetto alla norma",
+        "noBaseline": "Nessun riferimento",
+        "baselineTooSmall": "Troppo piccola per un confronto",
+        "aboveNormal": "sopra la norma",
+        "belowNormal": "sotto la norma",
+        "nearNormal": "nella norma",
+        "hoverHint": "Passa sopra un riquadro, o usa la tabella, per vederne la spesa, la norma e la variazione.",
+        "tableCaption": "Spese per categoria in {month}, confrontate con gli stessi giorni dei tre mesi precedenti.",
+        "subcategoryOf": "Sottocategoria di {parent}",
+        "viewTransactions": "Vedi le transazioni che compongono questo importo",
+        "noData": {
+          "title": "Nessuna spesa questo mese",
+          "description": "Prova un altro mese o verifica che i conti siano collegati."
+        }
+      }
+    },
+    "common": {
+      "loading": "Caricamento…",
+      "error": "Qualcosa è andato storto.",
+      "errorDescription": "Impossibile caricare il report. Controlla la connessione e riprova.",
+      "retry": "Riprova",
+      "currencyUnknown": "—",
+      "other": "Altro"
+    }
+  }
+}

@@ -20,7 +20,7 @@ interface EmailChannelDependencies {
 const trimSlash = (url: string) => url.replace(/\/$/u, '');
 
 /** What the email calls a card that has no name. */
-const CARD_FALLBACK_NAME = { en: 'card', es: 'tarjeta', pt: 'cartão' } as const;
+const CARD_FALLBACK_NAME = { en: 'card', es: 'tarjeta', it: 'carta', pt: 'cartão' } as const;
 
 /**
  * Payment-due reminders by email, in the owner's language: EN, PT or ES, the languages the template
@@ -38,7 +38,7 @@ export function createCreditCardDueReminderEmailChannel(dependencies: EmailChann
   return {
     available: configured,
     async deliver(message: CreditCardDueReminderMessage): Promise<CreditCardDueReminderChannelOutcome> {
-      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es']);
+      const lang = copyLocale(message.recipient.language, ['en', 'pt', 'es', 'it']);
       const link = accountLocale(message.recipient.language);
       const intlLocale = INTL_LOCALE[lang];
       const app = trimSlash(FRONTEND_URL);

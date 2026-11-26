@@ -1,6 +1,6 @@
 ---
 title: Conectar un cliente de IA
-description: Permite que Claude Desktop, Cursor u otro cliente MCP pregunte por tus propias finanzas con un token de solo lectura.
+description: Permite que ChatGPT, Claude Desktop, Cursor u otro cliente MCP pregunte por tus propias finanzas, en solo lectura.
 ---
 
 WonderMoney incluye un servidor [Model Context Protocol](https://modelcontextprotocol.io) (MCP) de solo lectura. Un cliente MCP como Claude Desktop, Cursor o VS Code puede preguntarle por tus cuentas, gastos, presupuestos, objetivos, patrimonio neto y cartera, y responder en el propio chat del cliente.
@@ -15,7 +15,7 @@ El cliente ve exactamente lo que ves tú:
 - Tus cuentas privadas y las cuentas privadas compartidas contigo, y **no** las cuentas privadas de otro miembro del hogar que están ocultas para ti.
 - Nunca los datos de otro hogar.
 
-Cada herramienta toma tu identidad del token, así que aquí se aplican las mismas reglas de privacidad que en la aplicación.
+Cada herramienta toma tu identidad del token, o de la conexión OAuth que autorizaste, así que aquí se aplican las mismas reglas de privacidad que en la aplicación.
 
 ## Qué puede hacer el cliente
 
@@ -83,13 +83,31 @@ Cursor y otros clientes que hablan Streamable HTTP directamente usan la URL y la
 
 Sustituye la dirección de la API por la tuya y `<your-token>` por el valor que copiaste. El endpoint no guarda estado: el cliente envía el token en cada petición y no hay sesión que mantener.
 
+## Conectar ChatGPT
+
+ChatGPT, y otros clientes que inician sesión con OAuth, se conectan sin token, en un servidor que lo ofrezca (consulta [Autoalojamiento](#autoalojamiento)). Los ajustes muestran entonces **Conectar ChatGPT** en **Conectar un cliente de IA**.
+
+1. En ChatGPT, añade una app (un conector), indica el endpoint MCP, `https://api.example.com/v1/mcp` con la dirección de tu API, y elige OAuth.
+2. ChatGPT te envía a WonderMoney. Inicia sesión si aún no lo has hecho, con el segundo factor si lo usas.
+3. La página de consentimiento indica el cliente, la dirección a la que te devuelve y tu hogar, y enumera lo que puede hacer. Selecciona **Autorizar**. Autorizar exige haber iniciado sesión en las últimas 24 horas y, si usas autenticación en dos pasos, tu código de autenticación, igual que crear un token.
+
+El cliente recibe solo acceso de lectura (`mcp:read`): las herramientas de solo lectura de arriba, nunca las de propuestas, que siguen exigiendo un token personal. Sigue conectado hasta que lo desconectes; su token de acceso dura 15 minutos y se renueva sin volver a preguntarte. Los clientes que autorizaste aparecen en **Conectados con OAuth**, con la última vez que llamaron a una herramienta.
+
+Comprueba la dirección en la página de consentimiento antes de autorizar: cualquier cliente puede registrarse con cualquier nombre, y solo la dirección a la que te devuelve (como `https://chatgpt.com`) dice adónde va tu respuesta. Un cliente que responde a una app de tu propio ordenador aparece como tal, con un aviso. Los clientes solo pueden registrar direcciones `https`, o `http` en `127.0.0.1` o `localhost`.
+
+La conexión pertenece al hogar en el que estabas cuando la autorizaste. Si sales de él o te unes a otro, el cliente se desconecta.
+
 ## Registro de auditoría
 
-Cada llamada a una herramienta se escribe en el registro de auditoría del asistente con el nombre de la herramienta, el token y la hora. Los importes y las descripciones nunca se escriben allí. **Configuración → Tokens de API → Conectar un cliente de IA** lista las llamadas más recientes.
+Cada llamada a una herramienta se escribe en el registro de auditoría del asistente con el nombre de la herramienta, el token o el cliente OAuth, y la hora. Los importes y las descripciones nunca se escriben allí. **Configuración → Tokens de API → Conectar un cliente de IA** lista las llamadas más recientes.
 
 ## Revocar el acceso
 
 Selecciona **Revocar** junto al token en **Configuración → Tokens de API**. La revocación es inmediata: la siguiente petición del cliente recibe `401 Unauthorized`. Borra también la entrada del servidor en la configuración del cliente, para que deje de intentarlo.
+
+Para un cliente conectado con OAuth, selecciona **Desconectar** junto a él en **Conectados con OAuth**. Sus tokens dejan de funcionar enseguida, y su siguiente petición recibe `401 Unauthorized`. Para volver a usarlo, conéctalo de nuevo desde el cliente. Cambiar o restablecer la contraseña, y cerrar sesión en los demás dispositivos o en todos, también desconecta todos los clientes OAuth.
+
+El servidor elimina un cliente que lleva siete días sin conexión: uno que nadie autorizó en los siete días siguientes a registrarse, o uno desconectado hace más de siete días. Si ChatGPT u otro cliente deja de conectarse después, elimina la app (el conector) en el cliente y vuelve a añadirla.
 
 ## Límites de uso
 
@@ -98,6 +116,8 @@ El tráfico MCP usa el presupuesto de peticiones del propio token, y cada token 
 ## Autoalojamiento
 
 El servidor está activado por defecto. Define `MCP_ENABLED=false` en la API para desactivarlo: `POST /v1/mcp` pasa a responder `404`, y `GET /v1/instance` informa de `features.mcp: false`, así que el panel de ajustes desaparece. Consulta [Configurar](/es/docs/self-hosting/configure).
+
+OAuth, que ChatGPT necesita, está desactivado por defecto. Define `MCP_OAUTH_ENABLED=true` en la API para ofrecerlo. Necesita un `API_URL` con `https`, y permite que cualquier cliente se registre, como esperan los clientes MCP; cada uno sigue necesitando el consentimiento de una persona. Con él activado, la API sirve los documentos de descubrimiento en `/.well-known/oauth-protected-resource` y `/.well-known/oauth-authorization-server`, y un `401` de `POST /v1/mcp` se los indica al cliente. Con un solo nombre de host, enruta también `/.well-known/oauth-*` a la API; el proxy incluido ya lo hace. Si lo vuelves a desactivar, ningún cliente puede conectarse ni llamar al servidor con OAuth, y los clientes conectados antes siguen en los ajustes para que las personas puedan desconectarlos.
 
 ## Páginas relacionadas
 

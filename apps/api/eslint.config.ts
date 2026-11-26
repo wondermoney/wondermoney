@@ -211,5 +211,13 @@ export default defineConfig(
     files: FS_IN_TESTS_ALLOWLIST,
     rules: { 'no-restricted-imports': 'off' },
   },
+  {
+    // New in typescript-eslint 8.73.0's strict config. It overflows the stack on MikroORM's
+    // recursive query types (rule-run.service.ts, typescript-eslint/typescript-eslint#13220), and
+    // past that it flags the `{ key } as Entity` references the services and tests build. Off
+    // until a release fixes the crash and those references move to `em.getReference`.
+    files: ['**/*.{js,ts}'],
+    rules: { '@typescript-eslint/no-unsafe-class-instance-assignment': 'off' },
+  },
   //{ extends: [packageJson.configs.recommended], files: ['package.json'] },
 );

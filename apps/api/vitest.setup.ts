@@ -49,6 +49,9 @@ const envBaseline = (globalScope[ENV_BASELINE_KEY] ??= {
   APP_URL: 'https://app.example.test',
   ...process.env,
 });
+// The placeholder DB_* settings below would sit beside a developer's own DATABASE_URL, which the
+// configuration refuses (config/database-target.ts). Tests that want one stub it themselves.
+delete envBaseline['DATABASE_URL'];
 
 for (const key of Object.keys(process.env)) {
   if (!(key in envBaseline)) Reflect.deleteProperty(process.env, key);

@@ -458,6 +458,14 @@
       "more_other": "E mais {{count}} alertas bancários.",
       "reconnect": "Voltar a ligar",
       "dismiss": "Dispensar"
+    },
+    "noAccounts": {
+      "title": "Adiciona a tua primeira conta",
+      "connect": "Ligar um banco",
+      "import": "Importar um extrato",
+      "importHint": "Um ficheiro exportado do teu banco",
+      "manual": "Adicionar uma conta à mão",
+      "manualHint": "Um nome e um saldo"
     }
   },
   "netWorthHistory": {
@@ -1259,6 +1267,8 @@
       "readStalled": "A leitura do ficheiro parou antes de terminar. Tenta outra vez para o ler de novo.",
       "importing": "A importar… {{imported}} de {{total}} transações até agora.",
       "stalled": "A importação parou antes de terminar. Tenta outra vez para continuar onde parou; nada é importado duas vezes.",
+      "accessLost": "Já não podes importar para esta conta, por isso nada foi importado.",
+      "accessLostPartway": "Já não podes importar para esta conta, por isso o resto do ficheiro não foi importado.",
       "readFailed": "Não conseguimos ler este ficheiro. Escolhe uma exportação do extrato em CSV ou Excel.",
       "expired": "Esta importação expirou antes de terminar. Começa outra vez com o ficheiro.",
       "unsupported": "Esta versão da app não consegue mostrar esta importação. Atualiza a app ou termina-a na web.",
@@ -1649,7 +1659,8 @@
       "device": "Idioma do dispositivo",
       "en": "English",
       "pt-PT": "Português (Portugal)",
-      "es": "Español"
+      "es": "Español",
+      "it": "Italiano"
     },
     "languageScope": "O idioma altera a interface da aplicação neste dispositivo e o idioma dos teus emails. Os emails que ainda não estão traduzidos chegam em inglês."
   },
@@ -4159,6 +4170,15 @@
           "title": "Património líquido como referência",
           "description": "Contas e investimentos combinam-se num só número para te ajudar a perceber a tua posição."
         }
+      },
+      "noBank": {
+        "headline": "Começar sem banco",
+        "description": "Importa um extrato ou adiciona uma conta com o saldo.",
+        "import": "Importar um extrato",
+        "importHint": "Um ficheiro exportado do teu banco",
+        "manual": "Adicionar uma conta à mão",
+        "manualHint": "Um nome e um saldo",
+        "skip": "Saltar por agora"
       }
     },
     "heading": "Bem-vindo ao WonderMoney",
@@ -4920,6 +4940,7 @@
     "viewAll": "Ver tudo",
     "cashflow": "Fluxo de caixa",
     "accountBalance": "Saldo da conta",
+    "balanceAsOf": "Saldo de {{date}}",
     "available": "Disponível",
     "private": "Privada",
     "viewOnly": "Só de leitura",
@@ -5111,6 +5132,7 @@
     "errors": {
       "account-phase-failed": "O teu banco não enviou a lista de contas.",
       "authentication": "O acesso ao teu banco tem de ser configurado novamente.",
+      "balance-unavailable": "As tuas transações foram sincronizadas, mas o teu banco não enviou o saldo.",
       "cancelled": "A ligação ao banco foi cancelada antes de terminar.",
       "consent-expired": "O teu acesso a este banco expirou.",
       "data-validation": "O teu banco enviou dados que não conseguimos ler.",
@@ -5551,6 +5573,7 @@
     "names": {
       "pt-PT": "Portugal",
       "es-ES": "Espanha",
+      "it-IT": "Itália",
       "pt-BR": "Brasil",
       "en": "o Reino Unido e os EUA"
     },
@@ -5563,7 +5586,7 @@
     },
     "dialog": {
       "title": "Regras para {{name}}",
-      "description": "Cada regra reconhece um comerciante na descrição do banco de um pagamento e define a categoria e o comerciante. Receitas, transferências e o que definiste à mão nunca mudam. As regras são adicionadas depois das tuas e podes editá-las ou eliminá-las depois.",
+      "description": "Cada regra reconhece um comerciante ou um salário na descrição do banco e define a categoria ou o comerciante. As regras de despesa só se aplicam a dinheiro que sai e as de salário só a dinheiro que entra, por isso uma receita nunca fica com uma categoria de despesa. Transferências e o que definiste à mão nunca mudam. As regras são adicionadas depois das tuas e podes editá-las ou eliminá-las depois.",
       "loading": "A carregar as regras…",
       "error": "Não foi possível carregar as regras.",
       "matches": "Descrição contém “{{values}}”",

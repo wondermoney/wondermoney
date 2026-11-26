@@ -1241,6 +1241,7 @@
   "balance-growth": "Balance growth",
   "account-overview": "Account overview",
   "account-balance": "Account balance",
+  "balance-as-of": "Balance as of {date}",
   "projected-balance": "Projected balance",
   "all-transactions": "All transactions",
   "account-overview-description": "This is a summary of your account, including balance growth, latest transactions and insights.",
@@ -1423,7 +1424,7 @@
   "appearance-description": "Change the appearance of the app.",
   "language-email-hint": "Your emails follow this language where they have been translated, and arrive in English otherwise.",
   "language-email-save-error": "Your emails could not be switched to this language. Pick it again to retry.",
-  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 English} es {🇪🇸 Español} other {Unknown}}",
+  "locale": "{locale, select, pt {🇵🇹 Português} en {🇺🇸 English} es {🇪🇸 Español} it {🇮🇹 Italiano} other {Unknown}}",
   "current-month": "Current month",
   "last-month": "Last month",
   "last-3-months": "Last 3 months",
@@ -2620,9 +2621,9 @@
   "transaction": "Transaction",
   "transaction-hidden": "Hidden",
   "bankProviderCredentialRequired": {
-    "title": "Add your Enable Banking key first",
-    "body": "Connecting a bank now needs your own Enable Banking application ID and key. Add them in Settings, then come back here.",
-    "cta": "Go to Bank Provider settings",
+    "title": "Set up bank sync first",
+    "body": "Linking a bank needs your own free Enable Banking application. The setup takes a few minutes.",
+    "cta": "Set up bank sync",
     "sharedUnavailable": "This server's shared bank connection covers one household only, so yours needs its own key."
   },
   "faq": {
@@ -2679,6 +2680,7 @@
     "removeDialogTitle": "Remove your Enable Banking key?",
     "removeDialogDescription": "You won't be able to connect or sync any bank accounts until you add a new key. Accounts already linked will stop refreshing.",
     "removeDialogConfirm": "Remove key",
+    "removeSignInAgain": "For your security, removing your key needs a recent sign-in. You'll come straight back here.",
     "cancel": "Cancel",
     "loadError": "Couldn't load your Enable Banking key. Try again shortly.",
     "toastRemoveSuccess": "Enable Banking key removed.",
@@ -2700,7 +2702,86 @@
       "submit": "Test & Save",
       "genericError": "Couldn't verify this key. Please check it and try again."
     },
-    "sharedAvailable": "This server has a shared Enable Banking connection for your household, so you can link banks without a key of your own. If you add one, new links use yours."
+    "sharedAvailable": "This server has a shared Enable Banking connection for your household, so you can link banks without a key of your own. If you add one, new links use yours.",
+    "statusPending": "Waiting for application ID",
+    "createKeyCta": "Let WonderMoney create the key",
+    "haveKeyCta": "I already have a key",
+    "continueSetup": "Continue setup",
+    "pendingWaiting": "A certificate is waiting for its application ID until {date}.",
+    "generated": {
+      "create": "Create certificate",
+      "recreate": "Create a new certificate",
+      "download": "Download certificate",
+      "copyCertificate": "Copy certificate",
+      "fieldName": "Application name",
+      "fieldDescription": "Description",
+      "fieldRedirectUrl": "Redirect URL",
+      "fieldPrivacyUrl": "Privacy URL",
+      "fieldTermsUrl": "Terms URL",
+      "copyValue": "Copy {field}",
+      "applicationIdPlaceholder": "e.g. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
+      "activate": "Activate",
+      "totp": "Authenticator code",
+      "copied": "Copied.",
+      "copyFailed": "Couldn't copy. Select the text and copy it instead.",
+      "errorApplicationNotFound": "Enable Banking doesn't recognise this application ID with this key. Check the ID, that the application was registered with this certificate, and that this server's clock is right.",
+      "errorRefused": "Enable Banking refused this key. Try again later, or register the application again.",
+      "errorSandbox": "This is a Sandbox application, which can't reach a real bank. Register a new application with Environment set to Production.",
+      "errorNotActivated": "This application isn't activated yet. In the Control Panel, choose \"Activate by linking accounts\", link one of your own bank accounts, then try again.",
+      "errorPendingMissing": "This certificate has expired or was replaced. Create a new certificate and register it again.",
+      "errorTotpRequired": "Enter your authenticator code to continue.",
+      "errorInvalidTotp": "That authenticator code is not valid.",
+      "errorSessionNotFresh": "For your security, sign in again before setting up your key.",
+      "errorGeneric": "Something went wrong. Please try again."
+    },
+    "wizard": {
+      "title": "Set up bank sync",
+      "progress": "Step {current} of {total}",
+      "guide": "Step-by-step guide",
+      "back": "Back",
+      "next": "Next",
+      "signIn": {
+        "title": "Sign in to Enable Banking",
+        "body": "Enable Banking is free. Enter your email on its sign-in page and open the link it emails you. There's no password.",
+        "open": "Open Enable Banking"
+      },
+      "create": {
+        "title": "Create the application",
+        "body": "In the Control Panel, open Applications and add a new application with these values.",
+        "environment": "Environment: Production",
+        "environmentWhy": "Not Sandbox. A Sandbox application never reaches a real bank.",
+        "urlsRequired": "Production needs both URLs, even though the form doesn't mark them as required.",
+        "certificate": "Public certificate",
+        "certificateHint": "Choose \"Generate outside the browser and import public certificate\", then paste this certificate.",
+        "waiting": "A certificate is waiting until {date}. If you haven't registered it, create a new one.",
+        "haveKey": "I already have a key"
+      },
+      "activate": {
+        "title": "Activate the application",
+        "body": "Once you submit, the application's page shows two buttons.",
+        "link": "Activate by linking accounts",
+        "linkHint": "Choose this and link one of your own bank accounts.",
+        "request": "Request activation",
+        "requestHint": "Skip this: it's for businesses and needs company verification."
+      },
+      "applicationId": {
+        "title": "Paste the application ID",
+        "label": "Application ID",
+        "hint": "Shown near the top of the application's page.",
+        "checking": "Checking with Enable Banking…",
+        "revisit": "Go to step {step}: {title}"
+      },
+      "done": {
+        "title": "Bank sync is ready",
+        "body": "Your Enable Banking application is active. Choose your bank to link your first account.",
+        "chooseBank": "Choose your bank"
+      },
+      "signInAgain": {
+        "title": "Sign in again first",
+        "body": "For your security, setting up bank sync needs a recent sign-in. You'll come straight back here.",
+        "action": "Sign in again"
+      }
+    }
   },
   "emailVerification": {
     "message": "Verify your email to use this feature. We sent a link to {email}.",
@@ -2765,6 +2846,7 @@
   "import-review-reading": "Reading your file…",
   "import-review-importing": "Importing… {imported} of {total} transactions so far.",
   "import-review-stalled": "The import stopped before it finished. Try again to carry on from where it stopped; nothing is imported twice.",
+  "import-review-access-lost": "You can no longer import into this account, so nothing was imported.",
   "import-review-read-failed": "We couldn't read this file. Choose a CSV or Excel export of your statement.",
   "import-pdf-entry": "Import PDF statement",
   "import-pdf-title": "Import a PDF statement",
@@ -2835,6 +2917,7 @@
   "import-review-date-order-hint-month-first": "The file doesn't say, so they were read month first (01/15/2026 is 15 January). Choose the other order if that's wrong.",
   "import-review-done": "{imported, plural, one {# transaction imported} other {# transactions imported}}, {skipped} skipped.",
   "import-review-done-failed": "{failed, plural, one {# row couldn't be imported} other {# rows couldn't be imported}}.",
+  "import-review-access-lost-partway": "You can no longer import into this account, so the rest of the file wasn't imported.",
   "import-review-details-deleted": "The row-by-row details of this import are no longer kept: they are deleted 7 days after an import. The imported transactions stay in the account.",
   "portfolioAccountLink": {
     "account-label": "Account that holds this portfolio",
@@ -2912,6 +2995,7 @@
     "errors": {
       "account-phase-failed": "Your bank didn't send the account list.",
       "authentication": "Your bank sign-in needs to be set up again.",
+      "balance-unavailable": "Your transactions synced, but your bank didn't send a balance.",
       "cancelled": "The bank connection was cancelled before it finished.",
       "consent-expired": "Your access to this bank has expired.",
       "data-validation": "Your bank sent data we couldn't read.",
