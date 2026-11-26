@@ -11,16 +11,21 @@ the repository root: `pnpm install && pnpm build:lib` first, since the API impor
 
 ## Database safety: read before any DB command
 
-**`.env` decides which database you touch.** Every `migrate:*` and `seed:*` script connects to
-whatever `DB_HOST`/`DB_PORT`/`DB_DATABASE` resolve to (process env first, then the *last*
-assignment in `.env`), regardless of the `dev`/`prd` in its name. A `.env` can hold a block
-for a remote database, and a port forward to one looks like `localhost`. The local compose
+**`.env` decides which database you touch.** Every `migrate:*`, `seed:*` and `demo:*` script
+reads `.env` (`src/config/load-dotenv.ts`) and connects to whatever `DB_HOST`/`DB_PORT`/
+`DB_DATABASE` resolve to (process env first, then the *last* assignment in `.env`), regardless
+of the `dev`/`prd` in its name. A `.env` can hold a block for a remote database, and a port
+forward to one looks like `localhost`. The local compose
 Postgres is on **5434**, so it is never confused with a forwarded `5432`. Run
 `grep -E '^DB_' .env` and confirm the target before anything that writes.
 
 - `scripts/assert-local-db.mjs` guards the scripts: `*:fresh` refuses any non-local host;
-  `migrate:dev` / `seed:dev` need `ALLOW_REMOTE_DB=1` for one. A port-forward passes as
-  local, so the guard is a seatbelt, not proof the target is disposable.
+  `migrate:dev`, `migrate:manual`, `seed:dev` and `demo:{seed,reset,refresh}:dev` need
+  `ALLOW_REMOTE_DB=1` for one. All of them refuse a non-local `MIKRO_ORM_HOST` or
+  `MIKRO_ORM_CLIENT_URL` and any `MIKRO_ORM_DB_NAME`, which MikroORM merges over the config.
+  The rest (`migrate:prd`, `migrate:manual:prd`, `seed:prd`, `demo:*` without `:dev`, the
+  read-only ones) are unguarded. A port-forward passes as local, so the guard is a seatbelt,
+  not proof the target is disposable.
 - **`migrate:dev:fresh` / `migrate:prd:fresh` drop the whole database.** Run them only on a
   throwaway local or CI database, and only with the human's explicit approval for that run.
   Move a real database forward with `pnpm migrate:dev` (apply pending, non-destructive); try a

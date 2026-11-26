@@ -2,8 +2,9 @@ import { pathToFileURL } from 'node:url';
 
 import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
-import { Client } from 'pg';
+import { Client, type ClientConfig } from 'pg';
 
+import { loadDotenv } from './config/load-dotenv.js';
 import { ensureInvestmentsAndSavingsCategory } from './database/seeders/InvestmentsAndSavingsCategorySeeder.js';
 import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
@@ -138,21 +139,31 @@ export function planBaseline(executed: readonly string[]): BaselinePlan {
  * run, and closing it releases the lock even if the process dies mid-migration.
  */
 async function createLockClient(): Promise<Client> {
-  // Read the connection details straight from the env rather than off `config`.
-  // Importing `./mikro-orm.config.js` has already run `dotenv.config()`, and that
-  // config object is itself built from exactly these five variables — but its
-  // `password` is typed as MikroORM's dynamic-credential union, which `pg` does
-  // not accept.
+  const client = new Client(lockClientConfig());
+  await client.connect();
+  return client;
+}
+
+/**
+ * The lock client's connection settings: the `DB_*` target, with `.env` loaded first
+ * (`loadDotenv`: the process environment wins, then the last assignment in `.env`). It loads it
+ * itself because no import can be relied on to have done so (`./mikro-orm.config.js` resolves
+ * lazily), and without `DB_*` `pg` falls back to the shell's `PG*` variables.
+ *
+ * Read from the env rather than off `config`: that object is built from these same five
+ * variables, but its `password` is typed as MikroORM's dynamic-credential union, which `pg`
+ * does not accept.
+ */
+export function lockClientConfig(): ClientConfig {
+  loadDotenv();
   const { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } = process.env;
-  const client = new Client({
+  return {
     database: DB_DATABASE,
     host: DB_HOST,
     password: DB_PASSWORD,
     port: DB_PORT === undefined ? undefined : Number(DB_PORT),
     user: DB_USERNAME,
-  });
-  await client.connect();
-  return client;
+  };
 }
 
 /**

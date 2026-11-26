@@ -26,16 +26,16 @@
  * - **One aggregated error.** Every problem is reported at once, not one redeploy at a
  *   time. The error never includes secret values.
  * - `bootConfiguration(role)` is the **only** place in the codebase that reads
- *   `process.env` or calls `dotenv.config()`. The returned value is deeply immutable.
+ *   `process.env` (after `loadDotenv` fills it from `.env`). The returned value is deeply immutable.
  * - Migration status: this module is the destination. `utils/constants.ts` and
- *   direct `dotenv.config()` calls are old readers still kept for compatibility;
+ *   direct `loadDotenv()` calls at import time are old readers still kept for compatibility;
  *   the ESLint restriction plus source-scan test reject new direct readers.
  */
-import dotenv from 'dotenv';
 import { z } from 'zod';
 
 import { CRYPTO_EXPLORER_ENV, isCryptoExplorerUrl } from './crypto-explorers';
 import { defaultBrowserOrigins, resolveAppUrl } from './instance-urls';
+import { loadDotenv } from './load-dotenv';
 import { parseMarketDataProviders } from './market-data-providers';
 import { isMerchantLogoTemplate } from './merchant-logo-template';
 import { parseTrustProxy, TrustProxyError } from './trust-proxy';
@@ -796,7 +796,7 @@ export function loadAuthConfiguration(source: ConfigurationSource): ReturnType<t
 let installed: ConfigurationByRole[keyof ConfigurationByRole] | null = null;
 
 function readProcessSource(): ConfigurationSource {
-  dotenv.config({ quiet: true });
+  loadDotenv();
   return Object.freeze({ ...(process.env as Record<string, string | undefined>) });
 }
 
@@ -804,7 +804,7 @@ function readProcessSource(): ConfigurationSource {
  * Validate the runtime configuration for the current process and return a deeply
  * immutable value.
  *
- * The sole place in the codebase permitted to read `process.env` or call `dotenv.config()`.
+ * The sole place in the codebase permitted to read `process.env` (filled from `.env` by `loadDotenv`).
  * Subsequent calls in the same process return the cached result; calling `bootConfiguration`
  * twice with different roles throws `ConfigurationError`.
  */

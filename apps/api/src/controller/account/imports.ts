@@ -1,7 +1,7 @@
 import { transactionImport } from '@wondermoney/shared';
-import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 
+import { loadDotenv } from '@config/load-dotenv';
 import { Account } from '@entity/Account';
 import { authedContext } from '@middleware/authed-context';
 import { canUseAi } from '@middleware/email-verification';
@@ -18,7 +18,7 @@ import { getAccountPresignedUrlForUploadRequestSchema, previewAccountCsvImportRe
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
-dotenv.config({ quiet: true });
+loadDotenv();
 
 /*
  * Who may import into an account is the route's `requireWritableAccount` guard

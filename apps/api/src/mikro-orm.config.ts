@@ -6,6 +6,7 @@ import { SeedManager } from '@mikro-orm/seeder';
 import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 import { type ConfigurationSource, loadConfiguration } from '@app/config/configuration';
+import { loadDotenv } from '@app/config/load-dotenv';
 
 import { NamingStrategy } from './database/naming-strategy.js';
 import { ExtendedEntityRepository } from './database/repositories/_ExtendedEntityRepository.js';
@@ -96,9 +97,12 @@ export function createMikroOrmOptions(
 
 /**
  * Legacy default export for tooling that imports `mikro-orm.config.ts` directly (the MikroORM
- * CLI and a number of database scripts). Validates lazily at access time so test environments
- * that lack secrets are not blocked at import; the validated Configuration module is the only
- * reader of `process.env`.
+ * CLI, `migrate.ts` and a number of database scripts). Validates lazily at access time so test
+ * environments that lack secrets are not blocked at import; the validated Configuration module is
+ * the only reader of `process.env`.
+ *
+ * It loads `.env` first (`loadDotenv`: the process environment wins, then the last assignment in
+ * `.env`), because nothing else on the MikroORM CLI's path does.
  *
  * The proxy must forward *every* object operation, not just `get`: `MikroORM.init` merges its
  * options with `Object.entries`, so a get-only proxy over `{}` enumerates as empty and MikroORM
@@ -107,6 +111,7 @@ export function createMikroOrmOptions(
 let resolvedOptions: Partial<Options<PostgreSqlDriver>> | undefined;
 function resolveOptions(): Partial<Options<PostgreSqlDriver>> {
   if (!resolvedOptions) {
+    loadDotenv();
     const source: ConfigurationSource = Object.freeze({ ...(process.env as Record<string, string | undefined>) });
     resolvedOptions = createMikroOrmOptions(loadConfiguration('orm-cli', source));
   }

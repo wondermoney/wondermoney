@@ -26,7 +26,7 @@
  *   NODE_ENV=development NODE_OPTIONS='--import=tsx' \
  *     node src/database/scripts/e2e-household-flow.auth.ts create a@b.test secret
  */
-import { existsSync } from 'node:fs';
+import { loadDotenv } from '@config/load-dotenv';
 
 function fail(message: string): never {
   console.error(`e2e auth helper: ${message}`);
@@ -38,12 +38,8 @@ async function main(): Promise<void> {
   if (!command || !email) return fail('usage: <create|signin|delete> <email> [password]');
 
   // Load the API .env before importing better-auth: the module builds its pg Pool from
-  // DB_* at import time. dotenv never overrides a value already exported by the caller.
-  const envFile = process.env['ENV_FILE'] ?? './.env';
-  if (existsSync(envFile)) {
-    const { config: loadEnvFile } = await import('dotenv');
-    loadEnvFile({ path: envFile, quiet: true });
-  }
+  // DB_* at import time. A value already exported by the caller wins over the file.
+  loadDotenv({ path: process.env['ENV_FILE'] ?? './.env' });
 
   if (command === 'create') {
     if (!password) return fail('create requires a password');
