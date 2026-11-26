@@ -1649,7 +1649,8 @@
       "device": "Idioma do dispositivo",
       "en": "English",
       "pt-PT": "Português (Portugal)",
-      "es": "Español"
+      "es": "Español",
+      "it": "Italiano"
     },
     "languageScope": "O idioma altera a interface da aplicação neste dispositivo e o idioma dos teus emails. Os emails que ainda não estão traduzidos chegam em inglês."
   },
