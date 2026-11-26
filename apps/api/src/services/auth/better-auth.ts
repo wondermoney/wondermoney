@@ -300,10 +300,12 @@ const auth = betterAuth({
     ...(mcpOAuthResource
       ? mcpOAuthPlugins({
         appUrl: FRONTEND_URL,
+        clearGrantEnd: (clientId) => clearMcpOAuthClientGrantEnd(clientId),
         householdReferenceOf: async (userId) => {
           const household = await householdOfUser(userId);
           return household === null ? null : mcpOAuthHouseholdReference(household);
         },
+        isClientRegistered: (clientId) => isMcpOAuthClientRegistered(clientId),
         resource: mcpOAuthResource,
         // Called from a hook once a request is under way, by which time `auth` exists.
         verifyTotp: async (headers, code) => {
@@ -801,19 +803,34 @@ function redirectOrigins(redirectUris: unknown): string[] {
   return [...new Set(origins)];
 }
 
-/** Revoke `userId`'s grants on one client, or on every client when `clientId` is null. */
+/**
+ * Revoke `userId`'s grants on one client, or on every client when `clientId` is null. A client
+ * this leaves with no consent from anyone records when it lost its last grant
+ * (`mcpOAuthClientActivity`), so the daily prune counts its seven days from then.
+ */
 async function revokeGrants(userId: string, clientId: null | string): Promise<boolean> {
   const client = await betterAuthPool.connect();
   const scope = clientId === null ? '' : ' and "clientId" = $2';
   const params = clientId === null ? [userId] : [userId, clientId];
   try {
     await client.query('begin');
-    const consents = await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope}`, params);
-    const refreshTokens = await client.query(
-      `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null`,
+    const consents = await client.query<{ clientId: string }>(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope} returning "clientId"`, params);
+    const refreshTokens = await client.query<{ clientId: string }>(
+      `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null returning "clientId"`,
       params,
     );
     await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}`, params);
+    const revokedClients = [...new Set([...consents.rows, ...refreshTokens.rows].map((row) => row.clientId))];
+    if (revokedClients.length > 0) {
+      await client.query(
+        `insert into "${BETTER_AUTH_SCHEMA}"."mcpOAuthClientActivity" ("clientId", "lastGrantEndedAt")
+         select registered."clientId", now() from "${BETTER_AUTH_SCHEMA}"."oauthClient" registered
+          where registered."clientId" = any($1::text[])
+            and not exists (select 1 from "${BETTER_AUTH_SCHEMA}"."oauthConsent" consent where consent."clientId" = registered."clientId")
+         on conflict ("clientId") do update set "lastGrantEndedAt" = excluded."lastGrantEndedAt"`,
+        [revokedClients],
+      );
+    }
     await client.query('commit');
     return (consents.rowCount ?? 0) + (refreshTokens.rowCount ?? 0) > 0;
   } catch (error) {
@@ -836,4 +853,26 @@ export const revokeMcpOAuthGrant = async (userId: string, clientId: string): Pro
 /** Take back every OAuth grant `userId` gave, on every client: after a password change or reset, or signing out everywhere. */
 export const revokeAllMcpOAuthGrants = async (userId: string): Promise<void> => {
   await revokeGrants(userId, null);
+};
+
+/**
+ * Whether `clientId` is a registered OAuth client, checked before a consent is stored for it. The
+ * lookup waits on the lock the daily prune holds while it removes a client
+ * (`pruneUnusedMcpOAuthClients`), so a client being removed reads as gone rather than failing the
+ * consent's foreign key afterwards.
+ */
+export const isMcpOAuthClientRegistered = async (clientId: string): Promise<boolean> => {
+  const { rows } = await betterAuthPool.query(
+    `select 1 from "${BETTER_AUTH_SCHEMA}"."oauthClient" where "clientId" = $1 for key share`,
+    [clientId],
+  );
+  return rows.length > 0;
+};
+
+/** Someone consented to `clientId`: it holds a grant again, so it no longer counts as disconnected. */
+export const clearMcpOAuthClientGrantEnd = async (clientId: string): Promise<void> => {
+  await betterAuthPool.query(
+    `update "${BETTER_AUTH_SCHEMA}"."mcpOAuthClientActivity" set "lastGrantEndedAt" = null where "clientId" = $1 and "lastGrantEndedAt" is not null`,
+    [clientId],
+  );
 };
