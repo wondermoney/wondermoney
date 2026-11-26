@@ -118,6 +118,7 @@ export async function authCallback(req: Request, res: Response) {
       language: mapRouteLocaleToEmailLanguage(body.locale),
       lastName,
       method,
+      referrerClass: body.referrerClass,
     });
     committedSignupAppuserKey = appUser.appuserKey;
 

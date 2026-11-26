@@ -1,5 +1,6 @@
 import { CTA_URL } from "@/hooks/useCtaUrl";
 import { readConsentDecision } from "./consent";
+import { REFERRER_CLASS_PARAM, consentedReferrerClass, type ReferrerClass } from "./referrerClass";
 import type { CuratedListRouteId, ToolRouteId } from "./routes";
 
 /**
@@ -12,6 +13,9 @@ import type { CuratedListRouteId, ToolRouteId } from "./routes";
  * (`apps/web/lib/analytics/landing-source.ts`). Nothing is stored: the id rides in the link.
  * The same id is added to every analytics event the page sends (`posthog.ts`), so a tool's
  * visits, uses and next-step clicks line up with its signups (`docs/landing-attribution.md`).
+ *
+ * Every page's signup links also get `?referrer_class=<class>` under the same consent: where the
+ * visitor came to the site from, as a coarse class (`referrerClass.ts`).
  */
 export type LandingSource = ToolRouteId | CuratedListRouteId;
 
@@ -29,6 +33,19 @@ export function getLandingSource(doc: Document = document): string | undefined {
  * app's signup change; any other link comes back as it was.
  */
 export function withLandingSource(href: string, source: string | undefined): string {
+  return withSignupAttribution(href, { landingSource: source });
+}
+
+export type SignupAttribution = Readonly<{
+  landingSource?: string;
+  referrerClass?: ReferrerClass;
+}>;
+
+/**
+ * `href` with the landing source and the referrer class set, each removed when undefined. Only
+ * links to the app's signup change; any other link comes back as it was.
+ */
+export function withSignupAttribution(href: string, attribution: SignupAttribution): string {
   let url: URL;
   try {
     url = new URL(href);
@@ -36,25 +53,34 @@ export function withLandingSource(href: string, source: string | undefined): str
     return href;
   }
   if (url.origin !== SIGNUP_URL.origin || url.pathname !== SIGNUP_URL.pathname) return href;
-  if (source) url.searchParams.set(LANDING_SOURCE_PARAM, source);
-  else url.searchParams.delete(LANDING_SOURCE_PARAM);
+  const params: Array<[string, string | undefined]> = [
+    [LANDING_SOURCE_PARAM, attribution.landingSource],
+    [REFERRER_CLASS_PARAM, attribution.referrerClass],
+  ];
+  for (const [name, value] of params) {
+    if (value) url.searchParams.set(name, value);
+    else url.searchParams.delete(name);
+  }
   return url.toString();
 }
 
 /**
- * Sets the landing source on a signup link as it is followed (click, middle click, or the
- * context menu's "open in new tab"), reading the consent at that moment, so a choice changed
- * after the page loaded is honoured and a withdrawn one takes the id back off.
+ * Sets the landing source (on a tool or list page) and the referrer class (on every page) on a
+ * signup link as it is followed (click, middle click, or the context menu's "open in new tab"),
+ * reading the consent at that moment, so a choice changed after the page loaded is honoured and a
+ * withdrawn one takes both back off.
  */
 export function installLandingSourceLinks(doc: Document = document): void {
   const source = getLandingSource(doc);
-  if (!source) return;
 
   const decorate = (event: Event) => {
     const link = (event.target as Element | null)?.closest?.<HTMLAnchorElement>("a[href]");
     if (!link) return;
     const consented = readConsentDecision(window.localStorage).purposes.analytics;
-    const next = withLandingSource(link.href, consented ? source : undefined);
+    const next = withSignupAttribution(
+      link.href,
+      consented ? { landingSource: source, referrerClass: consentedReferrerClass(doc, window) } : {},
+    );
     if (next !== link.href) link.href = next;
   };
 

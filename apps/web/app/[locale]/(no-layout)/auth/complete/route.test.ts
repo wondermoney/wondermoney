@@ -151,6 +151,31 @@ test("a Google signup hands its landing source to the API", async () => {
   await completeWith("?landing_source=toolMortgage");
 
   assert.deepEqual(bodies, [
-    { inviteToken: undefined, landingSource: "toolMortgage", locale: "en" },
+    {
+      inviteToken: undefined,
+      landingSource: "toolMortgage",
+      locale: "en",
+      referrerClass: undefined,
+    },
+  ]);
+});
+
+test("a Google signup from an AI assistant hands its referrer class to the API", async () => {
+  stubSession(true);
+  const bodies: unknown[] = [];
+  apiPost.mockImplementation(async (_url: string, body: unknown) => {
+    bodies.push(body);
+    return { data: { outcome: "signup", method: "google" } };
+  });
+
+  await completeWith("?landing_source=toolMortgage&referrer_class=ai_assistant");
+
+  assert.deepEqual(bodies, [
+    {
+      inviteToken: undefined,
+      landingSource: "toolMortgage",
+      locale: "en",
+      referrerClass: "ai_assistant",
+    },
   ]);
 });

@@ -18,6 +18,8 @@ export type AuthCallbackBody = {
   /** The website page the signup came from (`lib/analytics/landing-source.ts`), only with consent. */
   readonly landingSource?: string;
   readonly locale?: string;
+  /** Where the visitor came to the website from, a coarse class (`landing-source.ts`), only with consent. */
+  readonly referrerClass?: string;
 };
 
 const DEFAULT_SIGNUP_METHOD = "email";
