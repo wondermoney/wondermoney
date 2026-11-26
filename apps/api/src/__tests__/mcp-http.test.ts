@@ -11,6 +11,7 @@ import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditL
 import { AssistantProposal, AssistantProposalSource, AssistantProposalStatus } from '@entity/AssistantProposal';
 import { Transaction } from '@entity/Transaction';
 import { errorHandler } from '@middleware/error-handler';
+import { resetMcpAuthFailures } from '@middleware/mcp-auth';
 import mcpRoutes from '@route/mcp';
 import { createApiToken, hashApiToken } from '@service/api-token/api-token.service';
 import { resetMcpToolCallWindows } from '@service/mcp/mcp-rate-limit.service';
@@ -38,9 +39,10 @@ const initialize = {
 };
 
 describe('POST /v1/mcp', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     DI.em = db.em();
     resetMcpToolCallWindows();
+    await resetMcpAuthFailures();
   });
 
   afterEach(() => {
@@ -195,6 +197,25 @@ describe('POST /v1/mcp', () => {
       .send(initialize);
 
     expect(response.status).toBe(401);
+  });
+
+  it('refuses junk tokens from one address past 300 failures a quarter hour, and still lets a valid token through', async () => {
+    const { token } = await seedToken();
+    const statuses: number[] = [];
+    for (let i = 0; i < 300; i += 1) {
+      statuses.push((await post(i % 2 === 0 ? `not-a-token-${i}` : `wm_pat_unknown${i}`, initialize)).status);
+    }
+    expect(new Set(statuses)).toEqual(new Set([401]));
+
+    const overBudget = await post('not-a-token-301', initialize);
+    expect(overBudget.status).toBe(429);
+    expect(Number(overBudget.headers['retry-after'])).toBeGreaterThan(0);
+
+    // A valid token from the same address is never counted, so it still works, and again.
+    expect((await post(token, initialize)).status).toBe(200);
+    expect((await post(token, initialize)).status).toBe(200);
+    // A request with no bearer at all is the per-IP backstop's, not this budget's.
+    expect((await post(null, initialize)).status).toBe(401);
   });
 
   it('answers 404 when MCP_ENABLED is false', async () => {

@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
-import { ipKeyGenerator, rateLimit, type RateLimitInfo } from 'express-rate-limit';
+import { ipKeyGenerator, MemoryStore, rateLimit, type RateLimitInfo, type Options as RateLimitOptions } from 'express-rate-limit';
 import { StatusCodes } from 'http-status-codes';
 
 import { IS_PROD } from '@config/env';
@@ -163,6 +163,16 @@ export const RATE_LIMIT_FAMILIES = {
    * without punishing a browsing session.
    */
   marketData: { limit: 600, relaxable: true, scope: 'identity', windowMs: QUARTER_HOUR_MS },
+
+  /**
+   * Failed authentications on `POST /v1/mcp`, per address: a bearer that is malformed, an unknown
+   * or revoked personal token, an OAuth token with a bad signature, the wrong audience, expired
+   * or revoked. MCP calls with a bearer skip the per-IP backstop (`isSharedEgressRequest`), so
+   * this is what bounds junk tokens from one address. Only failures count: a valid credential
+   * from the same address always gets through, budgeted per token or grant instead. Never
+   * relaxed: it guards a credential check.
+   */
+  mcpAuthFailure: { limit: 300, relaxable: false, scope: 'ip', windowMs: QUARTER_HOUR_MS },
 
   /**
    * `POST /v1/auth/pair` — public, and takes a pairing code that is a credential. Codes are
@@ -343,6 +353,52 @@ function buildLimitHandler(family: RateLimitFamilyName) {
       message: 'Too many requests. Please retry shortly.',
       retryAfter,
     });
+  };
+}
+
+/** One counted credential check: settle it as a success (uncounted) or ask whether a failure is over budget. */
+export interface AuthAttempt {
+  /**
+   * The credential failed. True when the address is over the family's budget: a 429 with
+   * `Retry-After` has been sent, as every limiter here sends it, and the caller stops.
+   */
+  failedOverLimit: (res: Response) => boolean;
+  /** The credential was valid: the attempt is taken back off the count. */
+  succeeded: () => Promise<void>;
+}
+
+/**
+ * A per-address budget on failed credential checks, in the same kind of store as every other
+ * family (express-rate-limit's in-process `MemoryStore`, one per limiter).
+ *
+ * Unlike a limiter, it never refuses a request up front: `attempt` counts the request before the
+ * credential is looked at (so even a reject that costs nothing, a malformed or wrong-prefix
+ * bearer, is counted, and a lookup that fails half-way still is), a valid credential takes its
+ * count back, and only a failure past the budget answers 429. A valid credential from an address
+ * that is over budget therefore still works.
+ */
+export function createAuthFailureLimiter(family: RateLimitFamilyName): { attempt: (req: Request) => Promise<AuthAttempt>; reset: () => Promise<void> } {
+  const { windowMs } = RATE_LIMIT_FAMILIES[family];
+  const limit = resolveFamilyLimit(family);
+  const store = new MemoryStore();
+  store.init({ windowMs } as RateLimitOptions);
+  return {
+    attempt: async (req) => {
+      const key = buildRateLimitKey(req, 'ip');
+      const info = await store.increment(key);
+      return {
+        failedOverLimit: (res) => {
+          if (info.totalHits <= limit) return false;
+          (req as Request & { rateLimit?: Partial<RateLimitInfo> }).rateLimit = { limit, resetTime: info.resetTime };
+          buildLimitHandler(family)(req, res, () => undefined);
+          return true;
+        },
+        succeeded: () => store.decrement(key),
+      };
+    },
+    reset: async () => {
+      await store.resetAll();
+    },
   };
 }
 

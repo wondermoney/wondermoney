@@ -10,6 +10,7 @@ import { getMcpAuthorizationServerMetadataAtIssuer } from '@controller/mcp';
 import { AppuserTenant } from '@entity/AppuserTenant';
 import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
 import { errorHandler } from '@middleware/error-handler';
+import { resetMcpAuthFailures } from '@middleware/mcp-auth';
 import mcpRoutes from '@route/mcp';
 import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
 import { createApiToken } from '@service/api-token/api-token.service';
@@ -63,9 +64,10 @@ const accountNames = (response: request.Response) =>
   (response.body.result.structuredContent as { accounts: { name: string }[] }).accounts.map((account) => account.name);
 
 describe('OAuth on the MCP server', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     DI.em = db.em();
     resetMcpToolCallWindows();
+    await resetMcpAuthFailures();
     verify.mockReset();
     vi.mocked(revokeMcpOAuthGrant).mockClear();
   });
@@ -185,6 +187,18 @@ describe('OAuth on the MCP server', () => {
 
       expect(response.status).toBe(401);
       expect(response.headers['www-authenticate']).toContain('error="invalid_token"');
+    });
+
+    it('counts failed OAuth tokens per address, but never a valid one', async () => {
+      const household = await seedHousehold(db.em());
+      verify.mockImplementation((token) => Promise.resolve(token === 'valid'
+        ? { caller: callerFor(household), ok: true as const }
+        : { error: 'invalid_token' as const, ok: false as const }));
+
+      for (let i = 0; i < 300; i += 1) expect((await post(`forged-${i}`, initialize)).status).toBe(401);
+
+      expect((await post('forged-301', initialize)).status).toBe(429);
+      expect((await post('valid', initialize)).status).toBe(200);
     });
 
     it('answers a token without mcp:read with 403 and an insufficient_scope challenge', async () => {
