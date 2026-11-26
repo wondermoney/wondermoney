@@ -2680,6 +2680,7 @@
     "removeDialogTitle": "¿Eliminar tu clave de Enable Banking?",
     "removeDialogDescription": "No podrás conectar ni sincronizar cuentas bancarias hasta que añadas una nueva clave. Las cuentas ya vinculadas dejarán de actualizarse.",
     "removeDialogConfirm": "Eliminar clave",
+    "removeSignInAgain": "Por seguridad, eliminar tu clave requiere un inicio de sesión reciente. Volverás aquí enseguida.",
     "cancel": "Cancelar",
     "loadError": "No se pudo cargar tu clave de Enable Banking. Inténtalo de nuevo en breve.",
     "toastRemoveSuccess": "Clave de Enable Banking eliminada.",

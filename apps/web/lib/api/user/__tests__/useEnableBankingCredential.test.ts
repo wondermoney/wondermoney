@@ -83,7 +83,8 @@ test("saveEnableBankingCredential POSTs applicationId + privateKeyPem; onSuccess
 
   const input = {
     applicationId: "app-1",
-    privateKeyPem: "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----",
+    privateKeyPem:
+      "-----BEGIN PRIVATE KEY-----\nabc\n-----END PRIVATE KEY-----",
   };
 
   assert.equal(await saveEnableBankingCredential(input, client), response);
@@ -100,17 +101,46 @@ test("saveEnableBankingCredential POSTs applicationId + privateKeyPem; onSuccess
   ]);
 });
 
-test("deleteEnableBankingCredential DELETEs the credential; onSuccess invalidates the query", async () => {
-  const urls: string[] = [];
+test("saveEnableBankingCredential sends the authenticator code in a header, never in the body", async () => {
+  const calls: unknown[][] = [];
   const client = {
-    delete: async (url: string) => {
-      urls.push(url);
+    post: async (...args: unknown[]) => {
+      calls.push(args);
+      return { data: {} };
+    },
+  } as EnableBankingCredentialPostClient;
+
+  await saveEnableBankingCredential(
+    { applicationId: "app-1", privateKeyPem: "pasted-pem", totpCode: "123456" },
+    client,
+  );
+  assert.deepEqual(calls, [
+    [
+      "/v1/user/enable-banking-credential",
+      { applicationId: "app-1", privateKeyPem: "pasted-pem" },
+      { headers: { "x-totp-code": "123456" } },
+    ],
+  ]);
+});
+
+test("deleteEnableBankingCredential DELETEs the credential; onSuccess invalidates the query", async () => {
+  const calls: unknown[][] = [];
+  const client = {
+    delete: async (...args: unknown[]) => {
+      calls.push(args);
       return { data: undefined };
     },
   } as EnableBankingCredentialDeleteClient;
 
-  await deleteEnableBankingCredential(client);
-  assert.deepEqual(urls, ["/v1/user/enable-banking-credential"]);
+  await deleteEnableBankingCredential({}, client);
+  await deleteEnableBankingCredential({ totpCode: "123456" }, client);
+  assert.deepEqual(calls, [
+    ["/v1/user/enable-banking-credential", undefined],
+    [
+      "/v1/user/enable-banking-credential",
+      { headers: { "x-totp-code": "123456" } },
+    ],
+  ]);
 
   const cache = recordingCache();
   await fireOnSuccess(

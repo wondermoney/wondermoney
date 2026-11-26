@@ -48,7 +48,8 @@ export async function createEnableBankingCertificate(req: Request, res: Response
 /**
  * @description Remove the current user's Enable Banking BYOK credential. Idempotent
  * — calling this when no credential exists (or it was already removed) is a no-op
- * success, not a 404, since the caller's desired end state is already true.
+ * success, not a 404, since the caller's desired end state is already true. The route needs a
+ * fresh session, and the authenticator code when two-factor is on (`requireSensitiveSession`).
  */
 export async function deleteEnableBankingCredential(req: Request, res: Response) {
   const user = authedUser(req);
@@ -72,7 +73,8 @@ export async function getEnableBankingCredential(req: Request, res: Response) {
  * (`GET /application`, then `GET /aspsps`) before anything is persisted — a credential that fails validation
  * is never written to the database, encrypted or otherwise, and the raw provider
  * error is never echoed back to the client (it may contain identifying detail we
- * don't control the shape of).
+ * don't control the shape of). The route needs a fresh session, and the authenticator code when
+ * two-factor is on (`requireSensitiveSession`).
  */
 export async function saveEnableBankingCredential(req: Request, res: Response) {
   const user = authedUser(req);

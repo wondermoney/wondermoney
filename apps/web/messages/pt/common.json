@@ -2680,6 +2680,7 @@
     "removeDialogTitle": "Remover a tua chave do Enable Banking?",
     "removeDialogDescription": "Não vais conseguir ligar nem sincronizar contas bancárias até adicionares uma nova chave. As contas já ligadas deixam de atualizar.",
     "removeDialogConfirm": "Remover chave",
+    "removeSignInAgain": "Por segurança, remover a tua chave exige um início de sessão recente. Voltas logo aqui a seguir.",
     "cancel": "Cancelar",
     "loadError": "Não foi possível carregar a tua chave do Enable Banking. Tenta novamente dentro de momentos.",
     "toastRemoveSuccess": "Chave do Enable Banking removida.",

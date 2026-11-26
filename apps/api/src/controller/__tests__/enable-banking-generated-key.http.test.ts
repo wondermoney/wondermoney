@@ -16,16 +16,24 @@ vi.mock('@sentry/node', async (importOriginal) => ({
   captureMessage: (...args: unknown[]) => { reported.events.push(args); return 'event'; },
 }));
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
-/** The session double, with a session age a test can set to make it stale. */
-const session = vi.hoisted(() => ({ ageMs: 0 }));
+/**
+ * The session double: a test can make the session stale, turn two-factor on, and say which
+ * authenticator code better-auth accepts.
+ */
+const session = vi.hoisted(() => ({ ageMs: 0, twoFactorEnabled: false, validTotp: '123456' }));
 vi.mock('@service/auth/better-auth', async () => {
   const double = (await import('@app/__tests__/__helpers__/auth-session-double')).mockAuthSession();
   return {
     ...double,
     getAuthSession: async (headers: Record<string, string | string[] | undefined>) => {
       const found = await double.getAuthSession(headers);
-      return found && { ...found, session: { ...found.session, createdAt: new Date(Date.now() - session.ageMs) } };
+      return found && {
+        ...found,
+        session: { ...found.session, createdAt: new Date(Date.now() - session.ageMs) },
+        user: { ...found.user, twoFactorEnabled: session.twoFactorEnabled },
+      };
     },
+    verifyTotpForSession: (_headers: unknown, code: string) => (code === session.validTotp ? Promise.resolve() : Promise.reject(new Error('invalid code'))),
   };
 });
 
@@ -130,6 +138,7 @@ describe('a server-generated Enable Banking key', () => {
     return applicationId;
   };
   const paste = (household: Household, applicationId: string, privateKeyPem: string) => user.as(household.appuser).post('/v1/user/enable-banking-credential').send({ applicationId, privateKeyPem });
+  const remove = (household: Household) => user.as(household.appuser).delete('/v1/user/enable-banking-credential');
   const certificateFor = async (household: Household) => ((await createCertificate(household)).body as { certificatePem: string }).certificatePem;
   /** Which applications signed the session exchange when the bank sent the person back for this link. */
   const completedWith = async (state: string) => {
@@ -149,6 +158,7 @@ describe('a server-generated Enable Banking key', () => {
     enableBanking.calls = [];
     reported.events = [];
     session.ageMs = 0;
+    session.twoFactorEnabled = false;
     vi.stubEnv('ENABLE_BANKING_APP_ID', '');
     vi.stubEnv('ENABLE_BANKING_PRIVATE_KEY_FILE', '');
     vi.stubEnv('BANK_PROVIDERS', 'enable_banking');
@@ -505,6 +515,62 @@ describe('a server-generated Enable Banking key', () => {
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({ code: ERROR_CODE.SESSION_NOT_FRESH });
     }
+  });
+
+  it('needs a fresh session to paste or remove a key, and leaves the key as it was', async () => {
+    const household = await seedHousehold(db.em());
+    const { certificatePem, privateKeyPem: pem } = await generateEnableBankingKeyPair();
+    const applicationId = register(certificatePem);
+    expect((await paste(household, applicationId, pem)).status).toBe(200);
+    session.ageMs = 25 * 60 * 60 * 1000;
+
+    const replacement = register(certificatePem);
+    for (const response of [await paste(household, replacement, pem), await remove(household)]) {
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({ code: ERROR_CODE.SESSION_NOT_FRESH });
+    }
+    expect(await statusOf(household)).toMatchObject({ applicationId, status: 'active' });
+  });
+
+  it('asks for the authenticator code to paste or remove a key when two-factor is on', async () => {
+    const household = await seedHousehold(db.em());
+    const { certificatePem, privateKeyPem: pem } = await generateEnableBankingKeyPair();
+    const applicationId = register(certificatePem);
+    session.twoFactorEnabled = true;
+
+    for (const attempt of [paste(household, applicationId, pem), remove(household)]) {
+      const response = await attempt;
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({ code: ERROR_CODE.TOTP_REQUIRED });
+    }
+    for (const attempt of [paste(household, applicationId, pem).set('x-totp-code', '000000'), remove(household).set('x-totp-code', '000000')]) {
+      const response = await attempt;
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({ code: ERROR_CODE.INVALID_TOTP });
+    }
+    expect(await statusOf(household)).toBeNull();
+
+    expect((await paste(household, applicationId, pem).set('x-totp-code', session.validTotp)).status).toBe(200);
+    expect(await statusOf(household)).toMatchObject({ applicationId, status: 'active' });
+    expect((await remove(household).set('x-totp-code', session.validTotp)).status).toBe(204);
+    expect(await statusOf(household)).toBeNull();
+  });
+
+  it('limits how many times a person can paste or remove a key in an hour', async () => {
+    const household = await seedHousehold(db.em());
+    const { certificatePem, privateKeyPem: pem } = await generateEnableBankingKeyPair();
+    const applicationId = register(certificatePem);
+    const pasted: number[] = [];
+    const removed: number[] = [];
+    for (let attempt = 0; attempt < 11; attempt++) {
+      pasted.push((await paste(household, applicationId, pem)).status);
+      removed.push((await remove(household)).status);
+    }
+
+    expect(pasted.slice(0, 10).every((status) => status === 200)).toBe(true);
+    expect(pasted[10]).toBe(429);
+    expect(removed.slice(0, 10).every((status) => status === 204)).toBe(true);
+    expect(removed[10]).toBe(429);
   });
 
   it('limits how many certificates a person can create in an hour', async () => {

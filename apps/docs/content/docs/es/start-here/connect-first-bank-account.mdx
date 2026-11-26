@@ -98,6 +98,8 @@ Si registraste la aplicación con **Generate in the browser and export private k
 3. Pega el Application ID en **ID de la aplicación**, y el contenido completo del archivo `.pem` en **Clave privada**.
 4. Selecciona **Probar y guardar**. WonderMoney comprueba la credencial contra Enable Banking antes de guardarla, así que un identificador mal copiado, una clave incompleta, una aplicación Sandbox o una aún no activada se rechazan de inmediato en lugar de fallar más adelante.
 
+Si tienes activada la autenticación en dos pasos, el formulario también te pide el código del autenticador.
+
 La app móvil vincula bancos con una clave ya guardada, pero la clave se configura en la web.
 
 ## Qué hace WonderMoney con tu clave
@@ -105,6 +107,8 @@ La app móvil vincula bancos con una clave ya guardada, pero la clave se configu
 Tu clave privada se cifra en reposo (AES-256-GCM) y nunca sale del servidor: una clave creada por WonderMoney nunca se te muestra, y una clave pegada nunca vuelve a mostrarse. No aparece en ninguna respuesta, registro ni exportación de datos. WonderMoney la usa únicamente para autenticar tus propias solicitudes a Enable Banking — no se comparte con nadie más, ni siquiera con otros usuarios de WonderMoney.
 
 Una clave nueva solo sustituye a la anterior en las conexiones bancarias nuevas: las cuentas que ya vinculaste siguen usando la clave con la que se vincularon.
+
+Para eliminar tu clave, selecciona **Eliminar clave** en **Configuración → Proveedor bancario**. Guardar o eliminar una clave requiere un inicio de sesión reciente y, si tienes activada la autenticación en dos pasos, el código del autenticador. Si iniciaste sesión hace más de un día, WonderMoney te pide que vuelvas a iniciar sesión y luego te trae de vuelta.
 
 ## Problemas comunes
 

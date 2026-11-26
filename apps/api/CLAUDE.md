@@ -201,7 +201,8 @@ The suite is split into vitest projects (`vitest.config.ts`); `pnpm test` (`vite
   `services/auth/demo-sign-in.service.ts`; every demo session ends two hours after it starts
   (`services/auth/demo-session.ts`). `pnpm demo:seed` creates the account on a real database.
 - **Rate limits** are named families in `middleware/rate-limit.ts`. An auth or credential family
-  is never `relaxable` and is keyed on IP only. `TRUST_PROXY` sets Express `trust proxy`;
+  is never `relaxable` and is keyed on IP, or on the verified person when the session already
+  names them, with an IP family beside it (`sensitiveTotpFailure`). `TRUST_PROXY` sets Express `trust proxy`;
   `configureClientIp` copies the resolved `req.ip` into `x-wondermoney-client-ip`, the header
   better-auth's limiter reads, so both limiters key on the same address. Behind one proxy, set
   `TRUST_PROXY=1`.

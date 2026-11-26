@@ -1,10 +1,11 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 
 import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
+import { Alert } from "@/components/ui/Alert";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -18,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Heading, Text } from "@/components/ui/Typography";
+import { getApiErrorCode } from "@/lib/api/errors";
 import useEnableBankingCredential, {
   type EnableBankingCredentialApiError,
   type EnableBankingCredentialStatus,
@@ -27,8 +29,19 @@ import { useProfileField } from "@/lib/api/user/useProfile";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 
+import AuthenticatorCodeField from "./AuthenticatorCodeField";
+import {
+  enableBankingErrorKey,
+  isKnownEnableBankingError,
+} from "./enable-banking-errors";
+import { isTotpError } from "./enable-banking-setup-steps";
 import EnableBankingKeySetupDialog from "./EnableBankingKeySetupDialog";
 import EnableBankingSetupWizard from "./EnableBankingSetupWizard";
+import {
+  useReopenAfterSignIn,
+  useSensitiveSession,
+  useSignInAgain,
+} from "./sign-in-again";
 
 const apiMessage = (error: unknown): string | undefined =>
   (error as EnableBankingCredentialApiError)?.response?.data?.message;
@@ -84,6 +97,18 @@ export default function EnableBankingKeySettings() {
   );
   const deleteCredential = useDeleteEnableBankingCredential();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Removing the key needs a recent sign-in and, with two-factor on, the authenticator code.
+  const id = useId();
+  const { sessionFresh, twoFactorEnabled } = useSensitiveSession();
+  const signInAgain = useSignInAgain();
+  const [totpCode, setTotpCode] = useState("");
+  const [totpAsked, setTotpAsked] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [staleSession, setStaleSession] = useState(false);
+  const removeNeedsSignIn = !sessionFresh || staleSession;
+  const showTotp = twoFactorEnabled || totpAsked;
+  // Back from signing in again to remove the key: ask again.
+  useReopenAfterSignIn("remove", () => setConfirmOpen(true));
   const [wizardOpen, setWizardOpen] = useState(false);
   const isViewer = useIsHouseholdViewer();
   const [bankListOpen, setBankListOpen] = useState(false);
@@ -118,14 +143,36 @@ export default function EnableBankingKeySettings() {
   const hasKey = !!credential && status !== "pending";
   const pendingExpiresAt = credential?.pending?.expiresAt ?? null;
 
+  const onConfirmOpenChange = (next: boolean) => {
+    setConfirmOpen(next);
+    if (!next) {
+      setTotpCode("");
+      setRemoveError(null);
+      setStaleSession(false);
+    }
+  };
+
   const onConfirmRemove = () => {
-    deleteCredential.mutate(undefined, {
+    setRemoveError(null);
+    // The code is used once: whatever the answer, the next attempt asks for a fresh one.
+    const code = totpCode.trim();
+    setTotpCode("");
+    deleteCredential.mutate(code ? { totpCode: code } : {}, {
       onSuccess: () => {
         toast.success(t("toastRemoveSuccess"));
-        setConfirmOpen(false);
+        onConfirmOpenChange(false);
       },
       onError: (err) => {
         if (notifyIfRateLimited(err)) return;
+        if (isTotpError(err)) setTotpAsked(true);
+        if (getApiErrorCode(err) === "session_not_fresh") {
+          setStaleSession(true);
+          return;
+        }
+        if (isKnownEnableBankingError(err)) {
+          setRemoveError(t(`generated.${enableBankingErrorKey(err)}`));
+          return;
+        }
         toast.error(apiMessage(err) ?? t("toastRemoveError"));
       },
     });
@@ -202,7 +249,10 @@ export default function EnableBankingKeySettings() {
       />
       <AccountAddSyncModal isOpen={bankListOpen} setOpen={setBankListOpen} />
 
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <AlertDialog
+        open={confirmOpen && Boolean(credential)}
+        onOpenChange={onConfirmOpenChange}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("removeDialogTitle")}</AlertDialogTitle>
@@ -210,18 +260,40 @@ export default function EnableBankingKeySettings() {
               {t("removeDialogDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {removeNeedsSignIn ? (
+            <Text variant="mutedText" className="text-sm">
+              {t("removeSignInAgain")}
+            </Text>
+          ) : showTotp ? (
+            <AuthenticatorCodeField
+              id={`${id}-remove-totp`}
+              value={totpCode}
+              onChange={setTotpCode}
+            />
+          ) : null}
+          {removeError && !removeNeedsSignIn ? (
+            <Alert variant="destructive" className="text-sm">
+              {removeError}
+            </Alert>
+          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteCredential.isPending}>
               {t("cancel")}
             </AlertDialogCancel>
-            <Button
-              variant="destructive"
-              loading={deleteCredential.isPending}
-              disabled={deleteCredential.isPending}
-              onClick={onConfirmRemove}
-            >
-              {t("removeDialogConfirm")}
-            </Button>
+            {removeNeedsSignIn ? (
+              <Button type="button" onClick={() => void signInAgain("remove")}>
+                {t("wizard.signInAgain.action")}
+              </Button>
+            ) : (
+              <Button
+                variant="destructive"
+                loading={deleteCredential.isPending}
+                disabled={deleteCredential.isPending}
+                onClick={onConfirmRemove}
+              >
+                {t("removeDialogConfirm")}
+              </Button>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

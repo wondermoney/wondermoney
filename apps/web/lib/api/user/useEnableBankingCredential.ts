@@ -59,9 +59,16 @@ export interface EnableBankingCertificate {
   expiresAt: string;
 }
 
-/** Both generated-key steps need a fresh session, and the authenticator code when 2FA is on. */
+/**
+ * Every change to the key (pasting, removing, both generated-key steps) needs a fresh session,
+ * and the authenticator code when 2FA is on. The code is sent once, in a header, never stored.
+ */
 export interface SensitiveRequestInput {
   totpCode?: string;
+}
+
+interface SensitiveRequestConfig {
+  headers: { "x-totp-code": string };
 }
 
 export interface EnableBankingCredentialErrorBody {
@@ -84,12 +91,18 @@ export interface EnableBankingCredentialPostClient {
   post: <T>(
     url: string,
     input: SaveEnableBankingCredentialInput,
+    config?: SensitiveRequestConfig,
   ) => Promise<{ data: T }>;
 }
 
 export interface EnableBankingCredentialDeleteClient {
-  delete: (url: string) => Promise<unknown>;
+  delete: (url: string, config?: SensitiveRequestConfig) => Promise<unknown>;
 }
+
+const sensitiveHeaders = (
+  input: SensitiveRequestInput,
+): SensitiveRequestConfig | undefined =>
+  input.totpCode ? { headers: { "x-totp-code": input.totpCode } } : undefined;
 
 export async function getEnableBankingCredential(
   apiClient: EnableBankingCredentialGetClient = api,
@@ -120,12 +133,13 @@ export default function useEnableBankingCredential<
 }
 
 export async function saveEnableBankingCredential(
-  input: SaveEnableBankingCredentialInput,
+  input: SaveEnableBankingCredentialInput & SensitiveRequestInput,
   apiClient: EnableBankingCredentialPostClient = api,
 ): Promise<SaveEnableBankingCredentialResponse> {
   const { data } = await apiClient.post<SaveEnableBankingCredentialResponse>(
     "/v1/user/enable-banking-credential",
-    input,
+    { applicationId: input.applicationId, privateKeyPem: input.privateKeyPem },
+    sensitiveHeaders(input),
   );
   return data;
 }
@@ -138,7 +152,7 @@ export function getSaveEnableBankingCredentialMutationOptions(
 ): UseMutationOptions<
   SaveEnableBankingCredentialResponse,
   EnableBankingCredentialApiError,
-  SaveEnableBankingCredentialInput
+  SaveEnableBankingCredentialInput & SensitiveRequestInput
 > {
   return {
     mutationFn: (input) => saveEnableBankingCredential(input, apiClient),
@@ -156,9 +170,6 @@ export function useSaveEnableBankingCredential() {
     getSaveEnableBankingCredentialMutationOptions(queryClient),
   );
 }
-
-const sensitiveHeaders = (input: SensitiveRequestInput) =>
-  input.totpCode ? { headers: { "x-totp-code": input.totpCode } } : undefined;
 
 /**
  * Asks the server to generate a key pair and answers its certificate. The private key stays on
@@ -234,17 +245,25 @@ export function useActivateEnableBankingCredential() {
 }
 
 export async function deleteEnableBankingCredential(
+  input: SensitiveRequestInput = {},
   apiClient: EnableBankingCredentialDeleteClient = api,
 ): Promise<unknown> {
-  return apiClient.delete("/v1/user/enable-banking-credential");
+  return apiClient.delete(
+    "/v1/user/enable-banking-credential",
+    sensitiveHeaders(input),
+  );
 }
 
 export function getDeleteEnableBankingCredentialMutationOptions(
   queryClient: EnableBankingCredentialCache,
   apiClient: EnableBankingCredentialDeleteClient = api,
-): UseMutationOptions<unknown, EnableBankingCredentialApiError, void> {
+): UseMutationOptions<
+  unknown,
+  EnableBankingCredentialApiError,
+  SensitiveRequestInput
+> {
   return {
-    mutationFn: () => deleteEnableBankingCredential(apiClient),
+    mutationFn: (input) => deleteEnableBankingCredential(input, apiClient),
     scope: { id: "enable-banking-credential" },
     onSuccess: () =>
       queryClient.invalidateQueries({

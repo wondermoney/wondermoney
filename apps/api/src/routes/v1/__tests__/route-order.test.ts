@@ -88,6 +88,14 @@ vi.mock('@middleware/rate-limit', () => ({
   },
 }));
 
+// Ordering is the question here, not the fresh-session gate (`sensitive-session.test.ts`), so
+// requests without a session still reach the gated routes' handlers.
+vi.mock('@middleware/sensitive-session', () => ({
+  requireSensitiveSession: (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
+}));
+
 const mount = async (modulePath: string) => {
   const { default: router } = (await import(modulePath)) as { default: express.Router };
   const app = express();

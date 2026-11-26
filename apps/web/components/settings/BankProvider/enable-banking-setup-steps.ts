@@ -128,8 +128,9 @@ export function isTotpError(error: unknown): boolean {
 }
 
 /**
- * How old a session may be when the wizard opens. The API refuses certificate creation and
- * activation from a session older than 24 hours (`SENSITIVE_SESSION_MAX_AGE_MS` in the API's
+ * How old a session may be when the wizard, the paste form or Remove opens. The API refuses every
+ * change to the key (pasting, removing, certificate creation and activation) from a session older
+ * than 24 hours (`SENSITIVE_SESSION_MAX_AGE_MS` in the API's
  * `services/auth/sensitive-session-age.ts`); an hour less leaves time to finish the setup.
  */
 export const SETUP_SESSION_MAX_AGE_MS = 23 * 60 * 60 * 1000;
@@ -153,37 +154,54 @@ const REOPEN_KEY = "wm:enable-banking-setup:reopen";
 const REOPEN_TTL_MS = 30 * 60 * 1000;
 
 /**
- * Before signing out to sign in again: remember to reopen the wizard on this page when the
- * person comes back. Session storage, so it stays in this tab.
+ * What opens itself on the page, back from signing in again: the setup wizard, the paste-a-key
+ * form, or the confirmation to remove the key. Each asked for the recent sign-in.
+ */
+export type ReopenAfterSignIn = "paste" | "remove" | "wizard";
+
+/**
+ * Before signing out to sign in again: remember to reopen `target` on this page when the person
+ * comes back. Session storage, so it stays in this tab.
  */
 export function markReopenAfterSignIn(
   path: string,
+  target: ReopenAfterSignIn = "wizard",
   now: number = Date.now(),
 ): void {
   try {
     window.sessionStorage.setItem(
       REOPEN_KEY,
-      JSON.stringify({ at: now, path }),
+      JSON.stringify({ at: now, path, target }),
     );
   } catch {
-    // Storage blocked: they come back to the page and open the wizard themselves.
+    // Storage blocked: they come back to the page and open it themselves.
   }
 }
 
 /**
- * Whether this wizard should open itself, back from signing in again on `path`. The mark is
- * spent by the first wizard on the page to ask, so only that one opens (several entry points can
- * be mounted at once, and any of them leads on to the bank list).
+ * Whether `target` should open itself, back from signing in again on `path`. The mark is spent
+ * by the first one of that kind on the page to ask, so only that one opens (several entry points
+ * can be mounted at once, and any of them leads on to the bank list); a mark for another kind is
+ * left for it.
  */
 export function claimReopenAfterSignIn(
   path: string,
+  target: ReopenAfterSignIn = "wizard",
   now: number = Date.now(),
 ): boolean {
   try {
     const raw = window.sessionStorage.getItem(REOPEN_KEY);
     if (!raw) return false;
+    let mark: { at?: unknown; path?: unknown; target?: unknown };
+    try {
+      mark = JSON.parse(raw) as typeof mark;
+    } catch {
+      window.sessionStorage.removeItem(REOPEN_KEY);
+      return false;
+    }
+    // A mark from before targets existed was the wizard's.
+    if ((mark.target ?? "wizard") !== target) return false;
     window.sessionStorage.removeItem(REOPEN_KEY);
-    const mark = JSON.parse(raw) as { at?: unknown; path?: unknown };
     return (
       mark.path === path &&
       typeof mark.at === "number" &&

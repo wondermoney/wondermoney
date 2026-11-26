@@ -98,6 +98,8 @@ Se registaste a aplicação com **Generate in the browser and export private key
 3. Cola o Application ID em **ID da aplicação**, e o conteúdo completo do ficheiro `.pem` em **Chave privada**.
 4. Seleciona **Testar e guardar**. O WonderMoney valida a credencial junto da Enable Banking antes de a guardar, por isso um identificador mal copiado, uma chave incompleta, uma aplicação Sandbox ou uma ainda não ativada são rejeitados de imediato em vez de falharem mais tarde.
 
+Se tiveres a autenticação de dois fatores ativa, o formulário também pede o código do autenticador.
+
 A aplicação móvel liga bancos com uma chave já guardada, mas a chave é configurada na web.
 
 ## O que o WonderMoney faz com a tua chave
@@ -105,6 +107,8 @@ A aplicação móvel liga bancos com uma chave já guardada, mas a chave é conf
 A tua chave privada é encriptada em repouso (AES-256-GCM) e nunca sai do servidor: uma chave criada pelo WonderMoney nunca te é mostrada, e uma chave colada nunca volta a ser mostrada. Não aparece em nenhuma resposta, registo ou exportação de dados. O WonderMoney usa-a apenas para autenticar os teus próprios pedidos à Enable Banking — não é partilhada com mais ninguém, nem sequer com outros utilizadores do WonderMoney.
 
 Uma chave nova só substitui a antiga nas novas ligações bancárias: as contas que já ligaste continuam a usar a chave com que foram ligadas.
+
+Para remover a tua chave, seleciona **Remover chave** em **Definições → Fornecedor bancário**. Guardar ou remover uma chave exige um início de sessão recente e, se tiveres a autenticação de dois fatores ativa, o código do autenticador. Se iniciaste sessão há mais de um dia, o WonderMoney pede-te que inicies sessão novamente e depois traz-te de volta.
 
 ## Problemas comuns
 
