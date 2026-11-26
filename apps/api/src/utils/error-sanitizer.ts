@@ -157,6 +157,68 @@ function summarizeRedactedBody(body: unknown): unknown {
 /** Provider bodies are usually a few hundred bytes; an HTML error page is not, and Sentry truncates. */
 const PROVIDER_BODY_MAX_CHARS = 2000;
 
+/**
+ * Personal data a provider can write into its own prose ("account PT50 0002 ... not found",
+ * "amount 98765.43 exceeds ..."), where key-based redaction cannot see it:
+ *  - an IBAN, in any case, grouped by spaces or hyphens or not at all;
+ *  - an email address;
+ *  - a run of six or more digits, grouped by spaces or hyphens or not (an account or card number,
+ *    `4111-1111-1111-1111`);
+ *  - an amount with decimals (`1234.56`, `98765.43`, `1.234,56`).
+ * Every quantifier is bounded, and the text is capped before any of them runs
+ * (`FREE_TEXT_MAX_CHARS`), so a large body cannot make redaction slow.
+ */
+const FREE_TEXT_PATTERNS = [
+  /\b[A-Z]{2}\d{2}(?:[ -]?[A-Z0-9]){10,30}\b/gi,
+  /[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}/g,
+  /(?<![\d-])\d(?:[ -]?\d){5,40}/g,
+  /\b\d{1,15}(?:[.,\s]\d{3}){0,6}[.,]\d{1,2}\b/g,
+];
+
+/**
+ * Tokens that look like the data above but are not personal and help a diagnosis, kept as they
+ * are: a UUID, an ISO date or timestamp (fractional seconds included), a dotted date
+ * (`26.11.2025`), a protocol (`HTTP/1.1`) and a version (`1.12.0`, `v2.3`).
+ */
+const KEPT_TOKEN_PATTERNS = [
+  /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi,
+  /\b\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:?\d{2})?)?(?![\d-])/g,
+  /\b\d{1,2}\.\d{1,2}\.\d{4}\b/g,
+  /\bHTTP\/\d(?:\.\d)?\b/gi,
+  // Not a dotted figure grouped in thousands (`1.234.567`), nor one with decimals after it.
+  /\bv\d{1,4}(?:\.\d{1,4}){1,3}\b|\b(?!\d{1,3}(?:\.\d{3}){1,6}\b)\d{1,4}\.\d{1,4}\.\d{1,4}(?:\.\d{1,4})?\b(?![.,]\d)/gi,
+];
+
+/** Longer free text is cut before redaction: the useful part of a provider message is short. */
+const FREE_TEXT_MAX_CHARS = 2000;
+
+/** JSON fields whose numbers are money, so a number under one is redacted like an amount in prose. */
+const MONEY_KEY_PATTERN = /amount|balance/i;
+
+/**
+ * Masks the personal data a provider's free-text message may carry (see `FREE_TEXT_PATTERNS`).
+ * Key-based redaction (`redactSensitiveData`) blanks a field called `iban`; this catches the IBAN
+ * quoted inside a `message`. It cannot recognise a person's name, so callers log a provider's
+ * message only for an error, never a field that is meant to hold a name.
+ */
+export function redactFreeText(text: string): string {
+  const capped = text.length > FREE_TEXT_MAX_CHARS ? `${text.slice(0, FREE_TEXT_MAX_CHARS)}…[truncated]` : text;
+  // Kept tokens are set aside behind private-use placeholders the patterns cannot match, then put back.
+  const kept: string[] = [];
+  const shielded = KEPT_TOKEN_PATTERNS.reduce((current, pattern) => current.replace(pattern, (token) => `\uE000${kept.push(token) - 1}\uE001`), capped);
+  const redacted = FREE_TEXT_PATTERNS.reduce((current, pattern) => current.replace(pattern, REDACTED), shielded);
+  return redacted.replace(/\uE000(\d{1,6})\uE001/g, (_match, index: string) => kept[Number(index)] ?? '');
+}
+
+function redactStringLeaves(value: unknown, depth = 0, key?: string): unknown {
+  if (key !== undefined && MONEY_KEY_PATTERN.test(key) && (typeof value === 'number' || typeof value === 'string')) return REDACTED;
+  if (typeof value === 'string') return redactFreeText(value);
+  if (value == null || typeof value !== 'object') return value;
+  if (depth > 20) return REDACTED;
+  if (Array.isArray(value)) return value.map((item) => redactStringLeaves(item, depth + 1));
+  return Object.fromEntries(Object.entries(value).map(([entryKey, nested]) => [entryKey, redactStringLeaves(nested, depth + 1, entryKey)]));
+}
+
 function safeStringify(value: unknown): string | undefined {
   try {
     return JSON.stringify(value);
@@ -176,7 +238,8 @@ function safeStringify(value: unknown): string | undefined {
  *
  * The body goes through `redactSensitiveData` (blanks `iban` / `account*` /
  * `email` / `token` at any depth) because provider error payloads can echo
- * back the account details of the request that failed.
+ * back the account details of the request that failed, and every string in it through
+ * `redactFreeText`, for the IBAN or amount quoted inside a message.
  *
  * Returns `undefined` when there is nothing useful to attach, so callers can
  * spread it conditionally rather than sending an empty `extra`.
@@ -188,7 +251,7 @@ export function sanitizeProviderResponse(error: unknown): undefined | { body?: s
   const status = typeof response.status === 'number' ? response.status : undefined;
   if (response.data === undefined || response.data === null) return status === undefined ? undefined : { status };
 
-  const redacted = redactSensitiveData(response.data);
+  const redacted = redactStringLeaves(redactSensitiveData(response.data));
   const serialized = typeof redacted === 'string' ? redacted : safeStringify(redacted);
   if (serialized === undefined) return status === undefined ? undefined : { status };
 

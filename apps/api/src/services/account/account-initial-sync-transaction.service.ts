@@ -24,15 +24,15 @@ import type {
   BankStableIdFields,
   BankTransactionIdentity,
 } from '@service/bank-providers/types';
-import { isProviderRejection, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
-import { rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
+import { isProviderRejection, providerErrorInfoOf, type ProviderRateLimit, providerRateLimitOf, providerReportedCodeOf } from '@service/bank-sync-run/provider-failure';
+import { convertWithStatus, rateScope, resolveExchangeRate } from '@service/currency/exchange-rate';
 import { linkPostedInstallments } from '@service/installment/installment-plan.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
 import { triggerRecurringDetectionAfterTransactionIngestion } from '@service/recurring/post-transaction-ingestion-detection.service';
 import { applyRulesToNewTransactions } from '@service/rules/rule-application.service';
 import { enqueueTransactionEnrichmentForTenant } from '@service/transaction-enrichment/transaction-enrichment-enqueue.service';
-import { recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { deriveChainWithoutProviderBalance, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { applyBayesCategorization, prepareBayesCategorization } from '@service/transaction/bayes-categorization.service';
 import { applyCategorizationOutcome } from '@service/transaction/categorization-confidence';
 import { DEFAULT_PENDING_GRACE_DAYS, logDryRunExpirations, planPendingExpirations } from '@service/transaction/pending-expiry.service';
@@ -50,7 +50,7 @@ import { convertMoney, roundMoney, toNumber } from '@utils/money';
 
 /** See the identical note in `account-initial-sync-account.service.ts` — `requisitionId`/
  * `requisitionKey` are provider-agnostic sync-target identity fields. */
-export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; rateLimited?: ProviderRateLimit; /** What the aggregator reported for an account that failed. */ reportedErrorCode?: BankReportedErrorCode; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
+export interface AccountInitialSyncTransactionsResult { accountsFailed: number; accountsProcessed: number; accountsTotal: number; appuserKey: number; everyAccountRejected?: boolean; failedAccountIds: string[]; /** Accounts whose bank refused the asked period, and the first day of the shorter window fetched instead. */ historyShortened?: { accountId: string; fetchedFrom: string }[]; rateLimited?: ProviderRateLimit; /** What the aggregator reported for an account that failed. */ reportedErrorCode?: BankReportedErrorCode; requisitionId: string; requisitionKey: number; status: 'completed' | 'failed' | 'partial'; transactionsCategorized: number; transactionsCreated: number; transactionsFailed: number; transactionsFetched: number; transactionsSkipped: number; }
 
 /** One provider transaction row, re-exported under the name the sync services and tests use. */
 export type BankSyncTransaction = BankProviderTransaction;
@@ -69,7 +69,7 @@ const INCLUDE_HIDDEN = { includeHidden: true } as const;
 
 class AccountInitialSyncTransactionService {
   async syncTransactionsForRequisition(
-    input: { connection: BankConnectionRef; correlationId?: string; fetchWindowDays?: number; queueJobId?: string },
+    input: { connection: BankConnectionRef; correlationId?: string; fetchWindowDays?: number; queueJobId?: string; /** Accounts the account phase did not refresh a balance for (refused, missing, or the account failed). */ staleBalanceAccountIds?: string[] },
     deps: Deps = {},
   ): Promise<AccountInitialSyncTransactionsResult> {
     const em = deps.em ?? DI.em;
@@ -115,11 +115,21 @@ class AccountInitialSyncTransactionService {
     // See `account-initial-sync-account.service.ts`: a rate limit stops the loop, and a 400/401 on
     // every account is reported so the worker can check whether the consent ended.
     let rateLimited: ProviderRateLimit | undefined; let rejectedCount = 0; let reportedErrorCode: BankReportedErrorCode | undefined;
+    const historyShortened: { accountId: string; fetchedFrom: string }[] = [];
+    // The account phase could not refresh these balances, so `account.balance` is the last one the
+    // bank gave. Rebuilding a chain backwards from it would shift every older row by whatever this
+    // batch added; the balance is derived from the stored chain instead (`deriveStaleBalance`).
+    const staleBalanceAccountIds = new Set(input.staleBalanceAccountIds ?? []);
     for (const [index, account] of accounts.entries()) {
       let accountCreated = 0; let accountFailed = 0; let accountSkipped = 0;
       try {
         const response = await client.getTransactions(connection, account.accountId ?? '', { country: '', dateFrom: dateOffset(new Date(), input.fetchWindowDays ?? 365), dateTo: isoDate(new Date()) });
         const transactions = response;
+        if (transactions.fetchedFrom) {
+          // The bank refused the asked period and served a shorter one; recorded on the run's result.
+          historyShortened.push({ accountId: account.accountId ?? String(account.accountKey), fetchedFrom: transactions.fetchedFrom });
+          log.info({ accountId: account.accountId, fetchedFrom: transactions.fetchedFrom, requisitionId }, 'Account initial sync fetched a shorter transaction history');
+        }
         const accountStableId = account.accountId ?? String(account.accountKey);
         // Identical id-less rows are told apart by their position among their twins, counted per
         // list: a pending row and its booked version must not shift each other's identity.
@@ -168,10 +178,16 @@ class AccountInitialSyncTransactionService {
         // *previous* balance is exactly the case where `account.balance` and the top of the
         // transactions list would silently disagree. Inside the try so a failure marks the account failed
         // rather than leaving a half-written chain.
-        const { changed: rewritten } = await recalculateChainFromAccountBalance(em, account);
-        if (rewritten > 0) log.info({ accountId: account.accountId, rewritten }, 'Rebuilt account running-balance chain');
+        if (staleBalanceAccountIds.has(account.accountId ?? '')) {
+          // No new balance to anchor on: derive it from the chain already stored.
+          const derived = await this.deriveStaleBalance(em, account, tenant);
+          if (derived) log.info({ accountId: account.accountId, derived: derived.derived, rewritten: derived.changed }, 'Rebuilt account running-balance chain without a new balance');
+        } else {
+          const { changed: rewritten } = await recalculateChainFromAccountBalance(em, account);
+          if (rewritten > 0) log.info({ accountId: account.accountId, rewritten }, 'Rebuilt account running-balance chain');
+        }
         if (rows.length === 0) { processedAccountIds.add(account.accountId ?? String(account.accountKey)); continue; }
-        if (input.correlationId && input.queueJobId) await bg.heartbeatJob(input.correlationId, input.queueJobId, { progress: { accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, failedAccountIds, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped }, stage: 'account.initial-sync:syncing-transactions' });
+        if (input.correlationId && input.queueJobId) await bg.heartbeatJob(input.correlationId, input.queueJobId, { progress: { accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, failedAccountIds, ...(historyShortened.length > 0 ? { historyShortened } : {}), transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped }, stage: 'account.initial-sync:syncing-transactions' });
       } catch (error) {
         failedAccountIds.push(account.accountId ?? String(account.accountKey)); transactionsFailed += 1;
         if (isProviderRejection(error)) rejectedCount += 1;
@@ -188,8 +204,9 @@ class AccountInitialSyncTransactionService {
         // event to investigate from — matching account-initial-sync-account.service.ts's per-account
         // catch, which does report.
         const providerResponse = sanitizeProviderResponse(error);
+        const providerError = providerErrorInfoOf(error);
         Sentry.captureException(error, {
-          ...(providerResponse ? { extra: { providerResponse } } : {}),
+          ...(providerResponse || providerError ? { extra: { ...(providerError ? { providerError } : {}), ...(providerResponse ? { providerResponse } : {}) } } : {}),
           tags: { accountId: account.accountId, requisitionId, stage: 'transaction-phase' },
         });
         continue;
@@ -254,7 +271,7 @@ class AccountInitialSyncTransactionService {
     for (const tenantKey of affectedTenantKeys) await enqueueTransactionEnrichmentForTenant(tenantKey, 'account-initial-sync', { enqueue: deps.enqueue });
     const status = failedAccountIds.length === accounts.length ? 'failed' : failedAccountIds.length > 0 ? 'partial' : 'completed';
     const signals = { ...(processedAccountIds.size === 0 && rejectedCount === accounts.length ? { everyAccountRejected: true } : {}), ...(rateLimited ? { rateLimited } : {}), ...(reportedErrorCode ? { reportedErrorCode } : {}) };
-    return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), ...signals, failedAccountIds, requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
+    return { accountsFailed: failedAccountIds.length, accountsProcessed: processedAccountIds.size, accountsTotal: accounts.length, appuserKey: getAppuserKey(appuserRef), ...signals, failedAccountIds, ...(historyShortened.length > 0 ? { historyShortened } : {}), requisitionId, requisitionKey, status, transactionsCategorized, transactionsCreated, transactionsFailed, transactionsFetched, transactionsSkipped };
   }
 
   /** See `account-initial-sync-account.service.ts`'s identical-purpose `resolveSyncTarget`. */
@@ -290,6 +307,26 @@ class AccountInitialSyncTransactionService {
       if (transaction.transactionMerchantKey) categorized += await this.categorizeIfEnabled(em, tenant.appuserKey, transaction);
     }
     return categorized;
+  }
+  /**
+   * The account's balance, derived from its chain when the bank gave none this sync
+   * (`deriveChainWithoutProviderBalance`). The derived balance is written to the account and
+   * converted to the owner's currency the way the account phase converts a provider balance, and the
+   * chain is rebuilt backwards from both, as after any sync. `refreshedAt` stays: it says when the
+   * bank last gave a balance.
+   */
+  private async deriveStaleBalance(em: EntityManager, account: Account, tenant: AppuserTenant) {
+    const derived = await deriveChainWithoutProviderBalance(em, account);
+    if (!derived?.derived) return derived;
+    account.balance = derived.tail.balance;
+    const ownerCurrency = (tenant.appuserKey as unknown as undefined | { currencyKey?: Currency })?.currencyKey;
+    const converted = ownerCurrency
+      ? await convertWithStatus(em, derived.tail.balance, account.currencyKey, ownerCurrency, new Date(), rateScope(tenant.tenantKey))
+      : { amount: null, fxStatus: FxStatus.MISSING };
+    account.appuserCurrencyBalance = converted.amount;
+    account.fxStatus = converted.fxStatus;
+    await recalculateChainFromAccountBalance(em, account);
+    return derived;
   }
   private emptyResult(requisitionId: string, requisitionKey: number, appuserRef: number): AccountInitialSyncTransactionsResult { return { accountsFailed: 0, accountsProcessed: 0, accountsTotal: 0, appuserKey: getAppuserKey(appuserRef), failedAccountIds: [], requisitionId, requisitionKey, status: 'failed', transactionsCategorized: 0, transactionsCreated: 0, transactionsFailed: 0, transactionsFetched: 0, transactionsSkipped: 0 }; }
   private async findTransactionStatus(em: EntityManager, names: string[]) { for (const name of names) { const status = await em.findOne(TransactionStatus, { name }); if (status) return status; } return null; }
@@ -709,7 +746,7 @@ function isStillPending(pending: Transaction, seenIdentities: Set<string>): bool
 function nonEmpty(value?: null | string) { return value?.trim() ? value : undefined; }
 function rowDate(row: Partial<BankSyncTransaction>): Date { return new Date(row.bookingDate ?? row.valueDate ?? row.transactionDate ?? ''); }
 function sanitizeDirty(value?: string): string | undefined { if (!value) return undefined; return value.normalize('NFKC').split('').map((char) => { const code = char.charCodeAt(0); return code <= 31 || code === 127 ? ' ' : char; }).join('').replace(/\s+/g, ' ').trim().slice(0, 255) || undefined; }
-function sanitizeError(error: unknown) { if (!error || typeof error !== 'object') return { message: String(error) }; const safe = error as { code?: unknown; message?: unknown; name?: unknown; status?: unknown }; return { code: typeof safe.code === 'string' ? safe.code : undefined, message: typeof safe.message === 'string' ? safe.message : undefined, name: typeof safe.name === 'string' ? safe.name : undefined, providerResponse: sanitizeProviderResponse(error), status: typeof safe.status === 'number' || typeof safe.status === 'string' ? safe.status : undefined }; }
+function sanitizeError(error: unknown) { if (!error || typeof error !== 'object') return { message: String(error) }; const safe = error as { code?: unknown; message?: unknown; name?: unknown; status?: unknown }; return { code: typeof safe.code === 'string' ? safe.code : undefined, message: typeof safe.message === 'string' ? safe.message : undefined, name: typeof safe.name === 'string' ? safe.name : undefined, providerError: providerErrorInfoOf(error), providerResponse: sanitizeProviderResponse(error), status: typeof safe.status === 'number' || typeof safe.status === 'string' ? safe.status : undefined }; }
 function sanitizeMerchantName(value?: string) { return value ? value.normalize('NFKC').replace(/\s+/g, ' ').trim().slice(0, 255) || undefined : undefined; }
 
 /**

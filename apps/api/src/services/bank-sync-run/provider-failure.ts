@@ -1,4 +1,4 @@
-import { BankProviderError, type BankReportedErrorCode, ProviderReportedError, RateLimitedError } from '@service/bank-providers/errors';
+import { BankProviderError, type BankReportedErrorCode, type ProviderErrorInfo, ProviderReportedError, RateLimitedError, RequestRejectedError, UnavailableError } from '@service/bank-providers/errors';
 
 /**
  * Provider failure signals the sync phases read from a per-account error before they swallow it.
@@ -56,4 +56,25 @@ function statusOf(error: unknown): number | undefined {
  */
 export function providerReportedCodeOf(error: unknown): BankReportedErrorCode | undefined {
   return error instanceof ProviderReportedError ? error.reportedCode : undefined;
+}
+
+/**
+ * The code a failed balance fetch is recorded under when the sync can go on without it, or
+ * undefined when the account has to fail as before.
+ *
+ * A balance the bank cannot give right now (an outage or timeout, `UnavailableError`) or refuses
+ * to give (`RequestRejectedError`, e.g. a bank that answers 400 to every balances call) leaves the
+ * account's last balance in place; its transactions still sync and the run is partial. A rate
+ * limit, a lost consent, a credential the user must fix and an aggregator's own report keep their
+ * meaning, so they still fail the account.
+ */
+export function skippableBalanceFailureCodeOf(error: unknown): BankReportedErrorCode | undefined {
+  if (error instanceof RequestRejectedError) return 'institution_unavailable';
+  if (error instanceof UnavailableError) return 'provider_unavailable';
+  return undefined;
+}
+
+/** The aggregator's own code and message for a failed call, for logs. */
+export function providerErrorInfoOf(error: unknown): ProviderErrorInfo | undefined {
+  return error instanceof BankProviderError ? error.providerError : undefined;
 }

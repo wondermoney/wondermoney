@@ -190,7 +190,8 @@ export const handleAccountAutoSyncRequisitionJob = async (job: JobWithMetadata<A
       throw new AccountAutoSyncOutcomeError('account.auto-sync.requisition:failed');
     }
     if (phases.status === 'partial') {
-      if (await finalize('partial', phases.reportedErrorCode ?? 'data_validation', false, phases.account)) return false;
+      // A run short only of balances the bank refuses is not retried: the retry would be refused too.
+      if (await finalize('partial', phases.reportedErrorCode ?? 'data_validation', phases.partialRetryable === false, phases.account)) return false;
       throw new AccountAutoSyncOutcomeError('account.auto-sync.requisition:partial');
     }
     await finalize('full_success', undefined, false, phases.account);

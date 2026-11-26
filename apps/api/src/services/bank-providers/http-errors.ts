@@ -1,6 +1,6 @@
 import { BadGatewayError, BadRequestError, TooManyRequestsError, UnauthorizedError } from '@utils/errors';
 
-import { ConsentExpiredError, RateLimitedError, UnavailableError, UserActionRequiredError } from './errors';
+import { ConsentExpiredError, RateLimitedError, RequestRejectedError, UnavailableError, UserActionRequiredError } from './errors';
 
 /**
  * Translate the interface's typed provider failures into the HTTP errors the controllers and
@@ -10,7 +10,7 @@ import { ConsentExpiredError, RateLimitedError, UnavailableError, UserActionRequ
 export function toHttpError(error: unknown): unknown {
   if (error instanceof RateLimitedError) return new TooManyRequestsError(error.message, error.retryAfterSeconds);
   if (error instanceof ConsentExpiredError) return new UnauthorizedError(error.message);
-  if (error instanceof UserActionRequiredError) return new BadRequestError(error.message);
+  if (error instanceof UserActionRequiredError || error instanceof RequestRejectedError) return new BadRequestError(error.message);
   if (error instanceof UnavailableError) return new BadGatewayError(error.message);
   return error;
 }

@@ -525,10 +525,14 @@ export async function updateTransaction(req: Request, res: Response, next: NextF
         account,
         { previous, transactionKey: lockedTransaction.transactionKey },
       );
-      account.balance = tail.balance;
-      account.appuserCurrencyBalance = tail.appuserCurrencyBalance;
-      if (tail.appuserCurrencyBalance === null) account.fxStatus = FxStatus.MISSING;
-      em.persist(account);
+      // No tail: a bank account that has never had a balance, whose rows hold none either. There is
+      // nothing to write, and 0 would be a balance nobody reported.
+      if (tail) {
+        account.balance = tail.balance;
+        account.appuserCurrencyBalance = tail.appuserCurrencyBalance;
+        if (tail.appuserCurrencyBalance === null) account.fxStatus = FxStatus.MISSING;
+        em.persist(account);
+      }
 
       // A split follows its transaction's amount: its lines are rescaled (and the row goes back to
       // the review inbox), or the split is removed when it can no longer be kept.

@@ -7,7 +7,7 @@ import { FxStatus, Transaction } from '@entity/Transaction';
 import { TransactionAuditActorType, TransactionAuditEventType } from '@entity/TransactionAuditLog';
 import { ConflictError, ERROR_CODE } from '@utils/errors';
 
-import { isManualAccount, recalculateChainFromAccountBalance, removeFromChain } from './balance-chain.service';
+import { isBankLinkedAccount, isManualAccount, recalculateChainFromAccountBalance, removeFromChain } from './balance-chain.service';
 import { TransactionAuditService } from './transaction-audit.service';
 import { removeReimbursementLinksOf } from './transaction-reimbursement.service';
 import { reconcileTransfers } from './transfer-matching.service';
@@ -117,7 +117,7 @@ export async function deleteTransactions(em: EntityManager, actor: Actor, transa
 
       // A manual account's chain is rebuilt from the row before the first deleted one, and its
       // balance is the new tail. Read before the rows are marked deleted: they say where it changes.
-      const manualTail = account && isManualAccount(account) ? await removeFromChain(tx, account, removed) : null;
+      const manualTail = account && !isBankLinkedAccount(account) ? await removeFromChain(tx, account, removed) : null;
 
       for (const row of rows) {
         row.deletedAt = now;
@@ -150,7 +150,7 @@ export async function deleteTransactions(em: EntityManager, actor: Actor, transa
         account.balance = manualTail.tail.balance;
         account.appuserCurrencyBalance = manualTail.tail.appuserCurrencyBalance;
         if (manualTail.tail.appuserCurrencyBalance === null) account.fxStatus = FxStatus.MISSING;
-      } else if (account && !isManualAccount(account)) {
+      } else if (account && isBankLinkedAccount(account)) {
         // The bank owns this account's balance: the chain is rebuilt backwards from it, as sync does.
         await recalculateChainFromAccountBalance(tx, account);
       }

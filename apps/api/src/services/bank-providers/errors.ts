@@ -16,9 +16,21 @@ export type BankProviderIncidentCode = 'authentication' | 'consent_expired' | 'p
  */
 export type BankReportedErrorCode = 'authentication' | 'institution_action_required' | 'institution_unavailable' | 'provider_unavailable' | 'rate_limited' | 'unsupported_currency';
 
+/**
+ * What the aggregator itself said about a failed call: its own error code and message, already
+ * redacted by the provider implementation. For logs only; clients get the incident code.
+ */
+export interface ProviderErrorInfo {
+  code?: string;
+  message?: string;
+  status?: number;
+}
+
 export class BankProviderError extends Error {
   /** The incident error code this failure maps to (`analytics/bank-sync-contract.ts`). */
   readonly incidentCode: BankProviderIncidentCode;
+  /** The aggregator's own code and message for the call that failed, when it sent one. */
+  providerError?: ProviderErrorInfo;
   /** HTTP-ish status the legacy classifiers read. */
   readonly status: number;
 
@@ -53,6 +65,19 @@ export class ConsentExpiredError extends BankProviderError {
 export class UserActionRequiredError extends BankProviderError {
   constructor(message = 'The bank provider needs the user to act') {
     super(message, 'authentication', 400);
+  }
+}
+
+/**
+ * The provider refused one request (an HTTP 400) for a reason that is not the consent: a bank
+ * whose balances endpoint rejects every call, a parameter it does not accept. The connection is
+ * fine and a reconnect does not help, so this is never an `authentication` failure. `status` stays
+ * 400, so a rejection on every account still makes the worker ask the provider whether the consent
+ * ended (`provider-failure.ts`).
+ */
+export class RequestRejectedError extends BankProviderError {
+  constructor(message = 'The bank provider rejected the request', status = 400) {
+    super(message, 'institution_unavailable', status);
   }
 }
 

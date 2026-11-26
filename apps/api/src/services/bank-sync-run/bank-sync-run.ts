@@ -52,6 +52,13 @@ export type ServicePhaseStatus = 'completed' | 'failed' | 'partial';
 
 interface ServicePhaseResult extends BankSyncPhaseSignals {
   accountsTotal?: number;
+  /** Account phase: accounts synced without a new balance; the transaction phase extends their chain forward. */
+  balanceUnavailableAccountIds?: string[];
+  /** Account phase: why the first of those balances failed, when the provider said. */
+  balanceUnavailableCode?: BankReportedErrorCode;
+  /** Account phase: whether one of those failures may pass on a retry (an outage, a timeout). */
+  balanceUnavailableRetryable?: boolean;
+  failedAccountIds?: string[];
   institutionIds?: string[];
   status: ServicePhaseStatus;
 }
@@ -132,6 +139,8 @@ export interface RunBankSyncPhasesInput {
       correlationId: string;
       fetchWindowDays: number;
       queueJobId: string;
+      /** Accounts whose balance the account phase did not refresh: refused, missing, or failed. */
+      staleBalanceAccountIds?: string[];
     }, deps?: { enqueue?: import('@service/queue/enqueue').Enqueue; provider?: BankProvider }) => Promise<ServicePhaseResult>;
   };
   /**
@@ -174,6 +183,12 @@ const toPhaseResult = (input: ServicePhaseResult): BankSyncPhaseResult => ({
 });
 
 export interface RunBankSyncPhasesResult extends BankSyncPhaseSignals {
+  /**
+   * False on a partial run whose only shortfall is balances the bank refused or did not send.
+   * Retrying would spend another of the bank's daily calls to be refused again, so the workers
+   * finish such a run instead. Omitted otherwise.
+   */
+  partialRetryable?: false;
   status: BankSyncPhaseStatus;
   /** Account-phase result (always present). */
   account: BankSyncPhaseResult;
@@ -189,12 +204,15 @@ export interface RunBankSyncPhasesResult extends BankSyncPhaseSignals {
  * Behaviour:
  *  - optional `prePhase` (credential precheck)
  *  - account phase
- *  - transaction phase only if account succeeded
+ *  - transaction phase only if account succeeded; an account synced without a new balance
+ *    (the bank refused or timed out on it, or the account phase failed on it) still gets its
+ *    transactions, and is named to the transaction phase, which derives its balance from the chain
  *  - either phase `failed` returns immediately
  *  - a rate-limited account phase returns immediately too, even when some accounts succeeded,
  *    so the transaction phase does not call a provider that has just refused us
  *  - the failing phase's signals (`rateLimited`, `everyAccountRejected`) are passed up
- *  - `partial` collapses: any partial anywhere returns `partial`
+ *  - `partial` collapses: any partial anywhere returns `partial`; one whose only shortfall is
+ *    balances the bank refused or did not send is marked `partialRetryable: false`
  *  - both full success returns `full_success`
  */
 export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<RunBankSyncPhasesResult> {
@@ -208,7 +226,10 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
   if (account.status === 'failed' || account.rateLimited) {
     return { account, ...signalsOf(account), failedAt: 'account', status: account.status === 'failed' ? 'failed' : 'partial', transaction: undefined };
   }
+  // An account the account phase failed on has a stale balance too, so it gets the same treatment.
+  const staleBalanceAccountIds = [...new Set([...rawAccount.balanceUnavailableAccountIds ?? [], ...rawAccount.failedAccountIds ?? []])];
   const rawTransaction = await input.transactionService.syncTransactionsForRequisition({
+    ...(staleBalanceAccountIds.length > 0 ? { staleBalanceAccountIds } : {}),
     connection: input.connection,
     correlationId: input.correlationId,
     fetchWindowDays: input.fetchWindowDays,
@@ -222,8 +243,13 @@ export async function runBankSyncPhases(input: RunBankSyncPhasesInput): Promise<
     return { account, failedAt: 'transaction', rateLimited: transaction.rateLimited, status: 'partial', transaction };
   }
   if (account.status === 'partial' || transaction.status === 'partial') {
-    const reportedErrorCode = account.reportedErrorCode ?? transaction.reportedErrorCode;
-    return { account, failedAt: undefined, ...(reportedErrorCode ? { reportedErrorCode } : {}), status: 'partial', transaction };
+    const reportedErrorCode = account.reportedErrorCode ?? transaction.reportedErrorCode ?? rawAccount.balanceUnavailableCode;
+    const onlyBalancesMissing = transaction.status === 'full_success'
+      && !account.reportedErrorCode
+      && (rawAccount.failedAccountIds?.length ?? 0) === 0
+      && (rawAccount.balanceUnavailableAccountIds?.length ?? 0) > 0;
+    const partialRetryable = !onlyBalancesMissing || rawAccount.balanceUnavailableRetryable === true;
+    return { account, failedAt: undefined, ...(partialRetryable ? {} : { partialRetryable: false as const }), ...(reportedErrorCode ? { reportedErrorCode } : {}), status: 'partial', transaction };
   }
   return { account, failedAt: undefined, status: 'full_success', transaction };
 }
