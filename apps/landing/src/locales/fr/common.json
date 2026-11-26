@@ -5474,7 +5474,7 @@
           "prices": "Le haut de la page affiche le dernier prix moyen national au litre du gazole, de l'essence 95 et du GPL, tel que la DGEG l'a publié pour le {{asOf}}, et de combien chacun a bougé en une semaine : gazole {{dieselChange}} et essence {{gasolineChange}} par rapport à la semaine précédente.",
           "calculator": "Le calculateur transforme votre conduite en coût mensuel de carburant. Vous indiquez la distance, la consommation en litres aux 100 km et le carburant ; le prix part de la dernière moyenne et vous pouvez le remplacer par celui que vous payez vraiment.",
           "noForecast": "Cette page ne fait aucune prévision. Elle montre ce que la DGEG a mesuré et ce que coûte votre conduite à ce prix ; elle ne dit pas quel sera le prix la semaine prochaine.",
-          "stations": "En dessous figurent les stations les moins chères : les {{stationsDistrict}} moins chères du Portugal continental ou d'un district, ou les {{stationsMunicipality}} moins chères d'une commune, pour le carburant choisi. Chacune indique le prix, la station et sa marque, l'adresse, un lien vers la carte et la date de la dernière mise à jour du prix par la station."
+          "stations": "En dessous figurent les stations les moins chères : les {{stationsDistrict}} moins chères du Portugal continental ou d'un district, ou les {{stationsMunicipality}} moins chères d'une commune, pour le carburant choisi. Chacune indique le prix, la station et sa marque, l'adresse, un lien vers la carte et la date de la dernière mise à jour du prix par la station. Sur la carte, les stations proches partagent un repère avec le prix le plus bas parmi elles et leur nombre ; touchez-le pour zoomer."
         },
         "example": {
           "title": "Exemple chiffré",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "La carte ne s'ouvre pas dans ce navigateur. Utilisez le lien de chaque station.",
         "directions": "Itinéraire",
         "you": "Votre position",
+        "mapCluster": "{{count}} stations, la moins chère à {{price}}. Zoomer",
         "mapUi": {
           "zoomIn": "Zoom avant",
           "zoomOut": "Zoom arrière",

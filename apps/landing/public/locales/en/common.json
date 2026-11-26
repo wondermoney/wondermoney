@@ -5474,7 +5474,7 @@
           "prices": "The top of the page shows the latest national average price per litre of diesel, petrol 95 and autogas, as published by DGEG for {{asOf}}, and how far each moved in a week: diesel {{dieselChange}} and petrol {{gasolineChange}} against the previous week.",
           "calculator": "The calculator turns your driving into a monthly fuel cost. You give the distance, the consumption in litres per 100 km and the fuel; the price starts at the latest average and you can change it to the price you really pay.",
           "noForecast": "This page does not forecast. It shows what DGEG measured and what your driving costs at that price; it does not say what the price will be next week.",
-          "stations": "Below them are the cheapest stations: the {{stationsDistrict}} cheapest of mainland Portugal or of a district, or the {{stationsMunicipality}} cheapest of a municipality, for the fuel you choose. Each shows the price, the station and its brand, the address, a map link and when the station last updated the price."
+          "stations": "Below them are the cheapest stations: the {{stationsDistrict}} cheapest of mainland Portugal or of a district, or the {{stationsMunicipality}} cheapest of a municipality, for the fuel you choose. Each shows the price, the station and its brand, the address, a map link and when the station last updated the price. On the map, stations close together share one marker with the cheapest price among them and their number; tap it to zoom in."
         },
         "example": {
           "title": "Worked example",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "The map does not open in this browser. Use each station's link.",
         "directions": "Directions",
         "you": "Your location",
+        "mapCluster": "{{count}} stations, the cheapest at {{price}}. Zoom in",
         "mapUi": {
           "zoomIn": "Zoom in",
           "zoomOut": "Zoom out",

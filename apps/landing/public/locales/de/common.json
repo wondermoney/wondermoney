@@ -5474,7 +5474,7 @@
           "prices": "Oben steht der aktuelle nationale Durchschnittspreis pro Liter für Diesel, Benzin 95 und Autogas, wie ihn die DGEG für den {{asOf}} veröffentlicht hat, und wie stark sich jeder in einer Woche bewegt hat: Diesel {{dieselChange}} und Benzin {{gasolineChange}} gegenüber der Vorwoche.",
           "calculator": "Der Rechner macht aus Ihrem Fahren monatliche Tankkosten. Sie geben Strecke, Verbrauch in Litern pro 100 km und Kraftstoff an; der Preis beginnt beim aktuellen Durchschnitt, und Sie können ihn auf den Preis ändern, den Sie wirklich zahlen.",
           "noForecast": "Diese Seite macht keine Prognose. Sie zeigt, was die DGEG gemessen hat und was Ihr Fahren zu diesem Preis kostet; sie sagt nicht, wie hoch der Preis nächste Woche sein wird.",
-          "stations": "Darunter stehen die günstigsten Tankstellen: die {{stationsDistrict}} günstigsten des Festlands oder eines Distrikts oder die {{stationsMunicipality}} günstigsten einer Gemeinde, für den gewählten Kraftstoff. Jede zeigt den Preis, die Tankstelle und ihre Marke, die Adresse, einen Kartenlink und wann die Tankstelle den Preis zuletzt aktualisiert hat."
+          "stations": "Darunter stehen die günstigsten Tankstellen: die {{stationsDistrict}} günstigsten des Festlands oder eines Distrikts oder die {{stationsMunicipality}} günstigsten einer Gemeinde, für den gewählten Kraftstoff. Jede zeigt den Preis, die Tankstelle und ihre Marke, die Adresse, einen Kartenlink und wann die Tankstelle den Preis zuletzt aktualisiert hat. Auf der Karte teilen sich nahe beieinander liegende Tankstellen eine Markierung mit dem niedrigsten Preis unter ihnen und ihrer Anzahl; tippen Sie darauf, um hineinzuzoomen."
         },
         "example": {
           "title": "Rechenbeispiel",
@@ -5594,6 +5594,7 @@
         "mapUnavailable": "Die Karte lässt sich in diesem Browser nicht öffnen. Nutzen Sie den Link der jeweiligen Tankstelle.",
         "directions": "Route",
         "you": "Ihr Standort",
+        "mapCluster": "{{count}} Tankstellen, die günstigste für {{price}}. Vergrößern",
         "mapUi": {
           "zoomIn": "Vergrößern",
           "zoomOut": "Verkleinern",
