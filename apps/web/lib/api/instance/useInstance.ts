@@ -71,6 +71,12 @@ export interface InstanceDescription {
     statementImport?: null | StatementImportFeature;
   };
   /**
+   * What to enter in Enable Banking's Control Panel to register an application for this server:
+   * its own callback address, the privacy and terms URLs, and a suggested name and description.
+   * Null when Enable Banking is off; absent on an older API.
+   */
+  enableBankingSetup?: EnableBankingSetup | null;
+  /**
    * Whether the first account on this server becomes its admin: true unless single sign-on's
    * admin groups decide (`OIDC_ADMIN_GROUPS`). Absent on an API older than first-run setup.
    */
@@ -90,6 +96,14 @@ export interface InstanceDescription {
   supportEmail: null | string;
   /** The release version the server runs (`dev` for a local build); absent on an older API. */
   version?: string;
+}
+
+export interface EnableBankingSetup {
+  applicationDescription: string;
+  applicationName: string;
+  privacyUrl: string;
+  redirectUrl: string;
+  termsUrl: string;
 }
 
 export interface StatementImportFeature {
@@ -193,6 +207,13 @@ export function useInstanceBankSyncCredentials(): "instance" | "user" | undefine
   const hydrated = useHydrated();
   if (!hydrated || !data) return undefined;
   return data.features.bankSyncCredentials ?? "user";
+}
+
+/** The Control Panel values for registering an Enable Banking application, or null until the server has said. */
+export function useEnableBankingSetup(): EnableBankingSetup | null {
+  const { data } = useInstance();
+  const hydrated = useHydrated();
+  return hydrated ? (data?.enableBankingSetup ?? null) : null;
 }
 
 const NO_CHAINS: CryptoChain[] = [];

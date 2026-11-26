@@ -28,6 +28,11 @@ import {
 } from "@/lib/api/user/useEnableBankingCredential";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 
+import {
+  enableBankingErrorKey,
+  isKnownEnableBankingError,
+} from "./enable-banking-errors";
+
 const FORM_ID = "enable-banking-key-setup-form";
 
 const apiMessage = (error: unknown): string | undefined =>
@@ -37,6 +42,8 @@ const emptyValues = { applicationId: "", privateKeyPem: "" };
 
 interface Props {
   triggerLabel: string;
+  /** `outline` when it sits beside the generated-key path, the primary way in. */
+  triggerVariant?: "default" | "outline";
   isUpdate: boolean;
   /** Optional extra hook for callers — the query itself is already
    * invalidated by the mutation, so most callers don't need this. */
@@ -57,6 +64,7 @@ interface Props {
  */
 export default function EnableBankingKeySetupDialog({
   triggerLabel,
+  triggerVariant = "default",
   isUpdate,
   onSaved,
 }: Props) {
@@ -112,7 +120,12 @@ export default function EnableBankingKeySetupDialog({
         },
         onError: (err) => {
           if (notifyIfRateLimited(err)) return;
-          setError(apiMessage(err) ?? t("setup.genericError"));
+          // An unknown, Sandbox or not yet activated application has its own message.
+          setError(
+            isKnownEnableBankingError(err)
+              ? t(`generated.${enableBankingErrorKey(err)}`)
+              : (apiMessage(err) ?? t("setup.genericError")),
+          );
         },
       },
     );
@@ -121,7 +134,14 @@ export default function EnableBankingKeySetupDialog({
   return (
     <DrawerDialog
       title={isUpdate ? t("setup.titleUpdate") : t("setup.titleAdd")}
-      triggerLabel={triggerLabel}
+      trigger={
+        <Button
+          variant={triggerVariant}
+          className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2"
+        >
+          {triggerLabel}
+        </Button>
+      }
       open={open}
       onOpenChange={handleOpenChange}
       footer={

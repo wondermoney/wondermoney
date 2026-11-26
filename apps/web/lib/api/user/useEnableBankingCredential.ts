@@ -22,13 +22,23 @@ import api from "../api";
  * discarded.
  */
 
-export type EnableBankingCredentialStatus = "active" | "invalid" | "revoked";
+export type EnableBankingCredentialStatus =
+  | "active"
+  | "invalid"
+  | "pending"
+  | "revoked";
 
 export interface EnableBankingCredential {
-  applicationId: string;
+  /** Null only while the sole credential is a generated key waiting for its application ID. */
+  applicationId: string | null;
   status: EnableBankingCredentialStatus;
   lastValidatedAt: string | null; // date
   lastValidationError: string | null;
+  /**
+   * A key the server generated, waiting for its application ID, and when it lapses. Absent on
+   * an API older than generated keys.
+   */
+  pending?: { expiresAt: string } | null;
 }
 
 /** `null` when the user has no credential configured yet. */
@@ -43,6 +53,18 @@ export interface SaveEnableBankingCredentialResponse {
   applicationId: string;
   status: "active";
   lastValidatedAt: string; // date
+}
+
+/** `POST /v1/user/enable-banking-credential/certificate`: the certificate to register. */
+export interface EnableBankingCertificate {
+  certificatePem: string;
+  /** When the generated key lapses if it is not activated. */
+  expiresAt: string;
+}
+
+/** Both generated-key steps need a fresh session, and the authenticator code when 2FA is on. */
+export interface SensitiveRequestInput {
+  totpCode?: string;
 }
 
 export interface EnableBankingCredentialErrorBody {
@@ -136,6 +158,68 @@ export function useSaveEnableBankingCredential() {
   return useMutation(
     getSaveEnableBankingCredentialMutationOptions(queryClient),
   );
+}
+
+const sensitiveHeaders = (input: SensitiveRequestInput) =>
+  input.totpCode ? { headers: { "x-totp-code": input.totpCode } } : undefined;
+
+/**
+ * Asks the server to generate a key pair and answers its certificate. The private key stays on
+ * the server; calling this again replaces a key still waiting for its application ID.
+ */
+export async function createEnableBankingCertificate(
+  input: SensitiveRequestInput = {},
+): Promise<EnableBankingCertificate> {
+  const { data } = await api.post<EnableBankingCertificate>(
+    "/v1/user/enable-banking-credential/certificate",
+    undefined,
+    sensitiveHeaders(input),
+  );
+  return data;
+}
+
+export function useCreateEnableBankingCertificate() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    EnableBankingCertificate,
+    EnableBankingCredentialApiError,
+    SensitiveRequestInput
+  >({
+    mutationFn: (input) => createEnableBankingCertificate(input),
+    scope: { id: "enable-banking-credential" },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: enableBankingCredentialQueryKeys.all,
+      }),
+  });
+}
+
+/** Activates the generated key under the application ID Enable Banking gave its certificate. */
+export async function activateEnableBankingCredential(
+  input: SensitiveRequestInput & { applicationId: string },
+): Promise<EnableBankingCredential> {
+  const { data } = await api.post<EnableBankingCredential>(
+    "/v1/user/enable-banking-credential/activate",
+    { applicationId: input.applicationId },
+    sensitiveHeaders(input),
+  );
+  return data;
+}
+
+export function useActivateEnableBankingCredential() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    EnableBankingCredential,
+    EnableBankingCredentialApiError,
+    SensitiveRequestInput & { applicationId: string }
+  >({
+    mutationFn: (input) => activateEnableBankingCredential(input),
+    scope: { id: "enable-banking-credential" },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: enableBankingCredentialQueryKeys.all,
+      }),
+  });
 }
 
 export async function deleteEnableBankingCredential(

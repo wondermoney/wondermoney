@@ -25,6 +25,7 @@ import useEnableBankingCredential, {
 import { useProfileField } from "@/lib/api/user/useProfile";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
 
+import EnableBankingGeneratedKeyDialog from "./EnableBankingGeneratedKeyDialog";
 import EnableBankingKeySetupDialog from "./EnableBankingKeySetupDialog";
 
 const apiMessage = (error: unknown): string | undefined =>
@@ -57,6 +58,7 @@ const badgeVariantForStatus = (
       return "success";
     case "invalid":
       return "destructive";
+    case "pending":
     case "revoked":
       return "muted";
   }
@@ -104,7 +106,12 @@ export default function EnableBankingKeySettings() {
       ? t("statusActive")
       : status === "invalid"
         ? t("statusInvalid")
-        : t("statusRevoked");
+        : status === "pending"
+          ? t("statusPending")
+          : t("statusRevoked");
+  // A key of one's own, as opposed to only a generated one still waiting for its application ID.
+  const hasKey = !!credential && status !== "pending";
+  const pendingExpiresAt = credential?.pending?.expiresAt ?? null;
 
   const onConfirmRemove = () => {
     deleteCredential.mutate(undefined, {
@@ -150,10 +157,27 @@ export default function EnableBankingKeySettings() {
         </Text>
       )}
 
+      {pendingExpiresAt ? (
+        <Text variant="mutedText" className="text-sm">
+          {t("pendingWaiting", {
+            date: format.dateTime(new Date(pendingExpiresAt), {
+              dateStyle: "medium",
+            }),
+          })}
+        </Text>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2">
+        <EnableBankingGeneratedKeyDialog
+          triggerLabel={
+            pendingExpiresAt ? t("continueSetup") : t("createKeyCta")
+          }
+          pendingExpiresAt={pendingExpiresAt}
+        />
         <EnableBankingKeySetupDialog
-          triggerLabel={credential ? t("updateKey") : t("addKey")}
-          isUpdate={!!credential}
+          triggerLabel={hasKey ? t("updateKey") : t("haveKeyCta")}
+          isUpdate={hasKey}
+          triggerVariant="outline"
         />
         {credential && (
           <Button variant="outline" onClick={() => setConfirmOpen(true)}>
