@@ -1,4 +1,4 @@
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { isAppSignupUrl } from "./appLinks";
 import { readConsentDecision } from "./consent";
 import { REFERRER_CLASS_PARAM, consentedReferrerClass, type ReferrerClass } from "./referrerClass";
 import type { CuratedListRouteId, ToolRouteId } from "./routes";
@@ -21,8 +21,6 @@ export type LandingSource = ToolRouteId | CuratedListRouteId;
 
 export const LANDING_SOURCE_PARAM = "landing_source";
 
-const SIGNUP_URL = new URL(CTA_URL);
-
 /** The route id of the tool or list page being viewed, or undefined on any other page. */
 export function getLandingSource(doc: Document = document): string | undefined {
   return doc.body?.dataset.landingSource || undefined;
@@ -30,7 +28,7 @@ export function getLandingSource(doc: Document = document): string | undefined {
 
 /**
  * `href` with the landing source set, or removed when `source` is undefined. Only links to the
- * app's signup change; any other link comes back as it was.
+ * app's signup, in any of its languages, change; any other link comes back as it was.
  */
 export function withLandingSource(href: string, source: string | undefined): string {
   return withSignupAttribution(href, { landingSource: source });
@@ -52,7 +50,7 @@ export function withSignupAttribution(href: string, attribution: SignupAttributi
   } catch {
     return href;
   }
-  if (url.origin !== SIGNUP_URL.origin || url.pathname !== SIGNUP_URL.pathname) return href;
+  if (!isAppSignupUrl(url)) return href;
   const params: Array<[string, string | undefined]> = [
     [LANDING_SOURCE_PARAM, attribution.landingSource],
     [REFERRER_CLASS_PARAM, attribution.referrerClass],

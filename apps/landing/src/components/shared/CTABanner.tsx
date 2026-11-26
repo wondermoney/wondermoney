@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 export type Props = {
   headline?: string;
@@ -21,7 +21,7 @@ export default function CTABanner({
   headline,
   description,
   ctaText,
-  ctaHref = CTA_URL,
+  ctaHref,
   ctaNote,
   variant,
   locale,
@@ -57,11 +57,11 @@ function CTABannerContent({
   headline,
   description,
   ctaText,
-  ctaHref = CTA_URL,
+  ctaHref,
   ctaNote,
   variant = "banner",
 }: Omit<Props, "locale">) {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
   const action = (
     <Button
       asChild
@@ -70,7 +70,7 @@ function CTABannerContent({
       className={variant === "card" ? "h-auto min-h-10 max-w-full whitespace-normal py-2 text-center" : undefined}
     >
       <a
-        href={ctaHref}
+        href={ctaHref ?? appSignupUrl(locale)}
         onClick={() =>
           pushGtmEvent({
             event: "cta_click",

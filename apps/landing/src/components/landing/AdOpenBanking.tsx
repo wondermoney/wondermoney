@@ -9,7 +9,7 @@ import SocialProof from "@/components/landing/sections/SocialProof";
 import CTABanner from "@/components/shared/CTABanner";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 export default function AdOpenBanking({ locale }: { locale: Lang }) {
   return (
@@ -20,8 +20,8 @@ export default function AdOpenBanking({ locale }: { locale: Lang }) {
 }
 
 function AdOpenBankingContent() {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <>

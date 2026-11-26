@@ -16,9 +16,8 @@ import {
 import { toolsMenuClickEvent, type ToolsNavMenu } from "@/lib/toolsMenuTracking";
 import { getTranslations } from "@/lib/translations";
 import type { Lang } from "@/lib/i18nLocale";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
 import { useNavMenus } from "./useNavMenus";
-import { appFaqUrl } from "@/lib/appLinks";
+import { APP_LOGIN_URL, appFaqUrl, appSignupUrl } from "@/lib/appLinks";
 
 export type Props = {
   locale: Lang;
@@ -85,7 +84,7 @@ export default function Header({ locale }: Props) {
   // to the catalog appears in its menu here and in the drawer.
   const { columns: toolColumns, comparators } = buildHeaderToolMenus(locale);
   const toolGroups = toolColumns.flat();
-  const ctaUrl = useCtaUrl();
+  const ctaUrl = appSignupUrl(locale);
 
   const trackToolClick = (
     tool: ToolsHubTool,
@@ -380,7 +379,7 @@ export default function Header({ locale }: Props) {
         {/* Desktop CTAs */}
         <div className="hidden lg:flex lg:flex-none lg:items-center lg:gap-x-3">
           <Button asChild variant="link" className="text-foreground">
-            <a href="https://app.wonder.money/auth/login">
+            <a href={APP_LOGIN_URL}>
               {t("header.login")}
             </a>
           </Button>
@@ -568,7 +567,7 @@ export default function Header({ locale }: Props) {
                   </a>
                 </Button>
                 <a
-                  href="https://app.wonder.money/auth/login"
+                  href={APP_LOGIN_URL}
                   className="rounded-lg border border-border px-3 py-2.5 text-center text-base font-semibold leading-7 text-foreground hover:bg-accent"
                 >
                   {t("header.login")}

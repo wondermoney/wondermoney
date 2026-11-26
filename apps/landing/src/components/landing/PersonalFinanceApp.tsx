@@ -5,7 +5,7 @@ import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import { Check } from "lucide-react";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function FeatureCard({
   title,
@@ -63,7 +63,7 @@ export default function PersonalFinanceApp({ locale }: { locale: Lang }) {
 }
 
 function PersonalFinanceAppContent() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
 
   const features = [1, 2, 3, 4, 5, 6].map((n) => ({
     title: t(`lp.personalFinanceApp.feature${n}Title`),
@@ -85,7 +85,7 @@ function PersonalFinanceAppContent() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg">
               <a
-                href={CTA_URL}
+                href={appSignupUrl(locale)}
                 onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
               >
                 {t("lp.shared.ctaPrimary")}

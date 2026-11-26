@@ -1,6 +1,6 @@
 import type { Lang } from "./i18nLocale"
 import type { FeatureRouteId } from "./pageStaticPaths"
-import { APP_STORE_URL, PLAY_STORE_URL } from "./storeLinks"
+import { APP_STORE_URL, PLAY_STORE_URL } from "./appLinks"
 import { getTranslations } from "./translations"
 
 /**

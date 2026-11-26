@@ -1,6 +1,6 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { APP_LOGIN_URL, appSignupUrl } from "@/lib/appLinks";
 import { LAYER } from "@/lib/layers";
 import { cn } from "@/lib/utils";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
@@ -16,8 +16,8 @@ export default function StickyMobileCta({ locale }: { locale: Lang }) {
 }
 
 function StickyMobileCtaContent() {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <div
@@ -42,7 +42,7 @@ function StickyMobileCtaContent() {
           </a>
         </Button>
         <a
-          href="https://app.wonder.money/auth/login"
+          href={APP_LOGIN_URL}
           className="rounded-md border border-border px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent"
         >
           {t("header.login")}

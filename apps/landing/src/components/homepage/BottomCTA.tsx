@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { useTranslations } from "@/lib/reactTranslations";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
-import { DEMO_URL, useCtaUrl } from "@/hooks/useCtaUrl";
+import { appDemoUrl, appSignupUrl } from "@/lib/appLinks";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 export default function BottomCTA({ locale }: { locale: Lang }) {
@@ -16,8 +16,8 @@ export default function BottomCTA({ locale }: { locale: Lang }) {
 
 // The hero's action again, in one short band.
 function BottomCTAContent() {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <section className="relative isolate border-t border-border bg-paper-2">
@@ -49,7 +49,7 @@ function BottomCTAContent() {
             </Button>
             <Button asChild size="lg" variant="secondary" className="px-6">
               <a
-                href={DEMO_URL}
+                href={appDemoUrl(locale)}
                 onClick={() =>
                   pushGtmEvent({
                     event: "demo_cta_click",

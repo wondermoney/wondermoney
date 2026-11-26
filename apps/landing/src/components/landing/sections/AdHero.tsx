@@ -1,6 +1,6 @@
 import { useTranslations } from "@/lib/reactTranslations";
 import { Button } from "@/components/ui/button";
-import { useCtaUrl } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
 
 type Props = {
@@ -14,8 +14,8 @@ type Props = {
 };
 
 export default function AdHero({ badge, titleKey, subtitleKey, ctaLabelKey = "lp.shared.ctaPrimary", ctaNoteKey }: Props) {
-  const { t } = useTranslations();
-  const ctaUrl = useCtaUrl();
+  const { t, locale } = useTranslations();
+  const ctaUrl = appSignupUrl(locale);
 
   return (
     <section className="bg-background py-20 md:py-28">

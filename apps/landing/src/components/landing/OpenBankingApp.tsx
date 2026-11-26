@@ -6,7 +6,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import { Check, Landmark } from "lucide-react";
 import ResearchNote from "@/components/landing/sections/ResearchNote";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 
 function FeatureCard({
   title,
@@ -62,7 +62,7 @@ export default function OpenBankingApp({ locale }: { locale: Lang }) {
 }
 
 function OpenBankingAppContent() {
-  const { t } = useTranslations();
+  const { t, locale } = useTranslations();
 
   const features = [1, 2, 3, 4, 5, 6].map((n) => ({
     title: t(`lp.openBankingApp.feature${n}Title`),
@@ -84,7 +84,7 @@ function OpenBankingAppContent() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg">
               <a
-                href={CTA_URL}
+                href={appSignupUrl(locale)}
                 onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
               >
                 {t("lp.shared.ctaPrimary")}

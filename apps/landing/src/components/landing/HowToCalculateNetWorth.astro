@@ -10,7 +10,7 @@ import CTABanner from "@/components/shared/CTABanner";
 import FigureCards from "@/components/shared/FigureCards.astro";
 import FinancialDisclaimer from "@/components/shared/FinancialDisclaimer";
 import { buttonVariants } from "@/components/ui/button";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import { buildOutline, readingMinutes } from "@/lib/articleOutline";
 import { PAGE_FIGURES } from "@/lib/hairline/articleFigures";
 import type { Lang } from "@/lib/i18nLocale";
@@ -132,7 +132,7 @@ const keepReading = [
       <section class="rounded-card border border-border bg-paper-2 p-5 sm:p-6">
         <h2 class="text-lg font-semibold text-foreground">{t(k("autoTitle"))}</h2>
         <p class="mt-3 text-base leading-7 text-ink-2">{t(k("autoBody"))}</p>
-        <a href={CTA_URL} data-net-worth-inline-cta class:list={[buttonVariants(), "mt-5"]}>
+        <a href={appSignupUrl(locale)} data-net-worth-inline-cta class:list={[buttonVariants(), "mt-5"]}>
           {t("lp.shared.ctaPrimary")}
         </a>
         <p class="mt-3 text-sm text-muted-foreground">{t("lp.shared.trialNote")}</p>

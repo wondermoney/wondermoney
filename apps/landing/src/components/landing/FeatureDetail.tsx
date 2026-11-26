@@ -8,7 +8,7 @@ import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { pushGtmEvent, getPageType } from "@/lib/gtm";
-import { CTA_URL } from "@/hooks/useCtaUrl";
+import { appSignupUrl } from "@/lib/appLinks";
 import type { Lang } from "@/lib/i18nLocale";
 import { FEATURE_DETAILS, type FeatureDetailRouteId, type FeatureDetailSection } from "./featureDetails";
 
@@ -81,7 +81,7 @@ function FeatureDetailContent({ locale, routeId }: { locale: Lang; routeId: Feat
 							<div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
 								<Button asChild size="lg">
 									<a
-										href={CTA_URL}
+										href={appSignupUrl(locale)}
 										onClick={() => pushGtmEvent({ event: "cta_click", cta_position: "hero", page_type: getPageType() })}
 									>
 										{t("lp.shared.ctaPrimary")}

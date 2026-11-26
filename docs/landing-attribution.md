@@ -48,7 +48,8 @@ event. The account never holds any of them.
 - **Website** (`apps/landing/src/lib/landingSource.ts`, `posthog.ts`, `curatedListTracking.ts`).
   PostHog's `before_send` adds `landing_source` to every event a tool or list page sends, and
   `referrer_class` to every event of every page. As a link to the app's signup is followed
-  (click, middle click, context menu), the page sets `?landing_source=<route id>` (tool and list
+  (click, middle click, context menu; `/<language>/auth/signup` in any of the app's languages,
+  `appLinks.ts`), the page sets `?landing_source=<route id>` (tool and list
   pages) and `?referrer_class=<class>` (every page) on it if the visitor allowed analytics on the
   site at that moment, and takes both off otherwise. Besides PostHog's own storage, the only thing
   the site keeps in the browser is the visit's referrer class, as above.
