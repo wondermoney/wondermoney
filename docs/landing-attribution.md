@@ -22,13 +22,18 @@ with `utm_source=chatgpt.com`), then the referrer's hostname against a short all
 assistants are `chatgpt.com`, `chat.openai.com`, `perplexity.ai`, `gemini.google.com`,
 `copilot.microsoft.com` and `claude.ai`, and their Android apps; search engines and social
 networks have lists of their own. No referrer and no `utm_source` is `direct`, anything else
-`other`. A click from one page of the site to the next has no class of its own: the visit keeps
+`other`. A click from one page of the site to the next, or a return from the app or the docs
+(any `*.wonder.money` referrer), has no class of its own: the visit keeps
 the class of its first page, which the browser keeps in `sessionStorage`
 (`wondermoney.referrer-class`) once analytics is allowed, until the tab closes or the consent is
 withdrawn. A visitor who allows analytics only after the first page has no class.
 
-Only the class leaves that module. The referrer URL and the `utm_*` values are never put on a
-link, stored with the class, or sent with the signup, and the account never holds any of them.
+With the site's Analytics consent, PostHog's own events carry the referring page and the
+campaign parameters as they always have (`$referrer`, `$referring_domain`, `utm_*`, and
+`$current_url` with its query string), and posthog-js keeps the initial ones in its own storage;
+the dashboards rely on them. What the site adds is the class: the only thing WonderMoney's own
+code keeps in `sessionStorage`, and the only thing put on the signup link and so on the `signup`
+event. The account never holds any of them.
 
 ## The chain
 
@@ -45,8 +50,8 @@ link, stored with the class, or sent with the signup, and the account never hold
   `referrer_class` to every event of every page. As a link to the app's signup is followed
   (click, middle click, context menu), the page sets `?landing_source=<route id>` (tool and list
   pages) and `?referrer_class=<class>` (every page) on it if the visitor allowed analytics on the
-  site at that moment, and takes both off otherwise. The only thing stored in the browser is the
-  visit's referrer class, as above.
+  site at that moment, and takes both off otherwise. Besides PostHog's own storage, the only thing
+  the site keeps in the browser is the visit's referrer class, as above.
 - **App** (`apps/web/lib/analytics/landing-source.ts`). The signup page forwards both
   parameters only when the app's own analytics opt-in is granted: in the `POST /v1/auth/callback`
   body for an email signup (`landingSource`, `referrerClass`), and through the `/auth/complete`

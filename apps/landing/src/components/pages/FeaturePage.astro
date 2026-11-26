@@ -135,8 +135,8 @@ const structuredDataByRouteId: Record<ClassicFeatureRouteId, Record<string, unkn
       url: `https://wonder.money${toLocalizedPath(routeId, locale)}`,
       applicationCategory: "FinanceApplication",
       operatingSystem: "Web",
-      description:
-        "WonderMoney automatically categorises your bank transactions using AI. Spend less time on data entry and more time understanding your spending habits.",
+      // The page's own lead, in its language: what the page says about how categories are set.
+      description: t("lp.featureCategorization.heroSubtitle"),
     },
   ],
   featureCredits: [

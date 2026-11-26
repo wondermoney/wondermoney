@@ -7341,7 +7341,7 @@
       "faq2Q": "Devo inserire le spese a mano?",
       "faq2A": "No. Le transazioni delle banche collegate e dei file importati contano nel budget secondo la loro categoria. Puoi comunque aggiungere una transazione a mano, come un pagamento in contanti.",
       "faq3Q": "Posso condividere un budget con la mia famiglia?",
-      "faq3A": "Sì. Un budget familiare è condiviso con tutta la famiglia, e i suoi membri possono modificarlo. Un budget personale è solo tuo: nessun altro in famiglia lo vede."
+      "faq3A": "Sì. Un budget familiare è condiviso con tutta la famiglia, e i membri con permesso di modifica possono cambiarlo. Un budget personale è solo tuo: nessun altro in famiglia lo vede."
     },
     "featureAccounts": {
       "metaTitle": "Collega conti bancari europei tramite Open Banking — WonderMoney",
@@ -7371,7 +7371,7 @@
       "faq1Q": "Mi serve una mia chiave Enable Banking?",
       "faq1A": "Su wonder.money sì: registri una volta un'applicazione gratuita su Enable Banking e aggiungi la sua chiave nelle impostazioni di WonderMoney, e tutte le banche che colleghi dopo la usano. Su un server in self-hosting, chi lo gestisce può configurarne una per tutta la famiglia.",
       "faq2Q": "E se la mia banca non è nell'elenco?",
-      "faq2A": "Aggiungila come conto non collegato e aggiorna tu il saldo, oppure importa le sue transazioni da un file CSV, OFX o QIF o da un estratto conto in PDF. I conti non collegati contano nei budget e nel patrimonio come quelli collegati.",
+      "faq2A": "Aggiungila come conto non collegato e aggiorna tu il saldo, oppure importa le sue transazioni da un file CSV, OFX o QIF, o da un estratto conto in PDF quando il server ha un modello di IA configurato. I conti non collegati contano nei budget e nel patrimonio come quelli collegati.",
       "faq3Q": "Cosa succede quando un collegamento bancario scade?",
       "faq3A": "Il consenso della banca dura un periodo stabilito. Le impostazioni dei collegamenti di WonderMoney mostrano quando scade ciascuno e propongono di rinnovarlo negli ultimi 14 giorni: allora approvi di nuovo l'accesso presso la tua banca."
     },
@@ -7411,7 +7411,7 @@
       "faq2Q": "Devo usare l'IA?",
       "faq2A": "No. Le regole e i suggerimenti appresi dalle tue scelte non hanno bisogno di alcun servizio di IA e non gli inviano nulla. Puoi disattivare le funzioni di IA per il tuo account nelle impostazioni della privacy.",
       "faq3Q": "Una regola può cambiare una categoria che ho scelto io?",
-      "faq3A": "No. Una regola si applica una volta, quando arriva la transazione, e non cambia mai una categoria che hai scelto tu. Nemmeno una sincronizzazione successiva annulla le tue modifiche."
+      "faq3A": "No. Le regole si applicano alle nuove transazioni e, quando le applichi, a quelle che hai già; in ogni caso non cambiano mai una categoria che hai impostato tu."
     },
     "featurePrivacy": {
       "eyebrow": "Privacy e sicurezza",
@@ -7454,7 +7454,7 @@
       "faq2Q": "WonderMoney vede la password della mia banca?",
       "faq2A": "No. Accedi sulla pagina della tua banca, e WonderMoney non vede mai le tue credenziali. Puoi revocare l'accesso in qualsiasi momento, da WonderMoney o presso la tua banca.",
       "faq3Q": "Posso portare via i miei dati o cancellarli?",
-      "faq3A": "Sì. Dalle impostazioni della privacy esporti tutto ciò che vedi della tua famiglia in un file zip, che un altro server WonderMoney può ripristinare. Eliminare l'account revoca anche i tuoi collegamenti bancari."
+      "faq3A": "Sì. Dalle impostazioni della privacy esporti tutto ciò che vedi della tua famiglia in un file zip, che un altro server WonderMoney può ripristinare. Eliminare l'account interrompe anche tutti i collegamenti bancari; il consenso presso la tua banca termina alla scadenza o quando lo revochi lì."
     },
     "pricing": {
       "metaTitle": "Prezzi — WonderMoney",
@@ -8311,7 +8311,7 @@
   },
   "llms": {
     "summary": "WonderMoney è un'app di finanza personale gratuita e open source: sincronizzazione bancaria tramite Open Banking, budget a buste, obiettivi, investimenti e patrimonio netto, sul web, su iOS e Android, su wonder.money o sul tuo server.",
-    "about": "WonderMoney è gratuito e open source con licenza AGPL, e chiunque può installarlo sul proprio server con un solo file Docker Compose. Collega conti bancari in Portogallo, Spagna, Regno Unito, Germania, Francia e altri paesi europei tramite l'Open Banking in sola lettura di Enable Banking, con un'applicazione Enable Banking gratuita che ogni persona registra una volta; un server in self-hosting può offrire anche SimpleFIN per le banche di Stati Uniti e Canada. Gli altri conti si aggiungono a mano o si importano da file CSV, OFX e QIF o da estratti conto in PDF. Copre budget, obiettivi, prestiti, pagamenti ricorrenti, investimenti e patrimonio netto, per una persona o per tutta la famiglia, sul web su app.wonder.money e nelle app per iOS e Android.",
+    "about": "WonderMoney è gratuito e open source con licenza AGPL, e chiunque può installarlo sul proprio server con un solo file Docker Compose. Collega conti bancari in Portogallo, Spagna, Regno Unito, Germania, Francia e altri paesi europei tramite l'Open Banking in sola lettura di Enable Banking, con un'applicazione Enable Banking gratuita che ogni persona registra una volta; un server in self-hosting può fornire un'applicazione Enable Banking per tutta la famiglia, e può offrire anche SimpleFIN per le banche di Stati Uniti e Canada. Gli altri conti si aggiungono a mano o si importano da file CSV, OFX e QIF, o da estratti conto in PDF quando il server ha un modello di IA configurato. Copre budget, obiettivi, prestiti, pagamenti ricorrenti, investimenti e patrimonio netto, per una persona o per tutta la famiglia, sul web su app.wonder.money e nelle app per iOS e Android.",
     "sections": {
       "start": "Per iniziare",
       "features": "Funzionalità",

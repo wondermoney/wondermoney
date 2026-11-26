@@ -33,7 +33,6 @@ describe("classifyReferrer", () => {
     ["https://www.linkedin.com/feed", "social"],
     ["https://www.youtube.com/watch?v=1", "social"],
     ["https://example.com/blog", "other"],
-    ["https://docs.wonder.money/en/docs", "other"],
     ["https://mail.google.com/", "other"],
     ["android-app://com.example.reader/", "other"],
   ] as const)("classifies a visit from %s as %s", (referrer, expected) => {
@@ -56,8 +55,19 @@ describe("classifyReferrer", () => {
     expect(classifyReferrer("", `${PAGE}?utm_source=newsletter`)).toBe("other");
   });
 
-  it("has no class for a click from one page of the site to the next", () => {
+  it("has no class for a click from one page of the site to the next, or a return from the app or docs", () => {
     expect(classifyReferrer("https://wonder.money/it/features/budgeting", PAGE)).toBeUndefined();
+    expect(classifyReferrer("https://app.wonder.money/en/auth/signup", PAGE)).toBeUndefined();
+    expect(classifyReferrer("https://docs.wonder.money/en/docs", PAGE)).toBeUndefined();
+    expect(classifyReferrer("https://notwonder.money/", PAGE)).toBe("other");
+  });
+
+  it("keeps the first page's class when the visitor comes back from the app", () => {
+    window.sessionStorage.setItem(REFERRER_CLASS_STORAGE_KEY, "ai_assistant");
+    const back = { referrer: "https://app.wonder.money/en/auth/login", location: new URL(PAGE) } as unknown as Document;
+
+    expect(consentedReferrerClass(back, window)).toBe("ai_assistant");
+    window.sessionStorage.clear();
   });
 
   it("only ever answers one of the coarse classes", () => {

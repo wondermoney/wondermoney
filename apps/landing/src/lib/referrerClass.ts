@@ -2,11 +2,11 @@
  * Where a visitor came to the website from, as one coarse class: an AI assistant, a search
  * engine, a social network, no referrer at all (`direct`), or anything else (`other`).
  *
- * The class is all that leaves this module: the referrer URL and the campaign (`utm_*`) values
- * are read here and never sent, stored or put on a link. It rides on the site's analytics events
- * (`posthog.ts`) and on the signup links (`landingSource.ts`), both only with the visitor's
- * analytics consent, and the app sends it with the signup only with its own opt-in too
- * (`docs/landing-attribution.md`). The list is the analytics catalogue's
+ * With the visitor's analytics consent, PostHog's own events carry the referring page and the
+ * campaign (`utm_*`) parameters as they always have (`posthog.ts`). What this module adds is the
+ * class: the only thing the site's own code keeps in the browser (`sessionStorage`), and the only
+ * thing put on the signup links (`landingSource.ts`) and so passed to the app, which sends it
+ * with the signup only with its own opt-in too (`docs/landing-attribution.md`). The list is the analytics catalogue's
  * `ANALYTICS_REFERRER_CLASSES` (`packages/shared/lib/analytics/catalogue.ts`); keep the two in step.
  */
 export const REFERRER_CLASSES = ["ai_assistant", "search", "social", "direct", "other"] as const;
@@ -112,9 +112,15 @@ function classifyUtmSource(value: string): ReferrerClass | undefined {
 }
 
 /**
+ * wonder.money and its subdomains (the app, the docs): coming back from them continues the visit,
+ * so it keeps the class it had rather than becoming `other`.
+ */
+const isOwnHost = (host: string) => host === "wonder.money" || host.endsWith(".wonder.money");
+
+/**
  * The class of a page view, from its referrer and its URL's `utm_source`, or undefined when the
- * referrer is this site itself (a click from one page to the next): the visit's first page has
- * the class then. A `utm_source` the list knows wins over the referrer; an unknown one counts as
+ * referrer is this site, the app or the docs (a click from one page to the next, or a return
+ * from the app): the visit's first page has the class then. A `utm_source` the list knows wins over the referrer; an unknown one counts as
  * `other` only when there is no referrer to go by.
  */
 export function classifyReferrer(referrer: string, pageUrl: string): ReferrerClass | undefined {
@@ -138,7 +144,7 @@ export function classifyReferrer(referrer: string, pageUrl: string): ReferrerCla
 
   if (from.protocol === "android-app:") return ANDROID_APPS[from.hostname.toLowerCase()] ?? "other";
   const host = from.hostname.toLowerCase();
-  if (page && host === page.hostname.toLowerCase()) return undefined;
+  if (isOwnHost(host) || (page && host === page.hostname.toLowerCase())) return undefined;
   return classifyHost(host);
 }
 

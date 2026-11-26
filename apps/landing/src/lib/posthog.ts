@@ -96,13 +96,15 @@ export function applyPostHogConsent(consent: { analytics: boolean }): void {
         // page view included: a page's visits, uses and next-step clicks group by it,
         // whatever the locale's slug.
         // Where the visit came from, as a coarse class (`referrerClass.ts`), on every event of
-        // every page: an event is only sent with analytics consent, the class's own condition.
+        // every page, read with the consent at that moment. PostHog's own `$referrer`,
+        // `$referring_domain` and `utm_*` properties are left as they were.
         // The URL's fragment is dropped: a tool's share link carries the visitor's inputs there
         // (the electricity comparator's bill and consumption), and an anchor says nothing useful.
         before_send: (event) => {
           const source = getLandingSource();
           if (event && source) event.properties.landing_source = source;
-          const referrerClass = consentedReferrerClass();
+          const consented = readConsentDecision(window.localStorage).purposes.analytics;
+          const referrerClass = consented ? consentedReferrerClass() : undefined;
           if (event && referrerClass) event.properties.referrer_class = referrerClass;
           const url = event?.properties.$current_url;
           if (typeof url === "string" && url.includes("#")) event!.properties.$current_url = url.slice(0, url.indexOf("#"));

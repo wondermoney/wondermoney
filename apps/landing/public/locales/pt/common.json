@@ -7341,7 +7341,7 @@
       "faq2Q": "Tenho de registar os meus gastos à mão?",
       "faq2A": "Não. As transações dos bancos ligados e dos ficheiros importados contam no orçamento pela sua categoria. Podes na mesma adicionar uma transação à mão, como um pagamento em dinheiro.",
       "faq3Q": "Posso partilhar um orçamento com o meu agregado?",
-      "faq3A": "Sim. Um orçamento do agregado é partilhado com todas as pessoas do agregado, e os membros podem alterá-lo. Um orçamento pessoal é só teu: mais ninguém no agregado o vê."
+      "faq3A": "Sim. Um orçamento do agregado é partilhado com todas as pessoas do agregado, e os membros com permissão de edição podem alterá-lo. Um orçamento pessoal é só teu: mais ninguém no agregado o vê."
     },
     "featureAccounts": {
       "eyebrow": "Ligação a contas bancárias",
@@ -7371,7 +7371,7 @@
       "faq1Q": "Preciso de uma chave da Enable Banking só minha?",
       "faq1A": "Em wonder.money, sim: registas uma vez uma aplicação gratuita da Enable Banking e adicionas a chave nas definições do WonderMoney, e todos os bancos que ligares depois usam-na. Num servidor próprio, quem o gere pode configurar uma para todo o agregado.",
       "faq2Q": "E se o meu banco não aparecer na lista?",
-      "faq2A": "Adiciona-o como conta não ligada e atualiza tu o saldo, ou importa as transações de um ficheiro CSV, OFX ou QIF ou de um extrato em PDF. As contas não ligadas contam nos orçamentos e no património tal como as ligadas.",
+      "faq2A": "Adiciona-o como conta não ligada e atualiza tu o saldo, ou importa as transações de um ficheiro CSV, OFX ou QIF, ou de um extrato em PDF quando o servidor tem um modelo de IA configurado. As contas não ligadas contam nos orçamentos e no património tal como as ligadas.",
       "faq3Q": "O que acontece quando uma ligação bancária expira?",
       "faq3A": "O consentimento do banco dura um período definido. As definições de ligações do WonderMoney mostram quando termina cada um e propõem voltar a ligar nos últimos 14 dias: depois aprovas de novo o acesso no teu banco."
     },
@@ -7411,7 +7411,7 @@
       "faq2Q": "Tenho de usar IA?",
       "faq2A": "Não. As regras e as sugestões aprendidas com as tuas escolhas não precisam de nenhum serviço de IA nem lhe enviam nada. Podes desligar as funcionalidades de IA da tua conta nas definições de privacidade.",
       "faq3Q": "Uma regra pode mudar uma categoria que escolhi?",
-      "faq3A": "Não. Uma regra corre uma vez, quando a transação chega, e nunca muda uma categoria que escolheste tu. Uma sincronização posterior também não desfaz as tuas alterações."
+      "faq3A": "Não. As regras correm nas transações novas e, quando as aplicas, nas que já tens; em qualquer dos casos, nunca mudam uma categoria que definiste tu."
     },
     "featurePortfolio": {
       "eyebrow": "Acompanhamento de portefólio",
@@ -7534,7 +7534,7 @@
       "faq2Q": "O WonderMoney vê a palavra-passe do meu banco?",
       "faq2A": "Não. Inicias sessão na página do teu banco, e o WonderMoney nunca vê as tuas credenciais. Podes revogar o acesso a qualquer momento, no WonderMoney ou no teu banco.",
       "faq3Q": "Posso levar os meus dados ou apagá-los?",
-      "faq3A": "Sim. Nas definições de privacidade exportas tudo o que vês no teu agregado num ficheiro zip, que outro servidor WonderMoney consegue restaurar. Apagar a conta também revoga as tuas ligações bancárias."
+      "faq3A": "Sim. Nas definições de privacidade exportas tudo o que vês no teu agregado num ficheiro zip, que outro servidor WonderMoney consegue restaurar. Apagar a conta também para todas as ligações bancárias; o consentimento no teu banco termina quando expira ou quando o retiras lá."
     },
     "pricing": {
       "metaTitle": "Preços — WonderMoney",
@@ -8311,7 +8311,7 @@
   },
   "llms": {
     "summary": "O WonderMoney é uma app de finanças pessoais gratuita e open source: sincronização bancária por Open Banking, orçamentos por envelopes, objetivos, investimentos e património, na web, em iOS e em Android, em wonder.money ou no teu próprio servidor.",
-    "about": "O WonderMoney é gratuito e open source sob a AGPL, e qualquer pessoa o pode instalar no seu próprio servidor a partir de um único ficheiro Docker Compose. Liga contas bancárias em Portugal, Espanha, Reino Unido, Alemanha, França e outros países europeus através do Open Banking só de leitura da Enable Banking, com uma aplicação gratuita da Enable Banking que cada pessoa regista uma vez; um servidor próprio também pode oferecer o SimpleFIN para bancos dos Estados Unidos e do Canadá. As outras contas adicionam-se à mão ou importam-se de ficheiros CSV, OFX e QIF ou de extratos em PDF. Cobre orçamentos, objetivos, empréstimos, pagamentos recorrentes, investimentos e património, para uma pessoa ou para todo o agregado, na web em app.wonder.money e nas apps para iOS e Android.",
+    "about": "O WonderMoney é gratuito e open source sob a AGPL, e qualquer pessoa o pode instalar no seu próprio servidor a partir de um único ficheiro Docker Compose. Liga contas bancárias em Portugal, Espanha, Reino Unido, Alemanha, França e outros países europeus através do Open Banking só de leitura da Enable Banking, com uma aplicação gratuita da Enable Banking que cada pessoa regista uma vez; um servidor próprio pode disponibilizar uma aplicação da Enable Banking para todo o agregado, e também pode oferecer o SimpleFIN para bancos dos Estados Unidos e do Canadá. As outras contas adicionam-se à mão ou importam-se de ficheiros CSV, OFX e QIF, ou de extratos em PDF quando o servidor tem um modelo de IA configurado. Cobre orçamentos, objetivos, empréstimos, pagamentos recorrentes, investimentos e património, para uma pessoa ou para todo o agregado, na web em app.wonder.money e nas apps para iOS e Android.",
     "sections": {
       "start": "Começar",
       "features": "Funcionalidades",
