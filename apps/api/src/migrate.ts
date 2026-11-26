@@ -4,6 +4,7 @@ import { MikroORM } from '@mikro-orm/core';
 import type { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Client } from 'pg';
 
+import { loadDotenv } from './config/load-dotenv.js';
 import { ensureInvestmentsAndSavingsCategory } from './database/seeders/InvestmentsAndSavingsCategorySeeder.js';
 import { hasReferenceData, ReferenceDataSeeder } from './database/seeders/ReferenceDataSeeder.js';
 import config from './mikro-orm.config.js';
@@ -139,10 +140,10 @@ export function planBaseline(executed: readonly string[]): BaselinePlan {
  */
 async function createLockClient(): Promise<Client> {
   // Read the connection details straight from the env rather than off `config`.
-  // Importing `./mikro-orm.config.js` has already run `dotenv.config()`, and that
-  // config object is itself built from exactly these five variables — but its
-  // `password` is typed as MikroORM's dynamic-credential union, which `pg` does
-  // not accept.
+  // `main()` has loaded `.env` (`loadDotenv`) before this runs; importing
+  // `./mikro-orm.config.js` does not, since that config resolves lazily on first use.
+  // The config object is built from these same five variables, but its `password` is
+  // typed as MikroORM's dynamic-credential union, which `pg` does not accept.
   const { DB_DATABASE, DB_HOST, DB_PASSWORD, DB_PORT, DB_USERNAME } = process.env;
   const client = new Client({
     database: DB_DATABASE,
@@ -203,6 +204,8 @@ export function shouldSeedReferenceData(referenceDataPresent: boolean, env: Node
 }
 
 async function main() {
+  // The process environment wins, then the last assignment in `.env`, as for the API itself.
+  loadDotenv();
   const lockClient = await createLockClient();
   try {
     console.log('[migrate] acquiring advisory lock');

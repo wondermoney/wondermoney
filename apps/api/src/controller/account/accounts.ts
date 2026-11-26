@@ -1,9 +1,9 @@
 import { QueryOrder } from '@mikro-orm/core';
-import dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { pick } from 'lodash-es';
 
+import { loadDotenv } from '@config/load-dotenv';
 import { Account } from '@entity/Account';
 import { AccountFinancialInstitution } from '@entity/AccountFinancialInstitution';
 import { AccountType } from '@entity/AccountType';
@@ -45,7 +45,7 @@ import { createOfflineAccountRequestSchema, deleteAccountRequestSchema, getAccou
 import { zParse } from '@validators/parser';
 
 import { DI } from '../../app.js';
-dotenv.config({ quiet: true });
+loadDotenv();
 
 export async function createOfflineAccount(req: Request, res: Response, next: NextFunction) {
   const authedUser_ = authedUser(req);

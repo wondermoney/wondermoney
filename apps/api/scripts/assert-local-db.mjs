@@ -38,21 +38,14 @@
  * fixing it. Treat the guard as protection against the obvious mistake (a remote
  * block left in `.env`), not as proof the target is disposable.
  */
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import process from 'node:process';
-import { fileURLToPath } from 'node:url';
 
-import dotenv from 'dotenv';
+// Node strips the types of this plain TypeScript module, so the guard loads `.env` with the
+// same helper as the app and the MikroORM CLI: an exported DB_HOST wins over `.env`, and
+// within `.env` the last assignment wins.
+import { loadDotenv } from '../src/config/load-dotenv.ts';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const envPath = path.join(repoRoot, '.env');
-
-// Same call the app makes. dotenv does NOT override variables already present in
-// process.env, so an explicitly exported DB_HOST still wins — as it does at runtime.
-if (existsSync(envPath)) {
-  dotenv.config({ path: envPath, quiet: true });
-}
+loadDotenv();
 
 const LOCAL_HOSTS = new Set([
   '127.0.0.1',

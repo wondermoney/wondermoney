@@ -7,11 +7,11 @@ import {
   renderLifecycleNudgeEmail,
   renderPasswordResetEmail,
 } from '@wondermoney/react-email';
-import dotenv from 'dotenv';
 import { type CreateEmailOptions, type CreateEmailRequestOptions, type CreateEmailResponse, type CreateEmailResponseSuccess, Resend } from 'resend';
 
 import { SHOULD_INTERCEPT_EMAILS } from '@config/env';
 import { instanceName } from '@config/instance-name';
+import { loadDotenv } from '@config/load-dotenv';
 import { SupportedLanguages } from '@entity/Appuser';
 import { emailGlobalOptOutService, GLOBAL_EMAIL_OPT_OUT_CATEGORY } from '@service/email/email-global-opt-out.service';
 import { type EmailOutcome, emailSender, resolveEmailDriver, sendWithTransport, supportInbox } from '@service/email/email-transport';
@@ -33,7 +33,7 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-dotenv.config({ quiet: true });
+loadDotenv();
 
 /**
  * The copy languages of the texts in this file and of the react-email shells they render
