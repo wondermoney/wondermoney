@@ -16,6 +16,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/Label";
 import { Heading, Text } from "../ui/Typography";
+import McpOAuthClients from "./McpOAuthClients";
 
 /** The token name the shortcut creates, so it is recognisable in the API-token list. */
 export const MCP_TOKEN_NAME = "AI client";
@@ -28,8 +29,9 @@ export const MCP_TOKEN_EXPIRY_DAYS = 90;
  * than the member's `read` token: it reaches only `POST /v1/mcp` and nothing on the ordinary
  * data routes. With proposals allowed it also carries `mcp:propose`: the client may draft
  * changes, which wait for the member to apply them in Settings › Assistant and which the client
- * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config and
- * the recent calls the server recorded.
+ * can never apply itself. The panel shows the endpoint, a one-click token, copy-paste client config,
+ * the OAuth clients the member allowed when the server offers OAuth, and the recent calls the server
+ * recorded.
  */
 export default function ConnectAiClient() {
   const t = useTranslations("connectAiClient");
@@ -37,6 +39,8 @@ export default function ConnectAiClient() {
   const id = useId();
   // An older API that does not report `mcp` reads as on, like every other feature.
   const mcpEnabled = useFeature((features) => features.mcp !== false);
+  // OAuth (ChatGPT and other clients that sign in) is the operator's choice, off by default.
+  const mcpOAuthEnabled = useFeature((features) => features.mcpOAuth === true);
   const create = useCreateApiToken();
   const { data: calls = [], isLoading: callsLoading } = useMcpCalls(mcpEnabled);
 
@@ -64,7 +68,13 @@ export default function ConnectAiClient() {
     {
       mcpServers: {
         wondermoney: {
-          args: ["-y", "mcp-remote", endpoint, "--header", `Authorization: Bearer ${tokenForConfig}`],
+          args: [
+            "-y",
+            "mcp-remote",
+            endpoint,
+            "--header",
+            `Authorization: Bearer ${tokenForConfig}`,
+          ],
           command: "npx",
         },
       },
@@ -129,7 +139,11 @@ export default function ConnectAiClient() {
                 className="font-mono"
                 onFocus={(event) => event.currentTarget.select()}
               />
-              <Button type="button" variant="outline" onClick={() => void copy(endpoint)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void copy(endpoint)}
+              >
                 {t("copy")}
               </Button>
             </div>
@@ -142,9 +156,13 @@ export default function ConnectAiClient() {
                 <Checkbox
                   id={`${id}-proposals`}
                   checked={allowProposals}
-                  onCheckedChange={(checked) => setAllowProposals(checked === true)}
+                  onCheckedChange={(checked) =>
+                    setAllowProposals(checked === true)
+                  }
                 />
-                <Label htmlFor={`${id}-proposals`}>{t("allow-proposals")}</Label>
+                <Label htmlFor={`${id}-proposals`}>
+                  {t("allow-proposals")}
+                </Label>
               </div>
               <Text variant="mutedText">{t("allow-proposals-hint")}</Text>
             </div>
@@ -184,7 +202,11 @@ export default function ConnectAiClient() {
                   className="font-mono"
                   onFocus={(event) => event.currentTarget.select()}
                 />
-                <Button type="button" variant="default" onClick={() => void copy(createdToken)}>
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={() => void copy(createdToken)}
+                >
                   {t("copy")}
                 </Button>
               </div>
@@ -248,6 +270,8 @@ export default function ConnectAiClient() {
         </div>
       </section>
 
+      {mcpOAuthEnabled ? <McpOAuthClients endpoint={endpoint} /> : null}
+
       <section className="grid max-w-7xl grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-3">
         <div>
           <Heading variant="h2">{t("calls-title")}</Heading>
@@ -268,9 +292,13 @@ export default function ConnectAiClient() {
                   key={`${call.createdAt}-${index}`}
                   className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <code className="font-mono text-sm">{call.toolName ?? t("calls-unknown-tool")}</code>
+                  <code className="font-mono text-sm">
+                    {call.toolName ?? t("calls-unknown-tool")}
+                  </code>
                   <Text variant="mutedText">
-                    {formatShortDateForLocale(call.createdAt, locale, { withTime: true })}
+                    {formatShortDateForLocale(call.createdAt, locale, {
+                      withTime: true,
+                    })}
                   </Text>
                 </li>
               ))}

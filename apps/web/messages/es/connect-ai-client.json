@@ -27,6 +27,44 @@
     "error-create": "No se pudo crear el token. Inténtalo de nuevo.",
     "error-totp-required": "Introduce el código del autenticador para crear un token.",
     "error-invalid-totp": "Ese código del autenticador no es válido.",
-    "error-session-not-fresh": "Vuelve a iniciar sesión antes de crear un token."
+    "error-session-not-fresh": "Vuelve a iniciar sesión antes de crear un token.",
+    "oauth-title": "Conectados con OAuth",
+    "oauth-description": "ChatGPT y otros clientes que inician sesión con OAuth no necesitan token: inicias sesión y los autorizas una vez, y leen con el mismo acceso que tú tienes. Nunca pueden cambiar nada.",
+    "oauth-chatgpt-title": "Conectar ChatGPT",
+    "oauth-chatgpt-steps": "En ChatGPT, añade una app (conector) con el endpoint MCP {endpoint} y elige OAuth. ChatGPT te trae aquí para iniciar sesión y autorizarlo.",
+    "oauth-loading": "Cargando los clientes conectados…",
+    "oauth-empty": "Ningún cliente está conectado con OAuth.",
+    "oauth-unnamed": "Cliente sin nombre",
+    "oauth-connected-on": "Conectado el {date}",
+    "oauth-last-used": "último uso el {date}",
+    "oauth-never-used": "aún sin usar",
+    "oauth-revoke": "Desconectar",
+    "oauth-revoke-title": "¿Desconectar este cliente?",
+    "oauth-revoke-description": "{name} deja de tener acceso. Para volver a usarlo, conéctalo de nuevo desde el cliente.",
+    "oauth-revoke-confirm": "Desconectar",
+    "oauth-cancel": "Cancelar",
+    "oauth-revoked": "Cliente desconectado",
+    "oauth-error-revoke": "No se pudo desconectar el cliente. Inténtalo de nuevo."
+  },
+  "oauthConsent": {
+    "title": "{client} quiere leer tus finanzas en {instanceName}",
+    "title-unnamed": "Un cliente de IA quiere leer tus finanzas en {instanceName}",
+    "signed-in-as": "Sesión iniciada como {email}.",
+    "redirect-host": "Cuando respondas, volverás a {host}. Continúa solo si empezaste esto allí.",
+    "household-title": "Qué puede ver",
+    "household-alone": "Tu hogar: lo que ves en la app, incluidas tus cuentas privadas.",
+    "household-with": "Tu hogar con {members}: lo que ves en la app, incluidas tus cuentas privadas. La cuenta privada de otro miembro sigue oculta salvo que la haya compartido contigo.",
+    "scope": {
+      "read": "Leer tus cuentas y saldos, movimientos, presupuestos, objetivos, patrimonio neto e inversiones.",
+      "offline": "Seguir conectado hasta que lo desconectes, sin volver a preguntarte."
+    },
+    "never-writes": "No puede cambiar, añadir ni eliminar nada.",
+    "scope-unknown": "También pide accesos que este servidor no concede: {scopes}.",
+    "revoke-hint": "Puedes desconectarlo en cualquier momento en Configuración › Tokens de API › Conectar un cliente de IA.",
+    "allow": "Autorizar",
+    "deny": "Cancelar",
+    "error": "No se pudo completar esta solicitud. Puede que haya caducado: empieza de nuevo desde el cliente.",
+    "invalid-title": "Esta no es una solicitud de conexión válida",
+    "invalid-body": "Empieza de nuevo desde el cliente de IA que quieres conectar."
   }
 }
