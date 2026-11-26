@@ -10961,7 +10961,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": 255,
           "precision": null,
@@ -11159,6 +11159,7 @@
           "enumItems": [
             "active",
             "invalid",
+            "pending",
             "revoked"
           ],
           "mappedType": "enum"
@@ -11224,9 +11225,14 @@
       ],
       "checks": [
         {
+          "name": "enable_banking_credential_application_id_check",
+          "expression": "\"status\" = 'pending' or \"application_id\" is not null",
+          "definition": "check (\"status\" = 'pending' or \"application_id\" is not null)"
+        },
+        {
           "name": "enable_banking_credential_status_check",
-          "expression": "\"status\" in ('active', 'invalid', 'revoked')",
-          "definition": "check (\"status\" in ('active', 'invalid', 'revoked'))",
+          "expression": "\"status\" in ('active', 'invalid', 'pending', 'revoked')",
+          "definition": "check (\"status\" in ('active', 'invalid', 'pending', 'revoked'))",
           "columnName": "status"
         }
       ],

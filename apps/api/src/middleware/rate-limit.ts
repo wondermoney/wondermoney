@@ -124,6 +124,12 @@ export const RATE_LIMIT_FAMILIES = {
    */
   bankConnect: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
+  /**
+   * `POST /v1/user/enable-banking-credential/certificate` — each request generates an RSA key pair
+   * (CPU) and replaces the person's pending key. Setting up takes one or two; never relaxed.
+   */
+  enableBankingCertificate: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
+
   /** `/v1/feedback` — each request sends an email to the operator's inbox. */
   feedback: { limit: 10, relaxable: false, scope: 'identity', windowMs: HOUR_MS },
 
@@ -412,6 +418,9 @@ export const publicMarketingRateLimit = (): RequestHandler => createRateLimiter(
 
 /** Connecting a bank with a pasted credential (SimpleFIN setup token). */
 export const bankConnectRateLimit = (): RequestHandler => createRateLimiter({ family: 'bankConnect' });
+
+/** Generating an Enable Banking key pair and certificate. */
+export const enableBankingCertificateRateLimit = (): RequestHandler => createRateLimiter({ family: 'enableBankingCertificate' });
 
 /** `/v1/feedback` — sends email. */
 export const feedbackRateLimit = (): RequestHandler => createRateLimiter({ family: 'feedback' });

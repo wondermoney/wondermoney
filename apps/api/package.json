@@ -85,6 +85,7 @@
     "@mikro-orm/sql-highlighter": "^1.0.1",
     "@modelcontextprotocol/sdk": "1.32.2",
     "@noble/hashes": "^2.4.0",
+    "@peculiar/x509": "1.14.3",
     "@scure/base": "^2.4.0",
     "@scure/bip32": "^2.4.0",
     "@scure/bip39": "^2.4.0",

@@ -24,7 +24,7 @@ import { buildInfo } from '@utils/constants';
 
 import { getInstance } from '../instance';
 
-const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'CRYPTO_BTC_EXPLORER_URL', 'CRYPTO_ETH_EXPLORER_URL', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'PUSH_ENABLED', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
+const INTEGRATION_KEYS = ['AI_API_KEY', 'AI_BASE_URL', 'AI_MODEL', 'AI_MODEL_STATEMENT_IMPORT', 'AI_PROVIDER', 'ANTHROPIC_API_KEY', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AZURE_AI_FOUNDRY_API_KEY', 'AZURE_AI_FOUNDRY_API_VERSION', 'AZURE_AI_FOUNDRY_ENDPOINT', 'AZURE_OPENAI_API_KEY', 'AZURE_OPENAI_API_VERSION', 'AZURE_OPENAI_DEPLOYMENT', 'AZURE_OPENAI_ENDPOINT', 'AZURE_OPENAI_OCR_DEPLOYMENT', 'AZURE_OPENAI_STATEMENT_IMPORT_DEPLOYMENT', 'CRYPTO_BTC_EXPLORER_URL', 'CRYPTO_ETH_EXPLORER_URL', 'DEMO_SIGN_IN_ENABLED', 'EMAIL_DRIVER', 'ENABLE_BANKING_APP_ID', 'ENABLE_BANKING_PRIVATE_KEY_FILE', 'EODHD_API_KEY', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'INSTANCE_NAME', 'MARKET_DATA_PROVIDERS', 'MIN_APP_VERSION', 'PRIVACY_POLICY_URL', 'PUSH_ENABLED', 'RESEND_API_KEY', 'SIGNUP_MODE', 'SMTP_HOST', 'SPONSOR_URL', 'STATEMENT_IMPORT_MAX_BYTES', 'STATEMENT_IMPORT_MAX_PAGES', 'SUPPORT_EMAIL'];
 
 describe('GET /v1/instance', () => {
   afterEach(() => {
@@ -47,6 +47,13 @@ describe('GET /v1/instance', () => {
     expect((await describeInstance())).toEqual({
       apiVersion: 1,
       ...buildInfo(),
+      enableBankingSetup: {
+        applicationDescription: 'Personal use: reads my own bank accounts into WonderMoney.',
+        applicationName: 'WonderMoney',
+        privacyUrl: 'https://docs.wonder.money/about/privacy-policy',
+        redirectUrl: expect.stringMatching(/\/v1\/banking\/enable-banking\/callback$/) as unknown,
+        termsUrl: 'https://docs.wonder.money/about/terms-of-service',
+      },
       features: {
         ai: { assistant: false, csvMapping: false, enrichment: false, monthlyStory: false, ocr: false, statementImport: false },
         bankSync: true,
@@ -193,9 +200,11 @@ describe('GET /v1/instance', () => {
     for (const [key, value] of Object.entries(env)) vi.stubEnv(key, value);
     const body = (await describeInstance());
     expect(body).toMatchObject({ features: { ai: { statementImport: true } } });
-    const text = JSON.stringify(body);
+    // `enableBankingSetup` carries this server's own public URLs, for registering an application.
+    const { enableBankingSetup: _setup, ...rest } = body;
+    const text = JSON.stringify(rest);
     expect(text).not.toMatch(/:\/\/|https?:/u);
-    for (const secret of secrets) expect(text).not.toContain(secret);
+    for (const secret of secrets) expect(JSON.stringify(body)).not.toContain(secret);
   });
 
   it('reports the read-only MCP server, and hides it when MCP_ENABLED is false', async () => {
@@ -270,7 +279,16 @@ describe('GET /v1/instance', () => {
       withInstanceCredential('/run/secrets/b');
       vi.stubEnv('BANK_PROVIDERS', 'none');
 
-      expect((await describeInstance())).toMatchObject({ features: { bankSync: false, bankSyncCredentials: 'user' } });
+      expect((await describeInstance())).toMatchObject({ enableBankingSetup: null, features: { bankSync: false, bankSyncCredentials: 'user' } });
+    });
+
+    it("gives the operator's privacy policy and instance name as the values to register an application with", async () => {
+      vi.stubEnv('PRIVACY_POLICY_URL', 'https://example.org/{lang}/privacy');
+      vi.stubEnv('INSTANCE_NAME', 'Family Finance');
+
+      expect((await describeInstance())).toMatchObject({
+        enableBankingSetup: { applicationName: 'Family Finance', privacyUrl: 'https://example.org/en/privacy' },
+      });
     });
 
     it('reports user credentials when the key file cannot be read', async () => {

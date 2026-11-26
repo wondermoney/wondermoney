@@ -31,9 +31,20 @@ export interface EnableBankingClient {
   exchangeSession(code: string): Promise<EnableBankingExchangeSessionResult>;
   getAccountBalances(accountId: string): Promise<unknown>;
   getAccountTransactions(accountId: string, params: EnableBankingTransactionsParams): Promise<unknown>;
+  getApplication(): Promise<EnableBankingApplication>;
   getSession(sessionId: string): Promise<EnableBankingSessionResult>;
   listInstitutions(params: { country?: string }): Promise<EnableBankingInstitution[]>;
   startAuthorization(params: EnableBankingStartAuthorizationParams): Promise<EnableBankingStartAuthorizationResult>;
+}
+
+/**
+ * `GET /application`: the application the JWT's `kid` names, as Enable Banking sees it.
+ * `environment` is `PRODUCTION` or `SANDBOX`, undefined when the answer does not say. Its `active`
+ * flag is not read: a Restricted Production application activated by linking its owner's accounts
+ * is not known to report it.
+ */
+export interface EnableBankingApplication {
+  environment?: string;
 }
 
 export interface EnableBankingExchangeSessionResult {
@@ -137,6 +148,13 @@ export function createEnableBankingClient({ applicationId, privateKeyPem }: Crea
         }),
       );
       return data;
+    },
+
+    async getApplication() {
+      const headers = await authHeaders();
+      const { data } = await request<null | { environment?: unknown }>('getApplication', () => httpClient.get('/application', { headers }));
+      const environment = data && typeof data === 'object' && typeof data.environment === 'string' ? data.environment : undefined;
+      return environment === undefined ? {} : { environment };
     },
 
     async getSession(sessionId) {

@@ -1,13 +1,45 @@
-import * as Sentry from '@sentry/node';
 import type { Request, Response } from 'express';
 
 import { zParse } from '@app/validators/parser';
 import { authedUser } from '@middleware/authed-context';
-import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
-import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
-import { sanitizeProviderResponse } from '@utils/error-sanitizer';
-import { BadRequestError } from '@utils/errors';
-import { saveEnableBankingCredentialRequestSchema } from '@validators/enable-banking-credential';
+import { checkEnableBankingCredential } from '@service/enable-banking/enable-banking-application-check';
+import { type DecryptedEnableBankingCredential, enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
+import { ConflictError, ERROR_CODE } from '@utils/errors';
+import { activateEnableBankingCredentialRequestSchema, saveEnableBankingCredentialRequestSchema } from '@validators/enable-banking-credential';
+
+/**
+ * @description Activate the current user's pending, server-generated Enable Banking key under the
+ * application ID Enable Banking assigned its certificate. The pair must pass the signed test call
+ * first; an unknown ID, a Sandbox application and a not yet activated one each answer 400 with
+ * their own code. 409 `enable_banking_pending_credential_missing` when there is no pending key,
+ * or it lapsed.
+ */
+export async function activateEnableBankingCredential(req: Request, res: Response) {
+  const user = authedUser(req);
+  const {
+    body: { applicationId },
+  } = await zParse(activateEnableBankingCredentialRequestSchema, req);
+
+  const pending = await enableBankingCredentialService.getLivePendingCredential(user.appuserKey);
+  if (!pending) {
+    throw new ConflictError('There is no Enable Banking key waiting to be activated. Create a new certificate and register it again.', ERROR_CODE.ENABLE_BANKING_PENDING_CREDENTIAL_MISSING);
+  }
+
+  await validateCredential(enableBankingCredentialService.decryptPendingForActivation(pending, applicationId));
+  return res.json(await enableBankingCredentialService.activatePendingCredential(pending, applicationId));
+}
+
+/**
+ * @description Generate an RSA key pair for the current user's Enable Banking application and keep
+ * it as their pending credential (private key encrypted, never returned). Answers the self-signed
+ * certificate to upload in Enable Banking's Control Panel, and when the pending key lapses. Calling
+ * it again replaces the pending key, never the active one.
+ */
+export async function createEnableBankingCertificate(req: Request, res: Response) {
+  const user = authedUser(req);
+  const certificate = await enableBankingCredentialService.createPendingCredential({ appuser: user, tenant: req.tenant });
+  return res.status(201).json(certificate);
+}
 
 /**
  * @description Remove the current user's Enable Banking BYOK credential. Idempotent
@@ -33,7 +65,7 @@ export async function getEnableBankingCredential(req: Request, res: Response) {
 /**
  * @description Validate-then-save the current user's own Enable Banking application
  * credential (BYOK). The credential is proven against Enable Banking's real API
- * (`GET /aspsps`) before anything is persisted — a credential that fails validation
+ * (`GET /application`, then `GET /aspsps`) before anything is persisted — a credential that fails validation
  * is never written to the database, encrypted or otherwise, and the raw provider
  * error is never echoed back to the client (it may contain identifying detail we
  * don't control the shape of).
@@ -44,21 +76,7 @@ export async function saveEnableBankingCredential(req: Request, res: Response) {
     body: { applicationId, privateKeyPem },
   } = await zParse(saveEnableBankingCredentialRequestSchema, req);
 
-  try {
-    const client = createEnableBankingClient({ applicationId, privateKeyPem });
-    await client.listInstitutions({});
-  } catch (error) {
-    const providerResponse = sanitizeProviderResponse(error);
-    Sentry.captureException(error, {
-      extra: { applicationId, ...(providerResponse ? { providerResponse } : {}) },
-      tags: { provider: 'enable_banking', route: 'saveEnableBankingCredential' },
-    });
-    // Never persist and never echo the raw provider/error message — it may
-    // describe the key/application in ways we don't control. A single stable,
-    // generic reason is enough for the Settings UI to tell the user their
-    // Application ID / private key pair didn't work.
-    throw new BadRequestError('Could not validate this Enable Banking credential. Double-check the Application ID and private key and try again.');
-  }
+  await validateCredential({ applicationId, privateKeyPem });
 
   const status = await enableBankingCredentialService.saveValidatedCredential({
     applicationId,
@@ -68,4 +86,13 @@ export async function saveEnableBankingCredential(req: Request, res: Response) {
   });
 
   return res.json(status);
+}
+
+/**
+ * The signed test calls (`checkEnableBankingCredential`). A wrong application reaches the client
+ * only as our own classified 400, never the provider's text; the client has already logged the
+ * provider's sanitized error code. An outage at Enable Banking goes on as the client mapped it.
+ */
+function validateCredential(credential: DecryptedEnableBankingCredential): Promise<void> {
+  return checkEnableBankingCredential(credential);
 }

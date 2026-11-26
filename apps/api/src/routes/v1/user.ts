@@ -5,7 +5,13 @@ import { getCalendarFeedToken, resetCalendarFeedToken, revokeCalendarFeedToken }
 import { downloadDataExport, getDataExport, listDataExports, startDataExport } from '@controller/data-export';
 import { commitDataRestore, getDataRestore, listDataRestores, startDataRestore, validateDataRestore } from '@controller/data-restore';
 import { getEmailNotificationPreferences, patchEmailNotificationPreferences } from '@controller/email-notifications';
-import { deleteEnableBankingCredential, getEnableBankingCredential, saveEnableBankingCredential } from '@controller/enable-banking-credential';
+import {
+  activateEnableBankingCredential,
+  createEnableBankingCertificate,
+  deleteEnableBankingCredential,
+  getEnableBankingCredential,
+  saveEnableBankingCredential,
+} from '@controller/enable-banking-credential';
 import { listMcpCalls } from '@controller/mcp';
 import { createPairingCodeController, listDevices, revokeDevice } from '@controller/mobile-pairing';
 import { completeOnboarding, getOnboardingBootstrap } from '@controller/onboarding';
@@ -22,7 +28,7 @@ import {
   updateData,
 } from '@controller/user';
 import { getPreferences, patchPreferences } from '@controller/user-preferences';
-import { dataExportRateLimit, dataRestoreRateLimit, pushTestRateLimit } from '@middleware/rate-limit';
+import { bankConnectRateLimit, dataExportRateLimit, dataRestoreRateLimit, enableBankingCertificateRateLimit, pushTestRateLimit } from '@middleware/rate-limit';
 import { requireSensitiveSession } from '@middleware/sensitive-session';
 
 const router = express.Router();
@@ -77,6 +83,12 @@ router.post('/me/onboarding/complete', completeOnboarding);
 router.post('/enable-banking-credential', saveEnableBankingCredential);
 router.get('/enable-banking-credential', getEnableBankingCredential);
 router.delete('/enable-banking-credential', deleteEnableBankingCredential);
+// Let WonderMoney generate the key: the certificate creates a pending key pair (the private key
+// never leaves the server), and activate checks it against Enable Banking under the application ID
+// the person registered it as. Both hand out bank access, so like API tokens they need a fresh
+// session and TOTP when the account has it.
+router.post('/enable-banking-credential/certificate', requireSensitiveSession, enableBankingCertificateRateLimit(), createEnableBankingCertificate);
+router.post('/enable-banking-credential/activate', requireSensitiveSession, bankConnectRateLimit(), activateEnableBankingCredential);
 router.get('/:userId', getUserAccountInformation);
 router.patch('/:userId', updateData);
 router.get('/:userId/requisitions', getRequisitions);

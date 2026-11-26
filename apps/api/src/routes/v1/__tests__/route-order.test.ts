@@ -76,6 +76,9 @@ vi.mock('@middleware/rate-limit', () => ({
   dataRestoreRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
     next();
   },
+  enableBankingCertificateRateLimit: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => {
+    next();
+  },
   marketDataRateLimit: () => (_req: express.Request, res: express.Response, next: express.NextFunction) => {
     res.setHeader('x-market-data-limiter', 'applied');
     next();

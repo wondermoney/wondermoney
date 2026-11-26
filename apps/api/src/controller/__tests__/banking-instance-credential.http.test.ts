@@ -23,6 +23,7 @@ vi.mock('@service/enable-banking/enable-banking-client.service', () => ({
       exchangeSession: () => { record('exchangeSession'); return Promise.resolve({ access: { validUntil: '2027-06-01T00:00:00.000Z' }, accounts: [], sessionId: 'session-1' }); },
       getAccountBalances: () => { record('getAccountBalances'); return Promise.resolve({ balances: [] }); },
       getAccountTransactions: () => { record('getAccountTransactions'); return Promise.resolve({ transactions: [] }); },
+      getApplication: () => { record('getApplication'); return Promise.resolve({ active: true, environment: 'PRODUCTION' }); },
       getSession: () => { record('getSession'); return Promise.resolve({ status: 'AUTHORIZED' }); },
       listInstitutions: () => { record('listInstitutions'); return Promise.resolve([{ country: 'PT', logo: '', maximum_consent_validity: 7_776_000, name: 'Banco Exemplo' }]); },
       startAuthorization: () => { record('startAuthorization'); return Promise.resolve({ authorizationId: 'auth-1', psuIdHash: 'hash', url: 'https://bank.example/consent' }); },
@@ -91,7 +92,9 @@ describe('instance-wide Enable Banking credentials', () => {
   const listBanks = (who: Appuser) => banking.as(who).get('/v1/banking/bank?country=PT');
   const startLink = (who: Appuser) => banking.as(who).get(`/v1/banking/bank/${BANK_ID}/start`);
   const credentialsFor = async (who: Appuser) => ((await user.as(who).get('/v1/user/me/profile')).body as { profile: { bankSyncCredentials: string } }).profile.bankSyncCredentials;
-  const saveOwnCredential = (who: Appuser) => user.as(who).post('/v1/user/enable-banking-credential').send({ applicationId: `own-app-${who.appuserKey}`, privateKeyPem: USER_PEM });
+  /** A user's own application ID: a UUID, as Enable Banking assigns them. */
+  const ownApp = (who: Appuser) => `00000000-0000-4000-8000-${String(who.appuserKey).padStart(12, '0')}`;
+  const saveOwnCredential = (who: Appuser) => user.as(who).post('/v1/user/enable-banking-credential').send({ applicationId: ownApp(who), privateKeyPem: USER_PEM });
   /** The connection a start left behind, as the consent callback would mark it. */
   const linkedConnectionOf = async (who: Appuser) => {
     const em = db.em();
@@ -248,7 +251,7 @@ describe('instance-wide Enable Banking credentials', () => {
       provider.calls = [];
 
       expect((await startLink(second.appuser)).status).toBe(200);
-      expect(signedAs('startAuthorization')).toEqual([`own-app-${second.appuser.appuserKey}`]);
+      expect(signedAs('startAuthorization')).toEqual([ownApp(second.appuser)]);
     });
 
     it('does not count the read-only demo household', async () => {
@@ -340,9 +343,9 @@ describe('instance-wide Enable Banking credentials', () => {
       expect((await listBanks(household.appuser)).status).toBe(200);
       expect((await startLink(household.appuser)).status).toBe(200);
 
-      const ownApp = `own-app-${household.appuser.appuserKey}`;
-      expect(signedAs('listInstitutions')).toEqual([ownApp, ownApp]);
-      expect(signedAs('startAuthorization')).toEqual([ownApp]);
+      const own = ownApp(household.appuser);
+      expect(signedAs('listInstitutions')).toEqual([own, own]);
+      expect(signedAs('startAuthorization')).toEqual([own]);
       const connection = await linkedConnectionOf(household.appuser);
       expect(connection.enableBankingCredentialKey).not.toBeNull();
     });
