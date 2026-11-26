@@ -1,3 +1,4 @@
+import { ENABLE_BANKING_CALLBACK_PATH } from '@wondermoney/shared';
 import { template } from 'lodash-es';
 
 import { EnableBankingReturnTo } from '@app/types/enable-banking-return-to';
@@ -193,7 +194,7 @@ export function readBuildInfo(commit: string, version: string): { commit: null |
  * Production value confirmed already registered in Enable Banking's Control
  * Panel: https://api.wonder.money/v1/banking/enable-banking/callback.
  */
-export const ENABLE_BANKING_CALLBACK_URL = `${BACKEND_URL}/v1/banking/enable-banking/callback`;
+export const ENABLE_BANKING_CALLBACK_URL = `${BACKEND_URL}${ENABLE_BANKING_CALLBACK_PATH}`;
 
 /** The mobile app's URL scheme (`scheme` in `apps/mobile/app.config.ts`). */
 export const MOBILE_APP_SCHEME = 'wondermoney';

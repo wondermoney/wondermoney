@@ -1,0 +1,5 @@
+{
+  "callbackPath": "/v1/banking/enable-banking/callback",
+  "privacyUrl": "https://docs.wonder.money/about/privacy-policy",
+  "termsUrl": "https://docs.wonder.money/about/terms-of-service"
+}
