@@ -25,7 +25,7 @@ const h = vi.hoisted(() => ({
   credentialEnabled: undefined as boolean | undefined,
   simplefin: false,
   instanceKnown: true,
-  wizard: null as null | { onChooseBank: () => void },
+  wizard: null as null | { entry?: string; onChooseBank: () => void },
 }));
 
 vi.mock("@/lib/api/account/useAccounts", () => ({ default: () => h.accounts }));
@@ -51,7 +51,7 @@ vi.mock("@/lib/api/user/useBankLinkCredential", () => ({
 vi.mock("@/lib/api/instance/useInstance", () => ({ useFeature: () => true, useInstanceKnown: () => h.instanceKnown }));
 vi.mock("@/components/settings/Connections/SimplefinConnectButton", () => ({ useSimplefinAvailable: () => h.simplefin }));
 vi.mock("@/components/settings/BankProvider/EnableBankingSetupWizard", () => ({
-  default: (props: Open & { onChooseBank: () => void }) => {
+  default: (props: Open & { entry: string; onChooseBank: () => void }) => {
     h.wizard = props;
     return props.open ? <div data-testid="setup-wizard" /> : null;
   },
@@ -126,6 +126,7 @@ test("without a key, Connect a bank opens the setup wizard, which goes on to the
   await userEvent.click(option(copy.connect));
   screen.getByTestId("setup-wizard");
   assert.equal(screen.queryByTestId("add-account"), null);
+  assert.equal(h.wizard?.entry, "home_card");
   act(() => h.wizard!.onChooseBank());
   screen.getByTestId("connect-bank");
 });

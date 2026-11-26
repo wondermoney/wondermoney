@@ -1,7 +1,10 @@
 import type { Request, Response } from 'express';
 
+import { DI } from '@app/database/di';
 import { zParse } from '@app/validators/parser';
 import { authedUser } from '@middleware/authed-context';
+import { bankKeyActivationFailureReason, bankKeyEventId } from '@service/analytics/bank-key-setup-events';
+import { recordServiceEvent } from '@service/analytics/service-events.service';
 import { checkEnableBankingCredential } from '@service/enable-banking/enable-banking-application-check';
 import { type DecryptedEnableBankingCredential, enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
 import { ConflictError, ERROR_CODE } from '@utils/errors';
@@ -20,13 +23,13 @@ export async function activateEnableBankingCredential(req: Request, res: Respons
     body: { applicationId },
   } = await zParse(activateEnableBankingCredentialRequestSchema, req);
 
-  const pending = await enableBankingCredentialService.getLivePendingCredential(user.appuserKey);
-  if (!pending) {
-    throw new ConflictError('There is no Enable Banking key waiting to be activated. Create a new certificate and register it again.', ERROR_CODE.ENABLE_BANKING_PENDING_CREDENTIAL_MISSING);
-  }
-
-  await validateCredential(enableBankingCredentialService.decryptPendingForActivation(pending, applicationId));
-  return res.json(await enableBankingCredentialService.activatePendingCredential(pending, applicationId));
+  // Every attempt ends in one service event: activated, or failed with its classified reason.
+  const activated = await activatePendingCredential(user.appuserKey, applicationId).catch(async (error: unknown) => {
+    await recordServiceEvent(DI.em, user, 'bank_key_activation_failed', { reason: bankKeyActivationFailureReason(error) });
+    throw error;
+  });
+  await recordServiceEvent(DI.em, user, 'bank_key_activated', {}, { eventId: bankKeyEventId('bank_key_activated', activated.credentialKey) });
+  return res.json(activated.status);
 }
 
 /**
@@ -38,6 +41,7 @@ export async function activateEnableBankingCredential(req: Request, res: Respons
 export async function createEnableBankingCertificate(req: Request, res: Response) {
   const user = authedUser(req);
   const certificate = await enableBankingCredentialService.createPendingCredential({ appuser: user, tenant: req.tenant });
+  await recordServiceEvent(DI.em, user, 'bank_key_certificate_created', {});
   return res.status(201).json(certificate);
 }
 
@@ -86,6 +90,17 @@ export async function saveEnableBankingCredential(req: Request, res: Response) {
   });
 
   return res.json(status);
+}
+
+/** The person's live pending key, checked with the signed test calls, then made their active one. */
+async function activatePendingCredential(appuserKey: number, applicationId: string) {
+  const pending = await enableBankingCredentialService.getLivePendingCredential(appuserKey);
+  if (!pending) {
+    throw new ConflictError('There is no Enable Banking key waiting to be activated. Create a new certificate and register it again.', ERROR_CODE.ENABLE_BANKING_PENDING_CREDENTIAL_MISSING);
+  }
+  await validateCredential(enableBankingCredentialService.decryptPendingForActivation(pending, applicationId));
+  const status = await enableBankingCredentialService.activatePendingCredential(pending, applicationId);
+  return { credentialKey: pending.enableBankingCredentialKey, status };
 }
 
 /**

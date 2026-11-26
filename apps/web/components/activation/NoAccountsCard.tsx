@@ -131,6 +131,7 @@ export function NoAccountsCard() {
       />
       <AccountAddSyncModal isOpen={syncOpen} setOpen={setSyncOpen} />
       <EnableBankingSetupWizard
+        entry="home_card"
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onChooseBank={() => setSyncOpen(true)}

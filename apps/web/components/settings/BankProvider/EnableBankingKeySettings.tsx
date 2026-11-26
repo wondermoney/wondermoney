@@ -195,6 +195,7 @@ export default function EnableBankingKeySettings() {
       </div>
 
       <EnableBankingSetupWizard
+        entry="settings"
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onChooseBank={() => setBankListOpen(true)}

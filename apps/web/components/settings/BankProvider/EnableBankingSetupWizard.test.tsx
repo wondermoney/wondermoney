@@ -41,6 +41,7 @@ const PENDING: EnableBankingCredentialResponse = {
 
 const h = vi.hoisted(() => ({
   activate: vi.fn<Mutate>(),
+  track: vi.fn<(event: string, properties?: Record<string, unknown>) => void>(),
   create: vi.fn<Mutate>(),
   credential: null as EnableBankingCredentialResponse,
   session: { user: { id: "user-1", twoFactorEnabled: false } } as {
@@ -56,6 +57,7 @@ vi.mock("@/lib/api/user/useEnableBankingCredential", () => ({
   useActivateEnableBankingCredential: () => ({ isPending: false, mutate: h.activate }),
   useCreateEnableBankingCertificate: () => ({ isPending: false, mutate: h.create }),
 }));
+vi.mock("@/lib/analytics/track", () => ({ track: h.track }));
 vi.mock("@/lib/api/instance/useInstance", () => ({ useEnableBankingSetup: () => SETUP }));
 vi.mock("@/lib/api/useRateLimitToast", () => ({ useRateLimitToast: () => () => false }));
 vi.mock("@/lib/auth/client", () => ({ authClient: { signOut: h.signOut, useSession: () => ({ data: h.session }) } }));
@@ -99,6 +101,7 @@ afterEach(() => {
   h.credential = null;
   h.session = { user: { id: "user-1", twoFactorEnabled: false } };
   h.signOut.mockClear();
+  h.track.mockReset();
   h.pasteDialog = null;
 });
 
@@ -121,7 +124,7 @@ function Host({ onChooseBank }: { onChooseBank: () => void }) {
       <button type="button" onClick={() => setOpen(true)}>
         Open wizard
       </button>
-      <EnableBankingSetupWizard open={open} onOpenChange={setOpen} onChooseBank={onChooseBank} />
+      <EnableBankingSetupWizard entry="add_account" open={open} onOpenChange={setOpen} onChooseBank={onChooseBank} />
     </>
   );
 }
@@ -465,4 +468,78 @@ test("the paste form opened from the wizard says Update when a key is already ac
 
   await user.click(screen.getByRole("button", { name: "I already have a key" }));
   assert.equal(h.pasteDialog?.isUpdate, true);
+});
+
+/** What the wizard sent analytics, in order. */
+const tracked = () => h.track.mock.calls.map(([event, properties]) => [event, properties]);
+const viewed = (step: string) => ["bank_key_setup_step_viewed", { step }];
+const STARTED = ["bank_key_setup_started", { entry: "add_account" }];
+
+test("analytics: one started per opening, from its entry point, then each step shown once", async () => {
+  h.create.mockImplementation(createsTheCertificate);
+  const { user } = await openWizard();
+  await user.click(next());
+  await user.click(screen.getByRole("button", { name: "Back" }));
+  await user.click(next());
+  await user.click(screen.getByRole("button", { name: "Create certificate" }));
+  await user.click(next());
+
+  assert.deepEqual(tracked(), [STARTED, viewed("sign_in"), viewed("create_application"), viewed("activate")]);
+
+  // Closing and opening again is another opening.
+  await user.keyboard("{Escape}");
+  await waitFor(() => assert.equal(screen.queryByRole("dialog"), null));
+  await user.click(screen.getByRole("button", { name: "Open wizard" }));
+  heading("Activate the application");
+  assert.deepEqual(tracked().slice(4), [STARTED, viewed("activate")]);
+});
+
+test("analytics: a whole setup sends each step once, in order, and nothing it was given", async () => {
+  h.session = { user: { id: "user-1", twoFactorEnabled: true } };
+  h.create.mockImplementation(createsTheCertificate);
+  h.activate.mockImplementation((_input, { onSuccess }) => onSuccess?.({}));
+  const { user } = await openWizard();
+  await user.click(next());
+  await user.type(screen.getByLabelText("Authenticator code"), "123456");
+  await user.click(screen.getByRole("button", { name: "Create certificate" }));
+  await user.click(next());
+  await user.click(next());
+  await user.type(screen.getByLabelText("Application ID"), APPLICATION_ID);
+  await user.type(screen.getByLabelText("Authenticator code"), "654321");
+  await user.click(screen.getByRole("button", { name: "Activate" }));
+  heading("Bank sync is ready");
+
+  assert.deepEqual(tracked(), [
+    STARTED,
+    viewed("sign_in"),
+    viewed("create_application"),
+    viewed("activate"),
+    viewed("application_id"),
+    viewed("done"),
+  ]);
+  const sent = JSON.stringify(h.track.mock.calls);
+  for (const secret of [APPLICATION_ID, "123456", "654321", "BEGIN CERTIFICATE", "user-1", SETUP.redirectUrl]) {
+    assert.equal(sent.includes(secret), false, secret);
+  }
+});
+
+test("analytics: a step behind the sign-in-again notice is not counted as shown", async () => {
+  h.session = {
+    session: { createdAt: new Date(Date.now() - 23.5 * 60 * 60 * 1000).toISOString() },
+    user: { id: "user-1", twoFactorEnabled: false },
+  };
+  await openWizard();
+
+  heading("Sign in again first");
+  assert.deepEqual(tracked(), [STARTED]);
+});
+
+test("analytics: nothing is sent while the wizard is closed", () => {
+  render(
+    <NextIntlClientProvider locale="en" messages={enCommon} timeZone="UTC">
+      <Host onChooseBank={vi.fn()} />
+    </NextIntlClientProvider>,
+  );
+
+  assert.deepEqual(tracked(), []);
 });

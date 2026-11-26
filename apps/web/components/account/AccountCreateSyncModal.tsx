@@ -271,6 +271,7 @@ const AccountAddSyncModal: React.FC<AccountAddSyncModalProps> = ({
         </div>
       </DrawerDialog>
       <EnableBankingSetupWizard
+        entry="bank_picker"
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onChooseBank={() => setOpen(true)}

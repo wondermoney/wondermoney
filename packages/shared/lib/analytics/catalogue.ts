@@ -54,6 +54,32 @@ export type AnalyticsReferrerClass = (typeof ANALYTICS_REFERRER_CLASSES)[number]
 
 const PLATFORMS = ['web', 'mobile', 'api'] as const;
 
+/**
+ * The steps of the Enable Banking key setup wizard, in order, by their stable ids
+ * (`ENABLE_BANKING_SETUP_STEP` in web's `components/settings/BankProvider/enable-banking-setup-steps.ts`;
+ * web's tests keep the two equal).
+ */
+export const ANALYTICS_BANK_KEY_SETUP_STEPS = [
+  'sign_in',
+  'create_application',
+  'activate',
+  'application_id',
+  'done',
+] as const;
+
+export type AnalyticsBankKeySetupStep = (typeof ANALYTICS_BANK_KEY_SETUP_STEPS)[number];
+
+/** Where the person opened the Enable Banking key setup from. */
+export const ANALYTICS_BANK_KEY_SETUP_ENTRIES = [
+  'first_run',
+  'add_account',
+  'home_card',
+  'bank_picker',
+  'settings',
+] as const;
+
+export type AnalyticsBankKeySetupEntry = (typeof ANALYTICS_BANK_KEY_SETUP_ENTRIES)[number];
+
 /** The steps of web's first-run onboarding (`lib/onboarding/first-run/types.ts` in the web app). */
 const onboardingStep = {
   type: 'enum',
@@ -414,6 +440,55 @@ export const ANALYTICS_EVENTS = {
     properties: BANK_SYNC_PROPERTIES,
   },
 
+  bank_key_certificate_created: {
+    description:
+      'WonderMoney generated an Enable Banking key pair for the person and handed out its certificate to register: their pending key, which lapses after seven days unless activated. Creating another replaces it, and sends this again.',
+    surfaces: ['server'],
+    tier: 'service',
+    question: 'bank_connections',
+    properties: {},
+  },
+  bank_key_activation_failed: {
+    description:
+      "Activating the person's pending Enable Banking key under the application ID they entered failed, once per attempt. The key stays pending.",
+    surfaces: ['server'],
+    tier: 'service',
+    question: 'bank_connections',
+    properties: {
+      reason: {
+        type: 'enum',
+        values: [
+          'application_not_found',
+          'application_sandbox',
+          'application_not_activated',
+          'credential_refused',
+          'pending_credential_missing',
+          'rate_limited',
+          'provider_unavailable',
+          'unknown',
+        ],
+        description:
+          "Why, as the API's error code without its `enable_banking_` prefix: an ID Enable Banking does not know with this certificate, a Sandbox application, an application not activated by linking an account, another refusal, no pending key (lapsed or replaced), or Enable Banking rate-limited, unreachable or answering something else. Never the provider's message.",
+      },
+    },
+  },
+  bank_key_activated: {
+    description:
+      "The person's pending Enable Banking key passed the signed test call and became their active key. A key pasted in by hand sends nothing.",
+    surfaces: ['server'],
+    tier: 'service',
+    question: 'bank_connections',
+    properties: {},
+  },
+  bank_key_setup_abandoned: {
+    description:
+      "The daily bank sync sweep deleted the person's pending Enable Banking key, seven days after its certificate was created, never activated.",
+    surfaces: ['server'],
+    tier: 'service',
+    question: 'bank_connections',
+    properties: {},
+  },
+
   // Behavioural events: sent by the apps, only with the person's analytics opt-in.
   signup_started: {
     description: 'The signup form was shown.',
@@ -498,6 +573,35 @@ export const ANALYTICS_EVENTS = {
         type: 'enum',
         values: ['enable_banking'],
         description: 'The bank data provider: only Enable Banking sends the person to the bank.',
+      },
+    },
+  },
+  bank_key_setup_started: {
+    description:
+      'The Enable Banking key setup wizard opened, once per opening. The certificate and the activation are the service events `bank_key_certificate_created` and `bank_key_activated`.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'bank_connections',
+    properties: {
+      entry: {
+        type: 'enum',
+        values: ANALYTICS_BANK_KEY_SETUP_ENTRIES,
+        description:
+          "Where it was opened from: first-run onboarding's account step, the add account dialog, the home page's no-accounts card, the bank picker, or Settings.",
+      },
+    },
+  },
+  bank_key_setup_step_viewed: {
+    description:
+      'A step of the Enable Banking key setup wizard was shown, once per step and opening. A step behind the "sign in again" notice is not shown.',
+    surfaces: ['web'],
+    tier: 'behavioural',
+    question: 'bank_connections',
+    properties: {
+      step: {
+        type: 'enum',
+        values: ANALYTICS_BANK_KEY_SETUP_STEPS,
+        description: "The step's stable id.",
       },
     },
   },
