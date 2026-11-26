@@ -121,6 +121,18 @@ export function isManualAccount(account: Pick<Account, 'enableBankingConnectionK
   return account.enableBankingConnectionKey == null && account.nordigenRequisitionKey == null;
 }
 
+/**
+ * Linked to a bank, by any of its keys: an Enable Banking connection, a legacy requisition, or the
+ * provider-agnostic `bankConnectionKey` (the only one a SimpleFIN account has). Its balance is the
+ * bank's, so its chain is rebuilt backwards from `account.balance`, and while it has none nothing
+ * stands in for it. A manual or imported account is the opposite: its chain runs forwards from
+ * `openingBalance`. The chain code decides with this, not `isManualAccount`, which predates
+ * `bankConnectionKey` and reads a SimpleFIN account as manual.
+ */
+export function isBankLinkedAccount(account: Pick<Account, 'bankConnectionKey' | 'enableBankingConnectionKey' | 'nordigenRequisitionKey'>): boolean {
+  return !isManualAccount(account) || account.bankConnectionKey != null;
+}
+
 /** True when a row's settlement has actually happened, so it belongs in the chain. */
 export function isSettledStatusName(name: string | undefined): boolean {
   return name !== undefined && (SETTLED_TRANSACTION_STATUSES as readonly string[]).includes(name);
@@ -253,11 +265,22 @@ export async function loadChainRows(
  * instead (see ANCHOR above): every row is re-accumulated from the opening balance, and the
  * returned tail is the account's corrected balance.
  *
+ * A bank account that has never had a balance (`account.balance` null) and whose rows hold none
+ * either has nothing to anchor on: every balance stays null and `tail` is null, so a caller writes
+ * no balance rather than one the rows merely add up to from 0.
+ *
  * Returns the new tail balance plus the number of rows whose stored balance actually moved. The
  * tail is what an edit-transaction caller needs to assign to `account.balance` after the chain has
  * been rewritten, since the helper does not touch the account row itself.
  */
 export interface RecalculateChainResult {
+  changed: number;
+  /** Null when there is nothing to anchor the chain on (see above); the caller then writes no balance. */
+  tail: ChainBalance | null;
+}
+
+/** A rebuild that always has an anchor, so always a tail. */
+export interface ChainRebuildResult {
   changed: number;
   tail: ChainBalance;
 }
@@ -269,6 +292,7 @@ export async function recalculateChainFromAccountBalance(
 ): Promise<RecalculateChainResult> {
   const rows = await loadChainRows(em, account, { transactionDate: { $ne: null } });
   if (rows.length === 0) return { changed: 0, tail: { appuserCurrencyBalance: 0, balance: 0 } };
+  if (account.balance == null && isBankLinkedAccount(account) && rows.every((row) => row.balance == null)) return { changed: 0, tail: null };
 
   const anchorIndex = anchor === undefined ? -1 : rows.findIndex((row) => row.transactionKey === anchor.transactionKey);
 
@@ -278,15 +302,21 @@ export async function recalculateChainFromAccountBalance(
   const anchorRow = anchorIndex >= 0 ? rows[anchorIndex] : undefined;
   const prior = anchorIndex > 0 ? rows[anchorIndex - 1] : undefined;
 
-  if (prior) {
+  // A predecessor with no stored balance is not an opening: reading it as 0 would make the tail, and
+  // with it `account.balance`, the sum of the suffix. The chain then opens on the first row that has
+  // a stored balance instead (`openingFromFirstStoredBalance`), or is rebuilt whole when none has.
+  const fromStored = prior && prior.balance == null ? openingFromFirstStoredBalance(rows) : null;
+  if (prior?.balance != null) {
     // The anchor itself is the first row that can have changed; its predecessor's stored balance is
     // still correct, so it becomes the opening and every earlier row is never written.
     startIndex = anchorIndex;
     opening = {
-      appuserCurrencyBalance: storedAppuserBalance(prior, prior.balance ?? 0),
-      balance: prior.balance ?? 0,
+      appuserCurrencyBalance: storedAppuserBalance(prior, prior.balance),
+      balance: prior.balance,
     };
-  } else if (anchorRow && anchor?.previous && anchorRow.balance != null) {
+  } else if (fromStored) {
+    opening = fromStored;
+  } else if (!prior && anchorRow && anchor?.previous && anchorRow.balance != null) {
     // The oldest row has no predecessor: what the account held before it is its stored balance
     // minus its pre-change amount. Opening at 0 instead would replace the balance with the sum of
     // the rows.
@@ -301,7 +331,7 @@ export async function recalculateChainFromAccountBalance(
       balance: account.balance ?? 0,
     };
     opening = openingFromTail(rows, tail);
-    if (isManualAccount(account) && account.openingBalance != null) {
+    if (!isBankLinkedAccount(account) && account.openingBalance != null) {
       // A manual account's balance is derived, so the opening balance is the one value to trust.
       // In the user's currency the chain opens on it too when the rows are in that currency;
       // otherwise there is no converted opening, and that side stays on the account balance.
@@ -327,6 +357,72 @@ export async function recalculateChainFromAccountBalance(
 }
 
 /**
+ * Rebuild a bank account's chain when the bank gave no balance this sync, deriving the balance
+ * from the rows instead.
+ *
+ * Every other writer rebuilds backwards from `account.balance`, so that figure has to stay
+ * consistent with the chain even when the bank does not refresh it. The chain is anchored on the
+ * first row, in chain order, that still has a stored balance: what the account held before the
+ * chain is that row's balance minus the amounts up to and including it, and every row is then
+ * accumulated forward from there. That reproduces every stored row that was consistent, and
+ * corrects the ones this sync changed: rows inserted (before or after the stored ones), rows that
+ * left the chain (a booked row the bank cancelled) and rows whose amount or date the bank changed.
+ * The returned tail is the account's derived balance, with `derived: true`; the caller writes it.
+ *
+ * With no row holding a balance, the chain is rebuilt backwards from `account.balance` as usual
+ * (`derived: false`, the account untouched), and with neither, nothing is written and `null` is
+ * returned.
+ */
+export async function deriveChainWithoutProviderBalance(em: ChainEntityManager, account: Account): Promise<(ChainRebuildResult & { derived: boolean }) | null> {
+  const rows = await loadChainRows(em, account, { transactionDate: { $ne: null } });
+  const opening = openingFromFirstStoredBalance(rows);
+  if (!opening) {
+    if (account.balance == null) return null;
+    const rebuilt = await recalculateChainFromAccountBalance(em, account);
+    return rebuilt.tail ? { changed: rebuilt.changed, derived: false, tail: rebuilt.tail } : null;
+  }
+
+  const before = rows.map((row) => row.balance);
+  const tail = accumulateChain(rows, opening);
+  const changed = rows.reduce((count, row, index) => {
+    const previous = before[index];
+    return previous == null || Math.abs(previous - (row.balance ?? 0)) > BALANCE_TOLERANCE ? count + 1 : count;
+  }, 0);
+  await em.flush();
+  return { changed, derived: true, tail };
+}
+
+/**
+ * What the account held before `rows`, read off the first of them (in chain order) that has a stored
+ * balance: that balance minus the amounts up to and including it. Accumulating every row from it
+ * reproduces each stored balance that was consistent. Null when no row has one.
+ */
+function openingFromFirstStoredBalance(rows: ChainRow[]): ChainBalance | null {
+  const index = rows.findIndex((row) => row.balance != null);
+  const first = rows[index];
+  if (first?.balance == null) return null;
+  return openingFromTail(rows.slice(0, index + 1), { appuserCurrencyBalance: storedAppuserBalance(first, first.balance), balance: first.balance });
+}
+
+/**
+ * The opening a whole-account rebuild of `rows` uses (see the `else` branch of
+ * `recalculateChainFromAccountBalance`): a manual account's `openingBalance`; otherwise what makes
+ * the chain end on `account.balance`; failing both, the first stored row balance. Null when none of
+ * them is known: nothing is then written, rather than a chain that opens on 0.
+ */
+function wholeChainOpening(account: Account, rows: ChainRow[]): ChainBalance | null {
+  if (!isBankLinkedAccount(account) && account.openingBalance != null) {
+    const fromTail = account.balance == null ? null : openingFromTail(rows, { appuserCurrencyBalance: accountAppuserTail(account), balance: account.balance });
+    return {
+      appuserCurrencyBalance: rows.every(isInUserCurrency) ? account.openingBalance : fromTail?.appuserCurrencyBalance ?? null,
+      balance: account.openingBalance,
+    };
+  }
+  if (account.balance != null) return openingFromTail(rows, { appuserCurrencyBalance: accountAppuserTail(account), balance: account.balance });
+  return openingFromFirstStoredBalance(rows);
+}
+
+/**
  * Take rows out of an account's chain: rebuild every balance after the first of them as though they
  * had never been entered, and return the new tail. Call it *before* the rows are soft-deleted (it
  * reads them to find where the chain changes); the caller then deletes them and assigns the tail
@@ -338,18 +434,26 @@ export async function recalculateChainFromAccountBalance(
  * removing its oldest rows, and removing every row brings the account back to it. Removed rows that
  * are not chain members (pending, undated) change no balance, and `null` says so.
  */
-export async function removeFromChain(em: ChainEntityManager, account: Account, removedKeys: ReadonlySet<number>): Promise<null | RecalculateChainResult> {
+export async function removeFromChain(em: ChainEntityManager, account: Account, removedKeys: ReadonlySet<number>): Promise<ChainRebuildResult | null> {
   const rows = await loadChainRows(em, account, { transactionDate: { $ne: null } });
   const firstRemoved = rows.findIndex((row) => removedKeys.has(row.transactionKey));
   const removed = rows[firstRemoved];
   if (!removed) return null;
 
   const prior = firstRemoved > 0 ? rows[firstRemoved - 1] : undefined;
-  const opening: ChainBalance = prior
-    ? { appuserCurrencyBalance: storedAppuserBalance(prior, prior.balance ?? 0), balance: prior.balance ?? 0 }
-    : openingFromTail([removed], { appuserCurrencyBalance: storedAppuserBalance(removed, removed.balance ?? 0), balance: removed.balance ?? 0 });
+  const remaining = rows.filter((row) => !removedKeys.has(row.transactionKey));
+  // A row with no stored balance is no opening (see `recalculateChainFromAccountBalance`). Then the
+  // whole remaining chain is rebuilt the way a whole-account rebuild does it (`wholeChainOpening`),
+  // and with no known opening at all nothing is written.
+  const unknownOpening = (prior && prior.balance == null) || (!prior && removed.balance == null);
+  const opening: ChainBalance | null = unknownOpening
+    ? wholeChainOpening(account, remaining)
+    : prior
+      ? { appuserCurrencyBalance: storedAppuserBalance(prior, prior.balance ?? 0), balance: prior.balance ?? 0 }
+      : openingFromTail([removed], { appuserCurrencyBalance: storedAppuserBalance(removed, removed.balance ?? 0), balance: removed.balance ?? 0 });
 
-  const suffix = rows.slice(firstRemoved).filter((row) => !removedKeys.has(row.transactionKey));
+  if (!opening) return null;
+  const suffix = unknownOpening ? remaining : rows.slice(firstRemoved).filter((row) => !removedKeys.has(row.transactionKey));
   const before = suffix.map((row) => row.balance);
   const tail = accumulateChain(suffix, opening);
   const changed = suffix.reduce((count, row, index) => {

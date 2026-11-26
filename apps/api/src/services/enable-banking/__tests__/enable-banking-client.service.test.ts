@@ -168,6 +168,87 @@ describe('createEnableBankingClient', () => {
     expect(mocks.get).toHaveBeenCalledWith('/sessions/sess%2F1', { headers: { Authorization: 'Bearer signed.jwt.token' } });
   });
 
+  describe('Enable Banking error bodies', () => {
+    function failure(status: number, data: unknown) {
+      const response = { config: { headers: new AxiosHeaders() }, data, headers: new AxiosHeaders(), status, statusText: 'error' } as AxiosResponse;
+      return new AxiosError('Request failed', String(status), undefined, undefined, response);
+    }
+
+    it('keeps Enable Banking\'s own error code and message on the thrown error, so callers can branch on it', async () => {
+      const { createEnableBankingClient } = await importClient();
+      mocks.get.mockRejectedValueOnce(failure(422, { code: 422, detail: { echoed: 'request' }, error: 'WRONG_TRANSACTIONS_PERIOD', message: 'Wrong transactions period requested' }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+
+      const error = await client.getAccountTransactions('acc-1', { dateFrom: '2025-01-01' }).catch((caught: unknown) => caught);
+
+      expect(error).toMatchObject({ enableBankingError: { code: 'WRONG_TRANSACTIONS_PERIOD', message: 'Wrong transactions period requested', status: 422 }, status: 422 });
+    });
+
+    it('does not log a refused transaction period as an error, since the sync retries it', async () => {
+      const { createEnableBankingClient } = await importClient();
+      const { default: logger } = await import('@utils/logger');
+      const errorLog = vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+      mocks.get.mockRejectedValueOnce(failure(422, { code: 422, error: 'WRONG_TRANSACTIONS_PERIOD', message: 'Wrong transactions period requested' }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+
+      await expect(client.getAccountTransactions('acc-1', { dateFrom: '2025-01-01' })).rejects.toMatchObject({ status: 422 });
+
+      expect(errorLog).not.toHaveBeenCalled();
+      errorLog.mockRestore();
+    });
+
+    it('logs the code and message without the personal data a message can quote', async () => {
+      const { createEnableBankingClient } = await importClient();
+      const { default: logger } = await import('@utils/logger');
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+      const personal = ['ES9121000418450200051332', 'owner@example.test', '12345678901', '1.234,56'];
+      mocks.get.mockRejectedValueOnce(failure(400, {
+        code: 400,
+        error: 'WRONG_REQUEST_PARAMETERS',
+        iban: personal[0],
+        message: `Account ${personal[0]} of ${personal[1]} (number ${personal[2]}) refused: balance ${personal[3]} EUR`,
+      }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+
+      await expect(client.getAccountBalances('acc-1')).rejects.toMatchObject({ enableBankingError: { code: 'WRONG_REQUEST_PARAMETERS' }, status: 400 });
+
+      const logged = warn.mock.calls.find(([, message]) => String(message).includes('Enable Banking API request failed'));
+      expect(logged?.[0]).toMatchObject({ enableBankingError: { code: 'WRONG_REQUEST_PARAMETERS', status: 400 }, enableBankingOperation: 'getAccountBalances' });
+      const serialized = JSON.stringify(logged?.[0]);
+      expect(serialized).toContain('refused');
+      for (const value of personal) expect(serialized).not.toContain(value);
+      warn.mockRestore();
+    });
+
+    it('logs only the code of a failure the bank relays, and never the detail', async () => {
+      const { createEnableBankingClient } = await importClient();
+      const { default: logger } = await import('@utils/logger');
+      const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+      mocks.get.mockRejectedValueOnce(failure(400, { code: 400, detail: { request: 'echoed-request-body' }, error: 'ASPSP_ERROR', message: 'Bank says: customer Jane Doe blocked' }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+
+      const error = await client.getAccountBalances('acc-1').catch((caught: unknown) => caught);
+
+      expect((error as { enableBankingError?: unknown }).enableBankingError).toEqual({ code: 'ASPSP_ERROR', status: 400 });
+      const logged = warn.mock.calls.find(([, message]) => String(message).includes('Enable Banking API request failed'));
+      const serialized = JSON.stringify(logged?.[0]);
+      expect(serialized).toContain('ASPSP_ERROR');
+      expect(serialized).not.toContain('Jane Doe');
+      expect(serialized).not.toContain('echoed-request-body');
+      warn.mockRestore();
+    });
+
+    it('ignores an error field that is not an Enable Banking code', async () => {
+      const { createEnableBankingClient } = await importClient();
+      mocks.get.mockRejectedValueOnce(failure(400, { error: 'provider says no' }));
+      const client = createEnableBankingClient({ applicationId: 'app-123', privateKeyPem: 'test-pem' });
+
+      const error = await client.getAccountBalances('acc-1').catch((caught: unknown) => caught);
+
+      expect((error as { enableBankingError?: { code?: string } }).enableBankingError?.code).toBeUndefined();
+    });
+  });
+
   it('maps a 500 response to BadGatewayError', async () => {
     const { createEnableBankingClient } = await importClient();
     mocks.get.mockRejectedValueOnce(axiosErrorWithStatus(500));

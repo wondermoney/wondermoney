@@ -11,15 +11,16 @@ import { EnableBankingConnection } from '@entity/EnableBankingConnection';
 import { Tenant } from '@entity/Tenant';
 import { enableBankingPlatform } from '@service/analytics/bank-connection-events';
 import { recordAccountCreated } from '@service/analytics/service-events.service';
-import { createEnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
+import { createEnableBankingClient, type EnableBankingClient } from '@service/enable-banking/enable-banking-client.service';
 import { enableBankingCredentialService } from '@service/enable-banking/enable-banking-credential.service';
+import { enableBankingErrorOf } from '@service/enable-banking/enable-banking-error';
 import { createInitialEnableBankingAccounts } from '@service/enable-banking/enable-banking-initial-accounts.service';
 import { createEnableBankingSyncAdapter } from '@service/enable-banking/enable-banking-sync-adapter';
 import { getRef } from '@utils/em-helpers';
 import { buildEnableBankingInstitutionRecordId, decodeEnableBankingInstitutionId, encodeEnableBankingInstitutionId } from '@utils/enable-banking-institution-id';
 import { BadRequestError, InternalServerError, NotFoundError } from '@utils/errors';
 
-import { ConsentExpiredError, RateLimitedError, UnavailableError, UserActionRequiredError } from './errors';
+import { BankProviderError, ConsentExpiredError, RateLimitedError, RequestRejectedError, UnavailableError, UserActionRequiredError } from './errors';
 import type {
   BankAccountsResult,
   BankCompleteConnectionInput,
@@ -42,10 +43,17 @@ import type {
  * stays in `enable-banking-sync-adapter.ts`, and every provider failure is mapped to one of the
  * typed errors here so the sync path never sees an Axios or Enable Banking shape.
  */
-class EnableBankingProvider implements BankProvider {
+export interface EnableBankingProviderDeps {
+  /** Builds the API client for a connection; tests pass a stubbed Enable Banking client. */
+  clientFor?: (connection: EnableBankingConnection) => EnableBankingClient;
+}
+
+export class EnableBankingProvider implements BankProvider {
   readonly id = 'enable_banking';
   readonly institutionProvider = AccountFinancialInstitutionProvider.ENABLE_BANKING;
   readonly transactionIdentity = { column: 'enableBankingTransactionId' as const, prefix: 'enable_banking' as const };
+
+  constructor(private readonly deps: EnableBankingProviderDeps = {}) {}
 
   async completeConnection(input: BankCompleteConnectionInput): Promise<BankCompleteConnectionResult> {
     const repository = DI.em.getRepository(EnableBankingConnection);
@@ -110,7 +118,7 @@ class EnableBankingProvider implements BankProvider {
     const detail = await this.detailOf(connection);
     if (!detail) throw new NotFoundError('Enable Banking connection not found');
     try {
-      const response = await createEnableBankingSyncAdapter(detail).account(accountId).getBalances();
+      const response = await this.adapterFor(detail).account(accountId).getBalances();
       return response.balances ?? [];
     } catch (error) {
       throw mapEnableBankingError(error);
@@ -133,8 +141,8 @@ class EnableBankingProvider implements BankProvider {
     const detail = await this.detailOf(connection);
     if (!detail) throw new NotFoundError('Enable Banking connection not found');
     try {
-      const response = await createEnableBankingSyncAdapter(detail).account(accountId).getTransactions(input);
-      return response.transactions ?? {};
+      const response = await this.adapterFor(detail).account(accountId).getTransactions(input);
+      return { ...response.transactions, ...(response.fetchedFrom ? { fetchedFrom: response.fetchedFrom } : {}) };
     } catch (error) {
       throw mapEnableBankingError(error);
     }
@@ -143,7 +151,7 @@ class EnableBankingProvider implements BankProvider {
   async listAccounts(connection: BankConnectionRef): Promise<BankAccountsResult> {
     const detail = await this.detailOf(connection);
     if (!detail) throw new NotFoundError('Enable Banking connection not found');
-    const adapter = createEnableBankingSyncAdapter(detail);
+    const adapter = this.adapterFor(detail);
     const requisition = await adapter.requisition.getRequisitionById(detail.sessionId ?? detail.state);
     const accounts = await Promise.all((requisition.accounts ?? []).map(async (accountId) => {
       const [details, metadata] = await Promise.all([
@@ -247,8 +255,12 @@ class EnableBankingProvider implements BankProvider {
     return { redirectUrl: authorization.url };
   }
 
+  private adapterFor(connection: EnableBankingConnection) {
+    return createEnableBankingSyncAdapter(connection, this.deps.clientFor ? { client: this.deps.clientFor(connection) } : {});
+  }
+
   private clientFor(connection: EnableBankingConnection) {
-    return createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
+    return this.deps.clientFor?.(connection) ?? createEnableBankingClient(enableBankingCredentialService.decryptForConnection(connection));
   }
 
   private detailOf(connection: BankConnectionRef): Promise<EnableBankingConnection | null> {
@@ -268,17 +280,46 @@ function bankConnectionKeyOf(connection: EnableBankingConnection): number {
 }
 
 /**
+ * Enable Banking `ErrorCode`s that say the session (the consent) is over, whatever the HTTP status
+ * (https://enablebanking.com/docs/api/reference/#errorcode). Only these, and a 401, ask the user to
+ * reconnect.
+ */
+const SESSION_ENDED_CODES = new Set(['CLOSED_SESSION', 'EXPIRED_SESSION', 'REVOKED_SESSION', 'SESSION_DOES_NOT_EXIST', 'WRONG_SESSION_STATUS']);
+
+/** The bank's own rate limit, relayed by Enable Banking under whatever HTTP status. */
+const RATE_LIMIT_CODES = new Set(['ASPSP_RATE_LIMIT_EXCEEDED']);
+
+/**
  * Map Enable Banking/Axios failures onto the interface's typed errors. `status` is kept so the
  * pre-existing `provider-failure.ts` classifiers keep working unchanged.
+ *
+ * A 400 is a rejected request, not a lost consent: a bank whose balances endpoint answers 400 on
+ * every call still serves transactions, and a reconnect does not change that. The consent is over
+ * only on a 401 or a session-ended code. Enable Banking's own code and message ride along on
+ * `providerError` for the sync's logs.
  */
 function mapEnableBankingError(error: unknown) {
-  if (error instanceof ConsentExpiredError || error instanceof RateLimitedError || error instanceof UnavailableError || error instanceof UserActionRequiredError) return error;
+  if (error instanceof BankProviderError) return error;
+  const mapped = mapToProviderError(error);
+  const info = enableBankingErrorOf(error);
+  if (info) mapped.providerError = info;
+  return mapped;
+}
+
+function mapToProviderError(error: unknown): BankProviderError {
   const status = (error as null | { status?: unknown })?.status;
-  if (status === 429) return new RateLimitedError('Enable Banking rate limit reached', (error as { retryAfter?: number }).retryAfter);
-  if (status === 401) return new ConsentExpiredError('Enable Banking credential or consent is no longer valid');
-  if (status === 400 || status === 404) return new UserActionRequiredError('Enable Banking rejected the request; the user must reconnect');
+  const code = enableBankingErrorOf(error)?.code;
+  if (status === 429 || (code && RATE_LIMIT_CODES.has(code))) return new RateLimitedError('Enable Banking rate limit reached', retryAfterOf(error));
+  if (status === 401 || (code && SESSION_ENDED_CODES.has(code))) return new ConsentExpiredError('Enable Banking credential or consent is no longer valid');
+  if (status === 400) return new RequestRejectedError('Enable Banking rejected the request');
+  if (status === 404) return new UserActionRequiredError('Enable Banking rejected the request; the user must reconnect');
   if (status === 502 || status === 503 || status === 504) return new UnavailableError('Enable Banking is temporarily unavailable');
   return new UnavailableError(error instanceof Error ? error.message : 'Enable Banking request failed');
+}
+
+function retryAfterOf(error: unknown): number | undefined {
+  const retryAfter = (error as null | { retryAfter?: unknown })?.retryAfter;
+  return typeof retryAfter === 'number' ? retryAfter : undefined;
 }
 
 export const enableBankingProvider = new EnableBankingProvider();

@@ -1,9 +1,10 @@
 import axios, { isAxiosError } from 'axios';
 
 import { sanitizeProviderResponse } from '@utils/error-sanitizer';
-import { BadGatewayError, BadRequestError, ForbiddenError, GatewayTimeoutError, InternalServerError, NotFoundError, TooManyRequestsError, UnauthorizedError } from '@utils/errors';
+import { BadGatewayError, BadRequestError, ForbiddenError, GatewayTimeoutError, InternalServerError, NotFoundError, TooManyRequestsError, UnauthorizedError, UnprocessableEntityError } from '@utils/errors';
 import logger from '@utils/logger';
 
+import { type EnableBankingErrorInfo, loggableEnableBankingBody, readEnableBankingError } from './enable-banking-error';
 import { signEnableBankingJwt } from './enable-banking-jwt.service';
 
 /**
@@ -183,36 +184,53 @@ export function createEnableBankingClient({ applicationId, privateKeyPem }: Crea
  * Runs one Enable Banking HTTP call, mapping a non-2xx response (or a
  * transport-level failure) to this app's typed errors instead of letting a raw
  * `AxiosError` escape — mirrors `eodhd.service.ts`'s `handleEodhdError`.
+ *
+ * The thrown error carries `enableBankingError` (see {@link EnableBankingErrorInfo}), so a caller
+ * can branch on Enable Banking's own code and log it; the typed error's message stays ours.
  */
+function mapRequestError(operation: string, error: unknown): Error {
+  if (!isAxiosError(error)) {
+    return new InternalServerError(`Unexpected error calling Enable Banking (${operation})`);
+  }
+
+  if (!error.response) {
+    if (error.code === 'ECONNABORTED') {
+      return new GatewayTimeoutError('Enable Banking request timed out');
+    }
+    return new BadGatewayError('Enable Banking is temporarily unavailable');
+  }
+
+  const { status } = error.response;
+  if (status === 400) return new BadRequestError('Enable Banking rejected the request');
+  if (status === 401) return new UnauthorizedError('Enable Banking credential is invalid or expired');
+  if (status === 403) return new ForbiddenError('Enable Banking rejected the request as forbidden');
+  if (status === 404) return new NotFoundError('Enable Banking resource not found');
+  if (status === 429) {
+    return new TooManyRequestsError('Enable Banking rate limit reached', parseRetryAfter(error.response.headers['retry-after']));
+  }
+  if (status >= 500) return new BadGatewayError('Enable Banking is temporarily unavailable');
+  // A refused transaction period is retried with a shorter window (`enable-banking-sync-adapter.ts`),
+  // so it is not an unexpected response, and not logged as an error.
+  if (readEnableBankingError(status, error.response.data).code === 'WRONG_TRANSACTIONS_PERIOD') {
+    return new UnprocessableEntityError('Enable Banking refused the transaction period');
+  }
+  return new InternalServerError(`Unexpected Enable Banking response (${status})`);
+}
+
 async function request<T = unknown>(operation: string, call: () => Promise<{ data: T }>): Promise<{ data: T }> {
   try {
     return await call();
   } catch (error) {
-    const providerResponse = sanitizeProviderResponse(error);
-    logger.warn({ enableBankingOperation: operation, providerResponse }, `Enable Banking API request failed: ${operation}`);
-
-    if (!isAxiosError(error)) {
-      throw new InternalServerError(`Unexpected error calling Enable Banking (${operation})`);
-    }
-
-    if (!error.response) {
-      if (error.code === 'ECONNABORTED') {
-        throw new GatewayTimeoutError('Enable Banking request timed out');
-      }
-      throw new BadGatewayError('Enable Banking is temporarily unavailable');
-    }
-
-    const { status } = error.response;
-    if (status === 400) throw new BadRequestError('Enable Banking rejected the request');
-    if (status === 401) throw new UnauthorizedError('Enable Banking credential is invalid or expired');
-    if (status === 403) throw new ForbiddenError('Enable Banking rejected the request as forbidden');
-    if (status === 404) throw new NotFoundError('Enable Banking resource not found');
-    if (status === 429) {
-      throw new TooManyRequestsError('Enable Banking rate limit reached', parseRetryAfter(error.response.headers['retry-after']));
-    }
-    if (status >= 500) throw new BadGatewayError('Enable Banking is temporarily unavailable');
-    throw new InternalServerError(`Unexpected Enable Banking response (${status})`);
+    const response = isAxiosError(error) ? error.response : undefined;
+    const providerResponse = response ? sanitizeProviderResponse({ response: { data: loggableEnableBankingBody(response.data), status: response.status } }) : undefined;
+    const enableBankingError = response ? readEnableBankingError(response.status, response.data) : undefined;
+    logger.warn({ enableBankingError, enableBankingOperation: operation, providerResponse }, `Enable Banking API request failed: ${operation}`);
+    throw withEnableBankingError(mapRequestError(operation, error), enableBankingError);
   }
+}
+
+function withEnableBankingError(error: Error, info: EnableBankingErrorInfo | undefined): Error {
+  return info ? Object.assign(error, { enableBankingError: info }) : error;
 }
 
 /** `Retry-After` is either delay-seconds or an HTTP-date (RFC 9110, section 10.2.3). */

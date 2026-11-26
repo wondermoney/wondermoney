@@ -14,7 +14,7 @@ import { convertWithStatus, rateScope } from '@service/currency/exchange-rate';
 import { reconvertAccountRows } from '@service/currency/fx-reconvert.service';
 import backgroundOperationService from '@service/operations/background-operation.service';
 import type { Enqueue } from '@service/queue/enqueue';
-import { isManualAccount, loadChainRows, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
+import { isBankLinkedAccount, loadChainRows, recalculateChainFromAccountBalance } from '@service/transaction/balance-chain.service';
 import { TransactionAuditService } from '@service/transaction/transaction-audit.service';
 import { ERROR_CODE, TooManyRequestsError } from '@utils/errors';
 import logger from '@utils/logger';
@@ -111,11 +111,13 @@ export async function recalculateAccount(
 
     const { reconverted } = await reconvertAccountRows(tx, account, ACCOUNT_RECALCULATION_AUDIT_SOURCE);
 
-    if (isManualAccount(account)) {
+    if (!isBankLinkedAccount(account)) {
       // A manual account's balance is derived: the chain's tail, or the opening balance itself
       // when there is nothing on top of it.
-      if (rows.length > 0) account.balance = (await recalculateChainFromAccountBalance(tx, account)).tail.balance;
-      else if (account.openingBalance != null) account.balance = account.openingBalance;
+      if (rows.length > 0) {
+        const { tail } = await recalculateChainFromAccountBalance(tx, account);
+        if (tail) account.balance = tail.balance;
+      } else if (account.openingBalance != null) account.balance = account.openingBalance;
     }
     await refreshOwnerCurrencyBalance(tx, account, now);
     // Again, anchored on the refreshed figures: a chain in another currency than the owner's ends

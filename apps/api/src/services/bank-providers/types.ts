@@ -156,6 +156,11 @@ export interface BankProviderTransaction {
 
 export interface BankProviderTransactions {
   booked?: BankProviderTransaction[];
+  /**
+   * The first day the rows cover, when the provider served a shorter window than was asked
+   * (a bank that refuses a long history on the first sync). Omitted when it served the whole window.
+   */
+  fetchedFrom?: string;
   pending?: BankProviderTransaction[];
   /** Rejected or cancelled rows: never ingested, only used to retract a stored copy. */
   voided?: BankProviderTransaction[];
@@ -196,6 +201,12 @@ export interface BankProvider {
    */
   describeInstitutions?(em: EntityManager, bankConnectionKeys: number[]): Promise<Map<number, BankConnectionInstitution>>;
 
+  /**
+   * A balance that cannot be read now throws `UnavailableError` (an outage, a timeout) or
+   * `RequestRejectedError` (the bank refuses the call); the sync then keeps the account's last
+   * balance and still syncs its transactions. Throw `ConsentExpiredError` or
+   * `UserActionRequiredError` only when the user has to act.
+   */
   getBalances(connection: BankConnectionRef, accountId: string): Promise<BankProviderBalance[]>;
 
   /** The connection's current consent state, used after every account was rejected. */

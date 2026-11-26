@@ -171,7 +171,8 @@ export const handleAccountInitialSyncJob = async (job: JobWithMetadata<AccountIn
       throw new BankSyncOutcomeError(`account.initial-sync:${phases.failedAt}-phase-failed`);
     }
     if (phases.status === 'partial') {
-      const final = await finalize('partial', phases.rateLimited ? 'rate_limited' : phases.reportedErrorCode ?? 'data_validation', false, phases.account);
+      // A run short only of balances the bank refuses is not retried: the retry would be refused too.
+      const final = await finalize('partial', phases.rateLimited ? 'rate_limited' : phases.reportedErrorCode ?? 'data_validation', phases.partialRetryable === false, phases.account);
       if (final) return false;
       throw new BankSyncOutcomeError('account.initial-sync:partial');
     }

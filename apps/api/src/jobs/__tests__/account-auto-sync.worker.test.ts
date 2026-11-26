@@ -65,6 +65,20 @@ describe('scheduled bank sync producer contract worker', () => {
     expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ attempt: 2, final: false, result: 'partial', treatmentEligible: false }));
   });
 
+  it('finishes, without a retry, a refresh short only of balances the bank refuses', async () => {
+    const h = harness();
+    h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'institution_unavailable', balanceUnavailableRetryable: false, failedAccountIds: [], status: 'partial' } as { status: string });
+    await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-2', retryCount: 0, retryLimit: 1 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).resolves.toBe(false);
+    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'institution_unavailable', final: true, result: 'partial' }));
+  });
+
+  it('still retries a refresh whose balance timed out', async () => {
+    const h = harness();
+    h.accountService.syncAccountsForRequisition.mockResolvedValueOnce({ balanceUnavailableAccountIds: ['acc-1'], balanceUnavailableCode: 'provider_unavailable', balanceUnavailableRetryable: true, failedAccountIds: [], status: 'partial' } as { status: string });
+    await expect(handleAccountAutoSyncRequisitionJob(pgBossJob(payload, { id: 'job-2', retryCount: 0, retryLimit: 1 }) as Parameters<typeof handleAccountAutoSyncRequisitionJob>[0], h as unknown as Parameters<typeof handleAccountAutoSyncRequisitionJob>[1])).rejects.toThrow('partial');
+    expect(h.bankSyncIncidentService.finalizeAttempt).toHaveBeenCalledWith(expect.objectContaining({ errorCode: 'provider_unavailable', final: false, result: 'partial' }));
+  });
+
   it('does not reinterpret persistence rollback as a second failed provider outcome', async () => {
     const h = harness();
     h.bankSyncIncidentService.finalizeAttempt.mockRejectedValueOnce(new Error('transition rollback'));
