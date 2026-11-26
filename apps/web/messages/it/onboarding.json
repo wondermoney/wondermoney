@@ -303,7 +303,7 @@
         "exampleValue": "Esempio: {value}"
       },
       "stepLabels": {
-        "welcome": "Benvenuto",
+        "welcome": "Ti diamo il benvenuto",
         "goals": "I tuoi obiettivi",
         "privacy": "Privacy",
         "account": "Collega",
@@ -320,7 +320,7 @@
     },
     "dashboard": {
       "triggerLabel": "Aiuto",
-      "title": "Benvenuto nella tua dashboard",
+      "title": "Ti diamo il benvenuto nella tua dashboard",
       "description": "Questa è la tua dashboard principale: il punto di riferimento per una panoramica chiara della tua vita finanziaria, tutta in un unico posto.",
       "content1": "Vedi a colpo d'occhio il tuo patrimonio netto su tutti i conti.",
       "content2": "Tieni d'occhio lo stato dei budget e le principali categorie di spesa man mano che i dati si aggiornano.",
@@ -328,7 +328,7 @@
     },
     "accounts": {
       "triggerLabel": "Aiuto",
-      "title": "Benvenuto nei tuoi conti",
+      "title": "Ti diamo il benvenuto nei tuoi conti",
       "description": "Questa è la panoramica dei conti, dove puoi monitorare tutti i tuoi conti in un unico posto.",
       "content1": "Visualizza il saldo totale e tutti i conti collegati con gli indicatori di andamento.",
       "content2": "Segui entrate, uscite e tasso di risparmio, insieme alla crescita del saldo nel tempo.",
@@ -336,7 +336,7 @@
     },
     "transactions": {
       "triggerLabel": "Aiuto",
-      "title": "Benvenuto nelle tue transazioni",
+      "title": "Ti diamo il benvenuto nelle tue transazioni",
       "description": "Segui ogni movimento di tutti i tuoi conti collegati in un'unica vista ordinata.",
       "content1": "Ogni deposito, acquisto e trasferimento è elencato con categoria e importo.",
       "content2": "Filtra per data, conto o categoria per trovare rapidamente qualsiasi transazione.",
@@ -344,7 +344,7 @@
     },
     "budgets-monthly": {
       "triggerLabel": "Aiuto",
-      "title": "Benvenuto nel tuo budget mensile",
+      "title": "Ti diamo il benvenuto nel tuo budget mensile",
       "description": "Resta in linea con i tuoi obiettivi di spesa e segui facilmente i tuoi progressi durante il mese.",
       "content1": "Confronta a colpo d'occhio spese e obiettivi di budget per ogni categoria.",
       "content2": "Le spese si aggiornano automaticamente dalle transazioni dei conti bancari collegati.",
@@ -352,7 +352,7 @@
     },
     "budgets-yearly": {
       "triggerLabel": "Aiuto",
-      "title": "Benvenuto nel tuo budget annuale",
+      "title": "Ti diamo il benvenuto nel tuo budget annuale",
       "description": "Prendi il controllo del tuo piano finanziario annuale e gestisci con sicurezza le spese meno frequenti.",
       "content1": "Segui entrate, uscite e risparmi previsti dell'anno.",
       "content2": "Monitora l'andamento delle spese di ogni categoria rispetto al budget annuale.",
