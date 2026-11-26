@@ -19,6 +19,13 @@ description = "Placeholder private key in an API test"
 targetRules = ["private-key"]
 regexes = ['''^-----BEGIN PRIVATE KEY-----decrypted-----END PRIVATE KEY-----'\)''']
 
+# The PKCS#1 header the Enable Banking credential validator looks for, not a key. The match runs
+# on to the validator's `PRIVATE KEY-----` shape check further down: the entry matches the start only.
+[[allowlists]]
+description = "PKCS#1 header string in the Enable Banking credential validator"
+targetRules = ["private-key"]
+regexes = ['''^-----BEGIN RSA PRIVATE KEY-----'\)\) return pem;''']
+
 # PostHog project keys are public client keys, shipped in every app build.
 [[allowlists]]
 description = "Hosted instance's public PostHog project key"
