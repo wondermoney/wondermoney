@@ -41,10 +41,24 @@ export async function provisionAppUser(
   inviteToken?: string,
 ): Promise<ProvisionOutcome> {
   try {
-    const body = inviteToken ? { inviteToken, locale } : { locale }
-    await apiClient.write(authCallbackEndpoint, { body, commit: () => undefined })
+    await postCallback(apiClient, locale, inviteToken)
     return 'provisioned'
   } catch (error) {
+    if (locale !== 'en' && isBadRequest(error)) return provisionAppUser(apiClient, 'en', inviteToken)
     return isTransient(error) ? 'unavailable' : 'failed'
   }
+}
+
+/*
+ * A server older than one of the app's languages (one without the Italian account language,
+ * for `it`) rejects that locale with a 400 before the callback runs, which would sign the
+ * person out on every launch. The app then asks again in English: an existing account keeps
+ * its language, and a new one starts in English, the language that server's web app would have
+ * given it. A refusal for any other reason is refused again, and the result is `failed`.
+ */
+const isBadRequest = (error: unknown): boolean => error instanceof ApiError && error.code === 'http' && error.status === 400
+
+function postCallback(apiClient: ApiClient, locale: SignupLocale, inviteToken?: string) {
+  const body = inviteToken ? { inviteToken, locale } : { locale }
+  return apiClient.write(authCallbackEndpoint, { body, commit: () => undefined })
 }

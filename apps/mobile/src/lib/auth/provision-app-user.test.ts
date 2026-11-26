@@ -15,6 +15,36 @@ describe('provisionAppUser', () => {
   it('returns failed when the server refuses the callback', async () => {
     const write = jest.fn().mockRejectedValue(new ApiError('http', 400))
     await expect(provisionAppUser(clientWith(write), 'en')).resolves.toBe('failed')
+    expect(write).toHaveBeenCalledTimes(1)
+  })
+
+  it('signs in with en on a server that predates the app language', async () => {
+    // A server without the Italian account language rejects `it` in its locale enum with a 400,
+    // before any handler runs; refusing the callback there would sign every Italian-language
+    // person out.
+    const write = jest.fn()
+      .mockRejectedValueOnce(new ApiError('http', 400))
+      .mockImplementationOnce(async (_endpoint, opts) => { opts.commit({}); return {} })
+    await expect(provisionAppUser(clientWith(write), 'it', 'invite-tok-1')).resolves.toBe('provisioned')
+    expect(write.mock.calls.map(([, opts]) => opts.body)).toEqual([
+      { inviteToken: 'invite-tok-1', locale: 'it' },
+      { inviteToken: 'invite-tok-1', locale: 'en' },
+    ])
+  })
+
+  it('returns failed when the server refuses the en retry too', async () => {
+    const write = jest.fn().mockRejectedValue(new ApiError('http', 400))
+    await expect(provisionAppUser(clientWith(write), 'it')).resolves.toBe('failed')
+    expect(write).toHaveBeenCalledTimes(2)
+  })
+
+  it.each([
+    ['a forbidden callback', new ApiError('http', 403)],
+    ['a transient failure', new ApiError('http', 503)],
+  ])('does not retry %s in en', async (_label, error) => {
+    const write = jest.fn().mockRejectedValue(error)
+    await provisionAppUser(clientWith(write), 'it')
+    expect(write).toHaveBeenCalledTimes(1)
   })
 
   it('returns failed for a non-API error', async () => {
