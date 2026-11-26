@@ -9,6 +9,7 @@ import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import MidCTA from "@/components/homepage/MidCTA";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
@@ -111,6 +112,8 @@ function FeatureBudgetingContent({ locale }: { locale: Lang }) {
 					</div>
 				</div>
 			</section>
+
+			<FeatureFaq routeId="featureBudgeting" />
 
 			<TrustStripInline />
 

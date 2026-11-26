@@ -249,7 +249,7 @@
       },
       "faq2": {
         "question": "Which banks are supported?",
-        "answer": "WonderMoney connects to most banks in Portugal and many banks across Europe through Enable Banking's certified Open Banking service. Availability is confirmed in the bank picker when you connect, and coverage continues to expand."
+        "answer": "WonderMoney connects to most banks in Portugal and many banks across Europe through Enable Banking's certified Open Banking service. Availability is confirmed in the bank picker when you connect, and coverage continues to expand. To link a bank, you register a free Enable Banking application of your own once; the guide on docs.wonder.money walks you through it."
       },
       "faq3": {
         "question": "Is WonderMoney free?",
@@ -258,6 +258,20 @@
       "faq5": {
         "question": "Can I track investments too?",
         "answer": "Yes. WonderMoney tracks stocks, ETFs, and other assets alongside your bank accounts - giving you a complete picture of your net worth."
+      },
+      "faq6": {
+        "question": "Can I run WonderMoney on my own server?",
+        "answer": "Yes. WonderMoney is open source under the AGPL, and a self-hosted server has the same app as wonder.money, with your data in your own database. It runs from one Docker Compose file; the self-hosting guide on docs.wonder.money covers the setup, and the mobile app connects to your server too."
+      },
+      "faq7": {
+        "question": "Is there a mobile app?",
+        "answer": "Yes. The WonderMoney app is free on the App Store for iPhone and on Google Play for Android, and the web app is at app.wonder.money. The same account works in both, and the app can also connect to your own server.",
+        "appStore": "App Store",
+        "googlePlay": "Google Play"
+      },
+      "faq8": {
+        "question": "How does WonderMoney compare to a spreadsheet or YNAB?",
+        "answer": "Like YNAB, WonderMoney budgets with envelopes: each category gets a monthly amount. Unlike a spreadsheet, it brings in your bank transactions through Open Banking and categorises them with rules you set once. It also tracks investments and net worth beside your budget, and it is free and open source."
       }
     }
   },
@@ -7320,7 +7334,14 @@
       "feature5": "Budget vs actual comparison by category",
       "feature6": "Household mode: budget together with a partner",
       "ctaHeadline": "Start Budgeting with Intention",
-      "ctaBody": "Set up your first budget and let WonderMoney handle transaction tracking automatically. Free and open source."
+      "ctaBody": "Set up your first budget and let WonderMoney handle transaction tracking automatically. Free and open source.",
+      "faqTitle": "Budgeting questions",
+      "faq1Q": "How does envelope budgeting work in WonderMoney?",
+      "faq1A": "Each budget category is an envelope with a monthly amount, and every expense in it lowers what is left. A category can carry its leftover, or its overspending, into the next month.",
+      "faq2Q": "Do I have to enter my spending by hand?",
+      "faq2A": "No. Transactions from your linked banks and imported files count against your budget by their category. You can still add a transaction by hand, such as a cash payment.",
+      "faq3Q": "Can I share a budget with my household?",
+      "faq3A": "Yes. A household budget is shared with everyone in the household, and its members can change it. A personal budget is yours alone: nobody else in the household sees it."
     },
     "featureAccounts": {
       "metaTitle": "Connect European Bank Accounts via Open Banking — WonderMoney",
@@ -7345,7 +7366,14 @@
       "sync3": "Credit card balances and transactions",
       "sync4": "Loan account balances",
       "ctaHeadline": "Connect Your Accounts with Guided Open Banking",
-      "ctaBody": "Link your bank accounts and see your complete financial picture automatically. Free and open source."
+      "ctaBody": "Link your bank accounts and see your complete financial picture automatically. Free and open source.",
+      "faqTitle": "Bank account questions",
+      "faq1Q": "Do I need an Enable Banking key of my own?",
+      "faq1A": "On wonder.money, yes: you register a free Enable Banking application once and add its key in WonderMoney's settings, and every bank you link afterwards uses it. On a self-hosted server, the person who runs it can set one up for the whole household.",
+      "faq2Q": "What if my bank is not listed?",
+      "faq2A": "Add it as an unlinked account and update its balance yourself, or import its transactions from a CSV, OFX or QIF file or a PDF statement. Unlinked accounts count in your budgets and net worth like linked ones.",
+      "faq3Q": "What happens when a bank connection expires?",
+      "faq3A": "Bank consents last for a set period. WonderMoney's connection settings show when each one ends and offer to reconnect in its last 14 days: you then approve the access again at your bank."
     },
     "featureCategorization": {
       "eyebrow": "Transaction Categorisation",
@@ -7376,7 +7404,14 @@
       "rulesPoint3": "A preview of what a rule matches before you save it",
       "rulesPoint4": "Apply a rule to the transactions you already have",
       "rulesPoint5": "A suggested rule once you fix the same kind of transaction three times",
-      "rulesPoint6": "Export the rules as a file and import them on another server"
+      "rulesPoint6": "Export the rules as a file and import them on another server",
+      "faqTitle": "Categorisation questions",
+      "faq1Q": "How does WonderMoney categorise my transactions?",
+      "faq1A": "Your household's rules run first on every new transaction. WonderMoney then suggests a category from the ones you have already confirmed and, where AI is set up, suggests the rest. Suggestions wait for you to approve or change them.",
+      "faq2Q": "Do I have to use AI?",
+      "faq2A": "No. Rules and the suggestions learned from your own choices need no AI service and send nothing to one. You can turn AI features off for your account in the privacy settings.",
+      "faq3Q": "Will a rule change a category I chose myself?",
+      "faq3A": "No. A rule runs once, when a transaction arrives, and never changes a category you chose yourself. A later sync does not undo your changes either."
     },
     "featurePortfolio": {
       "eyebrow": "Portfolio tracking",
@@ -7492,7 +7527,14 @@
       "securityPoint3Title": "App lock",
       "securityPoint3Body": "The mobile app asks for Face ID, Touch ID or your device passcode every time it opens.",
       "securityPoint4Title": "Privacy mode",
-      "securityPoint4Body": "Hide every amount on screen with one tap, or with Shift+P on the web, on a train or while sharing your screen."
+      "securityPoint4Body": "Hide every amount on screen with one tap, or with Shift+P on the web, on a train or while sharing your screen.",
+      "faqTitle": "Privacy questions",
+      "faq1Q": "Can WonderMoney move money from my accounts?",
+      "faq1A": "No. Bank connections are read-only Open Banking through Enable Banking: WonderMoney reads balances and transactions, and cannot initiate transfers or payments.",
+      "faq2Q": "Does WonderMoney see my bank password?",
+      "faq2A": "No. You sign in on your bank's own page, and WonderMoney never sees your credentials. You can revoke the access at any time, in WonderMoney or at your bank.",
+      "faq3Q": "Can I take my data with me, or delete it?",
+      "faq3A": "Yes. The privacy settings export everything in your household that you can see as a zip file, which another WonderMoney server can restore. Deleting your account also revokes your bank connections."
     },
     "pricing": {
       "metaTitle": "Pricing - WonderMoney",
@@ -8265,6 +8307,32 @@
       "wallet": "Line drawing of an open wallet with three cards in stepped slots, one of them sliding out.",
       "safe": "Line drawing of a small safe with a combination dial and a spoked handle, its door swinging open on stacked coins.",
       "deckchair": "Line drawing of a deck chair beside a stack of coins climbing towards a dashed coin, the sum that pays your spending for good, the chair leaning back once the stack gets there."
+    }
+  },
+  "llms": {
+    "summary": "WonderMoney is a free, open-source personal finance app: bank sync through Open Banking, envelope budgets, goals, investments and net worth, on the web, iOS and Android, at wonder.money or on your own server.",
+    "about": "WonderMoney is free and open source under the AGPL, and anyone can run it on their own server from one Docker Compose file. It links bank accounts in Portugal, Spain, the UK, Germany, France and other European countries through Enable Banking's read-only Open Banking, with a free Enable Banking application each person registers once; a self-hosted server can also offer SimpleFIN for banks in the United States and Canada. Other accounts are added by hand or imported from CSV, OFX and QIF files or PDF statements. It covers budgets, goals, loans, recurring payments, investments and net worth, for one person or a whole household, on the web at app.wonder.money and in the iOS and Android apps.",
+    "sections": {
+      "start": "Start here",
+      "features": "Features",
+      "tools": "Free tools and calculators",
+      "guides": "Guides",
+      "more": "More"
+    },
+    "links": {
+      "home": "WonderMoney home page",
+      "webApp": "Web app",
+      "webAppDescription": "Sign up and use WonderMoney on the web",
+      "appStore": "iOS app",
+      "appStoreDescription": "WonderMoney for iPhone on the App Store",
+      "googlePlay": "Android app",
+      "googlePlayDescription": "WonderMoney for Android on Google Play",
+      "docs": "Documentation",
+      "docsDescription": "How to use WonderMoney, run your own server and use the API",
+      "selfHosting": "Self-hosting guide",
+      "selfHostingDescription": "Run WonderMoney on your own server with Docker Compose",
+      "source": "Source code",
+      "sourceDescription": "The public repository on GitHub, under the AGPL"
     }
   }
 }

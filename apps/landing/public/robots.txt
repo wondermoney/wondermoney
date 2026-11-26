@@ -1,4 +1,17 @@
 User-agent: *
 Allow: /
 
+# AI assistants' search and fetch crawlers, named so a broad block elsewhere never catches them.
+# What WonderMoney is, and the pages worth citing: https://wonder.money/llms.txt
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://wonder.money/sitemap-index.xml

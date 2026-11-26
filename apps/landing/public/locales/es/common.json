@@ -249,7 +249,7 @@
       },
       "faq2": {
         "question": "¿Qué bancos están disponibles?",
-        "answer": "WonderMoney se conecta a la mayoría de los bancos de Portugal y a muchos bancos de Europa mediante Open Banking certificado de Enable Banking. La disponibilidad se confirma en el selector de bancos al conectarte y la cobertura sigue ampliándose."
+        "answer": "WonderMoney se conecta a la mayoría de los bancos de Portugal y a muchos bancos de Europa mediante Open Banking certificado de Enable Banking. La disponibilidad se confirma en el selector de bancos al conectarte y la cobertura sigue ampliándose. Para conectar un banco, registras una vez una aplicación gratuita de Enable Banking propia; la guía de docs.wonder.money te lo explica paso a paso."
       },
       "faq3": {
         "question": "¿WonderMoney es gratis?",
@@ -258,6 +258,20 @@
       "faq5": {
         "question": "¿También puedo hacer seguimiento de inversiones?",
         "answer": "Sí. WonderMoney hace seguimiento de acciones, ETFs y otros activos junto con tus cuentas bancarias — dándote una visión completa de tu patrimonio neto."
+      },
+      "faq6": {
+        "question": "¿Puedo instalar WonderMoney en mi propio servidor?",
+        "answer": "Sí. WonderMoney es de código abierto bajo la AGPL, y en tu propio servidor tienes la misma app que en wonder.money, con tus datos en tu propia base de datos. Funciona con un solo archivo de Docker Compose; la guía de autoalojamiento de docs.wonder.money explica la instalación, y la app móvil también se conecta a tu servidor."
+      },
+      "faq7": {
+        "question": "¿Hay una app para el móvil?",
+        "answer": "Sí. La app de WonderMoney es gratuita en la App Store para iPhone y en Google Play para Android, y la app web está en app.wonder.money. La misma cuenta funciona en ambas, y la app también puede conectarse a tu propio servidor.",
+        "appStore": "App Store",
+        "googlePlay": "Google Play"
+      },
+      "faq8": {
+        "question": "¿Cómo se compara WonderMoney con una hoja de cálculo o con YNAB?",
+        "answer": "Como YNAB, WonderMoney presupuesta con sobres: cada categoría tiene un importe mensual. A diferencia de una hoja de cálculo, trae las transacciones de tu banco mediante Open Banking y las categoriza con reglas que defines una vez. Además sigue inversiones y patrimonio neto junto al presupuesto, y es gratuito y de código abierto."
       }
     }
   },
@@ -7320,7 +7334,14 @@
       "feature5": "Comparación de presupuesto vs real por categoría",
       "feature6": "Modo hogar: presupuesta junto con tu pareja",
       "ctaHeadline": "Empieza a presupuestar con intención",
-      "ctaBody": "Crea tu primer presupuesto y deja que WonderMoney haga el seguimiento automático de las transacciones. Gratis y de código abierto."
+      "ctaBody": "Crea tu primer presupuesto y deja que WonderMoney haga el seguimiento automático de las transacciones. Gratis y de código abierto.",
+      "faqTitle": "Preguntas sobre presupuestos",
+      "faq1Q": "¿Cómo funciona el presupuesto por sobres en WonderMoney?",
+      "faq1A": "Cada categoría del presupuesto es un sobre con un importe mensual, y cada gasto en ella reduce lo que queda. Una categoría puede pasar lo que le sobró, o lo que se excedió, al mes siguiente.",
+      "faq2Q": "¿Tengo que apuntar mis gastos a mano?",
+      "faq2A": "No. Las transacciones de tus bancos vinculados y de los archivos importados cuentan en el presupuesto según su categoría. Aun así puedes añadir una transacción a mano, como un pago en efectivo.",
+      "faq3Q": "¿Puedo compartir un presupuesto con mi hogar?",
+      "faq3A": "Sí. Un presupuesto del hogar se comparte con todas las personas del hogar, y sus miembros pueden cambiarlo. Un presupuesto personal es solo tuyo: nadie más del hogar lo ve."
     },
     "featureAccounts": {
       "metaTitle": "Conecta cuentas bancarias europeas mediante Open Banking — WonderMoney",
@@ -7345,7 +7366,14 @@
       "sync3": "Saldos y transacciones de tarjetas de crédito",
       "sync4": "Saldos de préstamos",
       "ctaHeadline": "Conecta tus cuentas con Open Banking guiado",
-      "ctaBody": "Vincula tus cuentas bancarias y ve el panorama financiero completo automáticamente. Gratis y de código abierto."
+      "ctaBody": "Vincula tus cuentas bancarias y ve el panorama financiero completo automáticamente. Gratis y de código abierto.",
+      "faqTitle": "Preguntas sobre cuentas bancarias",
+      "faq1Q": "¿Necesito una clave de Enable Banking propia?",
+      "faq1A": "En wonder.money, sí: registras una vez una aplicación gratuita de Enable Banking y añades su clave en los ajustes de WonderMoney, y todos los bancos que conectes después la usan. En un servidor propio, quien lo gestiona puede configurar una para todo el hogar.",
+      "faq2Q": "¿Y si mi banco no aparece en la lista?",
+      "faq2A": "Añádelo como cuenta no vinculada y actualiza tú el saldo, o importa sus transacciones desde un archivo CSV, OFX o QIF o un extracto en PDF. Las cuentas no vinculadas cuentan en tus presupuestos y tu patrimonio igual que las vinculadas.",
+      "faq3Q": "¿Qué pasa cuando caduca una conexión bancaria?",
+      "faq3A": "El consentimiento del banco dura un periodo fijo. Los ajustes de conexiones de WonderMoney muestran cuándo termina cada uno y ofrecen volver a conectar en sus últimos 14 días: entonces apruebas de nuevo el acceso en tu banco."
     },
     "featureCategorization": {
       "eyebrow": "Categorización de transacciones",
@@ -7376,7 +7404,14 @@
       "rulesPoint3": "Una vista previa de lo que coincide con una regla antes de guardarla",
       "rulesPoint4": "Aplica una regla a las transacciones que ya tienes",
       "rulesPoint5": "Una regla sugerida cuando corriges tres veces el mismo tipo de transacción",
-      "rulesPoint6": "Exporta las reglas como archivo e impórtalas en otro servidor"
+      "rulesPoint6": "Exporta las reglas como archivo e impórtalas en otro servidor",
+      "faqTitle": "Preguntas sobre la categorización",
+      "faq1Q": "¿Cómo categoriza WonderMoney mis transacciones?",
+      "faq1A": "Las reglas de tu hogar se aplican primero a cada transacción nueva. Después, WonderMoney sugiere una categoría a partir de las que ya confirmaste y, donde hay IA configurada, sugiere el resto. Las sugerencias esperan a que las apruebes o las cambies.",
+      "faq2Q": "¿Tengo que usar IA?",
+      "faq2A": "No. Las reglas y las sugerencias aprendidas de tus propias elecciones no necesitan ningún servicio de IA ni le envían nada. Puedes desactivar las funciones de IA de tu cuenta en los ajustes de privacidad.",
+      "faq3Q": "¿Una regla puede cambiar una categoría que elegí yo?",
+      "faq3A": "No. Una regla se aplica una vez, cuando llega la transacción, y nunca cambia una categoría que elegiste tú. Una sincronización posterior tampoco deshace tus cambios."
     },
     "featurePrivacy": {
       "eyebrow": "Privacidad y seguridad",
@@ -7412,7 +7447,14 @@
       "securityPoint3Title": "Bloqueo de la app",
       "securityPoint3Body": "La app móvil pide Face ID, Touch ID o el código de tu dispositivo cada vez que se abre.",
       "securityPoint4Title": "Modo privacidad",
-      "securityPoint4Body": "Oculta todos los importes de la pantalla con un toque, o con Shift+P en la web, en el tren o mientras compartes pantalla."
+      "securityPoint4Body": "Oculta todos los importes de la pantalla con un toque, o con Shift+P en la web, en el tren o mientras compartes pantalla.",
+      "faqTitle": "Preguntas sobre privacidad",
+      "faq1Q": "¿Puede WonderMoney mover dinero de mis cuentas?",
+      "faq1A": "No. Las conexiones bancarias usan Open Banking de solo lectura mediante Enable Banking: WonderMoney lee saldos y transacciones, y no puede iniciar transferencias ni pagos.",
+      "faq2Q": "¿Ve WonderMoney la contraseña de mi banco?",
+      "faq2A": "No. Inicias sesión en la página de tu banco, y WonderMoney nunca ve tus credenciales. Puedes revocar el acceso en cualquier momento, desde WonderMoney o en tu banco.",
+      "faq3Q": "¿Puedo llevarme mis datos o borrarlos?",
+      "faq3A": "Sí. Desde los ajustes de privacidad exportas todo lo que ves de tu hogar en un archivo zip, que otro servidor de WonderMoney puede restaurar. Eliminar tu cuenta también revoca tus conexiones bancarias."
     },
     "pricing": {
       "metaTitle": "Precios — WonderMoney",
@@ -8265,6 +8307,32 @@
       "wallet": "Dibujo lineal de una cartera abierta con tres tarjetas en ranuras escalonadas, una de ellas deslizándose hacia fuera.",
       "safe": "Dibujo lineal de una pequeña caja fuerte con un disco de combinación y una manilla de radios, cuya puerta se abre sobre pilas de monedas.",
       "deckchair": "Dibujo lineal de una tumbona junto a una pila de monedas que sube hacia una moneda discontinua, la cantidad que paga tus gastos para siempre, y la tumbona se reclina cuando la pila llega."
+    }
+  },
+  "llms": {
+    "summary": "WonderMoney es una app de finanzas personales gratuita y de código abierto: sincronización bancaria mediante Open Banking, presupuestos por sobres, objetivos, inversiones y patrimonio neto, en la web, iOS y Android, en wonder.money o en tu propio servidor.",
+    "about": "WonderMoney es gratuito y de código abierto bajo la AGPL, y cualquiera puede instalarlo en su propio servidor con un solo archivo de Docker Compose. Conecta cuentas bancarias de Portugal, España, Reino Unido, Alemania, Francia y otros países europeos mediante el Open Banking de solo lectura de Enable Banking, con una aplicación gratuita de Enable Banking que cada persona registra una vez; un servidor propio también puede ofrecer SimpleFIN para bancos de Estados Unidos y Canadá. Las demás cuentas se añaden a mano o se importan desde archivos CSV, OFX y QIF o extractos en PDF. Cubre presupuestos, objetivos, préstamos, pagos recurrentes, inversiones y patrimonio neto, para una persona o para todo el hogar, en la web en app.wonder.money y en las apps para iOS y Android.",
+    "sections": {
+      "start": "Para empezar",
+      "features": "Funciones",
+      "tools": "Herramientas y calculadoras gratuitas",
+      "guides": "Guías",
+      "more": "Más"
+    },
+    "links": {
+      "home": "Página de inicio de WonderMoney",
+      "webApp": "App web",
+      "webAppDescription": "Regístrate y usa WonderMoney en la web",
+      "appStore": "App para iOS",
+      "appStoreDescription": "WonderMoney para iPhone en la App Store",
+      "googlePlay": "App para Android",
+      "googlePlayDescription": "WonderMoney para Android en Google Play",
+      "docs": "Documentación",
+      "docsDescription": "Cómo usar WonderMoney, instalarlo en tu servidor y usar la API",
+      "selfHosting": "Guía de autoalojamiento",
+      "selfHostingDescription": "Instala WonderMoney en tu servidor con Docker Compose",
+      "source": "Código fuente",
+      "sourceDescription": "El repositorio público en GitHub, bajo la AGPL"
     }
   }
 }
