@@ -11,39 +11,44 @@ Num servidor próprio, quem o gere pode ter configurado uma aplicação Enable B
 
 ## Antes de começar
 
-Vais precisar de uns minutos, do email que queres usar na Enable Banking e de acesso ao início de sessão do teu banco para aprovar a ligação mais à frente neste mesmo fluxo. Não é preciso nenhum conhecimento técnico além de copiar dois valores — um identificador e uma chave — da Enable Banking para o WonderMoney.
+Vais precisar de uns minutos, do email que queres usar na Enable Banking e de acesso ao início de sessão do teu banco para aprovar a ligação mais à frente neste mesmo fluxo. Não é preciso nenhum conhecimento técnico: o WonderMoney cria a chave por ti, e só copias alguns valores entre o WonderMoney e a Enable Banking.
 
-## Configura a tua aplicação na Enable Banking
+Há duas formas de dar uma chave ao WonderMoney. A primeira é a que deves usar: **o WonderMoney cria a chave**, e entregas à Enable Banking apenas o certificado dela. Se já registaste uma aplicação com uma chave `.pem` da Enable Banking, vê [Se já tens uma chave .pem](#se-já-tens-uma-chave-pem).
+
+## Cria o certificado no WonderMoney
+
+1. Na aplicação web do WonderMoney, abre **Definições → Fornecedor bancário** e seleciona **Deixar o WonderMoney criar a chave**.
+2. Seleciona **Criar certificado** e depois **Transferir certificado** ou **Copiar certificado**.
+
+O WonderMoney cria o par de chaves no servidor e guarda lá a chave privada, encriptada. Nunca a vês nem a guardas; o certificado é só a parte pública. Mantém a janela aberta: tem os valores a introduzir na Enable Banking, cada um com um botão para copiar.
+
+O certificado espera sete dias pelo ID da aplicação. Depois disso, ou se selecionares **Criar um novo certificado**, é substituído, e registas o novo.
+
+## Regista a tua aplicação na Enable Banking
 
 1. Vai a `enablebanking.com/sign-in/` e introduz o teu email. A Enable Banking envia um link mágico de utilização única — não há palavra-passe a criar. Clica no link para abrir o Painel de Controlo.
 2. No Painel de Controlo, vai a **Applications** (`enablebanking.com/cp/applications`) e clica em **Add a new application**.
 3. Define **Environment** como **Production** — lê o aviso abaixo antes de continuares.
-4. Dá um nome e uma descrição à aplicação. Qualquer valor descritivo serve, por exemplo "WonderMoney" com uma linha a dizer que é para uso pessoal.
-5. Define **Redirect URL** exatamente como aqui: `https://api.wonder.money/v1/banking/enable-banking/callback` — lê a nota abaixo.
-6. Preenche **Privacy URL** e **Terms URL** — lê o aviso abaixo antes de submeteres o formulário.
-7. Na geração da chave, escolhe **Generate in the browser and export private key**. A Enable Banking gera um par de chaves por ti e descarrega automaticamente um ficheiro `.pem` — lê o aviso abaixo sobre como guardá-lo em segurança.
+4. Copia o **Nome da aplicação** e a **Descrição** da janela do WonderMoney. Qualquer valor descritivo serve; a descrição aparece no teu banco quando aprovas o acesso.
+5. Copia o **URL de redirecionamento** da janela, exatamente como aparece — lê a nota abaixo.
+6. Copia o **URL de privacidade** e o **URL dos termos** da janela para **Privacy URL** e **Terms URL** — lê o aviso abaixo antes de submeteres o formulário.
+7. Na geração da chave, escolhe **Generate outside the browser and import public certificate** e cola o certificado em **Public certificate**. Ignora os comandos OpenSSL que a Enable Banking mostra: o certificado já contém a chave.
 8. Submete o formulário para registar a aplicação.
 
 <Callout type="warn" title="Escolhe Production, não Sandbox">
-  O Sandbox só liga a dados bancários fictícios — nunca vai conseguir ligar a tua conta real, por mais que esteja tudo o resto bem configurado. É o passo mais fácil de errar em toda esta página, e o que mais vale a pena confirmar duas vezes antes de submeteres o formulário.
+  O Sandbox só liga a dados bancários fictícios — nunca vai conseguir ligar a tua conta real, por mais que esteja tudo o resto bem configurado. É o passo mais fácil de errar em toda esta página, e o que mais vale a pena confirmar duas vezes antes de submeteres o formulário. O WonderMoney recusa uma aplicação Sandbox quando a ativas.
 </Callout>
 
 <Callout type="info" title="O URL de redirecionamento é do WonderMoney, não teu">
-  `https://api.wonder.money/v1/banking/enable-banking/callback` é o endereço do próprio backend do WonderMoney. Estás a registar uma aplicação que fala com os servidores do WonderMoney, por isso este valor é fixo — introduz exatamente como está escrito, não o teu próprio domínio. A única exceção é um servidor próprio: aí, substitui `https://api.wonder.money` pelo endereço da API do teu servidor.
+  Em wonder.money é `https://api.wonder.money/v1/banking/enable-banking/callback`, o endereço do próprio backend do WonderMoney. Estás a registar uma aplicação que fala com os servidores do WonderMoney, por isso este valor é fixo — introduz exatamente como aparece, não o teu próprio domínio. Num servidor próprio, a janela mostra antes o endereço da API desse servidor.
 </Callout>
 
 <Callout type="warn" title="Privacy URL e Terms URL são obrigatórios em Production, mesmo que o formulário não o diga">
-  O formulário da Enable Banking não marca estes campos como obrigatórios, mas numa aplicação Production o envio falha em silêncio se algum ficar vazio, sem mostrar qualquer mensagem de erro. Usa:
+  O formulário da Enable Banking não marca estes campos como obrigatórios, mas numa aplicação Production o envio falha em silêncio se algum ficar vazio, sem mostrar qualquer mensagem de erro. A janela sugere-os; em wonder.money são:
 
   - Privacy URL: `https://docs.wonder.money/about/privacy-policy`
   - Terms URL: `https://docs.wonder.money/about/terms-of-service`
 </Callout>
-
-<Callout type="warn" title="Guarda a chave descarregada imediatamente">
-  A Enable Banking mostra e descarrega esta chave privada uma única vez. Não a consegue voltar a mostrar. Guarda o ficheiro `.pem` num sítio seguro — por exemplo, um gestor de palavras-passe — antes de fazeres qualquer outra coisa. Se a perderes, a única solução é registar uma aplicação nova de raiz.
-</Callout>
-
-Se preferires gerar tu mesmo o par de chaves e entregar à Enable Banking apenas o certificado público, escolhe **Generate outside the browser and import public certificate** e segue a [documentação da API](https://enablebanking.com/docs/api/reference/) da Enable Banking para esse caminho.
 
 ## Ativa a tua aplicação ligando a tua própria conta bancária
 
@@ -59,17 +64,35 @@ Depois de submeteres o formulário, a página da aplicação mostra **"Restricte
 2. Escolhe o teu banco e inicia sessão, aprovando o acesso da mesma forma que farias em qualquer ligação Open Banking.
 3. Assim que o banco confirmar o consentimento, volta ao Painel de Controlo — o estado da aplicação atualiza-se para refletir que já está ativada.
 
-## Adiciona a tua chave ao WonderMoney
+## Cola o ID da aplicação no WonderMoney
 
 1. Na página da aplicação, copia o **Application ID** — um UUID apresentado perto do topo.
-2. Localiza o ficheiro `.pem` que descarregaste antes.
-3. Na aplicação web do WonderMoney, abre **Definições → Fornecedor bancário** e seleciona **Adicionar chave**. A aplicação móvel liga bancos com uma chave já guardada, mas a chave é adicionada na web.
-4. Cola o Application ID em **ID da aplicação**, e o conteúdo completo do ficheiro `.pem` em **Chave privada**.
-5. Seleciona **Testar e guardar**. O WonderMoney valida a credencial junto da Enable Banking antes de a guardar, por isso um identificador mal copiado ou uma chave incompleta são rejeitados de imediato em vez de falharem mais tarde.
+2. De volta à janela do WonderMoney (**Definições → Fornecedor bancário → Continuar a configuração**, se a fechaste), cola-o em **Colar o ID da aplicação** e seleciona **Ativar**.
+
+O WonderMoney testa a aplicação junto da Enable Banking antes de ativar a chave, e diz-te o que corrigir quando não consegue:
+
+- **A Enable Banking não reconhece este ID de aplicação**: o ID está mal copiado, ou a aplicação foi registada com outro certificado.
+- **Esta é uma aplicação Sandbox**: regista uma nova aplicação com **Environment** definido como **Production**.
+- **Esta aplicação ainda não está ativada**: conclui a [ativação ligando uma conta](#ativa-a-tua-aplicação-ligando-a-tua-própria-conta-bancária) e seleciona **Ativar** novamente.
+
+Se tiveres a autenticação de dois fatores ativa, o WonderMoney pede o código do autenticador quando crias o certificado e quando o ativas.
+
+## Se já tens uma chave .pem
+
+Se registaste a aplicação com **Generate in the browser and export private key**, a Enable Banking descarregou um ficheiro `.pem` com o nome do ID da aplicação. A Enable Banking mostra essa chave uma única vez: se perderes o ficheiro, cria um certificado no WonderMoney e regista uma nova aplicação.
+
+1. Ativa a aplicação [ligando a tua própria conta bancária](#ativa-a-tua-aplicação-ligando-a-tua-própria-conta-bancária), se ainda não o fizeste.
+2. Na aplicação web do WonderMoney, abre **Definições → Fornecedor bancário** e seleciona **Já tenho uma chave** (**Atualizar chave**, se já tens uma guardada).
+3. Cola o Application ID em **ID da aplicação**, e o conteúdo completo do ficheiro `.pem` em **Chave privada**.
+4. Seleciona **Testar e guardar**. O WonderMoney valida a credencial junto da Enable Banking antes de a guardar, por isso um identificador mal copiado, uma chave incompleta, uma aplicação Sandbox ou uma ainda não ativada são rejeitados de imediato em vez de falharem mais tarde.
+
+A aplicação móvel liga bancos com uma chave já guardada, mas a chave é configurada na web.
 
 ## O que o WonderMoney faz com a tua chave
 
-A tua chave privada é encriptada em repouso (AES-256-GCM) e nunca volta a ser mostrada depois de guardada. O WonderMoney usa-a apenas para autenticar os teus próprios pedidos à Enable Banking — não é partilhada com mais ninguém, nem sequer com outros utilizadores do WonderMoney.
+A tua chave privada é encriptada em repouso (AES-256-GCM) e nunca sai do servidor: uma chave criada pelo WonderMoney nunca te é mostrada, e uma chave colada nunca volta a ser mostrada. Não aparece em nenhuma resposta, registo ou exportação de dados. O WonderMoney usa-a apenas para autenticar os teus próprios pedidos à Enable Banking — não é partilhada com mais ninguém, nem sequer com outros utilizadores do WonderMoney.
+
+Uma chave nova só substitui a antiga nas novas ligações bancárias: as contas que já ligaste continuam a usar a chave com que foram ligadas.
 
 ## Liga o teu primeiro banco
 
@@ -81,6 +104,7 @@ Depois de a tua chave estar guardada e ativa, ligar um banco funciona como qualq
 - O formulário da aplicação não foi submetido porque **Privacy URL** ou **Terms URL** ficaram vazios.
 - Foi clicado **Request activation** em vez de **Activate by linking accounts**, iniciando por engano o caminho de verificação empresarial.
 - O ficheiro `.pem` descarregado perdeu-se antes de ser copiado para o WonderMoney.
+- O ID da aplicação foi colado com um certificado diferente do registado com ela, por exemplo depois de **Criar um novo certificado**. Regista o certificado mais recente, ou cria um novo e regista-o.
 
 Para ajuda com qualquer um destes casos, consulta [Problemas de ligação bancária](/pt/docs/troubleshooting/bank-connection-problems).
 
