@@ -55,7 +55,7 @@
         },
         "credentialRequired": {
           "title": "Ligar um banco exige uma configuração rápida e única",
-          "body": "Antes de ligar um banco real, adiciona a tua própria chave Enable Banking nas Definições. Podes fazê-lo quando quiseres, depois de concluíres a configuração inicial. Por agora, adiciona uma conta manualmente acima ou salta este passo e liga mais tarde."
+          "body": "Para ligar um banco real, precisas da tua própria aplicação Enable Banking, que é gratuita. Demora poucos minutos, e também podes fazê-lo mais tarde."
         }
       },
       "connect": {

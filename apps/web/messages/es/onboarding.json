@@ -55,7 +55,7 @@
         },
         "credentialRequired": {
           "title": "Conectar un banco requiere una configuración rápida y única",
-          "body": "Antes de poder conectar un banco real, añade tu propia clave de Enable Banking desde Ajustes. Puedes hacerlo cuando quieras después de terminar la configuración. Por ahora, añade una cuenta manualmente arriba o salta este paso y conéctalo más tarde."
+          "body": "Para vincular un banco real necesitas tu propia aplicación de Enable Banking, que es gratuita. Lleva unos minutos, y también puedes hacerlo más tarde."
         }
       },
       "connect": {

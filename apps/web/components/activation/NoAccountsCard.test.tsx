@@ -21,6 +21,11 @@ const h = vi.hoisted(() => ({
   importAvailable: true,
   viewer: false,
   addModal: null as null | { onAddSyncAccountClick: () => void },
+  credentialRequired: false,
+  credentialEnabled: undefined as boolean | undefined,
+  simplefin: false,
+  instanceKnown: true,
+  wizard: null as null | { onChooseBank: () => void },
 }));
 
 vi.mock("@/lib/api/account/useAccounts", () => ({ default: () => h.accounts }));
@@ -37,6 +42,20 @@ vi.mock("@/components/account/AccountCreateSyncModal", () => ({
 vi.mock("@/components/account/AccountCreateOfflineModal", () => ({
   default: (props: Open) => (props.isOpen ? <div data-testid="manual-account" /> : null),
 }));
+vi.mock("@/lib/api/user/useBankLinkCredential", () => ({
+  default: ({ enabled }: { enabled?: boolean } = {}) => {
+    h.credentialEnabled = enabled;
+    return { credentialRequired: h.credentialRequired };
+  },
+}));
+vi.mock("@/lib/api/instance/useInstance", () => ({ useFeature: () => true, useInstanceKnown: () => h.instanceKnown }));
+vi.mock("@/components/settings/Connections/SimplefinConnectButton", () => ({ useSimplefinAvailable: () => h.simplefin }));
+vi.mock("@/components/settings/BankProvider/EnableBankingSetupWizard", () => ({
+  default: (props: Open & { onChooseBank: () => void }) => {
+    h.wizard = props;
+    return props.open ? <div data-testid="setup-wizard" /> : null;
+  },
+}));
 vi.mock("@/components/account/StatementImportFlow", () => ({
   useStatementImportAvailable: () => h.importAvailable,
   default: (props: Open) => (props.open ? <div data-testid="statement-import" /> : null),
@@ -48,6 +67,11 @@ afterEach(() => {
   h.importAvailable = true;
   h.viewer = false;
   h.addModal = null;
+  h.credentialRequired = false;
+  h.credentialEnabled = undefined;
+  h.simplefin = false;
+  h.instanceKnown = true;
+  h.wizard = null;
 });
 
 function renderCard() {
@@ -93,6 +117,55 @@ test("each option opens the flow the app already has", async () => {
 
   await userEvent.click(option(copy.manual));
   screen.getByTestId("manual-account");
+});
+
+test("without a key, Connect a bank opens the setup wizard, which goes on to the bank list", async () => {
+  h.credentialRequired = true;
+  renderCard();
+
+  await userEvent.click(option(copy.connect));
+  screen.getByTestId("setup-wizard");
+  assert.equal(screen.queryByTestId("add-account"), null);
+  act(() => h.wizard!.onChooseBank());
+  screen.getByTestId("connect-bank");
+});
+
+test("without a key on a server that also offers SimpleFIN, Connect a bank opens the add-account dialog", async () => {
+  h.credentialRequired = true;
+  h.simplefin = true;
+  renderCard();
+
+  await userEvent.click(option(copy.connect));
+  screen.getByTestId("add-account");
+  assert.equal(screen.queryByTestId("setup-wizard"), null);
+});
+
+test("before the server has said which bank providers it has, Connect a bank waits for the answer", async () => {
+  h.credentialRequired = true;
+  h.instanceKnown = false;
+  const view = renderCard();
+
+  await userEvent.click(option(copy.connect));
+  assert.equal(screen.queryByTestId("setup-wizard"), null);
+  assert.equal(screen.queryByTestId("add-account"), null);
+
+  h.instanceKnown = true;
+  view.rerender(
+    <NextIntlClientProvider locale="en" messages={homeMessages}>
+      <NoAccountsCard />
+    </NextIntlClientProvider>,
+  );
+  screen.getByTestId("setup-wizard");
+});
+
+test("the key is asked about only while the card shows", () => {
+  renderCard();
+  assert.equal(h.credentialEnabled, true);
+  cleanup();
+
+  h.accounts = { data: { accounts: [{ accountKey: 1 }] }, isSuccess: true };
+  renderCard();
+  assert.equal(h.credentialEnabled, false);
 });
 
 test("an import under way stays open when its new account takes the card away", async () => {

@@ -2621,9 +2621,9 @@
   "transaction": "Transacción",
   "transaction-hidden": "Oculta",
   "bankProviderCredentialRequired": {
-    "title": "Añade primero tu clave de Enable Banking",
-    "body": "Para conectar un banco ahora hace falta tu propio ID de aplicación y clave de Enable Banking. Añádelos en Ajustes y vuelve después aquí.",
-    "cta": "Ir a los ajustes del proveedor bancario",
+    "title": "Configura primero la sincronización bancaria",
+    "body": "Para vincular un banco necesitas tu propia aplicación de Enable Banking, que es gratuita. La configuración lleva unos minutos.",
+    "cta": "Configurar la sincronización bancaria",
     "sharedUnavailable": "La conexión bancaria compartida de este servidor solo sirve a un hogar, así que el tuyo necesita su propia clave."
   },
   "faq": {
@@ -2708,33 +2708,21 @@
     "continueSetup": "Continuar la configuración",
     "pendingWaiting": "Hay un certificado esperando el ID de la aplicación hasta el {date}.",
     "generated": {
-      "title": "Crea tu clave de Enable Banking",
-      "intro": "WonderMoney crea la clave y la guarda cifrada en este servidor; nunca la ves. Registra su certificado en Enable Banking y luego pega aquí el ID de la aplicación.",
-      "step1Title": "1. Obtén el certificado",
       "create": "Crear certificado",
       "recreate": "Crear un certificado nuevo",
-      "pendingNotice": "Ya hay un certificado esperando hasta el {date}. Si ya lo registraste, ve al paso 3. Un certificado nuevo lo sustituye.",
       "download": "Descargar certificado",
       "copyCertificate": "Copiar certificado",
-      "step2Title": "2. Registra la aplicación en Enable Banking",
-      "step2Intro": "En el Control Panel de Enable Banking, añade una aplicación nueva con estos valores. En la generación de la clave, elige \"Generate outside the browser and import public certificate\" y pega el certificado.",
-      "fieldEnvironment": "Entorno",
-      "valueProduction": "Production",
       "fieldName": "Nombre de la aplicación",
       "fieldDescription": "Descripción",
       "fieldRedirectUrl": "URL de redirección",
       "fieldPrivacyUrl": "URL de privacidad",
       "fieldTermsUrl": "URL de los términos",
       "copyValue": "Copiar {field}",
-      "activateHint": "Después de registrarla, elige \"Activate by linking accounts\" y vincula una de tus propias cuentas bancarias.",
-      "step3Title": "3. Pega el ID de la aplicación",
       "applicationIdPlaceholder": "p. ej. 6b1b3c2a-4e9d-4f2a-9c1b-1234567890ab",
       "activate": "Activar",
       "totp": "Código del autenticador",
-      "totpHint": "Solo es necesario si usas la autenticación en dos pasos.",
       "copied": "Copiado.",
       "copyFailed": "No se pudo copiar. Selecciona el texto y cópialo.",
-      "toastActivated": "Clave de Enable Banking activada.",
       "errorApplicationNotFound": "Enable Banking no reconoce este ID de aplicación con esta clave. Revisa el ID, que la aplicación se registró con este certificado y que el reloj de este servidor está en hora.",
       "errorRefused": "Enable Banking rechazó esta clave. Vuelve a intentarlo más tarde o registra la aplicación de nuevo.",
       "errorSandbox": "Esta es una aplicación Sandbox, que no llega a ningún banco real. Registra una aplicación nueva con el entorno Production.",
@@ -2744,6 +2732,54 @@
       "errorInvalidTotp": "Ese código del autenticador no es válido.",
       "errorSessionNotFresh": "Por seguridad, vuelve a iniciar sesión antes de configurar tu clave.",
       "errorGeneric": "Algo salió mal. Inténtalo de nuevo."
+    },
+    "wizard": {
+      "title": "Configurar la sincronización bancaria",
+      "progress": "Paso {current} de {total}",
+      "guide": "Guía paso a paso",
+      "back": "Atrás",
+      "next": "Siguiente",
+      "signIn": {
+        "title": "Iniciar sesión en Enable Banking",
+        "body": "Enable Banking es gratis. Introduce tu email en su página de inicio de sesión y abre el enlace que te envía. No hay contraseña.",
+        "open": "Abrir Enable Banking"
+      },
+      "create": {
+        "title": "Crear la aplicación",
+        "body": "En el Control Panel, abre Applications y añade una aplicación nueva con estos valores.",
+        "environment": "Environment: Production",
+        "environmentWhy": "No Sandbox. Una aplicación Sandbox nunca llega a un banco real.",
+        "urlsRequired": "Production necesita las dos URL, aunque el formulario no las marque como obligatorias.",
+        "certificate": "Certificado público",
+        "certificateHint": "Elige \"Generate outside the browser and import public certificate\" y pega este certificado.",
+        "waiting": "Hay un certificado esperando hasta el {date}. Si aún no lo has registrado, crea uno nuevo.",
+        "haveKey": "Ya tengo una clave"
+      },
+      "activate": {
+        "title": "Activar la aplicación",
+        "body": "Cuando la envíes, la página de la aplicación muestra dos botones.",
+        "link": "Activate by linking accounts",
+        "linkHint": "Elige este y vincula una de tus cuentas bancarias.",
+        "request": "Request activation",
+        "requestHint": "Sáltalo: es para empresas y exige verificar la empresa."
+      },
+      "applicationId": {
+        "title": "Pegar el ID de la aplicación",
+        "label": "ID de la aplicación",
+        "hint": "Aparece en la parte superior de la página de la aplicación.",
+        "checking": "Comprobando con Enable Banking…",
+        "revisit": "Ir al paso {step}: {title}"
+      },
+      "done": {
+        "title": "La sincronización bancaria está lista",
+        "body": "Tu aplicación de Enable Banking está activa. Elige tu banco para vincular tu primera cuenta.",
+        "chooseBank": "Elegir tu banco"
+      },
+      "signInAgain": {
+        "title": "Vuelve a iniciar sesión primero",
+        "body": "Por seguridad, configurar la sincronización bancaria requiere un inicio de sesión reciente. Volverás aquí enseguida.",
+        "action": "Volver a iniciar sesión"
+      }
     }
   },
   "emailVerification": {

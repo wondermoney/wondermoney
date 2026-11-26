@@ -4,6 +4,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import AccountAddSyncModal from "@/components/account/AccountCreateSyncModal";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -24,9 +25,10 @@ import useEnableBankingCredential, {
 } from "@/lib/api/user/useEnableBankingCredential";
 import { useProfileField } from "@/lib/api/user/useProfile";
 import { useRateLimitToast } from "@/lib/api/useRateLimitToast";
+import { useIsHouseholdViewer } from "@/lib/household/useIsHouseholdViewer";
 
-import EnableBankingGeneratedKeyDialog from "./EnableBankingGeneratedKeyDialog";
 import EnableBankingKeySetupDialog from "./EnableBankingKeySetupDialog";
+import EnableBankingSetupWizard from "./EnableBankingSetupWizard";
 
 const apiMessage = (error: unknown): string | undefined =>
   (error as EnableBankingCredentialApiError)?.response?.data?.message;
@@ -82,6 +84,9 @@ export default function EnableBankingKeySettings() {
   );
   const deleteCredential = useDeleteEnableBankingCredential();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const isViewer = useIsHouseholdViewer();
+  const [bankListOpen, setBankListOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -168,12 +173,15 @@ export default function EnableBankingKeySettings() {
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2">
-        <EnableBankingGeneratedKeyDialog
-          triggerLabel={
-            pendingExpiresAt ? t("continueSetup") : t("createKeyCta")
-          }
-          pendingExpiresAt={pendingExpiresAt}
-        />
+        {/* A viewer cannot link a bank, so the setup that leads to one is not offered. */}
+        {isViewer ? null : (
+          <Button
+            className="h-9 rounded-md px-3 md:h-10 md:px-4 md:py-2"
+            onClick={() => setWizardOpen(true)}
+          >
+            {pendingExpiresAt ? t("continueSetup") : t("createKeyCta")}
+          </Button>
+        )}
         <EnableBankingKeySetupDialog
           triggerLabel={hasKey ? t("updateKey") : t("haveKeyCta")}
           isUpdate={hasKey}
@@ -185,6 +193,13 @@ export default function EnableBankingKeySettings() {
           </Button>
         )}
       </div>
+
+      <EnableBankingSetupWizard
+        open={wizardOpen}
+        onOpenChange={setWizardOpen}
+        onChooseBank={() => setBankListOpen(true)}
+      />
+      <AccountAddSyncModal isOpen={bankListOpen} setOpen={setBankListOpen} />
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
