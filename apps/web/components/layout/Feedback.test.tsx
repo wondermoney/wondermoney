@@ -201,3 +201,29 @@ test("offers no form on an instance that cannot email feedback, even with analyt
   );
   assert.equal(shareButton() === null, true);
 });
+
+test("reopening the panel straight after closing it keeps what was typed", async () => {
+  const user = userEvent.setup();
+  renderFeedback(queryClientWithInstance(instanceFeatures({ feedback: true })));
+  await user.click(shareButton()!);
+  await user.click(
+    await screen.findByRole("button", { name: enMessages["feedback-bug"] }),
+  );
+  await user.type(
+    screen.getByPlaceholderText(enMessages["feedback-placeholder"]),
+    "Half a thought",
+  );
+  await user.keyboard("{Escape}");
+  await user.click(shareButton()!);
+
+  // Past the close animation's reset, which the reopen cancelled.
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  assert.equal(
+    (
+      (await screen.findByPlaceholderText(
+        enMessages["feedback-placeholder"],
+      )) as HTMLTextAreaElement
+    ).value,
+    "Half a thought",
+  );
+});
