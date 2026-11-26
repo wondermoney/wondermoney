@@ -3,13 +3,16 @@
  * Layout.astro), the website (the homepage) and the tool pages' graph (`buildToolStructuredData`).
  *
  * Structured data states only what the page itself shows: the visible title, the dek, the
- * breadcrumb trail, and for the data-snapshot tools the source and date the page prints. No
- * ratings, prices or FAQ entries the page does not carry (search engines penalise that).
+ * breadcrumb trail, the FAQ the page prints (`buildFaqPageSchema`), the app's stores and price
+ * as the home page's FAQ gives them, and for the data-snapshot tools the source and date the page
+ * prints. No ratings, prices or FAQ entries the page does not carry (search engines penalise that).
  */
+import type { FaqEntry } from "./faq"
 import type { Lang } from "./i18nLocale"
 import { ogImageFor, toolOgCard } from "./og/ogImages"
 import { toOgLocale } from "./ogLocale"
 import { toLocalizedPath, toToolsHubPath, type ToolRouteId } from "./routes"
+import { APP_STORE_URL, PLAY_STORE_URL, WEB_APP_URL } from "./storeLinks"
 import { getToolCatalogEntry } from "./toolsCatalog"
 import { getTranslations } from "./translations"
 import { DATASET_TOOL_ROUTE_IDS, loadToolDatasets, type DatasetToolRouteId } from "./toolDatasets"
@@ -55,6 +58,43 @@ export function buildWebSiteSchema(locale: Lang): JsonLd {
 		url: SITE_URL,
 		inLanguage: inLanguage(locale),
 		publisher: { "@id": ORGANIZATION_ID },
+	}
+}
+
+/** A page's FAQ as `FAQPage`: the entries it renders, question and answer text as printed. */
+export function buildFaqPageSchema(entries: ReadonlyArray<FaqEntry>): JsonLd {
+	return {
+		"@context": "https://schema.org",
+		"@type": "FAQPage",
+		mainEntity: entries.map(({ question, answer }) => ({
+			"@type": "Question",
+			name: question,
+			acceptedAnswer: { "@type": "Answer", text: answer },
+		})),
+	}
+}
+
+/**
+ * WonderMoney itself, on the home page: free (the FAQ's "Is WonderMoney free?"), on the web,
+ * iOS and Android, with the store links the FAQ's app question shows.
+ */
+export function buildSoftwareApplicationSchema(locale: Lang): JsonLd {
+	return {
+		"@context": "https://schema.org",
+		"@type": "SoftwareApplication",
+		name: "WonderMoney",
+		url: WEB_APP_URL,
+		inLanguage: inLanguage(locale),
+		applicationCategory: "FinanceApplication",
+		operatingSystem: "Web, iOS, Android",
+		isAccessibleForFree: true,
+		offers: {
+			"@type": "Offer",
+			price: "0",
+			priceCurrency: "EUR",
+		},
+		downloadUrl: [APP_STORE_URL, PLAY_STORE_URL],
+		publisher: ORGANIZATION_REF,
 	}
 }
 

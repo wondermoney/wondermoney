@@ -1,5 +1,6 @@
 import { readConsentDecision } from "./consent";
 import { getLandingSource } from "./landingSource";
+import { consentedReferrerClass, forgetReferrerClass } from "./referrerClass";
 
 /**
  * Same project as the app (PostHog project 3621, EU region), so the site's
@@ -62,6 +63,7 @@ export function applyPostHogConsent(consent: { analytics: boolean }): void {
     // still queued so it cannot be sent later.
     pending.length = 0;
     client?.opt_out_capturing();
+    forgetReferrerClass();
     return;
   }
 
@@ -93,11 +95,17 @@ export function applyPostHogConsent(consent: { analytics: boolean }): void {
         // The tool or list page's route id on every event it sends, the automatic
         // page view included: a page's visits, uses and next-step clicks group by it,
         // whatever the locale's slug.
+        // Where the visit came from, as a coarse class (`referrerClass.ts`), on every event of
+        // every page, read with the consent at that moment. PostHog's own `$referrer`,
+        // `$referring_domain` and `utm_*` properties are left as they were.
         // The URL's fragment is dropped: a tool's share link carries the visitor's inputs there
         // (the electricity comparator's bill and consumption), and an anchor says nothing useful.
         before_send: (event) => {
           const source = getLandingSource();
           if (event && source) event.properties.landing_source = source;
+          const consented = readConsentDecision(window.localStorage).purposes.analytics;
+          const referrerClass = consented ? consentedReferrerClass() : undefined;
+          if (event && referrerClass) event.properties.referrer_class = referrerClass;
           const url = event?.properties.$current_url;
           if (typeof url === "string" && url.includes("#")) event!.properties.$current_url = url.slice(0, url.indexOf("#"));
           return event;

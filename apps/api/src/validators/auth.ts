@@ -1,3 +1,4 @@
+import { ANALYTICS_REFERRER_CLASSES } from '@wondermoney/shared';
 import { z } from 'zod';
 
 import { SupportedLanguages } from '@entity/Appuser';
@@ -15,11 +16,19 @@ export type SignupRouteLocale = (typeof SIGNUP_ROUTE_LOCALES)[number];
 export const LANDING_SOURCE_PATTERN = /^[a-z][A-Za-z0-9]{1,63}$/u;
 const landingSourceSchema = z.string().regex(LANDING_SOURCE_PATTERN).optional().catch(undefined);
 
+/**
+ * Where the visitor came to the website from, as one of the catalogue's coarse classes
+ * (`ai_assistant`, `search`, `social`, `direct`, `other`), never the referrer or a campaign value.
+ * Sent under the same consent as the landing source; any other value is dropped.
+ */
+const referrerClassSchema = z.enum(ANALYTICS_REFERRER_CLASSES).optional().catch(undefined);
+
 export const authCallbackRequestSchema = z.object({
   body: z.object({
     inviteToken: z.string().max(200).optional(),
     landingSource: landingSourceSchema,
     locale: z.enum(SIGNUP_ROUTE_LOCALES).default('en'),
+    referrerClass: referrerClassSchema,
   }),
 });
 

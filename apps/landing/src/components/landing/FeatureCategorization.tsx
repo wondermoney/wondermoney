@@ -7,6 +7,7 @@ import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import TransactionsPreview from "@/components/homepage/previews/TransactionsPreview";
@@ -115,6 +116,8 @@ function FeatureCategorizationContent({ locale }: { locale: Lang }) {
 				]}
 				reverse
 			/>
+
+			<FeatureFaq routeId="featureCategorization" />
 
 			<TrustStripInline />
 

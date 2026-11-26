@@ -110,6 +110,17 @@ describe('auth callback signup', () => {
     expect(response.json).toHaveBeenCalledWith({ appuserKey: 42, method: 'email', outcome: 'signup' });
   });
 
+  it('hands the consented landing source and referrer class to the signup record', async () => {
+    mocked.zParse.mockResolvedValue({ body: { landingSource: 'toolMortgage', locale: 'pt', referrerClass: 'ai_assistant' } });
+
+    await authCallback(
+      { authUser: { session: { id: 'session-signup' }, user: { email: appuser.emailAddress, id: externalUserId } } } as Parameters<typeof authCallback>[0],
+      makeResponse(),
+    );
+
+    expect(mocked.recordSignup).toHaveBeenCalledWith(expect.objectContaining({ landingSource: 'toolMortgage', referrerClass: 'ai_assistant' }));
+  });
+
   describe('with admin groups set on the identity provider', () => {
     beforeEach(() => {
       vi.stubEnv('OIDC_ISSUER', 'https://id.example.com');

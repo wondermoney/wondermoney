@@ -1,0 +1,64 @@
+---
+/**
+ * The home page's FAQ: native disclosures, rendered on the server, so every answer is in the
+ * page a crawler or an assistant reads, and one opens at a time (`name`). `items` is
+ * `homepageFaq(locale)`, the list the page's FAQPage JSON-LD is built from too.
+ */
+import { ChevronDown } from "lucide-react";
+import type { FaqEntry } from "@/lib/faq";
+import type { Lang } from "@/lib/i18nLocale";
+import { getTranslations } from "@/lib/translations";
+
+interface Props {
+  locale: Lang;
+  items: ReadonlyArray<FaqEntry>;
+}
+
+const { locale, items } = Astro.props;
+const t = getTranslations(locale);
+---
+
+<section class="border-t border-border bg-background" aria-labelledby="homepage-faq-title">
+  <div class="mx-auto grid max-w-7xl gap-12 px-6 py-24 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:py-32">
+    <div class="min-w-0 lg:col-span-5">
+      <h2
+        id="homepage-faq-title"
+        class="text-4xl font-semibold leading-[1.08] tracking-[-0.02em] text-foreground sm:text-5xl lg:text-[3.25rem]"
+      >
+        {t("homepage.faq.title")}
+      </h2>
+      <p class="mt-6 text-lg leading-8 text-muted-foreground">{t("homepage.faq.subtitle")}</p>
+    </div>
+    <div class="w-full min-w-0 border-t border-border lg:col-span-6 lg:col-start-7">
+      {items.map((item) => (
+        <details name="homepage-faq" class="group border-b border-border">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm py-3.5 text-left text-base font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+            {item.question}
+            <ChevronDown
+              className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none"
+              aria-hidden="true"
+            />
+          </summary>
+          <div class="max-w-2xl pb-4 text-base leading-7 text-muted-foreground">
+            <p>{item.answer}</p>
+            {item.links && (
+              <ul class="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+                {item.links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      rel="noopener"
+                      class="rounded-sm text-sm font-medium text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>

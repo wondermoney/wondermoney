@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextRequest, NextResponse } from "next/server";
 
-import { LANDING_SOURCE_PARAM } from "@/lib/analytics/landing-source";
+import { LANDING_SOURCE_PARAM, REFERRER_CLASS_PARAM } from "@/lib/analytics/landing-source";
 import { SIGNUP_COMPLETION_QUERY_PARAMS } from "@/lib/analytics/signup";
 import api from "@/lib/api/api";
 import { getServerApiUrl } from "@/lib/api/server-api-url";
@@ -102,6 +102,10 @@ async function completeAuth(request: NextRequest) {
   // with the app's analytics consent; the API drops any value that is not a route id.
   const landingSource =
     request.nextUrl.searchParams.get(LANDING_SOURCE_PARAM) || undefined;
+  // Where the visitor came to the website from, under the same consent; the API keeps only a
+  // known class.
+  const referrerClass =
+    request.nextUrl.searchParams.get(REFERRER_CLASS_PARAM) || undefined;
 
   let session: BetterAuthSession | null;
   try {
@@ -125,7 +129,7 @@ async function completeAuth(request: NextRequest) {
   try {
     const { data: callbackResult } = await api.post<AuthCallbackResponse>(
       "/v1/auth/callback",
-      { inviteToken, landingSource, locale },
+      { inviteToken, landingSource, locale, referrerClass },
       {
         baseURL: getServerApiUrl(),
         // The API refuses a cookie-authenticated POST without an allowed

@@ -7,6 +7,7 @@ import { pushGtmEvent, getPageType } from "@/lib/gtm";
 import type { Lang } from "@/lib/i18nLocale";
 import { ReactTranslationsProvider } from "@/lib/reactTranslations";
 import TrustStripInline from "@/components/landing/sections/TrustStripInline";
+import FeatureFaq from "@/components/landing/sections/FeatureFaq";
 import RelatedFeatures from "@/components/landing/sections/RelatedFeatures";
 import FeatureExplainer from "@/components/landing/sections/FeatureExplainer";
 import { CTA_URL } from "@/hooks/useCtaUrl";
@@ -129,6 +130,8 @@ function FeaturePrivacyContent({ locale }: { locale: Lang }) {
 				]}
 				tone="muted"
 			/>
+
+			<FeatureFaq routeId="featurePrivacy" />
 
 			<TrustStripInline />
 

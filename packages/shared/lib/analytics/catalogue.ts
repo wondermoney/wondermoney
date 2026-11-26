@@ -41,6 +41,17 @@ export function analyticsImportFormat(value: unknown): AnalyticsImportFormat | u
 
 const BANK_PROVIDERS = ['enable_banking', 'simplefin'] as const;
 
+/**
+ * Where a visitor to the wonder.money website came from, in five coarse classes: an AI assistant
+ * (ChatGPT, Perplexity, Gemini, Copilot, Claude), a search engine, a social network, no referrer
+ * at all, or anything else. The website classifies the referrer and `utm_source` itself
+ * (`apps/landing/src/lib/referrerClass.ts`); neither the referrer nor the campaign values travel
+ * further (`docs/landing-attribution.md`).
+ */
+export const ANALYTICS_REFERRER_CLASSES = ['ai_assistant', 'search', 'social', 'direct', 'other'] as const;
+
+export type AnalyticsReferrerClass = (typeof ANALYTICS_REFERRER_CLASSES)[number];
+
 const PLATFORMS = ['web', 'mobile', 'api'] as const;
 
 /** The steps of web's first-run onboarding (`lib/onboarding/first-run/types.ts` in the web app). */
@@ -184,6 +195,13 @@ export const ANALYTICS_EVENTS = {
         pattern: /^[a-z][A-Za-z0-9]{1,63}$/u,
         description:
           "The route id of the website's free tool or resource list the signup came from, sent only with analytics consent on both the website and the app (`docs/landing-attribution.md`).",
+        optional: true,
+      },
+      referrer_class: {
+        type: 'enum',
+        values: ANALYTICS_REFERRER_CLASSES,
+        description:
+          'Where the visitor came to the website from before signing up (an AI assistant, search, social, direct or other), sent only with analytics consent on both the website and the app (`docs/landing-attribution.md`).',
         optional: true,
       },
     },
