@@ -50,7 +50,7 @@ database:
   existingSecret: wondermoney-db
 ```
 
-Or give a connection string in `database.url` (add `?sslmode=require` for TLS), or one stored in your Secret with `database.existingSecretUrlKey`. The chart refuses to install with no database at all.
+Or give a connection string in `database.url` (add `?sslmode=require` for TLS), or one stored in your Secret with `database.existingSecretUrlKey`. The chart refuses to install with no database at all. A connection string reaches the API and the worker as `DATABASE_URL`: don't add `DB_*` settings in `extraEnv` or `existingSecret`, or they refuse to start.
 
 ## One hostname
 

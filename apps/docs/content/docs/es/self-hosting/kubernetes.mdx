@@ -50,7 +50,7 @@ database:
   existingSecret: wondermoney-db
 ```
 
-O da una cadena de conexión en `database.url` (añade `?sslmode=require` para TLS), o una guardada en tu Secret con `database.existingSecretUrlKey`. El chart se niega a instalar sin ninguna base de datos.
+O da una cadena de conexión en `database.url` (añade `?sslmode=require` para TLS), o una guardada en tu Secret con `database.existingSecretUrlKey`. El chart se niega a instalar sin ninguna base de datos. Una cadena de conexión llega a la API y al worker como `DATABASE_URL`: no añadas ajustes `DB_*` en `extraEnv` o `existingSecret`, o se niegan a arrancar.
 
 ## Un solo nombre de host
 
