@@ -27,6 +27,7 @@ WITH
       countIf(distinct_id IN (
         SELECT distinct_id FROM events
         WHERE event IN ('first_budget_created', 'first_goal_created')
+          AND timestamp > now() - INTERVAL 90 DAY
       )) AS activations
     FROM signups
     GROUP BY referrer_class
