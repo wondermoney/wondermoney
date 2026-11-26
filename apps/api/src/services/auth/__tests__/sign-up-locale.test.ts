@@ -13,6 +13,8 @@ describe('acceptLanguageLocale', () => {
     ['pt_PT', 'pt'],
     ['es;q=0.9, en;q=0.8', 'es'],
     ['pt-PT,pt;q=0.9,en;q=0.8', 'pt'],
+    ['it-IT', 'it'],
+    ['it-CH,it;q=0.9', 'it'],
   ])('reads %s as %s', (header, locale) => {
     expect(acceptLanguageLocale(header)).toBe(locale);
   });

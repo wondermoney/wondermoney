@@ -21,12 +21,12 @@ export type RenderedEmailAdapter = (input: RenderedEmailInput) => Promise<Render
 type FinancialLanguage = SupportedLanguages;
 
 /**
- * The financial emails ship in EN, PT and ES; an account language outside that list reads
+ * The financial emails ship in EN, PT, ES and IT; an account language outside that list reads
  * English. Each renderer keeps three things apart: the copy language (`lang`, which the
  * react-email template and the formatting follow), its `Intl` locale, and the account's own web
  * locale (`link`), which every link into the app carries.
  */
-const COPY_LOCALES = ['en', 'pt', 'es'] as const;
+const COPY_LOCALES = ['en', 'pt', 'es', 'it'] as const;
 type CopyLang = (typeof COPY_LOCALES)[number];
 const languagesFor = (language: FinancialLanguage) => {
   const lang: CopyLang = copyLocale(language, COPY_LOCALES);
@@ -55,6 +55,17 @@ const COPY = {
     comparisonText: 'Comparado con la semana anterior',
     dataContext: 'Según las transacciones disponibles actualmente.',
     noChange: 'sin cambios',
+  },
+  it: {
+    above: 'sopra',
+    below: 'sotto',
+    budgetPressure: {
+      near: { detail: 'Questo mese sei vicino ai limiti del tuo budget.', status: 'Vicino al budget' },
+      over: { detail: 'Questo mese hai superato il budget in una o più categorie.', status: 'Oltre il budget' },
+    },
+    comparisonText: 'Rispetto alla settimana precedente',
+    dataContext: 'In base alle transazioni attualmente disponibili.',
+    noChange: 'nessuna variazione',
   },
   pt: {
     above: 'acima',

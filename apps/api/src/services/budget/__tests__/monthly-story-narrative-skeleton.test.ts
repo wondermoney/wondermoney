@@ -14,7 +14,7 @@ const baseFacts = () => ({
   spendingSubject: '1400',
 });
 
-const LANGUAGES: NarrativeLanguage[] = ['en', 'pt', 'es'];
+const LANGUAGES: NarrativeLanguage[] = ['en', 'pt', 'es', 'it'];
 
 describe('buildNarrativeSkeleton', () => {
   describe.each(LANGUAGES)('language=%s', (language) => {
@@ -53,7 +53,7 @@ describe('buildNarrativeSkeleton', () => {
     it('omits the savings-rate sentence when savingsRateSubject is null (zero income)', () => {
       const facts = { ...baseFacts(), savingsRateBaseline: null, savingsRateSubject: null };
       const skeleton = buildNarrativeSkeleton(facts, null, 'julho de 2026', language);
-      expect(skeleton.sentences.every((s) => !/poupança|savings/i.test(s))).toBe(true);
+      expect(skeleton.sentences.every((s) => !/poupança|ahorro|risparmio|savings/i.test(s))).toBe(true);
     });
   });
 
@@ -93,11 +93,11 @@ describe('buildNarrativeSkeleton', () => {
   // which still occupies a slot per the brief's inherited "zero-score driver" behavior, but
   // that's harmless here since only 2-3 total candidates exist, well under the cap) so
   // savingsRate/netWorth are guaranteed to appear in `sentences`, genuinely asserting their
-  // EN/PT/ES copy rather than relying on it "theoretically" being defined.
+  // EN/PT/ES/IT copy rather than relying on it "theoretically" being defined.
   describe.each(LANGUAGES)('language=%s — isolated low-score drivers actually asserted', (language) => {
-    const savingsRateWord = { en: /savings/i, es: /tasa de ahorro/i, pt: /poupança/i }[language];
-    const netWorthWord = { en: /net worth/i, es: /patrimonio neto/i, pt: /património/i }[language];
-    const monthLabel = { en: 'July 2026', es: 'julio de 2026', pt: 'julho de 2026' }[language];
+    const savingsRateWord = { en: /savings/i, es: /tasa de ahorro/i, it: /tasso di risparmio/i, pt: /poupança/i }[language];
+    const netWorthWord = { en: /net worth/i, es: /patrimonio neto/i, it: /patrimonio netto/i, pt: /património/i }[language];
+    const monthLabel = { en: 'July 2026', es: 'julio de 2026', it: 'luglio 2026', pt: 'julho de 2026' }[language];
 
     it('produces the savings-rate-up sentence in the correct language when savingsRate is the only material change', () => {
       const facts = { ...baseFacts(), savingsRateBaseline: '20.00', savingsRateSubject: '25.00' };

@@ -23,6 +23,7 @@ export enum AppuserAccountType {
 export enum SupportedLanguages {
   EN = 'EN',
   ES = 'ES',
+  IT = 'IT',
   PT = 'PT',
 }
 @Entity({ repository: () => AppuserRepository })

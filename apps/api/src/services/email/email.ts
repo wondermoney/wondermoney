@@ -37,10 +37,10 @@ dotenv.config({ quiet: true });
 
 /**
  * The copy languages of the texts in this file and of the react-email shells they render
- * (`TransactionalEmailLanguage`): English, Portuguese and Spanish. An account language outside
+ * (`TransactionalEmailLanguage`): English, Portuguese, Spanish and Italian. An account language outside
  * this list reads English. Links into the app use the account's own locale (`accountLocale`).
  */
-const COPY_LOCALES = ['en', 'pt', 'es'] as const;
+const COPY_LOCALES = ['en', 'pt', 'es', 'it'] as const;
 const copyLang = (language: LANGUAGE) => copyLocale(language, COPY_LOCALES);
 const appBase = () => FRONTEND_URL.replace(/\/$/u, '');
 const backendBase = () => BACKEND_URL.replace(/\/$/u, '');
@@ -281,6 +281,20 @@ const BANK_RECOVERY_COPY = {
     step2Label: 'Retomar la conexión',
     subject: 'Tu conexión bancaria necesita otro intento',
   },
+  it: {
+    body: [
+      (brand: string) => `La connessione con la tua banca non è stata completata, quindi i tuoi conti in ${brand} potrebbero non essere aggiornati.`,
+      (brand: string) => `Riapri ${brand} e riprova la connessione dall'app. Ci vuole solo un attimo. Se ancora non funziona, rispondi a questa email e ti aiutiamo.`,
+    ],
+    cta: 'Riprova la connessione',
+    heading: 'Completiamo la connessione con la tua banca',
+    step1DetailFallback: "L'ultimo tentativo non è arrivato al collegamento",
+    step1DetailWithBank: (bankName: string) => `Tentativo con ${bankName}`,
+    step1Label: 'Tentativo interrotto',
+    step2Detail: "Conferma di nuovo l'autorizzazione con la tua banca",
+    step2Label: 'Riprendi la connessione',
+    subject: 'La tua connessione bancaria ha bisogno di un nuovo tentativo',
+  },
   pt: {
     body: [
       (brand: string) => `A tua ligação bancária não ficou concluída, por isso as tuas contas podem não estar atualizadas na ${brand}.`,
@@ -345,6 +359,13 @@ const API_TOKEN_EXPIRY_COPY = {
     subject: (brand: string) => `Tu token de API de ${brand} caduca pronto`,
     text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
       `Hola ${name},\n\nEl token de API "${tokenName}" que creaste en ${brand} caduca el ${expiresOn}.\n\nSi un script, una hoja de cálculo o un panel lo usa, crea uno nuevo en Configuración -> Tokens de API antes de esa fecha. El token antiguo deja de funcionar el día que caduca.\n\nSi ya no lo necesitas, puedes revocarlo ahora en el mismo sitio.`,
+  },
+  it: {
+    body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Ciao ${name},<p>Il token API <strong>${tokenName}</strong> che hai creato in ${brand} scade il ${expiresOn}.</p><p>Se lo usa uno script, un foglio di calcolo o una dashboard, creane uno nuovo in Impostazioni → Token API prima di quella data. Il vecchio token smette di funzionare il giorno in cui scade.</p><p>Se non ti serve più, puoi revocarlo subito nello stesso punto.</p>`,
+    subject: (brand: string) => `Il tuo token API di ${brand} scade a breve`,
+    text: (name: string, tokenName: string, expiresOn: string, brand: string) =>
+      `Ciao ${name},\n\nIl token API "${tokenName}" che hai creato in ${brand} scade il ${expiresOn}.\n\nSe lo usa uno script, un foglio di calcolo o una dashboard, creane uno nuovo in Impostazioni -> Token API prima di quella data. Il vecchio token smette di funzionare il giorno in cui scade.\n\nSe non ti serve più, puoi revocarlo subito nello stesso punto.`,
   },
   pt: {
     body: (name: string, tokenName: string, expiresOn: string, brand: string) =>
@@ -550,7 +571,7 @@ function toBankRecoveryOutcome(outcome: RenderedEmailOutcome): BankRecoveryEmail
  * `lifecycle-nudge` shell, which renders an unsubscribe/settings footer — so `unsubscribeUrl` points at
  * a real account-wide opt-out (honest: it turns off optional email, never these transactional sends) and
  * `settingsUrl` at the relevant page. Footer-free transactional templates would need a separate
- * react-email publish (out of scope; noted in the handoff). Copy is EN, PT and ES, selected by
+ * react-email publish (out of scope; noted in the handoff). Copy is EN, PT, ES and IT, selected by
  * `language`. */
 
 /** Minimal user identity every transactional sender needs. */
@@ -627,6 +648,17 @@ const welcomeCopy = (brand: string): Record<(typeof COPY_LOCALES)[number], Trans
     preheader: 'Tu cuenta está lista: así puedes empezar.',
     subject: `Te damos la bienvenida a ${brand} 🎉`,
   },
+  it: {
+    body: [
+      'Grazie per la registrazione: il tuo account è pronto.',
+      `${brand} riunisce conti, budget e investimenti in un unico posto. Collega il tuo primo conto e guarda tutto prendere forma.`,
+      'Hai domande? Rispondi a questa email: la legge una persona vera.',
+    ],
+    ctaLabel: `Apri ${brand}`,
+    heading: `Ti diamo il benvenuto in ${brand}`,
+    preheader: 'Il tuo account è pronto: ecco come iniziare.',
+    subject: `Ti diamo il benvenuto in ${brand} 🎉`,
+  },
   pt: {
     body: [
       'Obrigado por te registares — a tua conta está pronta.',
@@ -672,6 +704,17 @@ const dataExportReadyCopy = (brand: string): Record<(typeof COPY_LOCALES)[number
     heading: 'La exportación de tus datos está lista',
     preheader: 'Descárgala en las próximas 24 horas.',
     subject: `La exportación de tus datos de ${brand} está lista`,
+  },
+  it: {
+    body: [
+      `L'esportazione dei tuoi dati di ${brand} che hai richiesto è pronta.`,
+      'Scaricala da Impostazioni > Privacy entro 24 ore. Dopo, il file viene eliminato e puoi avviare una nuova esportazione.',
+      "Se non hai richiesto tu questa esportazione, cambia la password e controlla i dispositivi collegati al tuo account.",
+    ],
+    ctaLabel: 'Scarica i tuoi dati',
+    heading: "L'esportazione dei tuoi dati è pronta",
+    preheader: 'Scaricala entro 24 ore.',
+    subject: `L'esportazione dei tuoi dati di ${brand} è pronta`,
   },
   pt: {
     body: [

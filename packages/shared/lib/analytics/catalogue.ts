@@ -11,7 +11,7 @@ import type {
 const SIGN_IN_METHODS = ['email', 'google', 'apple', 'oidc', 'other'] as const;
 
 /** `Appuser.language`, as the API stores it. */
-const LOCALES = ['EN', 'PT', 'ES'] as const;
+const LOCALES = ['EN', 'PT', 'ES', 'IT'] as const;
 
 /**
  * The transaction import formats (`IMPORT_FORMATS` in `lib/import/types.ts`; this entry is

@@ -14,7 +14,7 @@ export interface NetWorthDriverInput {
  * so every driver sentence must exist in every language. Never add a driver whose sentence
  * is missing from one. An account in any other language reads English.
  */
-export const NARRATIVE_LANGUAGES = ['en', 'pt', 'es'] as const;
+export const NARRATIVE_LANGUAGES = ['en', 'pt', 'es', 'it'] as const;
 export type NarrativeLanguage = (typeof NARRATIVE_LANGUAGES)[number];
 
 interface ScoredDriver {
@@ -73,6 +73,20 @@ const COPY: Record<
     savingsRateUp: (baseline, subject) => `Tu tasa de ahorro subió del ${baseline}% al ${subject}%.`,
     spendingCheaper: (monthLabel, delta, subjectTotal) => `En ${monthLabel} gastaste ${delta} menos de lo habitual: ${subjectTotal} en total.`,
     spendingMoreExpensive: (monthLabel, delta, subjectTotal) => `En ${monthLabel} gastaste ${delta} más de lo habitual: ${subjectTotal} en total.`,
+  },
+  it: {
+    budgetNear: 'Alcune categorie si sono avvicinate al budget previsto.',
+    budgetOver: 'Alcune categorie hanno superato il budget previsto.',
+    categoriesExplain: (names, plural, direction) => `${names} ${plural ? 'spiegano' : 'spiega'} gran parte ${direction === 'increase' ? "dell'aumento" : 'del calo'}.`,
+    conjunction: ' e ',
+    incomeDown: (delta) => `Le tue entrate sono scese di ${delta} rispetto al solito.`,
+    incomeUp: (delta) => `Le tue entrate sono salite di ${delta} rispetto al solito.`,
+    netWorthDown: (delta) => `Il tuo patrimonio netto è diminuito di ${delta} questo mese.`,
+    netWorthUp: (delta) => `Il tuo patrimonio netto è aumentato di ${delta} questo mese.`,
+    savingsRateDown: (baseline, subject) => `Il tuo tasso di risparmio è sceso da ${baseline}% a ${subject}%.`,
+    savingsRateUp: (baseline, subject) => `Il tuo tasso di risparmio è salito da ${baseline}% a ${subject}%.`,
+    spendingCheaper: (monthLabel, delta, subjectTotal) => `A ${monthLabel} hai speso ${delta} in meno del solito: ${subjectTotal} in totale.`,
+    spendingMoreExpensive: (monthLabel, delta, subjectTotal) => `A ${monthLabel} hai speso ${delta} in più del solito: ${subjectTotal} in totale.`,
   },
   pt: {
     budgetNear: 'Algumas categorias ficaram perto do valor definido no orçamento.',
