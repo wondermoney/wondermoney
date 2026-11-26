@@ -39,13 +39,14 @@ function greetingFor(language: TransactionalEmailLanguage, firstName?: string): 
   const name = firstName?.trim();
   if (language === "pt") return name ? `Olá ${name},` : "Olá,";
   if (language === "es") return name ? `Hola ${name},` : "Hola,";
+  if (language === "it") return name ? `Ciao ${name},` : "Ciao,";
   return name ? `Hi ${name},` : "Hi there,";
 }
 
 /**
  * Brand-consistent layout for TRANSACTIONAL emails (auth, receipts) — no marketing footer,
  * no unsubscribe, no tracking. Shares the WonderMoney visual system with `LifecycleEmailLayout`
- * but is localized (EN/PT/ES) so it can back English auth emails without a Portuguese greeting.
+ * but is localized (EN/PT/ES/IT) so it can back English auth emails without a Portuguese greeting.
  */
 export function TransactionalEmailLayout({
   language,

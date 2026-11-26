@@ -152,10 +152,10 @@ export interface MonthlyStoryInsufficientDataProps {
 
 export type MonthlyStoryProps = MonthlyStoryDataSufficientProps | MonthlyStoryInsufficientDataProps;
 
-export type TransactionalEmailLanguage = "en" | "pt" | "es";
+export type TransactionalEmailLanguage = "en" | "pt" | "es" | "it";
 
 /** The web app's locales: the first segment of every app path. */
-export type AppLocale = "en" | "es" | "pt";
+export type AppLocale = "en" | "es" | "it" | "pt";
 
 /** "New bank connected" confirmation sent after an account sync links a bank. Transactional. */
 export interface AccountConnectedEmailProps {

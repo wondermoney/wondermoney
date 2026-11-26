@@ -98,6 +98,36 @@ export const COPY = {
       "Este correo puede reunir categorías de distintos presupuestos para evitar varias notificaciones el mismo día.",
     ],
   },
+  it: {
+    subject: {
+      empty: "Aggiornamento sui tuoi budget",
+      over: "Alcune categorie sono oltre il previsto",
+      atLimit: "Alcune categorie hanno raggiunto l'importo impostato",
+      near: "Alcune categorie sono vicine all'importo impostato",
+    },
+    preheader: {
+      empty: "Controlla gli importi e le transazioni inclusi nei tuoi budget.",
+      over: "Alcune categorie hanno superato l'importo previsto per questo mese.",
+      atLimit: "Alcune categorie hanno raggiunto l'importo impostato per questo mese.",
+      near: "Alcune categorie sono vicine all'importo impostato per questo mese.",
+    },
+    status: {
+      near: { suffix: "vicino al limite", secondaryLabel: "Ancora disponibile", ariaState: "vicino all'importo impostato" },
+      at_limit: { suffix: "importo impostato raggiunto", secondaryLabel: "Disponibile", ariaState: "importo impostato raggiunto" },
+      over: { suffix: "oltre il previsto", secondaryLabel: "Oltre il previsto", ariaState: "oltre l'importo previsto" },
+    },
+    usedOverPlanned: "Speso / previsto",
+    ariaOf: "di",
+    ariaCategoriesIncluded: (count: number) => `${count} categorie incluse`,
+    heading: "Categorie da controllare nei tuoi budget",
+    intro: (periodLabel: string) => `Questo è il riepilogo aggregato di ${periodLabel}. Mostra le categorie che hanno raggiunto l'80% o il 100% dell'importo impostato.`,
+    ctaLabel: "Vedi i budget",
+    marketingFooterText: (brand: string) => `Ricevi questo riepilogo perché hai attivato gli avvisi sui budget su ${brand}.`,
+    bodyParagraphs: [
+      "Gli importi si basano sulle transazioni attualmente disponibili. Controlla le transazioni incluse in ogni categoria per verificare che il riepilogo corrisponda a quanto ti aspettavi.",
+      "Questa email può riunire categorie di budget diversi per evitare più notifiche nello stesso giorno.",
+    ],
+  },
 } as const satisfies Record<TransactionalEmailLanguage, unknown>;
 
 export function getBudgetThresholdSubject(
