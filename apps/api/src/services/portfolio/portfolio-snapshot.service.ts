@@ -1,3 +1,4 @@
+import type { EntityManager } from '@mikro-orm/postgresql';
 import type { Big as BigType } from 'big.js';
 import { isAfter } from 'date-fns';
 
@@ -21,23 +22,27 @@ import { big, roundDisplay } from '@utils/money';
  * Service for managing portfolio snapshots (daily value records)
  */
 class PortfolioSnapshotService {
-  /** Rebuilds a portfolio's daily snapshots from `fromDate` (default: its first trade) to `toDate` (default: today). */
-  async backfillSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date): Promise<void> {
-    const plan = await this.computeSnapshotsForPortfolio(portfolioId, fromDate, toDate);
+  /**
+   * Rebuilds a portfolio's daily snapshots from `fromDate` (default: its first trade) to `toDate`
+   * (default: today). `em` defaults to the request's; code that runs outside one (a seeder under
+   * the MikroORM CLI, which sets no `DI.em`) passes its own.
+   */
+  async backfillSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date, em: EntityManager = DI.em): Promise<void> {
+    const plan = await this.computeSnapshotsForPortfolio(portfolioId, fromDate, toDate, em);
     if (!plan) return;
     const { endDate, snapshots, startDate } = plan;
 
-    await DI.em.transactional(async (em) => {
-      await em.nativeDelete(PortfolioSnapshot, {
+    await em.transactional(async (tx) => {
+      await tx.nativeDelete(PortfolioSnapshot, {
         portfolioKey: { portfolioKey: portfolioId },
         snapshotDate: { $gte: startDate, $lte: endDate },
       });
 
       for (const snapshot of snapshots) {
-        em.persist(snapshot);
+        tx.persist(snapshot);
       }
 
-      await em.flush();
+      await tx.flush();
     });
   }
 
@@ -45,14 +50,14 @@ class PortfolioSnapshotService {
    * The daily snapshots a backfill would write, without writing them: every day from `fromDate`
    * (default: the first trade) to `toDate` (default: today) with a positive value. Reads stored
    * prices and exchange rates only; it never calls the market-data provider. Null when the range
-   * is empty.
+   * is empty. `em` as for `backfillSnapshotsForPortfolio`.
    */
-  async computeSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date): Promise<null | { endDate: Date; snapshots: PortfolioSnapshot[]; startDate: Date }> {
-    const portfolio = await this.getPortfolio(portfolioId);
+  async computeSnapshotsForPortfolio(portfolioId: number, fromDate?: Date, toDate?: Date, em: EntityManager = DI.em): Promise<null | { endDate: Date; snapshots: PortfolioSnapshot[]; startDate: Date }> {
+    const portfolio = await this.getPortfolio(em, portfolioId);
     const today = startOfUtcDay(new Date());
     const endDate = startOfUtcDay(toDate ?? today);
 
-    const transactions = await DI.em.find(
+    const transactions = await em.find(
       FinancialTransaction,
       {
         deletedAt: undefined,
@@ -69,7 +74,7 @@ class PortfolioSnapshotService {
       return name === 'BUY' || name === 'SELL';
     });
 
-    const stockSplits = await DI.em.find(
+    const stockSplits = await em.find(
       FinancialAssetStockAdjustment,
       {
         adjustmentType: 'SPLIT',
@@ -104,7 +109,7 @@ class PortfolioSnapshotService {
             .filter((assetKey): assetKey is number => assetKey != null),
         ),
       );
-      const pricesByAsset = await this.loadHistoricalPrices(assetKeys, endDate, portfolio.tenantKey.tenantKey);
+      const pricesByAsset = await this.loadHistoricalPrices(em, assetKeys, endDate, portfolio.tenantKey.tenantKey);
       const sameCurrency =
         portfolio.currencyKey.currencyKey === portfolio.portfolioOwnerAppuserKey.currencyKey.currencyKey;
       const exchangeRateCache = new Map<string, Map<string, number>>();
@@ -112,7 +117,7 @@ class PortfolioSnapshotService {
         const cacheKey = `${fromCurrency.currencyKey}:${toCurrency.currencyKey}`;
         let rates = exchangeRateCache.get(cacheKey);
         if (!rates) {
-          rates = await this.loadExchangeRates(endDate, fromCurrency, toCurrency);
+          rates = await this.loadExchangeRates(em, endDate, fromCurrency, toCurrency);
           exchangeRateCache.set(cacheKey, rates);
         }
         return rates;
@@ -281,8 +286,8 @@ class PortfolioSnapshotService {
     return null;
   }
 
-  private async getPortfolio(portfolioId: number): Promise<Portfolio> {
-    const portfolio = await DI.em.findOne(
+  private async getPortfolio(em: EntityManager, portfolioId: number): Promise<Portfolio> {
+    const portfolio = await em.findOne(
       Portfolio,
       { portfolioKey: portfolioId },
       { populate: ['portfolioOwnerAppuserKey.currencyKey', 'currencyKey', 'tenantKey'] },
@@ -301,10 +306,10 @@ class PortfolioSnapshotService {
     return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
   }
 
-  private async loadExchangeRates(toDate: Date, fromCurrency: Currency, toCurrency: Currency) {
+  private async loadExchangeRates(em: EntityManager, toDate: Date, fromCurrency: Currency, toCurrency: Currency) {
     if (fromCurrency.currencyKey === toCurrency.currencyKey) return new Map<string, number>();
 
-    const rates = await DI.em.find(
+    const rates = await em.find(
       ExchangeRate,
       {
         date: { $lte: toDate },
@@ -317,10 +322,10 @@ class PortfolioSnapshotService {
     return new Map(rates.map((rate) => [startOfUtcDay(rate.date).toISOString(), rate.rate]));
   }
 
-  private async loadHistoricalPrices(assetKeys: number[], toDate: Date, tenantKey?: number) {
+  private async loadHistoricalPrices(em: EntityManager, assetKeys: number[], toDate: Date, tenantKey?: number) {
     if (!assetKeys.length) return new Map<number, { date: Date; price: number }[]>();
 
-    const prices = (await sqlQuery(DI.em)
+    const prices = (await sqlQuery(em)
       .selectFrom('financial_asset_price')
       .select(['financial_asset_key', 'date', 'price'])
       .where(anyOf('financial_asset_key', assetKeys))
@@ -330,7 +335,7 @@ class PortfolioSnapshotService {
 
     // The household's overrides replace the market price on their own day. Raw SQL bypasses the
     // tenant filter, so the tenant and soft-delete predicates are explicit.
-    const overrides = tenantKey === undefined ? [] : (await sqlQuery(DI.em)
+    const overrides = tenantKey === undefined ? [] : (await sqlQuery(em)
       .selectFrom('financial_asset_price_override')
       .select(['financial_asset_key', 'date', 'price'])
       .where(anyOf('financial_asset_key', assetKeys))
