@@ -1,0 +1,93 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "wondermoney",
+  "version": "1.0.0",
+  "description": "Ask about your WonderMoney accounts, transactions, budgets, goals and investments. Read-only.",
+  "author": {
+    "name": "Radix Catch, Lda.",
+    "email": "support@wonder.money",
+    "url": "https://wonder.money/en"
+  },
+  "homepage": "https://wonder.money/en",
+  "repository": "https://github.com/wondermoney/wondermoney",
+  "license": "AGPL-3.0",
+  "keywords": ["personal finance", "budgeting", "expense tracking", "net worth", "investments", "open source"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "WonderMoney",
+        "shortDescription": "Ask about your own finances",
+        "longDescription": "WonderMoney is a personal finance app for tracking bank accounts, spending, budgets, savings goals and investments in one place. Connect your WonderMoney account to ask ChatGPT about your own finances in plain language.\n\nWhat ChatGPT can read:\n- Your accounts and their balances, and your net worth: accounts, manual assets and investment portfolios, less loans.\n- Your transactions: search by dates, account, category or amount (up to 100 at a time, with their descriptions), or list the ten largest in a period.\n- Spending by category, money in and out for a period, and total spending per month over the last six months.\n- How your budgets are doing for a period, and this month beside last month.\n- Your savings and debt-payoff goals and their progress.\n- Recurring payments expected in the next 30 days.\n- Your investment portfolios' value and gain or loss this year, and the dividends you have received.\n- The insights WonderMoney shows for a month, such as categories spending faster than usual.\n\nRead-only: every tool only reads. ChatGPT cannot move money, make payments or trades, or create, change or delete anything in WonderMoney, such as transactions, categories, budgets, goals or accounts.\n\nLimits:\n- It sees what you see in WonderMoney: your household's shared accounts and your own private accounts, never another member's private accounts.\n- Figures are as current as your last bank sync or import. Totals are in your base currency.\n- Summaries cover this month, last month, the last 90 days, the year to date or the last 12 months; a transaction search takes any dates.\n- It works with an account on wonder.money. You sign in to WonderMoney and approve access, and you can disconnect ChatGPT at any time under Settings > API tokens.",
+        "developerName": "Radix Catch, Lda.",
+        "category": "Finance",
+        "websiteURL": "https://wonder.money/en",
+        "supportURL": "https://docs.wonder.money/en/docs/troubleshooting/contact-support",
+        "privacyPolicyURL": "https://docs.wonder.money/about/privacy-policy",
+        "termsOfServiceURL": "https://docs.wonder.money/about/terms-of-service",
+        "defaultPrompt": [
+          "Where did my money go this month?",
+          "What bills are coming up in the next 30 days?",
+          "What is my net worth, and what makes it up?"
+        ],
+        "brandColor": "#6044B5",
+        "brandColorDark": "#9C85FC",
+        "composerIcon": "./assets/composer-icon.png",
+        "logo": "./assets/logo.png"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Net worth and what makes it up",
+              "prompt": "What is my net worth, and what makes it up?",
+              "tools_triggered": "get_net_worth_summary",
+              "expected_behavior": "Gives the test account's net worth with its parts (accounts, manual assets, portfolios and loans) in the account's base currency. Nothing in WonderMoney changes."
+            },
+            {
+              "description": "Spending by category for a past month",
+              "prompt": "Where did my money go last month?",
+              "tools_triggered": "get_spending_by_category",
+              "expected_behavior": "Lists last month's spending per category, largest first, in the base currency, and says which categories took the most."
+            },
+            {
+              "description": "Find transactions in one category",
+              "prompt": "Show my grocery transactions from the last 30 days.",
+              "tools_triggered": "list_categories, search_transactions",
+              "expected_behavior": "Finds the groceries category, then lists that category's transactions from the last 30 days, newest first, with date, amount, description and account. If there are none, it says so instead of inventing any."
+            },
+            {
+              "description": "This month's budget beside last month's",
+              "prompt": "Am I spending more than last month against my budget?",
+              "tools_triggered": "compare_budget_periods",
+              "expected_behavior": "Shows budgeted, spent and remaining for this month beside last month and says whether this month is on track."
+            },
+            {
+              "description": "Upcoming recurring payments",
+              "prompt": "What bills are coming up in the next 30 days?",
+              "tools_triggered": "get_recurring_payments_summary",
+              "expected_behavior": "Lists the recurring payments expected in the next 30 days with name, date and expected amount, or says that none are expected."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Moving money. Every WonderMoney tool only reads, so ChatGPT should say it cannot make transfers or payments, and no tool moves money.",
+              "prompt": "Transfer 200 euros from my current account to my savings account."
+            },
+            {
+              "description": "Editing data. No tool creates, changes or deletes anything, so ChatGPT should say it cannot recategorize a transaction and that this is done in the WonderMoney app.",
+              "prompt": "Change the category of my last supermarket purchase to Restaurants."
+            },
+            {
+              "description": "Investment trades. The plugin reads portfolio values but cannot place orders, so ChatGPT should decline to buy or sell anything.",
+              "prompt": "Sell all my shares in my largest holding."
+            }
+          ]
+        },
+        "commerce": false
+      },
+      "publication": {
+        "release_notes": "First release: read-only answers about your WonderMoney accounts, transactions, budgets, goals and investments."
+      }
+    }
+  }
+}

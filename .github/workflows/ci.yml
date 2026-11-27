@@ -578,6 +578,12 @@ jobs:
             echo "::warning::Could not list the releases; skipping the check of the pinned version."
           fi
           pnpm run render:check
+      # The ChatGPT plugin package (integrations/chatgpt-plugin) against its schemas and OpenAI's
+      # submission rules, and its review cases against the read tools, so renaming a tool cannot
+      # leave the listing naming one that is gone. A pull request that changes only the package
+      # reaches outside apps/ and packages/, so it gets the full run and this job.
+      - name: Check the ChatGPT plugin package
+        run: pnpm run chatgpt-plugin:check
       - name: Check the OpenAPI spec is not stale
         run: |
           pnpm run swagger
