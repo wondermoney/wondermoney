@@ -8,10 +8,11 @@ import { AI_PROPOSAL_TOOL_DEFINITIONS } from '@service/ai-tools/ai-proposal-tool
 import { type AiToolContext, executeAiTool } from '@service/ai-tools/ai-tool-types';
 import { AI_TOOL_DEFINITIONS } from '@service/ai-tools/ai-tools.service';
 import { AssistantAuditService } from '@service/assistant/assistant-audit.service';
-import { buildInfo } from '@utils/constants';
+import { buildInfo, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
 
 import { consumeMcpToolCall } from './mcp-rate-limit.service';
+import { mcpServerInfo } from './mcp-server-info';
 import { mcpCredentialKey, type McpRequestIdentity } from './mcp-types';
 
 /**
@@ -31,7 +32,7 @@ import { mcpCredentialKey, type McpRequestIdentity } from './mcp-types';
  */
 export function createMcpServer(identity: McpRequestIdentity): McpServer {
   const { version } = buildInfo();
-  const server = new McpServer({ name: 'wondermoney', version });
+  const server = new McpServer(mcpServerInfo(FRONTEND_URL, version));
   const context: AiToolContext = {
     appuserKey: identity.appuser.appuserKey,
     currency: identity.appuser.currencyKey.code || 'EUR',
