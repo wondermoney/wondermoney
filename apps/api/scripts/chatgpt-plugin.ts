@@ -292,31 +292,41 @@ for (const [serverName, value] of servers) {
 // -- URLs (with --urls) -----------------------------------------------------------------------
 
 if (checkUrls) {
+  /** A fetch that answers the error instead of throwing, and gives up after 15 seconds. */
+  const tryFetch = (url: string, init: RequestInit = {}): Promise<Error | Response> =>
+    fetch(url, { ...init, signal: AbortSignal.timeout(15_000) }).catch((error: unknown) => (error instanceof Error ? error : new Error(String(error))));
+
   const listingUrls = [
     author['url'], plugin['homepage'], plugin['repository'],
     ui['websiteURL'], ui['supportURL'], ui['privacyPolicyURL'], ui['termsOfServiceURL'],
   ].filter((url): url is string => typeof url === 'string');
   for (const url of new Set(listingUrls)) {
-    const response = await fetch(url, { redirect: 'manual' }).catch((error: unknown) => error as Error);
+    const response = await tryFetch(url, { redirect: 'manual' });
     if (response instanceof Error) fail(url, response.message);
     else if (response.status !== 200) fail(url, `answered ${response.status}${response.headers.get('location') ? ` (to ${response.headers.get('location')})` : ''}; it must answer 200`);
     else console.log(`200 ${url}`);
   }
   for (const [serverName, value] of servers) {
+    const where = `mcp.json mcpServers.${serverName}`;
     const url = objectAt(value)['url'];
     if (typeof url !== 'string') continue;
-    const response = await fetch(url, {
+    const response = await tryFetch(url, {
       body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'tools/list' }),
       headers: { Accept: 'application/json, text/event-stream', 'Content-Type': 'application/json' },
       method: 'POST',
     });
-    const metadataUrl = /resource_metadata="([^"]+)"/.exec(response.headers.get('www-authenticate') ?? '')?.[1];
-    if (response.status !== 401 || !metadataUrl) {
-      fail(`mcp.json mcpServers.${serverName}`, `${url} answered ${response.status} without a resource_metadata challenge; is MCP_OAUTH_ENABLED on?`);
+    if (response instanceof Error) {
+      fail(where, `${url}: ${response.message}`);
       continue;
     }
-    const metadata = await fetch(metadataUrl);
-    if (metadata.status !== 200) fail(`mcp.json mcpServers.${serverName}`, `${metadataUrl} answered ${metadata.status}`);
+    const metadataUrl = /resource_metadata="([^"]+)"/.exec(response.headers.get('www-authenticate') ?? '')?.[1];
+    if (response.status !== 401 || !metadataUrl) {
+      fail(where, `${url} answered ${response.status} without a resource_metadata challenge; is MCP_OAUTH_ENABLED on?`);
+      continue;
+    }
+    const metadata = await tryFetch(metadataUrl);
+    if (metadata instanceof Error) fail(where, `${metadataUrl}: ${metadata.message}`);
+    else if (metadata.status !== 200) fail(where, `${metadataUrl} answered ${metadata.status}`);
     else console.log(`401 ${url}, OAuth metadata 200 at ${metadataUrl}`);
   }
 }
