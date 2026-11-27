@@ -1,0 +1,48 @@
+---
+title: WonderMoney 1.13.0
+description: WonderMoney crea tu clave de Enable Banking, ChatGPT puede conectarse solo para leer y las aplicaciones hablan italiano.
+---
+
+[Notas de la versión en GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.13.0)
+
+## Actualizar
+
+- **Cinco migraciones** se aplican cuando arranca la API. Amplían dos comprobaciones (el italiano como idioma y las claves de Enable Banking que esperan su ID de aplicación) y añaden columnas opcionales y tablas nuevas, así que no se reescribe ningún dato. Una copia de seguridad es buena práctica, pero no es obligatoria.
+- **Quita `DATABASE_URL` si también defines `DB_*`.** WonderMoney ahora se niega a arrancar con los dos, cuando antes ignoraba uno. La instalación con Docker Compose siempre define sus propios ajustes `DB_*`, así que, si tu `.env` tiene `DATABASE_URL`, quítalo. Las migraciones ahora solo necesitan los ajustes de la base de datos, no los secretos de la aplicación.
+- **Nuevo y opcional: `MCP_OAUTH_ENABLED`.** Defínelo como `true` en la API y en el worker para que ChatGPT y otros clientes MCP se conecten con OAuth (consulta [Tu instancia](/es/docs/self-hosting/configure#tu-instancia)). El enrutamiento de Docker Compose y de Helm ahora envía `/.well-known/oauth-*` a la API; con otro proxy inverso, enruta también esas rutas a la API (consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)).
+
+## Nuevo
+
+- **WonderMoney crea tu clave de Enable Banking.** Genera la clave y un certificado, tú registras el certificado en Enable Banking y pegas de vuelta solo el ID de la aplicación. Un asistente de configuración en la web te guía en cada paso, con un botón para copiar cada valor. Consulta [Conecta tu primera cuenta bancaria](/es/docs/start-here/connect-first-bank-account).
+- **Conectar ChatGPT.** ChatGPT y otros clientes MCP pueden leer tus datos de WonderMoney con OAuth, en un servidor que lo tenga activado. Autorizas cada conexión con un inicio de sesión reciente y tu código de autenticación, y puedes desconectarla cuando quieras en **Conectados con OAuth**. Consulta [Conectar ChatGPT](/es/docs/settings-security-privacy/connect-ai-client#conectar-chatgpt).
+- **Empezar sin banco.** Si te saltas el paso del banco en la configuración inicial, WonderMoney ofrece **Importar un extracto** o **Añadir una cuenta a mano**, en lugar de un Inicio vacío.
+
+## Mejoras
+
+- **La sincronización bancaria sigue adelante** cuando un banco se niega a enviar el saldo o un historial largo. Tus transacciones llegan igualmente, el saldo se calcula a partir de ellas y la cuenta muestra la fecha en que se calculó. A un banco que rechaza un historial largo se le vuelven a pedir los últimos 89 días.
+- **wonder.money** abre el registro y la demo en el idioma de la página, el mapa de combustibles se abre en Portugal y agrupa las gasolineras cercanas, y los asistentes de IA pueden leer y citar sus páginas con más facilidad.
+
+## Correcciones
+
+- Los miembros del hogar pueden importar extractos a las cuentas compartidas que pueden editar, y las cuentas cerradas ya no aparecen como destino de una importación.
+- Cerrar el panel de comentarios y volver a abrirlo enseguida ya no borra lo que escribiste.
+
+## Seguridad y privacidad
+
+- Los intentos de adivinar tu código de autenticación ahora están limitados en todas las acciones que piden un inicio de sesión reciente.
+- Pegar o quitar una clave de Enable Banking pide un inicio de sesión reciente.
+- Una clave que WonderMoney crea para ti se guarda cifrada y nunca se muestra, se registra en los logs ni se exporta. Una que nunca terminas de configurar caduca a los siete días.
+
+## Aplicación móvil (1.0.7)
+
+- La aplicación está disponible en italiano.
+- Saltarse el paso del banco lleva a una importación o a una cuenta manual, los miembros pueden importar extractos a cuentas compartidas y la importación solo se ofrece cuando el servidor tiene almacenamiento de archivos.
+- Las cuentas sincronizadas sin saldo del banco muestran cuándo se calculó su saldo.
+
+## Traducciones
+
+- **Italiano** en la aplicación web, la aplicación móvil y los mensajes y correos del servidor, con [reglas predefinidas](/es/docs/accounts-transactions/rules#reglas-predefinidas-para-tu-país) para Italia.
+
+## Agradecimientos
+
+- @nip10
