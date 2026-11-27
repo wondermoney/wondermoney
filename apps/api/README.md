@@ -51,6 +51,13 @@ spending cover four complete months; investment history covers a longer holding 
 these examples and their transaction dates. Rerun `demo:seed` after deploying seed changes to
 rebaseline the demo's account balances as well; it leaves other households alone.
 
+App-store and AI-directory reviewers get an account of their own, not the demo:
+`pnpm review:seed -- --email <address>` (or `REVIEW_ACCOUNT_EMAIL`) creates a regular account that
+signs in with email and password, with two-factor off, in a household filled with the same sample
+data. The first run prints a generated password once; keep it in the password manager. Rerun it to
+date the sample data up to today; the password stays unless you pass `--reset-password`.
+`review:seed:dev` does the same from source on a local database.
+
 ## `.env` decides which database you touch
 
 Every `migrate:*` and `seed:*` script connects to whatever `DATABASE_URL`, or else `DB_HOST` /

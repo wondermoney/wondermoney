@@ -42,6 +42,8 @@
     "migrate:prd:pending": "NODE_ENV=production NODE_OPTIONS='--import=tsx' npx mikro-orm migration:pending",
     "operations:recover": "NODE_ENV=production node dist/jobs/recover-background-operations.js",
     "operations:recover:dev": "NODE_ENV=development tsx src/jobs/recover-background-operations.ts",
+    "review:seed": "NODE_ENV=production node dist/database/scripts/seed-review-account.js",
+    "review:seed:dev": "node scripts/assert-local-db.mjs review:seed:dev --opt-in && NODE_ENV=development tsx src/database/scripts/seed-review-account.ts",
     "seed:dev": "node scripts/assert-local-db.mjs seed:dev --opt-in && NODE_ENV=development NODE_OPTIONS='--import=tsx' npx mikro-orm seeder:run",
     "seed:prd": "NODE_ENV=production npx mikro-orm seeder:run",
     "sentry:inject": "sentry-cli sourcemaps inject --org wonder-money --project api ./dist",

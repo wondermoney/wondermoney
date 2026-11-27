@@ -207,7 +207,12 @@ const DEMO_PRICE_DAYS = 400;
 /** Where each demo stock's made-up history starts, near its real price when the fixtures were written. */
 const DEMO_BASE_PRICES: Record<string, number> = { AAPL: 120, CRM: 110, GOOGL: 80, INTC: 23, NVDA: 132, TXN: 170 };
 
-async function ensureDemoStockPrices(em: EntityManager, asOfDate: Date): Promise<void> {
+/**
+ * A made-up price history for each demo stock that has no price at all, so a sample portfolio (the
+ * demo's or the store-review account's) has a value on a server without market data. A stock with
+ * any price, real or not, is left alone.
+ */
+export async function ensureDemoStockPrices(em: EntityManager, asOfDate: Date): Promise<void> {
   const symbols = [...new Set(demoPortfolioTransactionFixtures.map((fixture) => fixture.symbol))].filter(
     (symbol) => !symbol.startsWith('CURRENCY_'),
   );

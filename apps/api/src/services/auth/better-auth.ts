@@ -34,6 +34,7 @@ import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
 import { mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
 import { removePushDevicesForSession } from '@service/push/push-session-cleanup';
+import { createReviewAuthUserPort, type ReviewAuthUserPort } from '@service/review-account/review-auth-user';
 import { accountLocale } from '@utils/account-language';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
@@ -873,6 +874,30 @@ export const revokeMcpOAuthGrant = async (userId: string, clientId: string): Pro
 export const revokeAllMcpOAuthGrants = async (userId: string): Promise<void> => {
   await revokeGrants(userId, null);
 };
+
+/**
+ * The store-review account's better-auth user (`pnpm review:seed`), on better-auth's own pool. A
+ * new password there takes back every OAuth grant, as a password reset does.
+ */
+export const betterAuthReviewUserPort: ReviewAuthUserPort = createReviewAuthUserPort(
+  {
+    transaction: async (run) => {
+      const client = await betterAuthPool.connect();
+      try {
+        await client.query('begin');
+        const result = await run(async <R extends object>(sql: string, params?: unknown[]) => (await client.query<R>(sql, params)).rows);
+        await client.query('commit');
+        return result;
+      } catch (error) {
+        await client.query('rollback');
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
+  { revokeGrants: (userId) => revokeAllMcpOAuthGrants(userId) },
+);
 
 /**
  * Whether `clientId` is a registered OAuth client, checked before a consent is stored for it. The

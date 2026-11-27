@@ -51,7 +51,13 @@ export interface DemoDataRefreshServiceDeps {
   buildPlan?: typeof buildDemoRefreshPlan;
   em: EntityManager;
   logger?: Pick<typeof logger, 'warn'>;
+  /**
+   * Starts the internal id of each sample portfolio transaction, which is unique across the whole
+   * database: another sample household (the store-review account's) needs a prefix of its own.
+   */
+  portfolioInternalIdPrefix?: string;
   resolveIdentity?: typeof resolveDemoRefreshIdentity;
+  /** Whether the household gets the demo's non-login example member; only the demo's does. */
   verifyInvariants?: (
     em: EntityManager,
     asOfDate: Date,
@@ -59,7 +65,10 @@ export interface DemoDataRefreshServiceDeps {
     tenant: Account['tenantKey'],
     affectedPortfolioTransactions: { portfolioName: string }[],
   ) => Promise<void>;
+  withCompanion?: boolean;
 }
+
+const DEMO_PORTFOLIO_INTERNAL_ID_PREFIX = 'DEMO-PORTFOLIO-INTERNAL-';
 
 export class DemoDataRefreshService {
   constructor(private readonly deps: Partial<DemoDataRefreshServiceDeps> = {}) {}
@@ -138,7 +147,7 @@ export class DemoDataRefreshService {
         tenant,
       );
       await tx.flush();
-      await upsertDemoFeatures(tx, appuser, tenant, plan.asOfDate);
+      await upsertDemoFeatures(tx, appuser, tenant, plan.asOfDate, { withCompanion: this.deps.withCompanion ?? true });
       await tx.flush();
     });
 
@@ -200,7 +209,7 @@ export class DemoDataRefreshService {
   }
 
   private buildDemoPortfolioInternalTransactionId(externalTransactionId: string): string {
-    return `DEMO-PORTFOLIO-INTERNAL-${externalTransactionId}`;
+    return `${this.deps.portfolioInternalIdPrefix ?? DEMO_PORTFOLIO_INTERNAL_ID_PREFIX}${externalTransactionId}`;
   }
 
   private async ensureCurrentBudgetTemplateCategories(

@@ -32,7 +32,9 @@ import { demoAccounts } from './demo-fixtures';
 import { demoLoans } from './demo-loans';
 import { demoTransactionPatterns } from './demo-transactions';
 
-/** Shared by the development seed and the daily refresh. Only the demo household is passed in.
+/** Shared by the development seed and the daily refresh. Only a sample household is passed in:
+ * the demo's, or the store-review account's (`withCompanion: false`, so the demo's non-login
+ * example member stays in the demo household).
  * Match fixture names/relations so reruns repair examples without accumulating duplicate rows.
  * Dates derived from transactions move with the daily refresh; valuation dates remain fixed.
  */
@@ -41,6 +43,7 @@ export async function upsertDemoFeatures(
   appuser: Appuser,
   tenant: Tenant,
   asOfDate: Date,
+  options: { withCompanion?: boolean } = {},
 ): Promise<void> {
   const currency = appuser.currencyKey;
   const budget = await em.findOneOrFail(Budget, { appuserKey: appuser, name: demoBudget.name, tenantKey: tenant });
@@ -258,7 +261,7 @@ export async function upsertDemoFeatures(
       { appuserKey: appuser, symbol, tenantKey: tenant },
     );
   }
-  await upsertDemoWorkflows(em, appuser, tenant, asOfDate, goal);
+  await upsertDemoWorkflows(em, appuser, tenant, asOfDate, goal, { withCompanion: options.withCompanion ?? true });
   const accounts = await em.find(Account, { accountOwnerAppuserKey: appuser, tenantKey: tenant });
   for (const account of accounts) {
     account.refreshedAt = asOfDate;
