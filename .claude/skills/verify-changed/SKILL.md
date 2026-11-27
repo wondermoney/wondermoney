@@ -38,7 +38,7 @@ paths (Markdown aside), and runs for those only. `--dry-run` prints the plan.
 |---|---|
 | 1 | `build:lib` when `packages/*` changed, then the tests related to the changed files: `vitest related` (api, web, landing, shared), `jest --findRelatedTests` (mobile, under Node 24 through volta or fnm), react-email's `test` |
 | 2 | `type-check` of touched packages and of those depending on a changed library; ESLint on the changed files (docs: its whole `lint`, which carries the locale-parity checks) |
-| 3 | `leak-check.sh` and gitleaks over the branch's commits; the docs build when `apps/docs` changed; API `openapi --check` (routes, validators, `src/openapi`); swagger regenerated and compared (routes, validators, controllers); `migrate:dev` plus `migrate:dev:check` on a scratch database when migrations or entities changed |
+| 3 | `leak-check.sh` and gitleaks over the branch's commits; the docs build when `apps/docs` changed; API `openapi --check` (routes, validators, `src/openapi`); swagger regenerated and compared (routes, validators, controllers); the ChatGPT plugin package check (`integrations/chatgpt-plugin`, the AI tools, the MCP service); `migrate:dev` plus `migrate:dev:check` on a scratch database when migrations or entities changed |
 
 Every step runs even after a failure; the exit code is 1 when any failed. Tier 3 reads commits,
 so commit before the run that counts.
