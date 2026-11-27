@@ -471,12 +471,16 @@ export const isMcpBearerRequest = (req: Request): boolean =>
  * failure budget uses; off, nothing changes), these skip the backstop: an MCP call with a bearer
  * credential has its own, larger per-address family (`mcpBearer`) besides its per-credential
  * budgets and the failure budget (`mcpAuthFailure`), the token and registration endpoints have
- * better-auth's own limits, and the discovery documents are static.
+ * better-auth's own limits, and the discovery documents and OpenAI's domain-verification token
+ * (`/.well-known/openai-apps-challenge`) are static.
  */
 export const isSharedEgressRequest = (req: Request): boolean =>
   mcpOAuthResourceIfEnabled() !== null && (
     (req.path === '/v1/mcp' && isMcpBearerRequest(req))
     || req.path.startsWith('/.well-known/oauth-')
+    // OpenAI's domain verification for the ChatGPT plugin: fetched from the same shared addresses
+    // as ChatGPT's own calls, and a static string that reads nothing.
+    || req.path === '/.well-known/openai-apps-challenge'
     // Budgeted by better-auth's own OAuth limits instead (services/auth/mcp-oauth.ts).
     || req.path === '/api/auth/oauth2/token'
     || req.path === '/api/auth/oauth2/register'
