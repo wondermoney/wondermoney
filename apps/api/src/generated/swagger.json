@@ -3958,6 +3958,16 @@
         }
       }
     },
+    "/.well-known/openai-apps-challenge": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/v1/net-worth/history": {
       "get": {
         "description": "",
