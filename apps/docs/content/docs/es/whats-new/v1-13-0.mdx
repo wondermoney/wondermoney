@@ -9,7 +9,7 @@ description: WonderMoney crea tu clave de Enable Banking, ChatGPT puede conectar
 
 - **Cinco migraciones** se aplican cuando arranca la API. Amplían dos comprobaciones (el italiano como idioma y las claves de Enable Banking que esperan su ID de aplicación) y añaden columnas opcionales y tablas nuevas, así que no se reescribe ningún dato. Una copia de seguridad es buena práctica, pero no es obligatoria.
 - **Quita `DATABASE_URL` si también defines `DB_*`.** WonderMoney ahora se niega a arrancar con los dos, cuando antes ignoraba uno. La instalación con Docker Compose siempre define sus propios ajustes `DB_*`, así que, si tu `.env` tiene `DATABASE_URL`, quítalo. Las migraciones ahora solo necesitan los ajustes de la base de datos, no los secretos de la aplicación.
-- **Nuevo y opcional: `MCP_OAUTH_ENABLED`.** Defínelo como `true` en la API y en el worker para que ChatGPT y otros clientes MCP se conecten con OAuth (consulta [Tu instancia](/es/docs/self-hosting/configure#tu-instancia)). El enrutamiento de Docker Compose y de Helm ya envía `/.well-known/oauth-*` a la API; con otro proxy inverso, enruta también esas rutas a la API (consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)).
+- **Nuevo y opcional: `MCP_OAUTH_ENABLED`.** Defínelo como `true` en la API y en el worker para que ChatGPT y otros clientes MCP se conecten con OAuth (consulta [Tu instancia](/es/docs/self-hosting/configure#tu-instancia)). El enrutamiento de Docker Compose y de Helm ahora envía `/.well-known/oauth-*` a la API; con otro proxy inverso, enruta también esas rutas a la API (consulta [HTTPS y dominios](/es/docs/self-hosting/https-and-domains)).
 
 ## Nuevo
 
@@ -33,7 +33,7 @@ description: WonderMoney crea tu clave de Enable Banking, ChatGPT puede conectar
 - Pegar o quitar una clave de Enable Banking pide un inicio de sesión reciente.
 - Una clave que WonderMoney crea para ti se guarda cifrada y nunca se muestra, se registra en los logs ni se exporta. Una que nunca terminas de configurar caduca a los siete días.
 
-## Aplicación móvil
+## Aplicación móvil (1.0.7)
 
 - La aplicación está disponible en italiano.
 - Saltarse el paso del banco lleva a una importación o a una cuenta manual, los miembros pueden importar extractos a cuentas compartidas y la importación solo se ofrece cuando el servidor tiene almacenamiento de archivos.

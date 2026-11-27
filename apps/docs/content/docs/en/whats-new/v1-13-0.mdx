@@ -9,7 +9,7 @@ description: WonderMoney creates your Enable Banking key for you, ChatGPT can co
 
 - **Five migrations** apply when the API starts. They widen two checks (Italian as a language, and Enable Banking keys waiting for their application ID) and add nullable columns and new tables, so no data is rewritten. A backup is good practice, not a requirement.
 - **Remove `DATABASE_URL` if you also set `DB_*`.** WonderMoney now refuses to start with both, where it used to ignore one. The Docker Compose install always sets its own `DB_*` settings, so if your `.env` has `DATABASE_URL`, remove it. Migrations now need only the database settings, not the app's secrets.
-- **New, optional: `MCP_OAUTH_ENABLED`.** Set it to `true` on the API and the worker to let ChatGPT and other MCP clients connect with OAuth (see [Your instance](/en/docs/self-hosting/configure#your-instance)). The Docker Compose and Helm routing already send `/.well-known/oauth-*` to the API; with another reverse proxy, route those paths to the API too (see [HTTPS and domains](/en/docs/self-hosting/https-and-domains)).
+- **New, optional: `MCP_OAUTH_ENABLED`.** Set it to `true` on the API and the worker to let ChatGPT and other MCP clients connect with OAuth (see [Your instance](/en/docs/self-hosting/configure#your-instance)). The Docker Compose and Helm routing now send `/.well-known/oauth-*` to the API; with another reverse proxy, route those paths to the API too (see [HTTPS and domains](/en/docs/self-hosting/https-and-domains)).
 
 ## New
 
@@ -33,7 +33,7 @@ description: WonderMoney creates your Enable Banking key for you, ChatGPT can co
 - Pasting or removing an Enable Banking key asks for a recent sign-in.
 - A key WonderMoney creates for you is stored encrypted and is never shown, logged or exported. One you never finish setting up lapses after seven days.
 
-## Mobile app
+## Mobile app (1.0.7)
 
 - The app is available in Italian.
 - Skipping the bank step leads to an import or a manual account, members can import statements into shared accounts, and import is offered only when the server has file storage.

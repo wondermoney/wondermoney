@@ -9,7 +9,7 @@ description: O WonderMoney cria a tua chave da Enable Banking, o ChatGPT pode li
 
 - **Cinco migrações** são aplicadas quando a API arranca. Alargam duas verificações (o italiano como idioma e as chaves da Enable Banking à espera do ID da aplicação) e acrescentam colunas opcionais e tabelas novas, por isso nenhum dado é reescrito. Uma cópia de segurança é boa prática, mas não é obrigatória.
 - **Remove o `DATABASE_URL` se também definires `DB_*`.** O WonderMoney passa a recusar arrancar com os dois, quando antes ignorava um deles. A instalação com Docker Compose define sempre as suas próprias definições `DB_*`, por isso, se o teu `.env` tem `DATABASE_URL`, remove-o. As migrações passam a precisar só das definições da base de dados, e não dos segredos da aplicação.
-- **Nova e opcional: `MCP_OAUTH_ENABLED`.** Define-a como `true` na API e no worker para que o ChatGPT e outros clientes MCP se liguem com OAuth (consulta [A tua instância](/pt/docs/self-hosting/configure#a-tua-instância)). O encaminhamento do Docker Compose e do Helm já envia `/.well-known/oauth-*` para a API; com outro proxy reverso, encaminha também esses caminhos para a API (consulta [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains)).
+- **Nova e opcional: `MCP_OAUTH_ENABLED`.** Define-a como `true` na API e no worker para que o ChatGPT e outros clientes MCP se liguem com OAuth (consulta [A tua instância](/pt/docs/self-hosting/configure#a-tua-instância)). O encaminhamento do Docker Compose e do Helm passa a enviar `/.well-known/oauth-*` para a API; com outro proxy reverso, encaminha também esses caminhos para a API (consulta [HTTPS e domínios](/pt/docs/self-hosting/https-and-domains)).
 
 ## Novo
 
@@ -33,7 +33,7 @@ description: O WonderMoney cria a tua chave da Enable Banking, o ChatGPT pode li
 - Colar ou remover uma chave da Enable Banking pede um início de sessão recente.
 - Uma chave que o WonderMoney cria para ti é guardada cifrada e nunca é mostrada, registada nos logs nem exportada. Uma que nunca acabes de configurar caduca ao fim de sete dias.
 
-## Aplicação móvel
+## Aplicação móvel (1.0.7)
 
 - A aplicação está disponível em italiano.
 - Saltar o passo do banco leva a uma importação ou a uma conta manual, os membros podem importar extratos para contas partilhadas e a importação só é oferecida quando o servidor tem armazenamento de ficheiros.
