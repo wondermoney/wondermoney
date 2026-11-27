@@ -114,14 +114,15 @@ describe('OAuth on the MCP server', () => {
       expect(challenge).toMatch(/^Bearer /);
       const metadataUrl = /resource_metadata="([^"]+)"/.exec(challenge)?.[1];
       expect(metadataUrl).toMatch(/\/\.well-known\/oauth-protected-resource\/v1\/mcp$/);
-      expect(challenge).toContain('scope="mcp:read"');
+      // A client takes its scopes from these hints: with offline_access it asks for a refresh token.
+      expect(challenge).toContain('scope="mcp:read offline_access"');
 
       const metadata = await app().get(new URL(metadataUrl ?? '').pathname).expect(200);
       expect(metadata.body).toMatchObject({
         authorization_servers: [expect.stringMatching(/\/api\/auth$/)],
         bearer_methods_supported: ['header'],
         resource: expect.stringMatching(/\/v1\/mcp$/),
-        scopes_supported: ['mcp:read'],
+        scopes_supported: ['mcp:read', 'offline_access'],
       });
     });
 

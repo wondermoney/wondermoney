@@ -13,7 +13,7 @@ import { type AuthFailureBudget, createAuthFailureLimiter } from '@middleware/ra
 import { recordUserActive } from '@service/analytics/service-events.service';
 import { authenticateApiToken, hashApiToken, isApiTokenShaped } from '@service/api-token/api-token.service';
 import { mcpOAuthHouseholdReference, revokeMcpOAuthGrant } from '@service/auth/better-auth';
-import { MCP_OAUTH_READ_SCOPE, mcpOAuthResourceIfEnabled, protectedResourceMetadataUrl } from '@service/mcp/mcp-oauth-config';
+import { MCP_OAUTH_READ_SCOPE, MCP_OAUTH_SCOPES, mcpOAuthResourceIfEnabled, protectedResourceMetadataUrl } from '@service/mcp/mcp-oauth-config';
 import { verifyMcpOAuthAccessToken } from '@service/mcp/mcp-oauth-token.service';
 import type { McpCredential } from '@service/mcp/mcp-types';
 import { ERROR_CODE, ForbiddenError, NotFoundError, UnauthorizedError } from '@utils/errors';
@@ -34,15 +34,16 @@ export function requireMcpEnabled(_req: Request, _res: Response, next: NextFunct
 /**
  * The RFC 6750 / RFC 9728 challenge for a refused MCP request, when OAuth is on: it points the
  * client at the protected resource metadata, which names the authorization server, so a client
- * that knows only the URL can start the OAuth flow. With OAuth off there is nothing to discover
- * and no header is sent.
+ * that knows only the URL can start the OAuth flow. Its `scope` includes `offline_access`, because
+ * an MCP client asks for the scopes this hint names and gets a refresh token only with that one.
+ * With OAuth off there is nothing to discover and no header is sent.
  */
 function setChallenge(res: Response, resource: null | string, error?: 'insufficient_scope' | 'invalid_token'): void {
   if (!resource) return;
   const params = [
     ...(error ? [`error="${error}"`] : []),
     `resource_metadata="${protectedResourceMetadataUrl(resource)}"`,
-    `scope="${MCP_OAUTH_READ_SCOPE}"`,
+    `scope="${MCP_OAUTH_SCOPES.join(' ')}"`,
   ];
   res.setHeader('WWW-Authenticate', `Bearer ${params.join(', ')}`);
 }
