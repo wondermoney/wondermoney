@@ -290,6 +290,21 @@ describe('seeding the store-review account', () => {
 
       expect(revoked).toEqual([]);
 
+      // A passkey and a social login the reviewer added survive a plain rerun.
+      await rows(
+        `insert into better_auth."passkey" (id, "publicKey", "userId", "credentialID", counter, "deviceType", "backedUp")
+         values ('passkey-1', 'key', ?, 'credential-1', 0, 'singleDevice', false)`,
+        [appuser.externalUserId],
+      );
+      await rows(
+        `insert into better_auth."account" (id, "accountId", "providerId", "userId", "createdAt", "updatedAt")
+         values ('social-1', 'google-123', 'google', ?, now(), now())`,
+        [appuser.externalUserId],
+      );
+      await seedReviewAccount({ auth, em: db.em(), email: REVIEW_EMAIL });
+      expect(await rows('select id from better_auth."passkey" where "userId" = ?', [appuser.externalUserId])).toHaveLength(1);
+      expect(await rows(`select id from better_auth."account" where "userId" = ? and "providerId" = 'google'`, [appuser.externalUserId])).toHaveLength(1);
+
       // A reset whose grant revocation fails saves nothing: the old password still works, so no
       // new password is ever saved without being printed.
       failRevocation = true;
@@ -308,6 +323,13 @@ describe('seeding the store-review account', () => {
       expect((await signIn(REVIEW_EMAIL, password)).status).toBe(401);
       expect((await signIn(REVIEW_EMAIL, reset.password ?? '')).status).toBe(200);
       expect(await rows('select 1 from better_auth."session" where "userId" = ?', [appuser.externalUserId])).toEqual([]);
+      // Nothing the previous reviewer added still opens the account.
+      expect(await rows('select id from better_auth."passkey" where "userId" = ?', [appuser.externalUserId])).toEqual([]);
+      expect(
+        (await rows('select "providerId" from better_auth."account" where "userId" = ?', [appuser.externalUserId])).map(
+          (row) => row['providerId'],
+        ),
+      ).toEqual(['credential']);
 
       // Refusals change nothing.
       const settled = await everythingElse(-1, -1, '');

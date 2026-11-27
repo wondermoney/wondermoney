@@ -30,8 +30,9 @@ export interface ReviewAuthUserPort {
   /**
    * Create the user with this id, or update it: its name, a verified address and two-factor off
    * (its TOTP secret and backup codes are deleted), since a reviewer can receive no code. With a
-   * `password`, set it as the email-and-password login; on an existing user that also ends every
-   * session and OAuth grant made with the old one. Its passkeys and social logins stay.
+   * `password`, set it as the email-and-password login; on an existing user that also locks the
+   * previous holder out: every session, OAuth grant, passkey and social login is removed. Without
+   * one, its passkeys and social logins stay.
    */
   ensureUser(input: { email: string; id: string; name: string; password?: string }): Promise<{ created: boolean }>;
   findUserByEmail(email: string): Promise<null | ReviewAuthUser>;
@@ -101,8 +102,11 @@ export function createReviewAuthUserPort(
           }
           // A new password ends what the old one opened, as a password reset in the app does, in
           // this transaction: the password is saved only with the rest gone.
+          // The previous reviewer is locked out: no passkey or social login they added still opens it.
           if (!isNew) {
             await query(`delete from ${SCHEMA}."session" where "userId" = $1`, [id]);
+            await query(`delete from ${SCHEMA}."passkey" where "userId" = $1`, [id]);
+            await query(`delete from ${SCHEMA}."account" where "userId" = $1 and "providerId" <> 'credential'`, [id]);
             await hooks.revokeGrants?.(query, id);
           }
         }
