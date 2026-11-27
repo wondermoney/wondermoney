@@ -73,6 +73,7 @@ import marketingRoutes from '@route/marketing';
 import mcpRoutes from '@route/mcp';
 import mcpOAuthMetadataRoutes from '@route/mcp-oauth-metadata';
 import netWorthRoutes from '@route/net-worth';
+import openAiAppsChallengeRoutes from '@route/openai-apps-challenge';
 import portfolioRoutes from '@route/portfolio';
 import portfolioImportSessionRoutes from '@route/portfolio-import-session';
 import recurringRoutes from '@route/recurring';
@@ -271,6 +272,9 @@ export default class Application {
       // No per-IP limit: many people's clients fetch them from the same few addresses (ChatGPT's),
       // and they are static documents that read nothing.
       this.host.use('/.well-known', mcpOAuthMetadataRoutes);
+      // OpenAI's domain verification for the ChatGPT plugin (`OPENAI_APPS_CHALLENGE`), on the MCP
+      // server's hostname. Public; 404 unless the setting is set.
+      this.host.use('/.well-known', openAiAppsChallengeRoutes);
       // Net worth is protected at mount level; route stays auth-agnostic.
       this.host.use('/v1/net-worth', ...authedTenant(), netWorthRoutes);
       this.host.use('/v1/portfolio', ...authedTenant(), portfolioRoutes);

@@ -93,6 +93,9 @@ services:
             handle /.well-known/oauth-* {
               reverse_proxy {$API_HOSTPORT}
             }
+            handle /.well-known/openai-apps-challenge {
+              reverse_proxy {$API_HOSTPORT}
+            }
             handle {
               reverse_proxy {$WEB_HOSTPORT}
             }

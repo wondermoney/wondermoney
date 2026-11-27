@@ -15,8 +15,8 @@
 //   Tier 2: type-check of the touched packages and of the packages that depend on a changed
 //           library; ESLint on the changed files.
 //   Tier 3: the checks that otherwise fail only in CI: leak-check.sh and gitleaks over the
-//           branch's commits, the docs build, the API's OpenAPI and swagger documents, and the
-//           migration chain and snapshot on a scratch database.
+//           branch's commits, the docs build, the API's OpenAPI and swagger documents, the
+//           ChatGPT plugin package, and the migration chain and snapshot on a scratch database.
 // Every step runs, even after a failure; the exit code is 1 when any failed. Test workers come
 // from scripts/agent-env.mjs (cores divided by active worktrees).
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -200,6 +200,9 @@ const docs = workspace['apps/docs'];
 if (touchedNames.has(docs?.name)) add(3, 'docs build', cmd(docs, ['pnpm', 'run', 'build']));
 if (any(/^apps\/api\/src\/(routes|validators|openapi)\/|^apps\/docs\/openapi\//)) {
   add(3, 'api: openapi --check', cmd(api, ['pnpm', 'run', 'openapi', '--', '--check']));
+}
+if (any(/^integrations\/chatgpt-plugin\/|^apps\/api\/src\/services\/(ai-tools|mcp)\/|^apps\/api\/scripts\/chatgpt-plugin\.ts$/)) {
+  add(3, 'api: chatgpt plugin package', cmd(api, ['pnpm', 'run', 'chatgpt-plugin:check']));
 }
 if (any(/^apps\/api\/src\/(routes|validators|controller)\/|^apps\/api\/src\/app\.ts$|^apps\/api\/src\/generated\/swagger\.json$/)) {
   add(3, 'api: swagger is current', swaggerCheck);

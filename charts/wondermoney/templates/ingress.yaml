@@ -43,12 +43,12 @@ spec:
                 port:
                   name: http
     {{- else }}
-    # One hostname: /v1, /api/auth and the MCP server's OAuth discovery documents to the API,
-    # everything else to the web app.
+    # One hostname: /v1, /api/auth, the MCP server's OAuth discovery documents and OpenAI's
+    # domain check (OPENAI_APPS_CHALLENGE) to the API, everything else to the web app.
     - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          {{- range $path := list "/v1" "/api/auth" "/.well-known/oauth-authorization-server" "/.well-known/oauth-protected-resource" }}
+          {{- range $path := list "/v1" "/api/auth" "/.well-known/oauth-authorization-server" "/.well-known/oauth-protected-resource" "/.well-known/openai-apps-challenge" }}
           - path: {{ $path }}
             pathType: Prefix
             backend:
