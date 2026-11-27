@@ -10,7 +10,7 @@
   },
   "homepage": "https://wonder.money/en",
   "repository": "https://github.com/wondermoney/wondermoney",
-  "license": "AGPL-3.0",
+  "license": "AGPL-3.0-only",
   "keywords": ["personal finance", "budgeting", "expense tracking", "net worth", "investments", "open source"],
   "extensions": {
     "com.openai": {
