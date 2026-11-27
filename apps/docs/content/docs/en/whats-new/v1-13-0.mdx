@@ -1,0 +1,48 @@
+---
+title: WonderMoney 1.13.0
+description: WonderMoney creates your Enable Banking key for you, ChatGPT can connect read-only, and the apps speak Italian.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.13.0)
+
+## Upgrading
+
+- **Five migrations** apply when the API starts. They widen two checks (Italian as a language, and Enable Banking keys waiting for their application ID) and add nullable columns and new tables, so no data is rewritten. A backup is good practice, not a requirement.
+- **Remove `DATABASE_URL` if you also set `DB_*`.** WonderMoney now refuses to start with both, where it used to ignore one. The Docker Compose install always sets its own `DB_*` settings, so if your `.env` has `DATABASE_URL`, remove it. Migrations now need only the database settings, not the app's secrets.
+- **New, optional: `MCP_OAUTH_ENABLED`.** Set it to `true` on the API and the worker to let ChatGPT and other MCP clients connect with OAuth (see [Your instance](/en/docs/self-hosting/configure#your-instance)). The Docker Compose and Helm routing already send `/.well-known/oauth-*` to the API; with another reverse proxy, route those paths to the API too (see [HTTPS and domains](/en/docs/self-hosting/https-and-domains)).
+
+## New
+
+- **WonderMoney creates your Enable Banking key.** It makes the key and a certificate, you register the certificate with Enable Banking, and you paste back only the application ID. A setup wizard on the web walks you through each step, with a copy button for every value. See [Connect your first bank account](/en/docs/start-here/connect-first-bank-account).
+- **Connect ChatGPT.** ChatGPT and other MCP clients can read your WonderMoney data with OAuth, on a server that turns it on. You approve each connection with a recent sign-in and your authenticator code, and can disconnect it at any time under **Connected with OAuth**. See [Connect ChatGPT](/en/docs/settings-security-privacy/connect-ai-client#connect-chatgpt).
+- **Start without a bank.** Skipping the bank step in first-run setup now offers **Import a statement** or **Add an account by hand**, instead of an empty home.
+
+## Improved
+
+- **Bank sync keeps going** when a bank refuses to send a balance or a long history. Your transactions still arrive, the balance is worked out from them, and the account shows the date it was worked out on. A bank that refuses a long history is asked again for the last 89 days.
+- **wonder.money** opens sign-up and the demo in the page's language, the fuel map opens on Portugal and groups nearby stations, and AI assistants can read and cite its pages more easily.
+
+## Fixes
+
+- Household members can import statements into the shared accounts they may edit, and closed accounts are no longer offered as an import target.
+- Closing the feedback panel and opening it again straight away no longer wipes what you typed.
+
+## Security and privacy
+
+- Guesses at your authenticator code are now limited on every action that asks for a recent sign-in.
+- Pasting or removing an Enable Banking key asks for a recent sign-in.
+- A key WonderMoney creates for you is stored encrypted and is never shown, logged or exported. One you never finish setting up lapses after seven days.
+
+## Mobile app
+
+- The app is available in Italian.
+- Skipping the bank step leads to an import or a manual account, members can import statements into shared accounts, and import is offered only when the server has file storage.
+- Accounts synced without a bank balance show when their balance was worked out.
+
+## Translations
+
+- **Italian** in the web app, the mobile app, and the server's messages and emails, with an Italian [rule preset](/en/docs/accounts-transactions/rules#rule-presets-for-your-country).
+
+## Thanks to
+
+- @nip10
