@@ -14,12 +14,15 @@ import { demoPersona } from '@app/database/seeders/demo/demo-fixtures';
 import { ReferenceDataSeeder } from '@app/database/seeders/ReferenceDataSeeder';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
+import { FinancialAsset } from '@entity/FinancialAsset';
+import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
 import { Tenant, TenantType } from '@entity/Tenant';
 import { Transaction } from '@entity/Transaction';
 import { isDemoRequest } from '@middleware/demo';
 import { executeAiTool } from '@service/ai-tools/ai-tool-types';
 import { AI_TOOL_DEFINITIONS } from '@service/ai-tools/ai-tools.service';
 import { isDemoAccountEmail, isExpiredDemoSession } from '@service/auth/demo-session';
+import { demoPortfolioTransactionFixtures } from '@service/demo-data/demo-data-fixtures';
 import { resolveDemoRefreshIdentity } from '@service/demo-data/demo-data-refresh-identity';
 import { type DemoAuthUserPort, seedDemoHousehold } from '@service/demo-data/demo-household-seed.service';
 import {
@@ -184,6 +187,20 @@ async function reviewAppuser(em: EntityManager): Promise<Appuser> {
   return em.findOneOrFail(Appuser, { emailAddress: REVIEW_EMAIL }, { filters: false });
 }
 
+/** A daily price for a year and more for each stock the sample portfolios hold, as market data would load. */
+async function priceDemoStocks(): Promise<void> {
+  const em = db.em();
+  const symbols = new Set(demoPortfolioTransactionFixtures.map((fixture) => fixture.symbol).filter((symbol) => !symbol.startsWith('CURRENCY_')));
+  for (const symbol of symbols) {
+    const asset = await em.findOneOrFail(FinancialAsset, { symbol });
+    for (let day = 0; day <= 400; day += 1) {
+      const date = new Date(FIRST_DAY.getTime() - day * 86_400_000);
+      em.create(FinancialAssetPrice, { date, financialAssetKey: asset, price: 100, volume: 1 }, { partial: true });
+    }
+  }
+  await em.flush();
+}
+
 /** better-auth's tables are not entities, so the per-test reset leaves them: empty them too. */
 async function emptyBetterAuth(): Promise<void> {
   for (const table of ['passkey', 'twoFactor', 'session', 'account', 'user']) {
@@ -199,6 +216,7 @@ describe('seeding the store-review account', () => {
   it('refuses on a server that is not set up yet, so the review account never becomes its first account', async () => {
     await new ReferenceDataSeeder().run(db.em(), {});
     await db.em().flush();
+    await priceDemoStocks();
     const auth = createReviewAuthUserPort(pgliteAuthStore());
     const untouched = await everythingElse(-1, -1, '');
 
@@ -207,6 +225,21 @@ describe('seeding the store-review account', () => {
     ).rejects.toBeInstanceOf(ReviewSeedRefusedError);
     expect(await everythingElse(-1, -1, '')).toEqual(untouched);
     expect(await db.em().count(Appuser, {}, { filters: false })).toBe(0);
+  }, 120_000);
+
+  it('refuses on a server without prices for the sample stocks, writing no made-up prices', async () => {
+    await new ReferenceDataSeeder().run(db.em(), {});
+    await db.em().flush();
+    await seedHousehold(db.em());
+    const auth = createReviewAuthUserPort(pgliteAuthStore());
+    const untouched = await everythingElse(-1, -1, '');
+    expect(untouched['financial_asset_price']).toMatch(/^0:/u);
+
+    await expect(
+      seedReviewAccount({ asOfDate: FIRST_DAY, auth, em: db.em(), email: REVIEW_EMAIL }),
+    ).rejects.toBeInstanceOf(ReviewSeedRefusedError);
+    expect(await everythingElse(-1, -1, '')).toEqual(untouched);
+    expect(await db.em().count(Appuser, { emailAddress: REVIEW_EMAIL }, { filters: false })).toBe(0);
   }, 120_000);
 
   // Loading the reference data and the demo takes a while, so one test walks the whole story.

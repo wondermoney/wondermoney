@@ -11,16 +11,18 @@ import { CURRENT_ONBOARDING_VERSION } from '@app/onboarding-version';
 import { Appuser, AppuserAccountType } from '@entity/Appuser';
 import { AppuserTenant, HouseholdRole } from '@entity/AppuserTenant';
 import { Currency } from '@entity/Currency';
+import { FinancialAsset } from '@entity/FinancialAsset';
+import { FinancialAssetPrice } from '@entity/FinancialAssetPrice';
 import { Onboarding } from '@entity/Onboarding';
 import { Tenant, TenantType } from '@entity/Tenant';
 import { TenantStatus } from '@entity/TenantStatus';
 import { betterAuthReviewUserPort } from '@service/auth/better-auth';
 import { isDemoAccountEmail } from '@service/auth/demo-session';
 import { isInstanceSetUp } from '@service/auth/instance-admin.service';
+import { demoPortfolioTransactionFixtures } from '@service/demo-data/demo-data-fixtures';
 import type { DemoRefreshIdentityResolution } from '@service/demo-data/demo-data-refresh-identity';
 import { type DemoDataRefreshResult, DemoDataRefreshService } from '@service/demo-data/demo-data-refresh.service';
 import { upsertDemoHouseholdCore } from '@service/demo-data/demo-household-core';
-import { ensureDemoStockPrices } from '@service/demo-data/demo-household-seed.service';
 import { generateReviewPassword, type ReviewAuthUserPort } from '@service/review-account/review-auth-user';
 
 /**
@@ -36,8 +38,9 @@ import { generateReviewPassword, type ReviewAuthUserPort } from '@service/review
  * 1. The `Appuser` (the given address) and the household it owns alone, named
  *    `reviewPersona.householdName`. That name, a regular account and a household with no other
  *    member are how a rerun knows the account as the review account.
- * 2. The household's core objects, price histories for demo stocks with none, then its
- *    transactions and linked examples through the demo's refresh.
+ * 2. The household's core objects, then its transactions and linked examples through the demo's
+ *    refresh. Its portfolios hold the demo's stocks, which need prices on the server: unlike the
+ *    demo seeder it never makes prices up, and refuses when a stock has none.
  * 3. The better-auth user, last, so a run that fails before it leaves no way in: a verified address
  *    and a password. A new user gets a generated one, returned once in the result; an existing one
  *    keeps its own unless `resetPassword`, which also locks the previous holder out. Two-factor is
@@ -111,6 +114,14 @@ export async function seedReviewAccount(options: {
     );
   }
 
+  const unpriced = await demoStocksWithoutPrices(em.fork());
+  if (unpriced.length > 0) {
+    throw new ReviewSeedRefusedError(
+      `No price on this server for ${unpriced.join(', ')}, so the sample portfolios would have no value. ` +
+        'Load market data for them first; the review seeder writes no made-up prices into the price table every household reads.',
+    );
+  }
+
   const existing = await findReviewAccount(em.fork(), email);
   const authByEmail = await auth.findUserByEmail(email);
   const externalUserId = existing?.externalUserId ?? randomUUID();
@@ -127,7 +138,6 @@ export async function seedReviewAccount(options: {
     const tenant = await ensureReviewTenant(tx, appuser);
     await ensureReviewMembership(tx, appuser, tenant);
     await upsertDemoHouseholdCore(tx, appuser, tenant);
-    await ensureDemoStockPrices(tx, asOfDate);
     await tx.flush();
     return { appuserKey: appuser.appuserKey, tenantKey: tenant.tenantKey };
   });
@@ -221,6 +231,23 @@ async function ensureReviewTenant(em: EntityManager, appuser: Appuser): Promise<
     },
     { partial: true },
   );
+}
+
+/**
+ * The demo stocks the sample portfolios hold that have no price at all here. The demo seeder makes
+ * a price history up for those, for a demo server; the review account lives beside real users,
+ * who read the same prices, so it needs real ones.
+ */
+async function demoStocksWithoutPrices(em: EntityManager): Promise<string[]> {
+  const symbols = [...new Set(demoPortfolioTransactionFixtures.map((fixture) => fixture.symbol))].filter(
+    (symbol) => !symbol.startsWith('CURRENCY_'),
+  );
+  const missing: string[] = [];
+  for (const symbol of symbols) {
+    const asset = await em.findOne(FinancialAsset, { symbol });
+    if (!asset || (await em.count(FinancialAssetPrice, { financialAssetKey: asset })) === 0) missing.push(symbol);
+  }
+  return missing;
 }
 
 /**
