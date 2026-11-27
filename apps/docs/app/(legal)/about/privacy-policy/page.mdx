@@ -98,6 +98,24 @@ We retain your personal data only for as long as necessary for the purposes set 
 
 We also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period, except when this data is used to strengthen security or improve the functionality of our Service, or when we are legally required to retain this data for longer periods.
 
+### Retention Periods
+
+The periods below apply to the hosted Service. A self-hosted server keeps data as its operator configures it.
+
+- **Your account.** We keep your account data while your account exists. You can delete your account at any time: on the web, in **Settings → Privacy → Delete WonderMoney account**; in the mobile app, in **More → Settings → Security → Delete account**. The deletion takes effect at once, with no grace period, and cannot be undone. At that moment we delete your sign-in record (email address, password hash, passkeys, two-factor authentication, sessions and the AI clients connected with OAuth), replace the name and email address in your profile with placeholder values and remove your phone number, disconnect your bank connections, delete your email notification preferences and the phones registered for notifications, and turn off the assistant. If you are a member of a household, the accounts and transactions you added stay with that household. If you own the household, it is dissolved and its other members lose access to it. [MAINTAINER: how long the financial records of a dissolved household, and the anonymised account record, are kept before they are erased; the code sets no erasure date today.] Our support inbox receives a notice of the deletion with your email address. [MAINTAINER: retention of email in the support inbox.]
+- **Sign-in sessions.** A session records the IP address and browser of the device you signed in on. It ends after 7 days without use; using the Service extends it, at most once a day. It is deleted when you sign out, sign out of other devices or everywhere, or delete your account. Sessions of the public demo account end after 2 hours.
+- **Personal API tokens.** A token is valid for the period you choose when you create it: 30, 90 or 365 days (90 days for a token created with **Create an AI client token**). A token you revoke stops working at once. Its record, without the token itself, is kept marked as revoked so that the assistant audit log can still name it.
+- **AI clients connected with OAuth.** An access token is valid for 15 minutes and a refresh token for 30 days. Each refresh replaces the refresh token, so a client you keep using stays connected until you disconnect it. Disconnecting deletes your consent and the client's access tokens and revokes its refresh tokens at once. A client's registration, with its revoked tokens, is removed 7 days after its last connection ended, or 7 days after it registered if nobody connected it; a daily job removes it on the next run.
+- **Pending Enable Banking keys.** The key we generate for your Enable Banking application waits 7 days to be activated. If you have not activated it by then, it is deleted on the next daily run. [MAINTAINER: retention of an activated Enable Banking key after you remove it or delete your account; the code keeps the encrypted key, marked as retired.]
+- **Assistant audit log.** The log of tool calls by the in-app assistant and by AI clients (see "Connected AI Clients" in section 8) is kept for [MAINTAINER: retention period of the assistant audit log; the code deletes no rows today, including after account deletion].
+- **Email and notification records.** We keep a record of each email we send you (its type, when it was sent and whether it was delivered) and of the bank sync alerts and reminders we have sent, so that the same message is not sent twice. [MAINTAINER: retention period of sent email and notification records; the code deletes none today, and keeps them, partly cleared, after account deletion.] A phone registered for notifications is removed when the session it was registered with ends. [MAINTAINER: how long Resend keeps the messages it sends for us.]
+- **Analytics (PostHog).** A service event that cannot be delivered to PostHog within 30 days is deleted, and events not yet sent are deleted at once when you turn off **Service analytics**. [MAINTAINER: how long our database keeps a copy of service events after they are sent; the code deletes none today.] PostHog keeps the events it receives for [MAINTAINER: PostHog project data retention].
+- **Error reports (Sentry).** Sentry keeps error reports for [MAINTAINER: Sentry project data retention].
+- **Uploaded files and statement imports.** A bank statement you upload for import, and the lines read from it, are deleted 7 days after you complete the import; we keep a summary of the import (file name, status, dates and the number of rows). An import you do not complete expires after 7 days and is deleted with its file. A file you attach to a transaction is deleted from storage when you remove it. A data export is deleted 24 hours after it is created, and a backup file you upload to restore is deleted when the restore ends, at the latest a day after it started. [MAINTAINER: retention of receipt and invoice images submitted for automatic reading, and of portfolio files you import; the code deletes neither today.]
+- **Server logs.** Our servers log each request: its method, address and result and, for a request that fails, the network address it came from and the browser's user agent. [MAINTAINER: how long the hosted servers keep their logs (log rotation).]
+- **Backups.** Deleted data can remain in database backups until they expire. [MAINTAINER: retention of hosted database backups.]
+- **Billing records.** [MAINTAINER: retention of billing and invoicing records that tax law requires us to keep.]
+
 ## 7. Location and Transfer of Data
 
 Your information, including Personal Data, may be transferred to computers located outside your state, province, country or other governmental jurisdiction, where data protection laws may differ from the laws of your country.
@@ -131,6 +149,19 @@ We may also disclose your information:
 - To fulfill the purpose for which you provided it, which will be made explicit
 - For any other purpose disclosed by us when you provided the information
 - If we believe disclosure is necessary or appropriate to protect the rights, property or safety of the Company, our customers or others
+- To an AI client you connect yourself, as described under "Connected AI Clients" below
+
+### Connected AI Clients
+
+You can connect an AI client, such as ChatGPT, Claude or another client that supports the Model Context Protocol (MCP), to your account: by allowing it with OAuth, or by giving it a personal API token you create. We share nothing with an AI client unless you connect it yourself.
+
+Once it is connected, when you ask the client something and it calls one of WonderMoney's read-only tools, we send it what that tool returns: your accounts with their names, types, currencies and balances; your net worth, with its assets, liabilities and portfolios; money in and out, spending by category and the monthly spending trend; individual transactions with their date, amount, description, account and category (at most 100 per request); budgets and how they are doing; categories; savings and debt goals and their progress; recurring payments due in the next 30 days; investment portfolios, their value and dividend income; and the insights the app shows. The client sees only what you see in the app: the household's shared data, your own private accounts and those shared with you, never a member's private accounts hidden from you and never another household's data. The tools cannot change anything. With a personal API token you may also let the client propose a category, a reviewed mark or a note for your transactions; each proposal waits in the app until you apply or dismiss it.
+
+The client's provider (for example OpenAI for ChatGPT, or Anthropic for Claude) receives this data and processes it under its own terms and privacy policy. It is not one of our Service Providers, and we do not control what it keeps. Read its privacy policy before you connect it.
+
+We keep an audit log of every tool call an AI client makes: the tool's name, the personal API token or OAuth client it came through, the time, whether it succeeded, and summary details such as the period asked about and the number of records returned. Amounts, descriptions and other content are never written to it. The most recent calls are listed in **Settings → API tokens → Connect an AI client**.
+
+To disconnect a client connected with OAuth, select **Disconnect** next to it under **Connected with OAuth** in **Settings → API tokens**. To stop a client that uses a personal API token, select **Revoke** next to the token in **Settings → API tokens**. Either way, its access ends at once. Changing or resetting your password, signing out of other devices or everywhere, and leaving your household also disconnect every client connected with OAuth. Section 6 sets out how long tokens last and when unused clients are removed.
 
 ## 9. Data Security
 
@@ -164,6 +195,8 @@ You have the right to lodge a complaint with a Data Protection Authority about o
 We may employ third party companies and individuals to facilitate our Service ("Service Providers"), provide the Service on our behalf, provide services related to the Service or assist us in analyzing how our Service is used.
 
 These third parties have access to your Personal Data only to perform these tasks on our behalf and are obligated not to disclose or use it for any other purpose.
+
+AI clients you connect yourself are a separate category of recipient, not Service Providers: see "Connected AI Clients" in section 8.
 
 ## 12. Analytics
 
