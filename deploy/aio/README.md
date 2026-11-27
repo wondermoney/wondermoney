@@ -13,7 +13,7 @@ Applications (`deploy/unraid`) and other NAS app stores. `wm-aio.sh` starts, in 
 | web app | 127.0.0.1:3100 | |
 | Caddy | 0.0.0.0:3000, the only published port | |
 
-Caddy routes `/v1/*`, `/api/auth/*` and `/.well-known/oauth-*` to the API, `/wondermoney-files/*` (the storage bucket, so
+Caddy routes `/v1/*`, `/api/auth/*`, `/.well-known/oauth-*` and `/.well-known/openai-apps-challenge` to the API, `/wondermoney-files/*` (the storage bucket, so
 presigned uploads go to the same address as the app) to SeaweedFS, and everything else to the web
 app. When any process exits the script stops the rest and exits, and the restart policy starts the
 container again. On `docker stop` it stops the apps (5 s, then killed), then storage (2 s, then

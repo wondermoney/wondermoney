@@ -124,8 +124,9 @@ reachable from the phone, over HTTPS in practice.
 ## HTTPS
 
 One hostname is enough. The bundled proxy (the `proxy` profile) serves the web app and the API
-on the same address: `/v1/*`, `/api/auth/*` and `/.well-known/oauth-*` (the MCP server's OAuth
-discovery documents) go to the API, everything else to the web app. It
+on the same address: `/v1/*`, `/api/auth/*`, `/.well-known/oauth-*` (the MCP server's OAuth
+discovery documents) and `/.well-known/openai-apps-challenge` (OpenAI's domain check, see
+`OPENAI_APPS_CHALLENGE`) go to the API, everything else to the web app. It
 is [Caddy](https://caddyserver.com), so it fetches and renews the certificate itself.
 
 In `.env`:
@@ -167,6 +168,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /.well-known/oauth-* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/openai-apps-challenge {
     reverse_proxy localhost:3001
   }
   handle {

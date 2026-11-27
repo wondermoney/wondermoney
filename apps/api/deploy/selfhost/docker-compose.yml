@@ -4,8 +4,9 @@
 #   docker compose up -d       # http://localhost:3000
 #
 # Optional extras, by profile (set COMPOSE_PROFILES in .env so every command includes them):
-#   proxy     Caddy, an HTTPS front door for one hostname: /v1/*, /api/auth/* and the OAuth
-#             discovery documents (/.well-known/oauth-*) to the API,
+#   proxy     Caddy, an HTTPS front door for one hostname: /v1/*, /api/auth/*, the OAuth
+#             discovery documents (/.well-known/oauth-*) and OpenAI's domain check
+#             (/.well-known/openai-apps-challenge) to the API,
 #             everything else to the web app (README.md, "HTTPS")
 #   storage   SeaweedFS, an S3-compatible store for file uploads (CSV imports, receipt copies)
 #   mail      Mailpit, to read outgoing mail at http://localhost:8025
@@ -179,6 +180,9 @@ services:
             reverse_proxy api:3001
           }
           handle /.well-known/oauth-* {
+            reverse_proxy api:3001
+          }
+          handle /.well-known/openai-apps-challenge {
             reverse_proxy api:3001
           }
           handle {
