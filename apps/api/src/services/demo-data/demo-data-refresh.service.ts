@@ -57,7 +57,6 @@ export interface DemoDataRefreshServiceDeps {
    */
   portfolioInternalIdPrefix?: string;
   resolveIdentity?: typeof resolveDemoRefreshIdentity;
-  /** Whether the household gets the demo's non-login example member; only the demo's does. */
   verifyInvariants?: (
     em: EntityManager,
     asOfDate: Date,
@@ -65,6 +64,7 @@ export interface DemoDataRefreshServiceDeps {
     tenant: Account['tenantKey'],
     affectedPortfolioTransactions: { portfolioName: string }[],
   ) => Promise<void>;
+  /** Whether the household gets the demo's non-login example member; only the demo's does. */
   withCompanion?: boolean;
 }
 
