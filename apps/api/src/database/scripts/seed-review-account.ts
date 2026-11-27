@@ -11,20 +11,22 @@ import type { ReviewSeedResult } from '@service/review-account/review-account-se
  * `review-account-seed.service.ts`). Safe to run again; it writes that account and household only.
  *
  * The address is required: `--email <address>`, or the `REVIEW_ACCOUNT_EMAIL` setting.
- * `--reset-password` replaces the password; `--as-of-date YYYY-MM-DD` dates the sample data up to
- * that day instead of today.
+ * `--reset-password` replaces the password and locks the previous holder out (two-factor off too);
+ * `--disable-2fa` turns two-factor sign-in off and nothing else; `--as-of-date YYYY-MM-DD` dates the
+ * sample data up to that day instead of today.
  *
  * A password set by the run is printed once, on standard output, and nowhere else.
  */
 
 export interface ReviewSeedArgs {
   asOfDate: Date;
+  disableTwoFactor: boolean;
   email: string;
   resetPassword: boolean;
 }
 
 const USAGE =
-  'Usage: review:seed --email <address> [--reset-password] [--as-of-date YYYY-MM-DD] (or set REVIEW_ACCOUNT_EMAIL)';
+  'Usage: review:seed --email <address> [--reset-password] [--disable-2fa] [--as-of-date YYYY-MM-DD] (or set REVIEW_ACCOUNT_EMAIL)';
 
 export async function main(
   argv = process.argv.slice(2),
@@ -38,7 +40,13 @@ export async function main(
 
   try {
     const result = await RequestContext.create(DI.em, () =>
-      seedReviewAccount({ asOfDate: args.asOfDate, em: DI.em, email: args.email, resetPassword: args.resetPassword }),
+      seedReviewAccount({
+        asOfDate: args.asOfDate,
+        disableTwoFactor: args.disableTwoFactor,
+        em: DI.em,
+        email: args.email,
+        resetPassword: args.resetPassword,
+      }),
     );
     for (const line of reviewSeedReport(args.email, result)) write(line);
   } finally {
@@ -51,12 +59,17 @@ export function parseReviewSeedArgs(args: string[], env: NodeJS.ProcessEnv = pro
   let email: string | undefined;
   let asOfDate = new Date();
   let resetPassword = false;
+  let disableTwoFactor = false;
   for (let index = 0; index < args.length; index += 1) {
     const flag = args[index];
     // `pnpm review:seed -- --email <address>`: pnpm passes the separator on.
     if (flag === '--') continue;
     if (flag === '--reset-password') {
       resetPassword = true;
+      continue;
+    }
+    if (flag === '--disable-2fa') {
+      disableTwoFactor = true;
       continue;
     }
     const value = args[index + 1];
@@ -69,7 +82,7 @@ export function parseReviewSeedArgs(args: string[], env: NodeJS.ProcessEnv = pro
   }
   email = (email ?? env['REVIEW_ACCOUNT_EMAIL'] ?? '').trim();
   if (!email) throw new Error(`The review account's address is required. ${USAGE}`);
-  return { asOfDate, email, resetPassword };
+  return { asOfDate, disableTwoFactor, email, resetPassword };
 }
 
 function parseDay(value: string): Date {
@@ -83,6 +96,7 @@ function parseDay(value: string): Date {
 export function reviewSeedReport(email: string, result: ReviewSeedResult): string[] {
   const { password, ...summary } = result;
   const lines = [`Review account ${email} is ready ${JSON.stringify(summary)}`];
+  if (result.twoFactorDisabled) lines.push('Two-factor sign-in was on; it is now off.');
   if (password) {
     lines.push(
       `Its password, shown this once (store it in the password manager; rerun with --reset-password to replace it):`,

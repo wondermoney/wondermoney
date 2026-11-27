@@ -28,13 +28,19 @@ export interface ReviewAuthUser {
 
 export interface ReviewAuthUserPort {
   /**
-   * Create the user with this id, or update it: its name, a verified address and two-factor off
-   * (its TOTP secret and backup codes are deleted), since a reviewer can receive no code. With a
-   * `password`, set it as the email-and-password login; on an existing user that also locks the
-   * previous holder out: every session, OAuth grant, passkey and social login is removed. Without
-   * one, its passkeys and social logins stay.
+   * Create the user with this id (two-factor off), or update it: its name and a verified address.
+   * Two-factor stays as it is unless `disableTwoFactor`, which turns it off and deletes its TOTP
+   * secret and backup codes; `twoFactorDisabled` says whether it was on. With a `password`, set it
+   * as the email-and-password login; on an existing user that also locks the previous holder out:
+   * every session, OAuth grant, passkey and social login is removed. Without one, those stay.
    */
-  ensureUser(input: { email: string; id: string; name: string; password?: string }): Promise<{ created: boolean }>;
+  ensureUser(input: {
+    disableTwoFactor?: boolean;
+    email: string;
+    id: string;
+    name: string;
+    password?: string;
+  }): Promise<{ created: boolean; twoFactorDisabled: boolean }>;
   findUserByEmail(email: string): Promise<null | ReviewAuthUser>;
   findUserById(id: string): Promise<null | ReviewAuthUser>;
 }
@@ -67,11 +73,17 @@ export function createReviewAuthUserPort(
     });
 
   return {
-    async ensureUser({ email, id, name, password }) {
+    async ensureUser({ disableTwoFactor = false, email, id, name, password }) {
       const hash = password === undefined ? undefined : await hashPassword(password);
-      const created = await store.transaction(async (query) => {
-        const existing = await query<{ id: string }>(`select id from ${SCHEMA}."user" where id = $1 for update`, [id]);
+      return store.transaction(async (query) => {
+        const existing = await query<{ id: string; twoFactorOn: boolean }>(
+          `select u.id, (coalesce(u."twoFactorEnabled", false)
+                         or exists(select 1 from ${SCHEMA}."twoFactor" f where f."userId" = u.id)) as "twoFactorOn"
+             from ${SCHEMA}."user" u where u.id = $1 for update of u`,
+          [id],
+        );
         const isNew = existing.length === 0;
+        const twoFactorDisabled = disableTwoFactor && existing[0]?.twoFactorOn === true;
         if (isNew) {
           if (hash === undefined) throw new Error('A new review account needs a password.');
           await query(
@@ -81,11 +93,14 @@ export function createReviewAuthUserPort(
           );
         } else {
           await query(
-            `update ${SCHEMA}."user" set name = $2, "emailVerified" = true, "twoFactorEnabled" = false, "updatedAt" = now() where id = $1`,
+            `update ${SCHEMA}."user" set name = $2, "emailVerified" = true, "updatedAt" = now() where id = $1`,
             [id, name],
           );
+          if (disableTwoFactor) {
+            await query(`update ${SCHEMA}."user" set "twoFactorEnabled" = false where id = $1`, [id]);
+            await query(`delete from ${SCHEMA}."twoFactor" where "userId" = $1`, [id]);
+          }
         }
-        await query(`delete from ${SCHEMA}."twoFactor" where "userId" = $1`, [id]);
 
         if (hash !== undefined) {
           const updated = await query(
@@ -110,9 +125,8 @@ export function createReviewAuthUserPort(
             await hooks.revokeGrants?.(query, id);
           }
         }
-        return isNew;
+        return { created: isNew, twoFactorDisabled };
       });
-      return { created };
     },
     findUserByEmail: (email) => findOne('lower(u.email) = lower($1)', email),
     findUserById: (id) => findOne('u.id = $1', id),

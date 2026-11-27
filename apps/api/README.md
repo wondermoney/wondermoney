@@ -55,8 +55,11 @@ App-store and AI-directory reviewers get an account of their own, not the demo:
 `pnpm review:seed -- --email <address>` (or `REVIEW_ACCOUNT_EMAIL`) creates a regular account that
 signs in with email and password, with two-factor off, in a household filled with the same sample
 data. The first run prints a generated password once; keep it in the password manager. Rerun it to
-date the sample data up to today; the password stays unless you pass `--reset-password`.
-`review:seed:dev` does the same from source on a local database.
+date the sample data up to today; the password and two-factor setting stay as they are. Before
+handing the account to a new reviewer, pass `--reset-password`: a new password, and the previous
+reviewer's sessions, OAuth grants, passkeys, social logins and two-factor removed.
+`--disable-2fa` only turns two-factor off. `review:seed:dev` does the same from source on a local
+database.
 
 ## `.env` decides which database you touch
 

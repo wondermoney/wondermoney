@@ -49,7 +49,12 @@ describe('the review seeder command line', () => {
 
   it('takes the address from --email, else from the setting, and the optional flags', () => {
     expect(parseReviewSeedArgs(['--email', 'review@example.com'], {})).toMatchObject({
+      disableTwoFactor: false,
       email: 'review@example.com',
+      resetPassword: false,
+    });
+    expect(parseReviewSeedArgs(['--disable-2fa'], { REVIEW_ACCOUNT_EMAIL: 'review@example.com' })).toMatchObject({
+      disableTwoFactor: true,
       resetPassword: false,
     });
     expect(parseReviewSeedArgs([], { REVIEW_ACCOUNT_EMAIL: 'review@example.com' }).email).toBe('review@example.com');
@@ -66,7 +71,7 @@ describe('the review seeder command line', () => {
   });
 
   it('prints a new password once, on its own line, and nowhere else', async () => {
-    seedMock.mockResolvedValue({ appuserKey: 7, authUserCreated: true, password: PASSWORD, refresh, tenantKey: 9 });
+    seedMock.mockResolvedValue({ appuserKey: 7, authUserCreated: true, password: PASSWORD, refresh, tenantKey: 9, twoFactorDisabled: false });
     const elsewhere = [
       vi.spyOn(console, 'log'),
       vi.spyOn(console, 'info'),
@@ -84,8 +89,20 @@ describe('the review seeder command line', () => {
     for (const spy of elsewhere) expect(JSON.stringify(spy.mock.calls)).not.toContain(PASSWORD);
   });
 
+  it('says when the run turned two-factor sign-in off, and only then', async () => {
+    const lines = async (twoFactorDisabled: boolean) => {
+      seedMock.mockResolvedValue({ appuserKey: 7, authUserCreated: false, refresh, tenantKey: 9, twoFactorDisabled });
+      const written: string[] = [];
+      await main(['--email', 'review@example.com', '--disable-2fa'], (line) => written.push(line));
+      return written;
+    };
+
+    expect((await lines(true)).length).toBe((await lines(false)).length + 1);
+    expect(seedMock).toHaveBeenCalledWith(expect.objectContaining({ disableTwoFactor: true }));
+  });
+
   it('prints no password when the run kept the existing one', async () => {
-    seedMock.mockResolvedValue({ appuserKey: 7, authUserCreated: false, refresh, tenantKey: 9 });
+    seedMock.mockResolvedValue({ appuserKey: 7, authUserCreated: false, refresh, tenantKey: 9, twoFactorDisabled: false });
     const lines: string[] = [];
 
     await main(['--email', 'review@example.com'], (line) => lines.push(line));

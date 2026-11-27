@@ -37,9 +37,11 @@ import { generateReviewPassword, type ReviewAuthUserPort } from '@service/review
  *    member are how a rerun knows the account as the review account.
  * 2. The household's core objects, price histories for demo stocks with none, then its
  *    transactions and linked examples through the demo's refresh.
- * 3. The better-auth user, last, so a run that fails before it leaves no way in: a verified address,
- *    two-factor off, and a password. A new user gets a generated one, returned once in the result;
- *    an existing one keeps its own unless `resetPassword`.
+ * 3. The better-auth user, last, so a run that fails before it leaves no way in: a verified address
+ *    and a password. A new user gets a generated one, returned once in the result; an existing one
+ *    keeps its own unless `resetPassword`, which also locks the previous holder out. Two-factor is
+ *    off on a new user; a rerun leaves it as it is unless `resetPassword` or `disableTwoFactor`,
+ *    since a reviewer can receive no code and OAuth consent asks for one while it is on.
  *
  * It refuses, changing nothing, when the address belongs to anybody else: an account that is not
  * the review account, or a better-auth login that is not the review account's.
@@ -59,6 +61,8 @@ export interface ReviewSeedResult {
   password?: string;
   refresh: DemoDataRefreshResult;
   tenantKey: number;
+  /** Whether this run turned two-factor sign-in off (it was on). */
+  twoFactorDisabled: boolean;
 }
 
 export class ReviewSeedRefusedError extends Error {
@@ -82,6 +86,7 @@ export function reviewAccountEmail(input: null | string | undefined): string {
 export async function seedReviewAccount(options: {
   asOfDate?: Date;
   auth?: ReviewAuthUserPort;
+  disableTwoFactor?: boolean;
   em?: EntityManager;
   email: string;
   generatePassword?: () => string;
@@ -127,14 +132,15 @@ export async function seedReviewAccount(options: {
   }).refresh({ asOfDate });
 
   const password = !authUser || options.resetPassword || !authUser.hasPassword ? generatePassword() : undefined;
-  const { created } = await auth.ensureUser({
+  const { created, twoFactorDisabled } = await auth.ensureUser({
+    disableTwoFactor: options.resetPassword === true || options.disableTwoFactor === true,
     email,
     id: externalUserId,
     name: `${reviewPersona.firstName} ${reviewPersona.lastName}`,
     password,
   });
 
-  return { appuserKey, authUserCreated: created, refresh, tenantKey, ...(password ? { password } : {}) };
+  return { appuserKey, authUserCreated: created, refresh, tenantKey, twoFactorDisabled, ...(password ? { password } : {}) };
 }
 
 async function ensureReviewAppuser(em: EntityManager, email: string, externalUserId: string, now: Date): Promise<Appuser> {

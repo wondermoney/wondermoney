@@ -168,6 +168,18 @@ async function everythingElse(reviewTenantKey: number, reviewAppuserKey: number,
   return snapshot;
 }
 
+let factors = 0;
+
+/** Two-factor on, as the reviewer would turn it on in Settings. */
+async function enableTwoFactor(userId: string): Promise<void> {
+  factors += 1;
+  await rows('update better_auth."user" set "twoFactorEnabled" = true where id = ?', [userId]);
+  await rows(
+    `insert into better_auth."twoFactor" (id, secret, "backupCodes", "userId", verified) values (?, 'secret', 'codes', ?, true)`,
+    [`factor-${String(factors)}`, userId],
+  );
+}
+
 async function reviewAppuser(em: EntityManager): Promise<Appuser> {
   return em.findOneOrFail(Appuser, { emailAddress: REVIEW_EMAIL }, { filters: false });
 }
@@ -194,7 +206,7 @@ describe('seeding the store-review account', () => {
 
       // First run: a new account with a generated password, returned once.
       const first = await seedReviewAccount({ asOfDate: FIRST_DAY, auth, em: db.em(), email: REVIEW_EMAIL });
-      expect(first.authUserCreated).toBe(true);
+      expect(first).toMatchObject({ authUserCreated: true, twoFactorDisabled: false });
       expect(first.password).toMatch(/^[\w-]{32}$/u);
       const password = first.password ?? '';
 
@@ -233,12 +245,8 @@ describe('seeding the store-review account', () => {
       const demoIdentity = await resolveDemoRefreshIdentity(db.em());
       expect(demoIdentity.status === 'found' && demoIdentity.appuser.emailAddress).toBe(demoPersona.email);
 
-      // A reviewer turned two-factor on: a rerun turns it off again.
-      await rows('update better_auth."user" set "twoFactorEnabled" = true where id = ?', [appuser.externalUserId]);
-      await rows(
-        `insert into better_auth."twoFactor" (id, secret, "backupCodes", "userId", verified) values ('factor-1', 'secret', 'codes', ?, true)`,
-        [appuser.externalUserId],
-      );
+      // A reviewer turned two-factor on.
+      await enableTwoFactor(appuser.externalUserId);
       await rows(
         `insert into better_auth."session" (id, "expiresAt", token, "createdAt", "updatedAt", "userId")
          values ('session-1', now() + interval '1 day', 'token-1', now(), now(), ?)`,
@@ -271,12 +279,23 @@ describe('seeding the store-review account', () => {
       for (const table of ['account', 'portfolio', 'loan']) {
         expect(await rows(`select 1 from public."${table}" where tenant_key = ? and deleted_at is not null`, [first.tenantKey])).toEqual([]);
       }
+      // A plain refresh leaves two-factor as the reviewer set it.
+      expect(second.twoFactorDisabled).toBe(false);
+      expect(await rows('select 1 from better_auth."twoFactor" where "userId" = ?', [appuser.externalUserId])).toHaveLength(1);
+      expect((await signIn(REVIEW_EMAIL, password)).body['twoFactorRedirect']).toBe(true);
+
+      // --disable-2fa turns it off, and changes nothing else about the login.
+      const disabled = await seedReviewAccount({ auth, disableTwoFactor: true, em: db.em(), email: REVIEW_EMAIL });
+      expect(disabled).toMatchObject({ twoFactorDisabled: true });
+      expect(disabled.password).toBeUndefined();
       expect(await rows('select 1 from better_auth."twoFactor" where "userId" = ?', [appuser.externalUserId])).toEqual([]);
       const rerunSignIn = await signIn(REVIEW_EMAIL, password);
       expect(rerunSignIn.status).toBe(200);
       expect(rerunSignIn.body['twoFactorRedirect']).toBeUndefined();
       // Keeping the password keeps the reviewer's session.
       expect(await rows('select 1 from better_auth."session" where "userId" = ?', [appuser.externalUserId])).toHaveLength(1);
+      // Already off: nothing to report.
+      expect((await seedReviewAccount({ auth, disableTwoFactor: true, em: db.em(), email: REVIEW_EMAIL })).twoFactorDisabled).toBe(false);
 
       // Every MCP read tool has something to show the reviewer.
       DI.em = db.em();
@@ -315,8 +334,12 @@ describe('seeding the store-review account', () => {
       expect((await signIn(REVIEW_EMAIL, password)).status).toBe(200);
       expect(revoked).toEqual([]);
 
-      // --reset-password: a new password, the old one, its sessions and its OAuth grants gone.
+      // --reset-password: a new password, the old one, its sessions and its OAuth grants gone, and
+      // two-factor off.
+      await enableTwoFactor(appuser.externalUserId);
       const reset = await seedReviewAccount({ auth, em: db.em(), email: REVIEW_EMAIL, resetPassword: true });
+      expect(reset.twoFactorDisabled).toBe(true);
+      expect((await signIn(REVIEW_EMAIL, reset.password ?? '')).body['twoFactorRedirect']).toBeUndefined();
       expect(revoked).toEqual([appuser.externalUserId]);
       expect(reset.password).toMatch(/^[\w-]{32}$/u);
       expect(reset.password).not.toBe(password);

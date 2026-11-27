@@ -130,7 +130,9 @@ export const listMcpOAuthGrants = vi
 export const revokeMcpOAuthGrant = vi.fn<(userId: string, clientId: string) => Promise<boolean>>().mockResolvedValue(false);
 
 export const betterAuthReviewUserPort = {
-  ensureUser: vi.fn<(input: { email: string; id: string; name: string; password?: string }) => Promise<{ created: boolean }>>().mockResolvedValue({ created: true }),
+  ensureUser: vi
+    .fn<(input: { disableTwoFactor?: boolean; email: string; id: string; name: string; password?: string }) => Promise<{ created: boolean; twoFactorDisabled: boolean }>>()
+    .mockResolvedValue({ created: true, twoFactorDisabled: false }),
   findUserByEmail: vi.fn<(email: string) => Promise<null>>().mockResolvedValue(null),
   findUserById: vi.fn<(id: string) => Promise<null>>().mockResolvedValue(null),
 };
