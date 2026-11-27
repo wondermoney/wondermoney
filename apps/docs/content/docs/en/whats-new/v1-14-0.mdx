@@ -1,0 +1,27 @@
+---
+title: WonderMoney 1.14.0
+description: ChatGPT and other MCP clients stay connected, and the WonderMoney connector shows its name and icon.
+---
+
+[Release notes on GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.14.0)
+
+## Upgrading
+
+Nothing to do. There are no migrations and no required settings.
+
+- **New, optional: `OPENAI_APPS_CHALLENGE`.** Set it only if you submit your server to OpenAI's ChatGPT plugin directory: the API serves it at `/.well-known/openai-apps-challenge` for OpenAI's domain check. The Docker Compose, Unraid, Helm and Render routing already send that path to the API; with another reverse proxy on one hostname, route it to the API too (see [Your instance](/en/docs/self-hosting/configure#your-instance)).
+- **Reconnect ChatGPT once.** If you connected ChatGPT with OAuth before this release, remove it in ChatGPT and add it again, so it gets a refresh token.
+
+## Improved
+
+- **ChatGPT stays connected.** ChatGPT and other MCP clients now get a refresh token, so they no longer ask you to reconnect every 15 minutes. See [Connect ChatGPT](/en/docs/settings-security-privacy/connect-ai-client#connect-chatgpt).
+- **The connector shows who it is.** ChatGPT and other MCP clients show the WonderMoney name, website and icon. A self-hosted server links to itself.
+
+## Self-hosting
+
+- `OPENAI_APPS_CHALLENGE` for OpenAI's domain check, routed by every bundled proxy.
+- `pnpm review:seed` creates or refreshes one store-review account with sample data, for operators who submit their server to an app store or app directory. It refuses on a server that isn't set up yet, or that has no prices for the sample stocks.
+
+## Thanks to
+
+- @nip10

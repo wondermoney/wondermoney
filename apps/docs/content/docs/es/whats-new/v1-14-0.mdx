@@ -1,0 +1,27 @@
+---
+title: WonderMoney 1.14.0
+description: ChatGPT y otros clientes MCP siguen conectados, y el conector de WonderMoney muestra su nombre y su icono.
+---
+
+[Notas de la versión en GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.14.0)
+
+## Actualizar
+
+Nada que hacer. No hay migraciones ni ajustes obligatorios.
+
+- **Nuevo y opcional: `OPENAI_APPS_CHALLENGE`.** Defínelo solo si envías tu servidor al directorio de plugins de ChatGPT de OpenAI: la API lo sirve en `/.well-known/openai-apps-challenge` para la verificación del dominio de OpenAI. El enrutamiento de Docker Compose, de Unraid, de Helm y de Render ya envía esa ruta a la API; con otro proxy inverso en un solo nombre de host, enrútala también a la API (consulta [Tu instancia](/es/docs/self-hosting/configure#tu-instancia)).
+- **Vuelve a conectar ChatGPT una vez.** Si conectaste ChatGPT con OAuth antes de esta versión, quítalo en ChatGPT y añádelo de nuevo, para que reciba un token de actualización.
+
+## Mejoras
+
+- **ChatGPT sigue conectado.** ChatGPT y otros clientes MCP ahora reciben un token de actualización, así que ya no te piden que vuelvas a conectarlos cada 15 minutos. Consulta [Conectar ChatGPT](/es/docs/settings-security-privacy/connect-ai-client#conectar-chatgpt).
+- **El conector muestra quién es.** ChatGPT y otros clientes MCP muestran el nombre, el sitio web y el icono de WonderMoney. Un servidor en alojamiento propio enlaza a sí mismo.
+
+## Alojamiento propio
+
+- `OPENAI_APPS_CHALLENGE` para la verificación del dominio de OpenAI, enrutado por todos los proxies incluidos.
+- `pnpm review:seed` crea o actualiza una cuenta de revisión con datos de ejemplo, para quien envía su servidor a una tienda de aplicaciones o a un directorio de apps. Se niega en un servidor que aún no está configurado o que no tiene precios para las acciones de ejemplo.
+
+## Agradecimientos
+
+- @nip10
