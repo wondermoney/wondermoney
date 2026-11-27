@@ -10,7 +10,7 @@ hosted read-only MCP server, `https://api.wonder.money/v1/mcp`. OpenAI's guides:
 | File | What |
 |---|---|
 | `plugin.json` | The manifest: identity, the listing (`extensions.com.openai.interface`), the review cases (`extensions.com.openai.review`) and the release notes (`extensions.com.openai.publication`) |
-| `mcp.json` | The one MCP server, Streamable HTTP, with OAuth through dynamic client registration and the `mcp:read` scope. No headers and no credentials |
+| `mcp.json` | The one MCP server, Streamable HTTP, with OAuth through dynamic client registration and the `mcp:read` and `offline_access` scopes. No headers and no credentials |
 | `assets/` | `logo.png` (1024 px) and `composer-icon.png` (256 px), from the mobile app's icon |
 | `schemas/` | The Agent Plugins 1.0.0 schemas the check validates against. Not part of the ZIP |
 
@@ -31,6 +31,11 @@ Every tool a review case names must be one of the read tools in `AI_TOOL_DEFINIT
 (`apps/api/src/services/ai-tools/ai-tools.service.ts`), so renaming a tool fails the check until
 the case is updated. With `--urls`, each listing URL must answer 200 without a redirect, and the
 MCP server must answer 401 with an OAuth challenge whose metadata loads.
+
+`baseScopes` asks for `offline_access` beside `mcp:read`. ChatGPT sends the base scopes on every
+OAuth request, and the authorization server issues a refresh token only for `offline_access`.
+With `mcp:read` alone, ChatGPT got no refresh token, so its connection ended when the 15-minute
+access token expired. `offline_access` reads nothing: the tools stay the read tools of `mcp:read`.
 
 `mcp.json` keeps OpenAI's authentication under the server's own `extensions["com.openai"]`, as
 OpenAI's guide places it. The Agent Plugins schema closes the server object and has no room for
