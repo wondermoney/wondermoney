@@ -52,7 +52,10 @@ const SELECT_USER = `select u.id, u.email,
 
 export function createReviewAuthUserPort(
   store: AuthSqlStore,
-  hooks: { revokeGrants?: (userId: string) => Promise<void> } = {},
+  hooks: {
+    /** Take back every OAuth grant of `userId`, on the transaction that changes the password. */
+    revokeGrants?: (query: AuthSqlQuery, userId: string) => Promise<void>;
+  } = {},
 ): ReviewAuthUserPort {
   const findOne = async (where: string, value: string): Promise<null | ReviewAuthUser> =>
     store.transaction(async (query) => {
@@ -96,12 +99,15 @@ export function createReviewAuthUserPort(
               [randomUUID(), id, id, hash],
             );
           }
-          // A new password ends what the old one opened, as a password reset in the app does.
-          if (!isNew) await query(`delete from ${SCHEMA}."session" where "userId" = $1`, [id]);
+          // A new password ends what the old one opened, as a password reset in the app does, in
+          // this transaction: the password is saved only with the rest gone.
+          if (!isNew) {
+            await query(`delete from ${SCHEMA}."session" where "userId" = $1`, [id]);
+            await hooks.revokeGrants?.(query, id);
+          }
         }
         return isNew;
       });
-      if (!created && hash !== undefined) await hooks.revokeGrants?.(id);
       return { created };
     },
     findUserByEmail: (email) => findOne('lower(u.email) = lower($1)', email),

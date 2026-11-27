@@ -160,6 +160,11 @@ async function everythingElse(reviewTenantKey: number, reviewAppuserKey: number,
       reviewAuthId,
     );
   }
+  // Shared market data, read by every household.
+  const [prices] = await rows(
+    `select count(*)::int as n, md5(coalesce(string_agg(t::text, '|' order by t::text), '')) as h from public.financial_asset_price t`,
+  );
+  snapshot['financial_asset_price'] = `${String(prices?.['n'])}:${String(prices?.['h'])}`;
   return snapshot;
 }
 
@@ -176,7 +181,16 @@ describe('seeding the store-review account', () => {
       await db.em().flush();
       const regular = await seedHousehold(db.em());
       await seedDemoHousehold({ asOfDate: FIRST_DAY, auth: demoAuth(), em: db.em() });
-      const auth = createReviewAuthUserPort(pgliteAuthStore());
+      const revoked: string[] = [];
+      let failRevocation = false;
+      const auth = createReviewAuthUserPort(pgliteAuthStore(), {
+        revokeGrants: (_query, userId) => {
+          if (failRevocation) return Promise.reject(new Error('revocation failed'));
+          revoked.push(userId);
+          return Promise.resolve();
+        },
+      });
+      const untouched = await everythingElse(-1, -1, '');
 
       // First run: a new account with a generated password, returned once.
       const first = await seedReviewAccount({ asOfDate: FIRST_DAY, auth, em: db.em(), email: REVIEW_EMAIL });
@@ -188,6 +202,7 @@ describe('seeding the store-review account', () => {
       const appuser = await reviewAppuser(em);
       const tenant = await em.findOneOrFail(Tenant, { tenantKey: first.tenantKey }, { filters: false });
       expect(appuser.appuserKey).toBe(first.appuserKey);
+      expect(await everythingElse(first.tenantKey, first.appuserKey, appuser.externalUserId)).toEqual(untouched);
       expect(appuser.accountType).toBe(AppuserAccountType.REGULAR);
       expect(tenant).toMatchObject({ name: reviewPersona.householdName, tenantType: TenantType.REGULAR });
       expect(tenant.ownerAppuserKey.appuserKey).toBe(appuser.appuserKey);
@@ -273,8 +288,21 @@ describe('seeding the store-review account', () => {
       }
       expect(empty).toEqual([]);
 
-      // --reset-password: a new password, the old one and its sessions gone.
+      expect(revoked).toEqual([]);
+
+      // A reset whose grant revocation fails saves nothing: the old password still works, so no
+      // new password is ever saved without being printed.
+      failRevocation = true;
+      await expect(seedReviewAccount({ auth, em: db.em(), email: REVIEW_EMAIL, resetPassword: true })).rejects.toThrow(
+        'revocation failed',
+      );
+      failRevocation = false;
+      expect((await signIn(REVIEW_EMAIL, password)).status).toBe(200);
+      expect(revoked).toEqual([]);
+
+      // --reset-password: a new password, the old one, its sessions and its OAuth grants gone.
       const reset = await seedReviewAccount({ auth, em: db.em(), email: REVIEW_EMAIL, resetPassword: true });
+      expect(revoked).toEqual([appuser.externalUserId]);
       expect(reset.password).toMatch(/^[\w-]{32}$/u);
       expect(reset.password).not.toBe(password);
       expect((await signIn(REVIEW_EMAIL, password)).status).toBe(401);
