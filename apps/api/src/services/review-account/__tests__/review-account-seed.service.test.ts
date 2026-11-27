@@ -3,7 +3,7 @@ import { betterAuth } from 'better-auth';
 import { memoryAdapter } from 'better-auth/adapters/memory';
 import { twoFactor } from 'better-auth/plugins';
 import type { Request } from 'express';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 
@@ -184,7 +184,31 @@ async function reviewAppuser(em: EntityManager): Promise<Appuser> {
   return em.findOneOrFail(Appuser, { emailAddress: REVIEW_EMAIL }, { filters: false });
 }
 
+/** better-auth's tables are not entities, so the per-test reset leaves them: empty them too. */
+async function emptyBetterAuth(): Promise<void> {
+  for (const table of ['passkey', 'twoFactor', 'session', 'account', 'user']) {
+    await rows(`delete from better_auth."${table}"`);
+  }
+}
+
 describe('seeding the store-review account', () => {
+  beforeEach(async () => {
+    await emptyBetterAuth();
+  });
+
+  it('refuses on a server that is not set up yet, so the review account never becomes its first account', async () => {
+    await new ReferenceDataSeeder().run(db.em(), {});
+    await db.em().flush();
+    const auth = createReviewAuthUserPort(pgliteAuthStore());
+    const untouched = await everythingElse(-1, -1, '');
+
+    await expect(
+      seedReviewAccount({ asOfDate: FIRST_DAY, auth, em: db.em(), email: REVIEW_EMAIL }),
+    ).rejects.toBeInstanceOf(ReviewSeedRefusedError);
+    expect(await everythingElse(-1, -1, '')).toEqual(untouched);
+    expect(await db.em().count(Appuser, {}, { filters: false })).toBe(0);
+  }, 120_000);
+
   // Loading the reference data and the demo takes a while, so one test walks the whole story.
   it(
     'creates a regular account beside the demo and a real household, signs in by password, and refreshes on a rerun without touching anyone else',

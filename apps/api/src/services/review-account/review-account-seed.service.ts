@@ -16,6 +16,7 @@ import { Tenant, TenantType } from '@entity/Tenant';
 import { TenantStatus } from '@entity/TenantStatus';
 import { betterAuthReviewUserPort } from '@service/auth/better-auth';
 import { isDemoAccountEmail } from '@service/auth/demo-session';
+import { isInstanceSetUp } from '@service/auth/instance-admin.service';
 import type { DemoRefreshIdentityResolution } from '@service/demo-data/demo-data-refresh-identity';
 import { type DemoDataRefreshResult, DemoDataRefreshService } from '@service/demo-data/demo-data-refresh.service';
 import { upsertDemoHouseholdCore } from '@service/demo-data/demo-household-core';
@@ -44,7 +45,8 @@ import { generateReviewPassword, type ReviewAuthUserPort } from '@service/review
  *    since a reviewer can receive no code and OAuth consent asks for one while it is on.
  *
  * It refuses, changing nothing, when the address belongs to anybody else: an account that is not
- * the review account, or a better-auth login that is not the review account's.
+ * the review account, or a better-auth login that is not the review account's. It refuses on a
+ * server that is not set up yet, so the review account never becomes its first account and admin.
  */
 
 export const reviewPersona = {
@@ -100,6 +102,13 @@ export async function seedReviewAccount(options: {
 
   if (!(await hasReferenceData(em))) {
     throw new ReviewSeedRefusedError('The database has no reference data. Run the migrations first (`pnpm migrate:prd`).');
+  }
+  // The first account on a new server is its admin and closes its setup page. The review account
+  // must not be that account: set the server up first.
+  if (!(await isInstanceSetUp(em.fork()))) {
+    throw new ReviewSeedRefusedError(
+      'This server is not set up yet: create its first account (its admin) before the review account.',
+    );
   }
 
   const existing = await findReviewAccount(em.fork(), email);
