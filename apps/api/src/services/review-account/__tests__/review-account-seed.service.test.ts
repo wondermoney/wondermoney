@@ -230,6 +230,15 @@ describe('seeding the store-review account', () => {
         [appuser.externalUserId],
       );
 
+      // A reviewer deleted a sample account, a portfolio and a loan: the rerun brings them back.
+      for (const table of ['account', 'portfolio', 'loan']) {
+        const owner = { account: 'account_owner_appuser_key', loan: 'owner_appuser_key', portfolio: 'portfolio_owner_appuser_key' }[table];
+        await rows(
+          `update public."${table}" set deleted_at = now() where ${table}_key = (select min(${table}_key) from public."${table}" where tenant_key = ? and ${owner} = ?)`,
+          [first.tenantKey, first.appuserKey],
+        );
+      }
+
       // A rerun on a later day, with no date given: today's sample data, the same password, and
       // nothing else in the database changed.
       const before = await everythingElse(first.tenantKey, first.appuserKey, appuser.externalUserId);
@@ -244,6 +253,9 @@ describe('seeding the store-review account', () => {
         .em()
         .findOneOrFail(Transaction, { tenantKey: { tenantKey: first.tenantKey } }, { filters: false, orderBy: { transactionDate: 'desc' } });
       expect(newest.transactionDate?.toISOString().slice(0, 10)).toBe('2026-11-20');
+      for (const table of ['account', 'portfolio', 'loan']) {
+        expect(await rows(`select 1 from public."${table}" where tenant_key = ? and deleted_at is not null`, [first.tenantKey])).toEqual([]);
+      }
       expect(await rows('select 1 from better_auth."twoFactor" where "userId" = ?', [appuser.externalUserId])).toEqual([]);
       const rerunSignIn = await signIn(REVIEW_EMAIL, password);
       expect(rerunSignIn.status).toBe(200);
