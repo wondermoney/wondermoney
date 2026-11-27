@@ -6,7 +6,7 @@ import { instanceName } from '@config/instance-name';
 import { AssistantAuditLog, AssistantAuditSource } from '@entity/AssistantAuditLog';
 import { authedContext } from '@middleware/authed-context';
 import { getMcpOAuthIssuer, getMcpOAuthServerMetadata, listMcpOAuthGrants, revokeMcpOAuthGrant } from '@service/auth/better-auth';
-import { MCP_OAUTH_READ_SCOPE, mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
+import { MCP_OAUTH_SCOPES, mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
 import { NotFoundError } from '@utils/errors';
 import { zParse } from '@validators/parser';
 
@@ -107,7 +107,9 @@ export async function getMcpProtectedResourceMetadata(_req: Request, res: Respon
     bearer_methods_supported: ['header'],
     resource,
     resource_name: instanceName(),
-    scopes_supported: [MCP_OAUTH_READ_SCOPE],
+    // `offline_access` too: an MCP client asks for the scopes listed here, and gets a refresh
+    // token only with that one.
+    scopes_supported: [...MCP_OAUTH_SCOPES],
   });
 }
 

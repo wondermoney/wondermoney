@@ -8,7 +8,7 @@ import { hashPassword, makeSignature, verifyPassword } from 'better-auth/crypto'
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';
 import { bearer, jwt, twoFactor } from 'better-auth/plugins';
 import type { JSONWebKeySet } from 'jose';
-import { Pool } from 'pg';
+import { Pool, type PoolClient } from 'pg';
 
 import { DI } from '@app/database/di';
 import { ConfigurationError, loadAuthConfiguration } from '@config/configuration';
@@ -34,6 +34,7 @@ import { TWO_FACTOR_COOKIE_MAX_AGE_SECONDS, twoFactorOAuthGuard } from '@service
 import { sendEmailVerificationEmail, sendPasswordResetEmail } from '@service/email/email';
 import { mcpOAuthResourceIfEnabled } from '@service/mcp/mcp-oauth-config';
 import { removePushDevicesForSession } from '@service/push/push-session-cleanup';
+import { type AuthSqlQuery, createReviewAuthUserPort, type ReviewAuthUserPort } from '@service/review-account/review-auth-user';
 import { accountLocale } from '@utils/account-language';
 import { BACKEND_URL, BETTER_AUTH_TRUSTED_ORIGINS, FRONTEND_URL } from '@utils/constants';
 import logger from '@utils/logger';
@@ -821,43 +822,54 @@ function redirectOrigins(redirectUris: unknown): string[] {
  */
 async function revokeGrants(userId: string, clientId: null | string): Promise<boolean> {
   const client = await betterAuthPool.connect();
-  const scope = clientId === null ? '' : ' and "clientId" = $2';
-  const params = clientId === null ? [userId] : [userId, clientId];
   try {
     await client.query('begin');
-    await client.query(
-      `select 1 from "${BETTER_AUTH_SCHEMA}"."oauthClient" where "clientId" in (
-         select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope}
-         union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" where "userId" = $1${scope}
-         union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}
-       ) order by "clientId" for no key update`,
-      params,
-    );
-    const consents = await client.query<{ clientId: string }>(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope} returning "clientId"`, params);
-    const refreshTokens = await client.query<{ clientId: string }>(
-      `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null returning "clientId"`,
-      params,
-    );
-    await client.query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}`, params);
-    const revokedClients = [...new Set([...consents.rows, ...refreshTokens.rows].map((row) => row.clientId))];
-    if (revokedClients.length > 0) {
-      await client.query(
-        `insert into "${BETTER_AUTH_SCHEMA}"."mcpOAuthClientActivity" ("clientId", "lastGrantEndedAt")
-         select registered."clientId", now() from "${BETTER_AUTH_SCHEMA}"."oauthClient" registered
-          where registered."clientId" = any($1::text[])
-            and not exists (select 1 from "${BETTER_AUTH_SCHEMA}"."oauthConsent" consent where consent."clientId" = registered."clientId")
-         on conflict ("clientId") do update set "lastGrantEndedAt" = excluded."lastGrantEndedAt"`,
-        [revokedClients],
-      );
-    }
+    const revoked = await revokeGrantsWith(rowsOf(client), userId, clientId);
     await client.query('commit');
-    return (consents.rowCount ?? 0) + (refreshTokens.rowCount ?? 0) > 0;
+    return revoked;
   } catch (error) {
     await client.query('rollback');
     throw error;
   } finally {
     client.release();
   }
+}
+
+/** `revokeGrants`'s statements, on a transaction the caller holds open (`query`). */
+async function revokeGrantsWith(query: AuthSqlQuery, userId: string, clientId: null | string): Promise<boolean> {
+  const scope = clientId === null ? '' : ' and "clientId" = $2';
+  const params = clientId === null ? [userId] : [userId, clientId];
+  await query(
+    `select 1 from "${BETTER_AUTH_SCHEMA}"."oauthClient" where "clientId" in (
+       select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope}
+       union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" where "userId" = $1${scope}
+       union select "clientId" from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}
+     ) order by "clientId" for no key update`,
+    params,
+  );
+  const consents = await query<{ clientId: string }>(`delete from "${BETTER_AUTH_SCHEMA}"."oauthConsent" where "userId" = $1${scope} returning "clientId"`, params);
+  const refreshTokens = await query<{ clientId: string }>(
+    `update "${BETTER_AUTH_SCHEMA}"."oauthRefreshToken" set revoked = now() where "userId" = $1${scope} and revoked is null returning "clientId"`,
+    params,
+  );
+  await query(`delete from "${BETTER_AUTH_SCHEMA}"."oauthAccessToken" where "userId" = $1${scope}`, params);
+  const revokedClients = [...new Set([...consents, ...refreshTokens].map((row) => row.clientId))];
+  if (revokedClients.length > 0) {
+    await query(
+      `insert into "${BETTER_AUTH_SCHEMA}"."mcpOAuthClientActivity" ("clientId", "lastGrantEndedAt")
+       select registered."clientId", now() from "${BETTER_AUTH_SCHEMA}"."oauthClient" registered
+        where registered."clientId" = any($1::text[])
+          and not exists (select 1 from "${BETTER_AUTH_SCHEMA}"."oauthConsent" consent where consent."clientId" = registered."clientId")
+       on conflict ("clientId") do update set "lastGrantEndedAt" = excluded."lastGrantEndedAt"`,
+      [revokedClients],
+    );
+  }
+  return consents.length + refreshTokens.length > 0;
+}
+
+/** A pg client's `query`, answering the rows only. */
+function rowsOf(client: PoolClient): AuthSqlQuery {
+  return async <R extends object>(sql: string, params?: unknown[]) => (await client.query<R>(sql, params)).rows;
 }
 
 /**
@@ -873,6 +885,31 @@ export const revokeMcpOAuthGrant = async (userId: string, clientId: string): Pro
 export const revokeAllMcpOAuthGrants = async (userId: string): Promise<void> => {
   await revokeGrants(userId, null);
 };
+
+/**
+ * The store-review account's better-auth user (`pnpm review:seed`), on better-auth's own pool. A
+ * new password there takes back every OAuth grant, as a password reset does, in the transaction
+ * that saves the password: both happen, or neither.
+ */
+export const betterAuthReviewUserPort: ReviewAuthUserPort = createReviewAuthUserPort(
+  {
+    transaction: async (run) => {
+      const client = await betterAuthPool.connect();
+      try {
+        await client.query('begin');
+        const result = await run(rowsOf(client));
+        await client.query('commit');
+        return result;
+      } catch (error) {
+        await client.query('rollback');
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
+  },
+  { revokeGrants: async (query, userId) => { await revokeGrantsWith(query, userId, null); } },
+);
 
 /**
  * Whether `clientId` is a registered OAuth client, checked before a consent is stored for it. The

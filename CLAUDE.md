@@ -11,6 +11,7 @@ Free, open-source, self-hostable personal finance. One pnpm workspace with Turbo
 | `apps/landing` | Astro marketing site (wonder.money) | pt, en, es, fr, de and it route trees must stay in step |
 | `packages/shared` | EODHD client, CSV/broker parsers | Private workspace package, `build:lib` |
 | `packages/react-email` | Email templates the API renders | Private workspace package, `build:lib` |
+| `integrations/chatgpt-plugin` | The ChatGPT plugin package (OpenAI's plugin directory) | Not a workspace package; `pnpm --filter @wondermoney/api chatgpt-plugin:check` checks it |
 
 Each app and package has its own agent guide (`CLAUDE.md` in `apps/api`, `AGENTS.md`
 elsewhere, with the other file pointing to it); it applies inside that directory. Visual and

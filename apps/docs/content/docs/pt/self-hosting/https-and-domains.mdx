@@ -29,7 +29,7 @@ Para experimentares localmente, define `APP_URL=http://localhost` e `API_URL=htt
 
 ## Outro proxy reverso
 
-Qualquer outro proxy reverso funciona: dá-lhe um só domínio e encaminha os mesmos prefixos de caminho para a API (`/.well-known/oauth-*` só conta com `MCP_OAUTH_ENABLED`). Com o Caddy na máquina:
+Qualquer outro proxy reverso funciona: dá-lhe um só domínio e encaminha os mesmos prefixos de caminho para a API (`/.well-known/oauth-*` só conta com `MCP_OAUTH_ENABLED`, e `/.well-known/openai-apps-challenge` só com `OPENAI_APPS_CHALLENGE`). Com o Caddy na máquina:
 
 ```
 money.example.com {
@@ -40,6 +40,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /.well-known/oauth-* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/openai-apps-challenge {
     reverse_proxy localhost:3001
   }
   handle {

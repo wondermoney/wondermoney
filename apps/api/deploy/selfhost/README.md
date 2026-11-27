@@ -23,7 +23,7 @@ stack and waits up to three minutes for the API. It asks for the web app and the
 
 | Flag | What it does |
 |---|---|
-| `--version 1.12.0` | Install a specific release instead of the latest |
+| `--version 1.13.0` | Install a specific release instead of the latest |
 | `--dir /srv/wondermoney` | Where to install (default `./wondermoney`) |
 | `--yes` | No questions: default addresses, and upgrade an existing install |
 | `--app-url`, `--api-url` | The addresses the web app and the API are served at |
@@ -47,8 +47,8 @@ sh install.sh
 Or do the same steps by hand, from the release tag:
 
 ```sh
-# v1.12.0 here: the release you want
-git clone --depth 1 --branch v1.12.0 https://github.com/wondermoney/wondermoney.git
+# v1.13.0 here: the release you want
+git clone --depth 1 --branch v1.13.0 https://github.com/wondermoney/wondermoney.git
 cd wondermoney/apps/api/deploy/selfhost
 ./generate-env.sh        # writes .env with fresh secrets (refuses to overwrite an existing one)
 docker compose up -d
@@ -124,8 +124,9 @@ reachable from the phone, over HTTPS in practice.
 ## HTTPS
 
 One hostname is enough. The bundled proxy (the `proxy` profile) serves the web app and the API
-on the same address: `/v1/*`, `/api/auth/*` and `/.well-known/oauth-*` (the MCP server's OAuth
-discovery documents) go to the API, everything else to the web app. It
+on the same address: `/v1/*`, `/api/auth/*`, `/.well-known/oauth-*` (the MCP server's OAuth
+discovery documents) and `/.well-known/openai-apps-challenge` (OpenAI's domain check, see
+`OPENAI_APPS_CHALLENGE`) go to the API, everything else to the web app. It
 is [Caddy](https://caddyserver.com), so it fetches and renews the certificate itself.
 
 In `.env`:
@@ -167,6 +168,9 @@ money.example.com {
     reverse_proxy localhost:3001
   }
   handle /.well-known/oauth-* {
+    reverse_proxy localhost:3001
+  }
+  handle /.well-known/openai-apps-challenge {
     reverse_proxy localhost:3001
   }
   handle {

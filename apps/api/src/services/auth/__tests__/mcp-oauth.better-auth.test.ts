@@ -263,6 +263,35 @@ describe.runIf(process.env['TEST_POSTGRES_URL'])('OAuth for the MCP server, end 
     expect((await listAccounts(next.access_token)).status).toBe(200);
   });
 
+  it('gives a client that asks for the scopes the server advertises a refresh token', async () => {
+    const { household } = await householdWithPartner();
+    // MCP scope selection: the challenge's `scope`, else the resource's `scopes_supported`,
+    // for both the registration and the authorization request.
+    const unauthenticated = await request(app).post('/v1/mcp').set('Accept', 'application/json, text/event-stream').send({ id: 1, jsonrpc: '2.0', method: 'initialize' });
+    const advertised = /scope="([^"]+)"/.exec(String(unauthenticated.headers['www-authenticate']))?.[1] ?? '';
+    const discovery = await discover();
+    const registered = await request(app).post(pathOf(discovery.registration_endpoint)).send({
+      client_name: 'ChatGPT',
+      grant_types: ['authorization_code', 'refresh_token'],
+      redirect_uris: [REDIRECT_URI],
+      response_types: ['code'],
+      scope: advertised,
+      token_endpoint_auth_method: 'none',
+    }).expect(201);
+    const clientId = (registered.body as { client_id: string }).client_id;
+
+    const cookie = await signInAs(household.appuser);
+    const { challenge, verifier } = pkce();
+    const code = await consent(discovery, clientId, cookie, { challenge, scope: advertised });
+    const tokens = await exchange(discovery, clientId, code, verifier);
+
+    expect(tokens.status).toBe(200);
+    const { refresh_token: refreshToken, scope } = tokens.body as { refresh_token?: string; scope: string };
+    expect(scope.split(' ')).toEqual(expect.arrayContaining(['mcp:read', 'offline_access']));
+    expect(refreshToken).toMatch(/^wm_oauth_rt_/);
+    expect((await refresh(discovery, clientId, refreshToken ?? '')).status).toBe(200);
+  });
+
   it('never shows one person\'s token another person\'s data, in or out of the household', async () => {
     const { household, partner } = await householdWithPartner();
     await addAccount(db.em(), household, { isPrivate: true, name: 'Owner private', owner: household.appuser });

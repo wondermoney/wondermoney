@@ -454,6 +454,22 @@ describe('rate-limit families', () => {
       expect(anonymousMcp.headers['ratelimit']).toBeDefined();
       expect(other.headers['ratelimit']).toBeDefined();
     });
+
+    it('with OAuth on, lets OpenAI\'s domain-verification fetch past the per-IP backstop, and no neighbouring path', async () => {
+      const { globalBackstopRateLimit } = await loadRateLimitModule({ ...PRODUCTION_ENV, MCP_OAUTH_ENABLED: 'true' });
+      const app = express();
+      app.set('trust proxy', true);
+      app.use(globalBackstopRateLimit());
+      app.all('/*splat', (_req, res) => res.sendStatus(200));
+      const ip = '198.51.100.79';
+
+      const challenge = await request(app).get('/.well-known/openai-apps-challenge').set('X-Forwarded-For', ip);
+      const lookalike = await request(app).get('/.well-known/openai-apps-challenge-other').set('X-Forwarded-For', ip);
+
+      expect(challenge.status).toBe(200);
+      expect(challenge.headers['ratelimit']).toBeUndefined();
+      expect(lookalike.headers['ratelimit']).toBeDefined();
+    });
   });
 });
 

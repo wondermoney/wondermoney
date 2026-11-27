@@ -27,16 +27,21 @@ import { buildInstallmentSchedule } from '@service/installment/installment-sched
 import { demoAccounts, demoCompanion } from './demo-fixtures';
 import { upsertDemoRow as upsert } from './demo-upsert';
 
-/** Linked examples for the public read-only demo, never for another household. */
+/**
+ * Linked examples for a sample household: the public read-only demo, or the store-review account.
+ * The demo's companion (a non-login member) belongs to the demo household alone; without it
+ * (`withCompanion: false`) the partner in the shared dinner is a name with no account.
+ */
 export async function upsertDemoWorkflows(
   em: EntityManager,
   owner: Appuser,
   tenant: Tenant,
   asOf: Date,
   goal: Goal,
+  { withCompanion }: { withCompanion: boolean },
 ): Promise<void> {
   const currency = owner.currencyKey;
-  const partner = await ensureCompanion(em, owner, tenant);
+  const partner = withCompanion ? await ensureCompanion(em, owner, tenant) : null;
   const groceries = await em.findOneOrFail(Category, { isSystemCategory: true, name: 'GROCERIES' });
   const leisure = await em.findOneOrFail(Category, { isSystemCategory: true, name: 'HOBBIES_AND_LEISURE' });
   const dining = await em.findOneOrFail(Category, { isSystemCategory: true, name: 'CAFE_RESTAURANTS_BARS' });

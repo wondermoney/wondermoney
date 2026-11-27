@@ -15,6 +15,7 @@ import { resetMcpAuthFailures } from '@middleware/mcp-auth';
 import mcpRoutes from '@route/mcp';
 import { createApiToken, hashApiToken } from '@service/api-token/api-token.service';
 import { resetMcpToolCallWindows } from '@service/mcp/mcp-rate-limit.service';
+import { FRONTEND_URL } from '@utils/constants';
 
 vi.mock('@app/app', async () => ({ DI: (await import('@app/database/di')).DI }));
 
@@ -73,8 +74,9 @@ describe('POST /v1/mcp', () => {
     expect(response.status).toBe(200);
     expect(response.body.result).toMatchObject({
       capabilities: { tools: expect.any(Object) },
-      serverInfo: { name: 'wondermoney' },
+      serverInfo: { name: 'wondermoney', title: 'WonderMoney', websiteUrl: FRONTEND_URL },
     });
+    expect(response.body.result.serverInfo.icons).toEqual([expect.objectContaining({ mimeType: 'image/png', src: `${FRONTEND_URL}/wondermoney-icon.png` })]);
     expect(response.body.result.protocolVersion).toEqual(expect.any(String));
   });
 

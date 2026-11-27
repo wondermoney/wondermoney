@@ -20,7 +20,7 @@ import { LoanPaymentFrequency, LoanRateType, LoanStatus, LoanType } from '@servi
  * The demo household's core objects, upserted from the seeder fixtures in `seeders/demo/`: its three
  * bank accounts, its budget, its portfolios and its two loans. Each is matched on the demo user and
  * its fixture name, so running this again changes nothing that is already in place, and nothing
- * outside the demo household is read or written. The caller flushes.
+ * outside the demo household is read or written. A soft-deleted one is restored. The caller flushes.
  *
  * Used by `demo:reset` (rebaseline an existing demo) and `demo:seed` (create or refresh one).
  */
@@ -204,7 +204,9 @@ async function upsertByCriteria<T extends object>(
   const existing = await em.findOne<T>(entity, criteria);
 
   if (existing) {
-    em.assign(existing, data);
+    // A sample row someone deleted comes back: the store-review account can be changed, and the
+    // refresh after this needs every sample account and portfolio. The demo never deletes any.
+    em.assign(existing, { ...data, deletedAt: null });
     return existing;
   }
 
