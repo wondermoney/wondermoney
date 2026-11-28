@@ -191,6 +191,12 @@ export type AppAuthAdapter = AuthSessionPort<AuthSession>
     signInWithPasskey: () => Promise<PasskeySignInOutcome>
     /** The signed-in user's passkeys. */
     listPasskeys: () => Promise<PasskeyListOutcome>
+    /**
+     * When the current session was created (ISO), or null when unknown. The API allows its
+     * sensitive actions only from a recent sign-in (`session_not_fresh`), so a screen can offer
+     * to sign in again before the person starts one.
+     */
+    sessionStartedAt: () => Promise<string | null>
     /** Creates a passkey on this device for the signed-in user. */
     addPasskey: () => Promise<PasskeyAddOutcome>
     /** Removes one of the signed-in user's passkeys from the server (the device keeps its copy). */

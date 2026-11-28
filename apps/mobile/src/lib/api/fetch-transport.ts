@@ -1,4 +1,4 @@
-import type { HttpRequest, HttpTransport } from './client'
+import { type HttpRequest, type HttpTransport, TOTP_CODE_HEADER } from './client'
 
 export type FetchTransportOptions = Readonly<{
   baseUrl: string
@@ -85,6 +85,9 @@ export const createFetchTransport = ({
         Authorization: request.headers.Authorization,
         Accept: 'application/json',
       }
+      // The one other header a request may carry: a sensitive action's authenticator code.
+      const totpCode = request.headers[TOTP_CODE_HEADER]
+      if (totpCode) headers[TOTP_CODE_HEADER] = totpCode
       const canHaveBody = request.method !== 'GET' && request.method !== 'HEAD'
       const rawBody = canHaveBody ? request.body : undefined
       // multipart/form-data uploads (currently only OCR receipt-scan) skip JSON serialization and

@@ -487,6 +487,15 @@ export function createAppAuthAdapter(
       }
     },
 
+    sessionStartedAt: async (): Promise<string | null> => {
+      try {
+        const { data } = await client.getSession()
+        return asText(data?.session.createdAt)
+      } catch {
+        return null
+      }
+    },
+
     deletePasskey: async (id): Promise<PasskeyDeleteOutcome> => {
       const request = client.$fetch
       if (!request) return { status: 'unavailable' }

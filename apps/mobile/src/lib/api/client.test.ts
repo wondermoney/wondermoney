@@ -483,6 +483,28 @@ describe('API client', () => {
     await expect(client.read(endpoint)).resolves.toBeUndefined()
   })
 
+  describe('authenticator code on a write', () => {
+    const sensitiveEndpoint = writeEndpoint({ method: 'POST', path: '/sensitive', schema: z.object({ ok: z.boolean() }) })
+
+    it('sends the code as x-totp-code beside the bearer token', async () => {
+      const { client, transport } = setup(async () => ({ status: 200, body: { ok: true } }))
+      await client.write(sensitiveEndpoint, { commit: () => undefined, totpCode: '654321' })
+      expect(transport.request.mock.calls[0][0].headers).toEqual({ Authorization: 'Bearer token-0', 'x-totp-code': '654321' })
+    })
+
+    it('sends no code header without one', async () => {
+      const { client, transport } = setup(async () => ({ status: 200, body: { ok: true } }))
+      await client.write(sensitiveEndpoint, { commit: () => undefined, totpCode: '' })
+      expect(Object.keys(transport.request.mock.calls[0][0].headers)).toEqual(['Authorization'])
+    })
+
+    it('keeps the API code of a refused sensitive action', async () => {
+      const { client } = setup(async () => ({ status: 403, body: { code: 'session_not_fresh', message: 'Please sign in again to continue.' } }))
+      const error = await client.write(sensitiveEndpoint, { commit: () => undefined }).catch((caught: unknown) => caught)
+      expect(error).toMatchObject({ code: 'http', status: 403, serverCode: 'session_not_fresh' })
+    })
+  })
+
   describe('readRaw', () => {
     const csvEndpoint = { method: 'GET' as const, path: '/report.csv' }
 

@@ -113,6 +113,21 @@ describe('createFetchTransport', () => {
     if (method === 'HEAD') expect(result.body).toBeUndefined()
   })
 
+  it('forwards a sensitive action\'s authenticator code and no other caller header', async () => {
+    const fetchImpl = jest.fn(async () => response('{"ok":true}'))
+    const transport = createFetchTransport({ baseUrl: 'https://api.example.test', fetchImpl })
+
+    await transport.request(request({
+      method: 'POST',
+      headers: { Authorization: 'Bearer private-token', 'x-totp-code': '123456', 'x-other': 'dropped' } as HttpRequest['headers'],
+    }))
+    expect(requestInit(fetchImpl).headers).toEqual({
+      Authorization: 'Bearer private-token',
+      Accept: 'application/json',
+      'x-totp-code': '123456',
+    })
+  })
+
   it('serializes a defined write body as JSON', async () => {
     const fetchImpl = jest.fn(async () => response('', 204))
     const transport = createFetchTransport({ baseUrl: 'https://api.example.test', fetchImpl })

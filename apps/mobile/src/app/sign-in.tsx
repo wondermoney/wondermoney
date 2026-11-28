@@ -13,6 +13,7 @@ import { SocialSignIn } from '@/features/auth/social-sign-in'
 import { SsoSignIn } from '@/features/auth/sso-sign-in'
 import { usePairing } from '@/features/auth/use-pairing'
 import { Button } from '@/components/ui/button'
+import { hasReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
 import { takeSignUpAfterSignOut } from '@/lib/auth/sign-up-after-sign-out'
 import { usePasswordSignIn, useServerSetup } from '@/lib/server/use-instance'
 
@@ -69,9 +70,14 @@ export default function SignInRoute() {
     }
   })()
 
+  // Signed out for a fresh session (lib/auth/return-after-sign-in.ts): say why, and that the
+  // app goes back afterwards.
+  const [signInAgain] = useState(hasReturnAfterSignIn)
   const notice = provisionFailed
     ? { message: t('auth.errors.provisionFailed'), tone: 'destructive' as const }
-    : pairingNotice ?? (passwordUpdatedNotice ? { message: passwordUpdatedNotice, tone: 'default' as const } : undefined)
+    : pairingNotice
+      ?? (passwordUpdatedNotice ? { message: passwordUpdatedNotice, tone: 'default' as const } : undefined)
+      ?? (signInAgain ? { message: t('auth.signInAgainNotice'), tone: 'default' as const } : undefined)
 
   if (serverSetup) return <ServerSetup server={serverSetup} />
 

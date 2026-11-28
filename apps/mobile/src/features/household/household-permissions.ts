@@ -20,6 +20,12 @@ export const householdRoleRank = (role: HouseholdRoleValue): number => RANK[role
 
 export const isHouseholdManager = (role: HouseholdRoleValue | null | undefined): boolean => role === 'owner' || role === 'admin'
 
+/**
+ * A viewer reads the household and writes only their own settings. Adding a bank key is for
+ * linking banks, a shared write, so the API refuses it (`household_read_only`).
+ */
+export const canAddBankKey = (role: HouseholdRoleValue | null | undefined): boolean => role !== 'viewer'
+
 /** The roles `actor` may grant, by invite or by a role change: those strictly below their own. */
 export function grantableRoles(actor: HouseholdRoleValue | null | undefined): readonly GrantableHouseholdRole[] {
   if (!actor || !isHouseholdManager(actor)) return []

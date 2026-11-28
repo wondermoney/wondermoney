@@ -42,10 +42,23 @@ jest.mock('../use-start-bank-connection', () => ({
   useStartBankConnection: () => ({ isPending: mockStartPending, variables: mockStartVariables, mutate: mockMutate }),
   classifyStartBankConnectionFailure: (error: unknown) => (error as { code?: string } | null)?.code ?? 'general',
 }))
+jest.mock('../enable-banking-setup-route', () => ({
+  EnableBankingSetupRoute: (props: { sharedUnavailable: boolean; onActivated: () => void }) => {
+    const Native = jest.requireActual<typeof import('react-native')>('react-native')
+    return (
+      <>
+        <Native.Text testID="setup">setup</Native.Text>
+        <Native.Text testID="sharedUnavailable">{String(props.sharedUnavailable)}</Native.Text>
+        <Native.Pressable accessibilityRole="button" accessibilityLabel="Activated" onPress={props.onActivated}><Native.Text>Activated</Native.Text></Native.Pressable>
+      </>
+    )
+  },
+}))
 jest.mock('../connect-bank-screen', () => ({
   ConnectBankScreen: (props: {
     state: { status: string; rows?: { id: string; name: string }[]; sharedUnavailable?: boolean }
     startFailure: string | null
+    keyActivated?: boolean
     onBack: () => void
     onRetry: () => void
     onSelectBank: (row: { id: string; name: string; logo: string }) => void
@@ -56,6 +69,7 @@ jest.mock('../connect-bank-screen', () => ({
         <Native.Text testID="state">{props.state.status}</Native.Text>
         <Native.Text testID="sharedUnavailable">{String(props.state.sharedUnavailable ?? '')}</Native.Text>
         <Native.Text testID="startFailure">{props.startFailure ?? ''}</Native.Text>
+        <Native.Text testID="keyActivated">{String(props.keyActivated ?? false)}</Native.Text>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={props.onBack}><Native.Text>Back</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Retry" onPress={props.onRetry}><Native.Text>Retry</Native.Text></Native.Pressable>
         <Native.Pressable accessibilityRole="button" accessibilityLabel="Select" onPress={() => props.onSelectBank({ id: '1', name: 'Revolut', logo: 'https://logo' })}><Native.Text>Select</Native.Text></Native.Pressable>
@@ -81,13 +95,26 @@ describe('ConnectBankRoute', () => {
     expect(mockInstitutionsOptions.at(-1)).toEqual({ enabled: true })
   })
 
-  it('asks for a key, without asking for the bank list, when the person has none to use', async () => {
+  it('sets up a key in the app, without asking for the bank list, when the person has none to use', async () => {
     mockCredential = { sharedUnavailable: false, status: 'credential-required' }
     const view = await render(<ConnectBankRoute />)
 
-    expect(view.getByTestId('state').props.children).toBe('credential-required')
+    expect(view.getByTestId('setup')).toBeOnTheScreen()
+    expect(view.queryByTestId('state')).not.toBeOnTheScreen()
     expect(view.getByTestId('sharedUnavailable').props.children).toBe('false')
     expect(mockInstitutionsOptions.at(-1)).toEqual({ enabled: false })
+  })
+
+  it('moves on to the bank list, saying the key is active, once the setup activates it', async () => {
+    mockCredential = { sharedUnavailable: false, status: 'credential-required' }
+    const view = await render(<ConnectBankRoute />)
+    await fireEvent.press(view.getByRole('button', { name: 'Activated' }))
+
+    mockCredential = { status: 'ready' }
+    await view.rerender(<ConnectBankRoute />)
+
+    expect(view.getByTestId('state').props.children).toBe('loaded')
+    expect(view.getByTestId('keyActivated').props.children).toBe('true')
   })
 
   it('passes on why the server\'s shared credential does not cover this household', async () => {

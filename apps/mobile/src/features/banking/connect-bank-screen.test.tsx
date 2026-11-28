@@ -37,16 +37,12 @@ describe('ConnectBankScreen', () => {
     expect(props.onRetry).toHaveBeenCalledTimes(1)
   })
 
-  it('asks for an Enable Banking key instead of a search box when the person has none to use', async () => {
-    const { view } = await setup({ state: { sharedUnavailable: false, status: 'credential-required' } })
-    expect(view.getByText('Add your Enable Banking key first')).toBeOnTheScreen()
-    expect(view.queryByLabelText('Search banks')).not.toBeOnTheScreen()
-    expect(view.queryByText(/covers one household only/)).not.toBeOnTheScreen()
-  })
-
-  it('says why when the server\'s shared credential serves another household', async () => {
-    const { view } = await setup({ state: { sharedUnavailable: true, status: 'credential-required' } })
-    expect(view.getByText(/covers one household only/)).toBeOnTheScreen()
+  it('says the key is active when the setup just finished, above the bank list', async () => {
+    const { view } = await setup({ keyActivated: true })
+    expect(view.getByText('Step 5 of 5')).toBeOnTheScreen()
+    expect(view.getByText('Choose your bank')).toBeOnTheScreen()
+    expect(view.getByText('Your Enable Banking key is active. Choose your bank to connect it.')).toBeOnTheScreen()
+    expect(view.getByText('Revolut')).toBeOnTheScreen()
   })
 
   it('lists every bank by name when loaded', async () => {

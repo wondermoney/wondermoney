@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native'
 import { I18nextProvider } from 'react-i18next'
 
+import { clearReturnAfterSignIn, hasReturnAfterSignIn, requestReturnAfterSignIn } from '@/lib/auth/return-after-sign-in'
 import { requestSignUpAfterSignOut, takeSignUpAfterSignOut } from '@/lib/auth/sign-up-after-sign-out'
 import { initMobileI18n } from '@/lib/i18n'
 import { captureAnalyticsEvent } from '@/lib/telemetry/analytics'
@@ -151,6 +152,15 @@ describe('SignInRoute', () => {
 
     expect(mockReplace).toHaveBeenCalledWith('/sign-up')
     expect(takeSignUpAfterSignOut()).toBe(false)
+  })
+
+  it('says why when signed out to sign in again, and leaves the return for after sign-in', async () => {
+    requestReturnAfterSignIn({ href: '/more/banking/connect', principalId: 'user-1', server: 'https://api.example.test' })
+    const view = await renderRoute()
+
+    expect(view.getByText('For your security, sign in again. WonderMoney takes you back to where you were.')).toBeTruthy()
+    expect(hasReturnAfterSignIn()).toBe(true)
+    clearReturnAfterSignIn()
   })
 
   it('stays on sign-in after an ordinary sign-out', async () => {

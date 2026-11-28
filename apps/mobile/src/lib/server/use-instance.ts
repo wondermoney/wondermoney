@@ -131,3 +131,26 @@ export function useInstanceBankSyncCredentials(): 'instance' | 'user' | undefine
   const { data } = useInstance()
   return data ? (data.features.bankSyncCredentials ?? 'user') : undefined
 }
+
+export type EnableBankingSetupValues = NonNullable<InstanceDescription['enableBankingSetup']>
+
+export type EnableBankingSetupState = Readonly<{
+  /** The values to enter in the Control Panel, or null while they are not to hand. */
+  values: EnableBankingSetupValues | null
+  /** `missing`: the description arrived without them (an older server, or Enable Banking off). */
+  status: 'loading' | 'failed' | 'missing' | 'ready'
+  retry: () => void
+}>
+
+/**
+ * The values to enter in Enable Banking's Control Panel for this server (its own redirect URL,
+ * the privacy and terms URLs, a suggested name and description), and why they are not there yet.
+ */
+export function useEnableBankingSetup(): EnableBankingSetupState {
+  const query = useInstance()
+  const retry = () => { void query.refetch() }
+  const values = query.data?.enableBankingSetup ?? null
+  if (values) return { retry, status: 'ready', values }
+  if (query.data) return { retry, status: 'missing', values: null }
+  return { retry, status: query.isError ? 'failed' : 'loading', values: null }
+}

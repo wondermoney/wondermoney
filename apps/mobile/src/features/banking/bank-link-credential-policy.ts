@@ -3,8 +3,9 @@ type BankSyncCredentials = 'instance' | 'user'
 /**
  * Whether the signed-in person can link a bank: with an active Enable Banking key of their own,
  * or when the server's shared credential covers their household (`bankSyncCredentials` on the
- * profile). Otherwise the connect screen asks for a key, added in the web app's Settings, and
- * says why when the server has a shared credential that serves another household.
+ * profile). Otherwise the connect screen sets up a key (`enable-banking-setup.tsx`), and says why
+ * when the server has a shared credential that serves another household. A household the shared
+ * credential covers never sees the setup.
  */
 export type BankLinkCredentialState =
   | { status: 'loading' }
