@@ -113,7 +113,7 @@ Os prazos abaixo aplicam-se ao Serviço alojado. Um servidor auto-alojado conser
 - **Relatórios de erros (Sentry).** O Sentry conserva os relatórios de erros durante até 90 dias.
 - **Ficheiros carregados e importações de extratos.** Um extrato bancário que carregue para importar, e as linhas lidas dele, são apagados 7 dias depois de concluir a importação; conservamos um resumo da importação (nome do ficheiro, estado, datas e número de linhas). Uma importação que não conclua expira ao fim de 7 dias e é apagada com o seu ficheiro. Um ficheiro que anexe a uma transação é apagado do armazenamento quando o remove. Uma exportação de dados é apagada 24 horas depois de ser criada, e um ficheiro de cópia de segurança que carregue para restaurar é apagado quando o restauro termina, no máximo um dia depois de ter começado. Uma imagem de recibo ou fatura que envie para leitura automática, e um ficheiro de carteira que importe, são apagados 30 dias depois de serem processados. Um recibo que confirme fica como anexo da transação até o remover.
 - **Registos do servidor.** Os nossos servidores registam cada pedido: o método, o endereço e o resultado e, para um pedido que falhe, o endereço de rede de onde veio e o agente de utilizador do navegador. Conservamos os registos do servidor durante 30 dias, no máximo.
-- **Cópias de segurança.** Os dados apagados podem permanecer nas cópias de segurança da base de dados até estas expirarem. As cópias de segurança da base de dados são conservadas durante 30 dias.
+- **Cópias de segurança.** Os dados apagados podem permanecer nas nossas cópias de segurança da base de dados.
 - **Registos de faturação.** O Serviço é gratuito, pelo que não conservamos registos de faturação.
 
 ## 7. Localização e Transferência de Dados
