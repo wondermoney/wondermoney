@@ -82,6 +82,7 @@ export const TENANT_TABLE = 'public.tenant';
 
 const SYSTEM_SCHEMAS = `('pg_catalog', 'information_schema', 'pg_toast')`;
 const MAX_ROUNDS = 50;
+const FILE_KEY_CHUNK = 1_000;
 const MARKS = 'wm_erasure_mark';
 
 const ACTIONS: Record<string, ForeignKeyAction> = { a: 'no action', c: 'cascade', d: 'set default', n: 'set null', r: 'restrict' };
@@ -280,7 +281,29 @@ async function listFiles(tx: EntityManager, schema: ErasureSchema, marked: Set<s
       files.set(`${row.bucket ?? ''}\u0000${key}`, { bucket: row.bucket, key });
     }
   }
-  return [...files.values()];
+  const inUse = await keysStillUsed(tx, schema, [...new Set([...files.values()].map((file) => file.key))]);
+  return [...files.values()].filter((file) => !inUse.has(file.key));
+}
+
+/**
+ * The keys a live row that is not being erased still names. One stored object can belong to two
+ * households: a receipt scanned in one is the attachment the person confirms it as in the next
+ * (`controller/account/ocr.ts`), so the file goes only with the last row that names it.
+ */
+async function keysStillUsed(tx: EntityManager, schema: ErasureSchema, keys: string[]): Promise<Set<string>> {
+  const used = new Set<string>();
+  for (let start = 0; start < keys.length; start += FILE_KEY_CHUNK) {
+    const chunk = keys.slice(start, start + FILE_KEY_CHUNK);
+    for (const source of FILE_COLUMNS) {
+      const key = primaryKeyOf(schema, source.table);
+      const rows = await run<{ key: string }[]>(tx, `
+        select distinct t.${quote(source.key)} as key from ${source.table} t
+         where t.${quote(source.key)} in (${chunk.map(() => '?').join(', ')}) and t.deleted_at is null
+           and not exists (select 1 from ${MARKS} m where m.tbl = ${literal(source.table)} and m.pk = ${pkJson('t', key)})`, chunk);
+      for (const row of rows) used.add(row.key);
+    }
+  }
+  return used;
 }
 
 /**

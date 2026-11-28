@@ -206,20 +206,23 @@ describe('the daily retention purge', () => {
   describe('payment-due reminder deliveries', () => {
     async function reminder(household: Household, periodEnd: string, at: Date) {
       const em = db.em();
-      const row = em.create(CreditCardDueReminderDelivery, { accountKey: household.account, channel: CreditCardDueReminderChannel.EMAIL, completedAt: at, periodEnd: new Date(`${periodEnd}T00:00:00Z`), sentAt: at, status: CreditCardDueReminderStatus.SENT }, { partial: true });
+      const row = em.create(CreditCardDueReminderDelivery, { accountKey: household.account, channel: CreditCardDueReminderChannel.EMAIL, completedAt: at, periodEnd: new Date(`${periodEnd}T00:00:00Z`), providerMessageId: 'msg-1', sentAt: at, status: CreditCardDueReminderStatus.SENT }, { partial: true });
       await em.flush();
       await age('credit_card_due_reminder_delivery', 'credit_card_due_reminder_delivery_key', row.creditCardDueReminderDeliveryKey, 'updated_at', at);
       return row.creditCardDueReminderDeliveryKey;
     }
 
-    it('deletes a delivery over 30 days old once its statement is out of the window the reminder sweep reads', async () => {
+    it('deletes a delivery over 30 days old once its statement is out of the window the reminder sweep reads, and clears the message id of one it keeps', async () => {
       const household = await seedHousehold(db.em());
       const old = await reminder(household, '2026-10-05', daysAgo(31));
       const stillInWindow = await reminder(household, '2026-10-26', daysAgo(31));
       const young = await reminder(household, '2026-09-30', daysAgo(29));
 
-      expect(await purgeCreditCardReminderDeliveries(db.em(), now)).toEqual({ deleted: 1, more: false });
+      expect(await purgeCreditCardReminderDeliveries(db.em(), now)).toEqual({ cleared: 1, deleted: 1, more: false });
       expect(await remaining('credit_card_due_reminder_delivery', 'credit_card_due_reminder_delivery_key')).toEqual(new Set([stillInWindow, young]));
+      // The row kept as the dedupe names no message any more; the young one is untouched.
+      const ids = await query('select credit_card_due_reminder_delivery_key as k, provider_message_id as id from credit_card_due_reminder_delivery order by 1');
+      expect(ids).toEqual([{ id: null, k: stillInWindow }, { id: 'msg-1', k: young }]);
       expect(old).toBeGreaterThan(0);
     });
   });

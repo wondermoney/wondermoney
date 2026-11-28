@@ -160,6 +160,29 @@ describe('erasing what an account deletion left, 30 days on', () => {
     expect(await query('select 1 from enable_banking_credential where enable_banking_credential_key = ?', [ownerKey.enableBankingCredentialKey])).toHaveLength(0);
   });
 
+  it('keeps a receipt file that another household still has as an attachment', async () => {
+    const dissolved = await seedHousehold(db.em());
+    const next = await seedHousehold(db.em());
+    const member = await addPartner(db.em(), dissolved);
+    const em = db.em();
+    // Scanned while in the dissolved household and left unreviewed...
+    const scan = em.create(TransactionOCRImport, { appuserKey: member, fileKey: 'wmocr/moved.png', fileUrl: '', status: TransactionOCRImportStatus.STARTED, tenantKey: dissolved.tenant, tokensSpent: 1 }, { partial: true });
+    await em.flush();
+    // ...then confirmed from the next household: its attachment is the same stored object.
+    const transaction = await addTransaction(db.em(), next, { amount: -9, date: daysAgo(10), status: 'BOOKED' });
+    const attaching = db.em();
+    attaching.create(TransactionAttachment, { contentType: 'image/png', fileName: 'receipt', sizeBytes: 10, storageKey: 'wmocr/moved.png', tenantKey: next.tenant, transactionKey: transaction, uploadedByAppuserKey: member }, { partial: true });
+    await attaching.flush();
+    await deleteAccount(dissolved.appuser, daysAgo(31));
+
+    const files = storage();
+    expect(await eraseDeletedAccounts({ em: db.em(), now, storage: files })).toMatchObject({ failed: 0, households: 1 });
+
+    expect(await query('select 1 from transaction_ocr_import where transaction_ocrimport_key = ?', [scan.transactionOCRImportKey])).toHaveLength(0);
+    expect(await query('select tenant_key from transaction_attachment where storage_key = ? and deleted_at is null', ['wmocr/moved.png'])).toEqual([{ tenant_key: next.tenant.tenantKey }]);
+    expect(files.deleted).not.toContain('files/wmocr/moved.png');
+  });
+
   it('leaves a dissolved household alone once someone is an active member of it again', async () => {
     const household = await seedHousehold(db.em());
     const { partner } = await furnish(household, 'rejoined');
@@ -208,6 +231,27 @@ describe('erasing what an account deletion left, 30 days on', () => {
 
     expect(await eraseDeletedAccounts({ em: db.em(), now, storage: storage() })).toMatchObject({ accounts: 1, failed: 0, households: 1 });
     expect(await householdRows(household.tenant.tenantKey)).toEqual({});
+  });
+
+  it('counts a refused person against the per-run limit, and starts somewhere else the next day', async () => {
+    const other = await seedHousehold(db.em());
+    const refused: Household[] = [];
+    for (let index = 0; index < 2; index += 1) {
+      const household = await seedHousehold(db.em());
+      const { merchant } = await furnish(household, `refused${index}`);
+      await addTransaction(db.em(), other, { amount: -1, date: daysAgo(40), merchant, status: 'BOOKED' });
+      refused.push(household);
+    }
+    const clean = await seedHousehold(db.em());
+    for (const household of [...refused, clean]) await deleteAccount(household.appuser, daysAgo(40));
+
+    const runs = [];
+    for (let day = 0; day < 3; day += 1) {
+      runs.push(await eraseDeletedAccounts({ em: db.em(), maxAccounts: 1, now: new Date(now.getTime() + day * 24 * 60 * 60 * 1000), storage: storage() }));
+    }
+
+    for (const run of runs) expect(run.accounts + run.failed).toBe(1);
+    expect(await appuserExists(clean.appuser.appuserKey)).toBe(false);
   });
 
   it('works through a bounded number of people per run', async () => {

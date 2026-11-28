@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Filter, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy';
 
 import { TENANT_FILTER, tenantScopedCond } from '../filters/tenant-filter';
 
@@ -14,6 +14,7 @@ import { Tenant } from './Tenant';
 
 @Entity()
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
+@Index({ name: 'financial_transaction_portfolio_key_index', properties: ['portfolioKey'] })
 export class FinancialTransaction extends Base {
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key', nullable: true })
   appuserKey?: Rel<Appuser>;

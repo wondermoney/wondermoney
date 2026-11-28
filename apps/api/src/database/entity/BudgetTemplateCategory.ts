@@ -9,6 +9,7 @@ import { Budget } from './Budget';
 import { Category } from './Category';
 
 @Entity()
+@Index({ name: 'budget_template_category_category_key_index', properties: ['categoryKey'] })
 @Index({ properties: ['budgetKey', 'year', 'month'] }) // Index for budget queries by year/month
 @Unique({ properties: ['budgetKey', 'categoryKey', 'year', 'month'] })
 export class BudgetTemplateCategory {

@@ -27,7 +27,10 @@ import { eraseRows, ErasureRefused, type ErasureSchema, loadErasureSchema, type 
 export interface DeletedAccountErasureInput {
   em: EntityManager;
   logger?: Pick<Logger, 'info' | 'warn'>;
-  /** People erased per run (those only checked do not count); the rest wait for the next run. */
+  /**
+   * People whose erasure runs per run, erased, refused or failed (those only checked, with nothing
+   * to erase, do not count); the rest wait for the next run.
+   */
   maxAccounts?: number;
   now: Date;
   storage: RetentionStorage;
@@ -59,7 +62,7 @@ export interface DeletedAccountErasureResult {
 const PERSONAL_ROWS = [{ owner: 'appuser_key', table: 'enable_banking_credential' }] as const;
 
 const DEFAULT_MAX_ACCOUNTS = 25;
-const PAGE = 200;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface OneOutcome {
   account: boolean;
@@ -72,48 +75,46 @@ interface OneOutcome {
 export async function eraseDeletedAccounts(input: DeletedAccountErasureInput): Promise<DeletedAccountErasureResult> {
   const maxAccounts = input.maxAccounts ?? DEFAULT_MAX_ACCOUNTS;
   const result: DeletedAccountErasureResult = { accounts: 0, failed: 0, files: 0, households: 0, keptAccounts: 0, keptHouseholds: 0, more: false, rows: 0 };
-  const cutoff = retentionCutoff(input.now);
+  const candidates = rotate(await deletedAccounts(input.em, retentionCutoff(input.now)), input.now);
+  if (candidates.length === 0) return result;
   const schema = await loadErasureSchema(input.em.fork());
 
-  let erased = 0;
-  let after = 0;
-  for (;;) {
-    const page = await deletedAccountsAfter(input.em, cutoff, after);
-    for (const appuserKey of page) {
-      if (erased >= maxAccounts) {
-        result.more = true;
-        return result;
-      }
-      try {
-        const outcome = await eraseOne(input.em.fork(), schema, appuserKey, input.storage);
-        result.households += outcome.households;
-        result.keptHouseholds += outcome.keptHouseholds;
-        result.rows += outcome.rows;
-        result.files += outcome.files;
-        if (outcome.account) result.accounts += 1;
-        else result.keptAccounts += 1;
-        if (outcome.account || outcome.households > 0) erased += 1;
-      } catch (error) {
-        result.failed += 1;
-        input.logger?.warn(
-          { appuserKey, error: error instanceof Error ? error.message : String(error), refused: error instanceof ErasureRefused },
-          'Erasing a deleted account failed',
-        );
-      }
+  // Every person whose erasure ran counts, refused or failed too: a run's work stays bounded.
+  let attempted = 0;
+  for (const appuserKey of candidates) {
+    if (attempted >= maxAccounts) {
+      result.more = true;
+      return result;
     }
-    if (page.length < PAGE) return result;
-    after = page[page.length - 1] ?? after;
+    try {
+      const outcome = await eraseOne(input.em.fork(), schema, appuserKey, input.storage);
+      result.households += outcome.households;
+      result.keptHouseholds += outcome.keptHouseholds;
+      result.rows += outcome.rows;
+      result.files += outcome.files;
+      if (outcome.account) result.accounts += 1;
+      else result.keptAccounts += 1;
+      if (outcome.account || outcome.households > 0) attempted += 1;
+    } catch (error) {
+      attempted += 1;
+      result.failed += 1;
+      input.logger?.warn(
+        { appuserKey, error: error instanceof Error ? error.message : String(error), refused: error instanceof ErasureRefused },
+        'Erasing a deleted account failed',
+      );
+    }
   }
+  return result;
 }
 
-/** Every account deleted (and anonymised) before the cutoff, a page at a time. */
-async function deletedAccountsAfter(em: EntityManager, cutoff: Date, after: number): Promise<number[]> {
+/** Every account deleted (and anonymised) before the cutoff. */
+async function deletedAccounts(em: EntityManager, cutoff: Date): Promise<number[]> {
   const rows = await em.getConnection().execute<{ appuser_key: number }[]>(
     `select appuser_key from appuser
       where deleted_at is not null and deleted_at < ? and record_active = false
-        and external_user_id = 'deleted:' || appuser_key::text and appuser_key > ?
-      order by appuser_key limit ?`,
-    [cutoff, after, PAGE],
+        and external_user_id = 'deleted:' || appuser_key::text
+      order by appuser_key`,
+    [cutoff],
   );
   return rows.map((row) => row.appuser_key);
 }
@@ -179,4 +180,14 @@ async function eraseOne(em: EntityManager, schema: ErasureSchema, appuserKey: nu
     }
     return outcome;
   });
+}
+
+/**
+ * The candidates, starting at a place that moves on each day: someone whose erasure keeps being
+ * refused (it needs a person to look) does not take the same place at the front of every run.
+ */
+function rotate(keys: number[], now: Date): number[] {
+  if (keys.length === 0) return keys;
+  const start = Math.floor(now.getTime() / DAY_MS) % keys.length;
+  return [...keys.slice(start), ...keys.slice(0, start)];
 }

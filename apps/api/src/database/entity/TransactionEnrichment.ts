@@ -27,6 +27,7 @@ export enum TransactionEnrichmentOutcome {
 
 @Entity({ tableName: 'transaction_enrichment' })
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
+@Index({ name: 'transaction_enrichment_category_suggestion_key_index', properties: ['categorySuggestionKey'] })
 @Index({ properties: ['transactionKey', 'status'] })
 @Index({ properties: ['tenantKey', 'status'] })
 export class TransactionEnrichment extends Base {

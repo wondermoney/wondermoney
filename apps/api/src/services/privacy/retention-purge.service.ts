@@ -34,6 +34,12 @@ import { storageKeyFromUrl } from './row-erasure';
  * that became an attachment); each step says which and what is kept.
  */
 
+export interface BankSyncAlertPurge {
+  deleted: number;
+  /** Older deliveries kept because their alert still applies; their provider message id is cleared. */
+  kept: number;
+}
+
 export interface BatchedDelete {
   deleted: number;
   /** Whether the step stopped at its per-run limit with rows left. */
@@ -44,6 +50,11 @@ export interface FileBackedDelete extends BatchedDelete {
   /** Files that could not be removed: their rows stay, for the next run. */
   fileErrors: number;
   files: number;
+}
+
+export interface ReminderPurge extends BatchedDelete {
+  /** Rows kept as the dedupe of a statement still in the window, whose provider message id was cleared. */
+  cleared: number;
 }
 
 export interface RetentionPurgeInput {
@@ -170,18 +181,20 @@ export function purgePushNotificationClaims(em: EntityManager, now: Date, limits
 /**
  * Payment-due reminder deliveries, 30 days after the delivery last changed, once their statement
  * has left the window the reminder sweep reads (it closed over 40 days ago): until then the row is
- * what stops the reminder going twice. The row holds the card's account key, the statement's
- * close day and the outcome, never an address.
+ * what stops the reminder going twice. A row kept for that loses its provider message id; it holds
+ * the card's account key, the statement's close day, the channel and the outcome, never an address.
  */
-export interface BankSyncAlertPurge {
-  deleted: number;
-  /** Older deliveries kept because their alert still applies; their provider message id is cleared. */
-  kept: number;
-}
-
-export function purgeCreditCardReminderDeliveries(em: EntityManager, now: Date, limits: Limits = defaultLimits()): Promise<BatchedDelete> {
+export async function purgeCreditCardReminderDeliveries(em: EntityManager, now: Date, limits: Limits = defaultLimits()): Promise<ReminderPurge> {
+  const cutoff = retentionCutoff(now);
   const outOfWindow = new Date(now.getTime() - (CREDIT_CARD_STATEMENT_WINDOW_DAYS + 1) * DAY_MS).toISOString().slice(0, 10);
-  return deleteInBatches(em, 'credit_card_due_reminder_delivery', 'credit_card_due_reminder_delivery_key', 't.updated_at < ? and t.period_end < ?::date', [retentionCutoff(now), outOfWindow], limits);
+  const purged = await deleteInBatches(em, 'credit_card_due_reminder_delivery', 'credit_card_due_reminder_delivery_key', 't.updated_at < ? and t.period_end < ?::date', [cutoff, outOfWindow], limits);
+  const cleared = affected(await em.getConnection().execute(
+    `update credit_card_due_reminder_delivery set provider_message_id = null
+      where updated_at < ? and period_end >= ?::date and provider_message_id is not null`,
+    [cutoff, outOfWindow],
+    'run',
+  ));
+  return { ...purged, cleared };
 }
 
 /**
@@ -351,11 +364,6 @@ export async function purgePortfolioImports(em: EntityManager, now: Date, storag
   return { ...result, more: true };
 }
 
-/**
- * Removes one stored file: `removed`, or `failed` when the store refused, and the row that names
- * it is kept for the next run. A server without file storage has no file it could remove
- * (`none`): the row goes on its own.
- */
 function chunks<T>(values: T[], size = DEFAULT_BATCH_SIZE): T[][] {
   const out: T[][] = [];
   for (let index = 0; index < values.length; index += size) out.push(values.slice(index, index + size));
@@ -366,6 +374,11 @@ function defaultLimits(): Limits {
   return { batchSize: DEFAULT_BATCH_SIZE, maxBatches: DEFAULT_MAX_BATCHES };
 }
 
+/**
+ * Removes one stored file: `removed`, or `failed` when the store refused, and the row that names
+ * it is kept for the next run. A server without file storage has no file it could remove
+ * (`none`): the row goes on its own.
+ */
 async function removeFile(storage: RetentionStorage, bucket: null | string, key: string): Promise<'failed' | 'none' | 'removed'> {
   if (!storage.isEnabled()) return 'none';
   try {

@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, ManyToOne, PrimaryKey, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Index, ManyToOne, PrimaryKey, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
@@ -13,6 +13,8 @@ export enum Source {
 }
 
 @Entity()
+@Index({ name: 'appuser_merchant_category_category_key_index', properties: ['categoryKey'] })
+@Index({ name: 'appuser_merchant_category_transaction_merchant_key_index', properties: ['transactionMerchantKey'] })
 @Unique({ properties: ['appuserKey', 'transactionMerchantKey', 'categoryKey'] })
 export class AppuserMerchantCategory extends Base {
   @ManyToOne({ cascade: [], entity: () => Appuser, fieldName: 'appuser_key' })

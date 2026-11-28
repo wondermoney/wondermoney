@@ -49,6 +49,11 @@ export enum FxStatus {
 @Entity()
 @Filter({ args: false, cond: transactionTenantCond, default: true, name: TENANT_FILTER })
 @Filter({ cond: hiddenTransactionCond, default: true, name: HIDDEN_FILTER })
+@Index({ name: 'transaction_transaction_merchant_key_index', properties: ['transactionMerchantKey'] })
+@Index({ name: 'transaction_installment_plan_key_index', properties: ['installmentPlanKey'] })
+@Index({ name: 'transaction_transfer_destination_account_key_index', properties: ['transferDestinationAccountKey'] })
+@Index({ name: 'transaction_transfer_destination_goal_key_index', properties: ['transferDestinationGoalKey'] })
+@Index({ name: 'transaction_transfer_destination_portfolio_key_index', properties: ['transferDestinationPortfolioKey'] })
 @Index({ properties: ['appuserKey', 'transactionDate'] }) // Composite index for user transaction queries
 @Index({ properties: ['accountKey', 'transactionDate'] }) // Composite index for account transaction queries
 @Index({
