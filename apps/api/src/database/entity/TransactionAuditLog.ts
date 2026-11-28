@@ -43,6 +43,7 @@ export enum TransactionAuditEventType {
  * ORM-subscriber fallback yet. Rows are never updated or deleted through the app.
  */
 @Entity({ tableName: 'transaction_audit_log' })
+@Index({ name: 'transaction_audit_log_account_key_index', properties: ['accountKey'] })
 @Index({ name: 'transaction_audit_log_transaction_key_created_at_index', properties: ['transactionKey', 'createdAt'] })
 @Index({ name: 'transaction_audit_log_tenant_key_appuser_key_created_at_index', properties: ['tenantKey', 'appuserKey', 'createdAt'] })
 export class TransactionAuditLog extends Base {

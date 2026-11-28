@@ -418,6 +418,7 @@ describe('createWorker', () => {
       'bank-sync-alert.sweep',
       'transaction-import.sweep',
       'mcp-oauth.client-prune',
+      'privacy.retention-purge',
       // Monthly Money Story is paused as part of the free/BYOK pivot too — the scheduler owner
       // tears that schedule down (see the unschedule assertions below) instead of registering it.
     ]));

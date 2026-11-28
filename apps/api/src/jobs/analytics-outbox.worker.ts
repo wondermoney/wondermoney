@@ -16,14 +16,12 @@ import {
   isAnalyticsOutboxEnabled,
   isCanonicalExternalUserId,
 } from '@service/analytics/analytics-outbox.service';
+import { retentionCutoff } from '@service/privacy/retention-period';
 import logger from '@utils/logger';
 
 const ANALYTICS_OUTBOX_BATCH_SIZE = 100;
 const CANONICAL_EXTERNAL_UUID_SQL_PATTERN = '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$';
 const DEFAULT_POSTHOG_HOST = 'https://eu.i.posthog.com';
-// Undelivered rows older than this are dropped: rows written before delivery became opt-in,
-// or rows the worker could never deliver (their user is gone).
-const STALE_UNDELIVERED_ROW_DAYS = 30;
 
 export interface AnalyticsOutboxDeliverySummary {
   blocked: number;
@@ -161,8 +159,10 @@ export async function purgeStaleAnalyticsOutboxRows(
 ): Promise<number> {
   const em = deps.em ?? DI.em;
   const now = deps.now ?? (() => new Date());
-  const cutoff = new Date(now().getTime() - STALE_UNDELIVERED_ROW_DAYS * 24 * 60 * 60 * 1000);
-  return em.nativeDelete(AnalyticsOutbox, { createdAt: { $lt: cutoff }, sentAt: null });
+  // Undelivered rows past the retention period are dropped: rows written before delivery became
+  // opt-in, or rows the worker could never deliver (their user is gone). Delivered rows go 30 days
+  // after delivery, in the daily retention purge (`services/privacy/retention-purge.service.ts`).
+  return em.nativeDelete(AnalyticsOutbox, { createdAt: { $lt: retentionCutoff(now()) }, sentAt: null });
 }
 
 // Purges on every run, whatever the mode, so an instance with delivery off drains old rows.

@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Account } from './Account';
 import { Appuser } from './Appuser';
@@ -14,6 +14,7 @@ export enum TransactionOCRImportStatus {
 }
 
 @Entity({ tableName: 'transaction_ocr_import' })
+@Index({ name: 'transaction_ocr_import_transaction_key_index', properties: ['transactionKey'] })
 @Unique({ properties: ['transactionOCRImportKey'] })
 export class TransactionOCRImport extends Base {
   @ManyToOne({ cascade: [], entity: () => Account, fieldName: 'account_key', nullable: true })

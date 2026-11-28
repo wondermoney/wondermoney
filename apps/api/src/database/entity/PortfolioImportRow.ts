@@ -19,6 +19,7 @@ export enum PortfolioImportRowStatus {
 }
 
 @Entity({ tableName: 'portfolio_import_row' })
+@Index({ name: 'portfolio_import_row_imported_financial_transaction_key_index', properties: ['importedFinancialTransactionKey'] })
 @Index({ name: 'portfolio_import_row_session_status_idx', properties: ['portfolioImportSessionKey', 'status'] })
 @Index({ name: 'portfolio_import_row_internal_transaction_id_idx', properties: ['internalTransactionId'] })
 @Unique({ name: 'portfolio_import_row_session_row_number_unique', properties: ['portfolioImportSessionKey', 'rowNumber'] })

@@ -28,6 +28,8 @@ export enum GoalActivityType {
 
 @Entity()
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
+@Index({ name: 'goal_activity_transaction_key_index', properties: ['transactionKey'] })
+@Index({ name: 'goal_activity_category_key_index', properties: ['categoryKey'] })
 @Index({ properties: ['goalKey', 'occurredAt'] })
 @Index({ properties: ['tenantKey', 'occurredAt'] })
 export class GoalActivity extends Base {

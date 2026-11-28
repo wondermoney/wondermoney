@@ -2871,6 +2871,16 @@
         },
         {
           "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "appuser_merchant_category_category_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "appuser_merchant_category_key"
           ],
           "composite": false,
@@ -2878,6 +2888,16 @@
           "keyName": "appuser_merchant_category_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "transaction_merchant_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "appuser_merchant_category_transaction_merchant_key_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [
@@ -3361,6 +3381,16 @@
         },
         {
           "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "appuser_transaction_category_category_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "appuser_transaction_category_key"
           ],
           "composite": false,
@@ -3368,6 +3398,16 @@
           "keyName": "appuser_transaction_category_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "appuser_transaction_category_transaction_key_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [
@@ -7710,6 +7750,16 @@
           "composite": true,
           "constraint": false,
           "keyName": "budget_template_category_budget_key_year_month_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "budget_template_category_category_key_index",
           "primary": false,
           "unique": false
         },
@@ -12305,6 +12355,16 @@
           "unique": true
         },
         {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "expense_group_expense_transaction_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
           "columnNames": [],
           "composite": false,
           "constraint": false,
@@ -15369,6 +15429,16 @@
           "keyName": "financial_transaction_pkey",
           "primary": true,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "portfolio_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "financial_transaction_portfolio_key_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [],
@@ -16603,6 +16673,16 @@
       "indexes": [
         {
           "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "goal_activity_category_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "goal_key",
             "occurred_at"
           ],
@@ -16630,6 +16710,16 @@
           "composite": true,
           "constraint": false,
           "keyName": "goal_activity_tenant_key_occurred_at_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "goal_activity_transaction_key_index",
           "primary": false,
           "unique": false
         }
@@ -22941,6 +23031,16 @@
       "indexes": [
         {
           "columnNames": [
+            "imported_financial_transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "portfolio_import_row_imported_financial_transaction_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "internal_transaction_id"
           ],
           "composite": false,
@@ -24394,6 +24494,16 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX recurring_occurrence_transaction_key_index ON recurring_occurrence (transaction_key) WHERE transaction_key IS NOT NULL"
+        },
+        {
+          "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "recurring_occurrence_transaction_key_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [
@@ -27734,6 +27844,16 @@
           "unique": false
         },
         {
+          "columnNames": [
+            "installment_plan_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_installment_plan_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
           "columnNames": [],
           "composite": false,
           "constraint": false,
@@ -27784,6 +27904,16 @@
         },
         {
           "columnNames": [
+            "transaction_merchant_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_transaction_merchant_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transfer_counterpart_key"
           ],
           "composite": false,
@@ -27791,6 +27921,36 @@
           "keyName": "transaction_transfer_counterpart_key_unique",
           "primary": false,
           "unique": true
+        },
+        {
+          "columnNames": [
+            "transfer_destination_account_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_transfer_destination_account_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "transfer_destination_goal_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_transfer_destination_goal_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "transfer_destination_portfolio_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_transfer_destination_portfolio_key_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [
@@ -28219,6 +28379,16 @@
         },
         {
           "columnNames": [
+            "storage_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_attachment_storage_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transaction_key"
           ],
           "composite": false,
@@ -28514,6 +28684,16 @@
       "indexes": [
         {
           "columnNames": [
+            "account_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_audit_log_account_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transaction_audit_log_key"
           ],
           "composite": false,
@@ -28802,6 +28982,16 @@
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_category_stats_category_key_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": [
             "transaction_category_stats_key"
@@ -29333,6 +29523,16 @@
       "indexes": [
         {
           "columnNames": [
+            "category_suggestion_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_enrichment_category_suggestion_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transaction_enrichment_key"
           ],
           "composite": false,
@@ -29854,6 +30054,26 @@
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "imported_transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_import_row_imported_transaction_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "matched_transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_import_row_matched_transaction_key_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": [
             "transaction_import_row_key"
@@ -30982,6 +31202,16 @@
         },
         {
           "columnNames": [
+            "transaction_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_ocr_import_transaction_key_index",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
             "transaction_ocrimport_key"
           ],
           "composite": false,
@@ -31518,6 +31748,16 @@
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "category_key"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "transaction_split_category_key_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": [
             "expense_group_member_key"
