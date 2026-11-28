@@ -85,7 +85,7 @@ for _ in $(seq 1 "$poll_count"); do
   case "$status" in
     finished) exit 0 ;;
     failed | cancelled-by-user)
-      echo "::error::The ${label} deployment ${deployment_uuid} ended with status ${status}. Its log in Coolify tells why; when the image pull failed, check the registry login of the server (Server > Docker Registries)." >&2
+      echo "::error::The ${label} deployment ${deployment_uuid} ended with status ${status}. Its log in Coolify tells why; when the image pull failed, check that the server can resolve and reach ghcr.io (on 27 Nov 2026 its DNS timed out) and its registry login (Server > Docker Registries)." >&2
       exit 1
       ;;
   esac
