@@ -175,6 +175,12 @@ import {
   PORTFOLIO_SNAPSHOT_MANUAL_QUEUE,
   schedulePortfolioSnapshotAutoJob,
 } from '@app/jobs/portfolio-snapshot.queue';
+import {
+  ensurePrivacyRetentionQueue,
+  PRIVACY_RETENTION_CRON,
+  PRIVACY_RETENTION_QUEUE,
+  schedulePrivacyRetentionJob,
+} from '@app/jobs/privacy-retention.queue';
 import { ensurePushSendQueue, PUSH_SEND_QUEUE } from '@app/jobs/push-send.queue';
 import { ensureFoundationQueue, FOUNDATION_QUEUE } from '@app/jobs/queue';
 import {
@@ -362,6 +368,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
     await ensureApiTokenExpiryQueue(boss);
     await ensureAssistantProposalExpiryQueue(boss);
     await ensureMcpOAuthClientPruneQueue(boss);
+    await ensurePrivacyRetentionQueue(boss);
     await ensureWorkerHeartbeatQueue(boss);
     await ensureInstanceHeartbeatQueue(boss);
     // monthlyStory ships unconditionally (no feature flag), so its queues must always exist —
@@ -409,6 +416,7 @@ export const createWorker = (deps: WorkerDeps = {}) => {
       await scheduleApiTokenExpiryJob(boss);
       await scheduleAssistantProposalExpiryJob(boss);
       await scheduleMcpOAuthClientPruneJob(boss);
+      await schedulePrivacyRetentionJob(boss);
       // Unschedule-then-conditionally-schedule keeps the schedule from drifting
       // when the heartbeat URL is added or removed between deploys.
       await unscheduleWorkerHeartbeatJob(boss);
@@ -738,6 +746,18 @@ export const createWorker = (deps: WorkerDeps = {}) => {
         async (job) => {
           const { handleMcpOAuthClientPruneJob } = await import('@app/jobs/mcp-oauth-client-prune.worker');
           await runInRequestContext(() => handleMcpOAuthClientPruneJob(job, { logger: log }));
+        },
+      ),
+    );
+
+    await boss.work<Record<string, never>>(
+      PRIVACY_RETENTION_QUEUE,
+      workCronJobs<Job<Record<string, never>>>(
+        PRIVACY_RETENTION_QUEUE,
+        { checkinMarginMinutes: 120, maxRuntimeMinutes: 60, monitorSlug: PRIVACY_RETENTION_QUEUE, schedule: PRIVACY_RETENTION_CRON },
+        async (job) => {
+          const { handlePrivacyRetentionJob } = await import('@app/jobs/privacy-retention.worker');
+          await runInRequestContext(() => handlePrivacyRetentionJob(job, { logger: log }));
         },
       ),
     );
