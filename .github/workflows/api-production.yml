@@ -10,6 +10,7 @@ on:
       - 'packages/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/api-production.yml'
+      - '.github/scripts/coolify-deploy.sh'
 # Each job asks for what it needs.
 permissions: {}
 concurrency:
@@ -127,6 +128,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # The tag that both Coolify apps deploy (.github/scripts/coolify-deploy.sh). It names this
+      # commit, so a server cannot start an older image under it (#766).
+      - name: Image tag
+        id: image
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
       - name: Docker meta API
         id: meta-api
         uses: docker/metadata-action@v6
@@ -140,8 +146,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
-            # The production Coolify apps pull the :master tag (the old repository's branch name).
+            type=raw,value=${{ steps.image.outputs.tag }}
+            # The tag the production Coolify apps pulled before each deploy set the sha tag
+            # (the old repository's branch name), kept as the latest production image.
             type=raw,value=master
       - name: Docker meta worker
         id: meta-worker
@@ -156,8 +163,9 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha
-            # The production Coolify apps pull the :master tag (the old repository's branch name).
+            type=raw,value=${{ steps.image.outputs.tag }}
+            # The tag the production Coolify apps pulled before each deploy set the sha tag
+            # (the old repository's branch name), kept as the latest production image.
             type=raw,value=master
       # Both images were built before the CI gate; these steps take them from the builder's
       # cache and upload them.
@@ -198,37 +206,16 @@ jobs:
         with:
           environment: production
           sourcemaps: './apps/api/dist'
+      # Sets the app's image tag to this commit's and deploys it, then waits for Coolify to report
+      # the deployment finished or failed. The script's header says why the tag is set each time.
       - name: Deploy API via Coolify
         id: deploy-api
         if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
-        run: |
-          response=$(curl --fail -sS -X POST \
-            "${DEPLOY_API_BASE}/api/v1/deploy?uuid=${{ secrets.COOLIFY_PRD_API_UUID }}&force=false" \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}")
-          echo "$response"
-          deployment_uuid=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
-          if [ -z "$deployment_uuid" ]; then
-            echo "Could not extract deployment_uuid from Coolify /deploy response: $response" >&2
-            exit 1
-          fi
-          echo "deployment_uuid=${deployment_uuid}" >> "$GITHUB_OUTPUT"
-      - name: Wait for API deployment to finish
-        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
-        run: |
-          deployment_uuid="${{ steps.deploy-api.outputs.deployment_uuid }}"
-          for _ in $(seq 1 60); do
-            status=$(curl -sS "${DEPLOY_API_BASE}/api/v1/deployments/${deployment_uuid}" \
-              -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" | jq -r '.status // empty')
-            echo "deployment status: ${status:-unknown}"
-            if [ "$status" = "finished" ]; then exit 0; fi
-            if [ "$status" = "failed" ] || [ "$status" = "cancelled-by-user" ]; then
-              echo "API deployment ended with status: $status" >&2
-              exit 1
-            fi
-            sleep 10
-          done
-          echo "API deployment did not finish within 10 minutes (last status: ${status:-unknown})" >&2
-          exit 1
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_PRD_API_UUID }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$IMAGE_TAG" API
       # Coolify reporting "finished" only proves the orchestrator finished, not that
       # the app is serving. Staging verifies end-to-end via /v1/health's
       # gitCommitHash; this is the production port of that check.
@@ -267,21 +254,8 @@ jobs:
           done
           echo "API did not report ${TARGET_SHA} within 10 minutes (last seen: ${seen:-unavailable})" >&2
           exit 1
-      - name: Deploy worker via Coolify
-        id: deploy-worker
-        if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
-        run: |
-          response=$(curl --fail -sS -X POST \
-            "${DEPLOY_API_BASE}/api/v1/deploy?uuid=${{ secrets.COOLIFY_PRD_WORKER_UUID }}&force=false" \
-            -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}")
-          echo "$response"
-          deployment_uuid=$(echo "$response" | jq -r '.deployments[0].deployment_uuid // empty')
-          if [ -z "$deployment_uuid" ]; then
-            echo "Could not extract deployment_uuid from Coolify /deploy response: $response" >&2
-            exit 1
-          fi
-          echo "deployment_uuid=${deployment_uuid}" >> "$GITHUB_OUTPUT"
-      # Without this, a worker that crash-loops on boot reads as a successful deploy.
+      # Without the wait in this step, a worker that crash-loops on boot reads as a successful
+      # deploy.
       #
       # That is not hypothetical: a boot-time env check rejected prod-worker's (legitimately
       # empty) HISTORICAL_ASSET_PRICE_BACKFILL_RUNNER, so four consecutive deploys failed,
@@ -291,21 +265,13 @@ jobs:
       #
       # The worker has no public health endpoint to poll for a commit hash the way the API
       # does, but Coolify's own deployment record is enough: it marked every one of those
-      # runs `failed`.
-      - name: Wait for worker deployment to finish
+      # runs `failed`. The image tag of this commit means a finished deployment runs this
+      # commit's worker: the server has no other image under that tag to fall back on.
+      - name: Deploy worker via Coolify
+        id: deploy-worker
         if: vars.COOLIFY_PRD_DEPLOY_ENABLED == 'true'
-        run: |
-          deployment_uuid="${{ steps.deploy-worker.outputs.deployment_uuid }}"
-          for _ in $(seq 1 60); do
-            status=$(curl -sS "${DEPLOY_API_BASE}/api/v1/deployments/${deployment_uuid}" \
-              -H "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}" | jq -r '.status // empty')
-            echo "worker deployment status: ${status:-unknown}"
-            if [ "$status" = "finished" ]; then exit 0; fi
-            if [ "$status" = "failed" ] || [ "$status" = "cancelled-by-user" ]; then
-              echo "Worker deployment ended with status: $status" >&2
-              exit 1
-            fi
-            sleep 10
-          done
-          echo "Worker deployment did not finish within 10 minutes (last status: ${status:-unknown})" >&2
-          exit 1
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_PRD_WORKER_UUID }}
+          IMAGE_TAG: ${{ steps.image.outputs.tag }}
+        run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$IMAGE_TAG" worker
