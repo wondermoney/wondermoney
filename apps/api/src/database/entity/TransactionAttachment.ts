@@ -21,6 +21,7 @@ import { Transaction } from './Transaction';
  */
 @Entity({ tableName: 'transaction_attachment' })
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
+@Index({ name: 'transaction_attachment_storage_key_index', properties: ['storageKey'] })
 @Index({ properties: ['transactionKey'] })
 export class TransactionAttachment extends Base {
   @Property({ length: 255 })

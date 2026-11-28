@@ -105,7 +105,7 @@ services:
     name: wondermoney-api
     runtime: image
     image:
-      url: ghcr.io/wondermoney/wondermoney-api:1.13.0
+      url: ghcr.io/wondermoney/wondermoney-api:1.14.0
     region: frankfurt
     plan: 0.5c-512mb
     healthCheckPath: /v1/health
@@ -175,7 +175,7 @@ services:
     name: wondermoney-web
     runtime: image
     image:
-      url: ghcr.io/wondermoney/wondermoney-web:1.13.0
+      url: ghcr.io/wondermoney/wondermoney-web:1.14.0
     region: frankfurt
     plan: 0.5c-512mb
     healthCheckPath: /health
@@ -199,7 +199,7 @@ services:
     name: wondermoney-worker
     runtime: image
     image:
-      url: ghcr.io/wondermoney/wondermoney-worker:1.13.0
+      url: ghcr.io/wondermoney/wondermoney-worker:1.14.0
     region: frankfurt
     plan: 0.5c-512mb
     envVars:

@@ -1,5 +1,5 @@
 import type { Rel } from '@mikro-orm/core';
-import { Entity, Enum, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Index, ManyToOne, PrimaryKey, Property, Unique } from '@mikro-orm/decorators/legacy';
 
 import { Appuser } from './Appuser';
 import { Base } from './BaseEntity';
@@ -13,6 +13,7 @@ export enum Source {
 }
 
 @Entity()
+@Index({ name: 'transaction_category_stats_category_key_index', properties: ['categoryKey'] })
 @Unique({ properties: ['transactionMerchantKey', 'categoryKey', 'source', 'appuserKey'] })
 export class TransactionCategoryStats extends Base {
   // Per-user scoping: a tenant is a household of several members and each member's

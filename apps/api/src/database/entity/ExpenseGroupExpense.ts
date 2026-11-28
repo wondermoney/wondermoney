@@ -31,6 +31,7 @@ export enum ExpenseGroupSplitMethod {
  */
 @Entity({ tableName: 'expense_group_expense' })
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
+@Index({ name: 'expense_group_expense_transaction_key_index', properties: ['transactionKey'] })
 @Index({ properties: ['expenseGroupKey'] })
 @Index({
   expression: 'CREATE UNIQUE INDEX expense_group_expense_transaction_live_unique ON expense_group_expense (transaction_key) WHERE deleted_at IS NULL',

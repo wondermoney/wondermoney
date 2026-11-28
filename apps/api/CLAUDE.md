@@ -284,7 +284,15 @@ Every integration is optional and fails closed: unconfigured, its feature report
   fetched and no logo URL is built.
 - Sentry and PostHog are optional too. Analytics outbox rows are written and delivered only
   with `ANALYTICS_OUTBOX_MODE=live` (`isAnalyticsOutboxEnabled`); the worker purges undelivered
-  rows older than 30 days.
+  rows older than 30 days, and delivered ones 30 days after delivery (below).
+- **Retention.** The daily `privacy.retention-purge` job (`services/privacy/retention-purge.service.ts`)
+  deletes the personal data the privacy policy keeps for `PERSONAL_DATA_RETENTION_DAYS` (30): a
+  household its owner's account deletion dissolved and the anonymised account record, retired
+  Enable Banking keys, the assistant/MCP audit log, sent email and notification records, delivered
+  analytics events, receipt scans and portfolio imports, files included. A household is erased
+  through its foreign keys (`services/privacy/row-erasure.ts`), so a new table with a `tenant_key`
+  is erased with it; the erasure refuses, and deletes nothing, when a row of another household
+  would be touched. A new kind of personal data with a stated retention gets a step there.
 
 ## Deploys
 

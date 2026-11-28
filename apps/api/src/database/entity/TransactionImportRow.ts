@@ -29,6 +29,8 @@ export enum TransactionImportRowStatus {
  * Read only through its session (`TransactionImportSession` is owner-scoped).
  */
 @Entity({ tableName: 'transaction_import_row' })
+@Index({ name: 'transaction_import_row_imported_transaction_key_index', properties: ['importedTransactionKey'] })
+@Index({ name: 'transaction_import_row_matched_transaction_key_index', properties: ['matchedTransactionKey'] })
 @Index({ name: 'transaction_import_row_session_status_idx', properties: ['transactionImportSessionKey', 'status'] })
 @Unique({ name: 'transaction_import_row_session_source_row_unique', properties: ['transactionImportSessionKey', 'sourceRow'] })
 export class TransactionImportRow extends Base {

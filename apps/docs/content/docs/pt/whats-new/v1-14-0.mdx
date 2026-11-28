@@ -1,0 +1,27 @@
+---
+title: WonderMoney 1.14.0
+description: O ChatGPT e outros clientes MCP mantêm-se ligados, e o conector do WonderMoney mostra o nome e o ícone.
+---
+
+[Notas da versão no GitHub](https://github.com/wondermoney/wondermoney/releases/tag/v1.14.0)
+
+## Atualizar
+
+Nada a fazer. Não há migrações nem definições obrigatórias.
+
+- **Nova e opcional: `OPENAI_APPS_CHALLENGE`.** Define-a só se submeteres o teu servidor ao diretório de plugins do ChatGPT da OpenAI: a API serve-a em `/.well-known/openai-apps-challenge` para a verificação do domínio da OpenAI. O encaminhamento do Docker Compose, do Unraid, do Helm e do Render já envia esse caminho para a API; com outro proxy reverso num só nome de anfitrião, encaminha-o também para a API (consulta [A tua instância](/pt/docs/self-hosting/configure#a-tua-instância)).
+- **Volta a ligar o ChatGPT uma vez.** Se ligaste o ChatGPT com OAuth antes desta versão, remove-o no ChatGPT e adiciona-o de novo, para que receba um token de atualização.
+
+## Melhorias
+
+- **O ChatGPT mantém-se ligado.** O ChatGPT e outros clientes MCP passam a receber um token de atualização, por isso deixam de te pedir para voltares a ligar a cada 15 minutos. Consulta [Ligar o ChatGPT](/pt/docs/settings-security-privacy/connect-ai-client#ligar-o-chatgpt).
+- **O conector mostra quem é.** O ChatGPT e outros clientes MCP mostram o nome, o site e o ícone do WonderMoney. Um servidor em alojamento próprio aponta para si mesmo.
+
+## Alojamento próprio
+
+- `OPENAI_APPS_CHALLENGE` para a verificação do domínio da OpenAI, encaminhada por todos os proxies incluídos.
+- `pnpm review:seed` cria ou atualiza uma conta de revisão com dados de exemplo, para quem submete o seu servidor a uma loja de aplicações ou a um diretório de apps. Recusa-se num servidor que ainda não está configurado, ou que não tem preços para as ações de exemplo.
+
+## Agradecimentos
+
+- @nip10

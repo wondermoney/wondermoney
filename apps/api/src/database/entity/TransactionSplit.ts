@@ -40,6 +40,7 @@ import { Transaction } from './Transaction';
 @Entity({ tableName: 'transaction_split' })
 @Filter({ args: false, cond: tenantScopedCond, default: true, name: TENANT_FILTER })
 @Filter({ cond: liveSplitCond, default: true, name: LIVE_SPLIT_FILTER })
+@Index({ name: 'transaction_split_category_key_index', properties: ['categoryKey'] })
 @Index({ properties: ['transactionKey'] })
 @Index({ properties: ['expenseGroupMemberKey'] })
 export class TransactionSplit extends Base {

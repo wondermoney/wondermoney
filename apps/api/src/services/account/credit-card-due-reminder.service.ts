@@ -39,8 +39,13 @@ import { getCreditCardStatements } from './credit-card-statement.service';
 const MS_PER_DAY = 86_400_000;
 /** The UTC day number of a `YYYY-MM-DD` calendar day. */
 const calendarDayNumber = (day: string) => utcDayNumber(new Date(`${day}T00:00:00.000Z`));
-/** How far either side of today the statement window is read. A due date is at most ~a month out. */
-const WINDOW_DAYS = 40;
+/**
+ * How far either side of today the statement window is read. A due date is at most ~a month out.
+ * A statement that closed before the window is never read again, so its delivery row, the
+ * dedupe, is no longer needed (`services/privacy/retention-purge.service.ts`).
+ */
+export const CREDIT_CARD_STATEMENT_WINDOW_DAYS = 40;
+const WINDOW_DAYS = CREDIT_CARD_STATEMENT_WINDOW_DAYS;
 
 /** The channels a reminder goes out on. */
 export const CREDIT_CARD_DUE_REMINDER_CHANNELS: readonly CreditCardDueReminderChannel[] = [CreditCardDueReminderChannel.EMAIL, CreditCardDueReminderChannel.PUSH];
